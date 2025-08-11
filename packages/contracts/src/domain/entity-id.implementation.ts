@@ -3,25 +3,8 @@
  * This is the fundamental building block for all entity identifiers in the DDD framework
  */
 
-import type { IEntityId, IEntityIdConstructorParams, IdType } from './entity-id.interfaces';
+import type { IEntityId, IdType } from './entity-id.interfaces';
 
-/**
- * @llm-summary EntityId class for entity id operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * EntityId class implementing core domain functionality for entity id operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EntityId();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EntityId<T = string> implements IEntityId<T> {
   constructor(
     public readonly value: T,

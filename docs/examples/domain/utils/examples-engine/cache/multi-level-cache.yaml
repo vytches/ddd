@@ -1,0 +1,333 @@
+# multi-level-cache - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'multi-level-cache'
+title: 'MultiLevelCache - Multi-Level Caching System'
+description: 'Multi-level caching system with performance monitoring for Enhanced Metadata System V2'
+business-context: 'Provides tiered caching strategy with memory optimization and performance tracking'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  MultiLevelCache:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Multi-level caching system for Enhanced Metadata System V2'
+      business-context: 'Implements tiered caching strategy for optimal performance and memory usage'
+
+      formats:
+        jsdoc:
+          description: 'Static multi-level cache implementation'
+        cli:
+          description: |
+            ## MultiLevelCache
+
+            Multi-level caching features:
+            - Memory-based primary cache
+            - Static singleton pattern
+            - Async get/set operations
+            - Configuration support
+            - Cache initialization
+            - Global cache clearing
+            - Future-ready for disk cache
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Static Singleton'
+        architecture: 'Tiered Caching'
+
+    # Methods
+    methods:
+      get:
+        description: 'Get value from multi-level cache'
+        business-context: 'Retrieves cached values with fallback through cache levels'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Cache key'
+
+        returns:
+          type: 'Promise<string | null>'
+          description: 'Cached value or null'
+
+        examples:
+          - id: 'cache-get'
+            code: |
+              const value = await MultiLevelCache.get('metadata:aggregates:commit');
+
+              // Checks memory cache first
+              // Falls back to disk cache (if configured)
+              // Returns null if not found
+
+        custom-tags:
+          static: 'true'
+          async: 'true'
+
+      set:
+        description: 'Set value in multi-level cache'
+        business-context: 'Stores values across cache levels for optimal retrieval'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Cache key'
+          - name: 'value'
+            type: 'string'
+            description: 'Value to cache'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when cached'
+
+        examples:
+          - id: 'cache-set'
+            code: |
+              await MultiLevelCache.set(
+                'metadata:repositories:save',
+                JSON.stringify(metadata)
+              );
+
+              // Stores in memory cache
+              // Optionally persists to disk cache
+
+        custom-tags:
+          static: 'true'
+          async: 'true'
+
+      clear:
+        description: 'Clear all cache levels'
+        business-context: 'Resets entire cache system for testing or memory management'
+
+        examples:
+          - id: 'cache-clear'
+            code: |
+              MultiLevelCache.clear();
+
+              // Clears memory cache
+              // Clears disk cache (if configured)
+              // Resets to initial state
+
+        custom-tags:
+          static: 'true'
+          management: 'true'
+
+      initialize:
+        description: 'Initialize cache system'
+        business-context: 'Sets up cache infrastructure and configuration'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when initialized'
+
+        examples:
+          - id: 'cache-init'
+            code: |
+              await MultiLevelCache.initialize();
+
+              // Sets up memory cache
+              // Configures disk cache (if enabled)
+              // Loads configuration
+              // Ready for operations
+
+        custom-tags:
+          static: 'true'
+          async: 'true'
+          lifecycle: 'initialization'
+
+  PerformanceMonitor:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Performance monitoring for caching and metadata operations'
+      business-context: 'Tracks system performance metrics for optimization and monitoring'
+
+      formats:
+        jsdoc:
+          description: 'Static performance monitoring utilities'
+        cli:
+          description: |
+            ## PerformanceMonitor
+
+            Performance monitoring features:
+            - Metric recording and aggregation
+            - Average calculation
+            - Operation counting
+            - Async operation benchmarking
+            - Performance reporting
+            - Memory profiling support
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Static Utility'
+        purpose: 'Performance Analysis'
+
+    # Methods
+    methods:
+      recordMetric:
+        description: 'Record performance metric'
+        business-context: 'Captures performance data points for analysis'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Metric name'
+          - name: 'value'
+            type: 'number'
+            description: 'Metric value (usually milliseconds)'
+
+        examples:
+          - id: 'record-metric'
+            code: |
+              const start = Date.now();
+              await someOperation();
+              const duration = Date.now() - start;
+
+              PerformanceMonitor.recordMetric('metadata.parse', duration);
+
+        custom-tags:
+          static: 'true'
+          telemetry: 'true'
+
+      getMetrics:
+        description: 'Get aggregated metrics'
+        business-context: 'Returns performance statistics for monitoring'
+
+        returns:
+          type: 'Record<string, { avg: number; count: number }>'
+          description: 'Metrics with averages and counts'
+
+        examples:
+          - id: 'get-metrics'
+            code: |
+              const metrics = PerformanceMonitor.getMetrics();
+
+              console.log(metrics);
+              // {
+              //   'metadata.parse': { avg: 12.5, count: 150 },
+              //   'cache.hit': { avg: 0.2, count: 850 },
+              //   'cache.miss': { avg: 45.3, count: 150 },
+              //   'file.read': { avg: 28.7, count: 75 }
+              // }
+
+              // Analyze performance
+              const cacheHitRate = metrics['cache.hit'].count / 
+                (metrics['cache.hit'].count + metrics['cache.miss'].count);
+              console.log(`Cache hit rate: ${(cacheHitRate * 100).toFixed(1)}%`);
+
+        custom-tags:
+          static: 'true'
+          reporting: 'true'
+
+      benchmark:
+        description: 'Benchmark async operation'
+        business-context: 'Measures and records execution time of async operations'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Operation name'
+          - name: 'fn'
+            type: '() => Promise<T>'
+            description: 'Async function to benchmark'
+
+        returns:
+          type: 'Promise<T>'
+          description: 'Result of the function'
+
+        examples:
+          - id: 'benchmark-op'
+            code: |
+              const result = await PerformanceMonitor.benchmark(
+                'aggregate.loadFromHistory',
+                async () => {
+                  const aggregate = new AggregateRoot({ id });
+                  await aggregate.loadFromHistory(events);
+                  return aggregate;
+                }
+              );
+
+              // Automatically records timing
+              // Returns function result
+
+              // Later, check performance
+              const metrics = PerformanceMonitor.getMetrics();
+              console.log(
+                `Average load time: ${metrics['aggregate.loadFromHistory'].avg}ms`
+              );
+
+        custom-tags:
+          static: 'true'
+          async: 'true'
+          instrumentation: 'true'
+
+# === EXAMPLES ===
+examples:
+  - id: 'complete-monitoring'
+    description: 'Complete caching and performance monitoring workflow'
+    code: |
+      // Initialize system
+      await MultiLevelCache.initialize();
+
+      // Benchmark metadata loading
+      const metadata = await PerformanceMonitor.benchmark(
+        'metadata.load',
+        async () => {
+          // Check cache first
+          let cached = await MultiLevelCache.get('metadata:aggregates');
+          if (cached) {
+            PerformanceMonitor.recordMetric('cache.hit', 0.1);
+            return JSON.parse(cached);
+          }
+          
+          // Cache miss - load from file
+          PerformanceMonitor.recordMetric('cache.miss', 1);
+          const loaded = await loadMetadataFromFile('/dist/aggregates.yaml');
+          
+          // Store in cache
+          await MultiLevelCache.set(
+            'metadata:aggregates',
+            JSON.stringify(loaded)
+          );
+          
+          return loaded;
+        }
+      );
+
+      // After multiple operations, analyze performance
+      const metrics = PerformanceMonitor.getMetrics();
+
+      console.log('Performance Report:');
+      console.log('==================');
+
+      Object.entries(metrics).forEach(([name, stats]) => {
+        console.log(
+          `${name}: avg=${stats.avg.toFixed(2)}ms, count=${stats.count}`
+        );
+      });
+
+      // Calculate cache effectiveness
+      const hits = metrics['cache.hit']?.count || 0;
+      const misses = metrics['cache.miss']?.count || 0;
+      const hitRate = hits / (hits + misses);
+
+      console.log(`\nCache Hit Rate: ${(hitRate * 100).toFixed(1)}%`);
+
+      // Clear cache if needed
+      if (hitRate < 0.5) {
+        console.log('Poor cache performance, clearing...');
+        MultiLevelCache.clear();
+      }

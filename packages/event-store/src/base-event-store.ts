@@ -1,44 +1,27 @@
 import type {
+  IAdvancedEventReplay,
   IAdvancedEventStore,
-  IEventStoreConfig,
+  IAggregateSnapshot,
   IAppendResult,
+  IEventReplay,
+  IEventReplayFactory,
+  IEventSerializer,
+  IEventStoreConfig,
   IEventStream,
   IGlobalEventStream,
-  IStoredEvent,
-  IReadStreamOptions,
   IReadAllOptions,
-  IStreamMetadata,
-  IEventSerializer,
+  IReadStreamOptions,
   IStoredDomainEvent,
-  IAggregateSnapshot,
-  IEventReplay,
-  IAdvancedEventReplay,
-  IEventReplayFactory,
+  IStoredEvent,
+  IStreamMetadata,
 } from '@vytches/ddd-contracts';
 
 import { EventStoreConcurrencyError } from './errors';
 import { EventReplayFactory } from './event-replay-factory';
 
-import { Logger } from '@vytches/ddd-logging';
 import type { ILogger } from '@vytches/ddd-logging';
+import { Logger } from '@vytches/ddd-logging';
 
-/**
- * @llm-summary BaseEventStore class for base event store operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * BaseEventStore class implementing infrastructure service for base event store operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseEventStore();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseEventStore implements IAdvancedEventStore {
   protected readonly logger: ILogger;
   protected readonly config: Required<IEventStoreConfig>;

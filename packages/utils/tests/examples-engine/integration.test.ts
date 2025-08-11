@@ -2,9 +2,9 @@
  * Integration tests for Examples Engine
  */
 
-import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches/ddd-utils';
-import { ExampleEngine, TagExtractor, FileScanner } from '../../src/examples-engine';
+import { describe, expect, it } from 'vitest';
+import { ExampleEngine, FileScanner, TagExtractor } from '../../src/examples-engine';
+import { safeRun } from '../../src/saferun';
 
 describe('Examples Engine Integration', () => {
   describe('TagExtractor', () => {
@@ -25,14 +25,12 @@ return user;
 @extract-end
       `;
 
-      const [error, examples] = safeRun(() => 
-        extractor.extractAllTags(content, 'test-package')
-      );
+      const [error, examples] = safeRun(() => extractor.extractAllTags(content, 'test-package'));
 
       expect(error).toBeUndefined();
       expect(examples).toBeDefined();
       expect(examples?.length).toBe(1);
-      
+
       if (examples && examples[0]) {
         expect(examples[0].methodName).toBe('create');
         expect(examples[0].layer).toBe('domain');
@@ -51,9 +49,9 @@ return user;
 
     it('should format output for JSDoc', () => {
       const content = 'const user = User.create(data);\nreturn user;';
-      
+
       const [error, result] = safeRun(() => engine.formatOutput(content, 'jsdoc'));
-      
+
       expect(error).toBeUndefined();
       expect(result).toContain('* @example');
       expect(result).toContain('* ```typescript');
@@ -62,9 +60,9 @@ return user;
 
     it('should format output for CLI', () => {
       const content = 'const user = User.create(data);';
-      
+
       const [error, result] = safeRun(() => engine.formatOutput(content, 'cli'));
-      
+
       expect(error).toBeUndefined();
       expect(result).toBe('```typescript\nconst user = User.create(data);\n```');
     });
@@ -75,7 +73,7 @@ return user;
       expect(initialStats?.size).toBe(0);
 
       engine.clearCache();
-      
+
       const [clearError, clearedStats] = safeRun(() => engine.getCacheStats());
       expect(clearError).toBeUndefined();
       expect(clearedStats?.size).toBe(0);

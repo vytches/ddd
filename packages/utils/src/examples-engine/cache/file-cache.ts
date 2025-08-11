@@ -22,7 +22,7 @@ export class FileCache {
     hits: 0,
     misses: 0,
     reads: 0,
-    parses: 0
+    parses: 0,
   };
 
   static getInstance(): FileCache {
@@ -39,30 +39,31 @@ export class FileCache {
     try {
       const normalizedPath = path.resolve(filePath);
       const fileStats = await fs.stat(normalizedPath);
-      
+
       const cached = this.cache.get(normalizedPath);
-      
+
       // Check if cache is valid
-      if (cached && 
-          cached.lastModified >= fileStats.mtime.getTime() && 
-          cached.size === fileStats.size) {
+      if (
+        cached &&
+        cached.lastModified >= fileStats.mtime.getTime() &&
+        cached.size === fileStats.size
+      ) {
         this.stats.hits++;
         return cached.content;
       }
-      
+
       // Cache miss - read file
       this.stats.misses++;
       this.stats.reads++;
       const content = await fs.readFile(normalizedPath, 'utf-8');
-      
+
       this.cache.set(normalizedPath, {
         content,
         lastModified: fileStats.mtime.getTime(),
-        size: fileStats.size
+        size: fileStats.size,
       });
-      
+
       return content;
-      
     } catch (error) {
       return null;
     }
@@ -71,25 +72,28 @@ export class FileCache {
   /**
    * Get parsed metadata with caching
    */
-  async getParsedMetadata(filePath: string, parser: (content: string) => MetadataParseResult): Promise<MetadataParseResult | null> {
+  async getParsedMetadata(
+    filePath: string,
+    parser: (content: string) => MetadataParseResult
+  ): Promise<MetadataParseResult | null> {
     const content = await this.getFileContent(filePath);
     if (!content) return null;
 
     const normalizedPath = path.resolve(filePath);
     const cached = this.cache.get(normalizedPath);
-    
+
     if (cached?.parsedMetadata) {
       return cached.parsedMetadata;
     }
-    
+
     // Parse and cache
     this.stats.parses++;
     const parsed = parser(content);
-    
+
     if (cached) {
       cached.parsedMetadata = parsed;
     }
-    
+
     return parsed;
   }
 
@@ -97,7 +101,7 @@ export class FileCache {
    * Get method-specific metadata with caching
    */
   async getMethodMetadata(
-    filePath: string, 
+    filePath: string,
     methodName: string,
     parser: (content: string, methodName: string) => MetadataParseResult | null
   ): Promise<MetadataParseResult | null> {
@@ -106,26 +110,26 @@ export class FileCache {
 
     const normalizedPath = path.resolve(filePath);
     const cached = this.cache.get(normalizedPath);
-    
+
     if (!cached?.parsedMethods) {
       if (cached) {
         cached.parsedMethods = new Map();
       }
     }
-    
+
     const methodCache = cached?.parsedMethods?.get(methodName);
     if (methodCache) {
       return methodCache;
     }
-    
+
     // Parse and cache method
     this.stats.parses++;
     const parsed = parser(content, methodName);
-    
+
     if (parsed && cached?.parsedMethods) {
       cached.parsedMethods.set(methodName, parsed);
     }
-    
+
     return parsed;
   }
 
@@ -142,13 +146,13 @@ export class FileCache {
 
     const normalizedPath = path.resolve(filePath);
     const cached = this.cache.get(normalizedPath);
-    
+
     if (!cached?.parsedMethods) {
       if (cached) {
         cached.parsedMethods = new Map();
       }
     }
-    
+
     // Parse all methods at once
     for (const methodName of methodNames) {
       if (!cached?.parsedMethods?.has(methodName)) {
@@ -183,7 +187,7 @@ export class FileCache {
     return {
       ...this.stats,
       cacheSize: this.cache.size,
-      hitRate: this.stats.hits / (this.stats.hits + this.stats.misses) * 100
+      hitRate: (this.stats.hits / (this.stats.hits + this.stats.misses)) * 100,
     };
   }
 

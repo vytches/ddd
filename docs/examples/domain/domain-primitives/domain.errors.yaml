@@ -1,25 +1,25 @@
 # Domain Errors - Universal Enhanced Metadata System V2
 
 # === FILE METADATA ===
-file-name: "domain.errors"
-title: "Domain Error Classes"
-description: "Core domain error classes for DDD error handling"
-business-context: "Provides comprehensive error hierarchy for domain-driven design with specific error types for common scenarios"
+file-name: 'domain.errors'
+title: 'Domain Error Classes'
+description: 'Core domain error classes for DDD error handling'
+business-context: 'Provides comprehensive error hierarchy for domain-driven design with specific error types for common scenarios'
 
 # === HIERARCHY ===
 hierarchy:
-  strategy: "merge"
-  scope: "file"
+  strategy: 'merge'
+  scope: 'file'
 
 # === TYPES ===
 types:
   DomainErrorOptions:
-    description: "Type definition for domain error options"
-    business-context: "Flexible error configuration supporting domain context, error codes, and custom data"
-    
+    description: 'Type definition for domain error options'
+    business-context: 'Flexible error configuration supporting domain context, error codes, and custom data'
+
     formats:
       jsdoc:
-        description: "Options for configuring domain errors"
+        description: 'Options for configuring domain errors'
       cli:
         description: |
           ## DomainErrorOptions
@@ -34,18 +34,18 @@ classes:
   IDomainError:
     # JSDoc Configuration
     jsdoc:
-      placement-strategy: "separate"
-      class-documentation: "enabled"
-      
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
     # Class Documentation
     class-doc:
-      description: "Abstract base class for all domain errors in DDD"
-      business-context: "Central error type providing consistent error handling across domain boundaries"
-      
+      description: 'Abstract base class for all domain errors in DDD'
+      business-context: 'Central error type providing consistent error handling across domain boundaries'
+
       # Format-specific
       formats:
         jsdoc:
-          description: "Base domain error with rich context"
+          description: 'Base domain error with rich context'
         cli:
           description: |
             ## IDomainError
@@ -55,29 +55,29 @@ classes:
             - Data attachment capability
             - Timestamp recording
             - Error wrapping
-      
+
       custom-tags:
-        since: "1.0.0"
-        abstract: "true"
-        extends: "BaseError"
-    
+        since: '1.0.0'
+        abstract: 'true'
+        extends: 'BaseError'
+
     # Methods
     methods:
       constructor:
-        description: "Creates a new domain error with message and options"
-        business-context: "Initialize domain error with comprehensive context for debugging"
-        
+        description: 'Creates a new domain error with message and options'
+        business-context: 'Initialize domain error with comprehensive context for debugging'
+
         parameters:
-          - name: "message"
-            type: "string"
-            description: "Error message describing the problem"
-          - name: "options"
-            type: "DomainErrorOptions | Error"
-            description: "Configuration options or wrapped error"
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the problem'
+          - name: 'options'
+            type: 'DomainErrorOptions | Error'
+            description: 'Configuration options or wrapped error'
             optional: true
-            
+
         examples:
-          - id: "basic"
+          - id: 'basic'
             code: |
               class CustomError extends IDomainError {
                 constructor(message: string) {
@@ -90,340 +90,184 @@ classes:
 
   MissingValueError:
     class-doc:
-      description: "Error thrown when a required value is missing"
-      business-context: "Validates presence of required data in domain operations"
-      
+      description: 'Error thrown when a required value is missing'
+      business-context: 'Validates presence of required data in domain operations'
+
       formats:
         jsdoc:
-          description: "Error for missing required values"
+          description: 'Error for missing required values'
         cli:
           description: |
             ## MissingValueError
             Thrown when required values are absent
-      
+
       custom-tags:
-        since: "1.0.0"
-        extends: "IDomainError"
-    
+        since: '1.0.0'
+        extends: 'IDomainError'
+
     methods:
       withValue:
-        description: "Creates a MissingValueError with specific message and data"
-        business-context: "Factory method for consistent missing value error creation"
-        
+        description: 'Creates a MissingValueError with specific message and data'
+        business-context: 'Factory method for consistent missing value error creation'
+
         parameters:
-          - name: "msg"
-            type: "string"
-            description: "Error message describing what value is missing"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
+          - name: 'msg'
+            type: 'string'
+            description: 'Error message describing what value is missing'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
             optional: true
-            
+
         returns:
-          type: "MissingValueError"
-          description: "Configured error instance"
-          
+          type: 'MissingValueError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "missing-field"
+          - id: 'missing-field'
             code: |
               throw MissingValueError.withValue('user name', { 
                 field: 'name',
                 context: { userId: 123 } 
               });
-              
+
         custom-tags:
-          static: "true"
+          static: 'true'
 
   InvalidParameterError:
     class-doc:
-      description: "Error thrown when a parameter value is invalid"
-      business-context: "Validates parameter constraints and business rules"
-      
+      description: 'Error thrown when a parameter value is invalid'
+      business-context: 'Validates parameter constraints and business rules'
+
       formats:
         jsdoc:
-          description: "Error for invalid parameter values"
+          description: 'Error for invalid parameter values'
         cli:
           description: |
             ## InvalidParameterError
             Thrown when parameters violate constraints
-      
+
       custom-tags:
-        since: "1.0.0"
-        extends: "IDomainError"
-    
+        since: '1.0.0'
+        extends: 'IDomainError'
+
     methods:
       withParameter:
-        description: "Creates an InvalidParameterError with parameter details"
-        business-context: "Factory method for parameter validation errors"
-        
-        parameters:
-          - name: "parameterName"
-            type: "string"
-            description: "Name of the invalid parameter"
-          - name: "reason"
-            type: "string"
-            description: "Reason why the parameter is invalid"
-            optional: true
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
-            optional: true
-            
-        returns:
-          type: "InvalidParameterError"
-          description: "Configured error instance"
-          
-        examples:
-          - id: "invalid-age"
-            code: |
-              throw InvalidParameterError.withParameter(
-                'age',
-                'must be between 0 and 150',
-                { providedValue: -5 }
-              );
-              
-        custom-tags:
-          static: "true"
+        description: 'Creates an InvalidParameterError for a specific parameter'
+        business-context: 'Factory method for parameter validation errors'
 
-  AlreadyExistsError:
-    class-doc:
-      description: "Error thrown when attempting to create a duplicate entity"
-      business-context: "Ensures uniqueness constraints in domain aggregates"
-      
-      formats:
-        jsdoc:
-          description: "Error for duplicate entity creation"
-        cli:
-          description: |
-            ## AlreadyExistsError
-            Prevents duplicate entity creation
-      
-      custom-tags:
-        since: "1.0.0"
-        extends: "IDomainError"
-    
-    methods:
-      withEntity:
-        description: "Creates an AlreadyExistsError with entity details"
-        business-context: "Factory method for duplicate entity errors"
-        
         parameters:
-          - name: "entityType"
-            type: "string"
-            description: "Type of the entity that already exists"
-          - name: "identifier"
-            type: "string | number"
-            description: "Identifier of the existing entity"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
+          - name: 'parameter'
+            type: 'string'
+            description: 'Parameter name that is invalid'
+          - name: 'msg'
+            type: 'string'
+            description: 'Optional custom error message'
             optional: true
-            
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error data'
+            optional: true
+
         returns:
-          type: "AlreadyExistsError"
-          description: "Configured error instance"
-          
+          type: 'InvalidParameterError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "duplicate-user"
+          - id: 'invalid-email'
             code: |
-              throw AlreadyExistsError.withEntity(
-                'User',
-                'user@example.com',
-                { field: 'email' }
-              );
-              
+              const error = InvalidParameterError.withParameter('email', 'Invalid format');
+              throw error;
+
         custom-tags:
-          static: "true"
+          static: 'true'
 
   DuplicateError:
     class-doc:
-      description: "Error thrown when attempting to create a duplicate entity"
-      business-context: "Ensures uniqueness constraints in domain aggregates"
-      
+      description: 'Error thrown when attempting to create a duplicate entity'
+      business-context: 'Ensures uniqueness constraints in domain aggregates'
+
       formats:
         jsdoc:
-          description: "Error for duplicate entity creation"
+          description: 'Error for duplicate entity creation'
         cli:
           description: |
             ## DuplicateError
             Prevents duplicate entity creation
-      
+
       custom-tags:
-        since: "1.0.0"
-        extends: "IDomainError"
-    
+        since: '1.0.0'
+        extends: 'IDomainError'
+
     methods:
       withEntityId:
-        description: "Creates a DuplicateError for a specific entity ID"
-        business-context: "Factory method for duplicate entity errors"
-        
+        description: 'Creates a DuplicateError for a specific entity ID'
+        business-context: 'Factory method for duplicate entity errors'
+
         parameters:
-          - name: "id"
-            type: "string"
-            description: "Entity ID that already exists"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
+          - name: 'id'
+            type: 'string'
+            description: 'Entity ID that already exists'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
             optional: true
-            
+
         returns:
-          type: "DuplicateError"
-          description: "Configured error instance"
-          
+          type: 'DuplicateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "duplicate-id"
+          - id: 'duplicate-id'
             code: |
               throw DuplicateError.withEntityId(
                 'user-123',
                 { entity: 'User', field: 'id' }
               );
-              
+
         custom-tags:
-          static: "true"
+          static: 'true'
 
   NotFoundError:
     class-doc:
-      description: "Error thrown when an entity cannot be found"
-      business-context: "Handles missing entity scenarios in repositories"
-      
+      description: 'Error thrown when an entity cannot be found'
+      business-context: 'Handles missing entity scenarios in repositories'
+
       formats:
         jsdoc:
-          description: "Error for entity not found"
+          description: 'Error for entity not found'
         cli:
           description: |
             ## NotFoundError
             Entity lookup failure error
-      
-      custom-tags:
-        since: "1.0.0"
-        extends: "IDomainError"
-    
-    methods:
-      withEntity:
-        description: "Creates a NotFoundError with entity details"
-        business-context: "Factory method for entity not found errors"
-        
-        parameters:
-          - name: "entityType"
-            type: "string"
-            description: "Type of the entity not found"
-          - name: "identifier"
-            type: "string | number"
-            description: "Identifier used in the failed lookup"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
-            optional: true
-            
-        returns:
-          type: "NotFoundError"
-          description: "Configured error instance"
-          
-        examples:
-          - id: "user-not-found"
-            code: |
-              throw NotFoundError.withEntity(
-                'User',
-                'user-123',
-                { searchCriteria: { id: 'user-123' } }
-              );
-              
-        custom-tags:
-          static: "true"
 
-  OperationNotAllowedError:
-    class-doc:
-      description: "Error thrown when an operation violates business rules"
-      business-context: "Enforces business invariants and operation constraints"
-      
-      formats:
-        jsdoc:
-          description: "Error for disallowed operations"
-        cli:
-          description: |
-            ## OperationNotAllowedError
-            Business rule violation error
-      
       custom-tags:
-        since: "1.0.0"
-        extends: "IDomainError"
-    
-    methods:
-      withOperation:
-        description: "Creates an OperationNotAllowedError with operation details"
-        business-context: "Factory method for operation constraint errors"
-        
-        parameters:
-          - name: "operation"
-            type: "string"
-            description: "Name of the disallowed operation"
-          - name: "reason"
-            type: "string"
-            description: "Reason why the operation is not allowed"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
-            optional: true
-            
-        returns:
-          type: "OperationNotAllowedError"
-          description: "Configured error instance"
-          
-        examples:
-          - id: "withdrawal-blocked"
-            code: |
-              throw OperationNotAllowedError.withOperation(
-                'withdraw',
-                'insufficient balance',
-                { balance: 100, requested: 500 }
-              );
-              
-        custom-tags:
-          static: "true"
+        since: '1.0.0'
+        extends: 'IDomainError'
 
-  ValidationError:
-    class-doc:
-      description: "Error thrown when validation rules are violated"
-      business-context: "Comprehensive validation error with field-level details"
-      
-      formats:
-        jsdoc:
-          description: "Error for validation failures"
-        cli:
-          description: |
-            ## ValidationError
-            Multi-field validation error
-      
-      custom-tags:
-        since: "1.0.0"
-        extends: "IDomainError"
-    
     methods:
-      withErrors:
-        description: "Creates a ValidationError with multiple field errors"
-        business-context: "Factory method for complex validation errors"
-        
+      withEntityId:
+        description: 'Creates a NotFoundError for a specific entity ID'
+        business-context: 'Factory method for entity not found errors'
+
         parameters:
-          - name: "errors"
-            type: "Record<string, string>"
-            description: "Map of field names to error messages"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
+          - name: 'id'
+            type: 'string'
+            description: 'Entity ID that was not found'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error data'
             optional: true
-            
+
         returns:
-          type: "ValidationError"
-          description: "Configured error instance"
-          
+          type: 'NotFoundError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "form-validation"
+          - id: 'user-not-found'
             code: |
-              throw ValidationError.withErrors({
-                email: 'Invalid email format',
-                age: 'Must be at least 18',
-                password: 'Too weak'
-              });
-              
+              const error = NotFoundError.withEntityId('user-123');
+              throw error;
+
         custom-tags:
-          static: "true"
+          static: 'true'

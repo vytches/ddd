@@ -1,47 +1,11 @@
-import type { LogProvider, LogEvent, LogContext } from '../core/index';
+import type { LogContext, LogEvent, LogProvider } from '../core/index';
 
-/**
- * @llm-summary Contract for console provider options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ConsoleProviderOptions interface implementing infrastructure service for console provider options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteConsoleProviderOptions implements ConsoleProviderOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ConsoleProviderOptions {
   colorize?: boolean;
   prettyPrint?: boolean;
   includeStackTrace?: boolean;
 }
 
-/**
- * @llm-summary ConsoleProvider class for console provider operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * ConsoleProvider class implementing infrastructure service for console provider operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ConsoleProvider();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ConsoleProvider implements LogProvider {
   readonly name = 'console';
 

@@ -1,26 +1,7 @@
-import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
+import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
 import type { IBusinessPolicy } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
 
-/**
- * @llm-summary Contract for policy builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyBuilder interface implementing domain pattern implementation for policy builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyBuilder implements IPolicyBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyBuilder<T> {
   /**
    * Set unique identifier for this policy
@@ -105,25 +86,6 @@ export interface IPolicyBuilder<T> {
   build(): IBusinessPolicy<T>;
 }
 
-/**
- * @llm-summary Contract for policy step builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyStepBuilder interface implementing domain pattern implementation for policy step builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyStepBuilder implements IPolicyStepBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyStepBuilder<T> {
   /**
    * Set error code for this step
@@ -166,25 +128,6 @@ export interface IPolicyStepBuilder<T> {
   build(): IBusinessPolicy<T>;
 }
 
-/**
- * @llm-summary Contract for policy group functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyGroup interface implementing domain pattern implementation for policy group operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyGroup implements IPolicyGroup {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyGroup<T> {
   /**
    * Add a specification that must be satisfied in this group
@@ -211,25 +154,6 @@ export interface IPolicyGroup<T> {
   getPolicy(): IBusinessPolicy<T>;
 }
 
-/**
- * @llm-summary Contract for policy group step builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyGroupStepBuilder interface implementing domain pattern implementation for policy group step builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyGroupStepBuilder implements IPolicyGroupStepBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyGroupStepBuilder<T> extends IPolicyGroup<T> {
   /**
    * Set error code for this group step
@@ -252,25 +176,6 @@ export interface IPolicyGroupStepBuilder<T> extends IPolicyGroup<T> {
   and(): IPolicyGroup<T>;
 }
 
-/**
- * @llm-summary Contract for conditional policy builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * ConditionalPolicyBuilder interface implementing domain pattern implementation for conditional policy builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteConditionalPolicyBuilder implements IConditionalPolicyBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IConditionalPolicyBuilder<T> {
   /**
    * Define what happens when condition is met
@@ -288,25 +193,6 @@ export interface IConditionalPolicyBuilder<T> {
   thenMustAsync(specification: IAsyncSpecification<T>): IConditionalPolicyThenStepBuilder<T>;
 }
 
-/**
- * @llm-summary Contract for conditional policy then step builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * ConditionalPolicyThenStepBuilder interface implementing domain pattern implementation for conditional policy then step builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteConditionalPolicyThenStepBuilder implements IConditionalPolicyThenStepBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IConditionalPolicyThenStepBuilder<T> {
   /**
    * Set error code for the then clause
@@ -344,25 +230,6 @@ export interface IConditionalPolicyThenStepBuilder<T> {
   otherwiseWarn(message: string): IConditionalPolicyElse<T>;
 }
 
-/**
- * @llm-summary Contract for conditional policy else functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * ConditionalPolicyElse interface implementing domain pattern implementation for conditional policy else operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteConditionalPolicyElse implements IConditionalPolicyElse {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IConditionalPolicyElse<T> {
   /**
    * Build the conditional policy
@@ -370,25 +237,6 @@ export interface IConditionalPolicyElse<T> {
   build(): IBusinessPolicy<T>;
 }
 
-/**
- * @llm-summary Contract for conditional policy else step builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * ConditionalPolicyElseStepBuilder interface implementing domain pattern implementation for conditional policy else step builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteConditionalPolicyElseStepBuilder implements IConditionalPolicyElseStepBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IConditionalPolicyElseStepBuilder<T> {
   /**
    * Set error code for the else clause
@@ -411,25 +259,6 @@ export interface IConditionalPolicyElseStepBuilder<T> {
   build(): IBusinessPolicy<T>;
 }
 
-/**
- * @llm-summary Contract for policy builder config functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyBuilderConfig interface implementing domain pattern implementation for policy builder config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyBuilderConfig implements PolicyBuilderConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyBuilderConfig<T> {
   /**
    * Default domain for policies created by this builder

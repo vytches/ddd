@@ -1,0 +1,292 @@
+# Outbox Processor - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'outbox-processor'
+title: 'OutboxProcessor - Reliable Message Processing'
+description: 'Processes outbox messages with retry logic and middleware support'
+business-context: 'Ensures reliable message delivery with configurable processing options'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  OutboxProcessorOptions:
+    description: 'Configuration options for the outbox processor'
+    business-context: 'Customizes message processing behavior for different environments'
+
+    properties:
+      - name: 'batchSize'
+        type: 'number'
+        description: 'Maximum messages to process in one batch'
+        required: false
+        default: '10'
+
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Maximum retry attempts for failed messages'
+        required: false
+        default: '3'
+
+      - name: 'processingInterval'
+        type: 'number'
+        description: 'Processing interval in milliseconds'
+        required: false
+        default: '5000'
+
+      - name: 'priorityOrder'
+        type: 'MessagePriority[]'
+        description: 'Priority order for message processing'
+        required: false
+        default: '[CRITICAL, HIGH, NORMAL, LOW]'
+
+      - name: 'messageTimeout'
+        type: 'number'
+        description: 'Timeout for processing a single message'
+        required: false
+        default: '30000'
+
+      - name: 'enableLogging'
+        type: 'boolean'
+        description: 'Enable detailed logging'
+        required: false
+        default: 'false'
+
+# === CLASSES ===
+classes:
+  OutboxProcessor:
+    class-doc:
+      description: 'Processes outbox messages with retry logic and middleware pipeline'
+      business-context: 'Core component for reliable message processing in distributed systems'
+
+      formats:
+        jsdoc:
+          description: 'Processes outbox messages with retry and middleware support'
+        cli:
+          description: |
+            ## OutboxProcessor
+
+            Enterprise-grade message processor with:
+            - Configurable batch processing
+            - Retry logic with exponential backoff
+            - Middleware pipeline support
+            - Priority-based processing
+            - Comprehensive logging and monitoring
+
+    methods:
+      constructor:
+        description: 'Creates a new OutboxProcessor instance'
+        business-context: 'Initializes processor with repository and configuration options'
+
+        parameters:
+          - name: 'repository'
+            type: 'IOutboxRepository'
+            description: 'Repository for accessing outbox messages'
+
+          - name: 'options'
+            type: 'OutboxProcessorOptions'
+            description: 'Configuration options'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const repository = new InMemoryOutboxRepository();
+              const processor = new OutboxProcessor(repository, {
+                batchSize: 20,
+                maxRetries: 5,
+                processingInterval: 3000
+              });
+
+      registerHandler:
+        description: 'Registers a message handler for a specific message type'
+        business-context: 'Enables type-specific message processing logic'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type of message to handle'
+
+          - name: 'handler'
+            type: 'IOutboxMessageHandler'
+            description: 'Handler implementation'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'register-handler'
+            code: |
+              processor.registerHandler('user.created', async (message) => {
+                await emailService.sendWelcome(message.payload);
+              });
+
+      use:
+        description: 'Registers middleware for message processing pipeline'
+        business-context: 'Adds cross-cutting concerns to message processing'
+
+        parameters:
+          - name: 'middleware'
+            type: 'OutboxMiddleware'
+            description: 'Middleware function to add'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'add-middleware'
+            code: |
+              processor.use((next) => async (message) => {
+                console.log('Processing:', message.id);
+                await next(message);
+              });
+
+      start:
+        description: 'Starts the processor with automatic interval processing'
+        business-context: 'Begins continuous message processing for production use'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          warning: 'Only call start() once per processor instance'
+
+        examples:
+          - id: 'start-processor'
+            code: |
+              // Register handlers first
+              processor.registerHandler('order.created', orderHandler);
+
+              // Start processing
+              processor.start();
+
+      stop:
+        description: 'Stops the processor and clears scheduled processing'
+        business-context: 'Graceful shutdown for maintenance or application exit'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'stop-processor'
+            code: |
+              // Graceful shutdown
+              processor.stop();
+
+      processBatch:
+        description: 'Processes a single batch of pending messages'
+        business-context: 'Manual processing for testing or on-demand scenarios'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when batch is processed'
+
+        examples:
+          - id: 'manual-batch'
+            code: |
+              // Process one batch manually
+              await processor.processBatch();
+
+      getStats:
+        description: 'Gets current processor statistics and configuration'
+        business-context: 'Provides monitoring and debugging information'
+
+        returns:
+          type: 'Promise<ProcessorStats>'
+          description: 'Current processor statistics'
+
+        examples:
+          - id: 'get-stats'
+            code: |
+              const stats = await processor.getStats();
+              console.log('Running:', stats.isRunning);
+              console.log('Handlers:', stats.registeredHandlers);
+
+  EventBusOutboxHandler:
+    class-doc:
+      description: 'Handler that publishes outbox messages to an event bus'
+      business-context: 'Bridges outbox pattern with event-driven architecture'
+
+      formats:
+        jsdoc:
+          description: 'Publishes outbox messages to event bus'
+
+    methods:
+      constructor:
+        description: 'Creates handler with event bus dependency'
+        business-context: 'Initializes handler for event bus integration'
+
+        parameters:
+          - name: 'eventBus'
+            type: 'IEventBus'
+            description: 'Event bus for publishing messages'
+
+        examples:
+          - id: 'event-bus-handler'
+            code: |
+              const eventBus = new UnifiedEventBus();
+              const handler = new EventBusOutboxHandler(eventBus);
+              processor.registerHandler('*', handler);
+
+      handle:
+        description: 'Handles outbox message by publishing to event bus'
+        business-context: 'Converts outbox messages to domain events'
+
+        parameters:
+          - name: 'message'
+            type: 'IOutboxMessage'
+            description: 'Message to publish'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when message is published'
+
+        examples:
+          - id: 'handle-message'
+            code: |
+              const message: IOutboxMessage = {
+                id: '123',
+                messageType: 'order.created',
+                payload: { orderId: 'order-456' },
+                // ... other properties
+              };
+
+              await handler.handle(message);
+
+# === TYPES ===
+types:
+  ProcessorStats:
+    description: 'Statistics and configuration information for processor'
+    business-context: 'Monitoring data for operational insights'
+
+    properties:
+      - name: 'isRunning'
+        type: 'boolean'
+        description: 'Whether processor is currently running'
+
+      - name: 'batchSize'
+        type: 'number'
+        description: 'Configured batch size'
+
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Configured maximum retries'
+
+      - name: 'processingInterval'
+        type: 'number'
+        description: 'Configured processing interval'
+
+      - name: 'registeredHandlers'
+        type: 'string[]'
+        description: 'List of registered message types'
+
+      - name: 'middlewareCount'
+        type: 'number'
+        description: 'Number of registered middlewares'

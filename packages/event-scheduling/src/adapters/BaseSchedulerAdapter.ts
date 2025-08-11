@@ -28,34 +28,17 @@ const Logger = {
 };
 import type {
   IEventScheduler,
-  IScheduledEvent,
-  IScheduleOptions,
-  IScheduledJob,
   IJobFilter,
   IJobQueryResult,
+  IScheduledEvent,
+  IScheduledJob,
+  IScheduleOptions,
   ISchedulerConfig,
   ISchedulerLifecycle,
 } from '@vytches/ddd-contracts';
 
 import { JobStatus } from '@vytches/ddd-contracts';
 
-/**
- * @llm-summary BaseSchedulerAdapter class for base scheduler adapter operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * BaseSchedulerAdapter class implementing core domain functionality for base scheduler adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseSchedulerAdapter();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseSchedulerAdapter implements IEventScheduler {
   protected readonly logger: ILogger;
   protected readonly config: ISchedulerConfig;

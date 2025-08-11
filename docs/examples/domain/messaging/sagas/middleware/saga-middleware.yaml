@@ -1,0 +1,428 @@
+# Saga Middleware - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'saga-middleware'
+title: 'SagaMiddleware - Cross-Cutting Concerns Pipeline'
+description: 'Middleware classes and pipeline for saga execution cross-cutting concerns'
+business-context: 'Provides enterprise middleware patterns for logging, retry, circuit breaker, and security'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseSagaMiddleware:
+    class-doc:
+      description: 'Abstract base class for saga middleware implementations with logging support'
+      business-context: 'Foundation for implementing cross-cutting concerns in saga execution pipeline'
+
+      formats:
+        jsdoc:
+          description: 'Base class for saga middleware with logging and lifecycle hooks'
+        cli:
+          description: |
+            ## BaseSagaMiddleware
+
+            Abstract middleware foundation providing:
+            - Structured logging integration
+            - Before/after/error lifecycle hooks
+            - Context-aware application logic
+            - Named middleware identification
+
+    methods:
+      constructor:
+        description: 'Creates base middleware with name and logger initialization'
+        business-context: 'Establishes middleware identity and logging context'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Unique middleware name for identification'
+
+        examples:
+          - id: 'base-middleware-creation'
+            code: |
+              class CustomMiddleware extends BaseSagaMiddleware {
+                constructor() {
+                  super('CustomBusinessLogic');
+                }
+              }
+
+      before:
+        description: 'Execute before saga step - override in derived classes'
+        business-context: 'Pre-processing hook for saga operations'
+
+        parameters:
+          - name: 'context'
+            type: 'ISagaMiddlewareContext'
+            description: 'Middleware execution context'
+          - name: 'next'
+            type: '() => Promise<void>'
+            description: 'Next middleware in chain'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completion promise'
+
+      after:
+        description: 'Execute after saga step - override in derived classes'
+        business-context: 'Post-processing hook for saga operations'
+
+        parameters:
+          - name: 'context'
+            type: 'ISagaMiddlewareContext'
+            description: 'Middleware execution context'
+          - name: 'result'
+            type: 'unknown'
+            description: 'Step execution result'
+          - name: 'next'
+            type: '(result: unknown) => Promise<void>'
+            description: 'Next middleware in chain'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completion promise'
+
+      onError:
+        description: 'Handle saga step errors - override in derived classes'
+        business-context: 'Error handling hook for saga operations'
+
+        parameters:
+          - name: 'context'
+            type: 'ISagaMiddlewareContext'
+            description: 'Middleware execution context'
+          - name: 'error'
+            type: 'Error'
+            description: 'Error that occurred'
+          - name: 'next'
+            type: '(error: Error) => Promise<void>'
+            description: 'Next error handler in chain'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completion promise'
+
+      getName:
+        description: 'Gets middleware name for identification'
+        business-context: 'Runtime middleware identification for debugging'
+
+        returns:
+          type: 'string'
+          description: 'Middleware name'
+
+      shouldApply:
+        description: 'Determines if middleware should be applied to context'
+        business-context: 'Conditional middleware application based on context'
+
+        parameters:
+          - name: 'context'
+            type: 'ISagaMiddlewareContext'
+            description: 'Middleware context to evaluate'
+
+        returns:
+          type: 'boolean'
+          description: 'True if middleware should be applied'
+
+  PerformanceMonitoringMiddleware:
+    class-doc:
+      description: 'Middleware for monitoring saga step execution performance with timing and logging'
+      business-context: 'Provides operational insights into saga performance characteristics'
+
+      formats:
+        jsdoc:
+          description: 'Performance monitoring with execution timing and alerts'
+        cli:
+          description: |
+            ## PerformanceMonitoringMiddleware
+
+            Performance monitoring providing:
+            - Execution time tracking
+            - Slow execution alerts
+            - Structured performance logging
+            - Success/failure metrics
+
+    methods:
+      constructor:
+        description: 'Creates performance monitoring middleware'
+        business-context: 'Initializes performance tracking infrastructure'
+
+        examples:
+          - id: 'performance-middleware'
+            code: |
+              const performanceMiddleware = new PerformanceMonitoringMiddleware();
+              sagaPipeline.use(performanceMiddleware);
+
+      before:
+        description: 'Records execution start time and logs step initiation'
+        business-context: 'Begins performance tracking for saga step'
+
+      after:
+        description: 'Calculates execution time and logs completion with performance metrics'
+        business-context: 'Completes performance tracking and alerts on slow execution'
+
+      onError:
+        description: 'Logs execution failure with timing information'
+        business-context: 'Captures performance data even for failed operations'
+
+  RetryMiddleware:
+    class-doc:
+      description: 'Middleware providing automatic retry logic with exponential backoff for failed saga steps'
+      business-context: 'Handles transient failures in distributed business processes'
+
+      formats:
+        jsdoc:
+          description: 'Automatic retry with exponential backoff for saga resilience'
+        cli:
+          description: |
+            ## RetryMiddleware
+
+            Retry mechanism providing:
+            - Configurable retry attempts
+            - Exponential backoff delays
+            - Per-step retry tracking
+            - Failure escalation after exhaustion
+
+    methods:
+      constructor:
+        description: 'Creates retry middleware with configurable retry parameters'
+        business-context: 'Establishes resilience policy for transient failures'
+
+        parameters:
+          - name: 'maxRetries'
+            type: 'number'
+            description: 'Maximum retry attempts'
+            required: false
+            default: '3'
+          - name: 'retryDelay'
+            type: 'number'
+            description: 'Initial retry delay in milliseconds'
+            required: false
+            default: '1000'
+          - name: 'backoffMultiplier'
+            type: 'number'
+            description: 'Exponential backoff multiplier'
+            required: false
+            default: '2'
+
+        examples:
+          - id: 'retry-middleware-config'
+            code: |
+              const retryMiddleware = new RetryMiddleware(
+                5,    // max retries
+                2000, // initial delay (2 seconds)
+                1.5   // backoff multiplier
+              );
+
+              sagaPipeline.use(retryMiddleware);
+
+  CircuitBreakerMiddleware:
+    class-doc:
+      description: 'Middleware implementing circuit breaker pattern to prevent cascading failures'
+      business-context: 'Protects against system overload by failing fast when errors exceed threshold'
+
+      formats:
+        jsdoc:
+          description: 'Circuit breaker pattern for saga fault tolerance'
+        cli:
+          description: |
+            ## CircuitBreakerMiddleware
+
+            Circuit breaker providing:
+            - Failure threshold monitoring
+            - Circuit state management (closed/open/half-open)
+            - Automatic recovery attempts
+            - Fast-fail protection
+
+    methods:
+      constructor:
+        description: 'Creates circuit breaker middleware with configurable thresholds'
+        business-context: 'Establishes fault tolerance policy for system protection'
+
+        parameters:
+          - name: 'failureThreshold'
+            type: 'number'
+            description: 'Number of failures before opening circuit'
+            required: false
+            default: '5'
+          - name: 'recoveryTimeout'
+            type: 'number'
+            description: 'Time before attempting recovery (milliseconds)'
+            required: false
+            default: '60000'
+          - name: 'successThreshold'
+            type: 'number'
+            description: 'Successful operations needed to close circuit'
+            required: false
+            default: '3'
+
+        examples:
+          - id: 'circuit-breaker-config'
+            code: |
+              const circuitBreaker = new CircuitBreakerMiddleware(
+                10,    // failure threshold
+                120000, // 2 minute recovery timeout
+                5      // success threshold
+              );
+
+              sagaPipeline.use(circuitBreaker);
+
+  SecurityMiddleware:
+    class-doc:
+      description: 'Middleware for enforcing security policies and authorization on saga operations'
+      business-context: 'Ensures only authorized users and systems can execute business processes'
+
+      formats:
+        jsdoc:
+          description: 'Security enforcement with authorization checks'
+        cli:
+          description: |
+            ## SecurityMiddleware
+
+            Security enforcement providing:
+            - Custom authorization logic
+            - User context validation
+            - Operation access control
+            - Security audit logging
+
+    methods:
+      constructor:
+        description: 'Creates security middleware with optional custom authorizer'
+        business-context: 'Establishes security policy for saga operations'
+
+        parameters:
+          - name: 'authorizer'
+            type: '(context: ISagaMiddlewareContext) => Promise<boolean>'
+            description: 'Custom authorization function'
+            required: false
+
+        examples:
+          - id: 'security-middleware-config'
+            code: |
+              const securityMiddleware = new SecurityMiddleware(
+                async (context) => {
+                  // Custom authorization logic
+                  return context.executionContext.userId !== null &&
+                         await permissionService.hasPermission(
+                           context.executionContext.userId,
+                           context.sagaType,
+                           'execute'
+                         );
+                }
+              );
+
+              sagaPipeline.use(securityMiddleware);
+
+  SagaMiddlewarePipeline:
+    class-doc:
+      description: 'Pipeline orchestrator for executing saga middleware in sequence with proper error handling'
+      business-context: 'Coordinates middleware execution for enterprise-grade saga processing'
+
+      formats:
+        jsdoc:
+          description: 'Middleware pipeline orchestrator with lifecycle management'
+        cli:
+          description: |
+            ## SagaMiddlewarePipeline
+
+            Pipeline orchestrator providing:
+            - Middleware registration and management
+            - Sequential before/after execution
+            - Error handling propagation
+            - Context-aware middleware filtering
+
+    methods:
+      constructor:
+        description: 'Creates empty middleware pipeline with logging'
+        business-context: 'Initializes middleware execution framework'
+
+        examples:
+          - id: 'pipeline-creation'
+            code: |
+              const sagaPipeline = new SagaMiddlewarePipeline();
+
+              // Add middleware in order
+              sagaPipeline.use(new SecurityMiddleware());
+              sagaPipeline.use(new PerformanceMonitoringMiddleware());
+              sagaPipeline.use(new RetryMiddleware());
+              sagaPipeline.use(new CircuitBreakerMiddleware());
+
+      use:
+        description: 'Adds middleware to the execution pipeline'
+        business-context: 'Registers cross-cutting concerns for saga processing'
+
+        parameters:
+          - name: 'middleware'
+            type: 'ISagaMiddleware & { getName?(): string; shouldApply?(context: unknown): boolean }'
+            description: 'Middleware instance to add'
+
+        examples:
+          - id: 'add-middleware'
+            code: |
+              sagaPipeline.use(new PerformanceMonitoringMiddleware());
+              sagaPipeline.use(new RetryMiddleware(5, 2000));
+
+              // Custom middleware
+              class AuditMiddleware extends BaseSagaMiddleware {
+                constructor() { super('Audit'); }
+                
+                override async before(context: ISagaMiddlewareContext, next: () => Promise<void>) {
+                  await this.auditService.logSagaStart(context);
+                  await next();
+                }
+              }
+
+              sagaPipeline.use(new AuditMiddleware());
+
+      execute:
+        description: 'Executes saga operation through the complete middleware pipeline'
+        business-context: 'Orchestrates enterprise-grade saga execution with all cross-cutting concerns'
+
+        parameters:
+          - name: 'saga'
+            type: 'ISaga'
+            description: 'Target saga instance'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Processing event'
+          - name: 'executionContext'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+          - name: 'stepName'
+            type: 'string'
+            description: 'Current step name'
+          - name: 'operation'
+            type: '() => Promise<ISagaActionResult>'
+            description: 'Operation to execute'
+
+        returns:
+          type: 'Promise<ISagaActionResult>'
+          description: 'Result of saga operation after middleware processing'
+
+        examples:
+          - id: 'pipeline-execution'
+            code: |
+              const result = await sagaPipeline.execute(
+                saga,
+                orderCreatedEvent,
+                executionContext,
+                'ProcessPayment',
+                async () => {
+                  return await saga.handleEvent(orderCreatedEvent, executionContext);
+                }
+              );
+
+              console.log('Operation result:', result.success);
+
+      getMiddlewareNames:
+        description: 'Gets list of registered middleware names for debugging'
+        business-context: 'Provides visibility into pipeline configuration'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of middleware names'
+
+      clear:
+        description: 'Removes all middleware from the pipeline'
+        business-context: 'Resets pipeline for testing or reconfiguration'

@@ -2,9 +2,9 @@
  * Tests for TagExtractor functionality
  */
 
-import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches/ddd-utils';
+import { describe, expect, it } from 'vitest';
 import { TagExtractor } from '../../src/examples-engine/extractor/tag-extractor';
+import { safeRun } from '../../src/saferun';
 
 describe('TagExtractor', () => {
   let extractor: TagExtractor;
@@ -36,36 +36,32 @@ return validation.isValid;
 @extract-end
       `;
 
-      const [error, examples] = safeRun(() => 
-        extractor.extractAllTags(content, 'test-package')
-      );
+      const [error, examples] = safeRun(() => extractor.extractAllTags(content, 'test-package'));
 
       expect(error).toBeUndefined();
       expect(examples).toHaveLength(3);
-      
+
       if (examples) {
         // Check first example
-        expect(examples[0].methodName).toBe('create');
-        expect(examples[0].layer).toBe('domain');
-        expect(examples[0].complexity).toBe('basic');
-        expect(examples[0].content).toContain('User.create(userData)');
-        
+        expect(examples?.[0]?.methodName).toBe('create');
+        expect(examples?.[0]?.layer).toBe('domain');
+        expect(examples?.[0]?.complexity).toBe('basic');
+        expect(examples?.[0]?.content).toContain('User.create(userData)');
+
         // Check second example
-        expect(examples[1].methodName).toBe('create');
-        expect(examples[1].layer).toBe('service');
-        expect(examples[1].complexity).toBe('basic');
-        
+        expect(examples?.[1]?.methodName).toBe('create');
+        expect(examples?.[1]?.layer).toBe('service');
+        expect(examples?.[1]?.complexity).toBe('basic');
+
         // Check third example
-        expect(examples[2].methodName).toBe('validate');
-        expect(examples[2].layer).toBe('domain');
-        expect(examples[2].complexity).toBe('basic');
+        expect(examples?.[2]?.methodName).toBe('validate');
+        expect(examples?.[2]?.layer).toBe('domain');
+        expect(examples?.[2]?.complexity).toBe('basic');
       }
     });
 
     it('should handle empty content', () => {
-      const [error, examples] = safeRun(() => 
-        extractor.extractAllTags('', 'test-package')
-      );
+      const [error, examples] = safeRun(() => extractor.extractAllTags('', 'test-package'));
 
       expect(error).toBeUndefined();
       expect(examples).toHaveLength(0);
@@ -82,9 +78,7 @@ const example = 'code';
 \`\`\`
       `;
 
-      const [error, examples] = safeRun(() => 
-        extractor.extractAllTags(content, 'test-package')
-      );
+      const [error, examples] = safeRun(() => extractor.extractAllTags(content, 'test-package'));
 
       expect(error).toBeUndefined();
       expect(examples).toHaveLength(0);
@@ -100,16 +94,14 @@ return user;
 @extract-end
       `;
 
-      const [error, examples] = safeRun(() => 
-        extractor.extractAllTags(content, 'test-package')
-      );
+      const [error, examples] = safeRun(() => extractor.extractAllTags(content, 'test-package'));
 
       expect(error).toBeUndefined();
       expect(examples).toHaveLength(1);
       if (examples && examples.length > 0) {
-        expect(examples[0].content).not.toContain('```typescript');
-        expect(examples[0].content).not.toContain('```');
-        expect(examples[0].content).toContain('const user = User.create(data)');
+        expect(examples?.[0]?.content).not.toContain('```typescript');
+        expect(examples?.[0]?.content).not.toContain('```');
+        expect(examples?.[0]?.content).toContain('const user = User.create(data)');
       }
     });
   });
@@ -126,7 +118,7 @@ const command = new CreateUserCommand();
 @extract-end
       `;
 
-      const [error, example] = safeRun(() => 
+      const [error, example] = safeRun(() =>
         extractor.extractSpecificTag(content, 'create', 'service', 'basic', 'test-package')
       );
 
@@ -145,7 +137,7 @@ const user = User.create(data);
 @extract-end
       `;
 
-      const [error, example] = safeRun(() => 
+      const [error, example] = safeRun(() =>
         extractor.extractSpecificTag(content, 'update', 'service', 'basic', 'test-package')
       );
 
@@ -174,18 +166,18 @@ Even more content
 
       expect(error).toBeUndefined();
       expect(tags).toHaveLength(3);
-      
-      expect(tags?.[0].methodName).toBe('create');
-      expect(tags?.[0].layer).toBe('domain');
-      expect(tags?.[0].complexity).toBe('basic');
-      
-      expect(tags?.[1].methodName).toBe('update');
-      expect(tags?.[1].layer).toBe('service');
-      expect(tags?.[1].complexity).toBe('intermediate');
-      
-      expect(tags?.[2].methodName).toBe('delete');
-      expect(tags?.[2].layer).toBe('integration');
-      expect(tags?.[2].complexity).toBe('advanced');
+
+      expect(tags?.[0]?.methodName).toBe('create');
+      expect(tags?.[0]?.layer).toBe('domain');
+      expect(tags?.[0]?.complexity).toBe('basic');
+
+      expect(tags?.[1]?.methodName).toBe('update');
+      expect(tags?.[1]?.layer).toBe('service');
+      expect(tags?.[1]?.complexity).toBe('intermediate');
+
+      expect(tags?.[2]?.methodName).toBe('delete');
+      expect(tags?.[2]?.layer).toBe('integration');
+      expect(tags?.[2]?.complexity).toBe('advanced');
     });
   });
 
@@ -206,11 +198,11 @@ Even more content
 
     it('should reject invalid tag formats', () => {
       const invalidTags = [
-        '@extract: create',  // Missing parts
-        '@extract: create:invalid:basic',  // Invalid layer
-        '@extract: create:domain:invalid',  // Invalid complexity
-        '@extract: 123create:domain:basic',  // Invalid method name
-        'extract: create:domain:basic',  // Missing @
+        '@extract: create', // Missing parts
+        '@extract: create:invalid:basic', // Invalid layer
+        '@extract: create:domain:invalid', // Invalid complexity
+        '@extract: 123create:domain:basic', // Invalid method name
+        'extract: create:domain:basic', // Missing @
       ];
 
       invalidTags.forEach(tag => {
@@ -246,17 +238,17 @@ Content 4
       expect(error).toBeUndefined();
       expect(stats).toBeDefined();
       expect(stats?.totalTags).toBe(4);
-      
+
       // Check layer distribution
       expect(stats?.tagsByLayer.domain).toBe(2);
       expect(stats?.tagsByLayer.service).toBe(1);
       expect(stats?.tagsByLayer.integration).toBe(1);
-      
+
       // Check complexity distribution
       expect(stats?.tagsByComplexity.basic).toBe(2);
       expect(stats?.tagsByComplexity.intermediate).toBe(1);
       expect(stats?.tagsByComplexity.advanced).toBe(1);
-      
+
       // Check methods
       expect(stats?.methods).toContain('create');
       expect(stats?.methods).toContain('update');

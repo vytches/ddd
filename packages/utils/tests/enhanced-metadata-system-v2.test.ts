@@ -1,21 +1,20 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { safeRun } from '@vytches/ddd-utils';
-import { 
+import { resolve } from 'path';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import {
+  FormatSpecificResolver,
   HierarchicalMetadataResolver,
-  FormatSpecificResolver, 
+  MetadataResolutionStrategies,
   MultiLevelCache,
-  MetadataResolutionStrategies
 } from '../src/examples-engine';
 import type { HierarchyConfig, ResolvedMetadata } from '../src/examples-engine/hierarchy/types';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { safeRun } from '../src/saferun';
 
 describe('Enhanced Metadata System V2', () => {
   let resolver: HierarchicalMetadataResolver;
 
   beforeEach(async () => {
     // Set base directory to project root (two levels up from packages/utils)
-    const projectRoot = path.resolve(__dirname, '../../..');
+    const projectRoot = resolve(__dirname, '../../..');
     resolver = new HierarchicalMetadataResolver(projectRoot);
     await MultiLevelCache.initialize();
   });
@@ -31,16 +30,14 @@ describe('Enhanced Metadata System V2', () => {
         packageName: 'aggregates',
         className: 'aggregate-root',
         methodName: 'commit',
-        format: 'jsdoc'
+        format: 'jsdoc',
       };
 
-      const [error, metadata] = await safeRun(async () => 
-        await resolver.resolveForMethod(config)
-      );
+      const [error, metadata] = await safeRun(async () => await resolver.resolveForMethod(config));
 
       expect(error).toBeUndefined();
       expect(metadata).toBeDefined();
-      
+
       if (metadata) {
         expect(metadata.description).toBeDefined();
         expect(metadata.author).toBe('Vytches DDD Team');
@@ -54,12 +51,10 @@ describe('Enhanced Metadata System V2', () => {
         packageName: 'nonexistent',
         className: 'nonexistent',
         methodName: 'nonexistent',
-        format: 'jsdoc'
+        format: 'jsdoc',
       };
 
-      const [error, metadata] = await safeRun(async () => 
-        await resolver.resolveForMethod(config)
-      );
+      const [error, metadata] = await safeRun(async () => await resolver.resolveForMethod(config));
 
       expect(error).toBeUndefined();
       expect(metadata).toBeDefined();
@@ -72,20 +67,18 @@ describe('Enhanced Metadata System V2', () => {
     it('should support custom metadata tags', async () => {
       const config: HierarchyConfig = {
         packageName: 'aggregates',
-        className: 'aggregate-root', 
+        className: 'aggregate-root',
         methodName: 'commit',
-        format: 'jsdoc'
+        format: 'jsdoc',
       };
 
-      const [error, metadata] = await safeRun(async () => 
-        await resolver.resolveForMethod(config)
-      );
+      const [error, metadata] = await safeRun(async () => await resolver.resolveForMethod(config));
 
       expect(error).toBeUndefined();
       expect(metadata).toBeDefined();
-      
+
       if (metadata) {
-        // Should have custom tags from global settings  
+        // Should have custom tags from global settings
         expect(metadata.license).toBe('MIT');
         // Should have custom complexity from package level
         expect(metadata.complexity).toBe('intermediate');
@@ -103,7 +96,7 @@ describe('Enhanced Metadata System V2', () => {
         'description.cli': 'CLI specific description',
         businessContext: 'Base context',
         examples: [],
-        author: 'Test Author'
+        author: 'Test Author',
       };
 
       const jsdocResult = FormatSpecificResolver.resolveForFormat(baseMetadata, 'jsdoc');
@@ -111,7 +104,7 @@ describe('Enhanced Metadata System V2', () => {
 
       expect(jsdocResult.description).toBe('JSDoc specific description');
       expect(cliResult.description).toBe('CLI specific description');
-      
+
       // Should clean up format-specific keys
       expect(jsdocResult['description.jsdoc']).toBeUndefined();
       expect(cliResult['description.cli']).toBeUndefined();
@@ -124,7 +117,7 @@ describe('Enhanced Metadata System V2', () => {
         examples: [],
         customTag: 'Custom value',
         documentationUrl: 'https://example.com',
-        complexityLevel: 'high'
+        complexityLevel: 'high',
       };
 
       const jsdoc = FormatSpecificResolver.formatAsJSDoc(metadata);
@@ -141,8 +134,8 @@ describe('Enhanced Metadata System V2', () => {
         businessContext: 'Business logic',
         examples: [
           'const result = method();\nconsole.log(result);',
-          'const another = method(param);\nreturn another;'
-        ]
+          'const another = method(param);\nreturn another;',
+        ],
       };
 
       const jsdoc = FormatSpecificResolver.formatAsJSDoc(metadata);
@@ -161,19 +154,19 @@ describe('Enhanced Metadata System V2', () => {
           level: 0,
           filePath: 'global',
           metadata: { author: 'Global Author', license: 'MIT' },
-          strategy: 'merge' as const
+          strategy: 'merge' as const,
         },
         {
           level: 1,
           filePath: 'package',
           metadata: { author: 'Package Author', complexity: 'high' },
-          strategy: 'merge' as const
-        }
+          strategy: 'merge' as const,
+        },
       ];
 
       const result = MetadataResolutionStrategies.applyHierarchy(sources);
 
-      expect(result.author).toBe('Global Author'); // First (lowest level) wins in merge
+      expect(result.author).toBe('Package Author'); // Higher level overrides lower level in merge
       expect(result.license).toBe('MIT'); // From global
       expect(result.complexity).toBe('high'); // From package
     });
@@ -184,14 +177,14 @@ describe('Enhanced Metadata System V2', () => {
           level: 0,
           filePath: 'global',
           metadata: { author: 'Global Author', license: 'MIT', description: 'Global desc' },
-          strategy: 'merge' as const
+          strategy: 'merge' as const,
         },
         {
           level: 1,
           filePath: 'package',
           metadata: { author: 'Package Author' },
-          strategy: 'replace' as const
-        }
+          strategy: 'replace' as const,
+        },
       ];
 
       const result = MetadataResolutionStrategies.applyHierarchy(sources);
@@ -212,17 +205,15 @@ describe('Enhanced Metadata System V2', () => {
       await MultiLevelCache.set(key, value);
 
       // Get value
-      const [error, cached] = await safeRun(async () => 
-        await MultiLevelCache.get(key)
-      );
+      const [error, cached] = await safeRun(async () => await MultiLevelCache.get(key));
 
       expect(error).toBeUndefined();
       expect(cached).toBe(value);
     });
 
     it('should return null for non-existent keys', async () => {
-      const [error, result] = await safeRun(async () => 
-        await MultiLevelCache.get('nonexistent:key')
+      const [error, result] = await safeRun(
+        async () => await MultiLevelCache.get('nonexistent:key')
       );
 
       expect(error).toBeUndefined();
@@ -234,7 +225,7 @@ describe('Enhanced Metadata System V2', () => {
       const value = 'test value';
 
       await MultiLevelCache.set(key, value);
-      
+
       // Verify it's cached
       let cached = await MultiLevelCache.get(key);
       expect(cached).toBe(value);
@@ -255,11 +246,11 @@ describe('Enhanced Metadata System V2', () => {
         packageName: 'aggregates',
         className: 'aggregate-root',
         methodName: 'commit',
-        format: 'jsdoc'
+        format: 'jsdoc',
       };
 
-      const [resolveError, metadata] = await safeRun(async () => 
-        await resolver.resolveForMethod(config)
+      const [resolveError, metadata] = await safeRun(
+        async () => await resolver.resolveForMethod(config)
       );
 
       expect(resolveError).toBeUndefined();
@@ -270,15 +261,13 @@ describe('Enhanced Metadata System V2', () => {
         expect(metadata.author).toBe('Vytches DDD Team'); // From global
         expect(metadata.complexity).toBe('intermediate'); // From package
         expect(metadata.description).toContain('Commits pending domain events'); // From method
-        
+
         // Should have examples
         expect(metadata.examples).toBeDefined();
         expect(metadata.examples.length).toBeGreaterThan(0);
 
         // Test JSDoc formatting
-        const [formatError, jsdoc] = safeRun(() => 
-          FormatSpecificResolver.formatAsJSDoc(metadata)
-        );
+        const [formatError, jsdoc] = safeRun(() => FormatSpecificResolver.formatAsJSDoc(metadata));
 
         expect(formatError).toBeUndefined();
         expect(jsdoc).toContain('/**');
@@ -287,7 +276,7 @@ describe('Enhanced Metadata System V2', () => {
         expect(jsdoc).toContain('@since 1.0.0');
         expect(jsdoc).toContain('@example');
         expect(jsdoc).toContain('```typescript');
-        
+
         // Should handle custom tags
         expect(jsdoc).toContain('@complexity intermediate');
         expect(jsdoc).toContain('@license MIT');
@@ -299,7 +288,7 @@ describe('Enhanced Metadata System V2', () => {
         packageName: 'aggregates',
         className: 'aggregate-root',
         methodName: 'commit',
-        format: 'jsdoc'
+        format: 'jsdoc',
       };
 
       // First resolution - should cache

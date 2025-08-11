@@ -1,0 +1,241 @@
+# ValidationError - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'validation-error'
+title: 'Validation Error Classes - Error Handling for Validation'
+description: 'Error classes for validation failure reporting and error aggregation'
+business-context: 'Structured error handling for domain validation with detailed context'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ValidationError:
+    class-doc:
+      description: 'Represents a single validation error with property, message and context'
+      business-context: 'Individual validation failure with detailed context for error reporting'
+
+      formats:
+        jsdoc:
+          description: 'Single validation error implementing IValidationError'
+        cli:
+          description: |
+            ## ValidationError
+
+            Represents a single validation error that occurred during domain validation.
+            Implements IValidationError interface and provides structured error information
+            including property name, error message, and optional context data.
+
+            **Key Features:**
+            - Property-specific error reporting
+            - Rich context data support
+            - String representation for logging
+            - Immutable error data
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Structured error reporting'
+        domain: 'Validation error handling'
+
+    properties:
+      property:
+        description: 'Property name where validation failed'
+        type: 'string'
+        business-context: 'Identifies which domain object property failed validation'
+        readonly: true
+
+      message:
+        description: 'Human-readable error message describing the validation failure'
+        type: 'string'
+        business-context: 'Clear description of business rule violation'
+        readonly: true
+
+      context:
+        description: 'Optional additional context data about the validation error'
+        type: 'Record<string, unknown> | undefined'
+        business-context: 'Extra metadata for debugging and detailed error reporting'
+        readonly: true
+
+    methods:
+      constructor:
+        description: 'Creates new validation error with property, message and optional context'
+        business-context: 'Captures validation failure details for error reporting'
+
+        parameters:
+          - name: 'property'
+            type: 'string'
+            description: 'Property name where validation failed (can be empty for global errors)'
+          - name: 'message'
+            type: 'string'
+            description: 'Human-readable error message'
+          - name: 'context'
+            type: 'Record<string, unknown> | undefined'
+            description: 'Optional additional context data'
+
+        examples:
+          - id: 'basic-constructor'
+            code: |
+              const error = new ValidationError('email', 'Invalid email format');
+
+              console.log(error.property); // 'email'
+              console.log(error.message);  // 'Invalid email format'
+          - id: 'constructor-with-context'
+            code: |
+              const error = new ValidationError(
+                'age', 
+                'Age must be between 18-65', 
+                { 
+                  min: 18, 
+                  max: 65, 
+                  actual: 16,
+                  severity: 'high'
+                }
+              );
+
+              console.log(error.context?.actual); // 16
+          - id: 'global-error'
+            code: |
+              // Global validation error (not property-specific)
+              const error = new ValidationError(
+                '', 
+                'User does not meet eligibility requirements',
+                { rule: 'eligibility', userId: '123' }
+              );
+
+      toString:
+        description: 'Returns string representation of validation error'
+        business-context: 'Provides formatted error message for logging and display'
+
+        returns:
+          type: 'string'
+          description: "Formatted string as 'property: message'"
+
+        examples:
+          - id: 'to-string'
+            code: |
+              const error = new ValidationError('email', 'Invalid format');
+              console.log(error.toString()); // 'email: Invalid format'
+
+              const globalError = new ValidationError('', 'General validation failed');
+              console.log(globalError.toString()); // ': General validation failed'
+
+  ValidationErrors:
+    class-doc:
+      description: 'Collection of validation errors extending Error for comprehensive validation failure reporting'
+      business-context: 'Aggregated validation failures for comprehensive error handling and reporting'
+
+      formats:
+        jsdoc:
+          description: 'Collection of validation errors implementing IValidationErrors'
+        cli:
+          description: |
+            ## ValidationErrors
+
+            Represents a collection of validation errors that occurred during domain validation.
+            Extends the standard Error class and implements IValidationErrors interface.
+            Provides comprehensive error reporting with detailed failure information.
+
+            **Key Features:**
+            - Aggregates multiple validation errors
+            - Standard Error interface for exception handling
+            - Structured error collection
+            - Formatted error messages
+            - Error count utilities
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Error aggregation and reporting'
+        domain: 'Validation error collection'
+        extends: 'Error class for standard exception handling'
+
+    properties:
+      errors:
+        description: 'Array of individual validation errors'
+        type: 'IValidationError[]'
+        business-context: 'Collection of all validation failures that occurred'
+        readonly: true
+
+      length:
+        description: 'Number of validation errors in the collection'
+        type: 'number'
+        business-context: 'Quick access to error count for reporting and logic'
+        readonly: true
+
+    methods:
+      constructor:
+        description: 'Creates validation errors collection from array of ValidationError objects'
+        business-context: 'Aggregates individual validation failures into comprehensive error report'
+
+        parameters:
+          - name: 'errors'
+            type: 'ValidationError[]'
+            description: 'Array of individual validation errors to aggregate'
+
+        examples:
+          - id: 'basic-constructor'
+            code: |
+              const errors = [
+                new ValidationError('email', 'Invalid email format'),
+                new ValidationError('age', 'Age must be at least 18'),
+                new ValidationError('', 'User not eligible')
+              ];
+
+              const validationErrors = new ValidationErrors(errors);
+              console.log(validationErrors.length); // 3
+          - id: 'from-validation-result'
+            code: |
+              const errors: ValidationError[] = [];
+
+              // Collect errors during validation
+              if (!user.email) {
+                errors.push(new ValidationError('email', 'Email required'));
+              }
+              if (user.age < 18) {
+                errors.push(new ValidationError('age', 'Must be at least 18'));
+              }
+
+              if (errors.length > 0) {
+                const validationErrors = new ValidationErrors(errors);
+                return Result.fail(validationErrors);
+              }
+          - id: 'error-handling'
+            code: |
+              try {
+                const result = validator.validate(user);
+                if (result.isFailure) {
+                  throw result.error; // ValidationErrors instance
+                }
+              } catch (error) {
+                if (error instanceof ValidationErrors) {
+                  console.log(`Validation failed with ${error.length} errors:`);
+                  error.errors.forEach(err => console.log(`- ${err.toString()}`));
+                }
+              }
+
+      name:
+        description: "Error name property set to 'ValidationErrors'"
+        type: 'string'
+        value: "'ValidationErrors'"
+        business-context: 'Standard error identification for error handling'
+        inherited: true
+
+      message:
+        description: 'Comprehensive error message describing all validation failures'
+        type: 'string'
+        business-context: 'Summary message for logging and error reporting'
+        inherited: true
+
+        examples:
+          - id: 'error-message'
+            code: |
+              const errors = [
+                new ValidationError('email', 'Invalid format'),
+                new ValidationError('age', 'Too young')
+              ];
+
+              const validationErrors = new ValidationErrors(errors);
+              console.log(validationErrors.message);
+              // "Validation failed with 2 error(s): email: Invalid format; age: Too young"

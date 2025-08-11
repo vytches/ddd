@@ -1,0 +1,457 @@
+# base-capability - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base-capability'
+title: 'BaseCapability - Foundation for Projection Capabilities'
+description: 'Abstract base class for projection capabilities'
+business-context: 'Foundation for extending projections with cross-cutting concerns'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  Capability:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for all projection capabilities'
+      business-context: 'Provides foundation for capability-based architecture'
+
+      formats:
+        jsdoc:
+          description: 'Base capability class for extending projection functionality'
+        cli:
+          description: |
+            ## Capability
+
+            Foundation for capabilities:
+            - Common capability interface
+            - Lifecycle integration
+            - Configuration management
+            - Type safety
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        pattern: 'Capability pattern'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates capability with optional configuration'
+        business-context: 'Initializes capability for use with projections'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Capability name'
+          - name: 'config'
+            type: 'TConfig'
+            description: 'Capability configuration'
+            optional: true
+
+        examples:
+          - id: 'basic-capability'
+            code: |
+              class CustomCapability extends Capability {
+                constructor() {
+                  super('custom-capability');
+                }
+              }
+
+          - id: 'configured-capability'
+            code: |
+              class MetricsCapability extends Capability<MetricsConfig> {
+                constructor(config: MetricsConfig) {
+                  super('metrics-capability', config);
+                }
+              }
+
+      getName:
+        description: 'Returns capability name'
+        business-context: 'Identifies capability for registration and lookup'
+
+        returns:
+          type: 'string'
+          description: 'Capability name'
+
+        examples:
+          - id: 'get-name'
+            code: |
+              const name = capability.getName();
+              console.log(`Using capability: ${name}`);
+
+      getConfig:
+        description: 'Returns capability configuration'
+        business-context: 'Accesses capability settings'
+
+        returns:
+          type: 'TConfig | undefined'
+          description: 'Configuration object'
+
+        examples:
+          - id: 'get-config'
+            code: |
+              const config = capability.getConfig();
+              if (config?.enabled) {
+                // Use capability
+              }
+
+      isEnabled:
+        description: 'Checks if capability is enabled'
+        business-context: 'Controls capability activation'
+
+        returns:
+          type: 'boolean'
+          description: 'True if enabled'
+
+        examples:
+          - id: 'check-enabled'
+            code: |
+              if (capability.isEnabled()) {
+                await capability.execute();
+              }
+
+        custom-tags:
+          virtual: 'true'
+
+      initialize:
+        description: 'Initializes capability resources'
+        business-context: 'Sets up capability before first use'
+
+        parameters:
+          - name: 'context'
+            type: 'ICapabilityContext'
+            description: 'Initialization context'
+            optional: true
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Initialization complete'
+
+        examples:
+          - id: 'async-init'
+            code: |
+              async initialize(context) {
+                this.logger = context.logger;
+                await this.connectToStorage();
+              }
+
+        custom-tags:
+          virtual: 'true'
+          lifecycle: 'initialization'
+
+      dispose:
+        description: 'Cleans up capability resources'
+        business-context: 'Releases resources when capability is removed'
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Cleanup complete'
+
+        examples:
+          - id: 'cleanup'
+            code: |
+              async dispose() {
+                await this.storage?.close();
+                this.logger = null;
+              }
+
+        custom-tags:
+          virtual: 'true'
+          lifecycle: 'cleanup'
+
+  BaseProjectionCapability:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Base class for projection-specific capabilities'
+      business-context: 'Provides projection lifecycle integration'
+
+      formats:
+        jsdoc:
+          description: 'Base class with projection lifecycle hooks'
+        cli:
+          description: |
+            ## BaseProjectionCapability
+
+            Projection capability base:
+            - Lifecycle hook implementation
+            - State access
+            - Event handling
+            - Error recovery
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        extends: 'Capability'
+        implements: 'IProjectionLifecycleCapability<TReadModel>'
+
+    # Methods
+    methods:
+      onBeforeApply:
+        description: 'Hook executed before applying event'
+        business-context: 'Pre-processing logic for events'
+
+        parameters:
+          - name: 'state'
+            type: 'TReadModel'
+            description: 'Current projection state'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to be applied'
+          - name: 'context'
+            type: 'IProjectionContext'
+            description: 'Processing context'
+            optional: true
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Hook completion'
+
+        examples:
+          - id: 'before-apply'
+            code: |
+              async onBeforeApply(state, event, context) {
+                // Validate event
+                if (!this.isValidEvent(event)) {
+                  throw new Error('Invalid event');
+                }
+                
+                // Log processing
+                this.logger.debug(`Processing ${event.eventType}`);
+              }
+
+        custom-tags:
+          virtual: 'true'
+          lifecycle: 'processing'
+
+      onAfterApply:
+        description: 'Hook executed after applying event'
+        business-context: 'Post-processing logic for events'
+
+        parameters:
+          - name: 'state'
+            type: 'TReadModel'
+            description: 'Updated projection state'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Applied event'
+          - name: 'context'
+            type: 'IProjectionContext'
+            description: 'Processing context'
+            optional: true
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Hook completion'
+
+        examples:
+          - id: 'after-apply'
+            code: |
+              async onAfterApply(state, event, context) {
+                // Update metrics
+                this.metrics.increment('events.processed');
+                
+                // Check for checkpoint
+                if (this.shouldCheckpoint(context)) {
+                  await this.saveCheckpoint(state, context.position);
+                }
+              }
+
+        custom-tags:
+          virtual: 'true'
+          lifecycle: 'processing'
+
+      onError:
+        description: 'Hook executed on processing error'
+        business-context: 'Error handling and recovery'
+
+        parameters:
+          - name: 'error'
+            type: 'ProjectionError'
+            description: 'Processing error'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event that caused error'
+            optional: true
+          - name: 'context'
+            type: 'IProjectionContext'
+            description: 'Error context'
+            optional: true
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Error handled'
+
+        examples:
+          - id: 'error-handling'
+            code: |
+              async onError(error, event, context) {
+                // Log error
+                this.logger.error('Processing failed', { error, event });
+                
+                // Determine if retryable
+                if (this.isRetryable(error)) {
+                  await this.scheduleRetry(event, context);
+                } else {
+                  await this.sendToDeadLetter(event, error);
+                }
+              }
+
+        custom-tags:
+          virtual: 'true'
+          lifecycle: 'error-handling'
+
+      onRebuildStart:
+        description: 'Hook executed when rebuild starts'
+        business-context: 'Prepares for projection rebuild'
+
+        parameters:
+          - name: 'context'
+            type: 'IRebuildContext'
+            description: 'Rebuild context'
+            optional: true
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Preparation complete'
+
+        examples:
+          - id: 'rebuild-start'
+            code: |
+              async onRebuildStart(context) {
+                this.logger.info('Starting rebuild', context);
+                
+                // Clear caches
+                await this.clearCaches();
+                
+                // Initialize progress tracking
+                this.rebuildProgress = {
+                  startTime: Date.now(),
+                  eventsProcessed: 0
+                };
+              }
+
+        custom-tags:
+          virtual: 'true'
+          lifecycle: 'rebuild'
+
+      onRebuildComplete:
+        description: 'Hook executed when rebuild completes'
+        business-context: 'Finalizes projection rebuild'
+
+        parameters:
+          - name: 'result'
+            type: 'IRebuildResult'
+            description: 'Rebuild result'
+          - name: 'context'
+            type: 'IRebuildContext'
+            description: 'Rebuild context'
+            optional: true
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Finalization complete'
+
+        examples:
+          - id: 'rebuild-complete'
+            code: |
+              async onRebuildComplete(result, context) {
+                const duration = Date.now() - this.rebuildProgress.startTime;
+                
+                this.logger.info('Rebuild complete', {
+                  eventsProcessed: result.eventsProcessed,
+                  duration,
+                  success: result.success
+                });
+                
+                // Save final checkpoint
+                if (result.success) {
+                  await this.saveFinalCheckpoint(result);
+                }
+              }
+
+        custom-tags:
+          virtual: 'true'
+          lifecycle: 'rebuild'
+
+# === INTERFACES ===
+interfaces:
+  ICapabilityContext:
+    description: 'Context for capability initialization'
+    business-context: 'Provides resources for capability setup'
+
+    properties:
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Associated projection name'
+        optional: true
+
+      - name: 'logger'
+        type: 'ILogger'
+        description: 'Logger instance'
+        optional: true
+
+      - name: 'config'
+        type: 'Record<string, any>'
+        description: 'Additional configuration'
+        optional: true
+
+  IProjectionContext:
+    description: 'Context during event processing'
+    business-context: 'Processing state and metadata'
+
+    properties:
+      - name: 'position'
+        type: 'number'
+        description: 'Current event position'
+
+      - name: 'eventCount'
+        type: 'number'
+        description: 'Events processed count'
+
+      - name: 'startTime'
+        type: 'Date'
+        description: 'Processing start time'
+
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Additional context data'
+        optional: true
+
+  IRebuildContext:
+    description: 'Context for projection rebuild'
+    business-context: 'Rebuild operation metadata'
+
+    properties:
+      - name: 'fromPosition'
+        type: 'number'
+        description: 'Starting position'
+        optional: true
+
+      - name: 'toPosition'
+        type: 'number'
+        description: 'Ending position'
+        optional: true
+
+      - name: 'batchSize'
+        type: 'number'
+        description: 'Event batch size'
+        optional: true
+
+      - name: 'resetFirst'
+        type: 'boolean'
+        description: 'Reset before rebuild'
+        optional: true

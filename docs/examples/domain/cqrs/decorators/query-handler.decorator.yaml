@@ -1,0 +1,204 @@
+# query-handler.decorator - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'query-handler.decorator'
+title: 'QueryHandler Decorator - Handler Registration'
+description: 'Decorator for registering query handlers with DI integration'
+business-context: 'Automatic query handler registration and metadata management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FUNCTIONS ===
+functions:
+  QueryHandler:
+    description: 'Decorator for registering query handlers with automatic DI integration'
+    business-context: 'Enables automatic handler discovery and type-safe query dispatch with return types'
+
+    formats:
+      jsdoc:
+        description: 'Registers query handlers with metadata for DI container'
+      cli:
+        description: |
+          ## QueryHandler Decorator
+
+          Core CQRS decorator that:
+          - Registers query handlers automatically
+          - Links queries to their handlers via metadata
+          - Integrates with VytchesDDD service locator
+          - Supports strongly-typed query results
+          - Enables read-side scaling and optimization
+
+    parameters:
+      - name: 'queryType'
+        type: 'new (...args: any[]) => T'
+        description: 'Query class that this handler processes'
+      - name: 'options'
+        type: 'QueryHandlerOptions'
+        description: 'Configuration options for handler registration'
+        optional: true
+        properties:
+          - name: 'serviceId'
+            type: 'string'
+            description: 'Custom service identifier for DI container'
+            optional: true
+          - name: 'autoRegister'
+            type: 'boolean'
+            description: 'Whether to automatically register with DI container'
+            optional: true
+            default: 'true'
+
+    returns:
+      type: 'ClassDecorator'
+      description: 'Decorator function that applies handler metadata'
+
+    examples:
+      - id: 'basic-query-handler'
+        code: |
+          @QueryHandler(GetUserQuery)
+          class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
+            constructor(private userRepository: UserRepository) {}
+            
+            async execute(query: GetUserQuery): Promise<User> {
+              return await this.userRepository.findById(query.userId);
+            }
+          }
+
+      - id: 'list-query-handler'
+        code: |
+          @QueryHandler(GetUsersQuery)
+          class GetUsersHandler implements IQueryHandler<GetUsersQuery, User[]> {
+            constructor(private userRepository: UserRepository) {}
+            
+            async execute(query: GetUsersQuery): Promise<User[]> {
+              return await this.userRepository.findByFilter({
+                active: query.activeOnly,
+                role: query.roleFilter,
+                limit: query.limit || 10
+              });
+            }
+          }
+
+      - id: 'complex-result-type'
+        code: |
+          interface OrderReport {
+            summary: {
+              totalOrders: number;
+              totalRevenue: number;
+              averageOrderValue: number;
+            };
+            breakdown: {
+              byStatus: Record<string, number>;
+              byMonth: { month: string; count: number; revenue: number }[];
+            };
+          }
+
+          @QueryHandler(GenerateOrderReportQuery)
+          class GenerateOrderReportHandler implements IQueryHandler<GenerateOrderReportQuery, OrderReport> {
+            constructor(
+              private orderRepository: OrderRepository,
+              private analyticsService: AnalyticsService
+            ) {}
+            
+            async execute(query: GenerateOrderReportQuery): Promise<OrderReport> {
+              const orders = await this.orderRepository.findByDateRange(query.dateRange);
+              const summary = this.analyticsService.calculateSummary(orders);
+              const breakdown = this.analyticsService.generateBreakdown(orders);
+              
+              return { summary, breakdown };
+            }
+          }
+
+      - id: 'handler-with-options'
+        code: |
+          @QueryHandler(GetCachedDataQuery, {
+            serviceId: 'cached-data-query-handler',
+            autoRegister: true
+          })
+          class GetCachedDataHandler implements IQueryHandler<GetCachedDataQuery, CachedData> {
+            constructor(
+              private cacheService: CacheService,
+              private dataRepository: DataRepository
+            ) {}
+            
+            async execute(query: GetCachedDataQuery): Promise<CachedData> {
+              const cached = await this.cacheService.get(query.key);
+              if (cached) return cached;
+              
+              const data = await this.dataRepository.findByKey(query.key);
+              await this.cacheService.set(query.key, data, query.ttl);
+              return data;
+            }
+          }
+
+      - id: 'read-model-optimization'
+        code: |
+          @QueryHandler(GetCustomerDashboardQuery)
+          class GetCustomerDashboardHandler implements IQueryHandler<GetCustomerDashboardQuery, CustomerDashboard> {
+            constructor(
+              private readModelRepository: CustomerDashboardReadModel,
+              private eventStore: EventStore
+            ) {}
+            
+            async execute(query: GetCustomerDashboardQuery): Promise<CustomerDashboard> {
+              // Optimized read model for dashboard queries
+              let dashboard = await this.readModelRepository.findByCustomerId(query.customerId);
+              
+              // Rebuild if stale or missing
+              if (!dashboard || this.isStale(dashboard, query.maxAge)) {
+                const events = await this.eventStore.getEvents(query.customerId);
+                dashboard = this.buildDashboardFromEvents(events);
+                await this.readModelRepository.save(dashboard);
+              }
+              
+              return dashboard;
+            }
+            
+            private isStale(dashboard: CustomerDashboard, maxAge: number): boolean {
+              return Date.now() - dashboard.lastUpdated > maxAge;
+            }
+          }
+
+    custom-tags:
+      decorator-type: 'Class decorator'
+      metadata-keys:
+        - 'di:query-handler (on query class)'
+        - 'di:handler-metadata (on handler class)'
+        - 'di:handler-type (on handler class)'
+        - 'di:registration-pending (on handler class)'
+      di-integration: 'Automatic registration with VytchesDDD container'
+      type-safety: 'Enforces IQueryHandler<TQuery, TResult> interface'
+      discovery: 'Handlers auto-discovered by CQRSDiscoveryPlugin'
+      read-side: 'Optimized for read operations and data retrieval'
+      cqrs-separation: 'Separates read concerns from write operations'
+
+  # Generic constraints and implementation details
+
+# === IMPLEMENTATION DETAILS ===
+implementation-details:
+  metadata-storage:
+    description: 'Uses reflect-metadata to store handler registration data'
+    keys:
+      - 'di:query-handler': 'Stored on query class for handler resolution'
+      - 'di:handler-metadata': 'Stored on handler class for discovery'
+      - 'di:handler-type': "Marks handler type as 'query'"
+      - 'di:registration-pending': 'Flags handler for auto-registration'
+
+  registration-flow:
+    description: 'Handler registration and discovery process'
+    steps:
+      1: 'Decorator applies metadata to both query and handler classes'
+      2: 'CQRSDiscoveryPlugin discovers handlers during container initialization'
+      3: 'QueryBus resolves handlers using query class metadata'
+      4: 'DI container provides handler instances with dependency injection'
+
+  query-characteristics:
+    description: 'Key differences from command handlers'
+    differences:
+      - 'Always return typed results (never void)'
+      - 'Should be side-effect free (idempotent)'
+      - 'Optimized for read operations and data retrieval'
+      - 'Can use specialized read models and caching'
+      - 'Support multiple concurrent executions'

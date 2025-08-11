@@ -1,19 +1,19 @@
 import type {
-  IEventStoreConfig,
+  IAggregateSnapshot,
   IAppendResult,
+  IEventStoreAdapter,
+  IEventStoreConfig,
   IEventStream,
   IGlobalEventStream,
-  IStoredEvent,
-  IReadStreamOptions,
   IReadAllOptions,
-  IStreamMetadata,
+  IReadStreamOptions,
   IStoredDomainEvent,
-  IAggregateSnapshot,
-  IEventStoreAdapter,
+  IStoredEvent,
+  IStreamMetadata,
 } from '@vytches/ddd-contracts';
 
-import { StreamNotFoundError, StreamDeletedError } from './errors';
 import { BaseEventStore } from './base-event-store';
+import { StreamDeletedError, StreamNotFoundError } from './errors';
 
 interface InMemoryStream {
   events: IStoredEvent[];
@@ -21,23 +21,6 @@ interface InMemoryStream {
   snapshot?: IAggregateSnapshot;
 }
 
-/**
- * @llm-summary InMemoryEventStore class for in memory event store operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * InMemoryEventStore class implementing infrastructure service for in memory event store operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new InMemoryEventStore();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class InMemoryEventStore extends BaseEventStore implements IEventStoreAdapter {
   private streams: Map<string, InMemoryStream> = new Map();
   private globalEvents: IStoredEvent[] = [];

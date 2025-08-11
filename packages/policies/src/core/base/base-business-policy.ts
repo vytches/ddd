@@ -1,34 +1,17 @@
+import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
-import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
 import type {
   IBusinessPolicy,
+  IGroupedPolicyComposer,
   IPolicyComposer,
   IPolicyConditionalBuilder,
   IPolicyConditionalElse,
-  IGroupedPolicyComposer,
-  PolicyRequest,
   PolicyCondition,
   PolicyContext,
+  PolicyRequest,
 } from '../interfaces/business-policy.interface';
 import { PolicyViolation } from '../models/policy-violation';
 
-/**
- * @llm-summary BaseBusinessPolicy class for base business policy operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BaseBusinessPolicy class implementing domain pattern implementation for base business policy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseBusinessPolicy();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {
   /**
    * Unique identifier for this policy
@@ -125,23 +108,6 @@ export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {
   }
 }
 
-/**
- * @llm-summary SpecificationPolicy class for specification policy operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * SpecificationPolicy class implementing domain pattern implementation for specification policy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SpecificationPolicy();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class SpecificationPolicy<T> extends BaseBusinessPolicy<T> {
   constructor(
     id: string,
@@ -197,23 +163,6 @@ export class SpecificationPolicy<T> extends BaseBusinessPolicy<T> {
   }
 }
 
-/**
- * @llm-summary AsyncSpecificationPolicy class for async specification policy operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * AsyncSpecificationPolicy class implementing domain pattern implementation for async specification policy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AsyncSpecificationPolicy();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class AsyncSpecificationPolicy<T> extends BaseBusinessPolicy<T> {
   constructor(
     id: string,
@@ -275,23 +224,6 @@ export class AsyncSpecificationPolicy<T> extends BaseBusinessPolicy<T> {
   }
 }
 
-/**
- * @llm-summary BaseCompositePolicy class for base composite policy operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BaseCompositePolicy class implementing domain pattern implementation for base composite policy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseCompositePolicy();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseCompositePolicy<T> extends BaseBusinessPolicy<T> {
   protected readonly policies: IBusinessPolicy<T>[];
 

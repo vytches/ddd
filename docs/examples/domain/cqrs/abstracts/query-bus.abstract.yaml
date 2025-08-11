@@ -1,0 +1,220 @@
+# query-bus.abstract - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'query-bus.abstract'
+title: 'IQueryBus Abstract Class - Query Bus Contract'
+description: 'Abstract base class defining the contract for CQRS query buses'
+business-context: 'Standardizes query bus interface across basic and enhanced implementations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  IQueryBus:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class defining the contract for query bus implementations'
+      business-context: 'Ensures consistent API across basic and enhanced query bus implementations'
+
+      formats:
+        jsdoc:
+          description: 'Abstract query bus contract for CQRS implementations'
+        cli:
+          description: |
+            ## IQueryBus Abstract Class
+
+            Standard contract for query bus implementations providing:
+            - Handler registration with typed results
+            - Factory-based handler creation
+            - Middleware pipeline integration
+            - Auto-discovery capabilities
+            - Type-safe query execution with return values
+
+      custom-tags:
+        implementations: 'QueryBus, EnhancedQueryBus'
+
+    # Methods
+    methods:
+      register:
+        description: 'Registers a query handler for a specific query type with typed result'
+        business-context: 'Establishes direct mapping between query and its handler with return type safety'
+        abstract: true
+
+        parameters:
+          - name: 'queryType'
+            type: 'QueryConstructor<T, R>'
+            description: 'Query class constructor with result type'
+          - name: 'handler'
+            type: 'IQueryHandler<T, R>'
+            description: 'Handler instance for the query with matching result type'
+
+        returns:
+          type: 'void'
+          description: 'Registration completes synchronously'
+
+        examples:
+          - id: 'typed-query-registration'
+            code: |
+              const queryBus = new QueryBus();
+              const getUserHandler = new GetUserHandler();
+
+              // Type-safe registration: GetUserQuery -> User
+              queryBus.register(GetUserQuery, getUserHandler);
+
+          - id: 'list-query-registration'
+            code: |
+              const queryBus = new QueryBus();
+              const getUsersHandler = new GetUsersHandler();
+
+              // Type-safe registration: GetUsersQuery -> User[]
+              queryBus.register(GetUsersQuery, getUsersHandler);
+
+        custom-tags:
+          registration-type: 'Direct instance registration'
+          type-safety: 'Enforces query-result type matching'
+
+      registerFactory:
+        description: 'Registers a factory function for creating query handlers with typed results'
+        business-context: 'Enables lazy handler instantiation and dependency injection with type safety'
+        abstract: true
+
+        parameters:
+          - name: 'queryType'
+            type: 'QueryConstructor<T, R>'
+            description: 'Query class constructor with result type'
+          - name: 'factory'
+            type: '() => IQueryHandler<T, R>'
+            description: 'Factory function returning handler instance with matching types'
+
+        returns:
+          type: 'void'
+          description: 'Factory registration completes synchronously'
+
+        examples:
+          - id: 'factory-registration-with-di'
+            code: |
+              const queryBus = new QueryBus();
+
+              queryBus.registerFactory(
+                GetOrderReportQuery,
+                () => container.resolve<GetOrderReportHandler>('orderReportHandler')
+              );
+
+        custom-tags:
+          registration-type: 'Factory-based registration'
+          di-integration: 'Supports dependency injection patterns'
+          type-safety: 'Maintains query-result type contracts'
+
+      use:
+        description: 'Adds middleware to the query bus execution pipeline'
+        business-context: 'Enables cross-cutting concerns like caching, logging, and performance monitoring'
+        abstract: true
+
+        parameters:
+          - name: 'middleware'
+            type: 'ICQRSMiddleware'
+            description: 'Middleware instance to add to the pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Query bus instance for method chaining'
+
+        examples:
+          - id: 'read-optimized-middleware'
+            code: |
+              const queryBus = new QueryBus()
+                .use(new CachingMiddleware())       // Cache frequently accessed data
+                .use(new LoggingMiddleware())       // Log query execution
+                .use(new MetricsMiddleware())       // Track query performance
+                .use(new ReadReplicationMiddleware()); // Route to read replicas
+
+        custom-tags:
+          chaining: 'Supports fluent interface pattern'
+          pipeline-order: 'Middleware executes in registration order'
+          read-optimization: 'Optimized for read operations and caching'
+
+      discoverHandlers:
+        description: 'Triggers automatic query handler discovery and registration'
+        business-context: 'Scans assemblies for @QueryHandler decorated classes and registers them'
+        abstract: true
+
+        returns:
+          type: 'void'
+          description: 'Discovery process completes synchronously'
+
+        examples:
+          - id: 'query-handler-discovery'
+            code: |
+              const queryBus = new QueryBus();
+
+              // Discover and register all @QueryHandler decorated classes
+              queryBus.discoverHandlers();
+
+        custom-tags:
+          discovery-mechanism: 'Uses CQRSDiscoveryPlugin'
+          decorator-integration: '@QueryHandler decorated classes'
+
+      execute:
+        description: 'Executes a query through the registered handler with middleware pipeline'
+        business-context: 'Core query processing with caching, logging, and result optimization'
+        abstract: true
+
+        parameters:
+          - name: 'query'
+            type: 'T extends IQuery<R>'
+            description: 'Query instance to execute with typed result'
+
+        returns:
+          type: 'Promise<R>'
+          description: 'Typed result from query handler execution'
+
+        examples:
+          - id: 'single-entity-query'
+            code: |
+              const queryBus = new QueryBus();
+
+              // Execute query returning single entity
+              const user: User = await queryBus.execute(
+                new GetUserQuery("user-123")
+              );
+
+          - id: 'collection-query'
+            code: |
+              const queryBus = new QueryBus();
+
+              // Execute query returning collection
+              const users: User[] = await queryBus.execute(
+                new GetActiveUsersQuery()
+              );
+
+          - id: 'complex-result-query'
+            code: |
+              const queryBus = new QueryBus();
+
+              // Execute query returning complex result
+              const report: OrderReport = await queryBus.execute(
+                new GenerateOrderReportQuery(dateRange, filters)
+              );
+
+        custom-tags:
+          middleware-pipeline: 'Executes through full middleware chain'
+          error-propagation: 'Throws errors from handlers or middleware'
+          type-safety: 'Strongly typed query-result mapping'
+          read-optimization: 'Optimized for read operations'
+          caching-support: 'Integrates with caching middleware'
+
+        throws:
+          - type: 'HandlerNotFoundError'
+            description: 'When no handler is registered for the query type'
+          - type: 'QueryExecutionError'
+            description: 'When query execution fails'
+          - type: 'CqrsValidationError'
+            description: 'When query validation fails'

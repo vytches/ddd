@@ -1,30 +1,11 @@
 import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import type {
-  ISagaStep,
-  ISagaState,
-  ISagaExecutionContext,
   ISagaActionResult,
+  ISagaExecutionContext,
+  ISagaState,
+  ISagaStep,
 } from '../interfaces';
 
-/**
- * @llm-summary Contract for saga step config functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaStepConfig interface implementing integration layer component for saga step config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaStepConfig implements SagaStepConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface SagaStepConfig {
   name: string;
   displayName: string;
@@ -43,23 +24,6 @@ export interface SagaStepConfig {
   canExecute?: (event: IExtendedDomainEvent, state: ISagaState) => boolean;
 }
 
-/**
- * @llm-summary ConcreteSagaStep class for concrete saga step operations
- * @llm-domain Integration
- * @llm-complexity Expert
- *
- * @description
- * ConcreteSagaStep class implementing integration layer component for concrete saga step operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ConcreteSagaStep();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ConcreteSagaStep implements ISagaStep {
   readonly name: string;
   readonly displayName: string;

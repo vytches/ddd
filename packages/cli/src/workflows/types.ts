@@ -1,17 +1,4 @@
 /**
- * @llm-summary Workflow system type definitions
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Core type definitions for the workflow system, providing interfaces
- * for workflow context, steps, and configuration options.
- *
- * @since 1.0.0
- * @public
- */
-
-/**
  * Context object passed through workflow execution
  */
 export interface WorkflowContext {

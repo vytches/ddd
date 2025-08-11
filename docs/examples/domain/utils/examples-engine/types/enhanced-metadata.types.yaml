@@ -1,0 +1,183 @@
+# enhanced-metadata.types - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'enhanced-metadata.types'
+title: 'Enhanced Metadata Types - Extended Type Definitions'
+description: 'Extended type definitions for hierarchical documentation system'
+business-context: 'Defines enhanced structures for multi-format metadata support'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  MetadataValue:
+    description: 'Multi-format metadata value with format-specific overrides'
+    business-context: 'Enables different content for different output formats'
+
+    properties:
+      - name: 'default'
+        type: 'string'
+        description: 'Default value if no format-specific override'
+        optional: true
+
+      - name: 'jsdoc'
+        type: 'string'
+        description: 'JSDoc-specific value'
+        optional: true
+
+      - name: 'cli'
+        type: 'string'
+        description: 'CLI-specific value'
+        optional: true
+
+      - name: '[format: string]'
+        type: 'string | undefined'
+        description: 'Additional format-specific values'
+
+  ParsedMetadata:
+    description: 'Parsed metadata with multi-format values'
+    business-context: 'Raw parsed structure before resolution'
+
+    properties:
+      - name: '[key: string]'
+        type: 'MetadataValue'
+        description: 'Metadata properties with format variants'
+
+  ConfigLevel:
+    description: 'Configuration level in hierarchy'
+    business-context: 'Represents one level of configuration hierarchy'
+
+    properties:
+      - name: 'source'
+        type: "'library' | 'package' | 'file' | 'local'"
+        description: 'Source level in hierarchy'
+
+      - name: 'strategy'
+        type: "'merge' | 'replace'"
+        description: 'Resolution strategy'
+
+      - name: 'scope'
+        type: 'string'
+        description: 'Scope identifier'
+        optional: true
+
+      - name: 'metadata'
+        type: 'ParsedMetadata'
+        description: 'Metadata at this level'
+
+  ResolvedMetadata:
+    description: 'Final resolved metadata after hierarchy processing'
+    business-context: 'Simple key-value pairs ready for output'
+
+    properties:
+      - name: '[key: string]'
+        type: 'string'
+        description: 'Resolved metadata values'
+
+  ExtractBlock:
+    description: 'Extracted code block with metadata'
+    business-context: 'Represents extracted example with full context'
+
+    properties:
+      - name: 'tag'
+        type: 'string'
+        description: 'Extract tag identifier'
+
+      - name: 'target'
+        type: 'string'
+        description: 'Target method/class'
+
+      - name: 'context'
+        type: 'string'
+        description: 'Context identifier'
+
+      - name: 'level'
+        type: 'string'
+        description: 'Complexity level'
+
+      - name: 'variant'
+        type: 'string'
+        description: 'Variant identifier'
+        optional: true
+
+      - name: 'metadata'
+        type: 'ResolvedMetadata'
+        description: 'Associated metadata'
+
+      - name: 'code'
+        type: 'string'
+        description: 'Extracted code'
+
+      - name: 'startLine'
+        type: 'number'
+        description: 'Start line number'
+
+      - name: 'endLine'
+        type: 'number'
+        description: 'End line number'
+
+  GlobalSettings:
+    description: 'Global settings for metadata system'
+    business-context: 'Organization-wide defaults and configuration'
+
+    properties:
+      - name: 'strategy'
+        type: "'merge' | 'replace'"
+        description: 'Global resolution strategy'
+
+      - name: 'metadata'
+        type: 'ParsedMetadata'
+        description: 'Global metadata defaults'
+
+      - name: 'scope'
+        type: 'string'
+        description: 'Global scope'
+        optional: true
+
+  FormatRules:
+    description: 'Format-specific transformation rules'
+    business-context: 'Defines how content is transformed for each format'
+
+    properties:
+      - name: '[format: string]'
+        type: 'object'
+        description: 'Format-specific rules'
+
+# === EXAMPLES ===
+examples:
+  - id: 'format-overrides'
+    description: 'Format-specific metadata overrides'
+    code: |
+      // Metadata with format-specific values
+      const metadata: ParsedMetadata = {
+        description: {
+          default: 'Standard description',
+          jsdoc: 'Concise technical description',
+          cli: '## Detailed Description\n\nWith markdown formatting'
+        },
+        businessContext: {
+          jsdoc: 'Brief business value',
+          cli: '### Business Value\n\nExtended explanation...'
+        },
+        warning: {
+          jsdoc: 'Experimental API',
+          // No CLI warning - JSDoc only
+        }
+      };
+
+      // Resolution for JSDoc format
+      const jsdocResolved: ResolvedMetadata = {
+        description: 'Concise technical description',
+        businessContext: 'Brief business value',
+        warning: 'Experimental API'
+      };
+
+      // Resolution for CLI format
+      const cliResolved: ResolvedMetadata = {
+        description: '## Detailed Description\n\nWith markdown formatting',
+        businessContext: '### Business Value\n\nExtended explanation...'
+        // No warning in CLI output
+      };

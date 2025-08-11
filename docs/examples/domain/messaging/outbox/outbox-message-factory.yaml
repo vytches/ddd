@@ -1,0 +1,231 @@
+# Outbox Message Factory - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'outbox-message-factory'
+title: 'OutboxMessageFactory - Message Creation Utilities'
+description: 'Factory class for creating outbox messages with various configurations'
+business-context: 'Provides consistent message creation patterns for different scenarios'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  OutboxMessageFactory:
+    class-doc:
+      description: 'Factory for creating outbox messages with various configurations'
+      business-context: 'Ensures consistent message structure across different creation patterns'
+
+      formats:
+        jsdoc:
+          description: 'Factory for creating outbox messages'
+        cli:
+          description: |
+            ## OutboxMessageFactory
+
+            Utility factory providing:
+            - Standard message creation
+            - Delayed message scheduling
+            - Priority-based messages
+            - Integration event conversion
+            - Consistent UUID generation and metadata handling
+
+    methods:
+      createMessage:
+        description: 'Creates a new outbox message with specified options'
+        business-context: 'Primary factory method for standard message creation'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type identifier for the message'
+
+          - name: 'payload'
+            type: 'T'
+            description: 'Message payload data'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message configuration'
+            required: false
+
+        returns:
+          type: 'IOutboxMessage<T>'
+          description: 'Created outbox message ready for persistence'
+
+        custom-tags:
+          static: 'true'
+          generates-uuid: 'Uses LibUtils.getUUID() for message ID'
+
+        examples:
+          - id: 'basic-message'
+            code: |
+              const message = OutboxMessageFactory.createMessage(
+                'user.registered',
+                { userId: '123', email: 'user@example.com' },
+                {
+                  priority: MessagePriority.HIGH,
+                  metadata: { source: 'registration' }
+                }
+              );
+
+      createDelayedMessage:
+        description: 'Creates a delayed outbox message scheduled for later processing'
+        business-context: 'Enables time-based business logic like scheduled notifications'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type identifier for the message'
+
+          - name: 'payload'
+            type: 'T'
+            description: 'Message payload data'
+
+          - name: 'delayMs'
+            type: 'number'
+            description: 'Delay in milliseconds before processing'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message configuration'
+            required: false
+
+        returns:
+          type: 'IOutboxMessage<T>'
+          description: 'Created message with processAfter timestamp'
+
+        custom-tags:
+          static: 'true'
+          scheduling: 'Sets processAfter based on current time + delayMs'
+
+        examples:
+          - id: 'delayed-message'
+            code: |
+              // Schedule welcome email for 1 hour later
+              const hourMs = 60 * 60 * 1000;
+              const delayedMessage = OutboxMessageFactory.createDelayedMessage(
+                'email.welcome',
+                { userId: '123', template: 'welcome' },
+                hourMs
+              );
+
+      createHighPriorityMessage:
+        description: 'Creates a high priority outbox message'
+        business-context: 'Convenience method for urgent business events'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type identifier for the message'
+
+          - name: 'payload'
+            type: 'T'
+            description: 'Message payload data'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message configuration'
+            required: false
+
+        returns:
+          type: 'IOutboxMessage<T>'
+          description: 'Created message with HIGH priority'
+
+        custom-tags:
+          static: 'true'
+          priority: 'Automatically sets priority to HIGH'
+
+        examples:
+          - id: 'high-priority'
+            code: |
+              const urgentMessage = OutboxMessageFactory.createHighPriorityMessage(
+                'security.alert',
+                { userId: '123', alertType: 'suspicious-login' }
+              );
+
+      createFromIntegrationEvent:
+        description: 'Creates an outbox message from an integration event'
+        business-context: 'Bridges integration events with outbox pattern for reliable delivery'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the event payload'
+
+        parameters:
+          - name: 'event'
+            type: 'IntegrationEventInput<T>'
+            description: 'Integration event to convert'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message configuration'
+            required: false
+
+        returns:
+          type: 'IOutboxMessage<T>'
+          description: 'Created message with integration_event: prefix'
+
+        custom-tags:
+          static: 'true'
+          prefixes-type: "Adds 'integration_event:' prefix to message type"
+          merges-metadata: 'Combines event metadata with options metadata'
+
+        examples:
+          - id: 'integration-event'
+            code: |
+              const event = {
+                eventType: 'order.created',
+                payload: { orderId: '456', customerId: '123' },
+                metadata: { version: 1, correlationId: 'req-789' }
+              };
+
+              const message = OutboxMessageFactory.createFromIntegrationEvent(event, {
+                priority: MessagePriority.HIGH
+              });
+
+              // message.messageType will be 'integration_event:order.created'
+
+# === TYPES ===
+types:
+  IntegrationEventInput:
+    description: 'Input structure for integration event conversion'
+    business-context: 'Defines event data for outbox message creation'
+
+    generic-parameters:
+      - name: 'T'
+        default: 'unknown'
+        description: 'Type of the event payload'
+
+    properties:
+      - name: 'eventType'
+        type: 'string'
+        description: 'Type identifier for the integration event'
+
+      - name: 'payload'
+        type: 'T'
+        description: 'Event payload data'
+        required: false
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Event metadata'
+        required: false

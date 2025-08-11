@@ -1,0 +1,79 @@
+# Domain Primitives Package Settings - Inherits from global-settings.yaml
+
+# === PACKAGE IDENTITY ===
+package-name: 'domain-primitives'
+display-name: 'Domain Primitives'
+description: 'Core domain building blocks including base errors, actors, and fundamental interfaces'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'core-foundations'
+complexity: 'beginner'
+patterns:
+  - 'base-error-pattern'
+  - 'actor-identification'
+  - 'domain-error-hierarchy'
+  - 'error-code-classification'
+
+# === PACKAGE-SPECIFIC JSDOC CONFIGURATION ===
+jsdoc:
+  placement-strategy: 'separate'
+  class-documentation: 'enabled'
+
+  class-defaults:
+    description: 'Core domain primitive for DDD foundations'
+    business-context: 'Essential building block for domain modeling'
+
+  constructor-defaults:
+    description: 'Creates new instance with domain-specific configuration'
+    business-context: 'Initializes domain primitive for business operations'
+
+# === PACKAGE BUSINESS CONTEXT ===
+business-context: |
+  Domain primitives package provides the foundational building blocks for domain-driven design:
+
+  - Base error classes with proper inheritance
+  - Actor identification for audit and authorization
+  - Comprehensive error code classification
+  - Type-safe error handling patterns
+
+  These primitives ensure consistent error handling and actor tracking across all domain operations.
+
+# === FORMAT-SPECIFIC PACKAGE SETTINGS ===
+formats:
+  jsdoc:
+    business-context: 'Foundation layer for domain-driven design patterns'
+    package-focus: 'Core abstractions and error handling'
+
+  cli:
+    business-context: |
+      ## Domain Primitives Package
+
+      Essential foundation layer for DDD applications providing:
+
+      ### Core Features
+      - **Base Error Classes**: Consistent error handling hierarchy
+      - **Actor Interface**: Audit trail and authorization context
+      - **Error Classifications**: Domain, application, and framework error codes
+      - **Type Safety**: Full TypeScript support with proper inheritance
+
+      ### Business Value
+      - Ensures consistent error handling across domains
+      - Provides audit trail through actor identification
+      - Enables proper error classification and handling strategies
+      - Reduces boilerplate with reusable error patterns
+
+# === DEPENDENCIES ===
+dependencies:
+  - '@vytches/ddd-utils'
+
+# === CUSTOM PACKAGE TAGS ===
+custom-tags:
+  layer: 'foundation'
+  stability: 'stable'
+  complexity-level: 'beginner'
+  required-for: 'all-domain-packages'

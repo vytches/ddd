@@ -1,4 +1,3 @@
-
 export interface ValueObjectValidator<T> {
   validate(value: T): boolean;
 }

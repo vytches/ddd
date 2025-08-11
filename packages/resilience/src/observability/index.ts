@@ -5,31 +5,31 @@
 
 // Core interfaces
 export type {
-  MetricType,
-  MetricValue,
-  MetricLabels,
-  Metric,
+  BulkheadMetrics,
+  CircuitBreakerMetrics,
   HistogramBucket,
   HistogramMetric,
-  TimerMetric,
+  Metric,
   MetricCollector,
-  MetricRegistry,
   MetricExporter,
+  MetricLabels,
+  MetricRegistry,
+  MetricType,
+  MetricValue,
   ObservabilityEvent,
-  ObservabilityEventListener,
   ObservabilityEventBus,
+  ObservabilityEventListener,
   ResilienceMetrics,
-  CircuitBreakerMetrics,
   RetryMetrics,
-  BulkheadMetrics,
   TimeoutMetrics,
+  TimerMetric,
 } from './metrics-interfaces';
 
 // Metric collectors
 export {
+  BulkheadMetricCollector,
   CircuitBreakerMetricCollector,
   RetryMetricCollector,
-  BulkheadMetricCollector,
   TimeoutMetricCollector,
 } from './metric-collectors';
 
@@ -44,10 +44,10 @@ export {
 
 // Exporters
 export {
-  JsonMetricExporter,
-  PrometheusMetricExporter,
-  CsvMetricExporter,
-  TextMetricExporter,
   CompositeMetricExporter,
+  CsvMetricExporter,
+  JsonMetricExporter,
   MetricExporterFactory,
+  PrometheusMetricExporter,
+  TextMetricExporter,
 } from './metric-exporters';

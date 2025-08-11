@@ -1,0 +1,292 @@
+# policy-step-builder - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-step-builder'
+title: 'PolicyStepBuilder - Individual Policy Step Builder'
+description: 'Builder for configuring individual policy validation steps'
+business-context: 'Provides granular control over policy rule configuration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyStepBuilder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Fluent builder for configuring individual policy validation steps'
+      business-context: 'Enables detailed configuration of policy rules with violations'
+
+      formats:
+        jsdoc:
+          description: 'Step-level policy configuration builder'
+        cli:
+          description: |
+            ## PolicyStepBuilder
+
+            Step configuration features:
+            - Violation code setting
+            - Custom messages
+            - Severity levels
+            - Field specification
+            - Metadata attachment
+            - Conditional application
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Builder Pattern'
+        generic-type: 'TEntity - Entity type to validate'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates step builder'
+        business-context: 'Initializes step configuration'
+
+        parameters:
+          - name: 'parentBuilder'
+            type: 'PolicyBuilder<TEntity>'
+            description: 'Parent builder reference'
+          - name: 'specification'
+            type: 'ISpecification<TEntity> | IAsyncSpecification<TEntity>'
+            description: 'Step specification'
+
+      withCode:
+        description: 'Sets violation code'
+        business-context: 'Identifies violation type'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Violation code'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'set-code'
+            code: |
+              stepBuilder
+                .withCode('INVALID_EMAIL')
+                .withMessage('Email format is invalid');
+
+      withMessage:
+        description: 'Sets violation message'
+        business-context: 'Human-readable error'
+
+        parameters:
+          - name: 'message'
+            type: 'string | ((entity: TEntity) => string)'
+            description: 'Static or dynamic message'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'dynamic-message'
+            code: |
+              stepBuilder
+                .withMessage(user => 
+                  `User ${user.name} does not meet requirements`
+                );
+
+      withSeverity:
+        description: 'Sets violation severity'
+        business-context: 'Categorizes violation importance'
+
+        parameters:
+          - name: 'severity'
+            type: 'PolicySeverity'
+            description: 'Severity level'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+      withField:
+        description: 'Sets affected field'
+        business-context: 'Identifies validation target'
+
+        parameters:
+          - name: 'field'
+            type: 'string | keyof TEntity'
+            description: 'Field name'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+      withDetails:
+        description: 'Adds violation details'
+        business-context: 'Provides additional context'
+
+        parameters:
+          - name: 'details'
+            type: 'Record<string, any> | ((entity: TEntity) => Record<string, any>)'
+            description: 'Static or dynamic details'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+      when:
+        description: 'Conditional step application'
+        business-context: 'Apply step conditionally'
+
+        parameters:
+          - name: 'condition'
+            type: '(entity: TEntity, context?: PolicyContext) => boolean'
+            description: 'Application condition'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+      and:
+        description: 'Returns to parent builder'
+        business-context: 'Continue with next step'
+
+        returns:
+          type: 'PolicyBuilder<TEntity>'
+          description: 'Parent builder'
+
+      or:
+        description: 'Starts OR group'
+        business-context: 'Alternative validation'
+
+        returns:
+          type: 'PolicyGroupBuilder<TEntity>'
+          description: 'Group builder'
+
+      build:
+        description: 'Builds the step'
+        business-context: 'Creates step configuration'
+
+        returns:
+          type: 'PolicyStep<TEntity>'
+          description: 'Configured step'
+
+  PolicyStep:
+    class-doc:
+      description: 'Represents configured policy step'
+      business-context: 'Encapsulates step validation logic'
+
+      custom-tags:
+        since: '2.0.0'
+
+    methods:
+      constructor:
+        description: 'Creates policy step'
+        parameters:
+          - name: 'config'
+            type: 'PolicyStepConfig<TEntity>'
+            description: 'Step configuration'
+
+      evaluate:
+        description: 'Evaluates the step'
+        parameters:
+          - name: 'entity'
+            type: 'TEntity'
+          - name: 'context'
+            type: 'PolicyContext'
+            optional: true
+        returns: 'Promise<StepResult<TEntity>>'
+
+      getViolation:
+        description: 'Creates violation for failed step'
+        parameters:
+          - name: 'entity'
+            type: 'TEntity'
+        returns: 'PolicyViolation'
+
+# === INTERFACES ===
+interfaces:
+  PolicyStepConfig:
+    description: 'Step configuration'
+    business-context: 'Defines step behavior'
+
+    properties:
+      - name: 'specification'
+        type: 'ISpecification<TEntity> | IAsyncSpecification<TEntity>'
+        description: 'Validation specification'
+
+      - name: 'code'
+        type: 'string'
+        description: 'Violation code'
+
+      - name: 'message'
+        type: 'string | ((entity: TEntity) => string)'
+        description: 'Violation message'
+
+      - name: 'severity'
+        type: 'PolicySeverity'
+        description: 'Violation severity'
+        default: 'ERROR'
+
+      - name: 'field'
+        type: 'string'
+        description: 'Affected field'
+        optional: true
+
+      - name: 'details'
+        type: 'Record<string, any> | ((entity: TEntity) => Record<string, any>)'
+        description: 'Additional details'
+        optional: true
+
+      - name: 'condition'
+        type: '(entity: TEntity, context?: PolicyContext) => boolean'
+        description: 'Application condition'
+        optional: true
+
+  StepResult:
+    description: 'Step evaluation result'
+    business-context: 'Captures step outcome'
+
+    properties:
+      - name: 'passed'
+        type: 'boolean'
+        description: 'Did step pass'
+
+      - name: 'violation'
+        type: 'PolicyViolation'
+        description: 'Violation if failed'
+        optional: true
+
+      - name: 'skipped'
+        type: 'boolean'
+        description: 'Was step skipped'
+        default: 'false'
+
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Result metadata'
+        optional: true
+
+# === EXAMPLES ===
+examples:
+  - id: 'complete-step'
+    description: 'Fully configured step'
+    code: |
+      const step = PolicyBuilder.create<User>()
+        .must(new EmailSpecification())
+        .withCode('INVALID_EMAIL')
+        .withMessage(user => `Email ${user.email} is invalid`)
+        .withSeverity('ERROR')
+        .withField('email')
+        .withDetails(user => ({
+          providedEmail: user.email,
+          validationPattern: EMAIL_REGEX.toString(),
+          timestamp: new Date().toISOString()
+        }))
+        .when((user, context) => context?.environment === 'production')
+        .and()
+        .build();

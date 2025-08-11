@@ -1,24 +1,5 @@
 import type { IACLAdapter } from './acl.interfaces';
 
-/**
- * @llm-summary Contract for a c l registration metadata functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * ACLRegistrationMetadata interface implementing integration layer component for a c l registration metadata operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteACLRegistrationMetadata implements ACLRegistrationMetadata {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ACLRegistrationMetadata {
   contextName: string;
   registeredAt: Date;
@@ -28,23 +9,6 @@ export interface ACLRegistrationMetadata {
   source?: 'direct' | 'module' | 'import' | 'versioned' | 'enhanced';
 }
 
-/**
- * @llm-summary BaseACLRegistry class for base a c l registry operations
- * @llm-domain Integration
- * @llm-complexity Simple
- *
- * @description
- * BaseACLRegistry class implementing integration layer component for base a c l registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseACLRegistry();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseACLRegistry {
   protected adapters = new Map<string, IACLAdapter<unknown, unknown>>();
   protected metadata = new Map<string, ACLRegistrationMetadata>();

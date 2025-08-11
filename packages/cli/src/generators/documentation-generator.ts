@@ -59,7 +59,12 @@ interface YamlInterface {
   businessContext: string;
   methods: Record<string, YamlMethod>;
   properties?: Array<{ name: string; type: string; description?: string; required?: boolean }>;
-  genericParameters?: Array<{ name: string; description?: string; default?: string; extends?: string }>;
+  genericParameters?: Array<{
+    name: string;
+    description?: string;
+    default?: string;
+    extends?: string;
+  }>;
   extends?: string[];
 }
 
@@ -67,7 +72,12 @@ interface YamlType {
   description: string;
   businessContext: string;
   properties?: Array<{ name: string; type: string; description?: string; required?: boolean }>;
-  genericParameters?: Array<{ name: string; description?: string; default?: string; extends?: string }>;
+  genericParameters?: Array<{
+    name: string;
+    description?: string;
+    default?: string;
+    extends?: string;
+  }>;
   typeDefinition?: string;
   functionSignature?: unknown;
   callSignature?: unknown;
@@ -149,7 +159,11 @@ export class DocumentationGenerator {
       seed: options.seed || packageConfig.tagFinder?.seed,
     };
 
-    const layout = options.enhancedMetadata ? 'yaml-doc' : (options.llmOptimized ? 'llm-optimized' : 'feature-doc');
+    const layout = options.enhancedMetadata
+      ? 'yaml-doc'
+      : options.llmOptimized
+        ? 'llm-optimized'
+        : 'feature-doc';
     const content = await this.templateEngine.render(layout, templateData);
 
     // 9. Write output
@@ -329,7 +343,7 @@ export class DocumentationGenerator {
   /**
    * Extract examples from various formats into a consistent structure
    */
-  private extractExamples(examples: any): Array<{ id?: string; code: string }> {
+  private extractExamples(examples: any): string[] {
     if (!examples || !Array.isArray(examples)) {
       return [];
     }
@@ -338,29 +352,20 @@ export class DocumentationGenerator {
       // Handle different example formats
       if (typeof example === 'string') {
         // Simple string example
-        return { id: `example-${index + 1}`, code: example };
+        return example;
       } else if (typeof example === 'object' && example !== null) {
         // Object with code property
         if (example.code) {
-          return { 
-            id: example.id || example.title || `example-${index + 1}`, 
-            code: example.code 
-          };
+          return example.code;
         }
         // Object with direct content
         if (example.content) {
-          return { 
-            id: example.id || example.title || `example-${index + 1}`, 
-            code: example.content 
-          };
+          return example.content;
         }
         // Try to stringify object as fallback
-        return { 
-          id: `example-${index + 1}`, 
-          code: JSON.stringify(example, null, 2) 
-        };
+        return JSON.stringify(example, null, 2);
       }
-      return { id: `example-${index + 1}`, code: String(example) };
+      return String(example);
     });
   }
 
@@ -374,35 +379,38 @@ export class DocumentationGenerator {
       .join('');
   }
 
-  private async loadYamlComponents(packageName: string, _complexity: string): Promise<YamlComponent[]> {
+  private async loadYamlComponents(
+    packageName: string,
+    _complexity: string
+  ): Promise<YamlComponent[]> {
     const components: YamlComponent[] = [];
     const yamlDir = path.join(process.cwd(), 'docs', 'examples', 'domain', packageName);
-    
+
     try {
       // Get all YAML files in the package directory (excluding .md-settings.yaml)
       const files = await fs.readdir(yamlDir);
       const yamlFiles = files.filter(f => f.endsWith('.yaml') && f !== '.md-settings.yaml');
-      
+
       console.log(`[DEBUG] Found ${yamlFiles.length} YAML files: ${yamlFiles.join(', ')}`);
-      
+
       for (const file of yamlFiles) {
         // Extract className from file name (e.g., 'aggregate-root.yaml' -> 'AggregateRoot')
         const baseName = path.basename(file, '.yaml');
         const className = this.toPascalCase(baseName);
-        
+
         console.log(`[DEBUG] Loading YAML component: ${className} from ${file}`);
-        
+
         // Read and parse the YAML file directly to access all sections
         const filePath = path.join(yamlDir, file);
         const yamlContent = await fs.readFile(filePath, 'utf8');
         const yamlData = yaml.load(yamlContent) as any;
-        
+
         if (!yamlData) {
           console.log(`[DEBUG] Failed to parse YAML file: ${file}`);
           continue;
         }
         console.log(`[DEBUG] Successfully parsed YAML file: ${file}`);
-        
+
         // Use HierarchicalMetadataResolver to get class-level metadata for classes section
         let classMetadata: any = null;
         if (yamlData.classes) {
@@ -410,10 +418,10 @@ export class DocumentationGenerator {
             packageName,
             className: baseName, // Use kebab-case for resolver
             methodName: 'constructor', // Get class-level info
-            format: 'cli'
+            format: 'cli',
           });
         }
-        
+
         const component: YamlComponent = {
           name: className,
           className,
@@ -424,18 +432,18 @@ export class DocumentationGenerator {
           interfaces: {}, // Add interfaces support
           types: {}, // Add types support
           enums: {}, // Add enums support
-          constants: {} // Add constants support
+          constants: {}, // Add constants support
         };
-        
+
         // Process classes if they exist
         if (yamlData.classes) {
           // Load method metadata using batch resolution for performance
           const allMethodsMetadata = await this.metadataResolver.resolveAllMethodsForClass({
             packageName,
             className: baseName, // Use kebab-case for resolver
-            format: 'cli'
+            format: 'cli',
           });
-          
+
           // Process each method
           for (const [methodName, methodMetadata] of Object.entries(allMethodsMetadata)) {
             if (methodMetadata) {
@@ -444,12 +452,12 @@ export class DocumentationGenerator {
                 businessContext: methodMetadata.businessContext || '',
                 parameters: methodMetadata.parameters || [],
                 returns: methodMetadata.returns || { type: 'void', description: '' },
-                examples: this.extractExamples(methodMetadata.examples || [])
+                examples: this.extractExamples(methodMetadata.examples || []),
               };
             }
           }
         }
-        
+
         // Process interfaces section
         if (yamlData.interfaces && typeof yamlData.interfaces === 'object') {
           if (!component.interfaces) component.interfaces = {};
@@ -460,22 +468,39 @@ export class DocumentationGenerator {
                 description: (iface.description as string) || '',
                 businessContext: (iface.businessContext as string) || '',
                 methods: {},
-                properties: (iface.properties as Array<{ name: string; type: string; description?: string; required?: boolean }>) || [],
-                genericParameters: (iface['generic-parameters'] as Array<{ name: string; description?: string; default?: string; extends?: string }>) || [],
-                extends: (iface.extends as string[]) || []
+                properties:
+                  (iface.properties as Array<{
+                    name: string;
+                    type: string;
+                    description?: string;
+                    required?: boolean;
+                  }>) || [],
+                genericParameters:
+                  (iface['generic-parameters'] as Array<{
+                    name: string;
+                    description?: string;
+                    default?: string;
+                    extends?: string;
+                  }>) || [],
+                extends: (iface.extends as string[]) || [],
               };
-              
+
               // Process interface methods
               if (iface.methods && typeof iface.methods === 'object') {
-                for (const [methodName, methodData] of Object.entries(iface.methods as Record<string, unknown>)) {
+                for (const [methodName, methodData] of Object.entries(
+                  iface.methods as Record<string, unknown>
+                )) {
                   if (typeof methodData === 'object' && methodData !== null) {
                     const method = methodData as Record<string, unknown>;
                     component.interfaces[interfaceName].methods[methodName] = {
                       description: (method.description as string) || '',
                       businessContext: (method.businessContext as string) || '',
                       parameters: (method.parameters as unknown[]) || [],
-                      returns: (method.returns as { type: string; description: string }) || { type: 'void', description: '' },
-                      examples: (method.examples as string[]) || []
+                      returns: (method.returns as { type: string; description: string }) || {
+                        type: 'void',
+                        description: '',
+                      },
+                      examples: (method.examples as string[]) || [],
                     };
                   }
                 }
@@ -483,7 +508,7 @@ export class DocumentationGenerator {
             }
           }
         }
-        
+
         // Process types section
         if (yamlData.types && typeof yamlData.types === 'object') {
           if (!component.types) component.types = {};
@@ -493,16 +518,28 @@ export class DocumentationGenerator {
               component.types[typeName] = {
                 description: (type.description as string) || '',
                 businessContext: (type.businessContext as string) || '',
-                properties: (type.properties as Array<{ name: string; type: string; description?: string; required?: boolean }>) || [],
-                genericParameters: (type['generic-parameters'] as Array<{ name: string; description?: string; default?: string; extends?: string }>) || [],
+                properties:
+                  (type.properties as Array<{
+                    name: string;
+                    type: string;
+                    description?: string;
+                    required?: boolean;
+                  }>) || [],
+                genericParameters:
+                  (type['generic-parameters'] as Array<{
+                    name: string;
+                    description?: string;
+                    default?: string;
+                    extends?: string;
+                  }>) || [],
                 typeDefinition: (type['type-definition'] as string) || '',
                 functionSignature: type['function-signature'] || null,
-                callSignature: type['call-signature'] || null
+                callSignature: type['call-signature'] || null,
               };
             }
           }
         }
-        
+
         // Process enums section
         if (yamlData.enums && typeof yamlData.enums === 'object') {
           if (!component.enums) component.enums = {};
@@ -512,12 +549,17 @@ export class DocumentationGenerator {
               component.enums[enumName] = {
                 description: (enumDef.description as string) || '',
                 businessContext: (enumDef.businessContext as string) || '',
-                values: (enumDef.values as Array<{ name: string; value?: string; description?: string }>) || []
+                values:
+                  (enumDef.values as Array<{
+                    name: string;
+                    value?: string;
+                    description?: string;
+                  }>) || [],
               };
             }
           }
         }
-        
+
         // Process constants section
         if (yamlData.constants && typeof yamlData.constants === 'object') {
           if (!component.constants) component.constants = {};
@@ -528,20 +570,26 @@ export class DocumentationGenerator {
                 description: (constant.description as string) || '',
                 businessContext: (constant.businessContext as string) || '',
                 type: (constant.type as string) || 'unknown',
-                properties: (constant.properties as Array<{ name: string; value?: string; description?: string }>) || []
+                properties:
+                  (constant.properties as Array<{
+                    name: string;
+                    value?: string;
+                    description?: string;
+                  }>) || [],
               };
             }
           }
         }
-        
+
         components.push(component);
-        console.log(`[DEBUG] Loaded component ${className} with ${Object.keys(component.methods).length} methods, ${Object.keys(component.interfaces || {}).length} interfaces, ${Object.keys(component.types || {}).length} types`);
+        console.log(
+          `[DEBUG] Loaded component ${className} with ${Object.keys(component.methods).length} methods, ${Object.keys(component.interfaces || {}).length} interfaces, ${Object.keys(component.types || {}).length} types`
+        );
       }
     } catch (error) {
       console.log(`[DEBUG] Failed to load YAML components for ${packageName}:`, error);
     }
-    
+
     return components;
   }
-  
 }

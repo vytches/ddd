@@ -2,7 +2,12 @@
 
 ## Executive Summary
 
-This document outlines the implementation plan for extending `@vytches/ddd-testing` with comprehensive domain seeding capabilities. The seeder will focus on pure domain data generation, scenario creation, and deep integration with all vytches-ddd patterns. Testing orchestration and external tool integrations will be addressed in a separate `@vytches/ddd-test-runner` package (Phase 2).
+This document outlines the implementation plan for extending
+`@vytches/ddd-testing` with comprehensive domain seeding capabilities. The
+seeder will focus on pure domain data generation, scenario creation, and deep
+integration with all vytches-ddd patterns. Testing orchestration and external
+tool integrations will be addressed in a separate `@vytches/ddd-test-runner`
+package (Phase 2).
 
 ## 1. Vision & Goals
 
@@ -17,17 +22,21 @@ This document outlines the implementation plan for extending `@vytches/ddd-testi
 ### 1.2 Key Features
 
 - ✅ **Domain-Aware Data Generation** - Respects business rules and invariants
-- ✅ **Event Sourcing Support** - Full event stream generation with realistic timelines
+- ✅ **Event Sourcing Support** - Full event stream generation with realistic
+  timelines
 - ✅ **Complex Scenario Engine** - Multi-aggregate coordinated scenarios
 - ✅ **Multi-Tenant Data** - Cross-tenant data with proper isolation
-- ✅ **Geographic Intelligence** - Location-aware data generation (LocalHero scenarios)
+- ✅ **Geographic Intelligence** - Location-aware data generation (LocalHero
+  scenarios)
 - ✅ **Temporal Constraints** - Time-based scenario evolution
 - ✅ **Relationship Management** - Complex inter-aggregate relationships
-- ✅ **AI-Enhanced Generation** - Smart data generation with contextual intelligence
+- ✅ **AI-Enhanced Generation** - Smart data generation with contextual
+  intelligence
 
 ### 1.3 Scope & Architecture Decision
 
 **📋 IN SCOPE (Phase 1): @vytches/ddd-testing**
+
 - Pure domain seeding and data generation
 - Complex scenario creation and management
 - Business rule compliance and validation
@@ -36,6 +45,7 @@ This document outlines the implementation plan for extending `@vytches/ddd-testi
 - AI-enhanced realistic data generation
 
 **🔮 FUTURE SCOPE (Phase 2): @vytches/ddd-test-runner**
+
 - External testing tool integrations (K6, Playwright, OWASP)
 - Performance testing orchestration
 - Testcontainers infrastructure management
@@ -104,24 +114,28 @@ packages/testing/src/
 ### 2.2 Core Components (Phase 1 Focus)
 
 #### A. DomainSeeder - Main Orchestrator
+
 - Central API for all seeding operations
 - Fluent builder pattern for complex scenarios
 - Deep integration with vytches-ddd patterns
 - Pure domain focus without external dependencies
 
 #### B. AggregateSeeder - Aggregate-Specific Logic
+
 - Type-safe aggregate generation
 - Business rule compliance and validation
 - Capability-aware seeding (audit, versioning, etc.)
 - Cross-aggregate relationship management
 
 #### C. EventSourcedSeeder - Event Stream Generation
+
 - Realistic event timelines and sequences
 - Business-driven event scenario creation
 - Snapshot generation for performance
 - Integration with @vytches/ddd-event-store
 
 #### D. ScenarioSeeder - Complex Domain Scenarios
+
 - Multi-aggregate coordination
 - Geographic and temporal constraints
 - Crisis and edge-case scenario simulation
@@ -147,9 +161,11 @@ packages/test-runner/src/
 ## 3. Implementation Phases
 
 ### Phase 1: Foundation Layer (Weeks 1-2)
+
 **Goal**: Core seeding infrastructure for domain data generation
 
 #### Week 1: Core Seeding Infrastructure
+
 - [ ] Extend `@vytches/ddd-testing` package structure
 - [ ] Implement `DomainSeeder` base class with fluent API
 - [ ] Create `AggregateSeeder` for type-safe aggregate generation
@@ -157,6 +173,7 @@ packages/test-runner/src/
 - [ ] Implement basic `EntityId` generation with proper factories
 
 #### Week 2: DDD Pattern Integration
+
 - [ ] Deep integration with all `@vytches/ddd-*` packages
 - [ ] Event generation for aggregates with realistic timelines
 - [ ] Basic relationship seeding between aggregates
@@ -164,22 +181,24 @@ packages/test-runner/src/
 - [ ] Unit tests for core seeding functionality
 
 **Deliverables:**
+
 ```typescript
 // Basic usage example
-const user = await DomainSeeder
-  .forAggregate(UserAggregate)
+const user = await DomainSeeder.forAggregate(UserAggregate)
   .withEntityId()
   .withValueObjects({
     email: EmailVO.create('test@example.com'),
-    age: AgeVO.create(25)
+    age: AgeVO.create(25),
   })
   .build();
 ```
 
 ### Phase 2: Event Sourcing & Advanced Patterns (Weeks 3-4)
+
 **Goal**: Event sourcing scenarios and complex DDD patterns
 
 #### Week 3: Event Sourcing Excellence
+
 - [ ] Implement `EventSourcedSeeder` with timeline management
 - [ ] Event stream generation with business-driven sequences
 - [ ] Snapshot generation and management strategies
@@ -187,6 +206,7 @@ const user = await DomainSeeder
 - [ ] Event-driven projection data generation
 
 #### Week 4: Advanced DDD Patterns
+
 - [ ] Saga scenario generation with compensation patterns
 - [ ] Policy-driven seeding with `@vytches/ddd-policies`
 - [ ] Multi-aggregate coordination and consistency
@@ -194,23 +214,26 @@ const user = await DomainSeeder
 - [ ] Complex business rule validation scenarios
 
 **Deliverables:**
+
 ```typescript
 // Event sourcing example
-const orderHistory = await DomainSeeder
-  .eventSourcedScenario('order-lifecycle')
-  .withEventStream(stream => stream
-    .start('OrderCreated', { amount: 1000 })
-    .after('2h', 'PaymentProcessed')
-    .after('1h', 'OrderShipped')
+const orderHistory = await DomainSeeder.eventSourcedScenario('order-lifecycle')
+  .withEventStream(stream =>
+    stream
+      .start('OrderCreated', { amount: 1000 })
+      .after('2h', 'PaymentProcessed')
+      .after('1h', 'OrderShipped')
   )
   .withSnapshots({ every: 10 })
   .generateWithHistory();
 ```
 
 ### Phase 3: Complex Scenario Engine (Weeks 5-6)
+
 **Goal**: Real-world domain scenarios and intelligent data generation
 
 #### Week 5: Scenario Framework
+
 - [ ] Implement `ScenarioSeeder` with multi-aggregate coordination
 - [ ] Timeline-based scenario evolution and progression
 - [ ] Geographic constraint support for location-aware scenarios
@@ -218,6 +241,7 @@ const orderHistory = await DomainSeeder
 - [ ] Scenario composition and inheritance patterns
 
 #### Week 6: Real-World Domain Scenarios
+
 - [ ] E-commerce scenarios (marketplace, customer journeys)
 - [ ] LocalHero scenarios (neighborhood dynamics, civic engagement)
 - [ ] Financial scenarios (banking workflows, compliance testing)
@@ -225,13 +249,13 @@ const orderHistory = await DomainSeeder
 - [ ] Crisis scenarios (emergency response, system recovery)
 
 **Deliverables:**
+
 ```typescript
 // Complex scenario example
-const neighborhood = await DomainSeeder
-  .scenario('active-local-community')
+const neighborhood = await DomainSeeder.scenario('active-local-community')
   .withGeographicContext({
     center: { lat: 52.229, lng: 21.012 },
-    radius: 2000
+    radius: 2000,
   })
   .withTimeline('90days')
   .withCrisisEvent('day-75', 'flooding')
@@ -239,9 +263,11 @@ const neighborhood = await DomainSeeder
 ```
 
 ### Phase 4: AI Enhancement & Geographic Intelligence (Weeks 7-8)
+
 **Goal**: Intelligent data generation and location-aware scenarios
 
 #### Week 7: AI-Enhanced Generation
+
 - [ ] Implement `AIGenerator` with OpenAI/Claude integration
 - [ ] Realistic behavior pattern generation
 - [ ] Cultural context and diversity awareness
@@ -249,6 +275,7 @@ const neighborhood = await DomainSeeder
 - [ ] Business context-aware data generation
 
 #### Week 8: Geographic Intelligence
+
 - [ ] Location-aware data generation (LocalHero focus)
 - [ ] Realistic geographic distribution patterns
 - [ ] Neighborhood dynamics and density modeling
@@ -256,28 +283,32 @@ const neighborhood = await DomainSeeder
 - [ ] Multi-location relationship constraints
 
 **Deliverables:**
+
 ```typescript
 // AI-enhanced geographic scenario
-const intelligentScenario = await DomainSeeder
-  .aiEnhancedScenario('realistic-neighborhood')
+const intelligentScenario = await DomainSeeder.aiEnhancedScenario(
+  'realistic-neighborhood'
+)
   .withAI({
     provider: 'openai',
     model: 'gpt-4',
-    context: 'urban-polish-community'
+    context: 'urban-polish-community',
   })
   .withGeography({
     center: { lat: 52.229, lng: 21.012 },
     radius: 2000,
-    density: 'urban'
+    density: 'urban',
   })
   .withRealisticBehaviors(['community-focused', 'tech-savvy'])
   .seed();
 ```
 
 ### Phase 5: Polish & Enterprise Features (Weeks 9-10)
+
 **Goal**: Production-ready seeding with comprehensive documentation
 
 #### Week 9: Advanced Seeding Features
+
 - [ ] Multi-tenant data isolation and cross-tenant scenarios
 - [ ] Temporal behavior simulation with seasonal patterns
 - [ ] Advanced business rule compliance and validation
@@ -285,6 +316,7 @@ const intelligentScenario = await DomainSeeder
 - [ ] Data consistency validation across aggregates
 
 #### Week 10: Documentation & Developer Experience
+
 - [ ] Comprehensive API documentation with JSDoc
 - [ ] Tutorial examples for all domain scenarios
 - [ ] Best practices guide for domain seeding
@@ -329,6 +361,7 @@ export class DomainSeeder {
 ### 4.2 Integration Points
 
 #### A. Deep vytches-ddd Integration
+
 - **@vytches/ddd-core**: AggregateRoot, EntityId, BaseError
 - **@vytches/ddd-value-objects**: All value object types
 - **@vytches/ddd-repositories**: Repository pattern integration
@@ -341,6 +374,7 @@ export class DomainSeeder {
 - **@vytches/ddd-acl**: Anti-corruption layer testing
 
 #### B. Dependencies Strategy (Phase 1: Minimal & Focused)
+
 ```json
 {
   "dependencies": {
@@ -363,6 +397,7 @@ export class DomainSeeder {
 ```
 
 #### C. Phase 2 Dependencies (@vytches/ddd-test-runner)
+
 ```json
 {
   "dependencies": {
@@ -380,7 +415,7 @@ export class DomainSeeder {
 ### 4.3 Performance Requirements (Phase 1: Pure Seeding)
 
 - **Seeding Speed**: >10,000 simple aggregates/second
-- **Memory Efficiency**: <500MB RAM for 100,000 aggregate scenario  
+- **Memory Efficiency**: <500MB RAM for 100,000 aggregate scenario
 - **Complex Scenarios**: <2 minutes for 1000-aggregate multi-tenant scenario
 - **Event Stream Generation**: >1000 events/second with realistic timelines
 - **Geographic Seeding**: <30 seconds for neighborhood-scale scenarios
@@ -399,31 +434,32 @@ export class DomainSeeder {
 
 ```typescript
 // Geographic-aware seeding for LocalHero scenarios
-const localScenario = await DomainSeeder
-  .geographicScenario('warsaw-mokotow-neighborhood')
+const localScenario = await DomainSeeder.geographicScenario(
+  'warsaw-mokotow-neighborhood'
+)
   .withBoundaries({
     center: { lat: 52.1946, lng: 21.0147 },
     radius: 2000, // 2km radius
     districts: ['Mokotów', 'Ursynów'],
-    density: 'urban'
+    density: 'urban',
   })
   .withRealisticDistribution({
     residential: 0.7,
     commercial: 0.2,
-    public: 0.1
+    public: 0.1,
   })
   .withUsers({
     count: 500,
     ageDistribution: 'realistic',
-    verificationRate: 0.8
+    verificationRate: 0.8,
   })
   .withLocalBusinesses({
     types: ['restaurant', 'pharmacy', 'repair'],
-    density: 'medium'
+    density: 'medium',
   })
   .withCivicEngagement({
     proposalsPerMonth: 2,
-    participationRate: 0.3
+    participationRate: 0.3,
   })
   .seed();
 ```
@@ -432,8 +468,7 @@ const localScenario = await DomainSeeder
 
 ```typescript
 // Emergency response testing
-const crisisTest = await DomainSeeder
-  .crisisScenario('neighborhood-flooding')
+const crisisTest = await DomainSeeder.crisisScenario('neighborhood-flooding')
   .withBaseline('active-community')
   .injectCrisis({
     type: 'natural-disaster',
@@ -441,20 +476,20 @@ const crisisTest = await DomainSeeder
     severity: 'high',
     triggerAt: 'day-30',
     duration: '6hours',
-    affectedArea: 0.6 // 60% of area affected
+    affectedArea: 0.6, // 60% of area affected
   })
   .withEmergencyResponse({
     alertPropagation: 'exponential',
     resourceMobilization: true,
     officialResponse: {
       delay: '15minutes',
-      effectiveness: 0.8
-    }
+      effectiveness: 0.8,
+    },
   })
   .withCommunityBehavior({
     helpRequestIncrease: 5.0,
     volunteerResponse: 0.4,
-    informationSharing: 0.9
+    informationSharing: 0.9,
   })
   .measureResilience()
   .seed();
@@ -464,12 +499,13 @@ const crisisTest = await DomainSeeder
 
 ```typescript
 // AI-enhanced realistic data generation
-const aiScenario = await DomainSeeder
-  .aiEnhancedScenario('realistic-user-behavior')
+const aiScenario = await DomainSeeder.aiEnhancedScenario(
+  'realistic-user-behavior'
+)
   .withAI({
     provider: 'openai', // or 'claude'
     model: 'gpt-4',
-    context: 'urban-neighborhood-platform'
+    context: 'urban-neighborhood-platform',
   })
   .generateRealisticProfiles({
     count: 1000,
@@ -479,13 +515,13 @@ const aiScenario = await DomainSeeder
       'early-adopter',
       'community-focused',
       'privacy-conscious',
-      'tech-savvy-senior'
-    ]
+      'tech-savvy-senior',
+    ],
   })
   .withRealisticInteractions({
     socialGraphComplexity: 'medium',
     communicationPatterns: 'authentic',
-    seasonalVariations: true
+    seasonalVariations: true,
   })
   .seed();
 ```
@@ -494,34 +530,35 @@ const aiScenario = await DomainSeeder
 
 ```typescript
 // Database performance comparison
-const dbComparison = await DomainSeeder
-  .benchmarkTest('database-performance-comparison')
+const dbComparison = await DomainSeeder.benchmarkTest(
+  'database-performance-comparison'
+)
   .withDatabases({
     postgresql: {
       container: PostgreSqlContainer,
-      config: { sharedBuffers: '256MB', maxConnections: 200 }
+      config: { sharedBuffers: '256MB', maxConnections: 200 },
     },
     mongodb: {
       container: MongoContainer,
-      config: { cacheSizeGB: 1 }
+      config: { cacheSizeGB: 1 },
     },
     eventstore: {
       container: EventStoreContainer,
-      config: { projections: 'all' }
-    }
+      config: { projections: 'all' },
+    },
   })
   .withIdenticalWorkload({
     scenario: 'e-commerce-orders',
     operations: ['create', 'read', 'update', 'query'],
     dataSize: '1M-records',
     concurrency: 100,
-    duration: '30m'
+    duration: '30m',
   })
   .withMetrics([
     'throughput-ops-per-second',
     'latency-percentiles',
     'resource-utilization',
-    'data-consistency-validation'
+    'data-consistency-validation',
   ])
   .generateComparisonReport()
   .run();
@@ -530,18 +567,21 @@ const dbComparison = await DomainSeeder
 ## 6. Success Metrics
 
 ### 6.1 Functional Metrics
+
 - **Coverage**: All vytches-ddd patterns supported
 - **Complexity**: Support for 10+ aggregate scenarios
 - **Performance**: 10,000+ aggregates/second generation
 - **Reliability**: 99.9% test scenario success rate
 
 ### 6.2 Developer Experience Metrics
+
 - **Learning Curve**: New developers productive in <2 hours
 - **Documentation**: 100% API coverage with examples
 - **Error Messages**: Clear, actionable error descriptions
 - **IDE Support**: Full IntelliSense and type hints
 
 ### 6.3 Business Impact Metrics
+
 - **Testing Confidence**: 95% of complex scenarios covered
 - **Bug Detection**: 50% improvement in pre-production bug discovery
 - **Development Speed**: 30% faster integration testing
@@ -550,12 +590,14 @@ const dbComparison = await DomainSeeder
 ## 7. Risk Management
 
 ### 7.1 Technical Risks
+
 - **Complexity Management**: Modular architecture with clear boundaries
 - **Performance Degradation**: Continuous benchmarking and optimization
 - **Memory Leaks**: Comprehensive resource cleanup testing
 - **Container Dependencies**: Fallback to in-memory alternatives
 
 ### 7.2 Mitigation Strategies
+
 - **Incremental Development**: Phased rollout with continuous validation
 - **Automated Testing**: Comprehensive test suite for all features
 - **Performance Monitoring**: Built-in metrics and alerting
@@ -564,6 +606,7 @@ const dbComparison = await DomainSeeder
 ## 8. Future Enhancements
 
 ### 8.1 Phase 2: @vytches/ddd-test-runner
+
 - **Testing Orchestration**: Multi-tool test pipeline coordination
 - **Performance Testing**: K6, Artillery, JMeter integration
 - **Security Testing**: OWASP ZAP, Nuclei scanner integration
@@ -571,6 +614,7 @@ const dbComparison = await DomainSeeder
 - **Chaos Engineering**: Resilience and failure injection testing
 
 ### 8.2 Advanced Seeding Features (Phase 3+)
+
 - **Machine Learning**: Pattern recognition in generated behavior
 - **Blockchain Support**: DeFi and Web3 scenario generation
 - **Real-time Collaboration**: Multi-developer seeding sessions
@@ -579,7 +623,10 @@ const dbComparison = await DomainSeeder
 
 ## 9. Conclusion
 
-The DDD Seeder will transform `@vytches/ddd-testing` into the most comprehensive domain seeding toolkit available. By focusing purely on domain data generation and complex scenario creation, it will enable developers to create realistic test data for even the most sophisticated DDD systems.
+The DDD Seeder will transform `@vytches/ddd-testing` into the most comprehensive
+domain seeding toolkit available. By focusing purely on domain data generation
+and complex scenario creation, it will enable developers to create realistic
+test data for even the most sophisticated DDD systems.
 
 **Phase 1 Focus:**
 
@@ -595,9 +642,13 @@ The DDD Seeder will transform `@vytches/ddd-testing` into the most comprehensive
 - Performance testing and infrastructure management
 - Complete testing ecosystem around seeded domain data
 
-The phased approach ensures a focused, high-quality seeding library first, with testing orchestration as a natural extension. This separation of concerns will drive adoption while maintaining architectural clarity.
+The phased approach ensures a focused, high-quality seeding library first, with
+testing orchestration as a natural extension. This separation of concerns will
+drive adoption while maintaining architectural clarity.
 
-This implementation will position vytches-ddd as the definitive DDD framework for TypeScript, with seeding capabilities that exceed anything currently available in the domain modeling space.
+This implementation will position vytches-ddd as the definitive DDD framework
+for TypeScript, with seeding capabilities that exceed anything currently
+available in the domain modeling space.
 
 ---
 

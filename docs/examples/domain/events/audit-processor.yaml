@@ -1,0 +1,206 @@
+# audit-processor - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'audit-processor'
+title: 'AuditEventProcessor - Domain Event to Audit Event Processor'
+description: 'Processes domain events and creates audit events for compliance'
+business-context: 'Automatically generates audit trails from domain events'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  AuditEventProcessorOptions:
+    description: 'Configuration options for audit event processor'
+    business-context: 'Controls which events are audited and how'
+
+    formats:
+      jsdoc:
+        description: 'Audit processor configuration options'
+      cli:
+        description: |
+          ## AuditEventProcessorOptions Interface
+          Configuration for controlling audit event processing behavior.
+
+    properties:
+      - name: 'auditAll'
+        type: 'boolean'
+        optional: true
+        description: 'Audit all domain events when true'
+      - name: 'auditEventTypes'
+        type: 'string[]'
+        optional: true
+        description: 'Specific event types to audit (when auditAll is false)'
+      - name: 'source'
+        type: 'string'
+        optional: true
+        description: 'Default source identifier for audit events'
+
+# === CLASSES ===
+classes:
+  AuditEventProcessor:
+    class-doc:
+      description: 'Processes domain events and creates corresponding audit events'
+      business-context: 'Core component for automatic audit trail generation'
+
+      formats:
+        jsdoc:
+          description: 'Domain event to audit event processor'
+          business-context: 'Automatic audit trail generation'
+        cli:
+          description: |
+            ## AuditEventProcessor Class
+            Processes domain events and automatically creates corresponding
+            audit events for compliance and monitoring purposes.
+          business-context: |
+            Essential component for enterprise audit trails. Automatically
+            transforms domain events into structured audit records.
+
+      implements: ['IEventProcessor']
+
+      custom-tags:
+        complexity: 'Complex'
+        enterprise: 'Compliance system component'
+
+    methods:
+      constructor:
+        description: 'Creates new audit event processor instance'
+        business-context: 'Initializes processor with repository and options'
+
+        parameters:
+          - name: 'auditRepository'
+            type: 'IRepository<any>'
+            description: 'Repository for persisting audit events'
+          - name: 'options'
+            type: 'AuditEventProcessorOptions'
+            optional: true
+            description: 'Processor configuration options'
+            default: '{}'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const auditRepository = new AuditRepository();
+              const processor = new AuditEventProcessor(auditRepository, {
+                auditAll: false,
+                auditEventTypes: ['OrderCreated', 'PaymentProcessed'],
+                source: 'order-service'
+              });
+
+      process:
+        description: 'Processes domain event and creates audit event if applicable'
+        business-context: 'Core processing method for domain event auditing'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Domain event to process'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Resolves when processing is complete'
+
+        custom-tags:
+          async: 'Asynchronous operation'
+          side-effects: 'May persist audit events'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const domainEvent = new OrderCreatedEvent({
+                orderId: 'order-123',
+                customerId: 'customer-456'
+              });
+
+              await processor.process(domainEvent);
+              // Audit event created and persisted if configured
+
+      recordAction:
+        description: 'Manually records an audit action'
+        business-context: 'Direct audit recording for non-event actions'
+
+        parameters:
+          - name: 'action'
+            type: 'AuditActionType | string'
+            description: 'Type of action performed'
+          - name: 'resourceType'
+            type: 'string'
+            description: 'Type of affected resource'
+          - name: 'resourceId'
+            type: 'string'
+            description: 'Identifier of affected resource'
+          - name: 'data'
+            type: 'any'
+            optional: true
+            description: 'Additional action data'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Resolves when action is recorded'
+
+        custom-tags:
+          manual: 'Manual audit recording'
+          compliance: 'Direct audit trail creation'
+
+        examples:
+          - id: 'basic'
+            code: |
+              await processor.recordAction(
+                AuditActionType.UPDATE,
+                'Order',
+                'order-123',
+                { status: 'shipped', updatedBy: 'user-789' }
+              );
+
+      shouldAudit:
+        description: 'Determines if event should be audited based on configuration'
+        business-context: 'Applies filtering rules to decide audit necessity'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Domain event to evaluate'
+
+        returns:
+          type: 'boolean'
+          description: 'True if event should be audited'
+
+        custom-tags:
+          private: 'Internal method'
+          filtering: 'Event filtering logic'
+
+        examples:
+          - id: 'basic'
+            code: |
+              // Internal usage - filters based on configuration
+              const shouldAudit = this.shouldAudit(domainEvent);
+              if (shouldAudit) {
+                // Create and persist audit event
+              }
+
+      createAuditEvent:
+        description: 'Creates audit event from domain event'
+        business-context: 'Transforms domain event into structured audit event'
+
+        parameters:
+          - name: 'domainEvent'
+            type: 'IExtendedDomainEvent'
+            description: 'Source domain event'
+
+        returns:
+          type: 'IAuditEvent'
+          description: 'Generated audit event'
+
+        custom-tags:
+          private: 'Internal method'
+          transformation: 'Domain to audit event conversion'
+
+        examples:
+          - id: 'basic'
+            code: |
+              // Internal usage - creates structured audit event
+              const auditEvent = this.createAuditEvent(domainEvent);
+              // Contains mapped action type, metadata, and payload

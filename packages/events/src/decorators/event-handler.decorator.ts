@@ -8,22 +8,12 @@ import type { EventHandlerOptions, DIHandlerMetadata } from './di-types';
 export type { EventHandlerOptions };
 
 /**
- * @llm-summary event handler function
- * @llm-domain Architecture
- * @llm-pure false
+ * Decorator for marking classes and methods as event handlers with DI support.
+ * Enables declarative event handler registration and auto-discovery.
  *
- * @description
- * EventHandler function implementing architectural component for event handler operations.
- *
- * @param {new (...args: any[]} eventType - eventType parameter
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = EventHandler(eventType);
- * ```
- * *
+ * @param eventType Constructor of the event type to handle
+ * @param options Handler configuration options
+ * @returns Decorator function for classes or methods
  * @since 1.0.0
  * @public
  */

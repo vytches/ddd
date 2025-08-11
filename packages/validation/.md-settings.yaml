@@ -1,0 +1,45 @@
+# Package Settings for @vytches/ddd-validation - Inherits from global-settings.yaml
+
+# === PACKAGE IDENTITY ===
+package-name: 'validation'
+display-name: 'DDD Validation'
+description: 'Comprehensive validation patterns for domain-driven design'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'domain-modeling'
+complexity: 'intermediate'
+patterns:
+  - 'specification-pattern'
+  - 'composite-pattern'
+  - 'business-rule-validation'
+  - 'adapter-pattern'
+  - 'result-pattern'
+
+# === VALIDATION-SPECIFIC METADATA ===
+validation:
+  primary-patterns:
+    - 'ISpecification<T> - Sync specification pattern'
+    - 'IAsyncSpecification<T> - Async specification pattern'
+    - 'CompositeSpecification - AND/OR/NOT combinatorial logic'
+    - 'BusinessRuleValidator - Domain business rule validation'
+    - 'ValidationFacade - Simplified validation API'
+    - 'BaseValidationAdapter - External validator integration'
+
+  key-features:
+    - 'Specification composition with fluent API'
+    - 'Business rule validation with Result pattern'
+    - 'External library adapter support'
+    - 'Comprehensive error reporting'
+    - 'Nested object validation'
+    - 'Conditional validation rules'
+
+  integrations:
+    - 'Result<T, E> pattern from @vytches/ddd-utils'
+    - 'ISpecification contracts from @vytches/ddd-contracts'
+    - 'Fluent builder patterns'
+    - 'Enterprise error handling'

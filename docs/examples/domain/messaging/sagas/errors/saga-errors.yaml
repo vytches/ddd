@@ -1,0 +1,585 @@
+# Saga Errors - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'saga-errors'
+title: 'Saga Error Classes - Comprehensive Error Handling'
+description: 'Specialized error classes for saga pattern with structured logging support'
+business-context: 'Provides detailed error information for saga debugging and monitoring'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  SagaError:
+    class-doc:
+      description: 'Abstract base class for all saga-related errors with structured logging'
+      business-context: 'Foundation for saga error handling with correlation and context tracking'
+
+      formats:
+        jsdoc:
+          description: 'Abstract saga error with structured logging and correlation'
+        cli:
+          description: |
+            ## SagaError
+
+            Abstract error base providing:
+            - Unique error identification
+            - Saga correlation tracking
+            - Structured logging support
+            - Context preservation
+            - Timestamp tracking
+
+    methods:
+      constructor:
+        description: 'Creates saga error with correlation and context information'
+        business-context: 'Initializes error with saga tracking and diagnostic data'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Saga instance identifier'
+
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type identifier'
+            required: false
+
+          - name: 'context'
+            type: 'Record<string, unknown>'
+            description: 'Additional error context'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'saga-error-creation'
+            code: |
+              const error = new SagaExecutionError(
+                'saga-123',
+                'ProcessPayment',
+                new Error('Payment service unavailable'),
+                'OrderProcessingSaga',
+                { orderId: 'order-456' }
+              );
+
+      toStructured:
+        description: 'Gets structured error information for logging and monitoring'
+        business-context: 'Provides comprehensive error data for observability systems'
+
+        returns:
+          type: 'Record<string, unknown>'
+          description: 'Structured error information'
+
+        examples:
+          - id: 'structured-logging'
+            code: |
+              const structuredError = error.toStructured();
+              logger.error('Saga error occurred', structuredError);
+
+              // Output:
+              // {
+              //   errorId: 'SagaExecutionError-1625097600000-abc123',
+              //   errorType: 'SagaExecutionError',
+              //   message: 'Saga execution failed...',
+              //   sagaId: 'saga-123',
+              //   sagaType: 'OrderProcessingSaga',
+              //   timestamp: '2021-06-30T12:00:00.000Z',
+              //   stack: '...',
+              //   context: { stepName: 'ProcessPayment', ... }
+              // }
+
+  SagaExecutionError:
+    class-doc:
+      description: 'Error thrown when saga step execution fails'
+      business-context: 'Captures execution failures with step context and original error details'
+
+      formats:
+        jsdoc:
+          description: 'Saga step execution failure error'
+
+    methods:
+      constructor:
+        description: 'Creates execution error with step and original error details'
+        business-context: 'Records step execution failure with full error chain'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Saga instance identifier'
+
+          - name: 'stepName'
+            type: 'string'
+            description: 'Name of failed step'
+
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Original error that caused failure'
+
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type identifier'
+            required: false
+
+          - name: 'context'
+            type: 'Record<string, unknown>'
+            description: 'Additional error context'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'execution-error'
+            code: |
+              try {
+                await paymentService.processPayment(paymentData);
+              } catch (error) {
+                throw new SagaExecutionError(
+                  sagaId,
+                  'ProcessPayment',
+                  error as Error,
+                  'OrderProcessingSaga',
+                  { orderId, amount: paymentData.amount }
+                );
+              }
+
+  SagaStepError:
+    class-doc:
+      description: 'Error specific to saga step validation or execution issues'
+      business-context: 'Captures step-level errors with step-specific context'
+
+      formats:
+        jsdoc:
+          description: 'Saga step-specific error'
+
+    methods:
+      constructor:
+        description: 'Creates step error with step context'
+        business-context: 'Records step-specific failure with business context'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Saga instance identifier'
+
+          - name: 'stepName'
+            type: 'string'
+            description: 'Name of step with error'
+
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type identifier'
+            required: false
+
+          - name: 'stepData'
+            type: 'Record<string, unknown>'
+            description: 'Step data context'
+            required: false
+
+        examples:
+          - id: 'step-error'
+            code: |
+              if (!canProcessPayment(order)) {
+                throw new SagaStepError(
+                  sagaId,
+                  'ProcessPayment',
+                  'Payment cannot be processed for cancelled order',
+                  'OrderProcessingSaga',
+                  { orderId: order.id, status: order.status }
+                );
+              }
+
+  SagaConfigurationError:
+    class-doc:
+      description: 'Error thrown for saga configuration and validation issues'
+      business-context: 'Captures configuration errors during saga setup or validation'
+
+      formats:
+        jsdoc:
+          description: 'Saga configuration validation error'
+
+    methods:
+      constructor:
+        description: 'Creates configuration error with validation details'
+        business-context: 'Records configuration issues for saga definition debugging'
+
+        parameters:
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type with configuration error'
+
+          - name: 'message'
+            type: 'string'
+            description: 'Configuration error message'
+
+          - name: 'validationErrors'
+            type: 'string[]'
+            description: 'Specific validation error messages'
+            required: false
+            default: '[]'
+
+          - name: 'configurationContext'
+            type: 'Record<string, unknown>'
+            description: 'Configuration context'
+            required: false
+
+        examples:
+          - id: 'configuration-error'
+            code: |
+              const validationErrors = sagaDefinition.validate();
+              if (validationErrors.length > 0) {
+                throw new SagaConfigurationError(
+                  'OrderProcessingSaga',
+                  'Saga definition validation failed',
+                  validationErrors,
+                  { definitionVersion: '1.2.0' }
+                );
+              }
+
+  SagaEventProcessingError:
+    class-doc:
+      description: 'Error thrown during event processing in saga'
+      business-context: 'Captures event-specific processing failures with event context'
+
+      formats:
+        jsdoc:
+          description: 'Saga event processing error'
+
+    methods:
+      constructor:
+        description: 'Creates event processing error with event details'
+        business-context: 'Records event processing failure with full event context'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Saga instance identifier'
+
+          - name: 'eventType'
+            type: 'string'
+            description: 'Type of event that failed processing'
+
+          - name: 'message'
+            type: 'string'
+            description: 'Processing error message'
+
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type identifier'
+            required: false
+
+          - name: 'eventData'
+            type: 'Record<string, unknown>'
+            description: 'Event payload data'
+            required: false
+
+          - name: 'processingContext'
+            type: 'Record<string, unknown>'
+            description: 'Processing context information'
+            required: false
+
+        examples:
+          - id: 'event-processing-error'
+            code: |
+              try {
+                await saga.handleEvent(orderCreatedEvent, context);
+              } catch (error) {
+                throw new SagaEventProcessingError(
+                  sagaId,
+                  'OrderCreated',
+                  'Failed to initialize order processing',
+                  'OrderProcessingSaga',
+                  orderCreatedEvent.payload,
+                  { correlationId: context.correlationId }
+                );
+              }
+
+  SagaCompensationError:
+    class-doc:
+      description: 'Error thrown during saga compensation execution'
+      business-context: 'Captures compensation failures which are critical for saga integrity'
+
+      formats:
+        jsdoc:
+          description: 'Saga compensation execution error'
+
+    methods:
+      constructor:
+        description: 'Creates compensation error with step and compensation details'
+        business-context: 'Records compensation failure which requires immediate attention'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Saga instance identifier'
+
+          - name: 'stepName'
+            type: 'string'
+            description: 'Name of step being compensated'
+
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Original error from compensation'
+
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type identifier'
+            required: false
+
+          - name: 'compensationData'
+            type: 'Record<string, unknown>'
+            description: 'Compensation data context'
+            required: false
+
+        examples:
+          - id: 'compensation-error'
+            code: |
+              try {
+                await step.compensate(sagaState, context);
+              } catch (error) {
+                throw new SagaCompensationError(
+                  sagaId,
+                  'ProcessPayment',
+                  error as Error,
+                  'OrderProcessingSaga',
+                  { paymentId: 'payment-123', refundAmount: 100.00 }
+                );
+              }
+
+  SagaDiscoveryError:
+    class-doc:
+      description: 'Error thrown during saga class discovery and registration'
+      business-context: 'Captures issues in saga auto-discovery and decorator processing'
+
+      formats:
+        jsdoc:
+          description: 'Saga discovery and registration error'
+
+    methods:
+      constructor:
+        description: 'Creates discovery error with class and context details'
+        business-context: 'Records discovery issues for development debugging'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Discovery error message'
+
+          - name: 'className'
+            type: 'string'
+            description: 'Name of class with discovery issue'
+            required: false
+
+          - name: 'discoveryContext'
+            type: 'Record<string, unknown>'
+            description: 'Discovery context information'
+            required: false
+
+        examples:
+          - id: 'discovery-error'
+            code: |
+              if (!Reflect.hasMetadata(SAGA_METADATA_KEY, sagaClass)) {
+                throw new SagaDiscoveryError(
+                  'Saga class missing @Saga decorator',
+                  sagaClass.name,
+                  { fileName: 'order-processing-saga.ts' }
+                );
+              }
+
+  SagaOrchestrationError:
+    class-doc:
+      description: 'Error thrown during saga orchestration operations'
+      business-context: 'Captures orchestrator-level errors in saga management'
+
+      formats:
+        jsdoc:
+          description: 'Saga orchestration error'
+
+    methods:
+      constructor:
+        description: 'Creates orchestration error with operation context'
+        business-context: 'Records orchestrator operation failures'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Saga instance identifier'
+
+          - name: 'message'
+            type: 'string'
+            description: 'Orchestration error message'
+
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type identifier'
+            required: false
+
+          - name: 'operation'
+            type: 'string'
+            description: 'Orchestration operation that failed'
+            required: false
+
+          - name: 'orchestrationContext'
+            type: 'Record<string, unknown>'
+            description: 'Orchestration context'
+            required: false
+
+        examples:
+          - id: 'orchestration-error'
+            code: |
+              throw new SagaOrchestrationError(
+                sagaId,
+                'Failed to persist saga state during event processing',
+                'OrderProcessingSaga',
+                'persistState',
+                { repositoryType: 'InMemory', eventType: 'OrderCreated' }
+              );
+
+  SagaInstanceLimitExceededError:
+    class-doc:
+      description: 'Error thrown when saga instance limit is exceeded'
+      business-context: 'Prevents resource exhaustion by enforcing instance limits'
+
+      formats:
+        jsdoc:
+          description: 'Saga instance limit exceeded error'
+
+    methods:
+      constructor:
+        description: 'Creates instance limit error with count information'
+        business-context: 'Records instance limit violations for resource management'
+
+        parameters:
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type that exceeded limit'
+
+          - name: 'maxInstances'
+            type: 'number'
+            description: 'Maximum allowed instances'
+
+          - name: 'currentCount'
+            type: 'number'
+            description: 'Current instance count'
+
+        examples:
+          - id: 'instance-limit-error'
+            code: |
+              if (currentInstances >= maxInstances) {
+                throw new SagaInstanceLimitExceededError(
+                  'OrderProcessingSaga',
+                  maxInstances,
+                  currentInstances
+                );
+              }
+
+  SagaDefinitionNotFoundError:
+    class-doc:
+      description: 'Error thrown when no saga definition is found for an event'
+      business-context: 'Indicates missing saga configuration for business events'
+
+      formats:
+        jsdoc:
+          description: 'Saga definition not found error'
+
+    methods:
+      constructor:
+        description: 'Creates definition not found error with available options'
+        business-context: 'Records missing saga definitions for event routing'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type with no saga definition'
+
+          - name: 'availableDefinitions'
+            type: 'string[]'
+            description: 'List of available saga definitions'
+            required: false
+            default: '[]'
+
+        examples:
+          - id: 'definition-not-found-error'
+            code: |
+              const availableTypes = Object.keys(sagaDefinitions);
+              throw new SagaDefinitionNotFoundError(
+                'CustomerRegistered',
+                availableTypes
+              );
+
+# === FUNCTIONS ===
+functions:
+  SagaConcurrencyError:
+    description: 'Alias for concurrency-related saga errors'
+    business-context: 'Backwards compatibility for concurrency error handling'
+
+    returns:
+      type: 'SagaError'
+      description: 'Saga error instance'
+
+  SagaNotFoundError:
+    description: 'Alias for saga not found errors'
+    business-context: 'Backwards compatibility for not found error handling'
+
+    returns:
+      type: 'SagaError'
+      description: 'Saga error instance'
+
+# === ERROR HIERARCHY ===
+error-hierarchy:
+  description: 'Saga error inheritance structure for proper error handling'
+  business-context: 'Enables specific error handling while maintaining base error properties'
+
+  base-errors:
+    - name: 'BaseError'
+      description: 'Foundation error from domain-primitives'
+
+    - name: 'SagaError'
+      description: 'Abstract base for saga-specific errors'
+      extends: 'BaseError'
+
+  concrete-errors:
+    - name: 'SagaExecutionError'
+      extends: 'SagaError'
+      use-case: 'Step execution failures'
+
+    - name: 'SagaStepError'
+      extends: 'SagaError'
+      use-case: 'Step validation and logic errors'
+
+    - name: 'SagaEventProcessingError'
+      extends: 'SagaError'
+      use-case: 'Event handling failures'
+
+    - name: 'SagaCompensationError'
+      extends: 'SagaError'
+      use-case: 'Compensation execution failures'
+
+    - name: 'SagaOrchestrationError'
+      extends: 'SagaError'
+      use-case: 'Orchestrator operation failures'
+
+    - name: 'SagaInstanceLimitExceededError'
+      extends: 'SagaError'
+      use-case: 'Resource limit violations'
+
+  configuration-errors:
+    - name: 'SagaConfigurationError'
+      extends: 'BaseError'
+      use-case: 'Saga definition validation'
+
+    - name: 'SagaDiscoveryError'
+      extends: 'BaseError'
+      use-case: 'Auto-discovery issues'
+
+    - name: 'SagaDefinitionNotFoundError'
+      extends: 'BaseError'
+      use-case: 'Missing saga definitions'

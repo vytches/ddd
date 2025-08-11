@@ -1,78 +1,70 @@
-/**
- * JSDoc Examples Engine - Main exports
- * 
- * @llm-summary Example extraction system for JSDoc injection and CLI generation
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- */
-
 // Core engine
 export { ExampleEngine } from './engine';
 
 // Interfaces
 export type {
-  IExampleEngine,
-  IJSDocAdapter,
   ICLIAdapter,
+  IExampleEngine,
   IExampleValidator,
   IFileScanner,
+  IJSDocAdapter,
 } from './interfaces';
 
 // Types
 export type {
+  ComplexityLevel,
   ExampleFile,
-  ExtractedExample,
-  ValidationResult,
-  ValidationError,
-  ValidationWarning,
   ExampleValidationRules,
+  ExtractedExample,
   ExtractionTag,
   GenerationOptions,
   LayerType,
-  ComplexityLevel,
   OutputType,
+  ValidationError,
+  ValidationResult,
+  ValidationWarning,
 } from './types';
 
 // Components
-export { FileScanner } from './scanner/file-scanner';
 export { TagExtractor } from './extractor/tag-extractor';
+export { FileScanner } from './scanner/file-scanner';
 export { ExampleValidator } from './validation/validator';
 
 // Validation rules
 export {
-  DEFAULT_VALIDATION_RULES,
-  COMPILATION_PATTERNS,
   BEST_PRACTICES,
+  COMPILATION_PATTERNS,
+  DEFAULT_VALIDATION_RULES,
   LINE_COUNTING_RULES,
   QUALITY_THRESHOLDS,
 } from './validation/rules';
 
 // Enhanced Metadata System V2 - Clean Architecture
-export { YamlMetadataEngine, type MetadataConfig } from './core/yaml-metadata-engine';
-export { JsDocOutputAdapter } from './adapters/jsdoc-output-adapter';
 export { CliOutputAdapter } from './adapters/cli-output-adapter';
-export { 
-  UnifiedAdapter, 
-  formatAsJSDoc, 
-  formatAsCLI,
-  formatAllMethodsAsJSDoc,
+export { JsDocOutputAdapter } from './adapters/jsdoc-output-adapter';
+export {
   formatAllMethodsAsCLI,
-  type OutputFormat 
+  formatAllMethodsAsJSDoc,
+  formatAsCLI,
+  formatAsJSDoc,
+  UnifiedAdapter,
+  type OutputFormat,
 } from './adapters/unified-adapter';
+export { YamlMetadataEngine, type MetadataConfig } from './core/yaml-metadata-engine';
 
 // Legacy Enhanced Metadata System (will be deprecated)
-export { HierarchicalMetadataResolver } from './hierarchy/hierarchical-metadata-resolver';
-export { FormatSpecificResolver } from './hierarchy/format-specific-resolver';
-export { MetadataResolutionStrategies } from './hierarchy/resolution-strategies';
 export { MultiLevelCache, PerformanceMonitor } from './cache/multi-level-cache';
+export { FormatSpecificResolver } from './hierarchy/format-specific-resolver';
+export { HierarchicalMetadataResolver } from './hierarchy/hierarchical-metadata-resolver';
+export { MetadataResolutionStrategies } from './hierarchy/resolution-strategies';
 
 // Enhanced Metadata Types
 export type {
-  ResolvedMetadata,
-  MetadataSource,
   HierarchyConfig,
-  ResolutionStrategy,
   MetadataLevel,
+  MetadataSource,
+  ResolutionStrategy,
+  ResolvedMetadata,
 } from './hierarchy/types';
 
 // Re-export for convenience

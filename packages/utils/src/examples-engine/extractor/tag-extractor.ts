@@ -15,7 +15,7 @@ export class TagExtractor {
   extractAllTags(content: string, packageName: string): ExtractedExample[] {
     const lines = content.split('\n');
     const examples: ExtractedExample[] = [];
-    
+
     let currentTag: ExtractionTag | null = null;
     let extractedLines: string[] = [];
 
@@ -47,11 +47,11 @@ export class TagExtractor {
       // Check for end tag
       if (trimmed.match(TagExtractor.EXTRACT_END_PATTERN) && currentTag) {
         currentTag.endLine = i + 1;
-        
+
         if (extractedLines.length > 0) {
           examples.push(this.createExtractedExample(currentTag, extractedLines, packageName));
         }
-        
+
         currentTag = null;
         extractedLines = [];
         continue;
@@ -63,7 +63,7 @@ export class TagExtractor {
         if (trimmed === '```typescript' || trimmed === '```') {
           continue;
         }
-        
+
         extractedLines.push(line);
       }
     }
@@ -88,13 +88,15 @@ export class TagExtractor {
     packageName: string
   ): ExtractedExample | null {
     const allExamples = this.extractAllTags(content, packageName);
-    
-    return allExamples.find(
-      example =>
-        example.methodName === methodName &&
-        example.layer === layer &&
-        example.complexity === complexity
-    ) || null;
+
+    return (
+      allExamples.find(
+        example =>
+          example.methodName === methodName &&
+          example.layer === layer &&
+          example.complexity === complexity
+      ) || null
+    );
   }
 
   /**
@@ -109,7 +111,7 @@ export class TagExtractor {
       if (!line) continue;
       const trimmed = line.trim();
       const startMatch = trimmed.match(TagExtractor.EXTRACT_START_PATTERN);
-      
+
       if (startMatch && startMatch[1] && startMatch[2] && startMatch[3]) {
         tags.push({
           methodName: startMatch[1].trim(),
@@ -132,7 +134,7 @@ export class TagExtractor {
     if (!match || !match[1] || !match[2] || !match[3]) return false;
 
     const [, methodName, layer, complexity] = match;
-    
+
     // Validate layer
     const validLayers: LayerType[] = ['domain', 'service', 'integration'];
     if (!validLayers.includes(layer as LayerType)) return false;
@@ -157,18 +159,18 @@ export class TagExtractor {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       // Start Description section
       if (trimmed === '## Description') {
         inDescriptionSection = true;
         continue;
       }
-      
+
       // End on next ## section
       if (inDescriptionSection && trimmed.startsWith('## ') && trimmed !== '## Description') {
         break;
       }
-      
+
       // Collect description content
       if (inDescriptionSection && trimmed) {
         descriptionLines.push(trimmed);
@@ -188,18 +190,22 @@ export class TagExtractor {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       // Start Business Context section
       if (trimmed === '## Business Context') {
         inBusinessContextSection = true;
         continue;
       }
-      
+
       // End on next ## section
-      if (inBusinessContextSection && trimmed.startsWith('## ') && trimmed !== '## Business Context') {
+      if (
+        inBusinessContextSection &&
+        trimmed.startsWith('## ') &&
+        trimmed !== '## Business Context'
+      ) {
         break;
       }
-      
+
       // Collect business context content
       if (inBusinessContextSection && trimmed) {
         contextLines.push(trimmed);
@@ -269,11 +275,14 @@ export class TagExtractor {
     methods: string[];
   } {
     const tags = this.findAllTags(content);
-    
+
     const stats = {
       totalTags: tags.length,
       tagsByLayer: { domain: 0, service: 0, integration: 0 } as Record<LayerType, number>,
-      tagsByComplexity: { basic: 0, intermediate: 0, advanced: 0 } as Record<ComplexityLevel, number>,
+      tagsByComplexity: { basic: 0, intermediate: 0, advanced: 0 } as Record<
+        ComplexityLevel,
+        number
+      >,
       methods: [...new Set(tags.map(tag => tag.methodName).filter(Boolean))],
     };
 

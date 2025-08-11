@@ -1,0 +1,484 @@
+# CQRS Middleware - Pipeline Logging for CQRS Operations
+
+# === FILE METADATA ===
+file-name: 'cqrs-middleware'
+title: 'CQRS Middleware - Pipeline Logging for Command and Query Execution'
+description: 'Middleware-based logging for CQRS command and query execution with performance monitoring and error handling'
+business-context: 'Enterprise CQRS pipeline integration providing centralized logging, performance monitoring, and error tracking for command and query processing workflows'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  CQRSMiddlewareOptions:
+    description: 'Configuration options for CQRS logging middleware'
+    business-context: 'Flexible middleware configuration enabling customizable logging behavior for CQRS pipelines with security and performance considerations'
+
+    formats:
+      jsdoc:
+        description: 'CQRS middleware logging configuration'
+      cli:
+        description: |
+          ## CQRSMiddlewareOptions Interface
+
+          Middleware configuration providing:
+          - **Logger Control**: Custom logger instance or automatic creation
+          - **Payload Security**: Configurable payload logging for sensitive operations
+          - **Log Level Control**: Adjustable verbosity for different environments
+          - **Pipeline Integration**: Seamless integration with CQRS execution pipelines
+
+    properties:
+      - name: 'logger'
+        type: 'Logger'
+        description: 'Custom logger instance, defaults to CQRS context logger if not provided'
+        optional: true
+
+      - name: 'includePayload'
+        type: 'boolean'
+        description: 'Include command/query payload in log entries (default: false for security)'
+        optional: true
+        default: 'false'
+
+      - name: 'logLevel'
+        type: "'debug' | 'info'"
+        description: "Log level for CQRS operations (default: 'info')"
+        optional: true
+        default: "'info'"
+
+    custom-tags:
+      since: '1.0.0'
+      middleware-pattern: 'Pipeline middleware for CQRS operations'
+
+  ExecutionContext:
+    description: 'Context information for CQRS operation execution within middleware pipeline'
+    business-context: 'Execution context providing complete operation information for comprehensive logging and monitoring in CQRS pipelines'
+
+    formats:
+      jsdoc:
+        description: 'CQRS execution context for middleware pipeline'
+      cli:
+        description: |
+          ## ExecutionContext Interface
+
+          Execution context containing:
+          - **Operation Data**: Command or query being executed
+          - **Operation Type**: Classification as Command or Query
+          - **Handler Information**: Optional handler instance for advanced logging
+          - **Pipeline State**: Context passed through middleware chain
+
+    properties:
+      - name: 'commandOrQuery'
+        type: 'unknown'
+        description: 'The command or query object being executed'
+
+      - name: 'type'
+        type: "'Command' | 'Query'"
+        description: 'Operation type classification for logging and monitoring'
+
+      - name: 'handler'
+        type: 'unknown'
+        description: 'Optional handler instance executing the operation'
+        optional: true
+
+    custom-tags:
+      since: '1.0.0'
+      pipeline-context: 'Middleware execution context'
+
+  ICQRSMiddleware:
+    description: 'Interface for CQRS middleware components in the execution pipeline'
+    business-context: 'Standard middleware contract enabling composable CQRS pipeline components for logging, validation, caching, and other cross-cutting concerns'
+
+    formats:
+      jsdoc:
+        description: 'CQRS middleware interface for pipeline components'
+      cli:
+        description: |
+          ## ICQRSMiddleware Interface
+
+          Middleware contract providing:
+          - **Pipeline Integration**: Standard interface for middleware chain
+          - **Async Operations**: Promise-based execution for async handlers
+          - **Context Passing**: Rich context information for middleware logic
+          - **Next Chain**: Continuation pattern for pipeline execution
+
+    methods:
+      handle:
+        description: 'Executes middleware logic within the CQRS pipeline'
+        business-context: 'Core middleware execution method enabling cross-cutting concerns like logging, validation, and performance monitoring'
+
+        parameters:
+          - name: 'context'
+            type: 'ExecutionContext'
+            description: 'Execution context containing operation and handler information'
+          - name: 'next'
+            type: '() => Promise<unknown>'
+            description: 'Continuation function to proceed to next middleware or handler'
+
+        returns:
+          type: 'Promise<unknown>'
+          description: 'Result of the operation after middleware processing'
+
+    custom-tags:
+      since: '1.0.0'
+      middleware-interface: 'Standard CQRS middleware contract'
+
+# === CLASSES ===
+classes:
+  EnhancedLoggingMiddleware:
+    # Class Documentation
+    class-doc:
+      description: 'Production-ready CQRS logging middleware providing comprehensive operation monitoring, performance tracking, and error logging'
+      business-context: 'Enterprise middleware component for CQRS pipelines offering automatic operation logging, execution timing, payload handling, and comprehensive error tracking with configurable security features'
+
+      formats:
+        jsdoc:
+          description: 'Enterprise CQRS logging middleware with performance monitoring'
+        cli:
+          description: |
+            ## EnhancedLoggingMiddleware - Enterprise CQRS Pipeline Logging
+
+            Production middleware providing:
+            - **Automatic Operation Logging**: Entry and exit logging for all CQRS operations
+            - **Performance Monitoring**: Precise execution timing with millisecond accuracy
+            - **Error Handling**: Comprehensive error logging with context preservation
+            - **Security Controls**: Configurable payload logging for sensitive operations
+            - **Handler Identification**: Automatic detection of command/query handlers
+            - **Pipeline Integration**: Seamless integration with middleware chains
+
+      custom-tags:
+        since: '1.0.0'
+        middleware-type: 'CQRS pipeline logging middleware'
+
+    methods:
+      constructor:
+        description: 'Creates enhanced logging middleware with configurable options'
+        business-context: 'Initializes middleware with enterprise logging configuration including security settings and performance monitoring options'
+
+        parameters:
+          - name: 'options'
+            type: 'CQRSMiddlewareOptions'
+            description: 'Optional middleware configuration'
+            optional: true
+            default: '{}'
+
+        examples:
+          - id: 'basic-middleware'
+            code: |
+              // Basic logging middleware with defaults
+              const loggingMiddleware = new EnhancedLoggingMiddleware();
+
+              // Registers in CQRS pipeline
+              commandBus.use(loggingMiddleware);
+              queryBus.use(loggingMiddleware);
+
+          - id: 'production-middleware'
+            code: |
+              // Production configuration with security controls
+              const productionMiddleware = new EnhancedLoggingMiddleware({
+                includePayload: false,  // Security: don't log sensitive payloads
+                logLevel: 'info',
+                logger: Logger.forContext('CQRSPipeline')
+              });
+
+          - id: 'development-middleware'
+            code: |
+              // Development configuration with detailed logging
+              const devMiddleware = new EnhancedLoggingMiddleware({
+                includePayload: true,   // Full debugging information
+                logLevel: 'debug',
+                logger: Logger.forContext('CQRSDevelopment')
+              });
+
+      handle:
+        description: 'Executes logging middleware within CQRS pipeline with comprehensive operation monitoring'
+        business-context: 'Core middleware execution providing entry/exit logging, performance timing, error handling, and operation correlation for enterprise CQRS monitoring'
+
+        parameters:
+          - name: 'context'
+            type: 'ExecutionContext'
+            description: 'CQRS execution context containing operation and handler details'
+          - name: 'next'
+            type: '() => Promise<unknown>'
+            description: 'Pipeline continuation function to next middleware or handler'
+
+        returns:
+          type: 'Promise<unknown>'
+          description: 'Operation result after logging and middleware processing'
+
+        examples:
+          - id: 'middleware-execution-flow'
+            code: |
+              // Middleware automatically logs:
+              // 1. Entry: "[Command] Executing CreateOrderCommand"
+              // 2. Success: "[Command] CreateOrderCommand completed {'duration':'45.23ms','success':true}"
+              // 3. Error: "[Command] CreateOrderCommand failed {'duration':'12.34ms','success':false}"
+
+              const result = await middleware.handle({
+                commandOrQuery: new CreateOrderCommand(data),
+                type: 'Command',
+                handler: createOrderHandler
+              }, async () => {
+                return await createOrderHandler.execute(command);
+              });
+
+          - id: 'performance-monitoring'
+            code: |
+              // Performance monitoring with timing
+              const startTime = Date.now();
+
+              try {
+                const result = await middleware.handle(context, next);
+                // Logs: "[Query] GetOrderQuery completed {'duration':'123.45ms','success':true}"
+                return result;
+              } catch (error) {
+                // Logs: "[Query] GetOrderQuery failed {'duration':'67.89ms','success':false}"
+                throw error;
+              }
+
+# === FUNCTIONS ===
+functions:
+  createCQRSMiddleware:
+    description: 'Factory function for creating enhanced CQRS logging middleware instances'
+    business-context: 'Convenience factory enabling simplified middleware creation with consistent configuration for CQRS pipeline integration'
+
+    parameters:
+      - name: 'options'
+        type: 'CQRSMiddlewareOptions'
+        description: 'Optional middleware configuration'
+        optional: true
+
+    returns:
+      type: 'EnhancedLoggingMiddleware'
+      description: 'Configured logging middleware instance ready for pipeline integration'
+
+    examples:
+      - id: 'factory-creation'
+        code: |
+          import { createCQRSMiddleware } from '@vytches/ddd-logging';
+
+          // Simple factory usage
+          const middleware = createCQRSMiddleware({
+            logLevel: 'info',
+            includePayload: false
+          });
+
+          // Register with command and query buses
+          commandBus.use(middleware);
+          queryBus.use(middleware);
+
+      - id: 'pipeline-setup'
+        code: |
+          // Complete CQRS pipeline setup with logging
+          const loggingMiddleware = createCQRSMiddleware({
+            logger: Logger.forContext('CQRSPipeline'),
+            logLevel: 'debug'
+          });
+
+          const validationMiddleware = new ValidationMiddleware();
+          const cachingMiddleware = new CachingMiddleware();
+
+          // Pipeline: Logging → Validation → Caching → Handler
+          commandBus.use(loggingMiddleware);
+          commandBus.use(validationMiddleware);
+          commandBus.use(cachingMiddleware);
+
+# === EXAMPLES ===
+examples:
+  enterprise-cqrs-pipeline:
+    description: 'Complete enterprise CQRS pipeline with comprehensive logging'
+    code: |
+      import { 
+        createCQRSMiddleware, 
+        EnhancedLoggingMiddleware 
+      } from '@vytches/ddd-logging';
+      import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+
+      // Enterprise logging setup
+      const enterpriseLogger = Logger.forContext('EnterpriseCQRS')
+        .withMetadata({
+          environment: process.env.NODE_ENV,
+          service: 'order-management',
+          version: '2.1.0'
+        });
+
+      // Production middleware configuration
+      const loggingMiddleware = createCQRSMiddleware({
+        logger: enterpriseLogger,
+        includePayload: false,     // Security: no sensitive data in logs
+        logLevel: 'info'
+      });
+
+      // Configure command bus pipeline
+      const commandBus = new CommandBus();
+      commandBus.use(loggingMiddleware);
+      commandBus.use(new ValidationMiddleware());
+      commandBus.use(new AuthorizationMiddleware());
+
+      // Configure query bus pipeline
+      const queryBus = new QueryBus();
+      queryBus.use(loggingMiddleware);
+      queryBus.use(new CachingMiddleware());
+      queryBus.use(new PerformanceMiddleware());
+
+      // Execute command with comprehensive logging
+      const command = new CreateOrderCommand({
+        customerId: 'cust-123',
+        items: orderItems,
+        metadata: {
+          correlationId: 'req-456',
+          userId: 'user-789'
+        }
+      });
+
+      await commandBus.execute(command);
+
+      // Automatic logging output:
+      // INFO [EnterpriseCQRS] [Command] Executing CreateOrderCommand {"operation":"Command","operationName":"CreateOrderCommand","handler":"CreateOrderCommandHandler"}
+      // INFO [EnterpriseCQRS] [Command] CreateOrderCommand completed {"operation":"Command","operationName":"CreateOrderCommand","handler":"CreateOrderCommandHandler","duration":"156.78ms","success":true}
+
+  conditional-logging-middleware:
+    description: 'Environment-aware middleware configuration with different logging strategies'
+    code: |
+      // Environment-specific middleware factory
+      function createEnvironmentAwareCQRSMiddleware(): EnhancedLoggingMiddleware {
+        const isProduction = process.env.NODE_ENV === 'production';
+        const isDevelopment = process.env.NODE_ENV === 'development';
+        const isTest = process.env.NODE_ENV === 'test';
+        
+        if (isProduction) {
+          return createCQRSMiddleware({
+            includePayload: false,    // Security: no sensitive data
+            logLevel: 'info',
+            logger: Logger.forContext('ProductionCQRS')
+              .withMetadata({ environment: 'production' })
+          });
+        }
+        
+        if (isDevelopment) {
+          return createCQRSMiddleware({
+            includePayload: true,     // Full debugging info
+            logLevel: 'debug',
+            logger: Logger.forContext('DevelopmentCQRS')
+              .withMetadata({ environment: 'development', debug: true })
+          });
+        }
+        
+        if (isTest) {
+          return createCQRSMiddleware({
+            includePayload: false,    // Minimize test noise
+            logLevel: 'error',        // Only log failures
+            logger: Logger.forContext('TestCQRS')
+          });
+        }
+        
+        // Default configuration
+        return createCQRSMiddleware();
+      }
+
+      const middleware = createEnvironmentAwareCQRSMiddleware();
+
+  performance-monitoring-integration:
+    description: 'CQRS pipeline with performance monitoring and alerting'
+    code: |
+      class PerformanceAwareCQRSMiddleware extends EnhancedLoggingMiddleware {
+        private readonly performanceThresholds = {
+          command: 1000,  // 1 second
+          query: 500      // 500ms
+        };
+        
+        async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+          const startTime = performance.now();
+          
+          try {
+            const result = await super.handle(context, next);
+            const duration = performance.now() - startTime;
+            
+            // Performance alerting
+            const threshold = this.performanceThresholds[context.type.toLowerCase()];
+            if (duration > threshold) {
+              this.logger.warn(`Slow ${context.type} operation detected`, {
+                operation: context.type,
+                operationName: (context.commandOrQuery as any).constructor.name,
+                duration: `${duration.toFixed(2)}ms`,
+                threshold: `${threshold}ms`,
+                performanceAlert: true
+              });
+            }
+            
+            return result;
+          } catch (error) {
+            const duration = performance.now() - startTime;
+            
+            // Error performance tracking
+            this.logger.error(`${context.type} operation failed`, error as Error, {
+              operation: context.type,
+              operationName: (context.commandOrQuery as any).constructor.name,
+              duration: `${duration.toFixed(2)}ms`,
+              errorTracking: true
+            });
+            
+            throw error;
+          }
+        }
+      }
+
+      const performanceMiddleware = new PerformanceAwareCQRSMiddleware({
+        logger: Logger.forContext('PerformanceCQRS'),
+        logLevel: 'info'
+      });
+
+  correlation-tracking-integration:
+    description: 'CQRS middleware with distributed correlation tracking'
+    code: |
+      class CorrelationAwareCQRSMiddleware extends EnhancedLoggingMiddleware {
+        async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+          // Extract correlation information from operation metadata
+          const operation = context.commandOrQuery as any;
+          const metadata = operation.metadata || {};
+          
+          // Create correlation-aware logger
+          const correlatedLogger = this.logger
+            .withCorrelationId(metadata.correlationId)
+            .withUserId(metadata.userId)
+            .withTenantId(metadata.tenantId)
+            .withRequestId(metadata.requestId);
+          
+          // Temporarily replace logger for this execution
+          const originalLogger = this.logger;
+          (this as any).logger = correlatedLogger;
+          
+          try {
+            const result = await super.handle(context, next);
+            return result;
+          } finally {
+            // Restore original logger
+            (this as any).logger = originalLogger;
+          }
+        }
+      }
+
+      const correlationMiddleware = new CorrelationAwareCQRSMiddleware({
+        logLevel: 'info',
+        includePayload: false
+      });
+
+      // Usage with correlated operations
+      const command = new ProcessPaymentCommand({
+        orderId: 'order-123',
+        amount: 99.99,
+        metadata: {
+          correlationId: 'req-abc-123',
+          userId: 'user-456',
+          tenantId: 'tenant-789',
+          requestId: 'req-def-456'
+        }
+      });
+
+      await commandBus.execute(command);
+
+      // Output with full correlation context:
+      // INFO [EnterpriseCQRS] (req-abc-123) [Command] Executing ProcessPaymentCommand {"userId":"user-456","tenantId":"tenant-789","requestId":"req-def-456"}
+      // INFO [EnterpriseCQRS] (req-abc-123) [Command] ProcessPaymentCommand completed {"duration":"234.56ms","success":true}

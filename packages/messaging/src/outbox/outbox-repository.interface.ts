@@ -1,23 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IOutboxMessage, MessageStatus, MessagePriority } from './outbox-interfaces';
+import type { IOutboxMessage, MessagePriority, MessageStatus } from './outbox-interfaces';
 
-/**
- * @llm-summary OutboxRepository class for outbox repository operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * OutboxRepository class implementing integration layer component for outbox repository operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IOutboxRepository();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class IOutboxRepository {
   /**
    * Saves a message to the outbox

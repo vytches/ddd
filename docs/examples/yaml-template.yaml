@@ -10,40 +10,41 @@
 # This file provides base metadata for ALL packages and classes
 
 # === GLOBAL DEFAULTS ===
-author: "VytchesDDD Team"
-since: "1.0.0"
-license: "MIT"
-documentation-url: "https://docs.vytches.com/ddd"
-version: "0.5.0"
+author: 'VytchesDDD Team'
+since: '1.0.0'
+license: 'MIT'
+documentation-url: 'https://docs.vytches.com/ddd'
+version: '0.5.0'
 
 # === HIERARCHICAL STRATEGY ===
 hierarchy:
-  strategy: "merge"  # merge | replace | append
-  scope: "global"    # global | package | file | class | method
+  strategy: 'merge' # merge | replace | append
+  scope: 'global' # global | package | file | class | method
 
 # === GLOBAL JSDOC PLACEMENT CONFIGURATION ===
 jsdoc:
-  placement-strategy: "separate"        # separate | constructor-only | class-only | smart
-  class-documentation: "enabled"       # enabled | disabled | auto
-  constructor-documentation: "enabled" # enabled | disabled | auto
-  content-strategy: "distinct"         # distinct | shared | primary-secondary
-  
+  placement-strategy: 'separate' # separate | constructor-only | class-only | smart
+  class-documentation: 'enabled' # enabled | disabled | auto
+  constructor-documentation: 'enabled' # enabled | disabled | auto
+  content-strategy: 'distinct' # distinct | shared | primary-secondary
+
   class-defaults:
-    description: "VytchesDDD implementation following enterprise DDD patterns"
-    business-context: "Part of the VytchesDDD library for domain-driven design"
-    author: "VytchesDDD Team"
-    since: "1.0.0"
+    description: 'VytchesDDD implementation following enterprise DDD patterns'
+    business-context: 'Part of the VytchesDDD library for domain-driven design'
+    author: 'VytchesDDD Team'
+    since: '1.0.0'
 
 # === FORMAT-SPECIFIC GLOBAL SETTINGS ===
 formats:
   jsdoc:
-    author: "VytchesDDD Team"
-    license: "MIT"
+    author: 'VytchesDDD Team'
+    license: 'MIT'
   cli:
     detailed-description: |
       ## VytchesDDD Library
       Enterprise-grade Domain-Driven Design patterns
 
+---
 # =============================================================================
 # PACKAGE SETTINGS TEMPLATE (domain/[package]/.md-settings.yaml)
 # =============================================================================
@@ -51,37 +52,38 @@ formats:
 # Inherits from global-settings.yaml and adds package-specific metadata
 
 # === PACKAGE IDENTITY ===
-package-name: "aggregates"
-display-name: "DDD Aggregates"
-description: "Core aggregate patterns for domain modeling"
-business-context: "Essential for maintaining business invariants"
+package-name: 'aggregates'
+display-name: 'DDD Aggregates'
+description: 'Core aggregate patterns for domain modeling'
+business-context: 'Essential for maintaining business invariants'
 
 # === HIERARCHICAL STRATEGY ===
 hierarchy:
-  strategy: "merge"
-  scope: "package"
+  strategy: 'merge'
+  scope: 'package'
 
 # === PACKAGE-SPECIFIC METADATA ===
-domain: "domain-modeling"
-complexity: "intermediate"
+domain: 'domain-modeling'
+complexity: 'intermediate'
 patterns:
-  - "aggregate-pattern"
-  - "event-sourcing"
+  - 'aggregate-pattern'
+  - 'event-sourcing'
 
 dependencies:
-  - "@vytches/ddd-contracts"
-  - "@vytches/ddd-domain-primitives"
+  - '@vytches/ddd-contracts'
+  - '@vytches/ddd-domain-primitives'
 
 # === FORMAT-SPECIFIC OVERRIDES ===
 formats:
   jsdoc:
-    description: "Core aggregate patterns with event sourcing"
+    description: 'Core aggregate patterns with event sourcing'
   cli:
     description: |
       ## DDD Aggregates Package
-      
+
       Core aggregate patterns implementing DDD principles
 
+---
 # =============================================================================
 # CLASS/FILE METADATA TEMPLATE (domain/[package]/[class-name].yaml)
 # =============================================================================
@@ -89,76 +91,76 @@ formats:
 # Documentation ONLY for elements defined in [class-name].d.ts file
 
 # === FILE METADATA ===
-file-name: "aggregate-root"
-title: "AggregateRoot - Enterprise Aggregate Root Implementation"
-description: "Core aggregate root class with event sourcing capabilities"
-business-context: "Main aggregate implementation following DDD principles"
+file-name: 'aggregate-root'
+title: 'AggregateRoot - Enterprise Aggregate Root Implementation'
+description: 'Core aggregate root class with event sourcing capabilities'
+business-context: 'Main aggregate implementation following DDD principles'
 
 # === GLOBAL HIERARCHY ===
 hierarchy:
-  strategy: "merge"
-  scope: "file"
+  strategy: 'merge'
+  scope: 'file'
 
 # === CLASSES ===
 classes:
   AggregateRoot:
     # === CLASS-LEVEL JSDOC CONFIGURATION ===
     jsdoc:
-      placement-strategy: "separate"
-      class-documentation: "enabled"
-      constructor-documentation: "enabled"
-      content-strategy: "distinct"
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+      constructor-documentation: 'enabled'
+      content-strategy: 'distinct'
 
     # === CLASS-LEVEL DOCUMENTATION ===
     class-doc:
-      description: "Enterprise aggregate root implementation"
-      business-context: "Core building block for domain aggregates"
-      
+      description: 'Enterprise aggregate root implementation'
+      business-context: 'Core building block for domain aggregates'
+
       # Format-specific overrides
       formats:
         jsdoc:
-          description: "Enterprise aggregate root with event sourcing"
+          description: 'Enterprise aggregate root with event sourcing'
         cli:
           description: |
             ## AggregateRoot - Enterprise Aggregate Pattern
-            
+
             Complete implementation of the Aggregate Root pattern
 
       hierarchy:
-        strategy: "append"
-        scope: "class-doc"
+        strategy: 'append'
+        scope: 'class-doc'
 
       custom-tags:
-        since: "1.0.0"
-        capabilities: "Supports extensible capability system"
+        since: '1.0.0'
+        capabilities: 'Supports extensible capability system'
 
     # === CLASS HIERARCHY ===
     hierarchy:
-      strategy: "merge"
-      scope: "class"
+      strategy: 'merge'
+      scope: 'class'
 
     # === METHODS ===
     methods:
       # === CONSTRUCTOR ===
       constructor:
-        description: "Creates new aggregate instance"
-        business-context: "Initializes aggregate for domain operations"
-        
+        description: 'Creates new aggregate instance'
+        business-context: 'Initializes aggregate for domain operations'
+
         hierarchy:
-          strategy: "replace"
-          scope: "method"
+          strategy: 'replace'
+          scope: 'method'
 
         parameters:
-          - name: "params"
-            type: "IAggregateConstructorParams<TId>"
-            description: "Aggregate construction parameters"
+          - name: 'params'
+            type: 'IAggregateConstructorParams<TId>'
+            description: 'Aggregate construction parameters'
             optional: false
 
         custom-tags:
-          sinceVersion: "0.0.1"
+          sinceVersion: '0.0.1'
 
         examples:
-          - id: "basic-construction"
+          - id: 'basic-construction'
             code: |
               const aggregate = new AggregateRoot({
                 id: EntityId.fromText('order-123'),
@@ -168,65 +170,65 @@ classes:
         # Format-specific overrides
         formats:
           jsdoc:
-            business-context: "Initializes new aggregate for business operations"
+            business-context: 'Initializes new aggregate for business operations'
           cli:
             description: |
               ### Constructor - New Aggregate Creation
-              
+
               Creates a new aggregate instance
 
       # === REGULAR METHOD ===
       commit:
-        description: "Commits pending events and increments version"
-        business-context: "Finalizes business transaction"
+        description: 'Commits pending events and increments version'
+        business-context: 'Finalizes business transaction'
 
         returns:
-          type: "void"
-          description: "Clears pending events and increments version"
+          type: 'void'
+          description: 'Clears pending events and increments version'
 
         custom-tags:
-          warning: "Clears pending events after commit"
+          warning: 'Clears pending events after commit'
           event-sourcing: "Events become part of aggregate's event history"
-          concurrency: "Version is incremented for optimistic locking"
+          concurrency: 'Version is incremented for optimistic locking'
 
         examples:
-          - id: "basic-commit"
+          - id: 'basic-commit'
             code: |
               aggregate.apply('OrderCreated', orderData);
               aggregate.commit();
 
       # === METHOD WITH PARAMETERS ===
       apply:
-        description: "Applies domain event"
-        business-context: "Records business changes as events"
+        description: 'Applies domain event'
+        business-context: 'Records business changes as events'
 
         parameters:
-          - name: "eventTypeOrEvent"
-            type: "string | IExtendedDomainEvent<P>"
-            description: "Event type or complete event"
+          - name: 'eventTypeOrEvent'
+            type: 'string | IExtendedDomainEvent<P>'
+            description: 'Event type or complete event'
             optional: false
-          - name: "payload"
-            type: "P"
-            description: "Event payload"
+          - name: 'payload'
+            type: 'P'
+            description: 'Event payload'
             optional: true
 
         returns:
-          type: "void"
-          description: "Modifies aggregate state"
+          type: 'void'
+          description: 'Modifies aggregate state'
 
         custom-tags:
-          visibility: "protected"
-          generics: "P - Event payload type"
+          visibility: 'protected'
+          generics: 'P - Event payload type'
 
 # === FILE-LEVEL ELEMENTS ===
 types:
   ABC:
-    description: "Test type for aggregate"
-    business-context: "Used for testing"
+    description: 'Test type for aggregate'
+    business-context: 'Used for testing'
     custom-tags:
-      since: "1.0.0"
+      since: '1.0.0'
     examples:
-      - id: "basic-usage"
+      - id: 'basic-usage'
         code: |
           const testData: ABC = {
             id: 'test-123',
@@ -235,49 +237,49 @@ types:
 
 interfaces:
   ITest:
-    description: "Test interface"
-    business-context: "Provides contract for test operations"
+    description: 'Test interface'
+    business-context: 'Provides contract for test operations'
     properties:
-      - name: "name"
-        type: "string"
-        description: "Name identifier"
-      - name: "execute"
-        type: "() => void"
-        description: "Execution method"
+      - name: 'name'
+        type: 'string'
+        description: 'Name identifier'
+      - name: 'execute'
+        type: '() => void'
+        description: 'Execution method'
 
 enums:
   IDtype:
-    description: "Identifier types enumeration"
-    business-context: "Valid identifier formats"
+    description: 'Identifier types enumeration'
+    business-context: 'Valid identifier formats'
     values:
-      - name: "UUID"
+      - name: 'UUID'
         value: "'uuid'"
-        description: "UUID format"
-      - name: "TEXT"
+        description: 'UUID format'
+      - name: 'TEXT'
         value: "'text'"
-        description: "Text format"
+        description: 'Text format'
 
 functions:
   isIdType:
-    description: "Type guard for IDtype"
-    business-context: "Validates identifier types"
+    description: 'Type guard for IDtype'
+    business-context: 'Validates identifier types'
     parameters:
-      - name: "value"
-        type: "string"
-        description: "Value to check"
+      - name: 'value'
+        type: 'string'
+        description: 'Value to check'
     returns:
-      type: "value is keyof typeof IDtype"
-      description: "Type predicate"
+      type: 'value is keyof typeof IDtype'
+      description: 'Type predicate'
 
 # === IMPORTED REFERENCES (Optional) ===
 imported:
   interfaces:
-    - name: "IAggregateRoot"
-      from: "../aggregate-interfaces"
-      description: "Contract for aggregate roots"
+    - name: 'IAggregateRoot'
+      from: '../aggregate-interfaces'
+      description: 'Contract for aggregate roots'
 
 # === ENVIRONMENT-SPECIFIC SETTINGS ===
 environment:
   VYTCHES_LOGGER:
     custom-tags:
-      logging: "Structured logging enabled"
+      logging: 'Structured logging enabled'

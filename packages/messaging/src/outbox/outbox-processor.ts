@@ -1,8 +1,8 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
-import { safeRun } from '@vytches/ddd-utils';
 import { Logger } from '@vytches/ddd-logging';
+import { safeRun } from '@vytches/ddd-utils';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
-import { MessageStatus, MessagePriority } from './outbox-interfaces';
+import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
 export interface OutboxProcessorOptions {
@@ -20,23 +20,6 @@ export interface OutboxProcessorOptions {
   enableLogging?: boolean;
 }
 
-/**
- * @llm-summary OutboxProcessor class for outbox processor operations
- * @llm-domain Integration
- * @llm-complexity Complex
- *
- * @description
- * OutboxProcessor class implementing integration layer component for outbox processor operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new OutboxProcessor();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class OutboxProcessor {
   private readonly repository: IOutboxRepository;
   private readonly options: Required<OutboxProcessorOptions>;
@@ -258,23 +241,6 @@ export class OutboxProcessor {
   }
 }
 
-/**
- * @llm-summary EventBusOutboxHandler class for event bus outbox handler operations
- * @llm-domain Integration
- * @llm-complexity Complex
- *
- * @description
- * EventBusOutboxHandler class implementing integration layer component for event bus outbox handler operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventBusOutboxHandler();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventBusOutboxHandler implements IOutboxMessageHandler {
   constructor(private readonly eventBus: IEventBus) {}
 

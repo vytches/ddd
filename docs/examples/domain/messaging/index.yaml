@@ -1,0 +1,401 @@
+# Messaging Package Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'VytchesDDD Messaging - Complete Package Exports'
+description: 'Main entry point for messaging package with outbox and saga patterns'
+business-context: 'Provides enterprise-grade messaging patterns for reliable distributed systems'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === OUTBOX PATTERN EXPORTS ===
+outbox-exports:
+  description: 'Complete outbox pattern implementation for reliable message delivery'
+  business-context: 'Ensures message delivery in distributed systems'
+
+  types:
+    - name: 'IOutboxMessage'
+      description: 'Core outbox message interface'
+
+    - name: 'OutboxMessageOptions'
+      description: 'Options for message creation'
+
+    - name: 'IOutboxMessageHandler'
+      description: 'Handler interface for message processing'
+
+    - name: 'OutboxMiddleware'
+      description: 'Middleware function type for processing pipeline'
+
+    - name: 'OutboxProcessorOptions'
+      description: 'Configuration for message processor'
+
+    - name: 'OutboxServiceOptions'
+      description: 'Configuration for outbox service'
+
+  enums:
+    - name: 'MessageStatus'
+      description: 'Message processing status enumeration'
+      values: ['PENDING', 'PROCESSING', 'PROCESSED', 'FAILED']
+
+    - name: 'MessagePriority'
+      description: 'Message priority levels'
+      values: ['LOW', 'NORMAL', 'HIGH', 'CRITICAL']
+
+  classes:
+    - name: 'IOutboxRepository'
+      description: 'Abstract repository for message persistence'
+
+    - name: 'OutboxMessageFactory'
+      description: 'Factory for creating outbox messages'
+
+    - name: 'OutboxProcessor'
+      description: 'Message processing engine with retry logic'
+
+    - name: 'EventBusOutboxHandler'
+      description: 'Handler for publishing messages to event bus'
+
+    - name: 'OutboxService'
+      description: 'High-level service for outbox operations'
+
+# === SAGA PATTERN EXPORTS ===
+saga-exports:
+  description: 'Complete saga pattern implementation for long-running business processes'
+  business-context: 'Manages distributed transactions with compensation support'
+
+  interfaces:
+    - name: 'ISaga'
+      description: 'Core saga interface for event handling'
+
+    - name: 'ISagaState'
+      description: 'Saga state container with versioning'
+
+    - name: 'ISagaExecutionContext'
+      description: 'Execution context with correlation data'
+
+    - name: 'ISagaActionResult'
+      description: 'Result of saga action execution'
+
+    - name: 'ISagaStep'
+      description: 'Individual saga step with compensation'
+
+    - name: 'ISagaDefinition'
+      description: 'Saga type definition and factory'
+
+    - name: 'ISagaFactory'
+      description: 'Factory for creating saga instances'
+
+    - name: 'ISagaRepository'
+      description: 'Repository for saga persistence'
+
+    - name: 'ISagaOrchestrator'
+      description: 'Orchestrator for managing sagas'
+
+    - name: 'ISagaMiddleware'
+      description: 'Middleware for saga processing'
+
+  enums:
+    - name: 'SagaStatus'
+      description: 'Saga lifecycle status'
+      values:
+        [
+          'STARTED',
+          'EXECUTING',
+          'WAITING',
+          'COMPLETED',
+          'FAILED',
+          'COMPENSATING',
+          'COMPENSATED',
+          'CANCELLED',
+          'TIMED_OUT',
+        ]
+
+  base-classes:
+    - name: 'BaseSaga'
+      description: 'Abstract base implementation for sagas'
+
+    - name: 'SagaStep'
+      description: 'Abstract base for saga steps'
+
+    - name: 'ConcreteSagaStep'
+      description: 'Concrete step implementation'
+
+    - name: 'SagaDefinition'
+      description: 'Saga definition implementation'
+
+  infrastructure:
+    - name: 'InMemorySagaRepository'
+      description: 'In-memory saga persistence'
+
+    - name: 'SagaOrchestrator'
+      description: 'Main saga orchestration engine'
+
+  decorators:
+    - name: 'Saga'
+      description: 'Class decorator for saga definition'
+
+    - name: 'SagaEventHandler'
+      description: 'Method decorator for event handlers'
+
+    - name: 'StartSaga'
+      description: 'Method decorator for saga start handlers'
+
+    - name: 'EndSaga'
+      description: 'Method decorator for saga completion'
+
+    - name: 'CompensationHandler'
+      description: 'Method decorator for compensation logic'
+
+  discovery:
+    - name: 'SagaDiscoveryPlugin'
+      description: 'Auto-discovery plugin for DI integration'
+
+    - name: 'sagaDiscoveryPlugin'
+      description: 'Plugin instance for easy registration'
+
+  middleware:
+    - name: 'BaseSagaMiddleware'
+      description: 'Base class for saga middleware'
+
+    - name: 'PerformanceMonitoringMiddleware'
+      description: 'Performance monitoring middleware'
+
+    - name: 'RetryMiddleware'
+      description: 'Retry logic middleware'
+
+    - name: 'CircuitBreakerMiddleware'
+      description: 'Circuit breaker middleware'
+
+    - name: 'SecurityMiddleware'
+      description: 'Security validation middleware'
+
+    - name: 'SagaMiddlewarePipeline'
+      description: 'Middleware pipeline orchestrator'
+
+  errors:
+    - name: 'SagaError'
+      description: 'Abstract base for saga errors'
+
+    - name: 'SagaExecutionError'
+      description: 'Step execution failure error'
+
+    - name: 'SagaStepError'
+      description: 'Step-specific error'
+
+    - name: 'SagaConfigurationError'
+      description: 'Configuration validation error'
+
+    - name: 'SagaEventProcessingError'
+      description: 'Event processing error'
+
+    - name: 'SagaCompensationError'
+      description: 'Compensation execution error'
+
+    - name: 'SagaDiscoveryError'
+      description: 'Discovery process error'
+
+    - name: 'SagaOrchestrationError'
+      description: 'Orchestration operation error'
+
+    - name: 'SagaInstanceLimitExceededError'
+      description: 'Instance limit violation error'
+
+    - name: 'SagaDefinitionNotFoundError'
+      description: 'Missing saga definition error'
+
+# === DECORATOR OPTIONS ===
+decorator-options:
+  description: 'Configuration options for saga decorators'
+  business-context: 'Provides flexible configuration for saga behavior'
+
+  types:
+    - name: 'SagaDecoratorOptions'
+      description: 'Options for @Saga decorator'
+
+    - name: 'SagaEventHandlerOptions'
+      description: 'Options for @SagaEventHandler decorator'
+
+    - name: 'CompensationHandlerOptions'
+      description: 'Options for @CompensationHandler decorator'
+
+    - name: 'StartSagaOptions'
+      description: 'Options for @StartSaga decorator'
+
+    - name: 'EndSagaOptions'
+      description: 'Options for @EndSaga decorator'
+
+    - name: 'TimeoutHandlerOptions'
+      description: 'Options for timeout handling'
+
+    - name: 'SagaStepOptions'
+      description: 'Options for saga step configuration'
+
+    - name: 'SagaCorrelationOptions'
+      description: 'Options for correlation handling'
+
+    - name: 'SagaMiddlewareOptions'
+      description: 'Options for middleware configuration'
+
+    - name: 'SagaValidationOptions'
+      description: 'Options for validation configuration'
+
+# === METADATA AND REFLECTION ===
+metadata-system:
+  description: 'Metadata system for saga discovery and configuration'
+  business-context: 'Enables decorator-based saga configuration and auto-discovery'
+
+  functions:
+    - name: 'getSagaMetadata'
+      description: 'Retrieves saga metadata from class'
+
+    - name: 'getSagaType'
+      description: 'Gets saga type identifier'
+
+    - name: 'isSagaClass'
+      description: 'Checks if class is a saga'
+
+    - name: 'getAllSagaTypes'
+      description: 'Gets all registered saga types'
+
+    - name: 'getEventHandlerMetadata'
+      description: 'Retrieves event handler metadata'
+
+    - name: 'getEventHandlerMethods'
+      description: 'Gets event handler methods from class'
+
+    - name: 'isEventHandlerMethod'
+      description: 'Checks if method is event handler'
+
+    - name: 'getCompensationHandlerMetadata'
+      description: 'Retrieves compensation handler metadata'
+
+    - name: 'getCompensationHandlerMethods'
+      description: 'Gets compensation methods from class'
+
+    - name: 'isCompensationHandlerMethod'
+      description: 'Checks if method is compensation handler'
+
+    - name: 'getCompensationHandlerForStep'
+      description: 'Gets compensation handler for specific step'
+
+    - name: 'getOrderedCompensationHandlers'
+      description: 'Gets compensation handlers in execution order'
+
+  constants:
+    - name: 'SAGA_METADATA_KEY'
+      description: 'Metadata key for saga information'
+
+    - name: 'SAGA_TYPE_METADATA_KEY'
+      description: 'Metadata key for saga type'
+
+# === REPOSITORY INTERFACES ===
+repository-interfaces:
+  description: 'Advanced repository interfaces for saga persistence'
+  business-context: 'Supports complex saga persistence scenarios'
+
+  types:
+    - name: 'ISagaQuery'
+      description: 'Query interface for saga searching'
+
+    - name: 'ISagaQueryResult'
+      description: 'Query result with pagination'
+
+    - name: 'ISagaRepositoryConfig'
+      description: 'Repository configuration options'
+
+    - name: 'ISagaRepositoryFactory'
+      description: 'Factory for creating repositories'
+
+    - name: 'ISagaProcessingResult'
+      description: 'Result of saga processing operation'
+
+    - name: 'ISagaOrchestratorConfig'
+      description: 'Orchestrator configuration'
+
+    - name: 'ISagaOrchestratorStatistics'
+      description: 'Orchestrator runtime statistics'
+
+    - name: 'ISagaMonitor'
+      description: 'Monitoring interface for sagas'
+
+    - name: 'ISagaMetricsFilter'
+      description: 'Filter for saga metrics'
+
+    - name: 'ISagaMetrics'
+      description: 'Saga performance metrics'
+
+# === ADVANCED FEATURES ===
+advanced-features:
+  description: 'Enterprise features for production saga systems'
+  business-context: 'Production-ready features for scalable saga implementations'
+
+  types:
+    - name: 'SagaMiddlewareContext'
+      description: 'Context for middleware execution'
+
+    - name: 'SagaMetadata'
+      description: 'Runtime saga metadata'
+
+    - name: 'SagaDiscoveryResult'
+      description: 'Result of saga discovery process'
+
+  functions:
+    - name: 'isSagaMetadata'
+      description: 'Type guard for saga metadata'
+
+# === INTEGRATION POINTS ===
+integration-points:
+  description: 'Integration with other VytchesDDD packages'
+  business-context: 'Seamless integration with DDD infrastructure'
+
+  dependencies:
+    - package: '@vytches/ddd-contracts'
+      types: ['IExtendedDomainEvent', 'IEventBus']
+
+    - package: '@vytches/ddd-logging'
+      types: ['Logger']
+
+    - package: '@vytches/ddd-utils'
+      functions: ['safeRun', 'LibUtils']
+
+    - package: '@vytches/ddd-domain-primitives'
+      types: ['BaseError']
+
+# === USAGE PATTERNS ===
+usage-patterns:
+  description: 'Common usage patterns for messaging package'
+  business-context: 'Proven patterns for enterprise implementations'
+
+  outbox-patterns:
+    - name: 'Basic Message Publishing'
+      description: 'Simple reliable message delivery'
+
+    - name: 'Domain Event Integration'
+      description: 'Bridge domain events with outbox'
+
+    - name: 'Priority Processing'
+      description: 'Handle critical messages first'
+
+    - name: 'Scheduled Messages'
+      description: 'Time-based message delivery'
+
+    - name: 'Batch Operations'
+      description: 'Efficient bulk processing'
+
+  saga-patterns:
+    - name: 'Order Processing Saga'
+      description: 'Multi-step order fulfillment'
+
+    - name: 'Payment Processing Saga'
+      description: 'Distributed payment handling'
+
+    - name: 'User Registration Saga'
+      description: 'Multi-service user onboarding'
+
+    - name: 'Compensation Pattern'
+      description: 'Rollback failed transactions'
+
+    - name: 'Timeout Handling'
+      description: 'Handle long-running processes'

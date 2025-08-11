@@ -2,26 +2,9 @@ import type { ISpecification } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
 
 import { CompositeSpecification as Specification } from '../specifications/composite-specification';
-import { ValidationErrors, ValidationError } from '../validation-error';
+import { ValidationError, ValidationErrors } from '../validation-error';
 import { BusinessRuleValidator } from './business-rule-validator';
 
-/**
- * @llm-summary BusinessRuleValidatorExtension class for business rule validator extension operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BusinessRuleValidatorExtension class implementing domain pattern implementation for business rule validator extension operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BusinessRuleValidatorExtension();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class BusinessRuleValidatorExtension<T> {
   constructor(private validator: BusinessRuleValidator<T>) {}
 

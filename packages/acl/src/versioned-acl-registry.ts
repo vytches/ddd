@@ -6,25 +6,6 @@ import type { ExecuteOptions, IACLAdapter } from './acl.interfaces';
 import type { ACLRegistrationMetadata } from './base-acl-registry';
 import { BaseACLRegistry } from './base-acl-registry';
 
-/**
- * @llm-summary Contract for a c l version metadata functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * ACLVersionMetadata interface implementing integration layer component for a c l version metadata operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteACLVersionMetadata implements ACLVersionMetadata {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ACLVersionMetadata extends ACLRegistrationMetadata {
   version: string;
   isLatest: boolean;
@@ -33,23 +14,6 @@ export interface ACLVersionMetadata extends ACLRegistrationMetadata {
   compatibleWith?: string[];
 }
 
-/**
- * @llm-summary VersionedACLRegistry class for versioned a c l registry operations
- * @llm-domain Integration
- * @llm-complexity Simple
- *
- * @description
- * VersionedACLRegistry class implementing integration layer component for versioned a c l registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new VersionedACLRegistry();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class VersionedACLRegistry extends BaseACLRegistry {
   private versionedAdapters = new Map<string, Map<string, IACLAdapter<any, any>>>();
   private latestVersions = new Map<string, string>();
@@ -157,23 +121,6 @@ export class VersionedACLRegistry extends BaseACLRegistry {
   }
 }
 
-/**
- * @llm-summary VersionedACLAdapter class for versioned a c l adapter operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * VersionedACLAdapter class implementing integration layer component for versioned a c l adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new VersionedACLAdapter();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class VersionedACLAdapter<TDomain, TExternal, TResult = any> {
   constructor(
     private registry: VersionedACLRegistry,

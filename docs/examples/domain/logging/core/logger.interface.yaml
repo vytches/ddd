@@ -1,0 +1,351 @@
+# Logger Interfaces - Core Logging Contracts
+
+# === FILE METADATA ===
+file-name: 'logger.interface'
+title: 'Logger Interfaces - Core Logging Contracts'
+description: 'Core interfaces defining logging contracts for DDD applications'
+business-context: 'Establishes contracts for enterprise logging with DDD pattern integration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  Logger:
+    description: 'Main logger interface providing structured logging with DDD context support'
+    business-context: 'Core contract for enterprise logging with bounded context awareness and correlation tracking'
+
+    formats:
+      jsdoc:
+        description: 'Core logger interface with DDD context support'
+      cli:
+        description: |
+          ## Logger Interface
+
+          Main logging contract providing:
+          - **Context-aware logging**: Automatic bounded context and correlation tracking
+          - **Structured logging**: Rich metadata support with data masking
+          - **Hierarchical contexts**: Child loggers and context inheritance
+          - **Enterprise features**: User, tenant, and request tracking
+
+    properties:
+      - name: 'context'
+        type: 'LogContext'
+        description: 'Current logging context with bounded context, correlation, and metadata'
+        readonly: true
+
+      - name: 'level'
+        type: 'LogLevel'
+        description: 'Current minimum log level for this logger instance'
+        readonly: true
+
+    methods:
+      trace:
+        description: 'Logs trace-level message for detailed debugging'
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            optional: true
+            description: 'Optional structured data'
+        returns:
+          type: 'void'
+
+      debug:
+        description: 'Logs debug-level message for development troubleshooting'
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            optional: true
+            description: 'Optional structured data'
+        returns:
+          type: 'void'
+
+      info:
+        description: 'Logs informational message for general application flow'
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            optional: true
+            description: 'Optional structured data'
+        returns:
+          type: 'void'
+
+      warn:
+        description: 'Logs warning message for potential issues'
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Warning message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            optional: true
+            description: 'Optional structured data'
+        returns:
+          type: 'void'
+
+      error:
+        description: 'Logs error message with optional error object'
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+          - name: 'error'
+            type: 'Error'
+            optional: true
+            description: 'Error object with stack trace'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            optional: true
+            description: 'Optional structured data'
+        returns:
+          type: 'void'
+
+      fatal:
+        description: 'Logs fatal error that may require application shutdown'
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Fatal error message'
+          - name: 'error'
+            type: 'Error'
+            optional: true
+            description: 'Error object with stack trace'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            optional: true
+            description: 'Optional structured data'
+        returns:
+          type: 'void'
+
+      log:
+        description: 'Generic logging method with explicit level control'
+        parameters:
+          - name: 'level'
+            type: 'LogLevel'
+            description: 'Log level'
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            optional: true
+            description: 'Optional structured data'
+          - name: 'error'
+            type: 'Error'
+            optional: true
+            description: 'Optional error object'
+        returns:
+          type: 'void'
+
+      isLevelEnabled:
+        description: 'Checks if specific log level is enabled'
+        parameters:
+          - name: 'level'
+            type: 'LogLevel'
+            description: 'Log level to check'
+        returns:
+          type: 'boolean'
+          description: 'True if level is enabled'
+
+      child:
+        description: 'Creates child logger inheriting current context'
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Name for child context'
+        returns:
+          type: 'Logger'
+          description: 'Child logger with inherited context'
+
+      withContext:
+        description: 'Creates logger with merged context'
+        parameters:
+          - name: 'context'
+            type: 'Partial<LogContext>'
+            description: 'Context updates to merge'
+        returns:
+          type: 'Logger'
+          description: 'Logger with merged context'
+
+      withCorrelationId:
+        description: 'Creates logger with correlation ID'
+        parameters:
+          - name: 'correlationId'
+            type: 'string'
+            description: 'Correlation ID for request tracking'
+        returns:
+          type: 'Logger'
+          description: 'Logger with correlation ID'
+
+      withUserId:
+        description: 'Creates logger with user ID'
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+        returns:
+          type: 'Logger'
+          description: 'Logger with user ID'
+
+      withTenantId:
+        description: 'Creates logger with tenant ID'
+        parameters:
+          - name: 'tenantId'
+            type: 'string'
+            description: 'Tenant identifier'
+        returns:
+          type: 'Logger'
+          description: 'Logger with tenant ID'
+
+    custom-tags:
+      since: '1.0.0'
+      contract-type: 'Core logging interface'
+
+  LogProvider:
+    description: 'Interface for pluggable log output providers'
+    business-context: 'Enables integration with various logging backends while maintaining consistent API'
+
+    formats:
+      jsdoc:
+        description: 'Pluggable log provider interface'
+      cli:
+        description: |
+          ## LogProvider Interface
+
+          Contract for logging providers enabling:
+          - **Backend flexibility**: Support for console, file, remote logging
+          - **Async support**: Optional async operations for remote providers
+          - **Resource management**: Proper cleanup with flush/close methods
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Provider identifier for debugging and configuration'
+        readonly: true
+
+    methods:
+      write:
+        description: "Writes log event to the provider's output"
+        parameters:
+          - name: 'event'
+            type: 'LogEvent'
+            description: 'Structured log event to write'
+        returns:
+          type: 'void | Promise<void>'
+          description: 'Synchronous or asynchronous write operation'
+
+      flush:
+        description: 'Flushes any buffered log entries'
+        optional: true
+        returns:
+          type: 'void | Promise<void>'
+          description: 'Optional flush operation'
+
+      close:
+        description: 'Closes provider and releases resources'
+        optional: true
+        returns:
+          type: 'void | Promise<void>'
+          description: 'Optional cleanup operation'
+
+    custom-tags:
+      since: '1.0.0'
+      pattern: 'Provider pattern for logging backends'
+
+  LoggerConfiguration:
+    description: 'Configuration interface for logger behavior and features'
+    business-context: 'Centralized configuration for enterprise logging features including security and performance settings'
+
+    formats:
+      jsdoc:
+        description: 'Logger configuration options'
+      cli:
+        description: |
+          ## LoggerConfiguration Interface
+
+          Comprehensive configuration supporting:
+          - **Log levels**: Configurable minimum log level
+          - **Providers**: Pluggable output providers
+          - **Context detection**: Automatic DDD context detection
+          - **Data masking**: PII and sensitive data protection
+          - **Formatting**: Output formatting options
+
+    properties:
+      - name: 'level'
+        type: 'LogLevel'
+        optional: true
+        description: 'Minimum log level to output'
+
+      - name: 'provider'
+        type: "LogProvider | 'console'"
+        optional: true
+        description: 'Log provider instance or built-in provider name'
+
+      - name: 'contextDetection'
+        type: 'object'
+        optional: true
+        description: 'Context detection configuration'
+        nested-properties:
+          - name: 'enabled'
+            type: 'boolean'
+            optional: true
+            description: 'Enable automatic context detection'
+          - name: 'includeStackTrace'
+            type: 'boolean'
+            optional: true
+            description: 'Include stack trace in context detection'
+
+      - name: 'formatting'
+        type: 'object'
+        optional: true
+        description: 'Output formatting options'
+        nested-properties:
+          - name: 'timestamp'
+            type: 'boolean'
+            optional: true
+            description: 'Include timestamp in output'
+          - name: 'colorize'
+            type: 'boolean'
+            optional: true
+            description: 'Use colors in console output'
+          - name: 'prettyPrint'
+            type: 'boolean'
+            optional: true
+            description: 'Pretty print JSON output'
+
+      - name: 'masking'
+        type: 'object'
+        optional: true
+        description: 'Data masking configuration for sensitive data'
+        nested-properties:
+          - name: 'enabled'
+            type: 'boolean'
+            optional: true
+            description: 'Enable data masking'
+          - name: 'patterns'
+            type: 'string[]'
+            optional: true
+            description: 'Regex patterns for masking'
+          - name: 'replacement'
+            type: 'string'
+            optional: true
+            description: 'Replacement text for masked data'
+          - name: 'sensitiveKeys'
+            type: 'string[]'
+            optional: true
+            description: 'Object keys to mask automatically'
+
+    custom-tags:
+      since: '1.0.0'
+      configuration-type: 'Enterprise logging configuration'

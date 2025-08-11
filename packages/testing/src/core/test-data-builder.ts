@@ -1,23 +1,3 @@
-/**
- * @llm-summary Contract for test data builder options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * TestDataBuilderOptions interface implementing infrastructure service for test data builder options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteTestDataBuilderOptions implements TestDataBuilderOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 export interface TestDataBuilderOptions<T> {
   /**
    * Default values for the object being built
@@ -37,25 +17,6 @@ export interface TestDataBuilderOptions<T> {
   deepMerge?: boolean;
 }
 
-/**
- * @llm-summary Contract for sequence options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * SequenceOptions interface implementing infrastructure service for sequence options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSequenceOptions implements SequenceOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface SequenceOptions {
   /**
    * Starting value for the sequence
@@ -75,25 +36,6 @@ export interface SequenceOptions {
   suffix?: string;
 }
 
-/**
- * @llm-summary Contract for random options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * RandomOptions interface implementing infrastructure service for random options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRandomOptions implements RandomOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface RandomOptions {
   /**
    * Minimum value for numbers
@@ -117,32 +59,6 @@ export interface RandomOptions {
   seed?: string;
 }
 
-/**
- * @llm-summary TestDataBuilder class for test data builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * TestDataBuilder class implementing infrastructure service for test data builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TestDataBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TestDataBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class TestDataBuilder<T> {
   protected data: Partial<T> = {};
   protected options: Required<TestDataBuilderOptions<T>>;
@@ -405,33 +321,6 @@ export class TestDataBuilder<T> {
   }
 }
 
-/**
- * @llm-summary EntityIdBuilder class for entity id builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EntityIdBuilder class implementing infrastructure service for entity id builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EntityIdBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EntityIdBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 // Entity ID builder
 export class EntityIdBuilder extends TestDataBuilder<{ id: string }> {
   constructor(options?: TestDataBuilderOptions<{ id: string }>) {
@@ -460,27 +349,6 @@ export class EntityIdBuilder extends TestDataBuilder<{ id: string }> {
   }
 }
 
-// User data builder
-
-/**
- * @llm-summary Contract for test user functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * TestUser interface implementing infrastructure service for test user operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteTestUser implements TestUser {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface TestUser {
   id: string;
   name: string;
@@ -491,32 +359,6 @@ export interface TestUser {
   roles: string[];
 }
 
-/**
- * @llm-summary UserBuilder class for user builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * UserBuilder class implementing infrastructure service for user builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new UserBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UserBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class UserBuilder extends TestDataBuilder<TestUser> {
   constructor(options?: TestDataBuilderOptions<TestUser>) {
     super({
@@ -558,27 +400,6 @@ export class UserBuilder extends TestDataBuilder<TestUser> {
   }
 }
 
-// Domain event builder
-
-/**
- * @llm-summary Contract for test domain event functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * TestDomainEvent interface implementing infrastructure service for test domain event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteTestDomainEvent implements TestDomainEvent {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface TestDomainEvent {
   id: string;
   type: string;
@@ -590,32 +411,6 @@ export interface TestDomainEvent {
   causationId?: string;
 }
 
-/**
- * @llm-summary DomainEventBuilder class for domain event builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * DomainEventBuilder class implementing infrastructure service for domain event builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DomainEventBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DomainEventBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class DomainEventBuilder extends TestDataBuilder<TestDomainEvent> {
   constructor(options?: TestDataBuilderOptions<TestDomainEvent>) {
     super({

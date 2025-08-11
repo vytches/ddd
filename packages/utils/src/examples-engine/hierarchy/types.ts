@@ -3,11 +3,11 @@
  */
 
 export enum MetadataLevel {
-  GLOBAL = 0,      // docs/global-settings.md
-  PACKAGE = 1,     // packages/[package]/.md-settings.md  
-  CLASS = 2,       // docs/examples/domain/[package]/[class].md
-  METHOD = 3,      // docs/examples/domain/[package]/[class]/[method].md
-  INLINE = 4       // Direct in TypeScript code
+  GLOBAL = 0, // docs/global-settings.md
+  PACKAGE = 1, // packages/[package]/.md-settings.md
+  CLASS = 2, // docs/examples/domain/[package]/[class].md
+  METHOD = 3, // docs/examples/domain/[package]/[class]/[method].md
+  INLINE = 4, // Direct in TypeScript code
 }
 
 export type ResolutionStrategy = 'merge' | 'replace' | 'append';

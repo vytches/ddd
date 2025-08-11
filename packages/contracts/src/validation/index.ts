@@ -1,2 +1,2 @@
-export * from './validator.interfaces';
 export * from './specification.interfaces';
+export * from './validator.interfaces';

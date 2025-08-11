@@ -1,26 +1,3 @@
-/**
- * @llm-summary Domain builder workflow implementation
- * @llm-domain Infrastructure
- * @llm-complexity Complex
- *
- * @description
- * Complete domain builder workflow that guides users through creating
- * enterprise-grade domain implementations with AI assistance and pattern detection.
- *
- * @example
- * ```typescript
- * const workflow = new DomainBuilderWorkflow({
- *   domainName: 'E-commerce',
- *   structure: 'clean-architecture',
- *   framework: 'nestjs'
- * });
- * const result = await workflow.execute();
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 import type { WorkflowContext, WorkflowResult, DomainBuilderOptions } from '../types';
 import { Colors } from '../../core/utils/colors';
 import { Performance } from '../../core/utils/performance';

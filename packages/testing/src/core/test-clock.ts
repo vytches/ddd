@@ -1,23 +1,3 @@
-/**
- * @llm-summary Contract for time advance options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * TimeAdvanceOptions interface implementing infrastructure service for time advance options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteTimeAdvanceOptions implements TimeAdvanceOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 export interface TimeAdvanceOptions {
   /**
    * Number of milliseconds to advance
@@ -41,57 +21,12 @@ export interface TimeAdvanceOptions {
   days?: number;
 }
 
-/**
- * @llm-summary Contract for test clock state functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * TestClockState interface implementing infrastructure service for test clock state operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteTestClockState implements TestClockState {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface TestClockState {
   readonly isFrozen: boolean;
   readonly frozenTime: Date | null;
   readonly totalAdvanced: number;
 }
 
-/**
- * @llm-summary TestClock class for test clock operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * TestClock class implementing infrastructure service for test clock operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TestClock();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TestClock());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class TestClock {
   private static instance: TestClock | null = null;
   private _isFrozen = false;
@@ -325,32 +260,6 @@ export class TestClock {
   }
 }
 
-/**
- * @llm-summary TimeScenarioBuilder class for time scenario builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * TimeScenarioBuilder class implementing infrastructure service for time scenario builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TimeScenarioBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TimeScenarioBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class TimeScenarioBuilder {
   private steps: Array<{
     type: 'freeze' | 'advance' | 'execute';
@@ -414,33 +323,6 @@ export class TimeScenarioBuilder {
   }
 }
 
-/**
- * @llm-summary with test clock function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * withTestClock function implementing infrastructure service for with test clock operations.
- *
- *
- * @param {{ freezeAt?: Date; autoRestore?: boolean }} options? - options? parameter
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = withTestClock(options?);
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => withTestClock(options?));
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export function withTestClock(options?: { freezeAt?: Date; autoRestore?: boolean }) {
   return function <T extends (...args: any[]) => any>(
     _target: any,

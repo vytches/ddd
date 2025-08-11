@@ -1,22 +1,5 @@
 import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
 
-/**
- * @llm-summary ProjectionError class for projection error operations
- * @llm-domain Architecture
- * @llm-complexity Expert
- *
- * @description
- * ProjectionError class implementing architectural component for projection error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ProjectionError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ProjectionError extends IDomainError {
   static processingFailed(
     projectionName: string,

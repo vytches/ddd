@@ -1,29 +1,12 @@
 import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type {
-  ISagaStep,
-  ISagaState,
-  ISagaExecutionContext,
   ISagaActionResult,
+  ISagaExecutionContext,
+  ISagaState,
+  ISagaStep,
 } from '../interfaces';
 
-/**
- * @llm-summary SagaStep class for saga step operations
- * @llm-domain Integration
- * @llm-complexity Expert
- *
- * @description
- * SagaStep class implementing integration layer component for saga step operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SagaStep();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class SagaStep implements ISagaStep {
   protected readonly logger: ReturnType<typeof Logger.forContext>;
 

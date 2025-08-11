@@ -1,26 +1,7 @@
 import type { Result } from '@vytches/ddd-utils';
-import type { PolicyViolation } from '../models/policy-violation';
 import type { PolicyMetadata } from '../models/policy-metadata';
+import type { PolicyViolation } from '../models/policy-violation';
 
-/**
- * @llm-summary Contract for business policy functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * BusinessPolicy interface implementing domain pattern implementation for business policy operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteBusinessPolicy implements IBusinessPolicy {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IBusinessPolicy<T> {
   /**
    * Unique identifier for this policy
@@ -68,25 +49,6 @@ export interface IBusinessPolicy<T> {
   when(condition: PolicyCondition<T>): IPolicyConditionalBuilder<T>;
 }
 
-/**
- * @llm-summary Contract for policy request functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyRequest interface implementing domain pattern implementation for policy request operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyRequest implements PolicyRequest {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyRequest<T> {
   /**
    * The entity to evaluate against the policy
@@ -104,25 +66,6 @@ export interface PolicyRequest<T> {
   readonly metadata?: PolicyMetadata;
 }
 
-/**
- * @llm-summary Contract for policy context functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyContext interface implementing domain pattern implementation for policy context operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyContext implements PolicyContext {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyContext {
   /**
    * User ID performing the operation
@@ -160,25 +103,6 @@ export interface PolicyContext {
   readonly metadata: Record<string, unknown>;
 }
 
-/**
- * @llm-summary Contract for policy composer functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyComposer interface implementing domain pattern implementation for policy composer operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyComposer implements IPolicyComposer {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyComposer<T> extends IBusinessPolicy<T> {
   /**
    * Continue composing with AND logic
@@ -196,25 +120,6 @@ export interface IPolicyComposer<T> extends IBusinessPolicy<T> {
   group(): IGroupedPolicyComposer<T>;
 }
 
-/**
- * @llm-summary Contract for grouped policy composer functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * GroupedPolicyComposer interface implementing domain pattern implementation for grouped policy composer operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteGroupedPolicyComposer implements IGroupedPolicyComposer {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IGroupedPolicyComposer<T> extends IPolicyComposer<T> {
   /**
    * End the current group
@@ -222,25 +127,6 @@ export interface IGroupedPolicyComposer<T> extends IPolicyComposer<T> {
   endGroup(): IPolicyComposer<T>;
 }
 
-/**
- * @llm-summary Contract for policy conditional builder functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyConditionalBuilder interface implementing domain pattern implementation for policy conditional builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyConditionalBuilder implements IPolicyConditionalBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyConditionalBuilder<T> {
   /**
    * Define what happens when condition is met
@@ -253,25 +139,6 @@ export interface IPolicyConditionalBuilder<T> {
   thenMust(specification: unknown): IPolicyConditionalElse<T>; // TODO: Type this properly
 }
 
-/**
- * @llm-summary Contract for policy conditional else functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyConditionalElse interface implementing domain pattern implementation for policy conditional else operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyConditionalElse implements IPolicyConditionalElse {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyConditionalElse<T> {
   /**
    * Define what happens when condition is not met
@@ -294,44 +161,8 @@ export interface IPolicyConditionalElse<T> {
   otherwiseWarn(message: string): IBusinessPolicy<T>;
 }
 
-/**
- * @llm-summary Type definition for policy condition
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * PolicyCondition type implementing domain pattern implementation for policy condition operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: PolicyCondition = {} as PolicyCondition;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type PolicyCondition<T> = (entity: T, context: PolicyContext) => boolean | Promise<boolean>;
 
-/**
- * @llm-summary Contract for policy definition functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyDefinition interface implementing domain pattern implementation for policy definition operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyDefinition implements PolicyDefinition {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyDefinition<T> {
   readonly id: string;
   readonly domain: string;

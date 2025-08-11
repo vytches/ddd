@@ -11,22 +11,6 @@ import { WorkflowEngine } from '../core/engines/workflow-engine';
 import { ConfigManager } from '../core/engines/config-manager';
 import { chatHistory } from '../core/utils/chat-history';
 
-/**
- * @llm-summary workflowCommand constant
- * @llm-domain Infrastructure
- *
- * @description
- * workflowCommand constant implementing infrastructure service for workflow command operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(workflowCommand);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const workflowCommand: Command = {
   name: 'workflow',
   description: 'Start interactive AI-powered workflows for domain modeling and generation',

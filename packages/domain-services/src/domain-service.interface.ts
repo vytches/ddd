@@ -1,25 +1,6 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
 import type { IUnitOfWork } from '@vytches/ddd-core';
 
-/**
- * @llm-summary Contract for domain service functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * DomainService interface implementing domain pattern implementation for domain service operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteDomainService implements IDomainService {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IDomainService {
   /**
    * Optional service identifier used for registration and lookup in service registry.
@@ -31,25 +12,6 @@ export interface IDomainService {
   readonly serviceId?: string;
 }
 
-/**
- * @llm-summary Contract for async domain service functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * AsyncDomainService interface implementing domain pattern implementation for async domain service operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAsyncDomainService implements IAsyncDomainService {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IAsyncDomainService extends IDomainService {
   /**
    * Asynchronously initializes the service.
@@ -72,25 +34,6 @@ export interface IAsyncDomainService extends IDomainService {
   dispose?(): Promise<void>;
 }
 
-/**
- * @llm-summary Contract for unit of work aware functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * UnitOfWorkAware interface implementing domain pattern implementation for unit of work aware operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteUnitOfWorkAware implements IUnitOfWorkAware {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IUnitOfWorkAware {
   /**
    * Sets the Unit of Work context for transactional operations.
@@ -111,25 +54,6 @@ export interface IUnitOfWorkAware {
   clearUnitOfWork(): void;
 }
 
-/**
- * @llm-summary Contract for event bus aware functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * EventBusAware interface implementing domain pattern implementation for event bus aware operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEventBusAware implements IEventBusAware {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEventBusAware {
   /**
    * Sets the event bus for the service to use when publishing events.
@@ -141,23 +65,4 @@ export interface IEventBusAware {
   setEventBus(eventBus: IEventBus): void;
 }
 
-/**
- * @llm-summary Contract for transactional domain service functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * TransactionalDomainService interface implementing domain pattern implementation for transactional domain service operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteTransactionalDomainService implements ITransactionalDomainService {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ITransactionalDomainService extends IDomainService, IUnitOfWorkAware {}

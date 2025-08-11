@@ -1,38 +1,21 @@
 // Removed logging dependency for Phase 1 simplification
-import type {
-  IDependencyContainer,
-  ServiceToken,
-  Constructor,
-  ServiceFactory,
-  ServiceDescriptor,
-  ServiceRegistrationOptions,
-} from '../types';
-import { ServiceLifetime } from '../types';
 import {
-  ServiceNotFoundError,
-  InvalidRegistrationError,
-  ServiceAlreadyRegisteredError,
   CircularDependencyError,
   ContainerDisposedError,
+  InvalidRegistrationError,
+  ServiceAlreadyRegisteredError,
+  ServiceNotFoundError,
 } from '../errors';
+import type {
+  Constructor,
+  IDependencyContainer,
+  ServiceDescriptor,
+  ServiceFactory,
+  ServiceRegistrationOptions,
+  ServiceToken,
+} from '../types';
+import { ServiceLifetime } from '../types';
 
-/**
- * @llm-summary SimpleContainer class for simple container operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * SimpleContainer class implementing infrastructure service for simple container operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SimpleContainer();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class SimpleContainer implements IDependencyContainer {
   private readonly services = new Map<string, ServiceDescriptor>();
   private readonly singletonInstances = new Map<string, any>();

@@ -60,7 +60,7 @@ describe('HybridTemplateEngine', () => {
   describe('constructor', () => {
     it('should create engine instance and register helpers', () => {
       expect(engine).toBeInstanceOf(HybridTemplateEngine);
-      expect(mockHandlebars.registerHelper).toHaveBeenCalledTimes(12); // All helpers registered
+      expect(mockHandlebars.registerHelper).toHaveBeenCalledTimes(15); // All helpers registered
     });
 
     it('should set up templates path correctly', () => {
@@ -466,7 +466,7 @@ describe('HybridTemplateEngine', () => {
 
     it('should handle helper functions in template context', () => {
       // Verify that helpers are registered correctly
-      expect(mockHandlebars.registerHelper).toHaveBeenCalledTimes(12);
+      expect(mockHandlebars.registerHelper).toHaveBeenCalledTimes(15);
 
       // Check specific helper registrations
       const helperCalls = mockHandlebars.registerHelper.mock.calls;

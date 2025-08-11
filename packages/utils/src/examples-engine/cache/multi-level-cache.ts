@@ -16,7 +16,7 @@ export class MultiLevelCache {
   private static config: CacheConfig = {
     enabled: true,
     maxSize: 1000,
-    ttl: 60000 // 1 minute
+    ttl: 60000, // 1 minute
   };
 
   static async get(key: string): Promise<string | null> {
@@ -41,7 +41,7 @@ export class MultiLevelCache {
     // Store in memory cache
     this.memoryCache.set(key, {
       value,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
 
     // Clean up if cache is too large

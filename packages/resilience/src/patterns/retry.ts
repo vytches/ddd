@@ -1,25 +1,6 @@
 import type { ResilienceContext } from '../core/resilience-context';
 import { DefaultResilienceContext } from '../core/resilience-context';
 
-/**
- * @llm-summary Contract for retry config functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * RetryConfig interface implementing infrastructure service for retry config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRetryConfig implements RetryConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface RetryConfig {
   readonly maxAttempts: number;
   readonly baseDelay: number;
@@ -29,25 +10,6 @@ export interface RetryConfig {
   readonly retryableErrors?: (error: Error) => boolean;
 }
 
-/**
- * @llm-summary Contract for retry metrics functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * RetryMetrics interface implementing infrastructure service for retry metrics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRetryMetrics implements RetryMetrics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface RetryMetrics {
   readonly attempt: number;
   readonly totalAttempts: number;
@@ -55,23 +17,6 @@ export interface RetryMetrics {
   readonly lastError?: Error;
 }
 
-/**
- * @llm-summary MaxRetriesExceededError class for max retries exceeded error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * MaxRetriesExceededError class implementing infrastructure service for max retries exceeded error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new MaxRetriesExceededError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class MaxRetriesExceededError extends Error {
   constructor(
     public readonly attempts: number,
@@ -82,23 +27,6 @@ export class MaxRetriesExceededError extends Error {
   }
 }
 
-/**
- * @llm-summary RetryPolicy class for retry policy operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * RetryPolicy class implementing infrastructure service for retry policy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new RetryPolicy();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class RetryPolicy {
   constructor(private readonly config: RetryConfig) {}
 

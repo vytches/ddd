@@ -43,19 +43,13 @@ After generation, documentation is available at:
 
 Our JSDoc includes special tags optimized for AI/LLM consumption:
 
-- `@llm-summary`: Brief one-line description
-- `@llm-domain`: Domain classification (Core, Pattern, Architecture, etc.)
-- `@llm-complexity`: Complexity level (Simple, Medium, Complex, Expert)
-- `@llm-contract`: Contract type (Required, Optional, Deprecated)
-- `@llm-pure`: Function purity indicator
+- (to be added)
 
 ### Package Documentation
 
 Each package includes:
 
 - ✅ **Comprehensive README** with usage examples and API reference
-- ✅ **JSDoc documentation** with LLM-optimized tags (@llm-summary, @llm-domain,
-  @llm-complexity)
 - ✅ **Multiple examples** per public API (basic, intermediate, advanced)
 - ✅ **Framework integration** examples (NestJS, Express, etc.)
 - ✅ **Parameter documentation** with types and constraints
@@ -149,10 +143,9 @@ See `docs/adr/` for architectural decisions affecting the library design.
    examples
 3. **Add framework examples**: Include NestJS, Express, or other framework
    integrations
-4. **Include LLM tags**: Use @llm-summary, @llm-domain, @llm-complexity tags
-5. **Validate before commit**: Run `pnpm cli examples validate --fix` to ensure
+4. **Validate before commit**: Run `pnpm cli examples validate --fix` to ensure
    compliance
-6. **Update package READMEs**: Keep package documentation current with API
+5. **Update package READMEs**: Keep package documentation current with API
    changes
 
 ## Documentation Status

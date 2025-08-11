@@ -2,33 +2,16 @@
 // enhanced-acl-adapter.ts
 import { Result } from '@vytches/ddd-utils';
 import { ACLError } from './acl-errors';
-import { SimpleACLAdapter } from './base-acl-adapter';
 import type {
-  IEnhancedACLAdapter,
   ACLContextInfo,
-  IModelTranslator,
-  IExternalAPI,
   ExecuteOptions,
+  IEnhancedACLAdapter,
+  IExternalAPI,
+  IModelTranslator,
 } from './acl.interfaces';
+import { SimpleACLAdapter } from './base-acl-adapter';
 import type { TypedOperation } from './typed-operations';
 
-/**
- * @llm-summary EnhancedACLAdapter class for enhanced a c l adapter operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * EnhancedACLAdapter class implementing integration layer component for enhanced a c l adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EnhancedACLAdapter();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EnhancedACLAdapter<TDomain, TExternal, TResult = any>
   extends SimpleACLAdapter<TDomain, TExternal, TResult>
   implements IEnhancedACLAdapter<TDomain, TExternal, TResult>

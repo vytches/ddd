@@ -3,27 +3,6 @@ import 'reflect-metadata';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
 
-/**
- * @description
- * CommandHandler function implementing architectural component for command handler operations.
- *
- * @param {new (...args: unknown[]} commandType - commandType parameter
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage with explicit types (when handler returns void)
- * @CommandHandler(CreateUserCommand)
- * class CreateUserHandler implements ICommandHandler<CreateUserCommand, void> {
- *   async execute(command: CreateUserCommand): Promise<void> {
- *     // implementation
- *   }
- * }
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function CommandHandler<TCommand extends ICommand>(
   commandType: new (...args: any[]) => TCommand,
   options?: CommandHandlerOptions

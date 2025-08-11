@@ -1,0 +1,583 @@
+# projection-registry - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'projection-registry'
+title: 'ProjectionRegistry - Projection Management'
+description: 'Central registry for managing projection instances'
+business-context: 'Provides discovery, registration, and lifecycle management for projections'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ProjectionRegistry:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Central registry managing all projection instances and their lifecycle'
+      business-context: 'Enables dynamic projection discovery, registration, and orchestration'
+
+      formats:
+        jsdoc:
+          description: 'Registry for projection discovery and management'
+        cli:
+          description: |
+            ## ProjectionRegistry
+
+            Projection management hub:
+            - Registration and discovery
+            - Lifecycle management
+            - Dependency resolution
+            - Health monitoring
+            - Dynamic loading
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry pattern'
+        thread-safe: 'true'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates projection registry'
+        business-context: 'Initializes registry for projection management'
+
+        parameters:
+          - name: 'options'
+            type: 'IRegistryOptions'
+            description: 'Registry configuration'
+            optional: true
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const registry = new ProjectionRegistry();
+
+          - id: 'with-options'
+            code: |
+              const registry = new ProjectionRegistry({
+                autoDiscover: true,
+                discoveryPaths: ['./projections'],
+                validateOnRegister: true,
+                allowDuplicates: false
+              });
+
+      register:
+        description: 'Registers a projection with the registry'
+        business-context: 'Adds projection for centralized management'
+
+        parameters:
+          - name: 'projection'
+            type: 'IProjection<any>'
+            description: 'Projection to register'
+          - name: 'metadata'
+            type: 'IProjectionMetadata'
+            description: 'Additional projection metadata'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'Projection registered'
+
+        examples:
+          - id: 'register-projection'
+            code: |
+              registry.register(userProjection, {
+                version: '1.0.0',
+                dependencies: ['event-store'],
+                priority: 1,
+                tags: ['user', 'read-model']
+              });
+
+          - id: 'bulk-registration'
+            code: |
+              const projections = [
+                userProjection,
+                orderProjection,
+                inventoryProjection
+              ];
+
+              projections.forEach(projection => {
+                registry.register(projection);
+              });
+
+        custom-tags:
+          validation: 'Validates projection before registration'
+
+      unregister:
+        description: 'Removes projection from registry'
+        business-context: 'Removes projection from management'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Name of projection to remove'
+
+        returns:
+          type: 'boolean'
+          description: 'True if removed, false if not found'
+
+        examples:
+          - id: 'unregister'
+            code: |
+              const removed = registry.unregister('user-projection');
+              if (removed) {
+                console.log('Projection unregistered');
+              }
+
+      get:
+        description: 'Retrieves projection by name'
+        business-context: 'Accesses registered projection'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Name of projection'
+
+        returns:
+          type: 'IProjection<any> | undefined'
+          description: 'Projection or undefined'
+
+        examples:
+          - id: 'get-projection'
+            code: |
+              const projection = registry.get('user-projection');
+
+              if (projection) {
+                const state = await projection.createInitialState();
+              }
+
+      getAll:
+        description: 'Retrieves all registered projections'
+        business-context: 'Lists all managed projections'
+
+        returns:
+          type: 'IProjection<any>[]'
+          description: 'Array of all projections'
+
+        examples:
+          - id: 'get-all'
+            code: |
+              const projections = registry.getAll();
+
+              console.log(`Managing ${projections.length} projections`);
+              projections.forEach(p => {
+                console.log(`- ${p.name}: ${p.eventTypes.join(', ')}`);
+              });
+
+      getByEventType:
+        description: 'Finds projections handling specific event type'
+        business-context: 'Event routing optimization'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type to match'
+
+        returns:
+          type: 'IProjection<any>[]'
+          description: 'Projections handling this event'
+
+        examples:
+          - id: 'by-event-type'
+            code: |
+              const projections = registry.getByEventType('UserCreated');
+
+              // Route event to relevant projections
+              for (const projection of projections) {
+                await processEvent(projection, userCreatedEvent);
+              }
+
+      getByTag:
+        description: 'Finds projections with specific tag'
+        business-context: 'Groups projections by category'
+
+        parameters:
+          - name: 'tag'
+            type: 'string'
+            description: 'Tag to search for'
+
+        returns:
+          type: 'IProjection<any>[]'
+          description: 'Projections with this tag'
+
+        examples:
+          - id: 'by-tag'
+            code: |
+              const analyticsProjections = registry.getByTag('analytics');
+
+              // Process only analytics projections
+              for (const projection of analyticsProjections) {
+                await rebuildProjection(projection);
+              }
+
+      has:
+        description: 'Checks if projection is registered'
+        business-context: 'Verifies projection registration'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Name to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if registered'
+
+        examples:
+          - id: 'check-existence'
+            code: |
+              if (registry.has('user-projection')) {
+                console.log('User projection is registered');
+              }
+
+      clear:
+        description: 'Removes all projections from registry'
+        business-context: 'Clears registry for reset'
+
+        returns:
+          type: 'void'
+          description: 'Registry cleared'
+
+        examples:
+          - id: 'clear-registry'
+            code: |
+              registry.clear();
+              console.log('All projections unregistered');
+
+      getMetadata:
+        description: 'Gets metadata for projection'
+        business-context: 'Accesses projection configuration'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Projection name'
+
+        returns:
+          type: 'IProjectionMetadata | undefined'
+          description: 'Metadata or undefined'
+
+        examples:
+          - id: 'get-metadata'
+            code: |
+              const metadata = registry.getMetadata('user-projection');
+
+              if (metadata) {
+                console.log(`Version: ${metadata.version}`);
+                console.log(`Priority: ${metadata.priority}`);
+                console.log(`Dependencies: ${metadata.dependencies.join(', ')}`);
+              }
+
+      updateMetadata:
+        description: 'Updates projection metadata'
+        business-context: 'Modifies projection configuration'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Projection to update'
+          - name: 'metadata'
+            type: 'Partial<IProjectionMetadata>'
+            description: 'Metadata updates'
+
+        returns:
+          type: 'boolean'
+          description: 'True if updated'
+
+        examples:
+          - id: 'update-metadata'
+            code: |
+              registry.updateMetadata('user-projection', {
+                version: '2.0.0',
+                priority: 2
+              });
+
+      discover:
+        description: 'Discovers projections from file system'
+        business-context: 'Auto-loads projection modules'
+
+        parameters:
+          - name: 'paths'
+            type: 'string[]'
+            description: 'Paths to search'
+            optional: true
+
+        returns:
+          type: 'Promise<IDiscoveryResult>'
+          description: 'Discovery results'
+
+        examples:
+          - id: 'auto-discovery'
+            code: |
+              const result = await registry.discover([
+                './src/projections',
+                './plugins/projections'
+              ]);
+
+              console.log(`Discovered ${result.discovered} projections`);
+              console.log(`Registered ${result.registered} successfully`);
+
+              if (result.errors.length > 0) {
+                console.error('Discovery errors:', result.errors);
+              }
+
+        custom-tags:
+          async: 'true'
+          file-system: 'Reads from file system'
+
+      validate:
+        description: 'Validates all registered projections'
+        business-context: 'Ensures projection integrity'
+
+        returns:
+          type: 'IValidationResult[]'
+          description: 'Validation results'
+
+        examples:
+          - id: 'validate-all'
+            code: |
+              const results = registry.validate();
+
+              for (const result of results) {
+                if (!result.valid) {
+                  console.error(`${result.projectionName}: ${result.errors.join(', ')}`);
+                }
+              }
+
+      getDependencyOrder:
+        description: 'Gets projections in dependency order'
+        business-context: 'Resolves initialization order'
+
+        returns:
+          type: 'IProjection<any>[]'
+          description: 'Projections sorted by dependencies'
+
+        examples:
+          - id: 'dependency-order'
+            code: |
+              const ordered = registry.getDependencyOrder();
+
+              // Initialize in correct order
+              for (const projection of ordered) {
+                await initializeProjection(projection);
+              }
+
+        custom-tags:
+          algorithm: 'Topological sort'
+
+      getStatistics:
+        description: 'Gets registry statistics'
+        business-context: 'Monitoring and metrics'
+
+        returns:
+          type: 'IRegistryStatistics'
+          description: 'Registry statistics'
+
+        examples:
+          - id: 'statistics'
+            code: |
+              const stats = registry.getStatistics();
+
+              console.log(`Total projections: ${stats.totalProjections}`);
+              console.log(`Event types covered: ${stats.uniqueEventTypes}`);
+              console.log(`Average events per projection: ${stats.averageEventsPerProjection}`);
+
+  GlobalProjectionRegistry:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Singleton global projection registry'
+      business-context: 'Provides application-wide projection management'
+
+      formats:
+        jsdoc:
+          description: 'Global singleton for projection registry'
+        cli:
+          description: |
+            ## GlobalProjectionRegistry
+
+            Application-wide registry:
+            - Singleton instance
+            - Global access point
+            - Thread-safe operations
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Singleton'
+        extends: 'ProjectionRegistry'
+
+    # Methods
+    methods:
+      getInstance:
+        description: 'Gets singleton registry instance'
+        business-context: 'Accesses global registry'
+
+        returns:
+          type: 'ProjectionRegistry'
+          description: 'Global registry instance'
+
+        examples:
+          - id: 'singleton-access'
+            code: |
+              const registry = GlobalProjectionRegistry.getInstance();
+              registry.register(userProjection);
+
+              // From another module
+              const sameRegistry = GlobalProjectionRegistry.getInstance();
+              const projection = sameRegistry.get('user-projection');
+
+        custom-tags:
+          static: 'true'
+          singleton: 'true'
+
+# === INTERFACES ===
+interfaces:
+  IRegistryOptions:
+    description: 'Configuration for projection registry'
+    business-context: 'Controls registry behavior'
+
+    properties:
+      - name: 'autoDiscover'
+        type: 'boolean'
+        description: 'Enable auto-discovery'
+        optional: true
+
+      - name: 'discoveryPaths'
+        type: 'string[]'
+        description: 'Paths for auto-discovery'
+        optional: true
+
+      - name: 'validateOnRegister'
+        type: 'boolean'
+        description: 'Validate on registration'
+        optional: true
+
+      - name: 'allowDuplicates'
+        type: 'boolean'
+        description: 'Allow duplicate names'
+        optional: true
+
+      - name: 'logger'
+        type: 'ILogger'
+        description: 'Custom logger'
+        optional: true
+
+  IProjectionMetadata:
+    description: 'Metadata for registered projection'
+    business-context: 'Additional projection information'
+
+    properties:
+      - name: 'version'
+        type: 'string'
+        description: 'Projection version'
+        optional: true
+
+      - name: 'dependencies'
+        type: 'string[]'
+        description: 'Required dependencies'
+        optional: true
+
+      - name: 'priority'
+        type: 'number'
+        description: 'Processing priority'
+        optional: true
+
+      - name: 'tags'
+        type: 'string[]'
+        description: 'Categorization tags'
+        optional: true
+
+      - name: 'description'
+        type: 'string'
+        description: 'Human-readable description'
+        optional: true
+
+      - name: 'author'
+        type: 'string'
+        description: 'Projection author'
+        optional: true
+
+      - name: 'createdAt'
+        type: 'Date'
+        description: 'Registration time'
+        optional: true
+
+  IDiscoveryResult:
+    description: 'Result of projection discovery'
+    business-context: 'Discovery operation outcome'
+
+    properties:
+      - name: 'discovered'
+        type: 'number'
+        description: 'Projections found'
+
+      - name: 'registered'
+        type: 'number'
+        description: 'Successfully registered'
+
+      - name: 'skipped'
+        type: 'number'
+        description: 'Skipped (duplicates, etc.)'
+
+      - name: 'errors'
+        type: 'IDiscoveryError[]'
+        description: 'Discovery errors'
+
+  IValidationResult:
+    description: 'Projection validation result'
+    business-context: 'Validation outcome'
+
+    properties:
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Validated projection'
+
+      - name: 'valid'
+        type: 'boolean'
+        description: 'Validation status'
+
+      - name: 'errors'
+        type: 'string[]'
+        description: 'Validation errors'
+
+      - name: 'warnings'
+        type: 'string[]'
+        description: 'Validation warnings'
+        optional: true
+
+  IRegistryStatistics:
+    description: 'Registry statistics'
+    business-context: 'Monitoring metrics'
+
+    properties:
+      - name: 'totalProjections'
+        type: 'number'
+        description: 'Total registered projections'
+
+      - name: 'uniqueEventTypes'
+        type: 'number'
+        description: 'Unique event types handled'
+
+      - name: 'averageEventsPerProjection'
+        type: 'number'
+        description: 'Average events per projection'
+
+      - name: 'projectionsByTag'
+        type: 'Map<string, number>'
+        description: 'Count by tag'
+
+      - name: 'orphanedProjections'
+        type: 'number'
+        description: 'Projections without events'

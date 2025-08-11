@@ -1,0 +1,163 @@
+# command-handler.decorator - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'command-handler.decorator'
+title: 'CommandHandler Decorator - Handler Registration'
+description: 'Decorator for registering command handlers with DI integration'
+business-context: 'Automatic command handler registration and metadata management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FUNCTIONS ===
+functions:
+  CommandHandler:
+    description: 'Decorator for registering command handlers with automatic DI integration'
+    business-context: 'Enables automatic handler discovery and type-safe command dispatch'
+
+    formats:
+      jsdoc:
+        description: 'Registers command handlers with metadata for DI container'
+      cli:
+        description: |
+          ## CommandHandler Decorator
+
+          Core CQRS decorator that:
+          - Registers command handlers automatically
+          - Links commands to their handlers via metadata
+          - Integrates with VytchesDDD service locator
+          - Supports type-safe command dispatching
+
+    # Overloaded signatures
+    overloads:
+      - signature: 'CommandHandler<TCommand extends ICommand>(commandType: new (...args: any[]) => TCommand, options?: CommandHandlerOptions)'
+        description: 'Handler decorator with void return type'
+        parameters:
+          - name: 'commandType'
+            type: 'new (...args: any[]) => TCommand'
+            description: 'Command class constructor'
+          - name: 'options'
+            type: 'CommandHandlerOptions'
+            description: 'Optional configuration for handler registration'
+            optional: true
+
+      - signature: 'CommandHandler<TCommand extends ICommand, TResult>(commandType: new (...args: any[]) => TCommand, options?: CommandHandlerOptions)'
+        description: 'Handler decorator with typed return value'
+        parameters:
+          - name: 'commandType'
+            type: 'new (...args: any[]) => TCommand'
+            description: 'Command class constructor'
+          - name: 'options'
+            type: 'CommandHandlerOptions'
+            description: 'Optional configuration for handler registration'
+            optional: true
+
+    parameters:
+      - name: 'commandType'
+        type: 'new (...args: any[]) => TCommand'
+        description: 'Command class that this handler processes'
+      - name: 'options'
+        type: 'CommandHandlerOptions'
+        description: 'Configuration options for handler registration'
+        optional: true
+        properties:
+          - name: 'serviceId'
+            type: 'string'
+            description: 'Custom service identifier for DI container'
+            optional: true
+          - name: 'autoRegister'
+            type: 'boolean'
+            description: 'Whether to automatically register with DI container'
+            optional: true
+            default: 'true'
+
+    returns:
+      type: 'ClassDecorator'
+      description: 'Decorator function that applies handler metadata'
+
+    examples:
+      - id: 'basic-command-handler'
+        code: |
+          @CommandHandler(CreateUserCommand)
+          class CreateUserHandler implements ICommandHandler<CreateUserCommand, void> {
+            async execute(command: CreateUserCommand): Promise<void> {
+              // Create user logic
+              const user = await userService.create(command.userData);
+            }
+          }
+
+      - id: 'handler-with-result'
+        code: |
+          @CommandHandler(ProcessPaymentCommand)
+          class ProcessPaymentHandler implements ICommandHandler<ProcessPaymentCommand, PaymentResult> {
+            async execute(command: ProcessPaymentCommand): Promise<PaymentResult> {
+              const result = await paymentService.process(command.paymentData);
+              return { transactionId: result.id, status: result.status };
+            }
+          }
+
+      - id: 'handler-with-options'
+        code: |
+          @CommandHandler(ComplexOperationCommand, {
+            serviceId: 'complex-operation-handler',
+            autoRegister: true
+          })
+          class ComplexOperationHandler implements ICommandHandler<ComplexOperationCommand, OperationResult> {
+            async execute(command: ComplexOperationCommand): Promise<OperationResult> {
+              // Complex business logic
+              return await this.processComplexOperation(command);
+            }
+          }
+
+      - id: 'di-integration'
+        code: |
+          @CommandHandler(SendEmailCommand)
+          class SendEmailHandler implements ICommandHandler<SendEmailCommand, void> {
+            constructor(
+              private emailService: EmailService,
+              private templateService: TemplateService
+            ) {}
+            
+            async execute(command: SendEmailCommand): Promise<void> {
+              const template = await this.templateService.get(command.templateId);
+              await this.emailService.send({
+                to: command.recipient,
+                subject: template.subject,
+                body: template.render(command.data)
+              });
+            }
+          }
+
+    custom-tags:
+      decorator-type: 'Class decorator'
+      metadata-keys:
+        - 'di:command-handler (on command class)'
+        - 'di:handler-metadata (on handler class)'
+        - 'di:handler-type (on handler class)'
+        - 'di:registration-pending (on handler class)'
+      di-integration: 'Automatic registration with VytchesDDD container'
+      type-safety: 'Enforces ICommandHandler<TCommand, TResult> interface'
+      discovery: 'Handlers auto-discovered by CQRSDiscoveryPlugin'
+
+  # Private helper functions are not exposed in public API
+  # but we document them for completeness of the implementation
+
+# === PRIVATE IMPLEMENTATION DETAILS ===
+implementation-details:
+  metadata-storage:
+    description: 'Uses reflect-metadata to store handler registration data'
+    keys:
+      - 'di:command-handler': 'Stored on command class for handler resolution'
+      - 'di:handler-metadata': 'Stored on handler class for discovery'
+      - 'di:handler-type': "Marks handler type as 'command'"
+      - 'di:registration-pending': 'Flags handler for auto-registration'
+
+  registration-flow:
+    description: 'Handler registration and discovery process'
+    steps:
+      1: 'Decorator applies metadata to both command and handler classes'
+      2: 'CQRSDiscoveryPlugin discovers handlers during container initialization'
+      3: 'CommandBus resolves handlers using command class metadata'
+      4: 'DI container provides handler instances with dependency injection'

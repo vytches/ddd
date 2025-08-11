@@ -1,0 +1,353 @@
+# Event Bus Interfaces - Foundation Layer Event Bus Contracts
+# Core event bus interface definitions for event publishing and subscription
+
+# === FILE METADATA ===
+file-name: 'event-bus.interfaces'
+title: 'Event Bus Interfaces - Event Publishing Foundation'
+description: 'Core interface definitions for event bus operations including publishing, subscription, and middleware support'
+business-context: 'Provides standardized contracts for event-driven architecture enabling decoupled communication between domain components'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  IEventBus:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class defining event bus contract for event publishing and subscription'
+      business-context: 'Foundation for event-driven architecture enabling decoupled communication across domain boundaries'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Abstract event bus with publish/subscribe operations'
+          business-context: 'Event-driven architecture foundation'
+        cli:
+          description: |
+            ## IEventBus Abstract Class
+
+            Foundation for event-driven architecture:
+
+            **Core Operations:**
+            - Event publishing to subscribed handlers
+            - Function and class-based subscription
+            - Batch event publishing capabilities
+            - Type-safe event handling
+
+            **Architecture Benefits:**
+            - Decoupled domain communication
+            - Extensible handler registration
+            - Async event processing support
+            - Scalable event distribution
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'publish-subscribe'
+        abstract: 'true'
+        architecture: 'event-driven'
+
+    # Generic Parameters
+    generic-parameters:
+      - name: 'TEvent'
+        description: 'Type of events this bus handles'
+        constraint: 'IDomainEvent'
+        default: 'IDomainEvent'
+
+    # Abstract Methods
+    methods:
+      publish:
+        description: 'Publishes an event to all subscribed handlers'
+        business-context: 'Distributes domain events to registered handlers enabling reactive processing across bounded contexts'
+        abstract: true
+
+        parameters:
+          - name: 'event'
+            type: 'TEvent'
+            description: 'Event to publish to handlers'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when all handlers complete'
+
+        examples:
+          - id: 'publish-basic'
+            code: |
+              // Publish domain event
+              const orderCreated = createDomainEvent('OrderCreated', {
+                orderId: 'order-123',
+                customerId: 'customer-456'
+              });
+
+              await eventBus.publish(orderCreated);
+              // All subscribed handlers have processed the event
+
+        custom-tags:
+          async: 'true'
+          distribution: 'all-handlers'
+
+      subscribe:
+        description: 'Subscribes a function to handle events of a specific type'
+        business-context: 'Enables reactive processing by registering handlers for specific event types'
+        abstract: true
+
+        generic-parameters:
+          - name: 'T'
+            description: 'Specific event type to handle'
+            constraint: 'TEvent'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | (new (...args: any[]) => T)'
+            description: 'Event type identifier or constructor'
+          - name: 'handler'
+            type: '(event: T) => Promise<void> | void'
+            description: 'Function to handle events of this type'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'subscribe-string-type'
+            code: |
+              // Subscribe with string event type
+              eventBus.subscribe('OrderCreated', async (event) => {
+                console.log(`Order created: ${event.payload.orderId}`);
+                await notificationService.sendEmail(event);
+              });
+
+          - id: 'subscribe-constructor'
+            code: |
+              // Subscribe with event constructor
+              eventBus.subscribe(OrderCreatedEvent, async (event) => {
+                // TypeScript knows event is OrderCreatedEvent
+                await processOrderCreation(event);
+              });
+
+        custom-tags:
+          registration: 'function-based'
+          type-support: 'string-or-constructor'
+
+      registerHandler:
+        description: 'Registers a class-based handler for events of a specific type'
+        business-context: 'Enables structured event handling through class-based handlers with defined contracts'
+        abstract: true
+
+        generic-parameters:
+          - name: 'T'
+            description: 'Specific event type to handle'
+            constraint: 'TEvent'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | (new (...args: any[]) => T)'
+            description: 'Event type identifier or constructor'
+          - name: 'handler'
+            type: '{ handle(event: T): Promise<void> | void; }'
+            description: 'Handler object with handle method'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'register-class-handler'
+            code: |
+              // Class-based handler
+              class OrderCreatedHandler {
+                async handle(event: OrderCreatedEvent): Promise<void> {
+                  await this.inventoryService.reserveItems(event.payload);
+                  await this.billingService.createInvoice(event.payload);
+                }
+              }
+
+              eventBus.registerHandler('OrderCreated', new OrderCreatedHandler());
+
+        custom-tags:
+          registration: 'class-based'
+          structure: 'handler-contract'
+
+      unsubscribe:
+        description: 'Unsubscribes a handler from an event type'
+        business-context: 'Enables dynamic handler management and cleanup for resource management'
+        abstract: true
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | (new (...args: any[]) => TEvent)'
+            description: 'Event type to unsubscribe from'
+          - name: 'handler'
+            type: '((event: TEvent) => Promise<void> | void) | { handle(event: TEvent): Promise<void> | void }'
+            description: 'Handler function or object to remove'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'unsubscribe-handler'
+            code: |
+              // Store handler reference for later removal
+              const orderHandler = async (event: OrderCreatedEvent) => {
+                await processOrder(event);
+              };
+
+              eventBus.subscribe('OrderCreated', orderHandler);
+
+              // Later, unsubscribe the handler
+              eventBus.unsubscribe('OrderCreated', orderHandler);
+
+        custom-tags:
+          cleanup: 'resource-management'
+          reference-based: 'true'
+
+      publishMany:
+        description: 'Publishes multiple events in a batch operation'
+        business-context: 'Enables efficient bulk event publishing for complex business operations that generate multiple events'
+        abstract: true
+
+        parameters:
+          - name: 'events'
+            type: 'TEvent[]'
+            description: 'Array of events to publish'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when all events are published'
+
+        examples:
+          - id: 'publish-many-basic'
+            code: |
+              // Batch publish related events
+              const orderEvents = [
+                createDomainEvent('OrderCreated', orderData),
+                createDomainEvent('InventoryReserved', inventoryData),
+                createDomainEvent('PaymentProcessed', paymentData)
+              ];
+
+              await eventBus.publishMany(orderEvents);
+              // All events published as a batch
+
+        custom-tags:
+          batch-operation: 'true'
+          performance: 'bulk-publishing'
+
+# === INTERFACES ===
+interfaces:
+  BaseEventBusOptions:
+    description: 'Configuration options interface for event bus implementations'
+    business-context: 'Provides standardized configuration for event bus behavior including logging, error handling, and middleware'
+
+    formats:
+      jsdoc:
+        description: 'Event bus configuration options with middleware support'
+        business-context: 'Configurable event bus behavior'
+      cli:
+        description: |
+          ## BaseEventBusOptions Interface
+
+          Event bus configuration options:
+
+          **Core Configuration:**
+          - Logging control for event processing
+          - Custom error handling for failures
+          - Middleware pipeline for event processing
+          - Custom logger integration
+
+          **Enterprise Features:**
+          - Error recovery strategies
+          - Performance monitoring support
+          - Audit logging capabilities
+          - Extensible middleware architecture
+
+    properties:
+      - name: 'enableLogging'
+        type: 'boolean'
+        description: 'Enable or disable event processing logging'
+        business-context: 'Controls diagnostic logging for event bus operations'
+        optional: true
+
+      - name: 'onError'
+        type: '(error: Error, eventType: string) => void'
+        description: 'Custom error handler for event processing errors'
+        business-context: 'Enables custom error recovery and logging strategies'
+        optional: true
+
+      - name: 'middlewares'
+        type: 'EventBusMiddleware[]'
+        description: 'Middleware pipeline to process events'
+        business-context: 'Enables cross-cutting concerns like validation, logging, and transformation'
+        optional: true
+
+      - name: 'logger'
+        type: '(message: string) => void'
+        description: 'Optional custom logger function'
+        business-context: 'Integrates with existing logging infrastructure'
+        optional: true
+
+# === TYPES ===
+types:
+  EventBusMiddleware:
+    description: 'Type definition for event bus middleware functions'
+    business-context: 'Enables extensible event processing pipeline with cross-cutting concerns'
+
+    formats:
+      jsdoc:
+        description: 'Middleware function type for event processing pipeline'
+      cli:
+        description: |
+          ## EventBusMiddleware Type
+
+          Function type for event processing middleware:
+
+          **Middleware Pattern:**
+          - Higher-order function taking next handler
+          - Returns event processing function
+          - Enables composable event processing pipeline
+
+          **Common Use Cases:**
+          - Event validation and transformation
+          - Audit logging and metrics collection
+          - Error handling and retry logic
+          - Performance monitoring and tracing
+
+    function-signature:
+      parameters:
+        - name: 'next'
+          type: '(event: unknown) => Promise<void>'
+          description: 'Next middleware or handler in the pipeline'
+      returns:
+        type: '(event: unknown) => Promise<void>'
+        description: 'Event processing function'
+
+    examples:
+      - id: 'logging-middleware'
+        code: |
+          // Logging middleware
+          const loggingMiddleware: EventBusMiddleware = (next) => {
+            return async (event: unknown) => {
+              console.log('Processing event:', event);
+              await next(event);
+              console.log('Event processed successfully');
+            };
+          };
+
+      - id: 'validation-middleware'
+        code: |
+          // Validation middleware
+          const validationMiddleware: EventBusMiddleware = (next) => {
+            return async (event: unknown) => {
+              if (!isValidEvent(event)) {
+                throw new Error('Invalid event format');
+              }
+              await next(event);
+            };
+          };

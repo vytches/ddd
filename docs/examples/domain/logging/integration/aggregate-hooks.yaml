@@ -1,0 +1,468 @@
+# Aggregate Hooks - DDD Aggregate State Change Logging
+
+# === FILE METADATA ===
+file-name: 'aggregate-hooks'
+title: 'Aggregate Hooks - DDD Aggregate State Change Logging'
+description: 'Decorators and utilities for automatic logging of DDD aggregate state changes and domain event raising'
+business-context: 'DDD-specific logging integration providing automatic state change tracking, domain event logging, and aggregate operation monitoring for enterprise domain modeling'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  StateChangeLoggingOptions:
+    description: 'Configuration options for aggregate state change logging'
+    business-context: 'Flexible configuration enabling customizable aggregate operation logging with state tracking and security considerations'
+
+    formats:
+      jsdoc:
+        description: 'Aggregate state change logging configuration'
+      cli:
+        description: |
+          ## StateChangeLoggingOptions Interface
+
+          Aggregate logging configuration providing:
+          - **Log Level Control**: Debug vs info level logging for different environments
+          - **State Value Inclusion**: Optional before/after state value logging
+          - **Security Masking**: Automatic masking of sensitive aggregate fields
+          - **Performance Control**: Configurable verbosity for production environments
+
+    properties:
+      - name: 'logLevel'
+        type: "'debug' | 'info'"
+        description: "Log level for aggregate operations (default: 'debug')"
+        optional: true
+        default: "'debug'"
+
+      - name: 'includeValues'
+        type: 'boolean'
+        description: 'Include before/after state values in logs (default: false for performance)'
+        optional: true
+        default: 'false'
+
+      - name: 'maskSensitiveFields'
+        type: 'boolean'
+        description: 'Apply data masking to sensitive aggregate fields (default: false)'
+        optional: true
+        default: 'false'
+
+    custom-tags:
+      since: '1.0.0'
+      ddd-integration: 'Designed specifically for DDD aggregate patterns'
+
+# === FUNCTIONS ===
+functions:
+  LogStateChanges:
+    description: 'Method decorator for automatic logging of aggregate state changes with before/after comparison'
+    business-context: 'Provides comprehensive aggregate operation monitoring enabling audit trails, debugging support, and business rule enforcement tracking in DDD implementations'
+
+    parameters:
+      - name: 'options'
+        type: 'StateChangeLoggingOptions'
+        description: 'Optional state change logging configuration'
+        optional: true
+        default: '{}'
+
+    returns:
+      type: 'MethodDecorator'
+      description: 'Decorator function that wraps aggregate methods with state change logging'
+
+    examples:
+      - id: 'basic-state-change-logging'
+        code: |
+          class OrderAggregate extends AggregateRoot {
+            @LogStateChanges()
+            addItem(item: OrderItem): void {
+              // Automatic logging:
+              // DEBUG [OrderAggregate] [Aggregate] Executing addItem {"aggregateId":"order-123","aggregateType":"OrderAggregate","method":"addItem"}
+              
+              this.items.push(item);
+              this.recalculateTotal();
+              
+              // DEBUG [OrderAggregate] [Aggregate] addItem completed {"aggregateId":"order-123","aggregateType":"OrderAggregate","method":"addItem","success":true}
+            }
+            
+            @LogStateChanges({ includeValues: true, logLevel: 'info' })
+            changeStatus(newStatus: OrderStatus): void {
+              // Logs include before/after state values for audit trail
+              const oldStatus = this.status;
+              this.status = newStatus;
+              this.addDomainEvent(new OrderStatusChangedEvent(this.id, oldStatus, newStatus));
+            }
+          }
+
+      - id: 'enterprise-aggregate-logging'
+        code: |
+          class PaymentAggregate extends AggregateRoot {
+            @LogStateChanges({
+              logLevel: 'info',
+              includeValues: false,      // Security: don't log payment details
+              maskSensitiveFields: true
+            })
+            processPayment(amount: Money, creditCard: CreditCard): void {
+              // Secure logging without sensitive payment data
+              if (this.status !== PaymentStatus.Pending) {
+                throw new InvalidPaymentStateError();
+              }
+              
+              this.status = PaymentStatus.Processing;
+              this.amount = amount;
+              // State changes logged without exposing sensitive data
+            }
+          }
+
+      - id: 'async-operations-logging'
+        code: |
+          class OrderAggregate extends AggregateRoot {
+            @LogStateChanges({ includeValues: true })
+            async processOrder(): Promise<void> {
+              // Decorator handles both sync and async operations
+              await this.validateOrderItems();
+              await this.reserveInventory();
+              
+              this.status = OrderStatus.Confirmed;
+              this.addDomainEvent(new OrderConfirmedEvent(this.id));
+              
+              // Async completion automatically logged with state changes
+            }
+          }
+
+    custom-tags:
+      since: '1.0.0'
+      decorator-type: 'Method decorator for aggregate state change tracking'
+      async-support: 'Handles both synchronous and asynchronous operations'
+
+  LogDomainEvents:
+    description: 'Method decorator for automatic logging of domain events raised by aggregate operations'
+    business-context: 'Provides comprehensive domain event tracking enabling event sourcing audit trails, integration monitoring, and business process visibility'
+
+    returns:
+      type: 'MethodDecorator'
+      description: 'Decorator function that wraps aggregate methods with domain event logging'
+
+    examples:
+      - id: 'domain-event-tracking'
+        code: |
+          class OrderAggregate extends AggregateRoot {
+            @LogDomainEvents()
+            createOrder(customerInfo: CustomerInfo, items: OrderItem[]): void {
+              // Method raises multiple domain events
+              this.addDomainEvent(new OrderCreatedEvent(this.id, customerInfo));
+              this.addDomainEvent(new InventoryReservationRequestedEvent(this.id, items));
+              
+              // Automatic logging:
+              // INFO [OrderAggregate] [Aggregate] Domain events raised {
+              //   "aggregateId": "order-123",
+              //   "aggregateType": "OrderAggregate", 
+              //   "method": "createOrder",
+              //   "eventsCount": 2,
+              //   "eventTypes": ["OrderCreatedEvent", "InventoryReservationRequestedEvent"]
+              // }
+            }
+            
+            @LogDomainEvents()
+            cancel(): void {
+              if (this.status === OrderStatus.Shipped) {
+                // No events raised, no logging
+                throw new CannotCancelShippedOrderError();
+              }
+              
+              this.status = OrderStatus.Cancelled;
+              this.addDomainEvent(new OrderCancelledEvent(this.id, this.reason));
+              
+              // Logs single event raised
+            }
+          }
+
+      - id: 'event-sourcing-integration'
+        code: |
+          class AuditableAggregate extends AggregateRoot {
+            @LogDomainEvents()
+            @LogStateChanges({ includeValues: true })
+            performBusinessOperation(operation: BusinessOperation): void {
+              // Combined state change and event logging for full audit trail
+              this.validateOperation(operation);
+              this.applyOperation(operation);
+              
+              this.addDomainEvent(new OperationPerformedEvent(this.id, operation));
+              
+              // Comprehensive logging:
+              // 1. State change logging with before/after values
+              // 2. Domain event logging with event types and count
+              // Perfect for event sourcing and compliance requirements
+            }
+          }
+
+    custom-tags:
+      since: '1.0.0'
+      decorator-type: 'Method decorator for domain event tracking'
+      event-sourcing: 'Supports event sourcing and audit trail requirements'
+
+# === PRIVATE FUNCTIONS ===
+private-functions:
+  getOrCreateAggregateLogger:
+    description: 'Internal utility for creating or retrieving cached aggregate logger instances'
+    business-context: 'Performance optimization ensuring single logger instance per aggregate with DDD-specific naming conventions'
+
+    parameters:
+      - name: 'instance'
+        type: 'any'
+        description: 'Aggregate instance to attach logger to'
+
+    returns:
+      type: 'Logger'
+      description: 'Logger instance with aggregate-specific context'
+
+# === CONSTANTS ===
+constants:
+  AggregateLoggingMixin:
+    description: 'Utility functions for aggregate logging that can be mixed into aggregate base classes'
+    business-context: 'Reusable logging utilities enabling consistent aggregate logging behavior across different aggregate implementations'
+
+    formats:
+      jsdoc:
+        description: 'Aggregate logging utility functions'
+      cli:
+        description: |
+          ## AggregateLoggingMixin Constant
+
+          Utility functions providing:
+          - **Success Logging**: Standardized success operation logging
+          - **Error Logging**: Consistent error operation logging  
+          - **State Comparison**: Before/after state change detection
+          - **Mixin Pattern**: Reusable across different aggregate implementations
+
+    methods:
+      logStateChangeSuccess:
+        description: 'Logs successful aggregate operation completion with state change information'
+        business-context: 'Provides standardized success logging with optional state comparison for audit trails'
+
+        parameters:
+          - name: 'logger'
+            type: 'Logger'
+            description: 'Logger instance for output'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Name of the aggregate method that completed'
+          - name: 'stateBefore'
+            type: 'any'
+            description: 'Aggregate state before operation'
+          - name: 'options'
+            type: 'StateChangeLoggingOptions'
+            description: 'Logging configuration options'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+      logStateChangeError:
+        description: 'Logs aggregate operation failure with error context'
+        business-context: 'Provides standardized error logging for aggregate operation failures'
+
+        parameters:
+          - name: 'logger'
+            type: 'Logger'
+            description: 'Logger instance for output'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Name of the aggregate method that failed'
+          - name: 'error'
+            type: 'any'
+            description: 'Error that caused the operation failure'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+# === EXAMPLES ===
+examples:
+  comprehensive-aggregate-logging:
+    description: 'Enterprise aggregate with comprehensive logging setup'
+    code: |
+      import { LogStateChanges, LogDomainEvents, AggregateLoggingMixin } from '@vytches/ddd-logging';
+      import { AggregateRoot } from '@vytches/ddd-aggregates';
+
+      class EnterpriseOrderAggregate extends AggregateRoot {
+        constructor(id: EntityId<OrderId>) {
+          super({ id });
+          // Mixin logging utilities
+          Object.assign(this, AggregateLoggingMixin);
+        }
+        
+        @LogStateChanges({
+          logLevel: 'info',
+          includeValues: false,  // Performance: don't log large order data
+          maskSensitiveFields: true
+        })
+        @LogDomainEvents()
+        createOrder(customerInfo: CustomerInfo, items: OrderItem[]): void {
+          this.validateCustomerInfo(customerInfo);
+          this.validateOrderItems(items);
+          
+          this.customerInfo = customerInfo;
+          this.items = items;
+          this.status = OrderStatus.Created;
+          this.createdAt = new Date();
+          
+          // Raise domain events
+          this.addDomainEvent(new OrderCreatedEvent(this.id, customerInfo, items));
+          this.addDomainEvent(new InventoryReservationRequestedEvent(this.id, items));
+          
+          // Combined logging output:
+          // INFO [OrderAggregate] [Aggregate] Executing createOrder {"aggregateId":"order-123","aggregateType":"EnterpriseOrderAggregate","method":"createOrder"}
+          // INFO [OrderAggregate] [Aggregate] Domain events raised {"aggregateId":"order-123","aggregateType":"EnterpriseOrderAggregate","method":"createOrder","eventsCount":2,"eventTypes":["OrderCreatedEvent","InventoryReservationRequestedEvent"]}
+          // INFO [OrderAggregate] [Aggregate] createOrder completed {"aggregateId":"order-123","aggregateType":"EnterpriseOrderAggregate","method":"createOrder","success":true}
+        }
+        
+        @LogStateChanges({ logLevel: 'info', includeValues: true })
+        @LogDomainEvents()
+        async processPayment(paymentInfo: PaymentInfo): Promise<void> {
+          if (this.status !== OrderStatus.Created) {
+            throw new InvalidOrderStateError('Cannot process payment for non-created order');
+          }
+          
+          const paymentResult = await this.paymentService.processPayment(paymentInfo);
+          
+          this.paymentInfo = paymentResult;
+          this.status = OrderStatus.PaymentProcessed;
+          this.paidAt = new Date();
+          
+          this.addDomainEvent(new PaymentProcessedEvent(this.id, paymentResult));
+          
+          // Async operation logging with state values for audit
+        }
+        
+        // Optional: Custom state capture for logging
+        captureState() {
+          return {
+            status: this.status,
+            itemCount: this.items.length,
+            totalAmount: this.calculateTotal(),
+            lastModified: this.updatedAt
+          };
+        }
+        
+        // Optional: Custom state comparison
+        hasStateChanged(stateBefore: any, stateAfter: any): boolean {
+          return stateBefore.status !== stateAfter.status ||
+                 stateBefore.itemCount !== stateAfter.itemCount ||
+                 stateBefore.totalAmount !== stateAfter.totalAmount;
+        }
+      }
+
+  audit-trail-integration:
+    description: 'Aggregate logging for compliance and audit trail requirements'
+    code: |
+      class AuditablePaymentAggregate extends AggregateRoot {
+        @LogStateChanges({
+          logLevel: 'info',
+          includeValues: true,    // Compliance: full audit trail
+          maskSensitiveFields: true  // Security: mask PII/PCI data
+        })
+        @LogDomainEvents()
+        authorizePayment(amount: Money, paymentMethod: PaymentMethod): void {
+          // Compliance logging captures all state changes
+          this.validatePaymentAmount(amount);
+          this.validatePaymentMethod(paymentMethod);
+          
+          const authorizationId = this.generateAuthorizationId();
+          
+          this.status = PaymentStatus.Authorized;
+          this.authorizedAmount = amount;
+          this.authorizationId = authorizationId;
+          this.authorizedAt = new Date();
+          
+          this.addDomainEvent(new PaymentAuthorizedEvent(
+            this.id,
+            authorizationId,
+            amount,
+            paymentMethod
+          ));
+          
+          // Full audit trail with masked sensitive data:
+          // INFO [PaymentAggregate] [Aggregate] Executing authorizePayment
+          // INFO [PaymentAggregate] [Aggregate] Domain events raised {"eventTypes":["PaymentAuthorizedEvent"]}
+          // INFO [PaymentAggregate] [Aggregate] authorizePayment completed {
+          //   "stateChanged": true,
+          //   "stateBefore": {"status":"Pending","authorizedAmount":null},
+          //   "stateAfter": {"status":"Authorized","authorizedAmount":"[MASKED]"}
+          // }
+        }
+      }
+
+  performance-optimized-logging:
+    description: 'Production-optimized aggregate logging configuration'
+    code: |
+      class ProductionOrderAggregate extends AggregateRoot {
+        @LogStateChanges({
+          logLevel: 'debug',      // Lower verbosity in production
+          includeValues: false,   // Performance: avoid state serialization
+          maskSensitiveFields: true
+        })
+        @LogDomainEvents()
+        updateOrderStatus(newStatus: OrderStatus, reason?: string): void {
+          // Minimal logging for high-throughput operations
+          const oldStatus = this.status;
+          
+          if (!this.canTransitionTo(newStatus)) {
+            throw new InvalidStatusTransitionError(oldStatus, newStatus);
+          }
+          
+          this.status = newStatus;
+          this.statusReason = reason;
+          this.updatedAt = new Date();
+          
+          this.addDomainEvent(new OrderStatusChangedEvent(
+            this.id,
+            oldStatus,
+            newStatus,
+            reason
+          ));
+          
+          // Minimal production logging:
+          // DEBUG [OrderAggregate] [Aggregate] updateOrderStatus completed {"success":true}
+          // INFO [OrderAggregate] [Aggregate] Domain events raised {"eventsCount":1,"eventTypes":["OrderStatusChangedEvent"]}
+        }
+      }
+
+  event-sourcing-aggregate:
+    description: 'Event-sourced aggregate with comprehensive domain event logging'
+    code: |
+      class EventSourcedAccountAggregate extends AggregateRoot {
+        @LogDomainEvents()
+        @LogStateChanges({ includeValues: true })
+        debit(amount: Money, reference: string): void {
+          // Event sourcing: state changes through events
+          if (this.balance.isLessThan(amount)) {
+            throw new InsufficientFundsError(this.balance, amount);
+          }
+          
+          // Apply event (changes state)
+          this.apply(new AccountDebitedEvent(this.id, amount, reference));
+          
+          // Comprehensive logging for event sourcing:
+          // 1. State change before/after event application
+          // 2. Domain events raised for event store
+          // Perfect for event sourcing audit requirements
+        }
+        
+        @LogDomainEvents()
+        @LogStateChanges({ includeValues: true })
+        credit(amount: Money, reference: string): void {
+          this.apply(new AccountCreditedEvent(this.id, amount, reference));
+        }
+        
+        // Event sourcing: reconstruct from events
+        static fromHistory(events: DomainEvent[]): EventSourcedAccountAggregate {
+          const aggregate = new EventSourcedAccountAggregate(events[0].aggregateId);
+          
+          events.forEach(event => {
+            aggregate.apply(event, { isReplay: true });
+          });
+          
+          return aggregate;
+        }
+      }

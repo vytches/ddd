@@ -1,0 +1,277 @@
+# EntityId Interfaces - Foundation Layer Contracts
+# Core interface definitions for entity identification
+
+# === FILE METADATA ===
+file-name: 'entity-id.interfaces'
+title: 'EntityId Interfaces - Foundation Contracts'
+description: 'Core interface definitions for entity identification in the DDD framework'
+business-context: 'Provides standardized contracts for entity identification across all bounded contexts'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  IdType:
+    description: 'Union type defining supported entity identifier formats'
+    business-context: 'Enables type-safe identifier classification across different persistence and integration scenarios'
+
+    formats:
+      jsdoc:
+        description: "Union type for entity identifier formats: 'uuid' | 'integer' | 'text' | 'bigint'"
+      cli:
+        description: |
+          ## Supported ID Types
+
+          - **'uuid'**: Globally unique identifiers for distributed systems
+          - **'integer'**: Numeric identifiers for database integration  
+          - **'text'**: Human-readable identifiers for domain entities
+          - **'bigint'**: Large-scale numeric identifiers for enterprise systems
+
+    values:
+      - name: 'uuid'
+        description: 'Universally unique identifier format'
+        business-use: 'Distributed systems, microservices, event sourcing'
+      - name: 'integer'
+        description: 'Numeric identifier format'
+        business-use: 'Database primary keys, sequential numbering'
+      - name: 'text'
+        description: 'Human-readable text format'
+        business-use: 'User-friendly identifiers, codes, slugs'
+      - name: 'bigint'
+        description: 'Large integer identifier format'
+        business-use: 'High-scale systems, large datasets'
+
+  EntityId:
+    description: 'Type alias for EntityId interface providing generic entity identification'
+    business-context: 'Simplifies type declarations while maintaining interface contract compliance'
+
+    formats:
+      jsdoc:
+        description: 'Generic type alias for IEntityId<T> interface'
+      cli:
+        description: |
+          ## EntityId Type
+
+          Type alias that simplifies EntityId usage while maintaining full interface compliance.
+          Equivalent to IEntityId<T> but with cleaner syntax for common use cases.
+
+# === INTERFACES ===
+interfaces:
+  IEntityId:
+    description: 'Core interface contract for entity identification in DDD systems'
+    business-context: 'Standardizes entity identity behavior across aggregates, repositories, and domain services'
+
+    formats:
+      jsdoc:
+        description: 'Foundation interface for all entity identifiers'
+        business-context: 'Core DDD identity contract with validation and comparison'
+      cli:
+        description: |
+          ## IEntityId Interface
+
+          The foundational interface for all entity identifiers in VytchesDDD.
+
+          **Key Features:**
+          - Generic type support for flexible value types
+          - Built-in validation and comparison
+          - Serialization support for persistence
+          - Type-safe identifier classification
+
+    generic-parameters:
+      - name: 'T'
+        description: 'The type of the identifier value'
+        default: 'unknown'
+
+    properties:
+      - name: 'value'
+        type: 'T'
+        description: 'The actual identifier value (readonly)'
+        business-context: 'Immutable identifier value ensuring entity identity consistency'
+        readonly: true
+
+    methods:
+      getValue:
+        description: 'Retrieves the raw identifier value'
+        business-context: 'Provides access to underlying value for comparison and serialization'
+
+        returns:
+          type: 'T'
+          description: 'The raw identifier value'
+
+      getType:
+        description: 'Returns the identifier type classification'
+        business-context: 'Enables type-aware processing and validation workflows'
+
+        returns:
+          type: 'IdType'
+          description: 'The identifier type (uuid, integer, text, bigint)'
+
+      validate:
+        description: 'Validates the identifier value according to type rules'
+        business-context: 'Ensures identifier integrity before persistence or processing'
+
+        parameters:
+          - name: 'value'
+            type: 'T'
+            description: 'The value to validate'
+
+        returns:
+          type: 'boolean'
+          description: 'True if the value is valid for this identifier type'
+
+      equals:
+        description: 'Compares two entity identifiers for equality'
+        business-context: 'Essential for entity comparison in aggregates and repositories'
+
+        parameters:
+          - name: 'other'
+            type: 'IEntityId<T>'
+            description: 'The other identifier to compare against'
+
+        returns:
+          type: 'boolean'
+          description: 'True if identifiers have equal values and types'
+
+      isType:
+        description: 'Checks if identifier matches a specific type'
+        business-context: 'Enables type-specific processing and validation branches'
+
+        parameters:
+          - name: 'type'
+            type: 'IdType'
+            description: 'The type to check against'
+
+        returns:
+          type: 'boolean'
+          description: 'True if identifier matches the specified type'
+
+      toString:
+        description: 'Returns string representation for display and logging'
+        business-context: 'Supports debugging, logging, and user interface display'
+
+        returns:
+          type: 'string'
+          description: 'String representation of the identifier'
+
+      toJSON:
+        description: 'Serializes identifier to JSON format'
+        business-context: 'Enables persistence, API communication, and event serialization'
+
+        returns:
+          type: 'string'
+          description: 'JSON string containing value and type information'
+
+  IEntityIdConstructorParams:
+    description: 'Interface defining constructor parameters for EntityId creation'
+    business-context: 'Standardizes EntityId construction across different factory methods and implementations'
+
+    formats:
+      jsdoc:
+        description: 'Constructor parameters interface for EntityId creation'
+      cli:
+        description: |
+          ## IEntityIdConstructorParams
+
+          Defines the standard structure for EntityId constructor parameters,
+          ensuring consistent initialization across all factory methods.
+
+    generic-parameters:
+      - name: 'T'
+        description: 'The type of the identifier value'
+        default: 'unknown'
+
+    properties:
+      - name: 'value'
+        type: 'T'
+        description: 'The identifier value to store'
+        business-context: 'The actual identifier data'
+
+      - name: 'type'
+        type: 'IdType'
+        description: 'The classification of the identifier'
+        business-context: 'Determines validation rules and processing behavior'
+
+  IEntityIdFactory:
+    description: 'Factory interface for creating EntityId instances with different formats'
+    business-context: 'Provides standardized creation methods for all supported identifier types'
+
+    formats:
+      jsdoc:
+        description: 'Factory interface for EntityId creation with validation'
+      cli:
+        description: |
+          ## IEntityIdFactory Interface
+
+          Factory pattern interface providing standardized methods for creating
+          EntityId instances with proper validation for each supported type.
+
+          **Supported Creation Methods:**
+          - Random UUID generation
+          - Validated UUID from string
+          - Integer validation and conversion
+          - BigInt support for large numbers
+          - Text validation with character restrictions
+
+    methods:
+      createWithRandomUUID:
+        description: 'Creates EntityId with automatically generated UUID'
+        business-context: 'Provides unique identifier generation without external dependencies'
+
+        returns:
+          type: 'IEntityId<string>'
+          description: 'New EntityId with randomly generated UUID'
+
+      fromUUID:
+        description: 'Creates EntityId from UUID string with format validation'
+        business-context: 'Ensures UUID compliance for distributed system compatibility'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'UUID string to validate and convert'
+
+        returns:
+          type: 'IEntityId<string>'
+          description: 'New EntityId with validated UUID'
+
+      fromInteger:
+        description: 'Creates EntityId from integer with non-negative validation'
+        business-context: 'Supports database primary key integration with validation'
+
+        parameters:
+          - name: 'value'
+            type: 'number'
+            description: 'Integer value to validate (must be non-negative)'
+
+        returns:
+          type: 'IEntityId<string>'
+          description: 'New EntityId with validated integer (stored as string)'
+
+      fromBigInt:
+        description: 'Creates EntityId from bigint for large-scale identifiers'
+        business-context: 'Supports enterprise-scale numeric identifiers'
+
+        parameters:
+          - name: 'value'
+            type: 'string | bigint'
+            description: 'BigInt value as primitive or string representation'
+
+        returns:
+          type: 'IEntityId<string>'
+          description: 'New EntityId with validated bigint'
+
+      fromText:
+        description: 'Creates EntityId from text with character validation'
+        business-context: 'Ensures text identifiers use safe characters for URLs and systems'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'Text string (alphanumeric plus underscore/hyphen only)'
+
+        returns:
+          type: 'IEntityId<string>'
+          description: 'New EntityId with validated text'

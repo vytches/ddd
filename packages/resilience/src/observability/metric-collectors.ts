@@ -4,16 +4,16 @@
  */
 
 import type {
-  Metric,
+  BulkheadMetrics,
+  CircuitBreakerMetrics,
+  HistogramBucket,
   HistogramMetric,
-  TimerMetric,
+  Metric,
   MetricCollector,
   MetricLabels,
-  HistogramBucket,
-  CircuitBreakerMetrics,
   RetryMetrics,
-  BulkheadMetrics,
   TimeoutMetrics,
+  TimerMetric,
 } from './metrics-interfaces';
 
 /**
@@ -92,23 +92,6 @@ abstract class BaseMetricCollector implements MetricCollector {
   }
 }
 
-/**
- * @llm-summary CircuitBreakerMetricCollector class for circuit breaker metric collector operations
- * @llm-domain Infrastructure
- * @llm-complexity Expert
- *
- * @description
- * CircuitBreakerMetricCollector class implementing infrastructure service for circuit breaker metric collector operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CircuitBreakerMetricCollector();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class CircuitBreakerMetricCollector extends BaseMetricCollector {
   private metrics: CircuitBreakerMetrics;
   private executionTimes: number[] = [];
@@ -289,23 +272,6 @@ export class CircuitBreakerMetricCollector extends BaseMetricCollector {
   }
 }
 
-/**
- * @llm-summary RetryMetricCollector class for retry metric collector operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * RetryMetricCollector class implementing infrastructure service for retry metric collector operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new RetryMetricCollector();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class RetryMetricCollector extends BaseMetricCollector {
   private metrics: RetryMetrics;
   private executionTimes: number[] = [];
@@ -445,23 +411,6 @@ export class RetryMetricCollector extends BaseMetricCollector {
   }
 }
 
-/**
- * @llm-summary BulkheadMetricCollector class for bulkhead metric collector operations
- * @llm-domain Infrastructure
- * @llm-complexity Expert
- *
- * @description
- * BulkheadMetricCollector class implementing infrastructure service for bulkhead metric collector operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BulkheadMetricCollector();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class BulkheadMetricCollector extends BaseMetricCollector {
   private metrics: BulkheadMetrics;
   private executionTimes: number[] = [];
@@ -609,23 +558,6 @@ export class BulkheadMetricCollector extends BaseMetricCollector {
   }
 }
 
-/**
- * @llm-summary TimeoutMetricCollector class for timeout metric collector operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * TimeoutMetricCollector class implementing infrastructure service for timeout metric collector operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TimeoutMetricCollector();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class TimeoutMetricCollector extends BaseMetricCollector {
   private metrics: TimeoutMetrics;
   private executionTimes: number[] = [];

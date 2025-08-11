@@ -1,33 +1,33 @@
 # Aggregate Errors - Universal Enhanced Metadata System V2
 
 # === FILE METADATA ===
-file-name: "aggregate-errors"
-title: "Aggregate Error Classes"
-description: "Comprehensive error classes for aggregate-specific domain errors"
-business-context: "Provides specialized error handling for aggregate operations including versioning, snapshots, and event sourcing"
+file-name: 'aggregate-errors'
+title: 'Aggregate Error Classes'
+description: 'Comprehensive error classes for aggregate-specific domain errors'
+business-context: 'Provides specialized error handling for aggregate operations including versioning, snapshots, and event sourcing'
 
 # === HIERARCHY ===
 hierarchy:
-  strategy: "merge"
-  scope: "file"
+  strategy: 'merge'
+  scope: 'file'
 
 # === CLASSES ===
 classes:
   AggregateError:
     # JSDoc Configuration
     jsdoc:
-      placement-strategy: "separate"
-      class-documentation: "enabled"
-      
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
     # Class Documentation
     class-doc:
-      description: "Comprehensive error class for aggregate-specific domain errors"
-      business-context: "Centralizes all aggregate-related error scenarios for consistent error handling across the domain"
-      
+      description: 'Comprehensive error class for aggregate-specific domain errors'
+      business-context: 'Centralizes all aggregate-related error scenarios for consistent error handling across the domain'
+
       # Format-specific
       formats:
         jsdoc:
-          description: "Domain error for aggregate-specific failures"
+          description: 'Domain error for aggregate-specific failures'
         cli:
           description: |
             ## AggregateError
@@ -36,66 +36,66 @@ classes:
             - Snapshot issues
             - Event sourcing errors
             - Configuration problems
-      
+
       custom-tags:
-        since: "1.0.0"
-        domain: "aggregates"
-    
+        since: '1.0.0'
+        domain: 'aggregates'
+
     # Methods
     methods:
       invalidArguments:
-        description: "Creates an error for invalid arguments provided to the aggregate"
-        business-context: "Validates input parameters for aggregate operations"
-        
+        description: 'Creates an error for invalid arguments provided to the aggregate'
+        business-context: 'Validates input parameters for aggregate operations'
+
         parameters:
-          - name: "message"
-            type: "string"
-            description: "Error message describing the invalid arguments"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context and metadata"
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the invalid arguments'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context and metadata'
             optional: true
-            
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "invalid-args"
+          - id: 'invalid-args'
             code: |
               throw AggregateError.invalidArguments(
                 'Aggregate ID cannot be empty',
                 { context: { providedId: null } }
               );
-              
+
         custom-tags:
-          static: "true"
-          validation: "input"
+          static: 'true'
+          validation: 'input'
 
       versionConflict:
-        description: "Creates an error for version conflicts in optimistic concurrency control"
-        business-context: "Detects concurrent modifications to prevent data corruption"
-        
+        description: 'Creates an error for version conflicts in optimistic concurrency control'
+        business-context: 'Detects concurrent modifications to prevent data corruption'
+
         parameters:
-          - name: "aggregateType"
-            type: "string"
-            description: "Type/name of the aggregate"
-          - name: "aggregateId"
-            type: "string | number"
-            description: "Unique identifier of the aggregate"
-          - name: "currentVersion"
-            type: "number"
-            description: "Current version in the system"
-          - name: "expectedVersion"
-            type: "number"
-            description: "Expected version from the client"
-            
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type/name of the aggregate'
+          - name: 'aggregateId'
+            type: 'string | number'
+            description: 'Unique identifier of the aggregate'
+          - name: 'currentVersion'
+            type: 'number'
+            description: 'Current version in the system'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected version from the client'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance with version details"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance with version details'
+
         examples:
-          - id: "version-conflict"
+          - id: 'version-conflict'
             code: |
               throw AggregateError.versionConflict(
                 'OrderAggregate',
@@ -103,313 +103,313 @@ classes:
                 5,  // current version
                 3   // expected version
               );
-              
+
         custom-tags:
-          static: "true"
-          concurrency: "optimistic"
+          static: 'true'
+          concurrency: 'optimistic'
 
       featureNotEnabled:
-        description: "Creates an error when a required capability is not enabled"
-        business-context: "Ensures proper capability configuration before operations"
-        
+        description: 'Creates an error when a required capability is not enabled'
+        business-context: 'Ensures proper capability configuration before operations'
+
         parameters:
-          - name: "feature"
-            type: "string"
-            description: "Name of the required feature/capability"
-            
+          - name: 'feature'
+            type: 'string'
+            description: 'Name of the required feature/capability'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "feature-disabled"
+          - id: 'feature-disabled'
             code: |
               throw AggregateError.featureNotEnabled('EventSourcing');
-              
+
         custom-tags:
-          static: "true"
-          configuration: "required"
+          static: 'true'
+          configuration: 'required'
 
       methodNotImplemented:
-        description: "Creates an error when a required method is not implemented"
-        business-context: "Enforces implementation of required abstract methods"
-        
+        description: 'Creates an error when a required method is not implemented'
+        business-context: 'Enforces implementation of required abstract methods'
+
         parameters:
-          - name: "methodName"
-            type: "string"
-            description: "Name of the unimplemented method"
-          - name: "aggregateType"
-            type: "string"
-            description: "Type/class of the aggregate"
-            
+          - name: 'methodName'
+            type: 'string'
+            description: 'Name of the unimplemented method'
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type/class of the aggregate'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "not-implemented"
+          - id: 'not-implemented'
             code: |
               throw AggregateError.methodNotImplemented(
                 'applyOrderCreatedEvent',
                 'OrderAggregate'
               );
-              
+
         custom-tags:
-          static: "true"
-          abstract: "enforcement"
+          static: 'true'
+          abstract: 'enforcement'
 
       invalidSnapshot:
-        description: "Creates an error for invalid snapshot data"
-        business-context: "Validates snapshot integrity during restoration"
-        
+        description: 'Creates an error for invalid snapshot data'
+        business-context: 'Validates snapshot integrity during restoration'
+
         parameters:
-          - name: "aggregateType"
-            type: "string"
-            description: "Type of the aggregate"
-          - name: "reason"
-            type: "string"
-            description: "Reason for snapshot invalidity"
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type of the aggregate'
+          - name: 'reason'
+            type: 'string'
+            description: 'Reason for snapshot invalidity'
             optional: true
-            
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "invalid-snapshot"
+          - id: 'invalid-snapshot'
             code: |
               throw AggregateError.invalidSnapshot(
                 'UserAggregate',
                 'Missing required fields in snapshot'
               );
-              
+
         custom-tags:
-          static: "true"
-          snapshot: "validation"
+          static: 'true'
+          snapshot: 'validation'
 
       idMismatch:
-        description: "Creates an error for ID mismatch during snapshot restoration"
-        business-context: "Ensures snapshot belongs to the correct aggregate instance"
-        
+        description: 'Creates an error for ID mismatch during snapshot restoration'
+        business-context: 'Ensures snapshot belongs to the correct aggregate instance'
+
         parameters:
-          - name: "snapshotId"
-            type: "string | number"
-            description: "ID from the snapshot"
-          - name: "aggregateId"
-            type: "string | number"
-            description: "ID of the aggregate being restored"
-            
+          - name: 'snapshotId'
+            type: 'string | number'
+            description: 'ID from the snapshot'
+          - name: 'aggregateId'
+            type: 'string | number'
+            description: 'ID of the aggregate being restored'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "id-mismatch"
+          - id: 'id-mismatch'
             code: |
               throw AggregateError.idMismatch(
                 'snapshot-456',
                 'aggregate-123'
               );
-              
+
         custom-tags:
-          static: "true"
-          snapshot: "validation"
+          static: 'true'
+          snapshot: 'validation'
 
       typeMismatch:
-        description: "Creates an error for type mismatch during snapshot restoration"
-        business-context: "Ensures type safety when restoring aggregates from snapshots"
-        
+        description: 'Creates an error for type mismatch during snapshot restoration'
+        business-context: 'Ensures type safety when restoring aggregates from snapshots'
+
         parameters:
-          - name: "snapshotType"
-            type: "string"
-            description: "Type specified in the snapshot"
-          - name: "aggregateType"
-            type: "string"
-            description: "Type of the aggregate being restored"
-            
+          - name: 'snapshotType'
+            type: 'string'
+            description: 'Type specified in the snapshot'
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type of the aggregate being restored'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "type-mismatch"
+          - id: 'type-mismatch'
             code: |
               throw AggregateError.typeMismatch(
                 'OrderSnapshot',
                 'UserAggregate'
               );
-              
+
         custom-tags:
-          static: "true"
-          type-safety: "runtime"
+          static: 'true'
+          type-safety: 'runtime'
 
       duplicateUpcaster:
-        description: "Creates an error for duplicate upcaster registration"
-        business-context: "Prevents conflicting event migration strategies"
-        
+        description: 'Creates an error for duplicate upcaster registration'
+        business-context: 'Prevents conflicting event migration strategies'
+
         parameters:
-          - name: "eventType"
-            type: "string"
-            description: "Type of the event"
-          - name: "sourceVersion"
-            type: "number"
-            description: "Source version of the upcaster"
-            
+          - name: 'eventType'
+            type: 'string'
+            description: 'Type of the event'
+          - name: 'sourceVersion'
+            type: 'number'
+            description: 'Source version of the upcaster'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "duplicate-upcaster"
+          - id: 'duplicate-upcaster'
             code: |
               throw AggregateError.duplicateUpcaster(
                 'OrderCreatedEvent',
                 1
               );
-              
+
         custom-tags:
-          static: "true"
-          event-migration: "configuration"
+          static: 'true'
+          event-migration: 'configuration'
 
       missingUpcaster:
-        description: "Creates an error when required upcaster is not found"
-        business-context: "Ensures event version compatibility during replay"
-        
+        description: 'Creates an error when required upcaster is not found'
+        business-context: 'Ensures event version compatibility during replay'
+
         parameters:
-          - name: "eventType"
-            type: "string"
-            description: "Type of the event"
-          - name: "fromVersion"
-            type: "number"
-            description: "Current version of the event"
-          - name: "toVersion"
-            type: "number"
-            description: "Target version needed"
-            
+          - name: 'eventType'
+            type: 'string'
+            description: 'Type of the event'
+          - name: 'fromVersion'
+            type: 'number'
+            description: 'Current version of the event'
+          - name: 'toVersion'
+            type: 'number'
+            description: 'Target version needed'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "missing-upcaster"
+          - id: 'missing-upcaster'
             code: |
               throw AggregateError.missingUpcaster(
                 'OrderCreatedEvent',
                 1,  // from version
                 3   // to version
               );
-              
+
         custom-tags:
-          static: "true"
-          event-migration: "required"
+          static: 'true'
+          event-migration: 'required'
 
       configurationError:
-        description: "Creates an error for aggregate configuration problems"
-        business-context: "Validates aggregate setup and initialization"
-        
+        description: 'Creates an error for aggregate configuration problems'
+        business-context: 'Validates aggregate setup and initialization'
+
         parameters:
-          - name: "aggregateType"
-            type: "string"
-            description: "Type of the aggregate"
-          - name: "message"
-            type: "string"
-            description: "Configuration error message"
-            
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type of the aggregate'
+          - name: 'message'
+            type: 'string'
+            description: 'Configuration error message'
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "config-error"
+          - id: 'config-error'
             code: |
               throw AggregateError.configurationError(
                 'PaymentAggregate',
                 'Missing required payment processor configuration'
               );
-              
+
         custom-tags:
-          static: "true"
-          configuration: "validation"
+          static: 'true'
+          configuration: 'validation'
 
       cannotInterceptApplyMethod:
-        description: "Creates an error when apply method interception fails"
-        business-context: "Ensures proper event handling method setup"
-        
+        description: 'Creates an error when apply method interception fails'
+        business-context: 'Ensures proper event handling method setup'
+
         parameters:
-          - name: "aggregateId"
-            type: "string"
+          - name: 'aggregateId'
+            type: 'string'
             description: "ID of the aggregate (note: typo in original 'aggergateId')"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
             optional: true
-            
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "intercept-failed"
+          - id: 'intercept-failed'
             code: |
               throw AggregateError.cannotInterceptApplyMethod(
                 'order-123',
                 { context: { method: 'applyOrderCreated' } }
               );
-              
+
         custom-tags:
-          static: "true"
-          event-handling: "setup"
+          static: 'true'
+          event-handling: 'setup'
 
       eventStoreNotConfigured:
-        description: "Creates an error when event store is not configured"
-        business-context: "Ensures event persistence infrastructure is available"
-        
+        description: 'Creates an error when event store is not configured'
+        business-context: 'Ensures event persistence infrastructure is available'
+
         parameters:
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
             optional: true
-            
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "no-event-store"
+          - id: 'no-event-store'
             code: |
               throw AggregateError.eventStoreNotConfigured({
                 context: { operation: 'save' }
               });
-              
+
         custom-tags:
-          static: "true"
-          infrastructure: "required"
+          static: 'true'
+          infrastructure: 'required'
 
       aggregateDoesNotSupportReplay:
-        description: "Creates an error when aggregate does not support event replay"
-        business-context: "Validates event sourcing capability requirements"
-        
+        description: 'Creates an error when aggregate does not support event replay'
+        business-context: 'Validates event sourcing capability requirements'
+
         parameters:
-          - name: "aggregateType"
-            type: "string"
-            description: "Type of the aggregate"
-          - name: "data"
-            type: "DomainErrorOptions"
-            description: "Additional error context"
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type of the aggregate'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
             optional: true
-            
+
         returns:
-          type: "AggregateError"
-          description: "Configured error instance"
-          
+          type: 'AggregateError'
+          description: 'Configured error instance'
+
         examples:
-          - id: "no-replay-support"
+          - id: 'no-replay-support'
             code: |
               throw AggregateError.aggregateDoesNotSupportReplay(
                 'SimpleAggregate',
                 { context: { capability: 'EventSourcing' } }
               );
-              
+
         custom-tags:
-          static: "true"
-          event-sourcing: "required"
+          static: 'true'
+          event-sourcing: 'required'

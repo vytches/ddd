@@ -82,11 +82,11 @@ export class EntityIdFactory implements IEntityIdFactory {
   static createWithRandomUUID(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
   }
-  
+
   /**
-  * @throws {MissingValueError} if value is empty
-  * @throws {InvalidParameterError} if value is empty
-  */
+   * @throws {MissingValueError} if value is empty
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromUUID(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
@@ -100,8 +100,8 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
-  * @throws {InvalidParameterError} if value is empty
-  */
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromInteger(value: number): EntityId<string> {
     if (!LibUtils.isValidInteger(value)) {
       throw InvalidParameterError.withParameter('entity identifier must be a non-negative integer');
@@ -111,8 +111,8 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
-  * @throws {InvalidParameterError} if value is empty
-  */
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromBigInt(value: string | bigint): EntityId<string> {
     const stringValue = LibUtils.normalizeIdToString(value);
 
@@ -123,10 +123,10 @@ export class EntityIdFactory implements IEntityIdFactory {
     return new EntityId(stringValue, 'bigint');
   }
 
-    /**
-  * @throws {MissingValueError} if value is empty
-  * @throws {InvalidParameterError} if value is empty
-  */
+  /**
+   * @throws {MissingValueError} if value is empty
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromText(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');

@@ -3,35 +3,35 @@
 # Imported interfaces (IAggregateRoot, etc.) are documented in their own files
 
 # === FILE METADATA ===
-file-name: "aggregate-root"
-title: "AggregateRoot - Enterprise Aggregate Root Implementation"
-description: "Core aggregate root class with event sourcing capabilities and capability system"
-business-context: "Main aggregate implementation following DDD principles with enterprise capabilities"
+file-name: 'aggregate-root'
+title: 'AggregateRoot - Enterprise Aggregate Root Implementation'
+description: 'Core aggregate root class with event sourcing capabilities and capability system'
+business-context: 'Main aggregate implementation following DDD principles with enterprise capabilities'
 
 # === GLOBAL HIERARCHY ===
 hierarchy:
-  strategy: "merge"
-  scope: "file"
+  strategy: 'merge'
+  scope: 'file'
 
 # === CLASSES (only what's defined in THIS file) ===
 classes:
   AggregateRoot:
     # === CLASS-LEVEL JSDOC CONFIGURATION ===
     jsdoc:
-      placement-strategy: "separate"     # Override: use separate strategy for this class
-      class-documentation: "enabled"    # Enable class-level JSDoc
-      constructor-documentation: "enabled" # Enable constructor JSDoc
-      content-strategy: "distinct"      # Different content for class vs constructor
+      placement-strategy: 'separate' # Override: use separate strategy for this class
+      class-documentation: 'enabled' # Enable class-level JSDoc
+      constructor-documentation: 'enabled' # Enable constructor JSDoc
+      content-strategy: 'distinct' # Different content for class vs constructor
 
     # === CLASS-LEVEL DOCUMENTATION ===
     class-doc:
-      description: "Enterprise aggregate root implementation with event sourcing and capability system"
-      business-context: "Core building block for domain aggregates following DDD principles and enterprise patterns"
+      description: 'Enterprise aggregate root implementation with event sourcing and capability system'
+      business-context: 'Core building block for domain aggregates following DDD principles and enterprise patterns'
 
       # Format-specific overrides for class documentation
       formats:
         jsdoc:
-          description: "Enterprise aggregate root with event sourcing capabilities"
+          description: 'Enterprise aggregate root with event sourcing capabilities'
         cli:
           description: |
             ## AggregateRoot - Enterprise Aggregate Pattern
@@ -42,21 +42,21 @@ classes:
             Provides event sourcing, capability system, and optimistic concurrency control.
 
       hierarchy:
-        strategy: "append"              # Replace global class defaults
-        scope: "class-doc"
+        strategy: 'append' # Replace global class defaults
+        scope: 'class-doc'
 
       custom-tags:
-        since: "1.0.0"
-        capabilities: "Supports extensible capability system for audit, versioning, and snapshots"
+        since: '1.0.0'
+        capabilities: 'Supports extensible capability system for audit, versioning, and snapshots'
 
         # Format-specific custom tags
         formats:
           jsdoc:
-            since: "1.0.0"
-            capabilities: "Extensible capability system (audit, versioning, snapshots)"
-            patterns: "Aggregate Root + Event Sourcing + Capability patterns"
+            since: '1.0.0'
+            capabilities: 'Extensible capability system (audit, versioning, snapshots)'
+            patterns: 'Aggregate Root + Event Sourcing + Capability patterns'
           cli:
-            since: "Version 1.0.0"
+            since: 'Version 1.0.0'
             capabilities: |
               **Capability System**:
               - Audit trails for compliance
@@ -64,38 +64,38 @@ classes:
               - Snapshots for performance optimization
 
     hierarchy:
-      strategy: "merge"
-      scope: "class"
+      strategy: 'merge'
+      scope: 'class'
 
     # custom-tags:
 
     methods:
       constructor:
-        description: "Creates new aggregate instance with unique identifier and initial configuration"
-        business-context: "Initializes aggregate for domain operations with specified ID and version"
+        description: 'Creates new aggregate instance with unique identifier and initial configuration'
+        business-context: 'Initializes aggregate for domain operations with specified ID and version'
 
         hierarchy:
-          strategy: "replace"            # Replace defaults for constructor-specific documentation
-          scope: "method"
+          strategy: 'replace' # Replace defaults for constructor-specific documentation
+          scope: 'method'
 
         parameters:
-          - name: "params"
-            type: "IAggregateConstructorParams<TId>"
-            description: "Aggregate construction parameters"
+          - name: 'params'
+            type: 'IAggregateConstructorParams<TId>'
+            description: 'Aggregate construction parameters'
             optional: false
 
         custom-tags:
-          sinceVersion: "0.0.1"
+          sinceVersion: '0.0.1'
 
         examples:
-          - id: "basic-construction"
+          - id: 'basic-construction'
             code: |
               const orderId = EntityId.createWithRandomUUID();
               const aggregate = new AggregateRoot({
                 id: orderId,
                 version: 0
               });
-          - id: "with-capabilities"
+          - id: 'with-capabilities'
             code: |
               const aggregate = new AggregateRoot({
                 id: EntityId.fromText('order-123'),
@@ -105,11 +105,11 @@ classes:
         # Format-specific overrides for constructor (consolidated)
         formats:
           jsdoc:
-            business-context: "Initializes new aggregate for business operations"
+            business-context: 'Initializes new aggregate for business operations'
             custom-tags:
-              sinceVersion: "0.0.1"
+              sinceVersion: '0.0.1'
             examples:
-              - id: "basic-jsdoc"
+              - id: 'basic-jsdoc'
                 code: |
                   const aggregate = new AggregateRoot({
                     id: EntityId.fromText('user-123'),
@@ -126,9 +126,9 @@ classes:
               **Use Case**: Create new aggregates when starting business processes
               **Best Practice**: Always provide unique ID and initial version
             custom-tags:
-              sinceVersion: "Available since version 0.0.1"
+              sinceVersion: 'Available since version 0.0.1'
             examples:
-              - id: "detailed-cli"
+              - id: 'detailed-cli'
                 code: |
                   // Step 1: Create unique identifier
                   const orderId = EntityId.createWithRandomUUID();
@@ -143,124 +143,124 @@ classes:
                   orderAggregate.addCapability(new AuditCapability());
 
       getId:
-        description: "Gets unique identifier of the aggregate"
+        description: 'Gets unique identifier of the aggregate'
         hierarchy:
-          strategy: "merge"
-          scope: "method"
+          strategy: 'merge'
+          scope: 'method'
         returns:
-          type: "EntityId<TId>"
-          description: "Strongly-typed aggregate identifier"
+          type: 'EntityId<TId>'
+          description: 'Strongly-typed aggregate identifier'
         examples:
-          - id: "get-id-basic"
+          - id: 'get-id-basic'
             code: |
               const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
               const id = aggregate.getId();
               console.log(id.toString()); // 'order-123'
 
       getVersion:
-        business-context: "Concurrency control in multi-user environments"
+        business-context: 'Concurrency control in multi-user environments'
         returns:
-          type: "number"
-          description: "Current version number for optimistic locking"
+          type: 'number'
+          description: 'Current version number for optimistic locking'
         examples:
-          - id: "version-tracking"
+          - id: 'version-tracking'
             code: |
               const aggregate = new AggregateRoot({ id, version: 5 });
               console.log(aggregate.getVersion()); // 5
-              
+
               aggregate.apply('OrderUpdated', { status: 'confirmed' });
               aggregate.commit();
               console.log(aggregate.getVersion()); // 6
 
       getInitialVersion:
-        description: "Gets initial version when aggregate was loaded"
-        business-context: "Tracking changes since loading for concurrency control"
+        description: 'Gets initial version when aggregate was loaded'
+        business-context: 'Tracking changes since loading for concurrency control'
         returns:
-          type: "number"
-          description: "Initial version when aggregate was loaded"
+          type: 'number'
+          description: 'Initial version when aggregate was loaded'
         examples:
-          - id: "initial-version"
+          - id: 'initial-version'
             code: |
               const aggregate = new AggregateRoot({ id, version: 10 });
               console.log(aggregate.getInitialVersion()); // 10
-              
+
               aggregate.apply('OrderUpdated', { status: 'shipped' });
               aggregate.commit();
-              
+
               console.log(aggregate.getVersion()); // 11
               console.log(aggregate.getInitialVersion()); // 11 (updated after commit)
 
       hasChanges:
-        description: "Checks if aggregate has uncommitted changes"
-        business-context: "Determines if persistence is needed"
+        description: 'Checks if aggregate has uncommitted changes'
+        business-context: 'Determines if persistence is needed'
         returns:
-          type: "boolean"
-          description: "True if there are pending domain events"
+          type: 'boolean'
+          description: 'True if there are pending domain events'
         examples:
-          - id: "check-changes"
+          - id: 'check-changes'
             code: |
               const aggregate = new AggregateRoot({ id });
               console.log(aggregate.hasChanges()); // false
-              
+
               aggregate.apply('OrderCreated', orderData);
               console.log(aggregate.hasChanges()); // true
-              
+
               aggregate.commit();
               console.log(aggregate.hasChanges()); // false
 
       getDomainEvents:
         hierarchy:
-          strategy: "replace"            # Replace defaults for constructor-specific documentation
-          scope: "method"
-        description: "Gets all uncommitted domain events"
-        business-context: "Access to pending domain events for persistence or inspection"
+          strategy: 'replace' # Replace defaults for constructor-specific documentation
+          scope: 'method'
+        description: 'Gets all uncommitted domain events'
+        business-context: 'Access to pending domain events for persistence or inspection'
         returns:
-          type: "ReadonlyArray<IExtendedDomainEvent>"
-          description: "Array of uncommitted domain events"
+          type: 'ReadonlyArray<IExtendedDomainEvent>'
+          description: 'Array of uncommitted domain events'
         examples:
-          - id: "get-pending-events"
+          - id: 'get-pending-events'
             code: |
               const aggregate = new AggregateRoot({ id });
-              
+
               aggregate.apply('OrderCreated', { customerId: 'cust-123' });
               aggregate.apply('ItemAdded', { productId: 'prod-456', quantity: 2 });
-              
+
               const events = aggregate.getDomainEvents();
               console.log(events.length); // 2
               console.log(events[0].eventType); // 'OrderCreated'
               console.log(events[1].eventType); // 'ItemAdded'
 
       apply:
-        description: "Applies domain event and updates aggregate state"
-        business-context: "Core method for recording business changes as domain events"
+        description: 'Applies domain event and updates aggregate state'
+        business-context: 'Core method for recording business changes as domain events'
 
         hierarchy:
-          strategy: "merge"
-          scope: "method"
+          strategy: 'merge'
+          scope: 'method'
 
         parameters:
-          - name: "eventTypeOrEvent"
-            type: "string | IExtendedDomainEvent<P>"
-            description: "Event type string or complete event object"
+          - name: 'eventTypeOrEvent'
+            type: 'string | IExtendedDomainEvent<P>'
+            description: 'Event type string or complete event object'
             optional: false
-          - name: "payload"
-            type: "P"
-            description: "Event payload containing business data"
+          - name: 'payload'
+            type: 'P'
+            description: 'Event payload containing business data'
             optional: true
-          - name: "metadata"
-            type: "Partial<IEventMetadata>"
-            description: "Optional event metadata"
+          - name: 'metadata'
+            type: 'Partial<IEventMetadata>'
+            description: 'Optional event metadata'
             optional: true
 
         returns:
-          type: "void"
-          description: "Method does not return value, modifies aggregate state"
+          type: 'void'
+          description: 'Method does not return value, modifies aggregate state'
 
         # Format-specific overrides for apply method
         formats:
           jsdoc:
             # description: "Applies domain event to aggregate and adds to pending events"
-            business-context: "Records business changes as domain events for persistence"
+            business-context: 'Records business changes as domain events for persistence'
           cli:
             description: |
               ### apply() - Domain Event Recording
@@ -269,45 +269,45 @@ classes:
               Events are queued for persistence until commit() is called.
 
         custom-tags:
-          warning: "Event is not persisted until save() is called"
-          event-sourcing: "Event is added to pending events for later persistence"
-          capability-support: "Automatically triggers enabled capabilities (audit, versioning)"
-          visibility: "protected"
+          warning: 'Event is not persisted until save() is called'
+          event-sourcing: 'Event is added to pending events for later persistence'
+          capability-support: 'Automatically triggers enabled capabilities (audit, versioning)'
+          visibility: 'protected'
 
         examples:
-          - id: "simple-event"
+          - id: 'simple-event'
             code: |
               aggregate.apply('OrderCreated', {
                 customerId: 'cust-123',
                 amount: 99.99,
                 currency: 'USD'
               });
-          - id: "event-chain"
+          - id: 'event-chain'
             code: |
               aggregate.apply('OrderCreated', { customerId, amount });
               aggregate.apply('PaymentRequested', { amount, method: 'credit-card' });
               aggregate.apply('InventoryReserved', { items: orderItems });
 
       commit:
-        description: "Commits pending events and increments version"
-        business-context: "Finalizes business transaction by clearing pending events"
+        description: 'Commits pending domain events'
+        business-context: 'Finalizes business transaction by clearing pending events'
 
         returns:
-          type: "void"
-          description: "Clears pending events and increments version"
+          type: 'void'
+          description: 'Clears pending events and increments version'
 
         custom-tags:
-          warning: "Clears pending events after commit"
+          warning: 'Clears pending events after commit'
           event-sourcing: "Events become part of aggregate's event history"
-          concurrency: "Version is incremented for optimistic concurrency control"
+          concurrency: 'Version is incremented for optimistic concurrency control'
 
         examples:
-          - id: "basic-commit"
+          - id: 'basic-commit'
             code: |
               aggregate.apply('OrderCreated', orderData);
               const events = aggregate.commit();
               console.log(`Committed ${events.length} events`);
-          - id: "with-persistence"
+          - id: 'with-persistence'
             code: |
               try {
                 aggregate.apply('OrderCreated', orderData);
@@ -319,32 +319,32 @@ classes:
               }
 
       loadFromHistory:
-        description: "Loads aggregate state from event history"
-        business-context: "Reconstructs aggregate state from historical domain events"
+        description: 'Loads aggregate state from event history'
+        business-context: 'Reconstructs aggregate state from historical domain events'
 
         parameters:
-          - name: "events"
-            type: "IExtendedDomainEvent[]"
-            description: "Array of historical domain events in chronological order"
+          - name: 'events'
+            type: 'IExtendedDomainEvent[]'
+            description: 'Array of historical domain events in chronological order'
             optional: false
 
         returns:
-          type: "void"
-          description: "Reconstructs aggregate state from events"
+          type: 'void'
+          description: 'Reconstructs aggregate state from events'
 
         custom-tags:
-          warning: "Clears current state before applying historical events"
-          event-sourcing: "Core event sourcing method for state reconstruction"
-          capability-support: "Replays events through enabled capabilities"
-          visibility: "protected"
+          warning: 'Clears current state before applying historical events'
+          event-sourcing: 'Core event sourcing method for state reconstruction'
+          capability-support: 'Replays events through enabled capabilities'
+          visibility: 'protected'
 
         examples:
-          - id: "simple-replay"
+          - id: 'simple-replay'
             code: |
               const events = await eventStore.getEvents(aggregateId);
               const aggregate = new AggregateRoot({ id: aggregateId });
               aggregate.loadFromHistory(events);
-          - id: "snapshot-replay"
+          - id: 'snapshot-replay'
             code: |
               const snapshot = await snapshotStore.getSnapshot(aggregateId);
               const eventsAfterSnapshot = await eventStore.getEventsAfter(
@@ -356,31 +356,31 @@ classes:
               aggregate.loadFromHistory(eventsAfterSnapshot);
 
       registerEventHandler:
-        description: "Registers handler for processing specific event types"
-        business-context: "Sets up domain event processing for aggregate behavior"
+        description: 'Registers handler for processing specific event types'
+        business-context: 'Sets up domain event processing for aggregate behavior'
 
         parameters:
-          - name: "eventType"
-            type: "string"
-            description: "Event type to register handler for"
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type to register handler for'
             optional: false
-          - name: "handler"
-            type: "IAggregateEventHandler<T>"
-            description: "Event handler function"
+          - name: 'handler'
+            type: 'IAggregateEventHandler<T>'
+            description: 'Event handler function'
             optional: false
 
         returns:
-          type: "this"
-          description: "Returns this for method chaining"
+          type: 'this'
+          description: 'Returns this for method chaining'
 
         custom-tags:
-          event-sourcing: "Part of event sourcing infrastructure"
-          internal-api: "Protected method for aggregate implementations"
-          visibility: "protected"
-          fluent: "Returns this for chaining"
+          event-sourcing: 'Part of event sourcing infrastructure'
+          internal-api: 'Protected method for aggregate implementations'
+          visibility: 'protected'
+          fluent: 'Returns this for chaining'
 
         examples:
-          - id: "event-handlers"
+          - id: 'event-handlers'
             code: |
               class OrderAggregate extends AggregateRoot {
                 constructor(params) {
@@ -396,30 +396,30 @@ classes:
               }
 
       addCapability:
-        description: "Adds capability instance to the aggregate"
-        business-context: "Extends aggregate with additional domain behaviors"
+        description: 'Adds capability instance to the aggregate'
+        business-context: 'Extends aggregate with additional domain behaviors'
 
         parameters:
-          - name: "capability"
-            type: "T extends Capability & IAggregateCapability"
-            description: "Capability instance to add to the aggregate"
+          - name: 'capability'
+            type: 'T extends Capability & IAggregateCapability'
+            description: 'Capability instance to add to the aggregate'
             optional: false
 
         returns:
-          type: "this"
-          description: "Returns this for method chaining"
+          type: 'this'
+          description: 'Returns this for method chaining'
 
         custom-tags:
-          capability-pattern: "Implements capability-based extension pattern"
-          extensibility: "Allows runtime behavior modification"
-          fluent: "Returns this for chaining"
+          capability-pattern: 'Implements capability-based extension pattern'
+          extensibility: 'Allows runtime behavior modification'
+          fluent: 'Returns this for chaining'
 
         examples:
-          - id: "single-capability"
+          - id: 'single-capability'
             code: |
               const aggregate = new AggregateRoot({ id, version: 0 });
               aggregate.addCapability(new AuditCapability());
-          - id: "chained-capabilities"
+          - id: 'chained-capabilities'
             code: |
               aggregate
                 .addCapability(new AuditCapability())
@@ -427,31 +427,31 @@ classes:
                 .addCapability(new ValidationCapability());
 
       getCapability:
-        description: "Gets capability instance by its constructor"
-        business-context: "Retrieves capability for accessing extended domain behaviors"
+        description: 'Gets capability instance by its constructor'
+        business-context: 'Retrieves capability for accessing extended domain behaviors'
 
         parameters:
-          - name: "CapabilityClass"
-            type: "CapabilityConstructor<T>"
-            description: "Constructor of the capability to retrieve"
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor of the capability to retrieve'
             optional: false
 
         returns:
-          type: "T | undefined"
-          description: "Capability instance or undefined if not found"
+          type: 'T | undefined'
+          description: 'Capability instance or undefined if not found'
 
         custom-tags:
-          performance: "O(1) capability lookup using constructor-based registry"
-          type-safety: "Uses constructor for type-safe capability retrieval"
+          performance: 'O(1) capability lookup using constructor-based registry'
+          type-safety: 'Uses constructor for type-safe capability retrieval'
 
         examples:
-          - id: "basic-retrieval"
+          - id: 'basic-retrieval'
             code: |
               const auditCap = aggregate.getCapability(AuditCapability);
               if (auditCap) {
                 const auditLog = auditCap.getAuditLog();
               }
-          - id: "chained-operations"
+          - id: 'chained-operations'
             code: |
               // Chain capability operations
               const snapshot = aggregate.getCapability(SnapshotCapability);
@@ -463,23 +463,23 @@ classes:
               }
 
       hasCapability:
-        description: "Checks if capability is present on aggregate"
-        business-context: "Verifies availability of specific domain behaviors"
+        description: 'Checks if capability is present on aggregate'
+        business-context: 'Verifies availability of specific domain behaviors'
 
         parameters:
-          - name: "CapabilityClass"
-            type: "CapabilityConstructor<T>"
-            description: "Constructor of the capability to check"
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor of the capability to check'
             optional: false
 
         returns:
-          type: "boolean"
-          description: "True if capability is present"
+          type: 'boolean'
+          description: 'True if capability is present'
 
         custom-tags:
 
         examples:
-          - id: "capability-check"
+          - id: 'capability-check'
             code: |
               if (aggregate.hasCapability(SnapshotCapability)) {
                 // Perform snapshot-specific operations
@@ -487,120 +487,118 @@ classes:
               }
 
       removeCapability:
-        description: "Removes capability from the aggregate"
-        business-context: "Disables specific domain behaviors from aggregate"
+        description: 'Removes capability from the aggregate'
+        business-context: 'Disables specific domain behaviors from aggregate'
 
         parameters:
-          - name: "CapabilityClass"
-            type: "CapabilityConstructor<T>"
-            description: "Constructor of the capability to remove"
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor of the capability to remove'
             optional: false
 
         returns:
-          type: "this"
-          description: "Returns this for method chaining"
+          type: 'this'
+          description: 'Returns this for method chaining'
 
         custom-tags:
-          lifecycle: "Allows runtime capability removal"
-          fluent: "Returns this for chaining"
+          lifecycle: 'Allows runtime capability removal'
+          fluent: 'Returns this for chaining'
 
         examples:
-          - id: "capability-removal"
+          - id: 'capability-removal'
             code: |
               # Remove audit capability after migration
               aggregate.removeCapability(AuditCapability);
 
       getAllCapabilities:
-        description: "Gets all registered capabilities"
-        business-context: "Access to all enabled capabilities for inspection"
+        description: 'Gets all registered capabilities'
+        business-context: 'Access to all enabled capabilities for inspection'
         returns:
-          type: "Capability[]"
-          description: "Array of all registered capabilities"
+          type: 'Capability[]'
+          description: 'Array of all registered capabilities'
         examples:
-          - id: "list-capabilities"
+          - id: 'list-capabilities'
             code: |
               const aggregate = new AggregateRoot({ id });
               aggregate.addCapability(new AuditCapability());
               aggregate.addCapability(new SnapshotCapability());
-              
+
               const capabilities = aggregate.getAllCapabilities();
               console.log(capabilities.length); // 2
 
       getCapabilityTypes:
-        description: "Gets names of all capability types"
-        business-context: "Capability inspection for debugging and configuration"
+        description: 'Gets names of all capability types'
+        business-context: 'Capability inspection for debugging and configuration'
         returns:
-          type: "string[]"
-          description: "Array of capability type names"
+          type: 'string[]'
+          description: 'Array of capability type names'
         examples:
-          - id: "capability-types"
+          - id: 'capability-types'
             code: |
               const aggregate = new AggregateRoot({ id });
               aggregate.addCapability(new AuditCapability());
               aggregate.addCapability(new VersioningCapability());
-              
+
               const types = aggregate.getCapabilityTypes();
               console.log(types); // ['AuditCapability', 'VersioningCapability']
 
       _internal_setState:
-        description: "Internal method for capabilities to access private state"
-        business-context: "Capability access to aggregate internals"
+        description: 'Internal method for capabilities to access private state'
+        business-context: 'Capability access to aggregate internals'
 
         parameters:
-          - name: "state"
-            type: "{ version: number; initialVersion: number; domainEvents: IExtendedDomainEvent[]; }"
-            description: "Internal state to set"
+          - name: 'state'
+            type: '{ version: number; initialVersion: number; domainEvents: IExtendedDomainEvent[]; }'
+            description: 'Internal state to set'
 
         custom-tags:
-          warning: "Should only be used by capabilities, not directly by domain code"
-          visibility: "internal"
-          capability-api: "Part of capability system infrastructure"
-
+          warning: 'Should only be used by capabilities, not directly by domain code'
+          visibility: 'internal'
+          capability-api: 'Part of capability system infrastructure'
 
 # === OPTIONAL: IMPORTED REFERENCES ===
 # Documentation of imported types (for reference only, not part of THIS file)
 imported:
   interfaces:
-    - name: "IAggregateRoot"
-      from: "../aggregate-interfaces"
-      description: "Contract for aggregate root implementations"
-    - name: "IAggregateCapability"
-      from: "../aggregate-interfaces"
-      description: "Contract for aggregate capability extensions"
-    - name: "IAggregateConstructorParams"
-      from: "../aggregate-interfaces"
-      description: "Parameters for aggregate construction"
-    - name: "IAggregateEventHandler"
-      from: "../aggregate-interfaces"
-      description: "Contract for aggregate event handling"
+    - name: 'IAggregateRoot'
+      from: '../aggregate-interfaces'
+      description: 'Contract for aggregate root implementations'
+    - name: 'IAggregateCapability'
+      from: '../aggregate-interfaces'
+      description: 'Contract for aggregate capability extensions'
+    - name: 'IAggregateConstructorParams'
+      from: '../aggregate-interfaces'
+      description: 'Parameters for aggregate construction'
+    - name: 'IAggregateEventHandler'
+      from: '../aggregate-interfaces'
+      description: 'Contract for aggregate event handling'
 
   types:
-    - name: "IExtendedDomainEvent"
-      from: "@vytches/ddd-contracts"
-      description: "Extended domain event with metadata"
-    - name: "IEventMetadata"
-      from: "@vytches/ddd-contracts"
-      description: "Event metadata structure"
-    - name: "Capability"
-      from: "@vytches/ddd-contracts"
-      description: "Base capability class"
-    - name: "CapabilityConstructor"
-      from: "@vytches/ddd-contracts"
-      description: "Capability constructor type"
-    - name: "EntityId"
-      from: "@vytches/ddd-contracts"
-      description: "Strongly-typed entity identifier"
+    - name: 'IExtendedDomainEvent'
+      from: '@vytches/ddd-contracts'
+      description: 'Extended domain event with metadata'
+    - name: 'IEventMetadata'
+      from: '@vytches/ddd-contracts'
+      description: 'Event metadata structure'
+    - name: 'Capability'
+      from: '@vytches/ddd-contracts'
+      description: 'Base capability class'
+    - name: 'CapabilityConstructor'
+      from: '@vytches/ddd-contracts'
+      description: 'Capability constructor type'
+    - name: 'EntityId'
+      from: '@vytches/ddd-contracts'
+      description: 'Strongly-typed entity identifier'
 
 # === ENVIRONMENT-SPECIFIC SETTINGS ===
 environment:
   VYTCHES_LOGGER:
     custom-tags:
-      logging: "Structured logging with DDD context for all aggregate operations"
+      logging: 'Structured logging with DDD context for all aggregate operations'
 
   VYTCHES_DEBUG:
     custom-tags:
-      debug-level: "Aggregate state transitions and event processing"
-
+      debug-level: 'Aggregate state transitions and event processing'
 
 # === FILE-LEVEL ELEMENTS (types, interfaces, enums, functions declared in this file) ===
 # Note: The aggregate-root.d.ts file does not define any file-level types, interfaces, enums, or functions.
@@ -609,7 +607,7 @@ environment:
 # === DEPENDENCIES ===
 dependencies:
   internal:
-    - "@vytches/ddd-contracts"
-    - "../aggregate-interfaces"
+    - '@vytches/ddd-contracts'
+    - '../aggregate-interfaces'
   external:
-    - "none"
+    - 'none'

@@ -1,0 +1,19 @@
+# Sagas Orchestrator Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Sagas Orchestrator - Export Module'
+description: 'Re-exports saga orchestrator'
+business-context: 'Saga coordination and management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  description: 'Saga orchestrator exports'
+  items:
+    - from: './saga-orchestrator'
+      exports: ['SagaOrchestrator']

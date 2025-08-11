@@ -1,25 +1,8 @@
 import type { IBusinessPolicy } from '../core/interfaces/business-policy.interface';
-import type { IPolicyBuilder, IPolicyStepBuilder } from './policy-builder.interface';
-import type { PolicyBuildStep } from './policy-builder';
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
+import type { PolicyBuildStep } from './policy-builder';
+import type { IPolicyBuilder, IPolicyStepBuilder } from './policy-builder.interface';
 
-/**
- * @llm-summary PolicyStepBuilder class for policy step builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyStepBuilder class implementing domain pattern implementation for policy step builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyStepBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyStepBuilder<T> implements IPolicyStepBuilder<T> {
   constructor(
     private readonly parentBuilder: IPolicyBuilder<T>,

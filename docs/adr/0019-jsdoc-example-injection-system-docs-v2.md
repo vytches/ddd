@@ -2,19 +2,23 @@
 
 **Status**: Accepted  
 **Date**: 2025-07-29  
-**Author**: Development Team  
+**Author**: Development Team
 
 ## Context
 
-As our DDD library grows, providing comprehensive and accurate code examples in JSDoc documentation becomes increasingly challenging. Developers need:
+As our DDD library grows, providing comprehensive and accurate code examples in
+JSDoc documentation becomes increasingly challenging. Developers need:
 
 1. **Method-specific examples** directly in their IDE tooltips and IntelliSense
-2. **Layer-appropriate examples** showing domain, service, and integration patterns
+2. **Layer-appropriate examples** showing domain, service, and integration
+   patterns
 3. **Consistent quality** across all documentation
 4. **Maintainable examples** that stay in sync with the codebase
 5. **TypeScript syntax highlighting** in documentation
 
-Currently, examples are scattered across various documentation files and are not automatically injected into JSDoc comments, leading to:
+Currently, examples are scattered across various documentation files and are not
+automatically injected into JSDoc comments, leading to:
+
 - Outdated examples in JSDoc comments
 - Inconsistent example quality
 - Manual maintenance burden
@@ -44,13 +48,14 @@ Total: 45 examples for Phase 1
 ### Technical Implementation
 
 1. **Example Tagging System**
+
    ```markdown
-   @extract: methodName:layer:complexity
-   const example = Code.here();
+   @extract: methodName:layer:complexity const example = Code.here();
    @extract-end
    ```
 
 2. **Build-Time Injection**
+
    ```typescript
    /**
     * Creates a new user
@@ -61,7 +66,7 @@ Total: 45 examples for Phase 1
 3. **Vite Plugin Integration**
    ```typescript
    export default defineConfig({
-     plugins: [createJSDocExamplesPlugin()]
+     plugins: [createJSDocExamplesPlugin()],
    });
    ```
 
@@ -70,16 +75,19 @@ Total: 45 examples for Phase 1
 ### Positive
 
 1. **Developer Experience**
+
    - ✅ IDE shows relevant examples with TypeScript highlighting
    - ✅ Zero configuration needed (`@example-inject`)
    - ✅ Examples always up-to-date
 
 2. **Code Quality**
+
    - ✅ Centralized example management
    - ✅ Automated validation (line limits, required elements)
    - ✅ Consistent example structure
 
 3. **Architecture Alignment**
+
    - ✅ Layer-specific examples (domain/service/integration)
    - ✅ DDD patterns properly demonstrated
    - ✅ Progressive complexity (basic/intermediate/advanced)
@@ -92,11 +100,13 @@ Total: 45 examples for Phase 1
 ### Negative
 
 1. **Build Complexity**
+
    - ❌ Additional build step required
    - ❌ Slightly increased build time
    - ❌ Vite plugin dependency
 
 2. **Initial Investment**
+
    - ❌ 45 examples needed for Phase 1
    - ❌ Learning curve for tagging system
    - ❌ Migration effort for existing examples
@@ -139,7 +149,7 @@ interface ExampleValidationRules {
 
 ### Example Format
 
-```typescript
+````typescript
 /**
  * Creates a new user with validation
  * @example
@@ -149,16 +159,18 @@ interface ExampleValidationRules {
  * return user; // Result<User, ValidationError>
  * ```
  */
-```
+````
 
 ## Migration Strategy
 
 1. **Phase 1** (Week 1-4): Foundation packages
+
    - domain-primitives (5 methods)
    - value-objects (5 methods)
    - aggregates (5 methods)
 
 2. **Phase 2** (Future): Pattern layer packages
+
    - validation, policies, domain-services
 
 3. **Phase 3** (Future): Architecture layer packages
@@ -174,14 +186,18 @@ interface ExampleValidationRules {
 
 ## References
 
-- [JSDOC_EXAMPLES_ROADMAP.md](../JSDOC_EXAMPLES_ROADMAP.md) - Implementation roadmap
-- [ADR-0013](./0013-enterprise-documentation-standards-and-llm-optimization.md) - Documentation standards
+- [JSDOC_EXAMPLES_ROADMAP.md](../JSDOC_EXAMPLES_ROADMAP.md) - Implementation
+  roadmap
+- [ADR-0013](./0013-enterprise-documentation-standards-and-llm-optimization.md) -
+  Documentation standards
 - [TypeDoc Documentation](https://typedoc.org/) - JSDoc rendering
-- [Vite Plugin API](https://vitejs.dev/guide/api-plugin.html) - Build integration
+- [Vite Plugin API](https://vitejs.dev/guide/api-plugin.html) - Build
+  integration
 
 ## Appendix: Example Output
 
 ### Before (Manual JSDoc)
+
 ```typescript
 /**
  * Creates a new user
@@ -192,7 +208,8 @@ interface ExampleValidationRules {
 ```
 
 ### After (Automatic Injection)
-```typescript
+
+````typescript
 /**
  * Creates a new user
  * @example
@@ -202,6 +219,6 @@ interface ExampleValidationRules {
  * return user; // Result<User, ValidationError>
  * ```
  */
-```
+````
 
 With full TypeScript syntax highlighting and IntelliSense support!

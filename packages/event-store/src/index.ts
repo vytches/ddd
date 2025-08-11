@@ -7,10 +7,10 @@ export { InMemoryEventStore } from './in-memory-event-store';
 // Event Replay
 export { EventReplayEngine } from './event-replay-engine';
 export {
-  EventReplayFactory,
-  createEventReplayFactory,
-  createEventReplay,
   createAdvancedEventReplay,
+  createEventReplay,
+  createEventReplayFactory,
+  EventReplayFactory,
 } from './event-replay-factory';
 
 // Serializers
@@ -18,15 +18,15 @@ export { JsonEventSerializer } from './serializers/json-event-serializer';
 
 // Errors
 export {
-  EventStoreErrorCode,
-  EventStoreError,
-  EventStoreConcurrencyError,
-  StreamNotFoundError,
-  StreamDeletedError,
-  EventSerializationError,
   EventDeserializationError,
+  EventSerializationError,
+  EventStoreConcurrencyError,
   EventStoreConnectionError,
+  EventStoreError,
+  EventStoreErrorCode,
   InvalidStreamVersionError,
+  StreamDeletedError,
+  StreamNotFoundError,
 } from './errors';
 
 export type { EventStoreErrorOptions } from './errors';
@@ -34,16 +34,16 @@ export type { EventStoreErrorOptions } from './errors';
 // Re-export interfaces from contracts for convenience
 export type {
   IAdvancedEventStore,
-  IEventStore,
-  IEventStoreConfig,
   IAppendResult,
-  IStoredEvent,
-  IStoredDomainEvent,
+  IEventSerializer,
+  IEventStore,
+  IEventStoreAdapter,
+  IEventStoreConfig,
   IEventStream,
   IGlobalEventStream,
-  IReadStreamOptions,
   IReadAllOptions,
+  IReadStreamOptions,
+  IStoredDomainEvent,
+  IStoredEvent,
   IStreamMetadata,
-  IEventSerializer,
-  IEventStoreAdapter,
 } from '@vytches/ddd-contracts';

@@ -6,25 +6,6 @@
 import type { ComponentType } from '../../types';
 import { CLIError } from '../../types';
 
-/**
- * @llm-summary Contract for pattern definition functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * PatternDefinition interface implementing infrastructure service for pattern definition operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePatternDefinition implements PatternDefinition {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PatternDefinition {
   name: ComponentType;
   displayName: string;
@@ -37,23 +18,6 @@ export interface PatternDefinition {
   frameworks: string[];
 }
 
-/**
- * @llm-summary PatternRegistry class for pattern registry operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * PatternRegistry class implementing infrastructure service for pattern registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PatternRegistry();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PatternRegistry {
   private patterns = new Map<ComponentType, PatternDefinition>();
 

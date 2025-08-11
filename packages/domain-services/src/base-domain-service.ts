@@ -1,29 +1,12 @@
+import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
+import type { IUnitOfWork } from '@vytches/ddd-core';
 import type {
+  IAsyncDomainService,
   IDomainService,
   IEventBusAware,
   IUnitOfWorkAware,
-  IAsyncDomainService,
 } from './domain-service.interface';
-import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
-import type { IUnitOfWork } from '@vytches/ddd-core';
 
-/**
- * @llm-summary BaseDomainService class for base domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BaseDomainService class implementing domain pattern implementation for base domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IBaseDomainService();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class IBaseDomainService implements IDomainService {
   /**
    * Creates a new instance of a domain service.
@@ -33,23 +16,6 @@ export abstract class IBaseDomainService implements IDomainService {
   constructor(public readonly serviceId: string) {}
 }
 
-/**
- * @llm-summary EventAwareDomainService class for event aware domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * EventAwareDomainService class implementing domain pattern implementation for event aware domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventAwareDomainService();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class EventAwareDomainService extends IBaseDomainService implements IEventBusAware {
   /**
    * Reference to the event bus for publishing domain events.
@@ -93,23 +59,6 @@ export abstract class EventAwareDomainService extends IBaseDomainService impleme
   }
 }
 
-/**
- * @llm-summary UnitOfWorkAwareDomainService class for unit of work aware domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * UnitOfWorkAwareDomainService class implementing domain pattern implementation for unit of work aware domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new UnitOfWorkAwareDomainService();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class UnitOfWorkAwareDomainService
   extends EventAwareDomainService
   implements IUnitOfWorkAware
@@ -194,23 +143,6 @@ export abstract class UnitOfWorkAwareDomainService
   }
 }
 
-/**
- * @llm-summary AsyncDomainService class for async domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * AsyncDomainService class implementing domain pattern implementation for async domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AsyncDomainService();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class AsyncDomainService extends IBaseDomainService implements IAsyncDomainService {
   /**
    * Creates a new asynchronous domain service.

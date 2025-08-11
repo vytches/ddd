@@ -1,30 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
-  IValidationRule as ValidationRule,
-  IValidator,
   ISpecification,
+  IValidator,
+  IValidationRule as ValidationRule,
 } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
 
 import { ValidationError, ValidationErrors } from '../validation-error';
 
-/**
- * @llm-summary BusinessRuleValidator class for business rule validator operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BusinessRuleValidator class implementing domain pattern implementation for business rule validator operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BusinessRuleValidator();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class BusinessRuleValidator<T> implements IValidator<T> {
   private rules: ValidationRule<T>[] = [];
   private stopOnFirstFailure = false;

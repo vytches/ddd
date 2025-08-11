@@ -1,196 +1,196 @@
 # EntityIdFactory - Enhanced Metadata System V2
 
 # === FILE METADATA ===
-file-name: "entity-id-factory"
-title: "EntityIdFactory - Factory for EntityId Creation"
-description: "Factory class implementing IEntityIdFactory for consistent EntityId creation"
-business-context: "Centralized factory for creating EntityId instances with validation"
+file-name: 'entity-id-factory'
+title: 'EntityIdFactory - Factory for EntityId Creation'
+description: 'Factory class implementing IEntityIdFactory for consistent EntityId creation'
+business-context: 'Centralized factory for creating EntityId instances with validation'
 
 # === HIERARCHY ===
 hierarchy:
-  strategy: "merge"
-  scope: "file"
+  strategy: 'merge'
+  scope: 'file'
 
 # === CLASSES ===
 classes:
   EntityIdFactory:
     # JSDoc Configuration
     jsdoc:
-      placement-strategy: "separate"
-      class-documentation: "enabled"
-      
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
     # Class Documentation
     class-doc:
-      description: "Factory class for creating EntityId instances with validation"
-      business-context: "Provides both static and instance methods for EntityId creation"
-      
+      description: 'Factory class for creating EntityId instances with validation'
+      business-context: 'Provides both static and instance methods for EntityId creation'
+
       # Format-specific
       formats:
         jsdoc:
-          description: "EntityIdFactory implementing IEntityIdFactory interface"
+          description: 'EntityIdFactory implementing IEntityIdFactory interface'
         cli:
           description: |
             ## EntityIdFactory
-            
+
             Factory class that provides both static and instance methods for creating
             EntityId instances. Implements the IEntityIdFactory interface and provides
             consistent creation patterns with proper validation.
-      
+
       custom-tags:
-        since: "1.0.0"
-        implements: "IEntityIdFactory"
-    
+        since: '1.0.0'
+        implements: 'IEntityIdFactory'
+
     # Methods
     methods:
       # Static Methods
       createWithRandomUUID:
-        description: "Creates a new EntityId with a randomly generated UUID"
-        business-context: "Generate unique identifiers for new entities"
-        
+        description: 'Creates a new EntityId with a randomly generated UUID'
+        business-context: 'Generate unique identifiers for new entities'
+
         returns:
-          type: "EntityId<string>"
-          description: "New EntityId with random UUID"
-          
+          type: 'EntityId<string>'
+          description: 'New EntityId with random UUID'
+
         custom-tags:
-          static: "true"
-          
+          static: 'true'
+
         examples:
-          - id: "static-random-uuid"
+          - id: 'static-random-uuid'
             code: |
               // Static factory method
               const newId = EntityIdFactory.createWithRandomUUID();
-              
+
               console.log(newId.getType()); // 'uuid'
               console.log(newId.getValue()); // '550e8400-e29b-41d4-a716-446655440000'
-              
+
               // Use in entity creation
               const order = new Order(newId, customerId, items);
-              
+
       fromUUID:
-        description: "Creates EntityId from UUID string with validation"
-        business-context: "Create identifiers from existing UUID strings"
-        
+        description: 'Creates EntityId from UUID string with validation'
+        business-context: 'Create identifiers from existing UUID strings'
+
         parameters:
-          - name: "value"
-            type: "string"
-            description: "UUID string value"
+          - name: 'value'
+            type: 'string'
+            description: 'UUID string value'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with UUID type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with UUID type'
+
         custom-tags:
-          static: "true"
-          throws: "MissingValueError if value is empty, InvalidParameterError if invalid UUID"
-          
+          static: 'true'
+          throws: 'MissingValueError if value is empty, InvalidParameterError if invalid UUID'
+
         examples:
-          - id: "static-fromUUID"
+          - id: 'static-fromUUID'
             code: |
               // Static factory method with validation
               const existingId = EntityIdFactory.fromUUID('550e8400-e29b-41d4-a716-446655440000');
-              
+
               // Use in queries
               const user = await userService.findById(existingId);
-              
+
       fromInteger:
-        description: "Creates EntityId from integer number with validation"
-        business-context: "Create identifiers from database auto-incremented IDs"
-        
+        description: 'Creates EntityId from integer number with validation'
+        business-context: 'Create identifiers from database auto-incremented IDs'
+
         parameters:
-          - name: "value"
-            type: "number"
-            description: "Integer value (must be non-negative)"
+          - name: 'value'
+            type: 'number'
+            description: 'Integer value (must be non-negative)'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with integer type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with integer type'
+
         custom-tags:
-          static: "true"
-          throws: "InvalidParameterError if not a valid integer"
-          
+          static: 'true'
+          throws: 'InvalidParameterError if not a valid integer'
+
         examples:
-          - id: "static-fromInteger"
+          - id: 'static-fromInteger'
             code: |
               // Convert database ID to EntityId
               const dbRecord = await db.users.findFirst();
               const entityId = EntityIdFactory.fromInteger(dbRecord.id);
-              
+
               // Use in domain layer
               const user = new User(entityId, dbRecord.name);
-              
+
       fromBigInt:
-        description: "Creates EntityId from bigint value with validation"
-        business-context: "Handle large integer identifiers from external systems"
-        
+        description: 'Creates EntityId from bigint value with validation'
+        business-context: 'Handle large integer identifiers from external systems'
+
         parameters:
-          - name: "value"
-            type: "string | bigint"
-            description: "BigInt value or string representation"
+          - name: 'value'
+            type: 'string | bigint'
+            description: 'BigInt value or string representation'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with bigint type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with bigint type'
+
         custom-tags:
-          static: "true"
-          throws: "InvalidParameterError if not a valid bigint"
-          
+          static: 'true'
+          throws: 'InvalidParameterError if not a valid bigint'
+
         examples:
-          - id: "static-fromBigInt"
+          - id: 'static-fromBigInt'
             code: |
               // Handle large external system IDs
               const externalId = '123456789012345678901234567890';
               const entityId = EntityIdFactory.fromBigInt(externalId);
-              
+
               // Use in integration scenarios
               const product = await externalSystem.getProduct(entityId);
-              
+
       fromText:
-        description: "Creates EntityId from text string with validation"
-        business-context: "Create human-readable identifiers with character validation"
-        
+        description: 'Creates EntityId from text string with validation'
+        business-context: 'Create human-readable identifiers with character validation'
+
         parameters:
-          - name: "value"
-            type: "string"
-            description: "Text string value"
+          - name: 'value'
+            type: 'string'
+            description: 'Text string value'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with text type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with text type'
+
         custom-tags:
-          static: "true"
-          throws: "MissingValueError if empty, InvalidParameterError if invalid characters"
-          
+          static: 'true'
+          throws: 'MissingValueError if empty, InvalidParameterError if invalid characters'
+
         examples:
-          - id: "static-fromText"
+          - id: 'static-fromText'
             code: |
               // Create readable identifiers
               const productId = EntityIdFactory.fromText('LAPTOP-DELL-XPS13');
               const categoryId = EntityIdFactory.fromText('ELECTRONICS-001');
-              
+
               // Use in business logic
               const product = new Product(productId, 'Dell XPS 13', categoryId);
-              
+
       # Instance Methods (implementing IEntityIdFactory)
       createWithRandomUUID_instance:
-        description: "Instance method to create EntityId with random UUID"
-        business-context: "Interface implementation for dependency injection scenarios"
-        
+        description: 'Instance method to create EntityId with random UUID'
+        business-context: 'Interface implementation for dependency injection scenarios'
+
         returns:
-          type: "EntityId<string>"
-          description: "New EntityId with random UUID"
-          
+          type: 'EntityId<string>'
+          description: 'New EntityId with random UUID'
+
         custom-tags:
-          instance: "true"
-          
+          instance: 'true'
+
         examples:
-          - id: "instance-random-uuid"
+          - id: 'instance-random-uuid'
             code: |
               // Use as dependency
               class UserService {
@@ -201,29 +201,29 @@ classes:
                   return new User(id, userData.name, userData.email);
                 }
               }
-              
+
               const factory = new EntityIdFactory();
               const userService = new UserService(factory);
-              
+
       fromUUID_instance:
-        description: "Instance method to create EntityId from UUID string"
-        business-context: "Interface implementation for dependency injection scenarios"
-        
+        description: 'Instance method to create EntityId from UUID string'
+        business-context: 'Interface implementation for dependency injection scenarios'
+
         parameters:
-          - name: "value"
-            type: "string"
-            description: "UUID string value"
+          - name: 'value'
+            type: 'string'
+            description: 'UUID string value'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with UUID type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with UUID type'
+
         custom-tags:
-          instance: "true"
-          
+          instance: 'true'
+
         examples:
-          - id: "instance-fromUUID"
+          - id: 'instance-fromUUID'
             code: |
               // Use in service with interface
               class OrderService {
@@ -234,26 +234,26 @@ classes:
                   return await this.orderRepository.findById(orderId);
                 }
               }
-              
+
       fromInteger_instance:
-        description: "Instance method to create EntityId from integer"
-        business-context: "Interface implementation for dependency injection scenarios"
-        
+        description: 'Instance method to create EntityId from integer'
+        business-context: 'Interface implementation for dependency injection scenarios'
+
         parameters:
-          - name: "value"
-            type: "number"
-            description: "Integer value (must be non-negative)"
+          - name: 'value'
+            type: 'number'
+            description: 'Integer value (must be non-negative)'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with integer type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with integer type'
+
         custom-tags:
-          instance: "true"
-          
+          instance: 'true'
+
         examples:
-          - id: "instance-fromInteger"
+          - id: 'instance-fromInteger'
             code: |
               // Repository pattern with factory
               class DatabaseRepository {
@@ -264,26 +264,26 @@ classes:
                   return await this.findByEntityId(entityId);
                 }
               }
-              
+
       fromBigInt_instance:
-        description: "Instance method to create EntityId from bigint"
-        business-context: "Interface implementation for dependency injection scenarios"
-        
+        description: 'Instance method to create EntityId from bigint'
+        business-context: 'Interface implementation for dependency injection scenarios'
+
         parameters:
-          - name: "value"
-            type: "string | bigint"
-            description: "BigInt value or string representation"
+          - name: 'value'
+            type: 'string | bigint'
+            description: 'BigInt value or string representation'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with bigint type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with bigint type'
+
         custom-tags:
-          instance: "true"
-          
+          instance: 'true'
+
         examples:
-          - id: "instance-fromBigInt"
+          - id: 'instance-fromBigInt'
             code: |
               // Integration service with factory
               class ExternalApiService {
@@ -294,26 +294,26 @@ classes:
                   await this.syncFromExternal(entityId);
                 }
               }
-              
+
       fromText_instance:
-        description: "Instance method to create EntityId from text string"
-        business-context: "Interface implementation for dependency injection scenarios"
-        
+        description: 'Instance method to create EntityId from text string'
+        business-context: 'Interface implementation for dependency injection scenarios'
+
         parameters:
-          - name: "value"
-            type: "string"
-            description: "Text string value"
+          - name: 'value'
+            type: 'string'
+            description: 'Text string value'
             required: true
-            
+
         returns:
-          type: "EntityId<string>"
-          description: "EntityId instance with text type"
-          
+          type: 'EntityId<string>'
+          description: 'EntityId instance with text type'
+
         custom-tags:
-          instance: "true"
-          
+          instance: 'true'
+
         examples:
-          - id: "instance-fromText"
+          - id: 'instance-fromText'
             code: |
               // Command handler with factory
               class CreateProductHandler {

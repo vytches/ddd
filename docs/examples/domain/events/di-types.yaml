@@ -1,0 +1,137 @@
+# di-types - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'di-types'
+title: 'DI Types - Dependency Injection Types for Event Handlers'
+description: 'Type definitions and interfaces for event handler DI integration'
+business-context: 'Enables type-safe dependency injection for event handlers'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  ServiceLifetime:
+    description: 'Type definition for service lifetime'
+    business-context: 'Controls object lifecycle in DI container'
+
+    formats:
+      jsdoc:
+        description: 'Service lifetime options for DI'
+      cli:
+        description: |
+          ## ServiceLifetime Type
+          Defines how long a service instance lives in the DI container.
+
+    type-definition: "'transient' | 'singleton' | 'scoped'"
+
+    values:
+      - name: 'transient'
+        description: 'New instance created for each request'
+      - name: 'singleton'
+        description: 'Single instance shared across requests'
+      - name: 'scoped'
+        description: 'Instance scoped to specific context'
+
+# === INTERFACES ===
+interfaces:
+  DIDecoratorOptions:
+    description: 'Configuration options for DI decorator functionality'
+    business-context: 'Base options for all DI-enabled decorators'
+
+    formats:
+      jsdoc:
+        description: 'Base DI decorator configuration'
+      cli:
+        description: |
+          ## DIDecoratorOptions Interface
+          Base configuration options for dependency injection decorators.
+
+    properties:
+      - name: 'lifetime'
+        type: 'ServiceLifetime'
+        optional: true
+        description: 'Service lifetime for DI registration'
+      - name: 'context'
+        type: 'string'
+        optional: true
+        description: 'Context for scoped services'
+      - name: 'tags'
+        type: 'string[]'
+        optional: true
+        description: 'Tags for service organization'
+      - name: 'autoRegister'
+        type: 'boolean'
+        optional: true
+        description: 'Whether to auto-register with DI container'
+        default: 'true'
+
+  EventHandlerOptions:
+    description: 'Configuration options for event handler functionality'
+    business-context: 'Complete configuration for event handler DI integration'
+
+    formats:
+      jsdoc:
+        description: 'Event handler DI configuration options'
+        business-context: 'Controls handler behavior and registration'
+      cli:
+        description: |
+          ## EventHandlerOptions Interface
+          Comprehensive configuration options for event handlers
+          including DI settings and handler-specific options.
+
+    extends: ['DIDecoratorOptions']
+
+    properties:
+      - name: 'active'
+        type: 'boolean'
+        optional: true
+        description: 'Whether handler is active'
+      - name: 'availableFrom'
+        type: 'string'
+        optional: true
+        description: 'Version from which handler is available'
+      - name: 'priority'
+        type: 'number'
+        optional: true
+        description: 'Handler priority (higher = earlier execution)'
+      - name: 'eventContext'
+        type: 'string | string[]'
+        optional: true
+        description: 'Context filter for event handling'
+
+  DIHandlerMetadata:
+    description: 'Metadata for DI handler registration and management'
+    business-context: 'Internal metadata for DI system integration'
+
+    formats:
+      jsdoc:
+        description: 'DI handler registration metadata'
+        business-context: 'Internal DI system metadata'
+      cli:
+        description: |
+          ## DIHandlerMetadata Interface
+          Internal metadata used by the DI system for handler
+          registration, discovery, and lifecycle management.
+
+    properties:
+      - name: 'type'
+        type: "'event'"
+        description: 'Handler type identifier'
+      - name: 'eventType'
+        type: 'new (...args: any[]) => any'
+        description: 'Event type constructor'
+      - name: 'handlerType'
+        type: 'new (...args: any[]) => any'
+        description: 'Handler constructor'
+      - name: 'options'
+        type: 'EventHandlerOptions'
+        description: 'DI options from decorator'
+      - name: 'registeredAt'
+        type: 'Date'
+        description: 'Registration timestamp'
+      - name: 'registeredWithDI'
+        type: 'boolean'
+        description: 'Whether registered with DI container'

@@ -1,24 +1,7 @@
-import type { PolicyRequest, PolicyContext } from '../core/interfaces/business-policy.interface';
+import type { PolicyContext, PolicyRequest } from '../core/interfaces/business-policy.interface';
 import type { PolicyMetadata } from '../core/models/policy-metadata';
 import { PolicyContextBuilder } from './policy-context-builder';
 
-/**
- * @llm-summary PolicyRequestBuilder class for policy request builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyRequestBuilder class implementing domain pattern implementation for policy request builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyRequestBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyRequestBuilder<T> {
   private entity?: T;
   private context?: PolicyContext;
@@ -165,23 +148,6 @@ export class PolicyRequestBuilder<T> {
   }
 }
 
-/**
- * @llm-summary PolicyRequestFactory class for policy request factory operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyRequestFactory class implementing domain pattern implementation for policy request factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyRequestFactory();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyRequestFactory {
   /**
    * Create a minimal request with entity and user

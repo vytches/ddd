@@ -2,13 +2,11 @@
  * Tests for ExampleEngine core functionality
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { safeRun } from '@vytches/ddd-utils';
-import {
-  ExampleEngine,
-  ExampleFile,
-  ExtractedExample,
-} from '../../src/examples-engine';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { safeRun } from '../../src/saferun';
+
+import type { ExampleFile, ExtractedExample } from '../../src/examples-engine';
+import { ExampleEngine } from '../../src/examples-engine';
 
 describe('ExampleEngine', () => {
   let engine: ExampleEngine;
@@ -20,9 +18,9 @@ describe('ExampleEngine', () => {
   describe('formatOutput', () => {
     it('should format content for JSDoc output', () => {
       const content = 'const user = User.create(data);\nreturn user;';
-      
+
       const [error, result] = safeRun(() => engine.formatOutput(content, 'jsdoc'));
-      
+
       expect(error).toBeUndefined();
       expect(result).toContain('* @example');
       expect(result).toContain('* ```typescript');
@@ -33,18 +31,18 @@ describe('ExampleEngine', () => {
 
     it('should format content for CLI output', () => {
       const content = 'const user = User.create(data);';
-      
+
       const [error, result] = safeRun(() => engine.formatOutput(content, 'cli'));
-      
+
       expect(error).toBeUndefined();
       expect(result).toBe('```typescript\nconst user = User.create(data);\n```');
     });
 
     it('should return original content for unknown output type', () => {
       const content = 'const user = User.create(data);';
-      
+
       const [error, result] = safeRun(() => engine.formatOutput(content, 'unknown' as any));
-      
+
       expect(error).toBeUndefined();
       expect(result).toBe(content);
     });
@@ -79,8 +77,8 @@ return result;
         },
       };
 
-      const [error, result] = await safeRun(async () => 
-        await engine.extractTaggedContent(mockFile, 'create:domain:basic')
+      const [error, result] = await safeRun(
+        async () => await engine.extractTaggedContent(mockFile, 'create:domain:basic')
       );
 
       expect(error).toBeUndefined();
@@ -108,8 +106,8 @@ return result;
         },
       };
 
-      const [error, result] = await safeRun(async () => 
-        await engine.extractTaggedContent(mockFile, 'create:domain:basic')
+      const [error, result] = await safeRun(
+        async () => await engine.extractTaggedContent(mockFile, 'create:domain:basic')
       );
 
       expect(error).toBeUndefined();
@@ -130,8 +128,8 @@ return result;
         },
       };
 
-      const [error] = await safeRun(async () => 
-        await engine.extractTaggedContent(mockFile, 'invalid-tag')
+      const [error] = await safeRun(
+        async () => await engine.extractTaggedContent(mockFile, 'invalid-tag')
       );
 
       expect(error).toBeDefined();
@@ -173,8 +171,9 @@ return result;
       const originalMethod = engine.getExamplesForMethod;
       engine.getExamplesForMethod = async () => mockExamples;
 
-      const [error, result] = await safeRun(async () => 
-        await engine.getBestExampleForMethod('create', 'test-package', 'domain', 'basic')
+      const [error, result] = await safeRun(
+        async () =>
+          await engine.getBestExampleForMethod('create', 'test-package', 'domain', 'basic')
       );
 
       expect(error).toBeUndefined();
@@ -192,8 +191,8 @@ return result;
       const originalMethod = engine.getExamplesForMethod;
       engine.getExamplesForMethod = async () => [];
 
-      const [error, result] = await safeRun(async () => 
-        await engine.getBestExampleForMethod('nonexistent', 'test-package')
+      const [error, result] = await safeRun(
+        async () => await engine.getBestExampleForMethod('nonexistent', 'test-package')
       );
 
       expect(error).toBeUndefined();
@@ -207,7 +206,7 @@ return result;
   describe('cache management', () => {
     it('should provide cache statistics', () => {
       const [error, stats] = safeRun(() => engine.getCacheStats());
-      
+
       expect(error).toBeUndefined();
       expect(stats).toBeDefined();
       expect(typeof stats?.size).toBe('number');
@@ -216,9 +215,9 @@ return result;
 
     it('should clear cache successfully', () => {
       const [error] = safeRun(() => engine.clearCache());
-      
+
       expect(error).toBeUndefined();
-      
+
       const stats = engine.getCacheStats();
       expect(stats.size).toBe(0);
     });

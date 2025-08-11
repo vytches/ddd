@@ -11,23 +11,6 @@ import { Prompts } from '../utils/prompts';
 import { Colors } from '../utils/colors';
 import { Performance } from '../utils/performance';
 
-/**
- * @llm-summary WorkflowEngine class for workflow engine operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * WorkflowEngine class implementing infrastructure service for workflow engine operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new WorkflowEngine();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class WorkflowEngine {
   private steps = new Map<string, WorkflowStep>();
   private context: WorkflowContext;

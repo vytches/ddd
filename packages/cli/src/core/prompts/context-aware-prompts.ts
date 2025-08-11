@@ -20,23 +20,6 @@ import type { WorkflowContext } from '../../workflows/types';
 import { FileSystem } from '../utils/file-system';
 import { Colors } from '../utils/colors';
 
-/**
- * @llm-summary ContextAwarePromptEngine class for context aware prompt engine operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * ContextAwarePromptEngine class implementing infrastructure service for context aware prompt engine operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ContextAwarePromptEngine();
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ContextAwarePromptEngine implements SmartPromptEngine {
   private projectAnalysisCache = new Map<string, ProjectAnalysis>();
 
@@ -713,23 +696,6 @@ export class ContextAwarePromptEngine implements SmartPromptEngine {
   }
 }
 
-/**
- * @llm-summary SmartPrompts class for smart prompts operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * SmartPrompts class implementing infrastructure service for smart prompts operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SmartPrompts();
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class SmartPrompts {
   /**
    * Create component name prompt with intelligent suggestions

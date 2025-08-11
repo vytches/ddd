@@ -1,23 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { ICQRSMiddleware, ExecutionContext } from './middleware.interface';
+import type { ExecutionContext, ICQRSMiddleware } from './middleware.interface';
 
-/**
- * @llm-summary LoggingMiddleware class for logging middleware operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * LoggingMiddleware class implementing architectural component for logging middleware operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new LoggingMiddleware();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class LoggingMiddleware implements ICQRSMiddleware {
   constructor(private logger?: { log: (message: string) => void }) {
     this.logger = logger || console;

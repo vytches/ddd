@@ -1,0 +1,461 @@
+# engine - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'engine'
+title: 'ExampleEngine - Example Extraction and Management Engine'
+description: 'Core engine for extracting, validating, and managing code examples from documentation'
+business-context: 'Powers the JSDoc generation and CLI documentation systems with example extraction'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ExampleEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Main orchestrator for example extraction, validation, and formatting'
+      business-context: 'Central engine that processes documentation examples for JSDoc injection and CLI display'
+
+      formats:
+        jsdoc:
+          description: 'Example processing engine for documentation generation'
+        cli:
+          description: |
+            ## ExampleEngine
+
+            Example processing features:
+            - File scanning with caching
+            - Tagged content extraction
+            - Multi-format output support
+            - Example validation
+            - Prioritized selection
+            - Layer and complexity filtering
+            - Global cache management
+
+      custom-tags:
+        since: '2.0.0'
+        implements: 'IExampleEngine'
+        pattern: 'Orchestrator'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates new ExampleEngine instance'
+        business-context: 'Initializes engine with scanner, extractor, validator, and cache'
+
+        examples:
+          - id: 'create-engine'
+            code: |
+              const engine = new ExampleEngine();
+              // Engine is ready to scan and process examples
+
+      clearGlobalCache:
+        description: 'Clear global cache (useful for testing or between builds)'
+        business-context: 'Resets global cache to ensure fresh scanning between builds'
+
+        returns:
+          type: 'void'
+          description: 'Cache cleared'
+
+        examples:
+          - id: 'clear-cache'
+            code: |
+              // Clear cache before new build
+              ExampleEngine.clearGlobalCache();
+
+              // Useful in tests
+              beforeEach(() => {
+                ExampleEngine.clearGlobalCache();
+              });
+
+        custom-tags:
+          static: 'true'
+          sideEffects: 'Clears cached data'
+
+      scanFolder:
+        description: 'Scan folder for example files with caching'
+        business-context: 'Discovers all example files in a directory for processing'
+
+        parameters:
+          - name: 'folderPath'
+            type: 'string'
+            description: 'Path to folder to scan'
+
+        returns:
+          type: 'Promise<ExampleFile[]>'
+          description: 'Array of discovered example files'
+
+        examples:
+          - id: 'scan-examples'
+            code: |
+              const files = await engine.scanFolder('/examples/domain');
+              console.log(`Found ${files.length} example files`);
+
+              // Files are cached for subsequent calls
+              const cachedFiles = await engine.scanFolder('/examples/domain');
+              // Returns immediately from cache
+
+        custom-tags:
+          async: 'true'
+          cached: 'true'
+
+      extractTaggedContent:
+        description: 'Extract tagged content from example file'
+        business-context: 'Extracts specific tagged examples from documentation files'
+
+        parameters:
+          - name: 'file'
+            type: 'ExampleFile'
+            description: 'Example file to extract from'
+          - name: 'tag'
+            type: 'string'
+            description: "Tag to extract (e.g., 'example:method:basic')"
+
+        returns:
+          type: 'Promise<ExtractedExample | null>'
+          description: 'Extracted example or null if not found'
+
+        examples:
+          - id: 'extract-tagged'
+            code: |
+              const example = await engine.extractTaggedContent(
+                file,
+                'example:createUser:basic'
+              );
+
+              if (example) {
+                console.log('Extracted:', example.content);
+                console.log('Complexity:', example.complexity);
+              }
+
+        custom-tags:
+          async: 'true'
+
+      formatOutput:
+        description: 'Format extracted content for output type'
+        business-context: 'Transforms content for specific output targets (JSDoc, CLI, markdown)'
+
+        parameters:
+          - name: 'content'
+            type: 'string'
+            description: 'Content to format'
+          - name: 'outputType'
+            type: 'OutputType'
+            description: 'Target output format'
+
+        returns:
+          type: 'string'
+          description: 'Formatted content'
+
+        examples:
+          - id: 'format-output'
+            code: |
+              // Format for JSDoc
+              const jsdoc = engine.formatOutput(content, 'jsdoc');
+
+              // Format for CLI
+              const cli = engine.formatOutput(content, 'cli');
+
+              // Format for Markdown
+              const md = engine.formatOutput(content, 'markdown');
+
+        custom-tags:
+          pure: 'true'
+
+      getExamplesForMethod:
+        description: 'Get examples for specific method across all layers'
+        business-context: 'Collects all available examples for a method from different documentation layers'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Name of method to find examples for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package containing the method'
+
+        returns:
+          type: 'Promise<ExtractedExample[]>'
+          description: 'Array of all found examples'
+
+        examples:
+          - id: 'get-method-examples'
+            code: |
+              const examples = await engine.getExamplesForMethod(
+                'createUser',
+                'domain-services'
+              );
+
+              // Examples from different layers
+              examples.forEach(ex => {
+                console.log(`${ex.layer}: ${ex.complexity}`);
+              });
+
+        custom-tags:
+          async: 'true'
+
+      findExampleFileForMethod:
+        description: 'Find example file containing specific method'
+        business-context: 'Locates the file containing examples for a specific method'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to search for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package to search in'
+
+        returns:
+          type: 'Promise<ExampleFile | null>'
+          description: 'Example file or null if not found'
+
+        examples:
+          - id: 'find-method-file'
+            code: |
+              const file = await engine.findExampleFileForMethod(
+                'validateUser',
+                'validation'
+              );
+
+              if (file) {
+                console.log('Found in:', file.path);
+                console.log('Layer:', file.layer);
+              }
+
+        custom-tags:
+          async: 'true'
+
+      validateExample:
+        description: 'Validate extracted example'
+        business-context: 'Ensures example meets quality standards and formatting requirements'
+
+        parameters:
+          - name: 'example'
+            type: 'ExtractedExample'
+            description: 'Example to validate'
+
+        returns:
+          type: 'Promise<ValidationResult>'
+          description: 'Validation result with errors if any'
+
+        examples:
+          - id: 'validate-example'
+            code: |
+              const result = await engine.validateExample(example);
+
+              if (!result.isValid) {
+                console.log('Validation errors:');
+                result.errors.forEach(err => {
+                  console.log(`- ${err.message}`);
+                });
+              }
+
+        custom-tags:
+          async: 'true'
+
+      getBestExampleForMethod:
+        description: 'Get best example for method (prioritized selection)'
+        business-context: 'Selects the most appropriate example based on layer and complexity preferences'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name'
+          - name: 'preferredLayer'
+            type: 'LayerType'
+            description: 'Preferred documentation layer'
+            optional: true
+          - name: 'preferredComplexity'
+            type: 'ComplexityLevel'
+            description: 'Preferred complexity level'
+            optional: true
+
+        returns:
+          type: 'Promise<ExtractedExample | null>'
+          description: 'Best matching example or null'
+
+        examples:
+          - id: 'get-best-example'
+            code: |
+              // Get simplest example
+              const basic = await engine.getBestExampleForMethod(
+                'createUser',
+                'domain-services',
+                'domain',
+                'basic'
+              );
+
+              // Get advanced framework example
+              const advanced = await engine.getBestExampleForMethod(
+                'createUser',
+                'domain-services',
+                'framework',
+                'advanced'
+              );
+
+        custom-tags:
+          async: 'true'
+          intelligent: 'Uses prioritization algorithm'
+
+      clearCache:
+        description: 'Clear instance cache'
+        business-context: 'Clears the local instance cache for fresh processing'
+
+        returns:
+          type: 'void'
+          description: 'Instance cache cleared'
+
+        examples:
+          - id: 'clear-instance-cache'
+            code: |
+              engine.clearCache();
+              // Next scan will read from disk
+
+        custom-tags:
+          sideEffects: 'Clears instance cache'
+
+      getCacheStats:
+        description: 'Get cache statistics'
+        business-context: 'Provides insights into cache usage and performance'
+
+        returns:
+          type: '{ size: number; keys: string[] }'
+          description: 'Cache statistics object'
+
+        examples:
+          - id: 'cache-stats'
+            code: |
+              const stats = engine.getCacheStats();
+              console.log(`Cache size: ${stats.size}`);
+              console.log('Cached paths:', stats.keys);
+
+        custom-tags:
+          pure: 'true'
+
+      validateExamples:
+        description: 'Batch validate multiple examples'
+        business-context: 'Efficiently validates multiple examples in a single operation'
+
+        parameters:
+          - name: 'examples'
+            type: 'ExtractedExample[]'
+            description: 'Array of examples to validate'
+
+        returns:
+          type: 'Promise<ValidationResult[]>'
+          description: 'Array of validation results'
+
+        examples:
+          - id: 'batch-validate'
+            code: |
+              const results = await engine.validateExamples(examples);
+
+              const invalid = results.filter(r => !r.isValid);
+              console.log(`${invalid.length} invalid examples found`);
+
+        custom-tags:
+          async: 'true'
+          batch: 'true'
+
+      getPackageStatistics:
+        description: 'Get example statistics for package'
+        business-context: 'Provides comprehensive statistics about package documentation coverage'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package to analyze'
+
+        returns:
+          type: 'Promise<PackageStatistics>'
+          description: 'Statistics object with counts and breakdowns'
+
+        examples:
+          - id: 'package-stats'
+            code: |
+              const stats = await engine.getPackageStatistics('domain-services');
+
+              console.log('Total examples:', stats.totalExamples);
+              console.log('By layer:', stats.examplesByLayer);
+              console.log('By complexity:', stats.examplesByComplexity);
+              console.log('Valid:', stats.validationResults.valid);
+              console.log('Invalid:', stats.validationResults.invalid);
+
+        custom-tags:
+          async: 'true'
+          analytics: 'true'
+
+# === TYPES ===
+types:
+  PackageStatistics:
+    description: 'Statistics for package examples'
+    business-context: 'Analytics data for documentation coverage'
+
+    properties:
+      - name: 'totalExamples'
+        type: 'number'
+        description: 'Total number of examples'
+
+      - name: 'examplesByLayer'
+        type: 'Record<LayerType, number>'
+        description: 'Examples grouped by layer'
+
+      - name: 'examplesByComplexity'
+        type: 'Record<ComplexityLevel, number>'
+        description: 'Examples grouped by complexity'
+
+      - name: 'methods'
+        type: 'string[]'
+        description: 'List of documented methods'
+
+      - name: 'validationResults'
+        type: '{ valid: number; invalid: number }'
+        description: 'Validation statistics'
+
+# === EXAMPLES ===
+examples:
+  - id: 'complete-workflow'
+    description: 'Complete example extraction workflow'
+    code: |
+      // Initialize engine
+      const engine = new ExampleEngine();
+
+      // Scan for examples
+      const files = await engine.scanFolder('/examples/domain');
+
+      // Find and extract best example
+      const example = await engine.getBestExampleForMethod(
+        'createUser',
+        'domain-services',
+        'domain',
+        'intermediate'
+      );
+
+      if (example) {
+        // Validate the example
+        const validation = await engine.validateExample(example);
+        
+        if (validation.isValid) {
+          // Format for output
+          const jsdoc = engine.formatOutput(example.content, 'jsdoc');
+          const cli = engine.formatOutput(example.content, 'cli');
+          
+          // Use formatted content...
+        }
+      }
+
+      // Get statistics
+      const stats = await engine.getPackageStatistics('domain-services');
+      console.log('Coverage:', stats);

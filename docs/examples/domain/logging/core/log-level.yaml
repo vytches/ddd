@@ -1,0 +1,159 @@
+# Log Level - Logging Level Management
+
+# === FILE METADATA ===
+file-name: 'log-level'
+title: 'LogLevel - Hierarchical Log Level Management'
+description: 'Log level types and utilities for hierarchical logging control'
+business-context: 'Enterprise log level management enabling fine-grained control over logging output and performance'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  LogLevel:
+    description: 'Hierarchical log level type supporting enterprise logging levels'
+    business-context: 'Six-level hierarchy from trace (most verbose) to fatal (least verbose) enabling precise logging control'
+
+    formats:
+      jsdoc:
+        description: 'Log level union type with six hierarchical levels'
+      cli:
+        description: |
+          ## LogLevel Type
+
+          Hierarchical logging levels:
+          - **trace** (0): Extremely detailed debugging information
+          - **debug** (1): Development debugging information
+          - **info** (2): General application flow information
+          - **warn** (3): Potential issues requiring attention
+          - **error** (4): Error conditions requiring investigation
+          - **fatal** (5): Critical failures requiring immediate action
+
+          Higher levels include all lower-level messages.
+
+    type-definition: "'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'"
+
+    custom-tags:
+      since: '1.0.0'
+      hierarchy: 'trace < debug < info < warn < error < fatal'
+      enterprise-usage: "Production typically uses 'info' or higher"
+
+# === CONSTANTS ===
+constants:
+  LOG_LEVELS:
+    description: 'Numeric mapping of log levels for hierarchical comparison'
+    business-context: 'Internal mapping enabling efficient log level filtering and comparison operations'
+
+    formats:
+      jsdoc:
+        description: 'Record mapping log levels to numeric values for comparison'
+      cli:
+        description: |
+          ## LOG_LEVELS Constant
+
+          Numeric hierarchy mapping:
+          ```typescript
+          {
+            trace: 0,  // Most verbose
+            debug: 1,
+            info: 2,   // Recommended production minimum
+            warn: 3,
+            error: 4,
+            fatal: 5   // Least verbose
+          }
+          ```
+
+    type: 'Record<LogLevel, number>'
+    value: '{ trace: 0, debug: 1, info: 2, warn: 3, error: 4, fatal: 5 }'
+
+    custom-tags:
+      since: '1.0.0'
+      readonly: 'Immutable constant for log level hierarchy'
+
+# === FUNCTIONS ===
+functions:
+  isLogLevelEnabled:
+    description: 'Determines if a specific log level meets the minimum threshold'
+    business-context: 'Performance-critical function enabling efficient log filtering without string comparisons'
+
+    parameters:
+      - name: 'level'
+        type: 'LogLevel'
+        description: 'Log level to check'
+      - name: 'minLevel'
+        type: 'LogLevel'
+        description: 'Minimum log level threshold'
+
+    returns:
+      type: 'boolean'
+      description: 'True if level meets or exceeds minimum threshold'
+
+    examples:
+      - id: 'level-filtering'
+        code: |
+          // Configuration: minimum level is 'info'
+          isLogLevelEnabled('trace', 'info');  // false - trace < info
+          isLogLevelEnabled('debug', 'info');  // false - debug < info
+          isLogLevelEnabled('info', 'info');   // true  - info >= info
+          isLogLevelEnabled('warn', 'info');   // true  - warn > info
+          isLogLevelEnabled('error', 'info');  // true  - error > info
+          isLogLevelEnabled('fatal', 'info');  // true  - fatal > info
+
+      - id: 'performance-check'
+        code: |
+          // Avoid expensive operations when level is disabled
+          if (isLogLevelEnabled('debug', logger.level)) {
+            const expensiveData = generateDiagnostics();
+            logger.debug('Debug info', expensiveData);
+          }
+
+    custom-tags:
+      since: '1.0.0'
+      performance: 'Optimized for frequent calls in hot paths'
+      pure-function: 'No side effects, suitable for caching'
+
+  parseLogLevel:
+    description: 'Parses string representation into validated LogLevel type'
+    business-context: 'Validates and normalizes log level configuration from environment variables, config files, and user input'
+
+    parameters:
+      - name: 'level'
+        type: 'string'
+        description: 'String representation of log level (case-insensitive)'
+
+    returns:
+      type: 'LogLevel'
+      description: 'Validated log level type'
+
+    throws:
+      - type: 'Error'
+        description: 'When provided string is not a valid log level'
+
+    examples:
+      - id: 'config-parsing'
+        code: |
+          // Environment variable parsing
+          const logLevel = parseLogLevel(process.env.LOG_LEVEL || 'info');
+
+          // Case-insensitive parsing
+          parseLogLevel('INFO');    // returns 'info'
+          parseLogLevel('Debug');   // returns 'debug'
+          parseLogLevel('ERROR');   // returns 'error'
+
+      - id: 'validation-example'
+        code: |
+          try {
+            const level = parseLogLevel(userInput);
+            logger.configure({ level });
+          } catch (error) {
+            console.error('Invalid log level provided:', error.message);
+            // Error: Invalid log level: invalid. Valid levels are: trace, debug, info, warn, error, fatal
+          }
+
+    custom-tags:
+      since: '1.0.0'
+      validation: 'Throws error for invalid input'
+      case-insensitive: 'Accepts uppercase, lowercase, and mixed case input'

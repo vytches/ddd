@@ -1,13 +1,13 @@
 // Core aggregates - re-exported from aggregates package
 // Test comment for lerna behavior
-export { AggregateRoot, AggregateBuilder, AggregateError } from '@vytches/ddd-aggregates';
+export { AggregateBuilder, AggregateError, AggregateRoot } from '@vytches/ddd-aggregates';
 
 // Aggregate interfaces
 export type {
-  IAggregateRoot,
-  IAggregateCapability,
   IAggregateBuilder,
+  IAggregateCapability,
   IAggregateConstructorParams,
+  IAggregateRoot,
 } from '@vytches/ddd-aggregates';
 
 // Value objects - re-exported from value-objects package
@@ -21,15 +21,15 @@ export type { IdType } from '@vytches/ddd-contracts';
 
 // Errors - re-exported from domain-primitives
 export {
-  IDomainError,
+  ApplicationErrorCode,
   BaseError,
+  DomainErrorCode,
+  DuplicateError,
+  FrameworkErrorCode,
+  IDomainError,
   InvalidParameterError,
   MissingValueError,
-  DuplicateError,
   NotFoundError,
-  DomainErrorCode,
-  ApplicationErrorCode,
-  FrameworkErrorCode,
 } from '@vytches/ddd-domain-primitives';
 
 export type { DomainErrorOptions } from '@vytches/ddd-domain-primitives';
@@ -37,10 +37,10 @@ export type { DomainErrorOptions } from '@vytches/ddd-domain-primitives';
 // Repositories - re-exported from repositories package
 export { IBaseRepository, VersionError } from '@vytches/ddd-repositories';
 export type {
-  IRepositoryAggregate,
-  IRepository,
-  IRepositoryProvider,
   IExtendedRepository,
+  IRepository,
+  IRepositoryAggregate,
+  IRepositoryProvider,
   IUnitOfWork,
 } from '@vytches/ddd-repositories';
 

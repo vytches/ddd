@@ -1,24 +1,6 @@
+import type { IEventMetadata, IScheduledEvent, IScheduleOptions } from '@vytches/ddd-contracts';
 import { DomainEvent } from '@vytches/ddd-events';
-import type { IScheduledEvent, IScheduleOptions } from '@vytches/ddd-contracts';
-import type { IEventMetadata } from '@vytches/ddd-contracts';
 
-/**
- * @llm-summary ScheduledEvent class for scheduled event operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * ScheduledEvent class implementing core domain functionality for scheduled event operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ScheduledEvent();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class ScheduledEvent<T = any> extends DomainEvent<T> implements IScheduledEvent {
   public readonly scheduleAt: Date;
   public readonly scheduleOptions?: IScheduleOptions | undefined;

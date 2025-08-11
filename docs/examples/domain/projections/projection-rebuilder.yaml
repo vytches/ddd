@@ -1,0 +1,261 @@
+# projection-rebuilder - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'projection-rebuilder'
+title: 'ProjectionRebuilder - Projection Rebuild Orchestrator'
+description: 'Manages projection rebuilding from event history'
+business-context: 'Orchestrates complete or incremental projection rebuilds'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ProjectionRebuilder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Orchestrates projection rebuilding from event stores'
+      business-context: 'Manages complex rebuild operations with progress tracking'
+
+      formats:
+        jsdoc:
+          description: 'Projection rebuild orchestrator with progress tracking'
+        cli:
+          description: |
+            ## ProjectionRebuilder
+
+            Rebuild management:
+            - Full and incremental rebuilds
+            - Progress tracking
+            - Checkpoint support
+            - Parallel processing
+            - Error recovery
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Orchestrator'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates rebuilder with configuration'
+        business-context: 'Initializes rebuild orchestration'
+
+        parameters:
+          - name: 'eventStore'
+            type: 'IEventStore'
+            description: 'Event store for reading events'
+          - name: 'options'
+            type: 'IRebuildOptions'
+            description: 'Rebuild configuration'
+            optional: true
+
+        examples:
+          - id: 'setup'
+            code: |
+              const rebuilder = new ProjectionRebuilder(eventStore, {
+                batchSize: 1000,
+                parallel: true,
+                maxConcurrency: 5,
+                progressInterval: 100
+              });
+
+      rebuildProjection:
+        description: 'Rebuilds single projection'
+        business-context: 'Reconstructs projection from events'
+
+        parameters:
+          - name: 'engine'
+            type: 'IProjectionEngine<any>'
+            description: 'Projection engine to rebuild'
+          - name: 'options'
+            type: 'ISingleRebuildOptions'
+            description: 'Rebuild options'
+            optional: true
+
+        returns:
+          type: 'Promise<IRebuildResult>'
+          description: 'Rebuild result'
+
+        examples:
+          - id: 'single-rebuild'
+            code: |
+              const result = await rebuilder.rebuildProjection(
+                userProjectionEngine,
+                {
+                  fromPosition: 0,
+                  resetFirst: true,
+                  onProgress: progress => {
+                    console.log(`Progress: ${progress.percentage}%`);
+                  }
+                }
+              );
+
+      rebuildMultiple:
+        description: 'Rebuilds multiple projections'
+        business-context: 'Batch rebuild operation'
+
+        parameters:
+          - name: 'engines'
+            type: 'IProjectionEngine<any>[]'
+            description: 'Engines to rebuild'
+          - name: 'options'
+            type: 'IMultiRebuildOptions'
+            description: 'Multi-rebuild options'
+            optional: true
+
+        returns:
+          type: 'Promise<IMultiRebuildResult>'
+          description: 'Combined results'
+
+        examples:
+          - id: 'parallel-rebuild'
+            code: |
+              const results = await rebuilder.rebuildMultiple(
+                [userEngine, orderEngine, analyticsEngine],
+                {
+                  parallel: true,
+                  continueOnError: true,
+                  onProjectionComplete: (name, result) => {
+                    console.log(`${name} rebuilt: ${result.eventsProcessed} events`);
+                  }
+                }
+              );
+
+      rebuildFromCheckpoint:
+        description: 'Rebuilds from last checkpoint'
+        business-context: 'Incremental rebuild from saved state'
+
+        parameters:
+          - name: 'engine'
+            type: 'IProjectionEngine<any>'
+            description: 'Engine with checkpoint capability'
+
+        returns:
+          type: 'Promise<IRebuildResult>'
+          description: 'Rebuild result'
+
+        examples:
+          - id: 'checkpoint-rebuild'
+            code: |
+              const result = await rebuilder.rebuildFromCheckpoint(engine);
+              console.log(`Resumed from position ${result.startPosition}`);
+
+      estimateRebuildTime:
+        description: 'Estimates rebuild duration'
+        business-context: 'Planning and resource allocation'
+
+        parameters:
+          - name: 'engine'
+            type: 'IProjectionEngine<any>'
+            description: 'Engine to estimate'
+          - name: 'sampleSize'
+            type: 'number'
+            description: 'Events to sample'
+            optional: true
+
+        returns:
+          type: 'Promise<ITimeEstimate>'
+          description: 'Time estimate'
+
+      cancelRebuild:
+        description: 'Cancels ongoing rebuild'
+        business-context: 'Stops rebuild operation'
+
+        parameters:
+          - name: 'rebuildId'
+            type: 'string'
+            description: 'Rebuild operation ID'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Cancellation complete'
+
+# === INTERFACES ===
+interfaces:
+  IRebuildOptions:
+    description: 'General rebuild configuration'
+    business-context: 'Controls rebuild behavior'
+
+    properties:
+      - name: 'batchSize'
+        type: 'number'
+        description: 'Events per batch'
+        default: '1000'
+        optional: true
+
+      - name: 'parallel'
+        type: 'boolean'
+        description: 'Enable parallel processing'
+        default: 'false'
+        optional: true
+
+      - name: 'maxConcurrency'
+        type: 'number'
+        description: 'Max parallel operations'
+        default: '5'
+        optional: true
+
+      - name: 'progressInterval'
+        type: 'number'
+        description: 'Progress update frequency'
+        default: '100'
+        optional: true
+
+  IRebuildResult:
+    description: 'Rebuild operation result'
+    business-context: 'Rebuild outcome and statistics'
+
+    properties:
+      - name: 'success'
+        type: 'boolean'
+        description: 'Overall success'
+
+      - name: 'eventsProcessed'
+        type: 'number'
+        description: 'Total events processed'
+
+      - name: 'startPosition'
+        type: 'number'
+        description: 'Starting position'
+
+      - name: 'endPosition'
+        type: 'number'
+        description: 'Ending position'
+
+      - name: 'duration'
+        type: 'number'
+        description: 'Duration in ms'
+
+      - name: 'errors'
+        type: 'Error[]'
+        description: 'Errors encountered'
+        optional: true
+
+  ITimeEstimate:
+    description: 'Rebuild time estimate'
+    business-context: 'Planning information'
+
+    properties:
+      - name: 'estimatedDuration'
+        type: 'number'
+        description: 'Estimated time in ms'
+
+      - name: 'totalEvents'
+        type: 'number'
+        description: 'Events to process'
+
+      - name: 'eventsPerSecond'
+        type: 'number'
+        description: 'Processing rate'
+
+      - name: 'confidence'
+        type: 'number'
+        description: 'Estimate confidence (0-1)'

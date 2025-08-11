@@ -1,0 +1,303 @@
+# ICqrsValidatable - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'validation-interface'
+title: 'ICqrsValidatable - CQRS Validation Interface'
+description: 'Interface for commands and queries that support automatic validation'
+business-context: 'Self-validating CQRS messages with optional asynchronous validation support'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ICqrsValidatable:
+    description: 'Interface for CQRS messages that can validate themselves'
+    business-context: 'Enable automatic validation in CQRS pipeline with sync/async support'
+
+    formats:
+      jsdoc:
+        description: 'Self-validation interface for commands and queries'
+      cli:
+        description: |
+          ## ICqrsValidatable Interface
+          Self-validation contract for CQRS messages:
+          - Optional validation method implementation
+          - Support for both sync and async validation
+          - Integration with CQRS middleware pipeline
+          - Automatic invocation by validation middleware
+
+    # Methods
+    methods:
+      validate:
+        description: 'Validates the message and throws error if validation fails'
+        business-context: 'Self-validation method called automatically by CQRS middleware'
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'No return value on success, throws on validation failure'
+
+        throws:
+          - type: 'CqrsValidationError'
+            description: 'When validation fails with specific field context'
+          - type: 'Error'
+            description: 'When validation fails with general error'
+
+        examples:
+          - id: 'sync-validation'
+            code: |
+              class CreateUserCommand implements ICommand, ICqrsValidatable {
+                constructor(
+                  public readonly email: string,
+                  public readonly age: number
+                ) {}
+                
+                validate(): void {
+                  if (!this.email) {
+                    throw new CqrsValidationError('Email is required', 'email');
+                  }
+                  
+                  if (!this.email.includes('@')) {
+                    throw new CqrsValidationError('Invalid email format', 'email');
+                  }
+                  
+                  if (this.age < 0) {
+                    throw new CqrsValidationError('Age must be positive', 'age');
+                  }
+                }
+              }
+
+          - id: 'async-validation'
+            code: |
+              class ProcessPaymentCommand implements ICommand, ICqrsValidatable {
+                constructor(
+                  public readonly accountId: string,
+                  public readonly amount: number
+                ) {}
+                
+                async validate(): Promise<void> {
+                  // Basic sync validation
+                  if (this.amount <= 0) {
+                    throw new CqrsValidationError(
+                      'Amount must be greater than zero',
+                      'amount'
+                    );
+                  }
+                  
+                  // Async validation (external service call)
+                  const accountExists = await this.accountService.exists(
+                    this.accountId
+                  );
+                  
+                  if (!accountExists) {
+                    throw new CqrsValidationError(
+                      'Account not found',
+                      'accountId'
+                    );
+                  }
+                  
+                  const hasBalance = await this.accountService.hasBalance(
+                    this.accountId,
+                    this.amount
+                  );
+                  
+                  if (!hasBalance) {
+                    throw new CqrsValidationError(
+                      'Insufficient account balance',
+                      'amount'
+                    );
+                  }
+                }
+              }
+
+          - id: 'query-validation'
+            code: |
+              class GetOrdersByDateRangeQuery implements IQuery<Order[]>, ICqrsValidatable {
+                constructor(
+                  public readonly startDate: Date,
+                  public readonly endDate: Date,
+                  public readonly userId?: string
+                ) {}
+                
+                validate(): void {
+                  if (this.startDate > this.endDate) {
+                    throw new CqrsValidationError(
+                      'Start date must be before end date',
+                      'startDate'
+                    );
+                  }
+                  
+                  const daysDiff = Math.abs(
+                    this.endDate.getTime() - this.startDate.getTime()
+                  ) / (1000 * 60 * 60 * 24);
+                  
+                  if (daysDiff > 365) {
+                    throw new CqrsValidationError(
+                      'Date range cannot exceed 365 days',
+                      'endDate'
+                    );
+                  }
+                }
+              }
+
+        custom-tags:
+          optional-implementation: 'Interface method is optional'
+          async-support: 'Supports both sync and async validation'
+          middleware-integration: 'Called automatically by ValidationMiddleware'
+
+        required: false
+
+# === USAGE PATTERNS ===
+usage-patterns:
+  middleware-integration:
+    description: 'Integration with CQRS validation middleware'
+    code: |
+      class ValidationMiddleware implements ICQRSMiddleware {
+        async handle<T>(
+          request: T,
+          next: () => Promise<unknown>
+        ): Promise<unknown> {
+          // Check if request implements ICqrsValidatable
+          if (this.isValidatable(request)) {
+            try {
+              // Call validation method (sync or async)
+              await request.validate();
+            } catch (error) {
+              // Re-throw as CqrsValidationError if needed
+              if (error instanceof CqrsValidationError) {
+                throw error;
+              }
+              throw new CqrsValidationError(
+                `Validation failed: ${error.message}`,
+                'command'
+              );
+            }
+          }
+          
+          return next();
+        }
+        
+        private isValidatable(obj: unknown): obj is ICqrsValidatable {
+          return (
+            typeof obj === 'object' &&
+            obj !== null &&
+            'validate' in obj &&
+            typeof obj.validate === 'function'
+          );
+        }
+      }
+
+  command-bus-integration:
+    description: 'Automatic validation in command bus execution'
+    code: |
+      class CommandBus {
+        async execute<T extends ICommand>(command: T): Promise<void> {
+          // Automatic validation if command implements ICqrsValidatable
+          if ('validate' in command && typeof command.validate === 'function') {
+            await command.validate();
+          }
+          
+          // Continue with handler execution
+          const handler = this.getHandler(command);
+          await handler.execute(command);
+        }
+      }
+
+  complex-validation-scenarios:
+    description: 'Complex validation patterns with business rules'
+    code: |
+      class UpdateOrderCommand implements ICommand, ICqrsValidatable {
+        constructor(
+          public readonly orderId: string,
+          public readonly updates: Partial<OrderData>,
+          public readonly requestingUserId: string
+        ) {}
+        
+        async validate(): Promise<void> {
+          // Basic field validation
+          if (!this.orderId) {
+            throw new CqrsValidationError('Order ID is required', 'orderId');
+          }
+          
+          if (!this.requestingUserId) {
+            throw new CqrsValidationError('User ID is required', 'requestingUserId');
+          }
+          
+          if (!this.updates || Object.keys(this.updates).length === 0) {
+            throw new CqrsValidationError('At least one update field is required', 'updates');
+          }
+          
+          // Business rule validation (async)
+          const order = await this.orderService.findById(this.orderId);
+          if (!order) {
+            throw new CqrsValidationError('Order not found', 'orderId');
+          }
+          
+          if (order.status === 'completed') {
+            throw new CqrsValidationError(
+              'Cannot update completed order',
+              'orderId'
+            );
+          }
+          
+          // Authorization validation
+          const canUpdate = await this.authService.canUpdateOrder(
+            this.requestingUserId,
+            this.orderId
+          );
+          
+          if (!canUpdate) {
+            throw new CqrsValidationError(
+              'User not authorized to update this order',
+              'requestingUserId'
+            );
+          }
+        }
+      }
+
+  validation-composition:
+    description: 'Composing multiple validation strategies'
+    code: |
+      interface ValidationRule<T> {
+        validate(entity: T): Promise<void> | void;
+      }
+
+      class CompositeValidationCommand implements ICommand, ICqrsValidatable {
+        private validationRules: ValidationRule<this>[] = [];
+        
+        constructor(public readonly data: unknown) {
+          this.validationRules = [
+            new RequiredFieldsRule(),
+            new DataFormatRule(),
+            new BusinessRuleValidator(),
+            new SecurityValidator()
+          ];
+        }
+        
+        async validate(): Promise<void> {
+          for (const rule of this.validationRules) {
+            await rule.validate(this);
+          }
+        }
+      }
+
+      // Individual validation rules
+      class RequiredFieldsRule implements ValidationRule<CompositeValidationCommand> {
+        validate(command: CompositeValidationCommand): void {
+          if (!command.data) {
+            throw new CqrsValidationError('Data is required', 'data');
+          }
+        }
+      }
+
+      class BusinessRuleValidator implements ValidationRule<CompositeValidationCommand> {
+        async validate(command: CompositeValidationCommand): Promise<void> {
+          // Complex async business rule validation
+          const isValid = await this.businessRuleService.validate(command.data);
+          if (!isValid) {
+            throw new CqrsValidationError('Business rule validation failed', 'data');
+          }
+        }
+      }

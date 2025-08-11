@@ -2,25 +2,6 @@ import type { Result } from '@vytches/ddd-utils';
 import type { PolicyContext } from '../core/interfaces';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
-/**
- * @llm-summary Contract for policy evaluation event functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyEvaluationEvent interface implementing domain pattern implementation for policy evaluation event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyEvaluationEvent implements PolicyEvaluationEvent {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyEvaluationEvent<T = unknown> {
   readonly type: 'POLICY_EVALUATED';
   readonly policyId: string;
@@ -37,25 +18,6 @@ export interface PolicyEvaluationEvent<T = unknown> {
   readonly executionId: string; // Unique ID for this execution
 }
 
-/**
- * @llm-summary Contract for policy evaluation error event functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyEvaluationErrorEvent interface implementing domain pattern implementation for policy evaluation error event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyEvaluationErrorEvent implements PolicyEvaluationErrorEvent {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyEvaluationErrorEvent<T = unknown> {
   readonly type: 'POLICY_EVALUATION_ERROR';
   readonly policyId: string;
@@ -70,25 +32,6 @@ export interface PolicyEvaluationErrorEvent<T = unknown> {
   readonly metadata?: Record<string, unknown>;
 }
 
-/**
- * @llm-summary Contract for policy evaluation started event functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyEvaluationStartedEvent interface implementing domain pattern implementation for policy evaluation started event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyEvaluationStartedEvent implements PolicyEvaluationStartedEvent {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyEvaluationStartedEvent<T = unknown> {
   readonly type: 'POLICY_EVALUATION_STARTED';
   readonly policyId: string;
@@ -101,45 +44,11 @@ export interface PolicyEvaluationStartedEvent<T = unknown> {
   readonly metadata?: Record<string, unknown>;
 }
 
-/**
- * @llm-summary Type definition for policy event
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * PolicyEvent type implementing domain pattern implementation for policy event operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: PolicyEvent = {} as PolicyEvent;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type PolicyEvent<T = unknown> =
   | PolicyEvaluationEvent<T>
   | PolicyEvaluationErrorEvent<T>
   | PolicyEvaluationStartedEvent<T>;
 
-/**
- * @llm-summary PolicyEventBuilder class for policy event builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyEventBuilder class implementing domain pattern implementation for policy event builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyEventBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyEventBuilder<T> {
   private constructor(
     private readonly baseData: {
@@ -250,25 +159,6 @@ export class PolicyEventBuilder<T> {
   }
 }
 
-/**
- * @llm-summary Contract for policy execution metrics functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyExecutionMetrics interface implementing domain pattern implementation for policy execution metrics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyExecutionMetrics implements PolicyExecutionMetrics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyExecutionMetrics {
   readonly policyId: string;
   readonly domain: string;
@@ -283,23 +173,6 @@ export interface PolicyExecutionMetrics {
   readonly violationFrequency: Map<string, number>; // violation code -> count
 }
 
-/**
- * @llm-summary PolicyMetricsAggregator class for policy metrics aggregator operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyMetricsAggregator class implementing domain pattern implementation for policy metrics aggregator operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyMetricsAggregator();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyMetricsAggregator {
   private readonly metrics = new Map<string, PolicyExecutionMetrics>();
 

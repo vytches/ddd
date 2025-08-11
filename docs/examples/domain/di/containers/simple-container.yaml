@@ -1,0 +1,380 @@
+# Simple Container - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'simple-container'
+title: 'SimpleContainer - Built-in Dependency Injection Container'
+description: 'Lightweight, production-ready dependency injection container'
+business-context: 'Built-in container with full enterprise features - lifecycle management, scoping, circular dependency detection'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  SimpleContainer:
+    class-doc:
+      description: 'Built-in lightweight dependency injection container'
+      business-context: 'Production-ready container with enterprise features - no external dependencies required'
+
+      formats:
+        jsdoc:
+          description: 'Lightweight DI container with lifecycle management'
+        cli:
+          description: |
+            ## SimpleContainer
+            Built-in dependency injection container featuring:
+            - Service lifetime management (Transient, Singleton, Scoped)
+            - Circular dependency detection and prevention
+            - Parent/child scoping for hierarchical service resolution
+            - Tag-based service organization and discovery
+            - Resource disposal and cleanup
+            - Thread-safe singleton management
+
+    constructor:
+      description: 'Create a new SimpleContainer instance'
+      business-context: 'Initialize container with optional parent scope for hierarchical DI'
+      parameters:
+        - name: 'parentScope'
+          type: 'SimpleContainer'
+          description: 'Optional parent container for hierarchical resolution'
+          optional: true
+      examples:
+        - id: 'basic-container'
+          code: |
+            // Basic container
+            const container = new SimpleContainer();
+
+        - id: 'scoped-container'
+          code: |
+            // Scoped container with parent
+            const parentContainer = new SimpleContainer();
+            const scopedContainer = new SimpleContainer(parentContainer);
+
+    methods:
+      resolve:
+        description: 'Resolve a service by token with circular dependency detection'
+        business-context: 'Primary service resolution with enterprise safety features'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service token to resolve'
+        returns:
+          type: 'T'
+          description: 'Resolved service instance'
+        throws:
+          - type: 'CircularDependencyError'
+            description: 'When circular dependencies are detected'
+          - type: 'ServiceNotFoundError'
+            description: 'When service is not registered'
+          - type: 'ContainerDisposedError'
+            description: 'When container has been disposed'
+        custom-tags:
+          circular-dependency-detection: 'Prevents infinite resolution loops'
+          parent-fallback: 'Falls back to parent scope if service not found'
+          lifecycle-aware: 'Respects service lifetime configuration'
+        examples:
+          - id: 'basic-resolution'
+            code: |
+              const userService = container.resolve<UserService>('userService');
+
+          - id: 'constructor-token'
+            code: |
+              const orderService = container.resolve<OrderService>(OrderService);
+
+      register:
+        description: 'Register a service with the container'
+        business-context: 'Primary service registration with enterprise configuration options'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'implementation'
+            type: 'Constructor<T>'
+            description: 'Service implementation constructor'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options including lifetime and tags'
+            optional: true
+        throws:
+          - type: 'ServiceAlreadyRegisteredError'
+            description: 'When service is already registered with same token'
+          - type: 'InvalidRegistrationError'
+            description: 'When implementation is null or undefined'
+          - type: 'ContainerDisposedError'
+            description: 'When container has been disposed'
+        examples:
+          - id: 'basic-registration'
+            code: |
+              // Basic service registration
+              container.register('userService', UserService);
+
+          - id: 'full-registration'
+            code: |
+              // Registration with full options
+              container.register('orderService', OrderService, {
+                lifetime: ServiceLifetime.Singleton,
+                context: 'OrderManagement',
+                tags: ['domain-service', 'business-logic']
+              });
+
+          - id: 'constructor-registration'
+            code: |
+              // Constructor-based registration
+              container.register(IUserRepository, UserRepository, {
+                lifetime: ServiceLifetime.Scoped
+              });
+
+      registerFactory:
+        description: 'Register a service using a factory function'
+        business-context: 'Custom service instantiation with container dependency access'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'factory'
+            type: 'ServiceFactory<T>'
+            description: 'Factory function to create service instances'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        throws:
+          - type: 'ServiceAlreadyRegisteredError'
+            description: 'When service is already registered'
+          - type: 'InvalidRegistrationError'
+            description: 'When factory is null or undefined'
+        examples:
+          - id: 'factory-with-dependencies'
+            code: |
+              // Factory with container dependencies
+              container.registerFactory('paymentService', (container) => {
+                const config = container.resolve<PaymentConfig>('paymentConfig');
+                const logger = container.resolve<Logger>('logger');
+                return new PaymentService(config, logger);
+              });
+
+          - id: 'conditional-factory'
+            code: |
+              // Conditional service creation
+              container.registerFactory('dataService', (container) => {
+                const env = container.resolve<Environment>('environment');
+                return env.isProduction() 
+                  ? new DatabaseService(env.connectionString)
+                  : new MockDataService();
+              });
+
+      registerInstance:
+        description: 'Register a pre-created service instance'
+        business-context: 'Direct instance registration for singletons and shared resources'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'instance'
+            type: 'T'
+            description: 'Pre-created service instance'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        throws:
+          - type: 'ServiceAlreadyRegisteredError'
+            description: 'When service is already registered'
+          - type: 'InvalidRegistrationError'
+            description: 'When instance is null or undefined'
+        custom-tags:
+          forced-singleton: 'Instance registrations are always treated as singletons'
+        examples:
+          - id: 'instance-registration'
+            code: |
+              // Register existing instance
+              const logger = new ConsoleLogger();
+              container.registerInstance('logger', logger);
+
+          - id: 'configuration-instance'
+            code: |
+              // Register configuration object
+              const config = {
+                apiUrl: 'https://api.example.com',
+                timeout: 5000
+              };
+              container.registerInstance('apiConfig', config);
+
+      isRegistered:
+        description: 'Check if a service is registered'
+        business-context: 'Service registration validation and conditional registration logic'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service token to check'
+        returns:
+          type: 'boolean'
+          description: 'True if service is registered (including parent scope)'
+        custom-tags:
+          parent-aware: 'Checks parent scope if service not found locally'
+        examples:
+          - id: 'conditional-registration'
+            code: |
+              // Conditional service registration
+              if (!container.isRegistered('logger')) {
+                container.register('logger', ConsoleLogger);
+              }
+
+          - id: 'service-availability'
+            code: |
+              // Check service availability before resolution
+              const hasUserService = container.isRegistered('userService');
+
+      getServices:
+        description: 'Get all registered services including parent scope'
+        business-context: 'Service discovery and container introspection for debugging'
+        returns:
+          type: 'ServiceDescriptor[]'
+          description: 'Array of all service descriptors from this container and parents'
+        examples:
+          - id: 'service-discovery'
+            code: |
+              // Get all registered services
+              const allServices = container.getServices();
+              console.log(`Registered ${allServices.length} services`);
+
+      getServicesByTag:
+        description: 'Get services by tag'
+        business-context: 'Feature-based service discovery and grouping'
+        parameters:
+          - name: 'tag'
+            type: 'string'
+            description: 'Tag to filter by'
+        returns:
+          type: 'ServiceDescriptor[]'
+          description: 'Array of matching service descriptors'
+        examples:
+          - id: 'tag-based-discovery'
+            code: |
+              // Find all domain services
+              const domainServices = container.getServicesByTag('domain-service');
+
+              // Find all repositories
+              const repositories = container.getServicesByTag('repository');
+
+              // Process services by category
+              repositories.forEach(descriptor => {
+                console.log(`Repository: ${descriptor.token}`);
+              });
+
+      createScope:
+        description: 'Create a scoped container'
+        business-context: 'Creates child container for request-scoped services and hierarchical DI'
+        parameters:
+          - name: 'context'
+            type: 'string'
+            description: 'Optional context name for the scope'
+            optional: true
+        returns:
+          type: 'IDependencyContainer'
+          description: 'New scoped container instance with this container as parent'
+        custom-tags:
+          hierarchical-di: 'Child container falls back to parent for unregistered services'
+        examples:
+          - id: 'request-scope'
+            code: |
+              // Create request-scoped container
+              const requestScope = container.createScope('request-123');
+
+              // Register request-specific services
+              requestScope.register('httpContext', HttpContext);
+
+              // Request scope inherits from parent
+              const userService = requestScope.resolve<UserService>('userService');
+
+      dispose:
+        description: 'Dispose of the container and clean up resources'
+        business-context: 'Proper resource cleanup for application shutdown and memory management'
+        returns:
+          type: 'void'
+          description: 'No return value'
+        custom-tags:
+          resource-cleanup: 'Calls dispose() on singleton instances that implement IDisposable'
+          memory-management: 'Clears all internal maps and references'
+        examples:
+          - id: 'cleanup'
+            code: |
+              // Application shutdown cleanup
+              container.dispose();
+
+          - id: 'scoped-cleanup'
+            code: |
+              // Clean up request scope
+              const requestScope = container.createScope();
+              try {
+                // Use request scope
+                const service = requestScope.resolve<UserService>('userService');
+              } finally {
+                // Always clean up
+                requestScope.dispose();
+              }
+
+# === LIFECYCLE MANAGEMENT ===
+lifecycle:
+  transient:
+    description: 'Creates new instance on every resolution'
+    business-context: 'Use for stateless services and temporary objects'
+    example: |
+      container.register('validator', DataValidator, { 
+        lifetime: ServiceLifetime.Transient 
+      });
+      // Each resolve() returns a new instance
+
+  singleton:
+    description: 'Creates single shared instance'
+    business-context: 'Use for shared resources, configurations, and stateful services'
+    example: |
+      container.register('cache', MemoryCache, { 
+        lifetime: ServiceLifetime.Singleton 
+      });
+      // All resolve() calls return the same instance
+
+  scoped:
+    description: 'Creates instance per scope'
+    business-context: 'Use for request-scoped services and bounded context isolation'
+    example: |
+      container.register('unitOfWork', UnitOfWork, { 
+        lifetime: ServiceLifetime.Scoped 
+      });
+      // Instance shared within scope, new instance per scope
+
+# === ENTERPRISE FEATURES ===
+features:
+  circular-dependency-detection:
+    description: 'Automatically detects and prevents circular dependencies'
+    business-context: 'Prevents infinite loops and stack overflow errors'
+    example: |
+      // Will throw CircularDependencyError
+      container.register('serviceA', ServiceA); // depends on ServiceB
+      container.register('serviceB', ServiceB); // depends on ServiceA
+      container.resolve<ServiceA>('serviceA'); // Throws error
+
+  hierarchical-resolution:
+    description: 'Child containers inherit from parent containers'
+    business-context: 'Enables service overriding and scoped customization'
+    example: |
+      const parent = new SimpleContainer();
+      parent.register('logger', ConsoleLogger);
+
+      const child = new SimpleContainer(parent);
+      child.register('logger', FileLogger); // Override
+
+      const logger = child.resolve<Logger>('logger'); // Returns FileLogger
+      const service = child.resolve<UserService>('userService'); // Falls back to parent
+
+  tag-based-organization:
+    description: 'Organize and discover services by tags'
+    business-context: 'Enables feature-based service grouping and bulk operations'
+    example: |
+      container.register('userRepo', UserRepository, { tags: ['repository', 'user-management'] });
+      container.register('orderRepo', OrderRepository, { tags: ['repository', 'order-management'] });
+
+      // Find all repositories
+      const repositories = container.getServicesByTag('repository');

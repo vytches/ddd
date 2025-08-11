@@ -1,47 +1,11 @@
-import type { IDomainEvent } from './domain-event-interfaces';
 import type { IAggregateWithEvents } from '../aggregates';
+import type { IDomainEvent } from './domain-event-interfaces';
 
-/**
- * @llm-summary Type definition for event middleware
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * EventMiddleware type implementing core domain functionality for event middleware operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: EventMiddleware = {} as EventMiddleware;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type EventMiddleware = (
   event: IDomainEvent,
   next: (event: IDomainEvent) => Promise<void>
 ) => Promise<void>;
 
-/**
- * @llm-summary Contract for event processor functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * EventProcessor interface implementing core domain functionality for event processor operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEventProcessor implements IEventProcessor {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEventProcessor {
   /**
    * Process an event
@@ -54,23 +18,6 @@ export interface IEventProcessor {
   canProcess(event: IDomainEvent): boolean;
 }
 
-/**
- * @llm-summary EventDispatcher class for event dispatcher operations
- * @llm-domain Core
- * @llm-complexity Simple
- *
- * @description
- * EventDispatcher class implementing core domain functionality for event dispatcher operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IEventDispatcher();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class IEventDispatcher {
   /**
    * Dispatch all events from an aggregate and clear them
@@ -88,23 +35,6 @@ export abstract class IEventDispatcher {
   abstract dispatchEvents(...events: IDomainEvent[]): Promise<void>;
 }
 
-/**
- * @llm-summary EnhancedEventDispatcher class for enhanced event dispatcher operations
- * @llm-domain Core
- * @llm-complexity Simple
- *
- * @description
- * EnhancedEventDispatcher class implementing core domain functionality for enhanced event dispatcher operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IEnhancedEventDispatcher();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class IEnhancedEventDispatcher extends IEventDispatcher {
   /**
    * Add middleware to the event pipeline

@@ -1,22 +1,5 @@
 import { IDomainError } from '@vytches/ddd-core';
 
-/**
- * @llm-summary ACLError class for a c l error operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * ACLError class implementing integration layer component for a c l error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ACLError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ACLError extends IDomainError {
   public metadata?: Record<string, unknown>;
 
@@ -64,23 +47,6 @@ export class ACLError extends IDomainError {
   }
 }
 
-/**
- * @llm-summary TranslationError class for translation error operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * TranslationError class implementing integration layer component for translation error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TranslationError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class TranslationError extends ACLError {
   constructor(
     message: string,
@@ -111,23 +77,6 @@ export class TranslationError extends ACLError {
   }
 }
 
-/**
- * @llm-summary AdapterNotFoundError class for adapter not found error operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * AdapterNotFoundError class implementing integration layer component for adapter not found error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AdapterNotFoundError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class AdapterNotFoundError extends ACLError {
   constructor(contextName: string, adapterName: string, error?: Error) {
     super(

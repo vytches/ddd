@@ -1,0 +1,259 @@
+# Domain to Integration Transformer - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'domain-to-integration-transformer'
+title: 'Domain to Integration Event Transformer'
+description: 'Abstract base class for transforming domain events to integration events'
+business-context: 'Enables bounded context communication by transforming internal domain events to external integration events'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  DomainToIntegrationTransformer:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract transformer for converting domain events to integration events for cross-context communication'
+      business-context: 'Implements Anti-Corruption Layer pattern for event translation between bounded contexts'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Abstract transformer for domain to integration event conversion'
+        cli:
+          description: |
+            ## DomainToIntegrationTransformer
+            Cross-context event transformation:
+            - Domain event to integration event mapping
+            - Metadata transformation and enrichment
+            - Multi-target context support
+            - Routing key generation
+            - Schema versioning support
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        generic: 'D = unknown, I = unknown'
+        implements: 'IDomainToIntegrationEventTransformer<IExtendedDomainEvent<D>, I>'
+        pattern: 'Anti-Corruption Layer'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates transformer with source context and optional router'
+        business-context: 'Initializes transformer for specific bounded context communication'
+
+        parameters:
+          - name: 'sourceContext'
+            type: 'string'
+            description: 'Name of source bounded context'
+          - name: 'contextRouter'
+            type: 'IContextRouter'
+            description: 'Optional router for multi-context targeting'
+            optional: true
+
+        examples:
+          - id: 'basic'
+            code: |
+              class OrderToInventoryTransformer extends DomainToIntegrationTransformer {
+                constructor() {
+                  super('OrderContext', new InventoryRouter());
+                }
+                
+                protected transformPayload(domainPayload) {
+                  return {
+                    itemId: domainPayload.productId,
+                    quantity: domainPayload.quantity
+                  };
+                }
+              }
+
+      transform:
+        description: 'Transform single domain event to integration event'
+        business-context: 'Core transformation method for single-target context communication'
+
+        parameters:
+          - name: 'domainEvent'
+            type: 'IExtendedDomainEvent<D>'
+            description: 'Domain event to transform'
+          - name: 'additionalMetadata'
+            type: 'Partial<IIntegrationEventMetadata>'
+            description: 'Optional metadata to add'
+            optional: true
+
+        returns:
+          type: 'IIntegrationEvent<I>'
+          description: 'Transformed integration event'
+
+        examples:
+          - id: 'transform'
+            code: |
+              const domainEvent = new OrderCreatedEvent(orderData);
+              const integrationEvent = transformer.transform(domainEvent, {
+                targetContext: 'InventoryContext',
+                routingKey: 'orders.created'
+              });
+              // Integration event ready for external context
+
+        custom-tags:
+          pattern: 'Adapter'
+
+      transformToMultipleTargets:
+        description: 'Transform domain event to multiple integration events for different contexts'
+        business-context: 'Enables fan-out pattern for multi-context event distribution'
+
+        parameters:
+          - name: 'domainEvent'
+            type: 'IExtendedDomainEvent<D>'
+            description: 'Domain event to transform'
+          - name: 'additionalMetadata'
+            type: 'Partial<IIntegrationEventMetadata>'
+            description: 'Optional metadata for all events'
+            optional: true
+
+        returns:
+          type: 'IIntegrationEvent<I>[]'
+          description: 'Array of integration events for each target context'
+
+        examples:
+          - id: 'multi-target'
+            code: |
+              const domainEvent = new OrderCreatedEvent(orderData);
+              const integrationEvents = transformer.transformToMultipleTargets(domainEvent);
+              // Returns events for: InventoryContext, PaymentContext, ShippingContext
+              console.log(`Generated ${integrationEvents.length} integration events`);
+
+        custom-tags:
+          pattern: 'Fan-Out'
+
+      transformPayload:
+        description: 'Abstract method to transform domain payload to integration format'
+        business-context: 'Template method for payload transformation logic'
+
+        parameters:
+          - name: 'domainPayload'
+            type: 'D | undefined'
+            description: 'Domain event payload to transform'
+
+        returns:
+          type: 'I'
+          description: 'Transformed integration payload'
+
+        examples:
+          - id: 'implementation'
+            code: |
+              protected transformPayload(domainPayload?: OrderCreatedPayload): InventoryUpdatePayload {
+                if (!domainPayload) {
+                  throw new Error('Payload required for transformation');
+                }
+                
+                return {
+                  itemId: domainPayload.productId,
+                  quantity: domainPayload.quantity,
+                  operation: 'RESERVE',
+                  orderId: domainPayload.orderId
+                };
+              }
+
+        custom-tags:
+          abstract: 'true'
+          protected: 'true'
+
+      transformMetadata:
+        description: 'Transform domain event metadata to integration metadata'
+        business-context: 'Enriches metadata with context information and routing details'
+
+        parameters:
+          - name: 'domainMetadata'
+            type: 'IEventMetadata'
+            description: 'Domain event metadata'
+          - name: 'additionalMetadata'
+            type: 'Partial<IIntegrationEventMetadata>'
+            description: 'Additional metadata to merge'
+            optional: true
+
+        returns:
+          type: 'Partial<IIntegrationEventMetadata>'
+          description: 'Transformed integration metadata'
+
+        examples:
+          - id: 'metadata'
+            code: |
+              // Automatically transforms:
+              // - Domain eventId becomes causationId
+              // - Adds source/target context
+              // - Preserves correlation ID
+              // - Adds routing key
+              const metadata = this.transformMetadata(domainMetadata, {
+                schemaVersion: 2,
+                priority: 'HIGH'
+              });
+
+        custom-tags:
+          protected: 'true'
+
+      getIntegrationEventType:
+        description: 'Map domain event type to integration event type'
+        business-context: 'Allows event type translation between contexts'
+
+        parameters:
+          - name: 'domainEventType'
+            type: 'string'
+            description: 'Domain event type name'
+
+        returns:
+          type: 'string'
+          description: 'Integration event type name'
+
+        examples:
+          - id: 'type-mapping'
+            code: |
+              protected getIntegrationEventType(domainEventType: string): string {
+                const typeMap = {
+                  'OrderCreated': 'InventoryReservationRequested',
+                  'OrderCancelled': 'InventoryReleaseRequested'
+                };
+                return typeMap[domainEventType] || domainEventType;
+              }
+
+        custom-tags:
+          protected: 'true'
+          virtual: 'true'
+
+      getRoutingKey:
+        description: 'Generate routing key for message broker routing'
+        business-context: 'Creates routing keys for topic-based message distribution'
+
+        parameters:
+          - name: 'domainMetadata'
+            type: 'IEventMetadata'
+            description: 'Domain event metadata'
+
+        returns:
+          type: 'string'
+          description: 'Routing key for integration event'
+
+        examples:
+          - id: 'routing'
+            code: |
+              protected getRoutingKey(domainMetadata: IEventMetadata): string {
+                // Generate hierarchical routing key
+                // e.g., "order.aggregate.OrderCreated"
+                return domainMetadata.aggregateType
+                  ? `${domainMetadata.aggregateType}.${domainMetadata.eventType}`
+                  : domainMetadata.eventType || '';
+              }
+
+        custom-tags:
+          protected: 'true'
+          virtual: 'true'
+# === FILE-LEVEL ELEMENTS ===
+# No additional types, interfaces, or functions in this file

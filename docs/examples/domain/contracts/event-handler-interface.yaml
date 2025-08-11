@@ -1,0 +1,301 @@
+# Event Handler Interface - Foundation Layer Event Handler Contracts
+# Core event handler interface definitions and utility functions
+
+# === FILE METADATA ===
+file-name: 'event-handler-interface'
+title: 'Event Handler Interface - Event Processing Contracts'
+description: 'Core interface definitions for event handlers with metadata support and utility functions'
+business-context: 'Provides standardized contracts for event handling enabling consistent domain event processing across all contexts'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  EventHandlerFn:
+    description: 'Function type definition for event handler functions'
+    business-context: 'Enables functional-style event handling as an alternative to class-based handlers'
+
+    formats:
+      jsdoc:
+        description: 'Function type for domain event handling'
+      cli:
+        description: |
+          ## EventHandlerFn Type
+
+          Function type for event handlers:
+
+          **Function Signature:**
+          - Receives typed domain event
+          - Returns void or Promise<void>
+          - Supports both sync and async processing
+
+          **Usage Patterns:**
+          - Functional event handling
+          - Lambda-style event processors
+          - Inline handler definitions
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Specific domain event type to handle'
+        constraint: 'IDomainEvent'
+
+    function-signature:
+      parameters:
+        - name: 'event'
+          type: 'T'
+          description: 'Domain event to process'
+      returns:
+        type: 'Promise<void> | void'
+        description: 'Processing completion (sync or async)'
+
+    examples:
+      - id: 'functional-handler'
+        code: |
+          // Functional event handler
+          const orderCreatedHandler: EventHandlerFn<OrderCreatedEvent> = async (event) => {
+            await sendWelcomeEmail(event.payload.customerEmail);
+            await createInvoice(event.payload.orderId);
+          };
+
+          // Sync functional handler
+          const auditHandler: EventHandlerFn<AuditEvent> = (event) => {
+            console.log(`Audit: ${event.eventType} at ${event.metadata?.timestamp}`);
+          };
+
+# === INTERFACES ===
+interfaces:
+  IEventHandler:
+    description: 'Core interface contract for domain event handlers'
+    business-context: 'Standardizes event handling behavior across all domain contexts enabling consistent event processing'
+
+    formats:
+      jsdoc:
+        description: 'Domain event handler interface with type safety'
+        business-context: 'Standard contract for event processing'
+      cli:
+        description: |
+          ## IEventHandler Interface
+
+          Standard contract for event handlers:
+
+          **Core Responsibility:**
+          - Handle method for processing events
+          - Type-safe event parameter
+          - Async processing support
+
+          **Implementation Patterns:**
+          - Command handlers for CQRS
+          - Domain event processors
+          - Integration event handlers
+          - Audit event processors
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Specific domain event type this handler processes'
+        constraint: 'IDomainEvent'
+
+    methods:
+      handle:
+        description: 'Processes a domain event according to handler-specific business logic'
+        business-context: 'Executes domain-specific reactions to events such as updating read models, sending notifications, or triggering workflows'
+
+        parameters:
+          - name: 'event'
+            type: 'T'
+            description: 'Domain event to handle'
+
+        returns:
+          type: 'Promise<void> | void'
+          description: 'Processing completion (supports both sync and async)'
+
+        examples:
+          - id: 'order-created-handler'
+            code: |
+              // Order creation handler
+              class OrderCreatedHandler implements IEventHandler<OrderCreatedEvent> {
+                constructor(
+                  private emailService: EmailService,
+                  private inventoryService: InventoryService
+                ) {}
+                
+                async handle(event: OrderCreatedEvent): Promise<void> {
+                  // Send confirmation email
+                  await this.emailService.sendOrderConfirmation(
+                    event.payload.customerEmail,
+                    event.payload.orderId
+                  );
+                  
+                  // Reserve inventory
+                  await this.inventoryService.reserveItems(event.payload.items);
+                }
+              }
+
+          - id: 'audit-handler'
+            code: |
+              // Audit handler for compliance
+              class AuditEventHandler implements IEventHandler<IDomainEvent> {
+                handle(event: IDomainEvent): void {
+                  // Sync processing for audit logs
+                  this.auditLogger.log({
+                    eventType: event.eventType,
+                    timestamp: new Date(),
+                    aggregateId: event.metadata?.aggregateId
+                  });
+                }
+              }
+
+  EventHandlerMetadata:
+    description: 'Metadata interface for event handler registration and discovery'
+    business-context: 'Enables event handler registration systems to associate handlers with specific event types'
+
+    formats:
+      jsdoc:
+        description: 'Event handler metadata for registration'
+        business-context: 'Handler discovery and registration support'
+      cli:
+        description: |
+          ## EventHandlerMetadata Interface
+
+          Metadata for event handler registration:
+
+          **Registration Support:**
+          - Event type constructor association
+          - Handler discovery mechanisms
+          - Decorator pattern support
+          - Dependency injection integration
+
+          **Framework Integration:**
+          - Used by event bus implementations
+          - Enables automatic handler registration
+          - Supports decorator-based configuration
+
+    properties:
+      - name: 'eventType'
+        type: 'new (...args: unknown[]) => IDomainEvent'
+        description: 'Constructor of the event type this handler processes'
+        business-context: 'Links handler to specific event type for automatic registration'
+
+# === CONSTANTS ===
+constants:
+  EVENT_HANDLER_METADATA:
+    description: 'Symbol used for attaching event handler metadata to classes'
+    business-context: 'Enables decorator-based event handler registration without namespace conflicts'
+
+    type: 'Symbol'
+    value: "Symbol('EVENT_HANDLER_METADATA')"
+
+    formats:
+      jsdoc:
+        description: 'Metadata symbol for event handler decorators'
+      cli:
+        description: |
+          ## EVENT_HANDLER_METADATA Symbol
+
+          Used for decorator-based handler registration:
+
+          **Decorator Pattern:**
+          - Attach metadata to handler classes
+          - Enable automatic discovery
+          - Support dependency injection
+          - Framework integration
+
+    examples:
+      - id: 'metadata-usage'
+        code: |
+          // Usage in decorator implementation
+          function EventHandler(eventType: new (...args: any[]) => IDomainEvent) {
+            return function (target: any) {
+              Reflect.defineMetadata(EVENT_HANDLER_METADATA, { eventType }, target);
+            };
+          }
+
+          // Usage with decorator
+          @EventHandler(OrderCreatedEvent)
+          class OrderCreatedHandler implements IEventHandler<OrderCreatedEvent> {
+            handle(event: OrderCreatedEvent): Promise<void> {
+              // Handler implementation
+            }
+          }
+
+  EVENT_HANDLER_OPTIONS:
+    description: 'Symbol used for attaching event handler configuration options to classes'
+    business-context: 'Enables decorator-based handler configuration for advanced event processing options'
+
+    type: 'Symbol'
+    value: "Symbol('EVENT_HANDLER_OPTIONS')"
+
+    formats:
+      jsdoc:
+        description: 'Options symbol for event handler configuration'
+      cli:
+        description: |
+          ## EVENT_HANDLER_OPTIONS Symbol
+
+          Used for advanced handler configuration:
+
+          **Configuration Options:**
+          - Event filtering criteria
+          - Processing priorities
+          - Retry policies
+          - Circuit breaker settings
+
+    examples:
+      - id: 'options-usage'
+        code: |
+          // Usage for handler configuration
+          function EventHandlerOptions(options: {
+            priority?: number;
+            retryPolicy?: RetryPolicy;
+            filter?: (event: IDomainEvent) => boolean;
+          }) {
+            return function (target: any) {
+              Reflect.defineMetadata(EVENT_HANDLER_OPTIONS, options, target);
+            };
+          }
+
+# === FUNCTIONS ===
+functions:
+  isEventHandler:
+    description: 'Type guard function to check if an object implements the IEventHandler interface'
+    business-context: 'Enables runtime validation of event handler objects for dynamic handler registration and validation'
+
+    parameters:
+      - name: 'obj'
+        type: 'unknown'
+        description: 'Object to check for event handler interface compliance'
+
+    returns:
+      type: 'obj is IEventHandler<IDomainEvent>'
+      description: 'Type predicate confirming the object is an event handler'
+
+    examples:
+      - id: 'type-guard-usage'
+        code: |
+          // Validate handler objects
+          const handler = getHandlerFromRegistry('OrderCreated');
+
+          if (isEventHandler(handler)) {
+            // TypeScript knows handler has handle() method
+            await handler.handle(orderCreatedEvent);
+          } else {
+            throw new Error('Invalid handler object');
+          }
+
+      - id: 'dynamic-registration'
+        code: |
+          // Dynamic handler validation during registration
+          function registerHandler(eventType: string, handlerObj: unknown): void {
+            if (!isEventHandler(handlerObj)) {
+              throw new Error(`Invalid handler for ${eventType}: missing handle method`);
+            }
+            
+            this.handlers.set(eventType, handlerObj);
+          }
+
+    custom-tags:
+      type-guard: 'true'
+      runtime-validation: 'true'
+      duck-typing: 'handle-method'

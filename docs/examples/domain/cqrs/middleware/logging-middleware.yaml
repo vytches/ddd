@@ -1,0 +1,260 @@
+# logging.middleware - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'logging.middleware'
+title: 'LoggingMiddleware - CQRS Execution Logging'
+description: 'Middleware for logging CQRS command and query execution with timing'
+business-context: 'Provides observability and performance monitoring for CQRS operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  LoggingMiddleware:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Middleware that logs CQRS operation execution with performance timing'
+      business-context: 'Essential for debugging, monitoring, and performance analysis of command/query processing'
+
+      formats:
+        jsdoc:
+          description: 'LoggingMiddleware for CQRS operation logging and performance monitoring'
+        cli:
+          description: |
+            ## LoggingMiddleware
+
+            CQRS logging middleware providing:
+            - Start/completion logging for operations
+            - Performance timing measurement
+            - Error logging with execution duration
+            - Configurable logger integration
+            - Success/failure operation tracking
+
+      custom-tags:
+        implements: 'ICQRSMiddleware'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates logging middleware with optional custom logger'
+        business-context: 'Allows integration with enterprise logging systems or custom loggers'
+
+        parameters:
+          - name: 'logger'
+            type: '{ log: (message: string) => void }'
+            description: 'Custom logger implementation (defaults to console)'
+            optional: true
+
+        examples:
+          - id: 'default-logger'
+            code: |
+              const loggingMiddleware = new LoggingMiddleware();
+              // Uses console.log by default
+
+          - id: 'custom-logger'
+            code: |
+              const customLogger = {
+                log: (message: string) => {
+                  console.log(`[${new Date().toISOString()}] ${message}`);
+                }
+              };
+
+              const loggingMiddleware = new LoggingMiddleware(customLogger);
+
+          - id: 'winston-logger'
+            code: |
+              import winston from 'winston';
+
+              const winstonLogger = winston.createLogger({
+                level: 'info',
+                format: winston.format.json(),
+                transports: [
+                  new winston.transports.File({ filename: 'cqrs.log' })
+                ]
+              });
+
+              const loggingMiddleware = new LoggingMiddleware({
+                log: (message: string) => winstonLogger.info(message)
+              });
+
+          - id: 'structured-logging'
+            code: |
+              const structuredLogger = {
+                log: (message: string) => {
+                  const timestamp = new Date().toISOString();
+                  const logEntry = {
+                    timestamp,
+                    level: 'INFO',
+                    component: 'CQRS',
+                    message
+                  };
+                  console.log(JSON.stringify(logEntry));
+                }
+              };
+
+              const loggingMiddleware = new LoggingMiddleware(structuredLogger);
+
+      handle:
+        description: 'Handles CQRS operation execution with comprehensive logging'
+        business-context: 'Logs operation start, measures execution time, and logs completion or errors'
+
+        parameters:
+          - name: 'context'
+            type: 'ExecutionContext'
+            description: 'Execution context containing command/query information'
+          - name: 'next'
+            type: '() => Promise<unknown>'
+            description: 'Next middleware or handler in the pipeline'
+
+        returns:
+          type: 'Promise<unknown>'
+          description: 'Result from the next middleware or handler'
+
+        throws:
+          - type: 'Error'
+            description: 'Re-throws any errors from the pipeline after logging'
+
+        examples:
+          - id: 'successful-command-log'
+            code: |
+              // When executing: new CreateUserCommand({ name: 'John' })
+              // Console output:
+              // [CQRS] Executing command: CreateUserCommand
+              // [CQRS] command CreateUserCommand completed in 45ms
+
+              const commandBus = new CommandBus(container);
+              commandBus.use(new LoggingMiddleware());
+
+              const command = new CreateUserCommand({ name: 'John Doe', email: 'john@example.com' });
+              await commandBus.execute(command);
+
+          - id: 'failed-query-log'
+            code: |
+              // When executing: new GetUserQuery({ userId: 'invalid' })
+              // Console output:
+              // [CQRS] Executing query: GetUserQuery
+              // [CQRS] query GetUserQuery failed after 12ms: User not found
+
+              const queryBus = new QueryBus(container);
+              queryBus.use(new LoggingMiddleware());
+
+              try {
+                const query = new GetUserQuery({ userId: 'invalid-id' });
+                await queryBus.execute(query);
+              } catch (error) {
+                // Error logged and re-thrown
+              }
+
+          - id: 'performance-monitoring'
+            code: |
+              class PerformanceAwareLoggingMiddleware extends LoggingMiddleware {
+                async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+                  const startTime = performance.now();
+                  const result = await super.handle(context, next);
+                  const duration = performance.now() - startTime;
+                  
+                  // Log slow operations
+                  if (duration > 1000) {
+                    console.warn(`Slow ${context.type} detected: ${duration}ms`);
+                  }
+                  
+                  return result;
+                }
+              }
+
+          - id: 'with-correlation-tracking'
+            code: |
+              class CorrelationLoggingMiddleware implements ICQRSMiddleware {
+                constructor(private baseMiddleware: LoggingMiddleware) {}
+                
+                async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+                  // Add correlation ID to context
+                  const correlationId = context.getMetadata<string>('correlationId') || generateId();
+                  context.setMetadata('correlationId', correlationId);
+                  
+                  // Create correlation-aware logger
+                  const correlationLogger = {
+                    log: (message: string) => {
+                      console.log(`[${correlationId}] ${message}`);
+                    }
+                  };
+                  
+                  // Use correlation logger for this execution
+                  const correlationMiddleware = new LoggingMiddleware(correlationLogger);
+                  return correlationMiddleware.handle(context, next);
+                }
+              }
+
+        custom-tags:
+          error-handling: 'Logs errors with execution time before re-throwing'
+          performance-tracking: 'Measures and logs execution duration'
+          format: 'Logs in format: [CQRS] {action} {type}: {name} [completed in|failed after] {duration}ms'
+
+# === INTEGRATION PATTERNS ===
+integration-patterns:
+  enterprise-logging:
+    description: 'Integration with enterprise logging systems'
+    examples:
+      - system: 'Structured JSON logging'
+        code: |
+          const jsonLogger = {
+            log: (message: string) => {
+              const entry = {
+                timestamp: new Date().toISOString(),
+                level: 'INFO',
+                component: 'CQRS',
+                message,
+                service: 'user-service',
+                version: '1.0.0'
+              };
+              console.log(JSON.stringify(entry));
+            }
+          };
+
+      - system: 'Application Insights integration'
+        code: |
+          const appInsightsLogger = {
+            log: (message: string) => {
+              appInsights.defaultClient.trackTrace({
+                message,
+                severity: SeverityLevel.Information,
+                properties: {
+                  component: 'CQRS',
+                  service: process.env.SERVICE_NAME
+                }
+              });
+            }
+          };
+
+  middleware-composition:
+    description: 'Using LoggingMiddleware with other middleware'
+    examples:
+      - pattern: 'Logging with validation and retry'
+        code: |
+          commandBus
+            .use(new LoggingMiddleware())
+            .use(new ValidationMiddleware())
+            .use(new RetryMiddleware({ maxAttempts: 3 }));
+
+      - pattern: 'Logging with performance monitoring'
+        code: |
+          queryBus
+            .use(new LoggingMiddleware())
+            .use(new PerformanceMiddleware({ slowThreshold: 500 }))
+            .use(new CacheMiddleware());
+
+  log-analysis:
+    description: 'Log patterns for analysis and monitoring'
+    patterns:
+      - 'Execution time trends': 'Monitor performance degradation'
+      - 'Error rate monitoring': 'Track failure rates by command/query type'
+      - 'Usage patterns': 'Identify most frequently used operations'
+      - 'Performance bottlenecks': 'Find consistently slow operations'

@@ -2,33 +2,14 @@ import type { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
   IPolicyComposer,
-  PolicyRequest,
   IPolicyConditionalBuilder,
   PolicyCondition,
+  PolicyRequest,
 } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation } from '../core/models/policy-violation';
 import { PolicyEventBuilder } from './policy-evaluation-event';
 import type { PolicyEventBus } from './policy-event-bus';
 
-/**
- * @llm-summary Contract for event driven policy config functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * EventDrivenPolicyConfig interface implementing domain pattern implementation for event driven policy config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEventDrivenPolicyConfig implements EventDrivenPolicyConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface EventDrivenPolicyConfig {
   readonly eventBus: PolicyEventBus;
   readonly emitStartEvents?: boolean; // Emit POLICY_EVALUATION_STARTED events
@@ -41,23 +22,6 @@ export interface EventDrivenPolicyConfig {
   readonly metadata?: Record<string, unknown>; // Additional metadata for events
 }
 
-/**
- * @llm-summary EventDrivenPolicy class for event driven policy operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * EventDrivenPolicy class implementing domain pattern implementation for event driven policy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventDrivenPolicy();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
   private readonly config: {
     eventBus: PolicyEventBus;
@@ -317,49 +281,12 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
   }
 }
 
-/**
- * @llm-summary with events function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * withEvents function implementing domain pattern implementation for with events operations.
- *
- * @param {EventDrivenPolicyConfig} config - config parameter
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = withEvents(config);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function withEvents<T>(config: EventDrivenPolicyConfig) {
   return function (policy: IBusinessPolicy<T>): EventDrivenPolicy<T> {
     return new EventDrivenPolicy(policy, config);
   };
 }
 
-/**
- * @llm-summary EventDrivenPolicyFactory class for event driven policy factory operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * EventDrivenPolicyFactory class implementing domain pattern implementation for event driven policy factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventDrivenPolicyFactory();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventDrivenPolicyFactory {
   constructor(
     private readonly defaultEventBus: PolicyEventBus,

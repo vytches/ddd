@@ -4,23 +4,6 @@ import type { IProjectionCheckpointStore } from '../projection-interfaces';
 
 import { BaseIntervalCapability } from './base-capability';
 
-/**
- * @llm-summary CheckpointCapability class for checkpoint capability operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * CheckpointCapability class implementing architectural component for checkpoint capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CheckpointCapability();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class CheckpointCapability<TReadModel> extends BaseIntervalCapability<
   'checkpoint',
   TReadModel

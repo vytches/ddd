@@ -1,0 +1,266 @@
+# Concrete Saga Step - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'concrete-saga-step'
+title: 'ConcreteSagaStep - Concrete Step Implementation'
+description: 'Concrete implementation of saga step with execution and compensation logic'
+business-context: 'Provides ready-to-use saga step implementation for common patterns'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ConcreteSagaStep:
+    class-doc:
+      description: 'Concrete saga step implementation with customizable execution and compensation logic'
+      business-context: 'Ready-to-use step implementation for rapid saga development'
+
+      formats:
+        jsdoc:
+          description: 'Concrete saga step with customizable logic'
+        cli:
+          description: |
+            ## ConcreteSagaStep
+
+            Concrete step implementation providing:
+            - Function-based execution logic
+            - Optional compensation handling
+            - Configurable validation
+            - Event-driven processing
+            - Error handling and retry support
+
+    methods:
+      constructor:
+        description: 'Creates concrete step with execution and compensation functions'
+        business-context: 'Enables rapid step creation with custom business logic'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Unique step name'
+
+          - name: 'displayName'
+            type: 'string'
+            description: 'Display name for monitoring'
+
+          - name: 'executeFn'
+            type: 'StepExecutionFunction'
+            description: 'Function to execute step logic'
+
+          - name: 'compensateFn'
+            type: 'StepCompensationFunction'
+            description: 'Function to execute compensation logic'
+            required: false
+
+          - name: 'options'
+            type: 'ConcreteSagaStepOptions'
+            description: 'Step configuration options'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'concrete-step-creation'
+            code: |
+              const processPaymentStep = new ConcreteSagaStep(
+                'ProcessPayment',
+                'Process Order Payment',
+                async (event, state, context) => {
+                  const orderData = event.payload as OrderCreatedPayload;
+                  
+                  try {
+                    const paymentResult = await paymentService.processPayment({
+                      orderId: orderData.orderId,
+                      amount: orderData.totalAmount
+                    });
+                    
+                    return {
+                      success: true,
+                      events: [new PaymentProcessedEvent(paymentResult)],
+                      compensationData: {
+                        paymentId: paymentResult.paymentId,
+                        amount: paymentResult.amount
+                      }
+                    };
+                  } catch (error) {
+                    return {
+                      success: false,
+                      error: {
+                        message: error.message,
+                        code: 'PAYMENT_FAILED'
+                      }
+                    };
+                  }
+                },
+                async (state, context) => {
+                  const compensationData = state.compensationData['ProcessPayment'];
+                  if (compensationData?.paymentId) {
+                    await paymentService.refund(compensationData.paymentId);
+                  }
+                  return { success: true };
+                },
+                {
+                  triggerEvents: ['OrderCreated'],
+                  compensatable: true,
+                  timeout: 30000,
+                  maxRetries: 3
+                }
+              );
+
+      execute:
+        description: 'Executes the step using the provided execution function'
+        business-context: 'Delegates to custom business logic function'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Triggering domain event'
+
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<ISagaActionResult>'
+          description: 'Result of step execution'
+
+        examples:
+          - id: 'step-execution'
+            code: |
+              // Called automatically by saga framework
+              const result = await step.execute(event, sagaState, context);
+              if (result.success) {
+                console.log('Step executed successfully');
+              }
+
+      compensate:
+        description: 'Executes compensation using the provided compensation function'
+        business-context: 'Delegates to custom compensation logic if provided'
+
+        parameters:
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<ISagaActionResult>'
+          description: 'Result of compensation'
+
+        examples:
+          - id: 'compensation'
+            code: |
+              // Called when saga needs to compensate this step
+              const result = await step.compensate(sagaState, context);
+              if (result.success) {
+                console.log('Compensation completed successfully');
+              }
+
+# === TYPES ===
+types:
+  StepExecutionFunction:
+    description: 'Function type for step execution logic'
+    business-context: 'Enables custom business logic implementation'
+
+    type-definition: |
+      (event: IExtendedDomainEvent, state: ISagaState, context: ISagaExecutionContext) 
+        => Promise<ISagaActionResult>
+
+    examples:
+      - id: 'execution-function'
+        code: |
+          const executeFn: StepExecutionFunction = async (event, state, context) => {
+            // Custom business logic here
+            const result = await businessService.processEvent(event);
+            
+            return {
+              success: true,
+              events: [new ProcessedEvent(result)],
+              compensationData: { processId: result.id }
+            };
+          };
+
+  StepCompensationFunction:
+    description: 'Function type for step compensation logic'
+    business-context: 'Enables custom compensation implementation'
+
+    type-definition: |
+      (state: ISagaState, context: ISagaExecutionContext) 
+        => Promise<ISagaActionResult>
+
+    examples:
+      - id: 'compensation-function'
+        code: |
+          const compensateFn: StepCompensationFunction = async (state, context) => {
+            const compensationData = state.compensationData['StepName'];
+            
+            if (compensationData?.processId) {
+              await businessService.rollback(compensationData.processId);
+            }
+            
+            return { success: true };
+          };
+
+  ConcreteSagaStepOptions:
+    description: 'Configuration options for concrete saga steps'
+    business-context: 'Provides flexible step configuration'
+
+    properties:
+      - name: 'triggerEvents'
+        type: 'string[]'
+        description: 'Events that trigger this step'
+        default: '[]'
+
+      - name: 'completionEvents'
+        type: 'string[]'
+        description: 'Events that complete this step'
+        default: '[]'
+
+      - name: 'compensatable'
+        type: 'boolean'
+        description: 'Whether step can be compensated'
+        default: 'false'
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Step execution timeout (ms)'
+        required: false
+
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Maximum retry attempts'
+        required: false
+
+      - name: 'description'
+        type: 'string'
+        description: 'Step description'
+        required: false
+
+      - name: 'validationFn'
+        type: 'StepValidationFunction'
+        description: 'Custom validation function'
+        required: false
+
+  StepValidationFunction:
+    description: 'Function type for step validation logic'
+    business-context: 'Enables custom pre-execution validation'
+
+    type-definition: |
+      (event: IExtendedDomainEvent, state: ISagaState) => boolean
+
+    examples:
+      - id: 'validation-function'
+        code: |
+          const validationFn: StepValidationFunction = (event, state) => {
+            // Custom validation logic
+            return event.payload?.orderId && state.status !== SagaStatus.FAILED;
+          };

@@ -1,0 +1,411 @@
+# policy-context-builder - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-context-builder'
+title: 'PolicyContextBuilder - Context Construction'
+description: 'Fluent builder for policy evaluation context'
+business-context: 'Simplifies context creation for policy evaluations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyContextBuilder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Fluent builder for constructing policy evaluation contexts'
+      business-context: 'Provides consistent context creation with validation'
+
+      formats:
+        jsdoc:
+          description: 'Builder for PolicyContext objects'
+        cli:
+          description: |
+            ## PolicyContextBuilder
+
+            Context builder features:
+            - User identification
+            - Tenant scoping
+            - Session tracking
+            - Feature flags
+            - Environment configuration
+            - Metadata attachment
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Builder Pattern'
+
+    # Methods
+    methods:
+      withUserId:
+        description: 'Sets user identifier'
+        business-context: 'User context configuration'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      withTenantId:
+        description: 'Sets tenant identifier'
+        business-context: 'Multi-tenant support'
+
+        parameters:
+          - name: 'tenantId'
+            type: 'string'
+            description: 'Tenant identifier'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      withSessionId:
+        description: 'Sets session identifier'
+        business-context: 'Session tracking'
+
+        parameters:
+          - name: 'sessionId'
+            type: 'string'
+            description: 'Session identifier'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      withTimestamp:
+        description: 'Sets evaluation timestamp'
+        business-context: 'Temporal context'
+
+        parameters:
+          - name: 'timestamp'
+            type: 'Date'
+            description: 'Evaluation time'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      withEnvironment:
+        description: 'Sets environment name'
+        business-context: 'Environment context'
+
+        parameters:
+          - name: 'environment'
+            type: 'string'
+            description: 'Environment name'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      withFeatures:
+        description: 'Sets all feature flags'
+        business-context: 'Feature configuration'
+
+        parameters:
+          - name: 'features'
+            type: 'Record<string, boolean>'
+            description: 'Feature flags map'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      withFeature:
+        description: 'Adds single feature flag'
+        business-context: 'Individual feature control'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Feature name'
+          - name: 'enabled'
+            type: 'boolean'
+            description: 'Feature state'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      enableFeature:
+        description: 'Enables a feature'
+        business-context: 'Feature activation'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Feature to enable'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      disableFeature:
+        description: 'Disables a feature'
+        business-context: 'Feature deactivation'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Feature to disable'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      withMetadata:
+        description: 'Sets all metadata'
+        business-context: 'Metadata configuration'
+
+        parameters:
+          - name: 'metadata'
+            type: 'Record<string, unknown>'
+            description: 'Metadata map'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      addMetadata:
+        description: 'Adds metadata property'
+        business-context: 'Individual metadata'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Metadata key'
+          - name: 'value'
+            type: 'unknown'
+            description: 'Metadata value'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder for chaining'
+
+      build:
+        description: 'Builds the context'
+        business-context: 'Creates final context object'
+
+        returns:
+          type: 'PolicyContext'
+          description: 'Complete policy context'
+
+        custom-tags:
+          throws: 'Error if userId is missing'
+
+      create:
+        description: 'Creates new builder'
+        business-context: 'Factory method'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'New builder instance'
+
+        custom-tags:
+          static: 'true'
+
+      forUser:
+        description: 'Creates builder for user'
+        business-context: 'User-scoped builder'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder with user'
+
+        custom-tags:
+          static: 'true'
+
+      forUserAndTenant:
+        description: 'Creates builder for user and tenant'
+        business-context: 'Multi-tenant builder'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+          - name: 'tenantId'
+            type: 'string'
+            description: 'Tenant identifier'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder with user and tenant'
+
+        custom-tags:
+          static: 'true'
+
+      development:
+        description: 'Creates development context'
+        business-context: 'Development environment'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+            default: 'dev-user'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Development builder'
+
+        custom-tags:
+          static: 'true'
+
+      production:
+        description: 'Creates production context'
+        business-context: 'Production environment'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Production builder'
+
+        custom-tags:
+          static: 'true'
+
+      test:
+        description: 'Creates test context'
+        business-context: 'Test environment'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+            default: 'test-user'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Test builder'
+
+        custom-tags:
+          static: 'true'
+
+      from:
+        description: 'Creates from existing context'
+        business-context: 'Context modification'
+
+        parameters:
+          - name: 'context'
+            type: 'PolicyContext'
+            description: 'Existing context'
+
+        returns:
+          type: 'PolicyContextBuilder'
+          description: 'Builder from context'
+
+        custom-tags:
+          static: 'true'
+
+  PolicyContextFactory:
+    class-doc:
+      description: 'Factory for creating policy contexts'
+      business-context: 'Provides pre-configured context patterns'
+
+      custom-tags:
+        since: '2.0.0'
+        static: 'true'
+
+    methods:
+      minimal:
+        description: 'Creates minimal context'
+        business-context: 'Basic context pattern'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+
+        returns:
+          type: 'PolicyContext'
+          description: 'Minimal context'
+
+        custom-tags:
+          static: 'true'
+
+      withTenant:
+        description: 'Creates tenant context'
+        business-context: 'Multi-tenant pattern'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+          - name: 'tenantId'
+            type: 'string'
+            description: 'Tenant identifier'
+
+        returns:
+          type: 'PolicyContext'
+          description: 'Tenant context'
+
+        custom-tags:
+          static: 'true'
+
+      webRequest:
+        description: 'Creates web request context'
+        business-context: 'HTTP context pattern'
+
+        parameters:
+          - name: 'options'
+            type: 'WebRequestOptions'
+            description: 'Web request options'
+
+        returns:
+          type: 'PolicyContext'
+          description: 'Web context'
+
+        custom-tags:
+          static: 'true'
+
+      apiRequest:
+        description: 'Creates API request context'
+        business-context: 'API authentication pattern'
+
+        parameters:
+          - name: 'options'
+            type: 'APIRequestOptions'
+            description: 'API request options'
+
+        returns:
+          type: 'PolicyContext'
+          description: 'API context'
+
+        custom-tags:
+          static: 'true'
+
+      backgroundJob:
+        description: 'Creates background job context'
+        business-context: 'Async processing pattern'
+
+        parameters:
+          - name: 'options'
+            type: 'BackgroundJobOptions'
+            description: 'Background job options'
+
+        returns:
+          type: 'PolicyContext'
+          description: 'Job context'
+
+        custom-tags:
+          static: 'true'

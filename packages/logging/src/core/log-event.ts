@@ -1,25 +1,6 @@
-import type { LogLevel } from './log-level';
 import type { LogContext } from './log-context';
+import type { LogLevel } from './log-level';
 
-/**
- * @llm-summary Contract for log event functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * LogEvent interface implementing infrastructure service for log event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteLogEvent implements LogEvent {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface LogEvent {
   readonly id: string;
   readonly timestamp: Date;
@@ -31,25 +12,6 @@ export interface LogEvent {
   readonly tags?: readonly string[];
 }
 
-/**
- * @llm-summary Contract for log event builder functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * LogEventBuilder interface implementing infrastructure service for log event builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteLogEventBuilder implements LogEventBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface LogEventBuilder {
   withData(data: Record<string, unknown>): LogEventBuilder;
   withError(error: Error): LogEventBuilder;
@@ -57,23 +19,6 @@ export interface LogEventBuilder {
   build(): LogEvent;
 }
 
-/**
- * @llm-summary DefaultLogEventBuilder class for default log event builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * DefaultLogEventBuilder class implementing infrastructure service for default log event builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DefaultLogEventBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class DefaultLogEventBuilder implements LogEventBuilder {
   private event: {
     id: string;

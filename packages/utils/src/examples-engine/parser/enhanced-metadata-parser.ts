@@ -1,10 +1,9 @@
 import type {
-  MetadataValue,
-  ParsedMetadata,
   ConfigLevel,
-  ResolvedMetadata,
-  GlobalSettings,
   FormatRules,
+  GlobalSettings,
+  ParsedMetadata,
+  ResolvedMetadata,
 } from '../types/enhanced-metadata.types';
 
 /**
@@ -12,47 +11,21 @@ import type {
  */
 const DEFAULT_FORMAT_RULES: FormatRules = {
   jsdoc: {
-    description: (content) => content.trim(),
-    'business-context': (content) => `@business ${content.trim()}`,
-    author: (content) => `@author ${content.trim()}`,
-    since: (content) => `@since ${content.trim()}`,
-    warning: (content) => `@warning ${content.trim()}`,
+    description: content => content.trim(),
+    'business-context': content => `@business ${content.trim()}`,
+    author: content => `@author ${content.trim()}`,
+    since: content => `@since ${content.trim()}`,
+    warning: content => `@warning ${content.trim()}`,
   },
   cli: {
-    description: (content) => `## Description\n\n${content.trim()}`,
-    'business-context': (content) => `## Business Context\n\n${content.trim()}`,
-    author: (content) => `**Author**: ${content.trim()}`,
-    since: (content) => `**Since**: ${content.trim()}`,
-    warning: (content) => `> **Warning**: ${content.trim()}`,
+    description: content => `## Description\n\n${content.trim()}`,
+    'business-context': content => `## Business Context\n\n${content.trim()}`,
+    author: content => `**Author**: ${content.trim()}`,
+    since: content => `**Since**: ${content.trim()}`,
+    warning: content => `> **Warning**: ${content.trim()}`,
   },
 };
 
-/**
- * @llm-summary EnhancedMetadataParser class for enhanced metadata parser operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- * 
- * @description
- * EnhancedMetadataParser class implementing infrastructure service for enhanced metadata parser operations.
- * 
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EnhancedMetadataParser();
- * ```
- * 
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedMetadataParser());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- * 
- * @since 1.0.0
- * @public
- */
 export class EnhancedMetadataParser {
   constructor(private formatRules: FormatRules = DEFAULT_FORMAT_RULES) {}
 
@@ -61,27 +34,28 @@ export class EnhancedMetadataParser {
    */
   parseMetadata(content: string): ParsedMetadata {
     const metadata: ParsedMetadata = {};
-    
+
     // Match metadata tags with optional dot notation
     // @key: value or @key.format: value
-    const metadataRegex = /@([\w-]+(?:\.[\w-]+)?):\s*(.+?)(?=\n@[\w-]|@extract-end|@global-settings-end|\n```|$)/gs;
-    
+    const metadataRegex =
+      /@([\w-]+(?:\.[\w-]+)?):\s*(.+?)(?=\n@[\w-]|@extract-end|@global-settings-end|\n```|$)/gs;
+
     for (const match of content.matchAll(metadataRegex)) {
       const [, fullKey, value] = match;
       if (!fullKey || !value) continue;
-      
+
       const [baseKey, format = 'default'] = fullKey.split('.');
       if (!baseKey) continue;
-      
+
       if (!metadata[baseKey]) {
         metadata[baseKey] = {};
       }
-      
+
       // Handle multi-line values - preserve escape sequences as-is during parsing
       const cleanValue = value.trim();
       metadata[baseKey][format] = cleanValue;
     }
-    
+
     return metadata;
   }
 
@@ -90,29 +64,29 @@ export class EnhancedMetadataParser {
    */
   parseGlobalSettings(content: string): GlobalSettings[] {
     const settings: GlobalSettings[] = [];
-    
+
     // Match global settings blocks with optional scope
     const globalRegex = /@global-settings(?::(\w+))?\n(.*?)@global-settings-end/gs;
-    
+
     for (const match of content.matchAll(globalRegex)) {
       const [, scope, settingsContent] = match;
       if (!settingsContent) continue;
-      
+
       // Extract strategy if specified
       const strategyMatch = settingsContent.match(/@strategy:\s*(merge|replace)/);
       const strategy = (strategyMatch?.[1] as 'merge' | 'replace') || 'merge';
-      
+
       // Parse metadata within settings block (exclude strategy from metadata)
       const cleanedContent = settingsContent.replace(/@strategy:\s*(merge|replace)/, '');
       const metadata = this.parseMetadata(cleanedContent);
-      
+
       settings.push({
         strategy,
         metadata,
         scope: scope || undefined,
       });
     }
-    
+
     return settings;
   }
 
@@ -126,14 +100,14 @@ export class EnhancedMetadataParser {
     scope?: string
   ): ResolvedMetadata {
     let accumulated: ParsedMetadata = {};
-    
+
     // Apply configs in order (library -> package -> file)
     for (const config of configs) {
       // Skip if scope doesn't match
       if (config.scope && config.scope !== scope) {
         continue;
       }
-      
+
       if (config.strategy === 'replace') {
         // Replace strategy: start fresh
         accumulated = { ...config.metadata };
@@ -142,10 +116,10 @@ export class EnhancedMetadataParser {
         accumulated = this.mergeMetadata(accumulated, config.metadata);
       }
     }
-    
+
     // Always merge local metadata (highest priority)
     const finalMetadata = this.mergeMetadata(accumulated, localMetadata);
-    
+
     // Resolve for specific format
     return this.resolveForFormat(finalMetadata, format);
   }
@@ -155,11 +129,11 @@ export class EnhancedMetadataParser {
    */
   private mergeMetadata(base: ParsedMetadata, override: ParsedMetadata): ParsedMetadata {
     const merged: ParsedMetadata = { ...base };
-    
+
     for (const [key, value] of Object.entries(override)) {
       merged[key] = { ...merged[key], ...value };
     }
-    
+
     return merged;
   }
 
@@ -168,13 +142,13 @@ export class EnhancedMetadataParser {
    */
   private resolveForFormat(metadata: ParsedMetadata, format: 'jsdoc' | 'cli'): ResolvedMetadata {
     const resolved: ResolvedMetadata = {};
-    
+
     for (const [key, value] of Object.entries(metadata)) {
       // 1. Check for format-specific override
       if (value[format]) {
         // For format-specific values, check if they look like they contain format markers
         const rawValue = value[format].replace(/\\n/g, '\n');
-        
+
         // If value already contains format markers (like ##, @, >), use as-is
         // Otherwise, apply format transformation rules
         const formatRule = this.formatRules[format]?.[key];
@@ -190,7 +164,7 @@ export class EnhancedMetadataParser {
         resolved[key] = formatRule ? formatRule(value.default) : value.default;
       }
     }
-    
+
     return resolved;
   }
 

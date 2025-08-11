@@ -22,7 +22,7 @@ export class ExampleEngine implements IExampleEngine {
   public tagExtractor: TagExtractor; // Make public for JSDocAdapter access
   private validator: ExampleValidator;
   private cache: Map<string, ExampleFile[]> = new Map();
-  
+
   // Global shared cache to prevent concurrent filesystem access
   private static globalCache = new Map<string, ExampleFile[]>();
   private static pendingScans = new Map<string, Promise<ExampleFile[]>>();
@@ -37,7 +37,9 @@ export class ExampleEngine implements IExampleEngine {
    * Clear global cache (useful for testing or between builds)
    */
   static clearGlobalCache(): void {
-    console.log(`[ExampleEngine] Clearing global cache with ${ExampleEngine.globalCache.size} entries`);
+    console.log(
+      `[ExampleEngine] Clearing global cache with ${ExampleEngine.globalCache.size} entries`
+    );
     ExampleEngine.globalCache.clear();
     ExampleEngine.pendingScans.clear();
   }
@@ -47,15 +49,15 @@ export class ExampleEngine implements IExampleEngine {
    */
   async scanFolder(folderPath: string): Promise<ExampleFile[]> {
     console.log(`[scanFolder] Starting scan of: ${folderPath}`);
-    
+
     const cacheKey = folderPath;
-    
+
     // Check global cache first (shared across all instances)
     if (ExampleEngine.globalCache.has(cacheKey)) {
       console.log(`[scanFolder] Global cache hit for: ${folderPath}`);
       return ExampleEngine.globalCache.get(cacheKey)!;
     }
-    
+
     // Check instance cache
     if (this.cache.has(cacheKey)) {
       console.log(`[scanFolder] Instance cache hit for: ${folderPath}`);
@@ -81,12 +83,14 @@ export class ExampleEngine implements IExampleEngine {
 
     try {
       const result = await scanPromise;
-      
+
       // Cache in both global and instance cache
       ExampleEngine.globalCache.set(cacheKey, result);
       this.cache.set(cacheKey, result);
-      
-      console.log(`[scanFolder] Scan completed successfully for: ${folderPath}, found ${result.length} files`);
+
+      console.log(
+        `[scanFolder] Scan completed successfully for: ${folderPath}, found ${result.length} files`
+      );
       return result;
     } catch (error) {
       console.error(`[scanFolder] Scan failed for ${folderPath}:`, error);
@@ -102,19 +106,22 @@ export class ExampleEngine implements IExampleEngine {
    */
   private async _performScan(folderPath: string): Promise<ExampleFile[]> {
     console.log(`[_performScan] Starting actual scan for: ${folderPath}`);
-    
+
     try {
       // Add timeout protection
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error(`_performScan timed out after 8 seconds for ${folderPath}`)), 8000);
+        setTimeout(
+          () => reject(new Error(`_performScan timed out after 8 seconds for ${folderPath}`)),
+          8000
+        );
       });
 
       console.log(`[_performScan] About to scan directory: ${folderPath}`);
       const filePaths = await Promise.race([
         this.fileScanner.scanDirectory(folderPath),
-        timeoutPromise
+        timeoutPromise,
       ]);
-      
+
       console.log(`[_performScan] Found ${filePaths.length} files in: ${folderPath}`);
       const exampleFiles: ExampleFile[] = [];
 
@@ -130,7 +137,9 @@ export class ExampleEngine implements IExampleEngine {
         }
       }
 
-      console.log(`[_performScan] Successfully parsed ${exampleFiles.length} files from: ${folderPath}`);
+      console.log(
+        `[_performScan] Successfully parsed ${exampleFiles.length} files from: ${folderPath}`
+      );
       return exampleFiles;
     } catch (error) {
       console.error(`[_performScan] Failed to scan folder ${folderPath}:`, error);
@@ -150,7 +159,7 @@ export class ExampleEngine implements IExampleEngine {
     try {
       // Parse tag: "methodName:layer:complexity"
       const [methodName, layer, complexity] = tag.split(':');
-      
+
       if (!methodName || !layer || !complexity) {
         throw new Error(`Invalid tag format: ${tag}. Expected: methodName:layer:complexity`);
       }
@@ -191,12 +200,12 @@ export class ExampleEngine implements IExampleEngine {
       // Determine base path for examples
       const basePath = this.resolveExamplesPath(packageName);
       const exampleFiles = await this.scanFolder(basePath);
-      
+
       // Filter files by package
       const packageFiles = exampleFiles.filter(file => file.packageName === packageName);
-      
+
       const examples: ExtractedExample[] = [];
-      
+
       for (const file of packageFiles) {
         try {
           const fileExamples = this.tagExtractor.extractAllTags(file.content, packageName);
@@ -210,21 +219,28 @@ export class ExampleEngine implements IExampleEngine {
 
       return examples;
     } catch (error) {
-      throw new Error(`Failed to get examples for method ${methodName} in package ${packageName}: ${error}`);
+      throw new Error(
+        `Failed to get examples for method ${methodName} in package ${packageName}: ${error}`
+      );
     }
   }
 
   /**
    * Find example file containing specific method
    */
-  async findExampleFileForMethod(methodName: string, packageName: string): Promise<ExampleFile | null> {
+  async findExampleFileForMethod(
+    methodName: string,
+    packageName: string
+  ): Promise<ExampleFile | null> {
     try {
-      console.log(`[findExampleFileForMethod] Starting search for method: ${methodName} in package: ${packageName}`);
-      
+      console.log(
+        `[findExampleFileForMethod] Starting search for method: ${methodName} in package: ${packageName}`
+      );
+
       // Determine base path for examples
       const basePath = this.resolveExamplesPath(packageName);
       console.log(`[findExampleFileForMethod] Resolved base path: ${basePath}`);
-      
+
       // Check if base path exists before scanning
       const fs = await import('fs/promises');
       try {
@@ -234,33 +250,35 @@ export class ExampleEngine implements IExampleEngine {
         console.log(`[findExampleFileForMethod] Base path does not exist: ${basePath}`);
         return null;
       }
-      
+
       console.log(`[findExampleFileForMethod] About to scan folder: ${basePath}`);
       const exampleFiles = await this.scanFolder(basePath);
       console.log(`[findExampleFileForMethod] Scanned ${exampleFiles.length} files in ${basePath}`);
-      
+
       // Filter files by package
       const packageFiles = exampleFiles.filter(file => file.packageName === packageName);
-      console.log(`[findExampleFileForMethod] Found ${packageFiles.length} files for package: ${packageName}`);
-      
+      console.log(
+        `[findExampleFileForMethod] Found ${packageFiles.length} files for package: ${packageName}`
+      );
+
       for (const file of packageFiles) {
         try {
           console.log(`[findExampleFileForMethod] Checking file: ${file.filePath}`);
-          
+
           // Check if file name matches method (e.g., getValue.md for getValue method)
           const fileName = file.filePath.split('/').pop()?.toLowerCase();
           const methodNameLower = methodName.toLowerCase();
-          
+
           if (fileName === `${methodNameLower}.md`) {
             console.log(`[findExampleFileForMethod] Found exact match: ${file.filePath}`);
             return file;
           }
-          
+
           // Also check if file contains extract tags for this method
           console.log(`[findExampleFileForMethod] Checking for extract tags in: ${file.filePath}`);
           const fileExamples = this.tagExtractor.extractAllTags(file.content, packageName);
           const hasMethodExample = fileExamples.some(ex => ex.methodName === methodName);
-          
+
           if (hasMethodExample) {
             console.log(`[findExampleFileForMethod] Found extract tags match: ${file.filePath}`);
             return file;
@@ -274,7 +292,10 @@ export class ExampleEngine implements IExampleEngine {
       console.log(`[findExampleFileForMethod] No matching file found for method: ${methodName}`);
       return null;
     } catch (error) {
-      console.error(`Failed to find example file for method ${methodName} in package ${packageName}:`, error);
+      console.error(
+        `Failed to find example file for method ${methodName} in package ${packageName}:`,
+        error
+      );
       return null;
     }
   }
@@ -286,20 +307,17 @@ export class ExampleEngine implements IExampleEngine {
     try {
       // Layer-specific validation
       const layerValidation = this.validator.validateExample(example);
-      
+
       // Compilation validation
       const compilationValidation = await this.validator.validateCompilation(example.content);
-      
+
       // Best practices validation
       const bestPracticesValidation = this.validator.validateBestPractices(example);
 
       // Combine results
       return {
         isValid: layerValidation.isValid && compilationValidation.isValid,
-        errors: [
-          ...layerValidation.errors,
-          ...compilationValidation.errors,
-        ],
+        errors: [...layerValidation.errors, ...compilationValidation.errors],
         warnings: [
           ...layerValidation.warnings,
           ...compilationValidation.warnings,
@@ -309,10 +327,12 @@ export class ExampleEngine implements IExampleEngine {
     } catch (error) {
       return {
         isValid: false,
-        errors: [{
-          type: 'compilation_error',
-          message: `Validation failed: ${error}`,
-        }],
+        errors: [
+          {
+            type: 'compilation_error',
+            message: `Validation failed: ${error}`,
+          },
+        ],
         warnings: [],
       };
     }
@@ -328,7 +348,7 @@ export class ExampleEngine implements IExampleEngine {
     preferredComplexity: ComplexityLevel = 'basic'
   ): Promise<ExtractedExample | null> {
     const examples = await this.getExamplesForMethod(methodName, packageName);
-    
+
     if (examples.length === 0) {
       return null;
     }
@@ -370,19 +390,14 @@ export class ExampleEngine implements IExampleEngine {
    */
   private formatForJSDoc(content: string): string {
     const lines = content.split('\n');
-    
+
     // Add proper JSDoc formatting - just the content, not the full @example wrapper
     const formattedLines = lines.map(line => {
       if (line.trim() === '') return ' *';
       return ` * ${line}`;
     });
 
-    return [
-      ' * @example',
-      ' * ```typescript',
-      ...formattedLines,
-      ' * ```',
-    ].join('\n');
+    return [' * @example', ' * ```typescript', ...formattedLines, ' * ```'].join('\n');
   }
 
   /**
@@ -398,7 +413,7 @@ export class ExampleEngine implements IExampleEngine {
   private resolveExamplesPath(packageName: string): string {
     // Find workspace root by looking for packages directory or pnpm-workspace.yaml
     let workspaceRoot = process.cwd();
-    
+
     // If we're in a package directory, go up to find workspace root
     if (workspaceRoot.includes('/packages/')) {
       const parts = workspaceRoot.split('/');
@@ -407,10 +422,10 @@ export class ExampleEngine implements IExampleEngine {
         workspaceRoot = parts.slice(0, packagesIndex).join('/');
       }
     }
-    
+
     // Try domain examples first (for JSDoc)
     const domainPath = join(workspaceRoot, 'docs', 'examples', 'domain', packageName);
-    
+
     return domainPath;
   }
 
@@ -419,7 +434,7 @@ export class ExampleEngine implements IExampleEngine {
    */
   async validateExamples(examples: ExtractedExample[]): Promise<ValidationResult[]> {
     const results: ValidationResult[] = [];
-    
+
     for (const example of examples) {
       try {
         const result = await this.validateExample(example);
@@ -427,15 +442,17 @@ export class ExampleEngine implements IExampleEngine {
       } catch (error) {
         results.push({
           isValid: false,
-          errors: [{
-            type: 'compilation_error',
-            message: `Validation failed for ${example.methodName}: ${error}`,
-          }],
+          errors: [
+            {
+              type: 'compilation_error',
+              message: `Validation failed for ${example.methodName}: ${error}`,
+            },
+          ],
           warnings: [],
         });
       }
     }
-    
+
     return results;
   }
 
@@ -453,7 +470,7 @@ export class ExampleEngine implements IExampleEngine {
       const basePath = this.resolveExamplesPath(packageName);
       const exampleFiles = await this.scanFolder(basePath);
       const packageFiles = exampleFiles.filter(file => file.packageName === packageName);
-      
+
       const allExamples: ExtractedExample[] = [];
       for (const file of packageFiles) {
         const examples = this.tagExtractor.extractAllTags(file.content, packageName);
@@ -464,7 +481,10 @@ export class ExampleEngine implements IExampleEngine {
       const stats = {
         totalExamples: allExamples.length,
         examplesByLayer: { domain: 0, service: 0, integration: 0 } as Record<LayerType, number>,
-        examplesByComplexity: { basic: 0, intermediate: 0, advanced: 0 } as Record<ComplexityLevel, number>,
+        examplesByComplexity: { basic: 0, intermediate: 0, advanced: 0 } as Record<
+          ComplexityLevel,
+          number
+        >,
         methods: [...new Set(allExamples.map(ex => ex.methodName))],
         validationResults: { valid: 0, invalid: 0 },
       };

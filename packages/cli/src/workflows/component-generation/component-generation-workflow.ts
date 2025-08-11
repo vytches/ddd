@@ -1,22 +1,4 @@
 /* eslint-disable no-case-declarations */
-/**
- * @llm-summary Component generation workflow implementation
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Workflow for generating DDD components like entities, aggregates,
- * value objects, and services with proper patterns and structure.
- *
- * @example
- * ```typescript
- * const workflow = new ComponentGenerationWorkflow();
- * const context = await workflow.start('entity');
- * ```
- *
- * @since 1.0.0
- * @public
- */
 
 import type { WorkflowContext, ComponentGenerationOptions } from '../types';
 import { Colors } from '../../core/utils/colors';

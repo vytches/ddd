@@ -1,0 +1,352 @@
+# Base Event Bus - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base-event-bus'
+title: 'Base Event Bus - Abstract Implementation'
+description: 'Abstract base class for event bus implementations with middleware support'
+business-context: 'Foundation for event-driven architecture with flexible middleware pipeline'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseEventBus:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base implementation of event bus with middleware pipeline support'
+      business-context: 'Provides foundation for domain event publishing with customizable middleware chain'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Abstract event bus with middleware pipeline and handler management'
+        cli:
+          description: |
+            ## BaseEventBus
+            Enterprise event bus foundation:
+            - Middleware pipeline architecture
+            - Flexible handler registration
+            - Type-safe event publishing
+            - Concurrent event processing
+            - Error handling strategies
+
+      hierarchy:
+        strategy: 'append'
+        scope: 'class-doc'
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        generic: 'TEvent extends IDomainEvent'
+        pattern: 'Template Method'
+
+    # === CLASS HIERARCHY ===
+    hierarchy:
+      strategy: 'merge'
+      scope: 'class'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates new event bus with configuration options'
+        business-context: 'Initializes event bus with logging, middleware, and DI support'
+
+        parameters:
+          - name: 'options'
+            type: 'BaseEventBusOptions'
+            description: 'Configuration options for event bus behavior'
+            optional: true
+          - name: 'useDI'
+            type: 'boolean'
+            description: 'Whether to use dependency injection for handler discovery'
+            optional: true
+
+        examples:
+          - id: 'basic'
+            code: |
+              class MyEventBus extends BaseEventBus {
+                // Implementation details
+              }
+
+              const eventBus = new MyEventBus({
+                enableLogging: true,
+                middlewares: [loggingMiddleware, retryMiddleware]
+              });
+
+      publish:
+        description: 'Publish single event through middleware pipeline to all handlers'
+        business-context: 'Core event publishing method with middleware processing'
+
+        parameters:
+          - name: 'event'
+            type: 'TEvent'
+            description: 'Event to publish to registered handlers'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Resolves when all handlers complete'
+
+        examples:
+          - id: 'publish'
+            code: |
+              const orderCreatedEvent = new OrderCreatedEvent(orderData);
+              await eventBus.publish(orderCreatedEvent);
+              // Event processed by all registered handlers
+
+        custom-tags:
+          async: 'true'
+          middleware: 'enabled'
+
+      publishMany:
+        description: 'Publish multiple events concurrently for performance'
+        business-context: 'Batch publishing for improved throughput in high-volume scenarios'
+
+        parameters:
+          - name: 'events'
+            type: 'TEvent[]'
+            description: 'Array of events to publish concurrently'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Resolves when all events are published'
+
+        examples:
+          - id: 'batch'
+            code: |
+              const events = [
+                new OrderCreatedEvent(order1),
+                new OrderCreatedEvent(order2),
+                new PaymentProcessedEvent(payment)
+              ];
+              await eventBus.publishMany(events);
+              // All events published in parallel
+
+        custom-tags:
+          async: 'true'
+          performance: 'optimized'
+
+      use:
+        description: 'Add middleware to the event processing pipeline'
+        business-context: 'Enables cross-cutting concerns like logging, retry, and monitoring'
+
+        parameters:
+          - name: 'middleware'
+            type: 'EventBusMiddleware'
+            description: 'Middleware function to add to pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Event bus instance for chaining'
+
+        examples:
+          - id: 'middleware'
+            code: |
+              const loggingMiddleware = (next) => async (event) => {
+                console.log('Before:', event);
+                await next(event);
+                console.log('After:', event);
+              };
+
+              eventBus
+                .use(loggingMiddleware)
+                .use(retryMiddleware)
+                .use(metricsMiddleware);
+
+        custom-tags:
+          chainable: 'true'
+          pattern: 'Chain of Responsibility'
+
+      subscribe:
+        description: 'Subscribe function handler to specific event type'
+        business-context: 'Register lightweight function handlers for event processing'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | Constructor<T>'
+            description: 'Event type name or constructor'
+          - name: 'handler'
+            type: '(event: T) => Promise<void> | void'
+            description: 'Function to handle events'
+
+        examples:
+          - id: 'subscribe'
+            code: |
+              // String-based subscription
+              eventBus.subscribe('OrderCreated', async (event) => {
+                await processOrder(event.payload);
+              });
+
+              // Class-based subscription
+              eventBus.subscribe(OrderCreatedEvent, async (event) => {
+                console.log('Order created:', event.orderId);
+              });
+
+        custom-tags:
+          generic: 'T extends TEvent'
+
+      registerHandler:
+        description: 'Register class-based handler with handle method'
+        business-context: 'Support for object-oriented handler pattern with encapsulation'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | Constructor<T>'
+            description: 'Event type to handle'
+          - name: 'handler'
+            type: '{ handle(event: T): Promise<void> | void }'
+            description: 'Handler object with handle method'
+
+        examples:
+          - id: 'class-handler'
+            code: |
+              class OrderHandler {
+                async handle(event: OrderCreatedEvent) {
+                  await this.orderService.process(event);
+                }
+              }
+
+              eventBus.registerHandler(
+                OrderCreatedEvent,
+                new OrderHandler()
+              );
+
+        custom-tags:
+          generic: 'T extends TEvent'
+          pattern: 'Strategy'
+
+      unsubscribe:
+        description: 'Remove handler from event type subscriptions'
+        business-context: 'Clean up handlers to prevent memory leaks'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | Constructor<T>'
+            description: 'Event type to unsubscribe from'
+          - name: 'handler'
+            type: 'Function | { handle: Function }'
+            description: 'Handler to remove'
+
+        examples:
+          - id: 'unsubscribe'
+            code: |
+              const handler = async (event) => { 
+                console.log('Processing event:', event);
+              };
+              eventBus.subscribe(OrderCreatedEvent, handler);
+
+              // Later, clean up
+              eventBus.unsubscribe(OrderCreatedEvent, handler);
+
+      buildPublishPipeline:
+        description: 'Build middleware pipeline for event publishing'
+        business-context: 'Creates composed function chain for event processing'
+
+        returns:
+          type: '(event: TEvent) => Promise<void>'
+          description: 'Composed pipeline function'
+
+        custom-tags:
+          protected: 'true'
+          pattern: 'Pipeline'
+
+      getHandlers:
+        description: 'Get registered handlers for specific event type'
+        business-context: 'Useful for testing and debugging handler registration'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | Constructor<TEvent>'
+            description: 'Event type to query'
+
+        returns:
+          type: 'Set<EventHandlerFn<TEvent> | IEventHandler<TEvent>> | undefined'
+          description: 'Set of handlers or undefined if none registered'
+
+        examples:
+          - id: 'debug'
+            code: |
+              const handlers = eventBus.getHandlers(OrderCreatedEvent);
+              console.log(`Found ${handlers?.size ?? 0} handlers`);
+
+      log:
+        description: 'Log message if logging is enabled'
+        business-context: 'Conditional logging based on configuration'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Message to log'
+
+        custom-tags:
+          protected: 'true'
+
+      handleError:
+        description: 'Handle errors during event processing'
+        business-context: 'Centralized error handling with custom strategies'
+
+        parameters:
+          - name: 'error'
+            type: 'Error'
+            description: 'Error that occurred'
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type being processed'
+
+        custom-tags:
+          protected: 'true'
+
+      getEventName:
+        description: 'Extract event name from constructor or string'
+        business-context: 'Normalize event type identification'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string | Constructor<T>'
+            description: 'Event type identifier'
+
+        returns:
+          type: 'string'
+          description: 'Normalized event name'
+
+        custom-tags:
+          protected: 'true'
+          generic: 'T extends TEvent'
+
+      getEventTypeName:
+        description: 'Extract event type name from event instance'
+        business-context: 'Runtime event type identification'
+
+        parameters:
+          - name: 'event'
+            type: 'TEvent'
+            description: 'Event instance'
+
+        returns:
+          type: 'string'
+          description: 'Event type name'
+
+        custom-tags:
+          protected: 'true'
+
+# === FILE-LEVEL ELEMENTS ===
+constants:
+  CUSTOM_MIDDLEWARE_SYMBOL:
+    description: 'Symbol to identify custom middleware functions'
+    business-context: 'Marks middleware added by user for special handling'
+    type: 'symbol'
+    value: "Symbol('CUSTOM_MIDDLEWARE')"
+
+    examples:
+      - id: 'usage'
+        code: |
+          // Middleware is tagged with symbol when added
+          eventBus.use(myMiddleware);
+          // myMiddleware[CUSTOM_MIDDLEWARE_SYMBOL] === true

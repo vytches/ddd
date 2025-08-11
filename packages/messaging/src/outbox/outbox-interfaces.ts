@@ -1,20 +1,3 @@
-/**
- * @llm-summary Enumeration of message status values
- * @llm-domain Integration
- * @llm-usage Frequent
- *
- * @description
- * MessageStatus enum implementing integration layer component for message status operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: MessageStatus = MessageStatus.VALUE;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export enum MessageStatus {
   PENDING = 'PENDING',
   PROCESSING = 'PROCESSING',
@@ -22,23 +5,6 @@ export enum MessageStatus {
   FAILED = 'FAILED',
 }
 
-/**
- * @llm-summary Enumeration of message priority values
- * @llm-domain Integration
- * @llm-usage Frequent
- *
- * @description
- * MessagePriority enum implementing integration layer component for message priority operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: MessagePriority = MessagePriority.VALUE;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export enum MessagePriority {
   LOW = 'low',
   NORMAL = 'normal',
@@ -46,25 +12,6 @@ export enum MessagePriority {
   CRITICAL = 'critical',
 }
 
-/**
- * @llm-summary Contract for outbox message functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * OutboxMessage interface implementing integration layer component for outbox message operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteOutboxMessage implements IOutboxMessage {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IOutboxMessage<T = unknown> {
   /** Unique identifier for the message */
   id: string;
@@ -97,25 +44,6 @@ export interface IOutboxMessage<T = unknown> {
   lastError?: string;
 }
 
-/**
- * @llm-summary Contract for outbox message options functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * OutboxMessageOptions interface implementing integration layer component for outbox message options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteOutboxMessageOptions implements OutboxMessageOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface OutboxMessageOptions {
   /** When to process the message (for delayed processing) */
   processAfter?: Date;
@@ -127,25 +55,6 @@ export interface OutboxMessageOptions {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * @llm-summary Contract for outbox message handler functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * OutboxMessageHandler interface implementing integration layer component for outbox message handler operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteOutboxMessageHandler implements IOutboxMessageHandler {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IOutboxMessageHandler<T = unknown> {
   /**
    * Handles a message from the outbox
@@ -154,23 +63,6 @@ export interface IOutboxMessageHandler<T = unknown> {
   handle(message: IOutboxMessage<T>): Promise<void>;
 }
 
-/**
- * @llm-summary Type definition for outbox middleware
- * @llm-domain Integration
- * @llm-usage Frequent
- *
- * @description
- * OutboxMiddleware type implementing integration layer component for outbox middleware operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: OutboxMiddleware = {} as OutboxMiddleware;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type OutboxMiddleware = (
   next: (message: IOutboxMessage) => Promise<void>
 ) => (message: IOutboxMessage) => Promise<void>;

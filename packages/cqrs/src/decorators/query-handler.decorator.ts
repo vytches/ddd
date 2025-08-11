@@ -1,28 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 import type { IQuery, IQueryHandler } from '../interfaces';
-import type { QueryHandlerOptions, DIHandlerMetadata } from './di-types';
+import type { DIHandlerMetadata, QueryHandlerOptions } from './di-types';
 
-/**
- * @llm-summary query handler function
- * @llm-domain Architecture
- * @llm-pure false
- *
- * @description
- * QueryHandler function implementing architectural component for query handler operations.
- *
- * @param {new (...args: unknown[]} queryType - queryType parameter
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = QueryHandler(queryType);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function QueryHandler<T extends IQuery<R>, R>(
   queryType: new (...args: any[]) => T,
   options?: QueryHandlerOptions

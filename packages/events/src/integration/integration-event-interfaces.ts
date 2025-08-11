@@ -1,25 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IActor } from '@vytches/ddd-core';
 
-/**
- * @llm-summary Contract for integration event metadata functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * IntegrationEventMetadata interface implementing architectural component for integration event metadata operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteIntegrationEventMetadata implements IIntegrationEventMetadata {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IIntegrationEventMetadata {
   /** Unique identifier for the event */
   eventId?: string;
@@ -55,25 +36,6 @@ export interface IIntegrationEventMetadata {
   [key: string]: unknown;
 }
 
-/**
- * @llm-summary Contract for integration event functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * IntegrationEvent interface implementing architectural component for integration event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteIntegrationEvent implements IIntegrationEvent {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IIntegrationEvent<P = unknown> {
   /** Type of the event */
   eventType: string;
@@ -85,30 +47,11 @@ export interface IIntegrationEvent<P = unknown> {
   metadata?: IIntegrationEventMetadata;
 }
 
-/**
- * @llm-summary Contract for domain to integration event transformer functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * DomainToIntegrationEventTransformer interface implementing architectural component for domain to integration event transformer operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteDomainToIntegrationEventTransformer implements IDomainToIntegrationEventTransformer {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IDomainToIntegrationEventTransformer<D = unknown, I = unknown> {
   /**
-   * Transformuje wydarzenie domenowe na wydarzenie integracyjne
-   * @param domainEvent Wydarzenie domenowe do transformacji
-   * @param additionalMetadata Opcjonalne dodatkowe metadane
+   * Transform domain event to integration event
+   * @param domainEvent Domain event to transform
+   * @param additionalMetadata Optional additional metadata
    */
   transform(
     domainEvent: D,
@@ -116,9 +59,9 @@ export interface IDomainToIntegrationEventTransformer<D = unknown, I = unknown> 
   ): IIntegrationEvent<I>;
 
   /**
-   * Transformuje wydarzenie domenowe na wydarzenia integracyjne dla wielu kontekstów
-   * @param domainEvent Wydarzenie domenowe do transformacji
-   * @param additionalMetadata Opcjonalne dodatkowe metadane
+   * Transform domain event to integration events for multiple contexts
+   * @param domainEvent Domain event to transform
+   * @param additionalMetadata Optional additional metadata
    */
   transformToMultipleTargets(
     domainEvent: D,

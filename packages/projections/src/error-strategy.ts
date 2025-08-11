@@ -1,22 +1,5 @@
 import type { IProjectionErrorStrategy, IProjectionRetryConfig } from './projection-interfaces';
 
-/**
- * @llm-summary ExponentialBackoffStrategy class for exponential backoff strategy operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * ExponentialBackoffStrategy class implementing architectural component for exponential backoff strategy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ExponentialBackoffStrategy();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ExponentialBackoffStrategy implements IProjectionErrorStrategy {
   shouldRetry(error: Error, attempt: number, config?: IProjectionRetryConfig): boolean {
     if (!config) {

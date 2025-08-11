@@ -8,22 +8,6 @@ import { Colors } from '../core/utils/colors';
 import { DomainBuilderWorkflow } from '../workflows/domain-builder/domain-builder-workflow';
 import { Performance } from '../core/utils/performance';
 
-/**
- * @llm-summary domainBuilderCommand constant
- * @llm-domain Infrastructure
- *
- * @description
- * domainBuilderCommand constant implementing infrastructure service for domain builder command operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(domainBuilderCommand);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const domainBuilderCommand: Command = {
   name: 'create-domain',
   description:

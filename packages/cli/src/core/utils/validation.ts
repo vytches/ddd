@@ -5,23 +5,6 @@
 
 import { ValidationError } from '../../types';
 
-/**
- * @llm-summary Validation class for validation operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Validation class implementing infrastructure service for validation operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new Validation();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class Validation {
   /**
    * Validate that a string is not empty

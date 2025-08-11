@@ -1,18 +1,6 @@
 /**
- * @llm-summary Contract for auditable functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * Auditable interface implementing architectural component for auditable operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAuditable implements IAuditable {
- *   // Implementation
- * }
- * ```
+ * Interface for objects that can maintain audit state snapshots.
+ * Used by audit decorators for automatic state change tracking.
  *
  * @since 1.0.0
  * @public

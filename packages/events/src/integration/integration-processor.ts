@@ -3,23 +3,6 @@ import type { IEventProcessor } from '../event-processor';
 import type { UnifiedEventBus } from '../unified-event-bus';
 import type { IntegrationEventTransformerRegistry } from './integration-event-transformer-registry';
 
-/**
- * @llm-summary IntegrationEventProcessor class for integration event processor operations
- * @llm-domain Architecture
- * @llm-complexity Complex
- *
- * @description
- * IntegrationEventProcessor class implementing architectural component for integration event processor operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IntegrationEventProcessor();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class IntegrationEventProcessor implements IEventProcessor {
   constructor(private readonly transformerRegistry: IntegrationEventTransformerRegistry) {}
 

@@ -1,27 +1,27 @@
 // Scheduled Event Interfaces
 export type {
-  IScheduledEvent,
-  IScheduleOptions,
-  IRecurringPattern,
-  IScheduledJob,
   IJobFilter,
   IJobQueryResult,
+  IRecurringPattern,
+  IScheduledEvent,
+  IScheduledJob,
+  IScheduleOptions,
 } from './scheduled-event.interfaces';
 
-export { SchedulePriority, BackoffStrategy, JobStatus } from './scheduled-event.interfaces';
+export { BackoffStrategy, JobStatus, SchedulePriority } from './scheduled-event.interfaces';
 
 // Scheduler Interfaces
 export type {
-  IEventScheduler,
   IBulkEventScheduler,
-  ISchedulerLifecycle,
+  IEventScheduler,
   ISchedulerConfig,
   ISchedulerFactory,
+  ISchedulerLifecycle,
 } from './scheduler.interfaces';
 
 // Store Interfaces
 export type {
   IScheduledEventStore,
-  ITransactionalScheduledEventStore,
   ISchedulerMetrics,
+  ITransactionalScheduledEventStore,
 } from './scheduling-store.interfaces';

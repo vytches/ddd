@@ -4,23 +4,6 @@ import type {
 } from '../core/interfaces/business-policy.interface';
 import type { IPolicyRegistry, PolicyQuery } from '../core/interfaces/policy-registry.interface';
 
-/**
- * @llm-summary PolicyRegistry class for policy registry operations
- * @llm-domain Pattern
- * @llm-complexity Simple
- *
- * @description
- * PolicyRegistry class implementing domain pattern implementation for policy registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyRegistry();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyRegistry implements IPolicyRegistry {
   private readonly policies = new Map<string, PolicyDefinition<unknown>>();
 
@@ -352,25 +335,6 @@ export class PolicyRegistry implements IPolicyRegistry {
   }
 }
 
-/**
- * @llm-summary Contract for policy registry statistics functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyRegistryStatistics interface implementing domain pattern implementation for policy registry statistics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyRegistryStatistics implements PolicyRegistryStatistics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyRegistryStatistics {
   totalPolicies: number;
   totalDomains: number;

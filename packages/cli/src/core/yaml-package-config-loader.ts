@@ -29,6 +29,7 @@ export class YamlPackageConfigLoader {
 
     // Find the root directory
     let rootDir = process.cwd();
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         await fs.access(path.join(rootDir, 'packages'));
@@ -61,8 +62,18 @@ export class YamlPackageConfigLoader {
     }
   }
 
-  private async loadYamlConfig(rootDir: string, packageName: string): Promise<PackageExampleConfig | null> {
-    const yamlPath = path.join(rootDir, 'docs', 'examples', 'domain', packageName, '.md-settings.yaml');
+  private async loadYamlConfig(
+    rootDir: string,
+    packageName: string
+  ): Promise<PackageExampleConfig | null> {
+    const yamlPath = path.join(
+      rootDir,
+      'docs',
+      'examples',
+      'domain',
+      packageName,
+      '.md-settings.yaml'
+    );
 
     try {
       await fs.access(yamlPath);
@@ -82,8 +93,8 @@ export class YamlPackageConfigLoader {
         sections: ['hero', 'description', 'examples'],
         tags: {
           core: [`${packageName}:core`],
-          patterns: yamlData.patterns || []
-        }
+          patterns: yamlData.patterns || [],
+        },
       };
     } catch (error) {
       logger.debug(`No YAML config found for ${packageName}, will try TypeScript config`);
@@ -91,7 +102,10 @@ export class YamlPackageConfigLoader {
     }
   }
 
-  private async loadTypescriptConfig(rootDir: string, packageName: string): Promise<PackageExampleConfig> {
+  private async loadTypescriptConfig(
+    rootDir: string,
+    packageName: string
+  ): Promise<PackageExampleConfig> {
     const configPath = path.join(rootDir, 'packages', packageName, 'src', 'examples', 'config.ts');
 
     try {
@@ -99,9 +113,7 @@ export class YamlPackageConfigLoader {
       const configModule = await import(configPath);
 
       const config =
-        configModule.default ||
-        configModule.config ||
-        configModule.packageExampleConfig;
+        configModule.default || configModule.config || configModule.packageExampleConfig;
 
       if (!config) {
         throw new Error(`No valid config export found in ${configPath}`);
@@ -120,16 +132,16 @@ export class YamlPackageConfigLoader {
 
     try {
       const items = await fs.readdir(examplesDir, { withFileTypes: true });
-      
+
       for (const item of items) {
         if (item.isFile() && item.name.endsWith('.yaml') && item.name !== '.md-settings.yaml') {
           const className = item.name.replace('.yaml', '');
           const yamlPath = path.join(examplesDir, item.name);
-          
+
           try {
             const yamlContent = await fs.readFile(yamlPath, 'utf-8');
             const yamlData = yaml.load(yamlContent) as any;
-            
+
             // Extract basic example info
             examples.push({
               id: `${className}-basic`,
@@ -138,7 +150,7 @@ export class YamlPackageConfigLoader {
               tags: [`${packageName}:core`],
               complexity: 'basic',
               priority: 'high',
-              description: yamlData.description || ''
+              description: yamlData.description || '',
             });
           } catch (err) {
             logger.debug(`Failed to parse YAML file ${item.name}`);
@@ -154,20 +166,20 @@ export class YamlPackageConfigLoader {
 
   private generateComplexityLevels(complexity?: string): Record<string, any> {
     const defaultLevel = complexity || 'intermediate';
-    
+
     return {
       basic: {
         level: 'basic',
-        description: 'Basic patterns and usage'
+        description: 'Basic patterns and usage',
       },
       intermediate: {
         level: 'intermediate',
-        description: 'Advanced patterns with capabilities'
+        description: 'Advanced patterns with capabilities',
       },
       advanced: {
         level: 'advanced',
-        description: 'Enterprise patterns and complex scenarios'
-      }
+        description: 'Enterprise patterns and complex scenarios',
+      },
     };
   }
 
@@ -184,8 +196,8 @@ export class YamlPackageConfigLoader {
       sections: ['hero', 'description'],
       tags: {
         core: [`${packageName}:core`],
-        patterns: []
-      }
+        patterns: [],
+      },
     };
   }
 
@@ -199,7 +211,8 @@ export class YamlPackageConfigLoader {
   async getAvailablePackages(): Promise<string[]> {
     const packages: string[] = [];
     let rootDir = process.cwd();
-    
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         await fs.access(path.join(rootDir, 'packages'));
@@ -217,7 +230,7 @@ export class YamlPackageConfigLoader {
     try {
       const yamlDir = path.join(rootDir, 'docs', 'examples', 'domain');
       const items = await fs.readdir(yamlDir, { withFileTypes: true });
-      
+
       for (const item of items) {
         if (item.isDirectory()) {
           const settingsPath = path.join(yamlDir, item.name, '.md-settings.yaml');

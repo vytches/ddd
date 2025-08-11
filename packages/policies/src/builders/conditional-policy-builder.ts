@@ -1,43 +1,25 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
+import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
+import type { Result } from '@vytches/ddd-utils';
+import {
+  AsyncSpecificationPolicy,
+  BaseBusinessPolicy,
+  SpecificationPolicy,
+} from '../core/base/base-business-policy';
 import type {
   IBusinessPolicy,
   PolicyContext,
   PolicyRequest,
 } from '../core/interfaces/business-policy.interface';
+import type { PolicyViolation, PolicyViolationSeverity } from '../core/models/policy-violation';
 import type {
-  IPolicyBuilder,
   IConditionalPolicyBuilder,
   IConditionalPolicyElse,
-  IConditionalPolicyThenStepBuilder,
   IConditionalPolicyElseStepBuilder,
+  IConditionalPolicyThenStepBuilder,
+  IPolicyBuilder,
 } from './policy-builder.interface';
-import {
-  BaseBusinessPolicy,
-  SpecificationPolicy,
-  AsyncSpecificationPolicy,
-} from '../core/base/base-business-policy';
-import type { PolicyViolationSeverity } from '../core/models/policy-violation';
-import type { Result } from '@vytches/ddd-utils';
-import type { PolicyViolation } from '../core/models/policy-violation';
 
-/**
- * @llm-summary ConditionalPolicyBuilder class for conditional policy builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * ConditionalPolicyBuilder class implementing domain pattern implementation for conditional policy builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ConditionalPolicyBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ConditionalPolicyBuilder<T> implements IConditionalPolicyBuilder<T> {
   constructor(
     private readonly parentBuilder: IPolicyBuilder<T>,
@@ -84,23 +66,6 @@ export class ConditionalPolicyBuilder<T> implements IConditionalPolicyBuilder<T>
   }
 }
 
-/**
- * @llm-summary ConditionalPolicyThenStepBuilder class for conditional policy then step builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * ConditionalPolicyThenStepBuilder class implementing domain pattern implementation for conditional policy then step builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ConditionalPolicyThenStepBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ConditionalPolicyThenStepBuilder<T> implements IConditionalPolicyThenStepBuilder<T> {
   constructor(
     private readonly parentBuilder: IPolicyBuilder<T>,
@@ -217,23 +182,6 @@ export class ConditionalPolicyThenStepBuilder<T> implements IConditionalPolicyTh
   }
 }
 
-/**
- * @llm-summary ConditionalPolicyElseStepBuilder class for conditional policy else step builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * ConditionalPolicyElseStepBuilder class implementing domain pattern implementation for conditional policy else step builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ConditionalPolicyElseStepBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ConditionalPolicyElseStepBuilder<T> implements IConditionalPolicyElseStepBuilder<T> {
   constructor(
     private readonly parentBuilder: IPolicyBuilder<T>,
@@ -306,23 +254,6 @@ export class ConditionalPolicyElseStepBuilder<T> implements IConditionalPolicyEl
   }
 }
 
-/**
- * @llm-summary ConditionalPolicyElse class for conditional policy else operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * ConditionalPolicyElse class implementing domain pattern implementation for conditional policy else operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ConditionalPolicyElse();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ConditionalPolicyElse<T> implements IConditionalPolicyElse<T> {
   constructor(
     private readonly parentBuilder: IPolicyBuilder<T>,

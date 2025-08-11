@@ -9,23 +9,6 @@ import { IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from './unified-event-bus';
 import { Logger } from '@vytches/ddd-logging';
 
-/**
- * @llm-summary UniversalEventDispatcher class for universal event dispatcher operations
- * @llm-domain Architecture
- * @llm-complexity Simple
- *
- * @description
- * UniversalEventDispatcher class implementing architectural component for universal event dispatcher operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new UniversalEventDispatcher();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
   private middlewares: EventMiddleware[] = [];
   private processors: IEventProcessor[] = [];

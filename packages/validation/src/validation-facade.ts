@@ -1,27 +1,11 @@
-import type { IValidator, ISpecification, IValidationErrors } from '@vytches/ddd-contracts';
+import type { ISpecification, IValidationErrors, IValidator } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
 
-import { ValidationError, ValidationErrors } from './validation-error';
-import { SpecificationValidator } from './specifications/specification-validator';
 import { BusinessRuleValidator } from './business-rules/business-rule-validator';
 import { CompositeSpecification as Specification } from './specifications/composite-specification';
+import { SpecificationValidator } from './specifications/specification-validator';
+import { ValidationError, ValidationErrors } from './validation-error';
 
-/**
- * @llm-summary Validation constant
- * @llm-domain Pattern
- *
- * @description
- * Validation constant implementing domain pattern implementation for validation operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(Validation);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const Validation = {
   /**
    * Tworzy nowy walidator reguł biznesowych

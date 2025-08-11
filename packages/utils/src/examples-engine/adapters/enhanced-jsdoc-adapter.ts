@@ -4,32 +4,6 @@
 
 import type { ExtractBlock } from '../types/enhanced-metadata.types';
 
-/**
- * @llm-summary EnhancedJSDocAdapter class for enhanced j s doc adapter operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EnhancedJSDocAdapter class implementing infrastructure service for enhanced j s doc adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EnhancedJSDocAdapter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedJSDocAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class EnhancedJSDocAdapter {
   /**
    * Convert extract block to JSDoc format
@@ -85,9 +59,8 @@ export class EnhancedJSDocAdapter {
     // Add all examples
     blocks.forEach((block, index) => {
       if (block.code) {
-        const exampleLabel = blocks.length > 1
-          ? `@example <caption>${block.level} example</caption>`
-          : '@example';
+        const exampleLabel =
+          blocks.length > 1 ? `@example <caption>${block.level} example</caption>` : '@example';
         mainParts.push(exampleLabel);
         mainParts.push(block.code);
       }
@@ -102,11 +75,11 @@ export class EnhancedJSDocAdapter {
   private getJSDocTagName(key: string): string | null {
     const mapping: Record<string, string> = {
       'business-context': '@business',
-      'author': '@author',
-      'since': '@since',
-      'warning': '@warning',
-      'deprecated': '@deprecated',
-      'see': '@see',
+      author: '@author',
+      since: '@since',
+      warning: '@warning',
+      deprecated: '@deprecated',
+      see: '@see',
       'performance-note': '@performance',
       'complexity-note': '@complexity',
       'validation-rules': '@validation',
@@ -126,7 +99,7 @@ export class EnhancedJSDocAdapter {
     const commentLines = [
       `${indent}/**`,
       ...lines.map(line => `${indent} * ${line}`),
-      `${indent} */`
+      `${indent} */`,
     ];
 
     return commentLines.join('\n');

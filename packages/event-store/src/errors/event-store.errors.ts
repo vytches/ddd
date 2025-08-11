@@ -1,5 +1,5 @@
-import { IDomainError, DomainErrorCode } from '@vytches/ddd-core';
 import type { DomainErrorOptions } from '@vytches/ddd-core';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
 
 /**
  * Helper function to create options object with undefined values omitted
@@ -34,23 +34,6 @@ function createOptions(options: {
   return result;
 }
 
-/**
- * @llm-summary Enumeration of event store error code values
- * @llm-domain Infrastructure
- * @llm-usage Frequent
- *
- * @description
- * EventStoreErrorCode enum implementing infrastructure service for event store error code operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: EventStoreErrorCode = EventStoreErrorCode.VALUE;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export enum EventStoreErrorCode {
   Default = 'ES_ERROR',
   ConcurrencyConflict = 'ES_CONCURRENCY_CONFLICT',
@@ -65,23 +48,6 @@ export enum EventStoreErrorCode {
   StorageError = 'ES_STORAGE_ERROR',
 }
 
-/**
- * @llm-summary Type definition for event store error options
- * @llm-domain Infrastructure
- * @llm-usage Frequent
- *
- * @description
- * EventStoreErrorOptions type implementing infrastructure service for event store error options operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: EventStoreErrorOptions = {} as EventStoreErrorOptions;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type EventStoreErrorOptions = DomainErrorOptions & {
   code?: EventStoreErrorCode;
   streamId?: string;
@@ -93,23 +59,6 @@ export type EventStoreErrorOptions = DomainErrorOptions & {
   error?: Error;
 };
 
-/**
- * @llm-summary EventStoreError class for event store error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EventStoreError class implementing infrastructure service for event store error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventStoreError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class EventStoreError extends IDomainError {
   declare streamId?: string | undefined;
   declare expectedVersion?: number | undefined;
@@ -131,23 +80,6 @@ export abstract class EventStoreError extends IDomainError {
   }
 }
 
-/**
- * @llm-summary EventStoreConcurrencyError class for event store concurrency error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EventStoreConcurrencyError class implementing infrastructure service for event store concurrency error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventStoreConcurrencyError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventStoreConcurrencyError extends EventStoreError {
   constructor(
     public override readonly streamId: string,
@@ -182,23 +114,6 @@ export class EventStoreConcurrencyError extends EventStoreError {
   }
 }
 
-/**
- * @llm-summary StreamNotFoundError class for stream not found error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * StreamNotFoundError class implementing infrastructure service for stream not found error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new StreamNotFoundError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class StreamNotFoundError extends EventStoreError {
   constructor(public override readonly streamId: string) {
     super(`Stream ${streamId} not found`, {
@@ -219,23 +134,6 @@ export class StreamNotFoundError extends EventStoreError {
   }
 }
 
-/**
- * @llm-summary StreamDeletedError class for stream deleted error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * StreamDeletedError class implementing infrastructure service for stream deleted error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new StreamDeletedError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class StreamDeletedError extends EventStoreError {
   constructor(public override readonly streamId: string) {
     super(`Stream ${streamId} has been deleted`, {
@@ -256,23 +154,6 @@ export class StreamDeletedError extends EventStoreError {
   }
 }
 
-/**
- * @llm-summary EventSerializationError class for event serialization error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EventSerializationError class implementing infrastructure service for event serialization error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventSerializationError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventSerializationError extends EventStoreError {
   constructor(
     message: string,
@@ -309,23 +190,6 @@ export class EventSerializationError extends EventStoreError {
   }
 }
 
-/**
- * @llm-summary EventDeserializationError class for event deserialization error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EventDeserializationError class implementing infrastructure service for event deserialization error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventDeserializationError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventDeserializationError extends EventStoreError {
   constructor(
     message: string,
@@ -361,23 +225,6 @@ export class EventDeserializationError extends EventStoreError {
   }
 }
 
-/**
- * @llm-summary EventStoreConnectionError class for event store connection error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EventStoreConnectionError class implementing infrastructure service for event store connection error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventStoreConnectionError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventStoreConnectionError extends EventStoreError {
   constructor(
     message: string,
@@ -407,23 +254,6 @@ export class EventStoreConnectionError extends EventStoreError {
   }
 }
 
-/**
- * @llm-summary InvalidStreamVersionError class for invalid stream version error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * InvalidStreamVersionError class implementing infrastructure service for invalid stream version error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new InvalidStreamVersionError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class InvalidStreamVersionError extends EventStoreError {
   constructor(
     public override readonly streamId: string,

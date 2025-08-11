@@ -3,23 +3,6 @@
  * Minimal implementation for performance tracking without external dependencies
  */
 
-/**
- * @llm-summary Performance class for performance operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Performance class implementing infrastructure service for performance operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new Performance();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class Performance {
   private static startTimes = new Map<string, number>();
 

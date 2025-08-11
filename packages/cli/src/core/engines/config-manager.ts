@@ -35,23 +35,6 @@ const DEFAULT_CONFIG: CLIConfig = {
   plugins: [],
 };
 
-/**
- * @llm-summary ConfigManager class for config manager operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * ConfigManager class implementing infrastructure service for config manager operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ConfigManager();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ConfigManager {
   private static config: CLIConfig | null = null;
   private static configPath: string | null = null;

@@ -78,17 +78,17 @@ export const BEST_PRACTICES = {
  */
 export const LINE_COUNTING_RULES = {
   excludeFromCount: [
-    /^\s*$/,           // Empty lines
-    /^\s*\/\//,        // Single line comments
-    /^\s*\/\*/,        // Multi-line comment start
-    /^\s*\*/,          // Multi-line comment content
-    /^\s*\*\//,        // Multi-line comment end
-    /^\s*import\s+/,   // Import statements
-    /^\s*export\s+/,   // Export statements (unless main logic)
+    /^\s*$/, // Empty lines
+    /^\s*\/\//, // Single line comments
+    /^\s*\/\*/, // Multi-line comment start
+    /^\s*\*/, // Multi-line comment content
+    /^\s*\*\//, // Multi-line comment end
+    /^\s*import\s+/, // Import statements
+    /^\s*export\s+/, // Export statements (unless main logic)
   ],
   countAsOne: [
-    /{\s*$/,           // Opening braces on their own line
-    /^\s*}\s*$/,       // Closing braces on their own line
+    /{\s*$/, // Opening braces on their own line
+    /^\s*}\s*$/, // Closing braces on their own line
   ],
 };
 

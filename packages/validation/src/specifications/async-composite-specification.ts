@@ -1,31 +1,5 @@
 import type { IAsyncSpecification } from '@vytches/ddd-contracts';
 
-/**
- * @description
- * Base class for building complex asynchronous specifications using the Composite pattern.
- * Provides standard logical operators (and, or, not) for combining async specifications.
- * Useful for specifications that require async operations like database queries or API calls.
- *
- * @example
- * ```typescript
- * // Create custom async specification
- * class UserExistsSpecification extends AsyncCompositeSpecification<{ email: string; repository: IUserRepository }> {
- *   async isSatisfiedByAsync(candidate: { email: string; repository: IUserRepository }): Promise<boolean> {
- *     const user = await candidate.repository.findByEmail(candidate.email);
- *     return user !== null;
- *   }
- * }
- * ```
- *
- * @example
- * ```typescript
- * // Combine async specifications
- * const userExists = new UserExistsSpecification();
- * const emailValid = new EmailValidSpecification();
- * const combined = userExists.and(emailValid);
- * const result = await combined.isSatisfiedByAsync(candidate);
- * ```
- */
 export abstract class AsyncCompositeSpecification<T> implements IAsyncSpecification<T> {
   /**
    * Check if the candidate satisfies this specification asynchronously
@@ -88,10 +62,6 @@ export abstract class AsyncCompositeSpecification<T> implements IAsyncSpecificat
 }
 
 /**
- * @description
- * Creates an async specification from a predicate function.
- * Useful for simple async specifications without creating a full class.
- *
  * @since 0.4.2
  */
 class PredicateAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
@@ -112,20 +82,6 @@ class PredicateAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
 }
 
 /**
- * @description
- * Combines two async specifications with AND logic.
- * Both specifications must be satisfied for the result to be true.
- * Executes both specifications in parallel for better performance.
- *
- * @example
- * ```typescript
- * // Combine two async specifications with AND
- * const spec1 = new UserExistsSpecification();
- * const spec2 = new HasPermissionSpecification();
- * const combined = new AndAsyncSpecification(spec1, spec2);
- * const result = await combined.isSatisfiedByAsync(candidate);
- * ```
- *
  * @since 0.4.2
  */
 export class AndAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
@@ -176,20 +132,6 @@ export class AndAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
 }
 
 /**
- * @description
- * Combines two async specifications with OR logic.
- * At least one specification must be satisfied for the result to be true.
- * Executes both specifications in parallel for better performance.
- *
- * @example
- * ```typescript
- * // Combine two async specifications with OR
- * const spec1 = new IsAdminSpecification();
- * const spec2 = new IsOwnerSpecification();
- * const combined = new OrAsyncSpecification(spec1, spec2);
- * const result = await combined.isSatisfiedByAsync(candidate);
- * ```
- *
  * @since 0.4.2
  */
 export class OrAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
@@ -245,18 +187,6 @@ export class OrAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
 }
 
 /**
- * @description
- * Negates an async specification.
- * The specification is satisfied when the wrapped specification is NOT satisfied.
- *
- * @example
- * ```typescript
- * // Negate an async specification
- * const userExists = new UserExistsSpecification();
- * const userNotExists = new NotAsyncSpecification(userExists);
- * const result = await userNotExists.isSatisfiedByAsync(candidate);
- * ```
- *
  * @since 0.4.2
  */
 export class NotAsyncSpecification<T> extends AsyncCompositeSpecification<T> {

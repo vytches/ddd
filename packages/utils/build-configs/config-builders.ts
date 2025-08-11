@@ -1,13 +1,12 @@
 /**
  * Configuration builders for different package types
  */
-import { defineConfig, mergeConfig } from 'vite';
 import { resolve } from 'path';
+import { defineConfig, mergeConfig } from 'vite';
 import dts from 'vite-plugin-dts';
-import type { PackageConfigOptions, BuildContext } from './types';
+import { createExternalFunction, getBuildAliases, getBundleStrategy } from './bundle-strategies';
 import { detectPackageType, getWorkspaceAliases } from './package-detection';
-import { getBundleStrategy, createExternalFunction, getBuildAliases } from './bundle-strategies';
-import { createJSDocExamplesPlugin } from './plugins/jsdoc-examples';
+import type { BuildContext, PackageConfigOptions } from './types';
 
 /**
  * Create DTS plugin configuration with path transformation for meta packages
@@ -50,9 +49,10 @@ function createDTSPlugin(context: BuildContext, options: PackageConfigOptions) {
       // Enhanced Metadata System V2 has been replaced with YAML-based system
       // YAML processing is now handled by separate scripts, not during build
       if (options.jsdocExamples?.enabled !== false) {
-        console.log(`[createDTSPlugin] Skipping deprecated Enhanced Metadata System V2 - use YAML system instead`);
+        console.log(
+          `[createDTSPlugin] Skipping deprecated Enhanced Metadata System V2 - use YAML system instead`
+        );
       }
-      
     } catch (error) {
       console.warn(
         `Warning: DTS post-processing failed for ${context.packagePath}:`,
@@ -98,7 +98,7 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
       //   console.log(`[createPackageConfig] JSDoc plugin will be ${jsDocEnabled ? 'ENABLED' : 'DISABLED'} for ${context.packageName}`);
       //   return jsDocEnabled ? [createJSDocExamplesPlugin(options.jsdocExamples || {})] : [];
       // })()),
-      
+
       // Generate DTS with Enhanced Metadata System V2 post-processing
       // This is the ONLY place where @*-inject directives are processed
       ...(options.generateDTS !== false ? [createDTSPlugin(context, options)] : []),
@@ -158,7 +158,9 @@ import { createBuildContext } from './package-detection';
  */
 function shouldEnableJSDocPlugin(packageType: string, options: PackageConfigOptions): boolean {
   // Debug logging
-  console.log(`[shouldEnableJSDocPlugin] packageType: ${packageType}, enabled: ${options.jsdocExamples?.enabled}`);
+  console.log(
+    `[shouldEnableJSDocPlugin] packageType: ${packageType}, enabled: ${options.jsdocExamples?.enabled}`
+  );
 
   // Explicitly disabled
   if (options.jsdocExamples?.enabled === false) {

@@ -1,0 +1,20 @@
+# Package Settings - Inherits from global-settings.yaml
+
+# === PACKAGE IDENTITY ===
+package-name: 'di'
+display-name: 'DDD Dependency Injection'
+description: 'Enterprise-grade dependency injection with global service locator'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'infrastructure'
+complexity: 'intermediate'
+patterns:
+  - 'service-locator'
+  - 'adapter-pattern'
+  - 'auto-discovery'
+  - 'context-isolation'

@@ -13,16 +13,19 @@ export class FileScanner implements IFileScanner {
    */
   async scanDirectory(path: string): Promise<string[]> {
     console.log(`[FileScanner.scanDirectory] Starting scan: ${path}`);
-    
+
     try {
       // Add timeout protection to prevent hanging
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error(`Directory scan timed out after 5 seconds for ${path}`)), 5000);
+        setTimeout(
+          () => reject(new Error(`Directory scan timed out after 5 seconds for ${path}`)),
+          5000
+        );
       });
 
       const scanPromise = this._scanDirectoryRecursive(path);
       const files = await Promise.race([scanPromise, timeoutPromise]);
-      
+
       console.log(`[FileScanner.scanDirectory] Found ${files.length} files in: ${path}`);
       return files;
     } catch (error) {
@@ -36,7 +39,7 @@ export class FileScanner implements IFileScanner {
    */
   private async _scanDirectoryRecursive(path: string): Promise<string[]> {
     console.log(`[FileScanner._scanDirectoryRecursive] Scanning: ${path}`);
-    
+
     try {
       const entries = await readdir(path, { withFileTypes: true });
       const files: string[] = [];
@@ -45,14 +48,17 @@ export class FileScanner implements IFileScanner {
         try {
           const fullPath = join(path, entry.name);
           console.log(`[FileScanner._scanDirectoryRecursive] Processing: ${fullPath}`);
-          
+
           if (entry.isDirectory()) {
             // Recursively scan subdirectories with error protection
             try {
               const subFiles = await this._scanDirectoryRecursive(fullPath);
               files.push(...subFiles);
             } catch (subdirError) {
-              console.warn(`[FileScanner._scanDirectoryRecursive] Failed to scan subdirectory ${fullPath}:`, subdirError);
+              console.warn(
+                `[FileScanner._scanDirectoryRecursive] Failed to scan subdirectory ${fullPath}:`,
+                subdirError
+              );
               // Continue with other directories instead of failing completely
               continue;
             }
@@ -61,15 +67,23 @@ export class FileScanner implements IFileScanner {
             files.push(fullPath);
           }
         } catch (entryError) {
-          console.warn(`[FileScanner._scanDirectoryRecursive] Failed to process entry ${entry.name}:`, entryError);
+          console.warn(
+            `[FileScanner._scanDirectoryRecursive] Failed to process entry ${entry.name}:`,
+            entryError
+          );
           continue;
         }
       }
 
-      console.log(`[FileScanner._scanDirectoryRecursive] Completed ${path}, found ${files.length} files`);
+      console.log(
+        `[FileScanner._scanDirectoryRecursive] Completed ${path}, found ${files.length} files`
+      );
       return files;
     } catch (error) {
-      console.error(`[FileScanner._scanDirectoryRecursive] Failed to read directory ${path}:`, error);
+      console.error(
+        `[FileScanner._scanDirectoryRecursive] Failed to read directory ${path}:`,
+        error
+      );
       // Return empty array instead of throwing to prevent build failure
       return [];
     }
@@ -82,7 +96,7 @@ export class FileScanner implements IFileScanner {
     try {
       const content = await readFile(filePath, 'utf-8');
       const metadata = this.extractMetadata(content);
-      
+
       // Extract package name from path structure
       // Expected: docs/examples/domain/[package-name]/
       const pathParts = filePath.split('/');
@@ -119,10 +133,10 @@ export class FileScanner implements IFileScanner {
 
     // Look for metadata in first 20 lines
     const headerSection = lines.slice(0, 20);
-    
+
     for (const line of headerSection) {
       const trimmed = line.trim();
-      
+
       // Extract title from first heading
       if (trimmed.startsWith('# ') && !metadata.title) {
         metadata.title = trimmed.substring(2).trim();
@@ -134,10 +148,16 @@ export class FileScanner implements IFileScanner {
         metadata.description = trimmed.substring(16).trim();
       } else if (trimmed.startsWith('**Patterns**:')) {
         const patternsText = trimmed.substring(13).trim();
-        metadata.patterns = patternsText.split(',').map(p => p.trim()).filter(Boolean);
+        metadata.patterns = patternsText
+          .split(',')
+          .map(p => p.trim())
+          .filter(Boolean);
       } else if (trimmed.startsWith('**Dependencies**:')) {
         const depsText = trimmed.substring(17).trim();
-        metadata.dependencies = depsText.split(',').map(d => d.trim()).filter(Boolean);
+        metadata.dependencies = depsText
+          .split(',')
+          .map(d => d.trim())
+          .filter(Boolean);
       }
     }
 
@@ -157,7 +177,7 @@ export class FileScanner implements IFileScanner {
    */
   private extractComplexityFromPath(filePath: string): ComplexityLevel {
     const pathLower = filePath.toLowerCase();
-    
+
     if (pathLower.includes('/basic/') || pathLower.includes('basic')) {
       return 'basic';
     } else if (pathLower.includes('/advanced/') || pathLower.includes('advanced')) {
@@ -165,7 +185,7 @@ export class FileScanner implements IFileScanner {
     } else if (pathLower.includes('/intermediate/') || pathLower.includes('intermediate')) {
       return 'intermediate';
     }
-    
+
     // Default to basic if no complexity indicator found
     return 'basic';
   }

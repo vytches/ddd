@@ -10,23 +10,6 @@ import type {
 } from '../projection-interfaces';
 import { CircuitState } from '../projection-interfaces';
 
-/**
- * @llm-summary CircuitBreakerCapability class for circuit breaker capability operations
- * @llm-domain Architecture
- * @llm-complexity Expert
- *
- * @description
- * CircuitBreakerCapability class implementing architectural component for circuit breaker capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CircuitBreakerCapability();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class CircuitBreakerCapability<TReadModel>
   extends Capability<'circuitBreaker'>
   implements IProjectionCapability, IProjectionLifecycleCapability<TReadModel>

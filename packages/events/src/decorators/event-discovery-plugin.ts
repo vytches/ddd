@@ -22,19 +22,9 @@ interface HandlerInfo {
 import type { DIHandlerMetadata } from './di-types';
 
 /**
- * @llm-summary EventDiscoveryPlugin class for event discovery plugin operations
- * @llm-domain Architecture
- * @llm-complexity Simple
+ * Plugin for automatic discovery and registration of event handlers.
+ * Integrates with VytchesDDD DI system to auto-register @EventHandler classes.
  *
- * @description
- * EventDiscoveryPlugin class implementing architectural component for event discovery plugin operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventDiscoveryPlugin();
- * ```
- * *
  * @since 1.0.0
  * @public
  */
@@ -169,17 +159,8 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
 }
 
 /**
- * @llm-summary eventDiscoveryPlugin constant
- * @llm-domain Architecture
- *
- * @description
- * eventDiscoveryPlugin constant implementing architectural component for event discovery plugin operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(eventDiscoveryPlugin);
- * ```
+ * Pre-configured event discovery plugin instance.
+ * Ready for immediate use with DI systems.
  *
  * @since 1.0.0
  * @public

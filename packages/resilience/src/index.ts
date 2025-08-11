@@ -1,80 +1,80 @@
 // Most commonly used - prioritized exports
 export {
   CircuitBreaker,
-  CircuitBreakerState,
   CircuitBreakerOpenError,
+  CircuitBreakerState,
 } from './patterns/circuit-breaker';
 
-export { RetryPolicy, MaxRetriesExceededError } from './patterns/retry';
+export { MaxRetriesExceededError, RetryPolicy } from './patterns/retry';
 
 export { Bulkhead, BulkheadRejectedException } from './patterns/bulkhead';
 
 export {
-  CircuitBreakerStrategy,
-  RetryStrategy,
   BulkheadStrategy,
+  CircuitBreakerStrategy,
   CompositeResilienceStrategy,
   ResiliencePolicyBuilder,
+  RetryStrategy,
 } from './patterns/resilience-strategy';
 
 export {
   DefaultResilienceContext,
-  TimeoutError,
   OperationCancelledError,
+  TimeoutError,
 } from './core/resilience-context';
 
 // Core functionality - full exports removed for better tree-shaking
 
 // Observability and metrics (explicit exports to avoid naming conflicts)
 export type {
-  MetricType,
-  MetricValue,
-  MetricLabels,
-  Metric,
   HistogramBucket,
   HistogramMetric,
-  TimerMetric,
+  Metric,
   MetricCollector,
-  MetricRegistry,
   MetricExporter,
+  MetricLabels,
+  MetricRegistry,
+  MetricType,
+  MetricValue,
   ObservabilityEvent,
-  ObservabilityEventListener,
   ObservabilityEventBus,
+  ObservabilityEventListener,
+  TimerMetric,
 } from './observability';
 
 export {
-  CircuitBreakerMetricCollector,
-  RetryMetricCollector,
   BulkheadMetricCollector,
-  TimeoutMetricCollector,
+  CircuitBreakerMetricCollector,
+  CompositeMetricExporter,
+  CsvMetricExporter,
   DefaultMetricRegistry,
   DefaultObservabilityEventBus,
   GlobalMetricRegistry,
   GlobalObservabilityEventBus,
-  ObservabilityEventFactory,
   JsonMetricExporter,
-  PrometheusMetricExporter,
-  CsvMetricExporter,
-  TextMetricExporter,
-  CompositeMetricExporter,
   MetricExporterFactory,
+  ObservabilityEventFactory,
+  PrometheusMetricExporter,
+  RetryMetricCollector,
+  TextMetricExporter,
+  TimeoutMetricCollector,
 } from './observability';
 
 // Decorators (re-exported with different names to avoid conflicts)
 export {
-  CircuitBreaker as CircuitBreakerDecorator,
-  Retry as RetryDecorator,
   Bulkhead as BulkheadDecorator,
-  Resilience as ResilienceDecorator,
-  Timeout as TimeoutDecorator,
+  CircuitBreaker as CircuitBreakerDecorator,
   getResilienceMetrics,
+  Resilience as ResilienceDecorator,
+  Retry as RetryDecorator,
+  Timeout as TimeoutDecorator,
 } from './decorators/resilience-decorators';
 
 export type {
-  ResilienceDecoratorConfig,
-  CircuitBreakerDecoratorConfig,
-  RetryDecoratorConfig,
   BulkheadDecoratorConfig,
-  TimeoutDecoratorConfig,
+  CircuitBreakerDecoratorConfig,
   CompositeResilienceConfig,
+  ResilienceDecoratorConfig,
+  RetryDecoratorConfig,
+  TimeoutDecoratorConfig,
 } from './decorators/resilience-decorators';

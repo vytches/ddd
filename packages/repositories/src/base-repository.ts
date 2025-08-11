@@ -1,10 +1,11 @@
 import type {
+  EntityId,
+  IAggregateWithEvents,
   IEnhancedEventDispatcher,
   IEventPersistenceHandler,
-  IAggregateWithEvents,
-  EntityId,
 } from '@vytches/ddd-contracts';
-import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
+import type { Result } from '@vytches/ddd-utils';
 
 export class VersionError extends IDomainError {
   static withEntityIdAndVersions(
@@ -37,7 +38,9 @@ export abstract class IBaseRepository {
    * @param aggregate The aggregate to save
    * @throws VersionError if version conflict occurs
    */
-  async save(aggregate: IRepositoryAggregate): Promise<void> {
+  async save(
+    aggregate: IRepositoryAggregate
+  ): Promise<void | Result<void, VersionError | any> | any> {
     const events = aggregate.getDomainEvents();
 
     if (events.length === 0) return;
@@ -54,10 +57,8 @@ export abstract class IBaseRepository {
       );
     }
 
-    let version = currentVersion;
-
     for (const event of events) {
-      version = await this.eventPersistenceHandler.handleEvent(event);
+      await this.eventPersistenceHandler.handleEvent(event);
     }
 
     // Publish events

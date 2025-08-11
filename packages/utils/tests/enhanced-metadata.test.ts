@@ -1,8 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { EnhancedMetadataParser } from '../src/examples-engine/parser/enhanced-metadata-parser';
-import { EnhancedTagExtractor } from '../src/examples-engine/extractor/enhanced-tag-extractor';
+import { describe, expect, it } from 'vitest';
 import { EnhancedJSDocAdapter } from '../src/examples-engine/adapters/enhanced-jsdoc-adapter';
-import { ConfigLevel } from '../src/examples-engine/types/enhanced-metadata.types';
+import { EnhancedMetadataParser } from '../src/examples-engine/parser/enhanced-metadata-parser';
 
 describe('Enhanced Metadata System', () => {
   describe('EnhancedMetadataParser', () => {
@@ -16,7 +14,7 @@ describe('Enhanced Metadata System', () => {
       `;
 
       const metadata = parser.parseMetadata(content);
-      
+
       expect(metadata).toEqual({
         description: { default: 'Basic factory method' },
         'business-context': { default: 'API endpoint usage' },
@@ -33,12 +31,12 @@ describe('Enhanced Metadata System', () => {
       `;
 
       const metadata = parser.parseMetadata(content);
-      
+
       expect(metadata.description).toEqual({
         default: 'Simple description',
         cli: '## Extended Description\\n\\nWith markdown formatting',
       });
-      
+
       expect(metadata['business-context']).toEqual({
         default: 'Basic context',
         jsdoc: 'Concise JSDoc context',
@@ -61,7 +59,7 @@ describe('Enhanced Metadata System', () => {
       `;
 
       const settings = parser.parseGlobalSettings(content);
-      
+
       expect(settings).toHaveLength(2);
       expect(settings[0]).toEqual({
         strategy: 'merge',
@@ -71,7 +69,7 @@ describe('Enhanced Metadata System', () => {
         },
         scope: undefined,
       });
-      
+
       expect(settings[1]).toEqual({
         strategy: 'replace',
         metadata: {
@@ -85,16 +83,16 @@ describe('Enhanced Metadata System', () => {
     it('should resolve metadata with hierarchy', () => {
       const configs = [
         {
-          source: 'library',
-          strategy: 'merge',
+          source: 'library' as const,
+          strategy: 'merge' as const,
           metadata: {
             description: { default: 'Library default' },
             author: { default: 'Library Team' },
           },
         },
         {
-          source: 'package',
-          strategy: 'merge',
+          source: 'package' as const,
+          strategy: 'merge' as const,
           metadata: {
             description: { default: 'Package override' },
             domain: { default: 'aggregates' },
@@ -145,7 +143,7 @@ describe('Enhanced Metadata System', () => {
       };
 
       const formatted = adapter.formatBlock(block);
-      
+
       expect(formatted).toContain('Factory method for creating aggregates');
       expect(formatted).toContain('@business Used in API endpoints');
       expect(formatted).toContain('@author DDD Team');
@@ -154,22 +152,24 @@ describe('Enhanced Metadata System', () => {
     });
 
     it('should generate complete JSDoc comment', () => {
-      const blocks = [{
-        tag: 'create:domain:basic',
-        target: 'create',
-        context: 'domain',
-        level: 'basic',
-        metadata: {
-          description: 'Creates new aggregate',
-          'business-context': 'Standard creation pattern',
+      const blocks = [
+        {
+          tag: 'create:domain:basic',
+          target: 'create',
+          context: 'domain',
+          level: 'basic',
+          metadata: {
+            description: 'Creates new aggregate',
+            'business-context': 'Standard creation pattern',
+          },
+          code: 'const agg = Aggregate.create(data);',
+          startLine: 1,
+          endLine: 5,
         },
-        code: 'const agg = Aggregate.create(data);',
-        startLine: 1,
-        endLine: 5,
-      }];
+      ];
 
       const comment = adapter.generateJSDocComment(blocks, '  ');
-      
+
       expect(comment).toBe(`  /**
    * Creates new aggregate
    * @business Standard creation pattern

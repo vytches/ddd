@@ -1,32 +1,14 @@
-import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
-import type { IBusinessPolicy } from '../core/interfaces/business-policy.interface';
-import type { IPolicyGroup, IPolicyGroupStepBuilder } from './policy-builder.interface';
+import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
+import type { Result } from '@vytches/ddd-utils';
 import {
+  AsyncSpecificationPolicy,
   BaseBusinessPolicy,
   SpecificationPolicy,
-  AsyncSpecificationPolicy,
 } from '../core/base/base-business-policy';
-import type { PolicyViolationSeverity, PolicyViolation } from '../core/models/policy-violation';
-import type { PolicyRequest } from '../core/interfaces/business-policy.interface';
-import type { Result } from '@vytches/ddd-utils';
+import type { IBusinessPolicy, PolicyRequest } from '../core/interfaces/business-policy.interface';
+import type { PolicyViolation, PolicyViolationSeverity } from '../core/models/policy-violation';
+import type { IPolicyGroup, IPolicyGroupStepBuilder } from './policy-builder.interface';
 
-/**
- * @llm-summary PolicyGroup class for policy group operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyGroup class implementing domain pattern implementation for policy group operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyGroup();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyGroup<T> implements IPolicyGroup<T> {
   private steps: PolicyGroupStep<T>[] = [];
   private readonly groupName?: string;
@@ -168,23 +150,6 @@ export class PolicyGroup<T> implements IPolicyGroup<T> {
   }
 }
 
-/**
- * @llm-summary PolicyGroupStepBuilder class for policy group step builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyGroupStepBuilder class implementing domain pattern implementation for policy group step builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyGroupStepBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyGroupStepBuilder<T> implements IPolicyGroupStepBuilder<T> {
   constructor(
     private readonly parentGroup: PolicyGroup<T>,
@@ -256,25 +221,6 @@ export class PolicyGroupStepBuilder<T> implements IPolicyGroupStepBuilder<T> {
   }
 }
 
-/**
- * @llm-summary Contract for policy group step functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyGroupStep interface implementing domain pattern implementation for policy group step operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyGroupStep implements PolicyGroupStep {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyGroupStep<T> {
   type: 'specification' | 'async-specification' | 'predicate';
   specification?: ISpecification<T>;

@@ -1,0 +1,470 @@
+# Outbox Service - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'outbox-service'
+title: 'OutboxService - High-Level Message Management'
+description: 'Service layer for outbox pattern with convenience methods and batch operations'
+business-context: 'Simplifies outbox operations with domain event integration and batch processing'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  OutboxServiceOptions:
+    description: 'Configuration options for the outbox service'
+    business-context: 'Customizes service behavior for different application needs'
+
+    properties:
+      - name: 'defaultPriority'
+        type: 'MessagePriority'
+        description: 'Default priority for messages'
+        required: false
+        default: 'NORMAL'
+
+      - name: 'defaultMetadata'
+        type: 'Record<string, unknown>'
+        description: 'Default metadata to add to all messages'
+        required: false
+        default: '{}'
+
+      - name: 'autoCleanup'
+        type: 'boolean'
+        description: 'Enable automatic cleanup of processed messages'
+        required: false
+        default: 'false'
+
+      - name: 'cleanupAfterDays'
+        type: 'number'
+        description: 'Age threshold for cleanup in days'
+        required: false
+        default: '7'
+
+      - name: 'enableLogging'
+        type: 'boolean'
+        description: 'Enable detailed logging'
+        required: false
+        default: 'false'
+
+# === CLASSES ===
+classes:
+  OutboxService:
+    class-doc:
+      description: 'High-level service for managing outbox messages with convenience methods'
+      business-context: 'Provides enterprise-ready outbox operations with domain event support'
+
+      formats:
+        jsdoc:
+          description: 'Service for outbox message management with domain event support'
+        cli:
+          description: |
+            ## OutboxService
+
+            Enterprise outbox service providing:
+            - Simple message creation and scheduling
+            - Domain event integration
+            - Batch operations for performance
+            - Priority-based message handling
+            - Automatic cleanup and monitoring
+
+    methods:
+      constructor:
+        description: 'Creates outbox service with repository and options'
+        business-context: 'Initializes service for enterprise message handling'
+
+        parameters:
+          - name: 'repository'
+            type: 'IOutboxRepository'
+            description: 'Repository for message persistence'
+
+          - name: 'options'
+            type: 'OutboxServiceOptions'
+            description: 'Service configuration options'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'basic-service'
+            code: |
+              const repository = new InMemoryOutboxRepository();
+              const service = new OutboxService(repository, {
+                defaultPriority: MessagePriority.HIGH,
+                autoCleanup: true,
+                cleanupAfterDays: 30
+              });
+
+      saveMessage:
+        description: 'Saves a message to the outbox'
+        business-context: 'Primary method for reliable message publishing'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type identifier for the message'
+
+          - name: 'payload'
+            type: 'T'
+            description: 'Message payload data'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message options'
+            required: false
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Message ID for tracking'
+
+        examples:
+          - id: 'save-message'
+            code: |
+              const messageId = await service.saveMessage('user.registered', {
+                userId: '123',
+                email: 'user@example.com'
+              }, {
+                priority: MessagePriority.HIGH,
+                metadata: { source: 'registration-flow' }
+              });
+
+      saveMessages:
+        description: 'Saves multiple messages to the outbox in a batch'
+        business-context: 'Efficient bulk message processing for high-throughput scenarios'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messages'
+            type: 'BatchMessageInput<T>[]'
+            description: 'Array of messages to save'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Array of message IDs'
+
+        examples:
+          - id: 'batch-save'
+            code: |
+              const messageIds = await service.saveMessages([
+                {
+                  messageType: 'user.registered',
+                  payload: { userId: '123' }
+                },
+                {
+                  messageType: 'email.welcome',
+                  payload: { to: 'user@example.com' },
+                  options: { priority: MessagePriority.HIGH }
+                }
+              ]);
+
+      scheduleMessage:
+        description: 'Schedules a message for delayed processing'
+        business-context: 'Enables time-based business logic like reminders and scheduled notifications'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type identifier for the message'
+
+          - name: 'payload'
+            type: 'T'
+            description: 'Message payload data'
+
+          - name: 'delayMs'
+            type: 'number'
+            description: 'Delay in milliseconds'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message options'
+            required: false
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Message ID for tracking'
+
+        examples:
+          - id: 'schedule-message'
+            code: |
+              // Schedule reminder for 24 hours later
+              const reminderMs = 24 * 60 * 60 * 1000;
+              const messageId = await service.scheduleMessage(
+                'payment.reminder',
+                { orderId: 'order-456' },
+                reminderMs
+              );
+
+      saveHighPriorityMessage:
+        description: 'Saves a high priority message to the outbox'
+        business-context: 'Convenience method for urgent business events'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type identifier for the message'
+
+          - name: 'payload'
+            type: 'T'
+            description: 'Message payload data'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message options'
+            required: false
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Message ID for tracking'
+
+        examples:
+          - id: 'high-priority'
+            code: |
+              const messageId = await service.saveHighPriorityMessage(
+                'fraud.detected',
+                { userId: '123', riskScore: 0.9 }
+              );
+
+      saveCriticalMessage:
+        description: 'Saves a critical priority message to the outbox'
+        business-context: 'For system-critical events that must be processed immediately'
+
+        generic-parameters:
+          - name: 'T'
+            default: 'unknown'
+            description: 'Type of the message payload'
+
+        parameters:
+          - name: 'messageType'
+            type: 'string'
+            description: 'Type identifier for the message'
+
+          - name: 'payload'
+            type: 'T'
+            description: 'Message payload data'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message options'
+            required: false
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Message ID for tracking'
+
+        examples:
+          - id: 'critical-priority'
+            code: |
+              const messageId = await service.saveCriticalMessage(
+                'system.alert',
+                { alertType: 'security-breach', severity: 'critical' }
+              );
+
+      saveDomainEvent:
+        description: 'Converts a domain event to an outbox message and saves it'
+        business-context: 'Bridges domain events with outbox pattern for reliable delivery'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Domain event to save'
+
+          - name: 'options'
+            type: 'OutboxMessageOptions'
+            description: 'Additional message options'
+            required: false
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Message ID for tracking'
+
+        examples:
+          - id: 'domain-event'
+            code: |
+              const orderCreatedEvent = new OrderCreatedEvent({
+                orderId: 'order-123',
+                customerId: 'customer-456'
+              });
+
+              const messageId = await service.saveDomainEvent(orderCreatedEvent);
+
+      getMessage:
+        description: 'Gets a message by ID'
+        business-context: 'Retrieves message for tracking and debugging purposes'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Message ID to retrieve'
+
+        returns:
+          type: 'Promise<IOutboxMessage | null>'
+          description: 'Message if found, null otherwise'
+
+        examples:
+          - id: 'get-message'
+            code: |
+              const message = await service.getMessage('msg-123');
+              if (message) {
+                console.log('Status:', message.status);
+                console.log('Attempts:', message.attempts);
+              }
+
+      getPendingMessages:
+        description: 'Gets pending messages for monitoring purposes'
+        business-context: 'Provides visibility into unprocessed messages'
+
+        parameters:
+          - name: 'limit'
+            type: 'number'
+            description: 'Maximum number of messages to return'
+            required: false
+            default: '100'
+
+        returns:
+          type: 'Promise<IOutboxMessage[]>'
+          description: 'Array of pending messages'
+
+        examples:
+          - id: 'pending-messages'
+            code: |
+              const pending = await service.getPendingMessages(50);
+              console.log(`${pending.length} messages pending processing`);
+
+      retryMessage:
+        description: 'Retries a failed message by resetting it to pending status'
+        business-context: 'Manual intervention for failed message recovery'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Message ID to retry'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when message is reset'
+
+        examples:
+          - id: 'retry-single'
+            code: |
+              // Retry a specific failed message
+              await service.retryMessage('msg-123');
+
+      retryMessages:
+        description: 'Retries multiple failed messages'
+        business-context: 'Bulk retry operation for operational recovery'
+
+        parameters:
+          - name: 'ids'
+            type: 'string[]'
+            description: 'Array of message IDs to retry'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when all messages are reset'
+
+        examples:
+          - id: 'retry-batch'
+            code: |
+              const failedIds = ['msg-123', 'msg-124', 'msg-125'];
+              await service.retryMessages(failedIds);
+
+      cleanup:
+        description: 'Cleans up old processed messages'
+        business-context: 'Maintains database performance by removing old records'
+
+        parameters:
+          - name: 'olderThanDays'
+            type: 'number'
+            description: 'Delete messages older than specified days'
+            required: false
+
+        returns:
+          type: 'Promise<number>'
+          description: 'Number of messages deleted'
+
+        examples:
+          - id: 'cleanup-old'
+            code: |
+              // Clean up messages older than 90 days
+              const deletedCount = await service.cleanup(90);
+              console.log(`Deleted ${deletedCount} old messages`);
+
+      getStats:
+        description: 'Gets outbox statistics for monitoring'
+        business-context: 'Provides operational metrics for system health'
+
+        returns:
+          type: 'Promise<OutboxStats>'
+          description: 'Current outbox statistics'
+
+        examples:
+          - id: 'get-stats'
+            code: |
+              const stats = await service.getStats();
+              console.log('Pending:', stats.totalPending);
+              console.log('Failed:', stats.totalFailed);
+
+# === TYPES ===
+types:
+  BatchMessageInput:
+    description: 'Input structure for batch message operations'
+    business-context: 'Defines message data for bulk operations'
+
+    generic-parameters:
+      - name: 'T'
+        default: 'unknown'
+        description: 'Type of the message payload'
+
+    properties:
+      - name: 'messageType'
+        type: 'string'
+        description: 'Type identifier for the message'
+
+      - name: 'payload'
+        type: 'T'
+        description: 'Message payload data'
+
+      - name: 'options'
+        type: 'OutboxMessageOptions'
+        description: 'Additional message options'
+        required: false
+
+  OutboxStats:
+    description: 'Statistics about outbox message status'
+    business-context: 'Provides operational visibility into message processing'
+
+    properties:
+      - name: 'totalPending'
+        type: 'number'
+        description: 'Number of pending messages'
+
+      - name: 'totalProcessing'
+        type: 'number'
+        description: 'Number of messages currently processing'
+
+      - name: 'totalProcessed'
+        type: 'number'
+        description: 'Number of successfully processed messages'
+
+      - name: 'totalFailed'
+        type: 'number'
+        description: 'Number of failed messages'

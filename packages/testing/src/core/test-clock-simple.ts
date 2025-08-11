@@ -6,32 +6,6 @@
 
 import type { TestClockState, TimeAdvanceOptions } from './test-clock';
 
-/**
- * @llm-summary TestClockSimple class for test clock simple operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * TestClockSimple class implementing infrastructure service for test clock simple operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TestClockSimple();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TestClockSimple());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class TestClockSimple {
   private _isFrozen = false;
   private _frozenTime: Date | null = null;

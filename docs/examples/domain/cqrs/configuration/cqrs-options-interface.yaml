@@ -1,0 +1,187 @@
+# CQRSOptions - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'cqrs-options-interface'
+title: 'CQRSOptions - CQRS Configuration Interface'
+description: 'Configuration options interface for CQRS module initialization'
+business-context: 'Centralized configuration for command and query bus setup with middleware'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  CQRSOptions:
+    # Interface Documentation
+    interface-doc:
+      description: 'Configuration options for CQRS module initialization'
+      business-context: 'Defines settings for command bus, query bus, and middleware configuration'
+
+      formats:
+        jsdoc:
+          description: 'CQRS configuration options with bus types and middleware setup'
+        cli:
+          description: |
+            ## CQRSOptions Interface
+            Comprehensive configuration for CQRS module:
+            - Command bus type selection (basic/enhanced)
+            - Query bus type selection (basic/enhanced)  
+            - Middleware pipeline configuration
+            - Legacy auto-discovery options
+
+    # Properties
+    properties:
+      - name: 'commandBusType'
+        type: "'basic' | 'enhanced'"
+        required: false
+        description: 'Type of command bus implementation to use'
+        business-context: 'Basic for simple scenarios, enhanced for enterprise features'
+
+        examples:
+          - id: 'basic-command-bus'
+            code: |
+              const options: CQRSOptions = {
+                commandBusType: 'basic' // Simple command dispatching
+              };
+
+          - id: 'enhanced-command-bus'
+            code: |
+              const options: CQRSOptions = {
+                commandBusType: 'enhanced' // Full middleware support
+              };
+
+        custom-tags:
+          default-value: "'basic'"
+          enterprise-feature: 'Enhanced provides advanced middleware'
+
+      - name: 'queryBusType'
+        type: "'basic' | 'enhanced'"
+        required: false
+        description: 'Type of query bus implementation to use'
+        business-context: 'Basic for simple queries, enhanced for caching and complex middleware'
+
+        examples:
+          - id: 'basic-query-bus'
+            code: |
+              const options: CQRSOptions = {
+                queryBusType: 'basic' // Simple query execution
+              };
+
+          - id: 'enhanced-query-bus'
+            code: |
+              const options: CQRSOptions = {
+                queryBusType: 'enhanced' // Caching and middleware support
+              };
+
+        custom-tags:
+          default-value: "'basic'"
+          caching-support: 'Enhanced supports automatic query caching'
+
+      - name: 'autoDiscovery'
+        type: 'boolean'
+        required: false
+        description: 'Enable automatic handler discovery (deprecated)'
+        business-context: 'Legacy option - superseded by DI container auto-discovery'
+
+        examples:
+          - id: 'deprecated-usage'
+            code: |
+              // ❌ Deprecated approach
+              const options: CQRSOptions = {
+                autoDiscovery: true
+              };
+
+              // ✅ Modern approach - use DI container
+              VytchesDDD.configure(container);
+
+        custom-tags:
+          deprecated: 'true'
+          replacement: 'Use DI container auto-discovery instead'
+          migration-path: 'Remove this option and use VytchesDDD.configure()'
+
+      - name: 'middlewares'
+        type: 'ICQRSMiddleware[]'
+        required: false
+        description: 'Array of middleware to apply to CQRS operations'
+        business-context: 'Cross-cutting concerns like logging, validation, retry logic'
+
+        examples:
+          - id: 'logging-middleware'
+            code: |
+              const options: CQRSOptions = {
+                middlewares: [
+                  new LoggingMiddleware(),
+                  new ValidationMiddleware()
+                ]
+              };
+
+          - id: 'enterprise-middleware'
+            code: |
+              const options: CQRSOptions = {
+                commandBusType: 'enhanced',
+                queryBusType: 'enhanced',
+                middlewares: [
+                  new LoggingMiddleware(),
+                  new ValidationMiddleware(),
+                  new RetryMiddleware(),
+                  new CircuitBreakerMiddleware()
+                ]
+              };
+
+        custom-tags:
+          pipeline-order: 'Middleware executes in array order'
+          enterprise-patterns: 'Supports resilience and observability patterns'
+
+# === USAGE EXAMPLES ===
+usage-examples:
+  basic-configuration:
+    description: 'Simple CQRS setup for basic applications'
+    code: |
+      const basicOptions: CQRSOptions = {
+        commandBusType: 'basic',
+        queryBusType: 'basic'
+      };
+
+      const cqrs = CQRSModule.create(container, basicOptions);
+
+  enterprise-configuration:
+    description: 'Full enterprise CQRS setup with middleware'
+    code: |
+      const enterpriseOptions: CQRSOptions = {
+        commandBusType: 'enhanced',
+        queryBusType: 'enhanced',
+        middlewares: [
+          new LoggingMiddleware({
+            logLevel: 'info',
+            includePayload: true
+          }),
+          new ValidationMiddleware({
+            validateCommands: true,
+            validateQueries: true
+          }),
+          new RetryMiddleware({
+            maxAttempts: 3,
+            backoffStrategy: 'exponential'
+          })
+        ]
+      };
+
+      const cqrs = CQRSModule.create(container, enterpriseOptions);
+
+  factory-methods:
+    description: 'Using convenience factory methods'
+    code: |
+      // Basic setup without options
+      const basicCQRS = CQRSModule.createBasic(container);
+
+      // Enhanced setup without options
+      const enhancedCQRS = CQRSModule.createEnhanced(container);
+
+      // Custom configuration
+      const customCQRS = CQRSModule.create(container, {
+        commandBusType: 'enhanced',
+        queryBusType: 'basic',
+        middlewares: [new LoggingMiddleware()]
+      });

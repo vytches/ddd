@@ -1,0 +1,84 @@
+# Core Index - Core Logging Components
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Core Index - Core Logging Components'
+description: 'Main exports for core logging interfaces, builders, and utilities'
+business-context: 'Centralized access to fundamental logging components including contexts, events, levels, and interfaces'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  # Interfaces
+  LogContext:
+    description: 'DDD-aware logging context interface'
+    source: './log-context'
+    type: 'interface'
+
+  LogContextBuilder:
+    description: 'Builder interface for log contexts'
+    source: './log-context'
+    type: 'interface'
+
+  LogEvent:
+    description: 'Structured log event interface'
+    source: './log-event'
+    type: 'interface'
+
+  LogEventBuilder:
+    description: 'Builder interface for log events'
+    source: './log-event'
+    type: 'interface'
+
+  Logger:
+    description: 'Main logger interface'
+    source: './logger.interface'
+    type: 'interface'
+
+  LogProvider:
+    description: 'Log provider interface'
+    source: './logger.interface'
+    type: 'interface'
+
+  LoggerConfiguration:
+    description: 'Logger configuration interface'
+    source: './logger.interface'
+    type: 'interface'
+
+  # Types
+  LogLevel:
+    description: 'Log level union type'
+    source: './log-level'
+    type: 'type'
+
+  # Classes
+  DefaultLogContextBuilder:
+    description: 'Default log context builder implementation'
+    source: './log-context'
+    type: 'class'
+
+  DefaultLogEventBuilder:
+    description: 'Default log event builder implementation'
+    source: './log-event'
+    type: 'class'
+
+  # Functions
+  isLogLevelEnabled:
+    description: 'Checks if log level is enabled'
+    source: './log-level'
+    type: 'function'
+
+  parseLogLevel:
+    description: 'Parses string to LogLevel'
+    source: './log-level'
+    type: 'function'
+
+  # Constants
+  LOG_LEVELS:
+    description: 'Log levels numeric mapping'
+    source: './log-level'
+    type: 'constant'

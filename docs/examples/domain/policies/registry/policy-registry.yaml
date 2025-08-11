@@ -1,0 +1,82 @@
+# policy-registry - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-registry'
+title: 'PolicyRegistry - Central Policy Management'
+description: 'Central registry for business policy management'
+business-context: 'Provides centralized policy discovery and lifecycle management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyRegistry:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Central registry for managing and discovering business policies'
+      business-context: 'Enables dynamic policy resolution and centralized management'
+
+      formats:
+        jsdoc:
+          description: 'Centralized policy registry'
+        cli:
+          description: |
+            ## PolicyRegistry
+
+            Registry features:
+            - Policy registration
+            - Dynamic discovery
+            - Domain grouping
+            - Tag-based search
+            - Version management
+            - Lifecycle hooks
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Registry Pattern'
+        singleton: 'true'
+
+    # Methods
+    methods:
+      static getInstance:
+        description: 'Gets registry singleton'
+        returns: 'PolicyRegistry'
+
+      register:
+        description: 'Registers policy'
+        parameters:
+          - name: 'policy'
+            type: 'IBusinessPolicy<any>'
+          - name: 'options'
+            type: 'RegistrationOptions'
+            optional: true
+        returns: 'void'
+
+      resolve:
+        description: 'Resolves policy by ID'
+        parameters:
+          - name: 'policyId'
+            type: 'string'
+        returns: 'IBusinessPolicy<T> | undefined'
+
+      findByDomain:
+        description: 'Finds policies by domain'
+        parameters:
+          - name: 'domain'
+            type: 'string'
+        returns: 'IBusinessPolicy<any>[]'
+
+      findByTags:
+        description: 'Finds policies by tags'
+        parameters:
+          - name: 'tags'
+            type: 'string[]'
+        returns: 'IBusinessPolicy<any>[]'

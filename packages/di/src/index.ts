@@ -19,8 +19,8 @@ export * from './errors';
 export * from './service-locator';
 
 // Containers
-export { SimpleContainer } from './containers/simple-container';
 export { ContainerBuilder } from './containers/container-builder';
+export { SimpleContainer } from './containers/simple-container';
 
 // Adapters
 export { BaseContainerAdapter } from './adapters/base-adapter';

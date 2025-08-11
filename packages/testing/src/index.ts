@@ -2,41 +2,34 @@
 
 // Phase 1: Foundation Layer - Core testing utilities
 export {
+  DomainEventBuilder,
+  EntityIdBuilder,
+  expectError,
+  expectSuccess,
   // Safe execution utilities
   safeRun,
   safeRunTest,
-  expectError,
-  expectSuccess,
   safeRunWithTimeout,
-  type SafeRunResult,
-
+  SimpleTestHarness,
   // Time control utilities
   TestClock,
-  TimeScenarioBuilder,
-  withTestClock,
-  type TimeAdvanceOptions,
-  type TestClockState,
-
+  // Test data building utilities
+  TestDataBuilder,
   // Test harness utilities
   TestHarness,
-  SimpleTestHarness,
   TestResourceBuilder,
+  TimeScenarioBuilder,
+  UserBuilder,
+  withTestClock,
+  type RandomOptions,
+  type SafeRunResult,
+  type SequenceOptions,
+  type TestClockState,
+  type TestDataBuilderOptions,
+  type TestDomainEvent,
   type TestHarnessOptions,
   type TestHarnessState,
   type TestResource,
-
-  // Test data building utilities
-  TestDataBuilder,
-  EntityIdBuilder,
-  UserBuilder,
-  DomainEventBuilder,
-  type TestDataBuilderOptions,
-  type SequenceOptions,
-  type RandomOptions,
   type TestUser,
-  type TestDomainEvent,
+  type TimeAdvanceOptions,
 } from './core';
-
-// Phase 2: Domain Layer - Domain-specific testing utilities
-// TODO: Domain utilities temporarily removed to fix circular dependencies
-// export { ... } from './domain';

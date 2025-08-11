@@ -1,33 +1,33 @@
 # AuditCapability - Universal Enhanced Metadata System V2
 
 # === FILE METADATA ===
-file-name: "audit-capability"
-title: "AuditCapability - Aggregate Auditing System"
-description: "Enterprise-grade auditing capability for tracking aggregate changes and events"
-business-context: "Provides comprehensive audit trails for compliance, debugging, and business intelligence"
+file-name: 'audit-capability'
+title: 'AuditCapability - Aggregate Auditing System'
+description: 'Enterprise-grade auditing capability for tracking aggregate changes and events'
+business-context: 'Provides comprehensive audit trails for compliance, debugging, and business intelligence'
 
 # === HIERARCHY ===
 hierarchy:
-  strategy: "merge"
-  scope: "file"
+  strategy: 'merge'
+  scope: 'file'
 
 # === CLASSES ===
 classes:
   AuditCapability:
     # JSDoc Configuration
     jsdoc:
-      placement-strategy: "separate"
-      class-documentation: "enabled"
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
 
     # Class Documentation
     class-doc:
-      description: "Extensible auditing capability that tracks all domain events and provides comprehensive audit trails"
-      business-context: "Essential for compliance requirements, debugging complex business flows, and maintaining detailed change history"
+      description: 'Extensible auditing capability that tracks all domain events and provides comprehensive audit trails'
+      business-context: 'Essential for compliance requirements, debugging complex business flows, and maintaining detailed change history'
 
       # Format-specific
       formats:
         jsdoc:
-          description: "Auditing capability for aggregate event tracking and compliance"
+          description: 'Auditing capability for aggregate event tracking and compliance'
         cli:
           description: |
             ## AuditCapability
@@ -36,38 +36,38 @@ classes:
             Provides comprehensive audit trails with statistics, filtering, and compliance features.
 
       custom-tags:
-        since: "1.0.0"
-        capability-type: "audit"
-        compliance: "SOX, GDPR, HIPAA compatible"
-        performance: "Low-overhead event interception"
+        since: '1.0.0'
+        capability-type: 'audit'
+        compliance: 'SOX, GDPR, HIPAA compatible'
+        performance: 'Low-overhead event interception'
 
     # Methods
     methods:
       constructor:
-        description: "Creates new audit capability instance"
-        business-context: "Initializes empty audit log and prepares for aggregate attachment"
+        description: 'Creates new audit capability instance'
+        business-context: 'Initializes empty audit log and prepares for aggregate attachment'
 
         examples:
-          - id: "basic"
+          - id: 'basic'
             code: |
               const auditCapability = new AuditCapability();
               aggregate.addCapability(auditCapability);
 
       attach:
-        description: "Attaches audit capability to aggregate and intercepts apply method"
+        description: 'Attaches audit capability to aggregate and intercepts apply method'
         business-context: "Enables automatic event tracking by wrapping the aggregate's apply method"
 
         parameters:
-          - name: "aggregate"
-            type: "unknown"
-            description: "Aggregate instance to attach auditing to"
+          - name: 'aggregate'
+            type: 'unknown'
+            description: 'Aggregate instance to attach auditing to'
 
         returns:
-          type: "void"
-          description: "No return value - modifies aggregate behavior"
+          type: 'void'
+          description: 'No return value - modifies aggregate behavior'
 
         examples:
-          - id: "attachment"
+          - id: 'attachment'
             code: |
               const auditCapability = new AuditCapability();
               auditCapability.attach(myAggregate);
@@ -80,32 +80,32 @@ classes:
           warning: "Modifies aggregate's apply method - call detach() when done"
 
       detach:
-        description: "Detaches audit capability and restores original aggregate behavior"
-        business-context: "Cleanly removes auditing without affecting aggregate functionality"
+        description: 'Detaches audit capability and restores original aggregate behavior'
+        business-context: 'Cleanly removes auditing without affecting aggregate functionality'
 
         returns:
-          type: "void"
-          description: "No return value - restores original behavior"
+          type: 'void'
+          description: 'No return value - restores original behavior'
 
         examples:
-          - id: "cleanup"
+          - id: 'cleanup'
             code: |
               auditCapability.detach();
               // Aggregate's apply method is restored to original
 
         custom-tags:
-          cleanup: "Always call detach() to prevent memory leaks"
+          cleanup: 'Always call detach() to prevent memory leaks'
 
       getAuditLog:
-        description: "Returns copy of complete audit log with all tracked events"
-        business-context: "Provides access to full event history for reporting and analysis"
+        description: 'Returns copy of complete audit log with all tracked events'
+        business-context: 'Provides access to full event history for reporting and analysis'
 
         returns:
-          type: "IAuditEvent[]"
-          description: "Array copy of all audit events in chronological order"
+          type: 'IAuditEvent[]'
+          description: 'Array copy of all audit events in chronological order'
 
         examples:
-          - id: "basic-retrieval"
+          - id: 'basic-retrieval'
             code: |
               const auditLog = auditCapability.getAuditLog();
               console.log(`Total events: ${auditLog.length}`);
@@ -115,36 +115,36 @@ classes:
               });
 
         custom-tags:
-          returns-copy: "Returns defensive copy to prevent external modification"
-          thread-safe: "Safe to call from multiple threads"
+          returns-copy: 'Returns defensive copy to prevent external modification'
+          thread-safe: 'Safe to call from multiple threads'
 
       clearAuditLog:
-        description: "Clears all audit events from memory"
-        business-context: "Used for testing or when audit data needs to be reset"
+        description: 'Clears all audit events from memory'
+        business-context: 'Used for testing or when audit data needs to be reset'
 
         returns:
-          type: "void"
-          description: "No return value - empties audit log"
+          type: 'void'
+          description: 'No return value - empties audit log'
 
         examples:
-          - id: "reset"
+          - id: 'reset'
             code: |
               auditCapability.clearAuditLog();
               console.log(auditCapability.getAuditLog().length); // 0
 
         custom-tags:
-          warning: "Irreversible operation - audit history will be lost"
+          warning: 'Irreversible operation - audit history will be lost'
 
       getAuditStatistics:
-        description: "Calculates comprehensive audit statistics including event counts and timing"
-        business-context: "Provides insights into aggregate usage patterns and performance metrics"
+        description: 'Calculates comprehensive audit statistics including event counts and timing'
+        business-context: 'Provides insights into aggregate usage patterns and performance metrics'
 
         returns:
-          type: "{ totalEvents: number; eventsByType: Record<string, number>; averageTimeBetweenEvents: number }"
-          description: "Statistics object with event counts, type distribution, and timing metrics"
+          type: '{ totalEvents: number; eventsByType: Record<string, number>; averageTimeBetweenEvents: number }'
+          description: 'Statistics object with event counts, type distribution, and timing metrics'
 
         examples:
-          - id: "statistics"
+          - id: 'statistics'
             code: |
               const stats = auditCapability.getAuditStatistics();
 
@@ -158,24 +158,24 @@ classes:
               // Avg time between events: 1247ms
 
         custom-tags:
-          performance: "O(n) complexity - caches results for repeated calls"
-          business-intelligence: "Useful for performance analysis and usage patterns"
+          performance: 'O(n) complexity - caches results for repeated calls'
+          business-intelligence: 'Useful for performance analysis and usage patterns'
 
       recordEvent:
-        description: "Manually records domain event in audit log with full metadata"
-        business-context: "Allows explicit event recording for special cases or external events"
+        description: 'Manually records domain event in audit log with full metadata'
+        business-context: 'Allows explicit event recording for special cases or external events'
 
         parameters:
-          - name: "event"
-            type: "IExtendedDomainEvent"
-            description: "Domain event to record with payload and metadata"
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Domain event to record with payload and metadata'
 
         returns:
-          type: "void"
-          description: "No return value - adds event to audit log"
+          type: 'void'
+          description: 'No return value - adds event to audit log'
 
         examples:
-          - id: "manual-recording"
+          - id: 'manual-recording'
             code: |
               const externalEvent = {
                 eventType: 'ExternalOrderUpdate',
@@ -186,23 +186,23 @@ classes:
               auditCapability.recordEvent(externalEvent);
 
         custom-tags:
-          use-case: "External event integration and manual audit entries"
+          use-case: 'External event integration and manual audit entries'
 
       getEventsByType:
-        description: "Filters audit log to return only events of specified type"
-        business-context: "Enables focused analysis of specific business events"
+        description: 'Filters audit log to return only events of specified type'
+        business-context: 'Enables focused analysis of specific business events'
 
         parameters:
-          - name: "eventType"
-            type: "string"
-            description: "Event type to filter by (case-sensitive)"
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type to filter by (case-sensitive)'
 
         returns:
-          type: "IAuditEvent[]"
-          description: "Array of audit events matching the specified type"
+          type: 'IAuditEvent[]'
+          description: 'Array of audit events matching the specified type'
 
         examples:
-          - id: "type-filtering"
+          - id: 'type-filtering'
             code: |
               const orderCreatedEvents = auditCapability.getEventsByType('OrderCreated');
               const orderCancelledEvents = auditCapability.getEventsByType('OrderCancelled');
@@ -210,26 +210,26 @@ classes:
               console.log(`Created: ${orderCreatedEvents.length}, Cancelled: ${orderCancelledEvents.length}`);
 
         custom-tags:
-          performance: "O(n) complexity - consider caching for frequent queries"
+          performance: 'O(n) complexity - consider caching for frequent queries'
 
       getEventsByTimeRange:
-        description: "Filters audit log to return events within specified time range"
-        business-context: "Supports time-based reporting and incident analysis"
+        description: 'Filters audit log to return events within specified time range'
+        business-context: 'Supports time-based reporting and incident analysis'
 
         parameters:
-          - name: "startDate"
-            type: "Date"
-            description: "Start of time range (inclusive)"
-          - name: "endDate"
-            type: "Date"
-            description: "End of time range (inclusive)"
+          - name: 'startDate'
+            type: 'Date'
+            description: 'Start of time range (inclusive)'
+          - name: 'endDate'
+            type: 'Date'
+            description: 'End of time range (inclusive)'
 
         returns:
-          type: "IAuditEvent[]"
-          description: "Array of audit events within the specified time range"
+          type: 'IAuditEvent[]'
+          description: 'Array of audit events within the specified time range'
 
         examples:
-          - id: "time-range-query"
+          - id: 'time-range-query'
             code: |
               const today = new Date();
               const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
@@ -238,19 +238,19 @@ classes:
               console.log(`Events in last 24 hours: ${recentEvents.length}`);
 
         custom-tags:
-          performance: "O(n) complexity - uses timestamp comparison"
-          use-case: "Incident analysis, daily reports, compliance audits"
+          performance: 'O(n) complexity - uses timestamp comparison'
+          use-case: 'Incident analysis, daily reports, compliance audits'
 
       getFirstEvent:
-        description: "Returns the chronologically first audit event or null if none exists"
-        business-context: "Useful for determining aggregate creation time and initial state"
+        description: 'Returns the chronologically first audit event or null if none exists'
+        business-context: 'Useful for determining aggregate creation time and initial state'
 
         returns:
-          type: "IAuditEvent | null"
-          description: "First audit event in chronological order or null if audit log is empty"
+          type: 'IAuditEvent | null'
+          description: 'First audit event in chronological order or null if audit log is empty'
 
         examples:
-          - id: "first-event"
+          - id: 'first-event'
             code: |
               const firstEvent = auditCapability.getFirstEvent();
               if (firstEvent) {
@@ -259,18 +259,18 @@ classes:
               }
 
         custom-tags:
-          performance: "O(1) complexity - direct array access"
+          performance: 'O(1) complexity - direct array access'
 
       getLastEvent:
-        description: "Returns the chronologically last audit event or null if none exists"
-        business-context: "Provides access to most recent aggregate change for status checking"
+        description: 'Returns the chronologically last audit event or null if none exists'
+        business-context: 'Provides access to most recent aggregate change for status checking'
 
         returns:
-          type: "IAuditEvent | null"
-          description: "Last audit event in chronological order or null if audit log is empty"
+          type: 'IAuditEvent | null'
+          description: 'Last audit event in chronological order or null if audit log is empty'
 
         examples:
-          - id: "last-event"
+          - id: 'last-event'
             code: |
               const lastEvent = auditCapability.getLastEvent();
               if (lastEvent) {
@@ -279,21 +279,21 @@ classes:
               }
 
         custom-tags:
-          performance: "O(1) complexity - direct array access"
-          use-case: "Status checking, modification tracking"
+          performance: 'O(1) complexity - direct array access'
+          use-case: 'Status checking, modification tracking'
 
 # === STATIC PROPERTIES ===
 static-properties:
   capabilityType:
-    description: "Returns the string identifier for this capability type"
-    business-context: "Used by capability system for registration and type checking"
+    description: 'Returns the string identifier for this capability type'
+    business-context: 'Used by capability system for registration and type checking'
 
     returns:
-      type: "string"
+      type: 'string'
       description: "Always returns 'audit'"
 
     examples:
-      - id: "type-check"
+      - id: 'type-check'
         code: |
           console.log(AuditCapability.capabilityType); // 'audit'
 
@@ -305,34 +305,34 @@ static-properties:
 # === INTERFACES ===
 interfaces:
   IAuditEvent:
-    description: "Audit event structure containing event data and metadata"
-    business-context: "Standard format for all audit entries with compliance fields"
+    description: 'Audit event structure containing event data and metadata'
+    business-context: 'Standard format for all audit entries with compliance fields'
 
     properties:
-      - name: "eventId"
-        type: "string"
-        description: "Unique identifier for the audit event"
-      - name: "eventType"
-        type: "string"
-        description: "Type of domain event that triggered this audit entry"
-      - name: "aggregateId"
-        type: "string | number"
-        description: "ID of the aggregate that generated the event"
-      - name: "aggregateType"
-        type: "string"
-        description: "Class name of the aggregate"
-      - name: "aggregateVersion"
-        type: "number"
-        description: "Version of aggregate when event occurred"
-      - name: "timestamp"
-        type: "Date"
-        description: "When the event was recorded"
-      - name: "payload"
-        type: "unknown"
-        description: "Event payload data"
-      - name: "metadata"
-        type: "unknown"
-        description: "Event metadata including audit flags"
-      - name: "actor"
-        type: "string | undefined"
-        description: "User or system that triggered the event"
+      - name: 'eventId'
+        type: 'string'
+        description: 'Unique identifier for the audit event'
+      - name: 'eventType'
+        type: 'string'
+        description: 'Type of domain event that triggered this audit entry'
+      - name: 'aggregateId'
+        type: 'string | number'
+        description: 'ID of the aggregate that generated the event'
+      - name: 'aggregateType'
+        type: 'string'
+        description: 'Class name of the aggregate'
+      - name: 'aggregateVersion'
+        type: 'number'
+        description: 'Version of aggregate when event occurred'
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'When the event was recorded'
+      - name: 'payload'
+        type: 'unknown'
+        description: 'Event payload data'
+      - name: 'metadata'
+        type: 'unknown'
+        description: 'Event metadata including audit flags'
+      - name: 'actor'
+        type: 'string | undefined'
+        description: 'User or system that triggered the event'

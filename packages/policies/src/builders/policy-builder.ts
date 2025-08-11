@@ -1,41 +1,22 @@
-import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
-import type { IBusinessPolicy } from '../core/interfaces/business-policy.interface';
+import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
+import type { Result } from '@vytches/ddd-utils';
 import {
+  AsyncSpecificationPolicy,
   BaseBusinessPolicy,
   SpecificationPolicy,
-  AsyncSpecificationPolicy,
 } from '../core/base/base-business-policy';
+import type { IBusinessPolicy, PolicyRequest } from '../core/interfaces/business-policy.interface';
+import type { PolicyViolation, PolicyViolationSeverity } from '../core/models/policy-violation';
+import { ConditionalPolicyBuilder } from './conditional-policy-builder';
 import type {
-  IPolicyBuilder,
-  IPolicyStepBuilder,
-  IPolicyGroup,
   IConditionalPolicyBuilder,
+  IPolicyBuilder,
+  IPolicyGroup,
+  IPolicyStepBuilder,
   PolicyBuilderConfig,
 } from './policy-builder.interface';
 import { PolicyStepBuilder } from './policy-step-builder';
-import { PolicyGroup } from './policy-group';
-import { ConditionalPolicyBuilder } from './conditional-policy-builder';
-import type { PolicyViolationSeverity, PolicyViolation } from '../core/models/policy-violation';
-import type { PolicyRequest } from '../core/interfaces/business-policy.interface';
-import type { Result } from '@vytches/ddd-utils';
 
-/**
- * @llm-summary PolicyBuilder class for policy builder operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyBuilder class implementing domain pattern implementation for policy builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyBuilder();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyBuilder<T> implements IPolicyBuilder<T> {
   private id?: string;
   private domain?: string;
@@ -379,25 +360,6 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
   }
 }
 
-/**
- * @llm-summary Contract for policy build step functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyBuildStep interface implementing domain pattern implementation for policy build step operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyBuildStep implements PolicyBuildStep {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyBuildStep<T> {
   type:
     | 'specification'

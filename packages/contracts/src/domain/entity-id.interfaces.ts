@@ -1,42 +1,5 @@
-/**
- * @llm-summary Type definition for id type
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * IdType type implementing core domain functionality for id type operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: IdType = {} as IdType;
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 export type IdType = 'uuid' | 'integer' | 'text' | 'bigint';
 
-/**
- * @llm-summary Contract for entity id functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * EntityId interface implementing core domain functionality for entity id operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEntityId implements IEntityId {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEntityId<T = unknown> {
   /**
    * Get the raw value of the entity ID
@@ -79,49 +42,11 @@ export interface IEntityId<T = unknown> {
   readonly value: T;
 }
 
-/**
- * @llm-summary Contract for entity id constructor params functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * EntityIdConstructorParams interface implementing core domain functionality for entity id constructor params operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEntityIdConstructorParams implements IEntityIdConstructorParams {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEntityIdConstructorParams<T = unknown> {
   value: T;
   type: IdType;
 }
 
-/**
- * @llm-summary Contract for entity id factory functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * EntityIdFactory interface implementing core domain functionality for entity id factory operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEntityIdFactory implements IEntityIdFactory {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEntityIdFactory {
   /**
    * Create Entity ID with random UUID
@@ -149,21 +74,4 @@ export interface IEntityIdFactory {
   fromText(value: string): IEntityId<string>;
 }
 
-/**
- * @llm-summary Type definition for entity id
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * EntityId type implementing core domain functionality for entity id operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: EntityId = {} as EntityId;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type EntityId<T = string> = IEntityId<T>;

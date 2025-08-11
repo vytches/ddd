@@ -32,17 +32,20 @@ class JSDocPlacementValidator {
         context,
         type: 'invalid-placement-strategy',
         message: `Invalid placement-strategy: ${config['placement-strategy']}`,
-        fix: `Use one of: ${validStrategies.join(', ')}`
+        fix: `Use one of: ${validStrategies.join(', ')}`,
       });
     }
 
     // Validate content-strategy
-    if (config['content-strategy'] && !validContentStrategies.includes(config['content-strategy'])) {
+    if (
+      config['content-strategy'] &&
+      !validContentStrategies.includes(config['content-strategy'])
+    ) {
       this.errors.push({
         context,
-        type: 'invalid-content-strategy', 
+        type: 'invalid-content-strategy',
         message: `Invalid content-strategy: ${config['content-strategy']}`,
-        fix: `Use one of: ${validContentStrategies.join(', ')}`
+        fix: `Use one of: ${validContentStrategies.join(', ')}`,
       });
     }
 
@@ -53,27 +56,34 @@ class JSDocPlacementValidator {
           context,
           type: 'invalid-documentation-state',
           message: `Invalid ${key}: ${config[key]}`,
-          fix: `Use one of: ${validStates.join(', ')}`
+          fix: `Use one of: ${validStates.join(', ')}`,
         });
       }
     });
 
     // Validate strategy conflicts
-    if (config['placement-strategy'] === 'class-only' && config['constructor-documentation'] === 'enabled') {
+    if (
+      config['placement-strategy'] === 'class-only' &&
+      config['constructor-documentation'] === 'enabled'
+    ) {
       this.errors.push({
         context,
         type: 'strategy-conflict',
         message: 'class-only strategy conflicts with enabled constructor-documentation',
-        fix: 'Set constructor-documentation to "disabled" or change placement-strategy'
+        fix: 'Set constructor-documentation to "disabled" or change placement-strategy',
       });
     }
 
-    if (config['placement-strategy'] === 'constructor-only' && config['class-documentation'] === 'enabled') {
+    if (
+      config['placement-strategy'] === 'constructor-only' &&
+      config['class-documentation'] === 'enabled'
+    ) {
       this.warnings.push({
         context,
         type: 'potential-conflict',
         message: 'constructor-only strategy with enabled class-documentation may cause issues',
-        recommendation: 'Consider using "separate" strategy for both class and constructor documentation'
+        recommendation:
+          'Consider using "separate" strategy for both class and constructor documentation',
       });
     }
   }
@@ -84,25 +94,32 @@ class JSDocPlacementValidator {
   analyzeClassMetadata(className, metadata) {
     const analysis = {
       hasClassDoc: !!metadata.classes?.[className]?.['class-doc'],
-      hasConstructorMethod: !!metadata.classes?.[className]?.methods?.constructor || !!metadata.methods?.constructor,
+      hasConstructorMethod:
+        !!metadata.classes?.[className]?.methods?.constructor || !!metadata.methods?.constructor,
       hasMethodSpecificTags: false,
       hasClassSpecificTags: false,
-      contentAnalysis: 'neutral'
+      contentAnalysis: 'neutral',
     };
 
     // Check for method-specific tags in class metadata
     const classData = metadata.classes?.[className] || metadata;
-    const methodTags = ['parameters', 'returns', 'throws', 'param-', 'visibility', 'internal-api', 'fluent'];
-    
+    const methodTags = [
+      'parameters',
+      'returns',
+      'throws',
+      'param-',
+      'visibility',
+      'internal-api',
+      'fluent',
+    ];
+
     analysis.hasMethodSpecificTags = Object.keys(classData).some(key =>
       methodTags.some(tag => key.startsWith(tag))
     );
 
     // Check for class-specific tags
     const classTags = ['capability', 'event-sourcing', 'performance', 'domain-pattern'];
-    analysis.hasClassSpecificTags = Object.keys(classData).some(key =>
-      classTags.includes(key)
-    );
+    analysis.hasClassSpecificTags = Object.keys(classData).some(key => classTags.includes(key));
 
     // Analyze description content
     const description = classData.description || '';
@@ -120,10 +137,12 @@ class JSDocPlacementValidator {
    */
   isConstructorLikeDescription(description) {
     const lowerDesc = description.toLowerCase();
-    return /creates?\s+.*(?:aggregate|instance|object)/.test(lowerDesc) ||
-           /initializes?\s+.*(?:aggregate|instance)/.test(lowerDesc) ||
-           /constructs?\s+.*(?:aggregate|instance)/.test(lowerDesc) ||
-           /constructor/.test(lowerDesc);
+    return (
+      /creates?\s+.*(?:aggregate|instance|object)/.test(lowerDesc) ||
+      /initializes?\s+.*(?:aggregate|instance)/.test(lowerDesc) ||
+      /constructs?\s+.*(?:aggregate|instance)/.test(lowerDesc) ||
+      /constructor/.test(lowerDesc)
+    );
   }
 
   /**
@@ -131,11 +150,13 @@ class JSDocPlacementValidator {
    */
   isClassLikeDescription(description) {
     const lowerDesc = description.toLowerCase();
-    return /provides?/.test(lowerDesc) ||
-           /implements?/.test(lowerDesc) ||
-           /represents?/.test(lowerDesc) ||
-           /manages?/.test(lowerDesc) ||
-           /pattern|capability|feature/.test(lowerDesc);
+    return (
+      /provides?/.test(lowerDesc) ||
+      /implements?/.test(lowerDesc) ||
+      /represents?/.test(lowerDesc) ||
+      /manages?/.test(lowerDesc) ||
+      /pattern|capability|feature/.test(lowerDesc)
+    );
   }
 
   /**
@@ -145,43 +166,47 @@ class JSDocPlacementValidator {
     const recommendations = [];
 
     // Recommend separate strategy for complex classes
-    if (analysis.hasClassDoc && analysis.hasConstructorMethod && 
-        currentConfig['placement-strategy'] !== 'separate') {
+    if (
+      analysis.hasClassDoc &&
+      analysis.hasConstructorMethod &&
+      currentConfig['placement-strategy'] !== 'separate'
+    ) {
       recommendations.push({
         type: 'strategy-upgrade',
         priority: 'high',
         message: `Consider "separate" strategy for ${className} - has both class and constructor documentation`,
         implementation: {
           'placement-strategy': 'separate',
-          'content-strategy': 'distinct'
-        }
+          'content-strategy': 'distinct',
+        },
       });
     }
 
     // Recommend class-doc section for constructor-only classes with class-like content
-    if (currentConfig['placement-strategy'] === 'constructor-only' && 
-        analysis.contentAnalysis === 'class-like') {
+    if (
+      currentConfig['placement-strategy'] === 'constructor-only' &&
+      analysis.contentAnalysis === 'class-like'
+    ) {
       recommendations.push({
         type: 'content-separation',
-        priority: 'medium', 
+        priority: 'medium',
         message: `Class-like content detected in ${className} - consider adding class-doc section`,
         implementation: {
           'placement-strategy': 'separate',
-          'add-class-doc': true
-        }
+          'add-class-doc': true,
+        },
       });
     }
 
     // Recommend smart strategy for auto-optimization
-    if (analysis.contentAnalysis !== 'neutral' && 
-        !currentConfig['placement-strategy']) {
+    if (analysis.contentAnalysis !== 'neutral' && !currentConfig['placement-strategy']) {
       recommendations.push({
         type: 'auto-optimization',
         priority: 'low',
         message: `Consider "smart" strategy for ${className} - system can auto-optimize placement`,
         implementation: {
-          'placement-strategy': 'smart'
-        }
+          'placement-strategy': 'smart',
+        },
       });
     }
 
@@ -214,7 +239,9 @@ class JSDocPlacementValidator {
     }
 
     // Validate class configurations
-    const classFiles = globSync(path.join(this.rootDir, 'docs', 'examples', 'domain', '**', '*.yaml'));
+    const classFiles = globSync(
+      path.join(this.rootDir, 'docs', 'examples', 'domain', '**', '*.yaml')
+    );
     for (const file of classFiles) {
       const classConfig = await this.loadYamlFile(file);
       if (classConfig?.classes) {
@@ -226,7 +253,11 @@ class JSDocPlacementValidator {
 
           // Analyze class metadata and generate recommendations
           const analysis = this.analyzeClassMetadata(className, classConfig);
-          const recommendations = this.generateRecommendations(className, analysis, classData.jsdoc);
+          const recommendations = this.generateRecommendations(
+            className,
+            analysis,
+            classData.jsdoc
+          );
           this.recommendations.push(...recommendations);
         });
       }
@@ -249,7 +280,7 @@ class JSDocPlacementValidator {
         this.warnings.push({
           context: filePath,
           type: 'file-error',
-          message: `Could not load file: ${error.message}`
+          message: `Could not load file: ${error.message}`,
         });
       }
       return null;
@@ -263,7 +294,7 @@ class JSDocPlacementValidator {
     const plan = {
       immediate: [],
       recommended: [],
-      optional: []
+      optional: [],
     };
 
     this.errors.forEach(error => {
@@ -272,7 +303,7 @@ class JSDocPlacementValidator {
         priority: 'critical',
         issue: error.message,
         fix: error.fix,
-        context: error.context
+        context: error.context,
       });
     });
 
@@ -282,14 +313,14 @@ class JSDocPlacementValidator {
           action: 'implement-recommendation',
           priority: rec.priority,
           change: rec.message,
-          implementation: rec.implementation
+          implementation: rec.implementation,
         });
       } else {
         plan.optional.push({
           action: 'consider-improvement',
           priority: rec.priority,
           change: rec.message,
-          implementation: rec.implementation
+          implementation: rec.implementation,
         });
       }
     });
@@ -305,14 +336,14 @@ class JSDocPlacementValidator {
       summary: {
         errors: this.errors.length,
         warnings: this.warnings.length,
-        recommendations: this.recommendations.length
+        recommendations: this.recommendations.length,
       },
       details: {
         errors: this.errors,
         warnings: this.warnings,
-        recommendations: this.recommendations
+        recommendations: this.recommendations,
       },
-      migrationPlan: this.generateMigrationPlan()
+      migrationPlan: this.generateMigrationPlan(),
     };
 
     return report;
@@ -368,7 +399,7 @@ class JSDocPlacementValidator {
     const plan = report.migrationPlan;
     if (plan.immediate.length > 0 || plan.recommended.length > 0) {
       console.log('🚀 Migration Plan:');
-      
+
       if (plan.immediate.length > 0) {
         console.log('\n   🔥 Immediate Actions (Critical):');
         plan.immediate.forEach((action, index) => {
@@ -382,7 +413,9 @@ class JSDocPlacementValidator {
         console.log('   📈 Recommended Changes:');
         plan.recommended.forEach((action, index) => {
           console.log(`      ${index + 1}. ${action.change}`);
-          console.log(`         Implementation: ${JSON.stringify(action.implementation, null, 2)}\n`);
+          console.log(
+            `         Implementation: ${JSON.stringify(action.implementation, null, 2)}\n`
+          );
         });
       }
 
@@ -410,26 +443,25 @@ async function main() {
   const args = process.argv.slice(2);
   const outputFile = args.find(arg => arg.startsWith('--output='))?.split('=')[1];
   const fixErrors = args.includes('--fix');
-  
+
   console.log('🔍 JSDoc Placement Configuration Validator');
   console.log('==========================================\n');
-  
+
   const validator = new JSDocPlacementValidator(process.cwd());
-  
+
   try {
     await validator.validateAllConfigurations();
     const isValid = validator.printReport();
-    
+
     // Save report to file if requested
     if (outputFile) {
       const report = validator.generateReport();
       await fs.writeFile(outputFile, JSON.stringify(report, null, 2));
       console.log(`📄 Report saved to: ${outputFile}`);
     }
-    
+
     // Exit with error code if validation failed
     process.exit(isValid ? 0 : 1);
-    
   } catch (error) {
     console.error('❌ Validation failed:', error.message);
     console.error(error.stack);

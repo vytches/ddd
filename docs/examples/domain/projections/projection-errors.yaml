@@ -1,0 +1,496 @@
+# projection-errors - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'projection-errors'
+title: 'Projection Errors - Error Types and Handling'
+description: 'Error classes for projection processing failures'
+business-context: 'Provides structured error handling for projection operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ProjectionError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Base error class for projection-related failures'
+      business-context: 'Standardizes error handling across projection system'
+
+      formats:
+        jsdoc:
+          description: 'Base projection error with context and metadata'
+        cli:
+          description: |
+            ## ProjectionError
+
+            Structured error handling for:
+            - Processing failures
+            - State corruption
+            - Capability errors
+            - Rebuild failures
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'Error'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates projection error with context'
+        business-context: 'Captures error details for debugging and recovery'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+          - name: 'code'
+            type: 'string'
+            description: 'Error code for categorization'
+          - name: 'cause'
+            type: 'Error'
+            description: 'Original error if wrapped'
+            optional: true
+          - name: 'metadata'
+            type: 'Record<string, unknown>'
+            description: 'Additional error context'
+            optional: true
+
+        examples:
+          - id: 'basic-error'
+            code: |
+              throw new ProjectionError(
+                'Failed to apply event',
+                'APPLY_EVENT_FAILED',
+                originalError,
+                { 
+                  projectionName: 'user-projection',
+                  eventType: 'UserCreated',
+                  eventId: event.eventId 
+                }
+              );
+
+  ProjectionProcessingError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown during event processing'
+      business-context: 'Captures event processing failures with full context'
+
+      formats:
+        jsdoc:
+          description: 'Event processing error with event details'
+        cli:
+          description: |
+            ## ProjectionProcessingError
+
+            Processing failure details:
+            - Event information
+            - Projection state
+            - Processing stage
+            - Retry metadata
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ProjectionError'
+
+    # Properties
+    properties:
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Name of failed projection'
+
+      - name: 'event'
+        type: 'IExtendedDomainEvent'
+        description: 'Event that caused failure'
+
+      - name: 'attemptNumber'
+        type: 'number'
+        description: 'Current retry attempt'
+        optional: true
+
+      - name: 'isRetryable'
+        type: 'boolean'
+        description: 'Whether error can be retried'
+        optional: true
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates processing error with event context'
+        business-context: 'Captures complete failure context for recovery'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Projection that failed'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event being processed'
+          - name: 'cause'
+            type: 'Error'
+            description: 'Underlying error'
+          - name: 'metadata'
+            type: 'Record<string, unknown>'
+            description: 'Additional context'
+            optional: true
+
+        examples:
+          - id: 'processing-error'
+            code: |
+              throw new ProjectionProcessingError(
+                'user-projection',
+                event,
+                originalError,
+                {
+                  stage: 'apply',
+                  attemptNumber: 2,
+                  isRetryable: true
+                }
+              );
+
+  ProjectionStateError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error related to projection state management'
+      business-context: 'Handles state persistence and loading failures'
+
+      formats:
+        jsdoc:
+          description: 'State management error for projections'
+        cli:
+          description: |
+            ## ProjectionStateError
+
+            State management failures:
+            - Load failures
+            - Save failures
+            - State corruption
+            - Version conflicts
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ProjectionError'
+
+    # Properties
+    properties:
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Affected projection'
+
+      - name: 'operation'
+        type: "'load' | 'save' | 'delete' | 'reset'"
+        description: 'Failed operation type'
+
+      - name: 'state'
+        type: 'unknown'
+        description: 'State involved in error'
+        optional: true
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates state error with operation context'
+        business-context: 'Captures state operation failures'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Projection name'
+          - name: 'operation'
+            type: "'load' | 'save' | 'delete' | 'reset'"
+            description: 'Operation that failed'
+          - name: 'cause'
+            type: 'Error'
+            description: 'Underlying error'
+          - name: 'state'
+            type: 'unknown'
+            description: 'State if available'
+            optional: true
+
+        examples:
+          - id: 'state-error'
+            code: |
+              throw new ProjectionStateError(
+                'user-projection',
+                'save',
+                dbError,
+                currentState
+              );
+
+  ProjectionRebuildError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error during projection rebuild process'
+      business-context: 'Captures rebuild failures with progress information'
+
+      formats:
+        jsdoc:
+          description: 'Rebuild process error with progress details'
+        cli:
+          description: |
+            ## ProjectionRebuildError
+
+            Rebuild failure information:
+            - Events processed count
+            - Last successful position
+            - Failure point
+            - Recovery options
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ProjectionError'
+
+    # Properties
+    properties:
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Projection being rebuilt'
+
+      - name: 'eventsProcessed'
+        type: 'number'
+        description: 'Events processed before failure'
+
+      - name: 'lastPosition'
+        type: 'number'
+        description: 'Last successful position'
+        optional: true
+
+      - name: 'failedEvent'
+        type: 'IExtendedDomainEvent'
+        description: 'Event that caused failure'
+        optional: true
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates rebuild error with progress'
+        business-context: 'Enables resumable rebuilds after failure'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Projection name'
+          - name: 'eventsProcessed'
+            type: 'number'
+            description: 'Events processed'
+          - name: 'cause'
+            type: 'Error'
+            description: 'Underlying error'
+          - name: 'metadata'
+            type: '{ lastPosition?: number; failedEvent?: IExtendedDomainEvent }'
+            description: 'Rebuild context'
+            optional: true
+
+        examples:
+          - id: 'rebuild-error'
+            code: |
+              throw new ProjectionRebuildError(
+                'user-projection',
+                1500,
+                processingError,
+                {
+                  lastPosition: 1499,
+                  failedEvent: event
+                }
+              );
+
+  ProjectionCapabilityError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error in projection capability execution'
+      business-context: 'Handles capability-specific failures'
+
+      formats:
+        jsdoc:
+          description: 'Capability execution error'
+        cli:
+          description: |
+            ## ProjectionCapabilityError
+
+            Capability failures:
+            - Checkpoint errors
+            - Snapshot errors
+            - Circuit breaker trips
+            - Dead letter failures
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ProjectionError'
+
+    # Properties
+    properties:
+      - name: 'capabilityName'
+        type: 'string'
+        description: 'Failed capability name'
+
+      - name: 'operation'
+        type: 'string'
+        description: 'Failed operation'
+
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Affected projection'
+        optional: true
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates capability error'
+        business-context: 'Captures capability execution failures'
+
+        parameters:
+          - name: 'capabilityName'
+            type: 'string'
+            description: 'Capability that failed'
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation attempted'
+          - name: 'cause'
+            type: 'Error'
+            description: 'Underlying error'
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Projection context'
+            optional: true
+
+        examples:
+          - id: 'capability-error'
+            code: |
+              throw new ProjectionCapabilityError(
+                'CheckpointCapability',
+                'saveCheckpoint',
+                storageError,
+                'user-projection'
+              );
+
+  ProjectionNotFoundError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: "Error when projection doesn't exist"
+      business-context: 'Handles missing projection scenarios'
+
+      formats:
+        jsdoc:
+          description: 'Projection not found error'
+        cli:
+          description: |
+            ## ProjectionNotFoundError
+
+            Missing projection:
+            - Registry lookup failures
+            - Store retrieval failures
+            - Configuration errors
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ProjectionError'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates not found error'
+        business-context: 'Indicates missing projection'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Missing projection name'
+          - name: 'context'
+            type: 'string'
+            description: 'Context where projection was expected'
+            optional: true
+
+        examples:
+          - id: 'not-found'
+            code: |
+              throw new ProjectionNotFoundError(
+                'user-projection',
+                'projection registry'
+              );
+
+# === ERROR FACTORIES ===
+functions:
+  createProjectionError:
+    description: 'Factory for creating typed projection errors'
+    business-context: 'Standardizes error creation with proper typing'
+
+    parameters:
+      - name: 'type'
+        type: "'processing' | 'state' | 'rebuild' | 'capability' | 'notFound'"
+        description: 'Error type to create'
+      - name: 'params'
+        type: 'ErrorParams'
+        description: 'Error parameters'
+
+    returns:
+      type: 'ProjectionError'
+      description: 'Typed projection error'
+
+    examples:
+      - id: 'error-factory'
+        code: |
+          const error = createProjectionError('processing', {
+            projectionName: 'user-projection',
+            event: domainEvent,
+            cause: originalError,
+            metadata: { attemptNumber: 1 }
+          });
+
+  isRetryableError:
+    description: 'Checks if error should be retried'
+    business-context: 'Determines retry strategy for errors'
+
+    parameters:
+      - name: 'error'
+        type: 'Error'
+        description: 'Error to check'
+      - name: 'config'
+        type: 'IProjectionRetryConfig'
+        description: 'Retry configuration'
+
+    returns:
+      type: 'boolean'
+      description: 'True if error is retryable'
+
+    examples:
+      - id: 'retry-check'
+        code: |
+          if (isRetryableError(error, retryConfig)) {
+            // Schedule retry
+            await scheduleRetry(event, attemptNumber + 1);
+          } else {
+            // Send to dead letter queue
+            await deadLetterStore.store(event, error);
+          }

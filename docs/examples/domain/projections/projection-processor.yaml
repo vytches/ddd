@@ -1,0 +1,486 @@
+# projection-processor - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'projection-processor'
+title: 'ProjectionProcessor - Event Processing Orchestrator'
+description: 'Orchestrates event processing across multiple projections'
+business-context: 'Routes events to projections and manages processing lifecycle'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ProjectionProcessor:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Central orchestrator for processing events through multiple projections'
+      business-context: 'Manages event distribution, error handling, and projection coordination'
+
+      formats:
+        jsdoc:
+          description: 'Event processor orchestrating multiple projection engines'
+        cli:
+          description: |
+            ## ProjectionProcessor
+
+            Central event processing hub:
+            - Event routing to projections
+            - Parallel processing support
+            - Error isolation between projections
+            - Batch processing optimization
+            - Progress tracking
+
+      custom-tags:
+        since: '1.0.0'
+        thread-safe: 'false'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates processor with projection engines'
+        business-context: 'Initializes event processing orchestration'
+
+        parameters:
+          - name: 'engines'
+            type: 'IProjectionEngine<any>[]'
+            description: 'Array of projection engines to manage'
+          - name: 'options'
+            type: 'IProcessorOptions'
+            description: 'Processing configuration'
+            optional: true
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const processor = new ProjectionProcessor([
+                userProjectionEngine,
+                orderProjectionEngine,
+                analyticsProjectionEngine
+              ]);
+
+          - id: 'with-options'
+            code: |
+              const processor = new ProjectionProcessor(
+                engines,
+                {
+                  parallel: true,
+                  maxConcurrency: 10,
+                  continueOnError: true,
+                  errorHandler: error => logger.error(error)
+                }
+              );
+
+      addEngine:
+        description: 'Adds a projection engine to the processor'
+        business-context: 'Dynamically extends processing capabilities'
+
+        parameters:
+          - name: 'engine'
+            type: 'IProjectionEngine<any>'
+            description: 'Engine to add'
+
+        returns:
+          type: 'void'
+          description: 'Engine added to processor'
+
+        examples:
+          - id: 'dynamic-addition'
+            code: |
+              const processor = new ProjectionProcessor([]);
+              processor.addEngine(userProjectionEngine);
+              processor.addEngine(orderProjectionEngine);
+
+      removeEngine:
+        description: 'Removes a projection engine from processor'
+        business-context: 'Allows runtime reconfiguration'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Name of projection to remove'
+
+        returns:
+          type: 'boolean'
+          description: 'True if removed, false if not found'
+
+        examples:
+          - id: 'removal'
+            code: |
+              const removed = processor.removeEngine('user-projection');
+              if (removed) {
+                console.log('Projection removed successfully');
+              }
+
+      processEvent:
+        description: 'Processes single event through all relevant projections'
+        business-context: 'Core event distribution and processing'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process'
+
+        returns:
+          type: 'Promise<IProcessingResult>'
+          description: 'Processing result with success/failure details'
+
+        examples:
+          - id: 'single-event'
+            code: |
+              const result = await processor.processEvent(userCreatedEvent);
+
+              console.log(`Processed by ${result.projectionsProcessed.length} projections`);
+              if (result.errors.length > 0) {
+                console.error('Processing errors:', result.errors);
+              }
+
+          - id: 'error-handling'
+            code: |
+              try {
+                const result = await processor.processEvent(event);
+                
+                if (!result.success) {
+                  // Some projections failed
+                  for (const error of result.errors) {
+                    await deadLetterQueue.store(error);
+                  }
+                }
+              } catch (error) {
+                // Catastrophic failure
+                console.error('Processor failed:', error);
+              }
+
+        custom-tags:
+          async: 'true'
+          parallel: 'May process projections in parallel'
+
+      processEvents:
+        description: 'Processes multiple events through projections'
+        business-context: 'Batch processing for efficiency'
+
+        parameters:
+          - name: 'events'
+            type: 'IExtendedDomainEvent[]'
+            description: 'Events to process'
+          - name: 'options'
+            type: 'IBatchOptions'
+            description: 'Batch processing options'
+            optional: true
+
+        returns:
+          type: 'Promise<IBatchProcessingResult>'
+          description: 'Batch processing results'
+
+        examples:
+          - id: 'batch-processing'
+            code: |
+              const result = await processor.processEvents(events, {
+                batchSize: 100,
+                parallel: true,
+                progressCallback: progress => {
+                  console.log(`Processed ${progress.current}/${progress.total}`);
+                }
+              });
+
+              console.log(`Total: ${result.totalEvents}`);
+              console.log(`Succeeded: ${result.successCount}`);
+              console.log(`Failed: ${result.failureCount}`);
+
+        custom-tags:
+          async: 'true'
+          streaming: 'Supports streaming for large batches'
+
+      processEventStream:
+        description: 'Processes stream of events'
+        business-context: 'Handles continuous event streams'
+
+        parameters:
+          - name: 'eventStream'
+            type: 'AsyncIterable<IExtendedDomainEvent>'
+            description: 'Stream of events'
+          - name: 'options'
+            type: 'IStreamOptions'
+            description: 'Stream processing options'
+            optional: true
+
+        returns:
+          type: 'Promise<IStreamProcessingResult>'
+          description: 'Stream processing results'
+
+        examples:
+          - id: 'stream-processing'
+            code: |
+              const stream = eventStore.streamEvents({
+                fromPosition: lastPosition,
+                batchSize: 1000
+              });
+
+              const result = await processor.processEventStream(stream, {
+                checkpoint: async position => {
+                  await saveCheckpoint(position);
+                },
+                onError: async (error, event) => {
+                  await deadLetterQueue.store(event, error);
+                }
+              });
+
+        custom-tags:
+          async: 'true'
+          streaming: 'true'
+          backpressure: 'Handles backpressure'
+
+      rebuild:
+        description: 'Rebuilds all projections from event history'
+        business-context: 'Reconstructs read models from scratch'
+
+        parameters:
+          - name: 'eventStore'
+            type: 'IEventStore'
+            description: 'Event store to read from'
+          - name: 'options'
+            type: 'IRebuildOptions'
+            description: 'Rebuild configuration'
+            optional: true
+
+        returns:
+          type: 'Promise<IRebuildResult>'
+          description: 'Rebuild results'
+
+        examples:
+          - id: 'full-rebuild'
+            code: |
+              const result = await processor.rebuild(eventStore, {
+                resetFirst: true,
+                parallel: false, // Sequential for consistency
+                progressInterval: 1000,
+                onProgress: progress => {
+                  console.log(`Rebuilding: ${progress.percentage}%`);
+                }
+              });
+
+              console.log(`Rebuilt ${result.projectionCount} projections`);
+              console.log(`Processed ${result.totalEvents} events`);
+
+        custom-tags:
+          async: 'true'
+          long-running: 'May take significant time'
+
+      getProjectionStatus:
+        description: 'Gets status of specific projection'
+        business-context: 'Monitors projection health'
+
+        parameters:
+          - name: 'projectionName'
+            type: 'string'
+            description: 'Projection to check'
+
+        returns:
+          type: 'IProjectionStatus | undefined'
+          description: 'Status or undefined if not found'
+
+        examples:
+          - id: 'status-check'
+            code: |
+              const status = processor.getProjectionStatus('user-projection');
+
+              if (status) {
+                console.log(`Events processed: ${status.eventsProcessed}`);
+                console.log(`Last error: ${status.lastError?.message}`);
+                console.log(`Health: ${status.health}`);
+              }
+
+      getAllStatuses:
+        description: 'Gets status of all projections'
+        business-context: 'Overall system health monitoring'
+
+        returns:
+          type: 'Map<string, IProjectionStatus>'
+          description: 'Map of projection statuses'
+
+        examples:
+          - id: 'health-check'
+            code: |
+              const statuses = processor.getAllStatuses();
+
+              for (const [name, status] of statuses) {
+                if (status.health === 'unhealthy') {
+                  console.error(`Projection ${name} is unhealthy`);
+                }
+              }
+
+      reset:
+        description: 'Resets all projections to initial state'
+        business-context: 'Clears all read models for fresh start'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when all projections reset'
+
+        examples:
+          - id: 'reset-all'
+            code: |
+              await processor.reset();
+              console.log('All projections reset to initial state');
+
+        custom-tags:
+          async: 'true'
+          destructive: 'Removes all projection state'
+
+      pause:
+        description: 'Pauses event processing'
+        business-context: 'Temporarily stops processing for maintenance'
+
+        returns:
+          type: 'void'
+          description: 'Processing paused'
+
+        examples:
+          - id: 'pause-processing'
+            code: |
+              processor.pause();
+              console.log('Processing paused');
+
+              // Perform maintenance
+              await performMaintenance();
+
+              processor.resume();
+
+      resume:
+        description: 'Resumes event processing after pause'
+        business-context: 'Continues processing after maintenance'
+
+        returns:
+          type: 'void'
+          description: 'Processing resumed'
+
+        examples:
+          - id: 'resume-processing'
+            code: |
+              processor.resume();
+              console.log('Processing resumed');
+
+# === INTERFACES ===
+interfaces:
+  IProcessorOptions:
+    description: 'Configuration for projection processor'
+    business-context: 'Controls processing behavior'
+
+    properties:
+      - name: 'parallel'
+        type: 'boolean'
+        description: 'Process projections in parallel'
+        optional: true
+
+      - name: 'maxConcurrency'
+        type: 'number'
+        description: 'Maximum parallel projections'
+        optional: true
+
+      - name: 'continueOnError'
+        type: 'boolean'
+        description: 'Continue if projection fails'
+        optional: true
+
+      - name: 'errorHandler'
+        type: '(error: Error, projectionName: string) => void | Promise<void>'
+        description: 'Custom error handler'
+        optional: true
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Processing timeout per event'
+        optional: true
+
+  IProcessingResult:
+    description: 'Result of event processing'
+    business-context: 'Processing outcome details'
+
+    properties:
+      - name: 'success'
+        type: 'boolean'
+        description: 'Overall success status'
+
+      - name: 'event'
+        type: 'IExtendedDomainEvent'
+        description: 'Processed event'
+
+      - name: 'projectionsProcessed'
+        type: 'string[]'
+        description: 'Successfully processed projections'
+
+      - name: 'errors'
+        type: 'IProcessingError[]'
+        description: 'Processing errors'
+
+      - name: 'duration'
+        type: 'number'
+        description: 'Processing time in ms'
+
+  IBatchProcessingResult:
+    description: 'Result of batch processing'
+    business-context: 'Batch processing statistics'
+
+    properties:
+      - name: 'totalEvents'
+        type: 'number'
+        description: 'Total events processed'
+
+      - name: 'successCount'
+        type: 'number'
+        description: 'Successfully processed events'
+
+      - name: 'failureCount'
+        type: 'number'
+        description: 'Failed events'
+
+      - name: 'projectionResults'
+        type: 'Map<string, IProjectionBatchResult>'
+        description: 'Results per projection'
+
+      - name: 'duration'
+        type: 'number'
+        description: 'Total processing time'
+
+  IProjectionStatus:
+    description: 'Status of individual projection'
+    business-context: 'Health and progress tracking'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Projection name'
+
+      - name: 'health'
+        type: "'healthy' | 'degraded' | 'unhealthy'"
+        description: 'Health status'
+
+      - name: 'eventsProcessed'
+        type: 'number'
+        description: 'Total events processed'
+
+      - name: 'lastProcessedAt'
+        type: 'Date'
+        description: 'Last processing time'
+        optional: true
+
+      - name: 'lastError'
+        type: 'Error'
+        description: 'Last error encountered'
+        optional: true
+
+      - name: 'errorCount'
+        type: 'number'
+        description: 'Total error count'
+
+      - name: 'averageProcessingTime'
+        type: 'number'
+        description: 'Average processing time in ms'
+        optional: true

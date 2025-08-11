@@ -1,0 +1,192 @@
+# command-bus.abstract - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'command-bus.abstract'
+title: 'ICommandBus Abstract Class - Command Bus Contract'
+description: 'Abstract base class defining the contract for CQRS command buses'
+business-context: 'Standardizes command bus interface across basic and enhanced implementations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ICommandBus:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class defining the contract for command bus implementations'
+      business-context: 'Ensures consistent API across basic and enhanced command bus implementations'
+
+      formats:
+        jsdoc:
+          description: 'Abstract command bus contract for CQRS implementations'
+        cli:
+          description: |
+            ## ICommandBus Abstract Class
+
+            Standard contract for command bus implementations providing:
+            - Handler registration and factory patterns
+            - Middleware pipeline integration
+            - Auto-discovery capabilities
+            - Type-safe command execution
+
+      custom-tags:
+        abstract: true
+        implementations: 'CommandBus, EnhancedCommandBus'
+
+    # Methods
+    methods:
+      register:
+        description: 'Registers a command handler for a specific command type'
+        business-context: 'Establishes direct mapping between command and its handler instance'
+        abstract: true
+
+        parameters:
+          - name: 'commandType'
+            type: 'CommandConstructor<T>'
+            description: 'Command class constructor'
+          - name: 'handler'
+            type: 'ICommandHandler<T, TResult>'
+            description: 'Handler instance for the command'
+
+        returns:
+          type: 'void'
+          description: 'Registration completes synchronously'
+
+        examples:
+          - id: 'direct-handler-registration'
+            code: |
+              const commandBus = new CommandBus();
+              const createUserHandler = new CreateUserHandler();
+
+              commandBus.register(CreateUserCommand, createUserHandler);
+
+        custom-tags:
+          registration-type: 'Direct instance registration'
+
+      registerFactory:
+        description: 'Registers a factory function for creating command handlers'
+        business-context: 'Enables lazy handler instantiation and dependency injection integration'
+        abstract: true
+
+        parameters:
+          - name: 'commandType'
+            type: 'CommandConstructor<T>'
+            description: 'Command class constructor'
+          - name: 'factory'
+            type: '() => ICommandHandler<T, TResult>'
+            description: 'Factory function returning handler instance'
+
+        returns:
+          type: 'void'
+          description: 'Factory registration completes synchronously'
+
+        examples:
+          - id: 'factory-registration-with-di'
+            code: |
+              const commandBus = new CommandBus();
+
+              commandBus.registerFactory(
+                CreateUserCommand,
+                () => container.resolve<CreateUserHandler>('createUserHandler')
+              );
+
+        custom-tags:
+          registration-type: 'Factory-based registration'
+          di-integration: 'Supports dependency injection patterns'
+
+      use:
+        description: 'Adds middleware to the command bus execution pipeline'
+        business-context: 'Enables cross-cutting concerns like logging, validation, and metrics'
+        abstract: true
+
+        parameters:
+          - name: 'middleware'
+            type: 'ICQRSMiddleware'
+            description: 'Middleware instance to add to the pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Command bus instance for method chaining'
+
+        examples:
+          - id: 'middleware-chaining'
+            code: |
+              const commandBus = new CommandBus()
+                .use(new LoggingMiddleware())
+                .use(new ValidationMiddleware())
+                .use(new MetricsMiddleware());
+
+        custom-tags:
+          chaining: 'Supports fluent interface pattern'
+          pipeline-order: 'Middleware executes in registration order'
+
+      discoverHandlers:
+        description: 'Triggers automatic handler discovery and registration'
+        business-context: 'Scans assemblies for decorated handlers and registers them automatically'
+        abstract: true
+
+        returns:
+          type: 'void'
+          description: 'Discovery process completes synchronously'
+
+        examples:
+          - id: 'handler-discovery'
+            code: |
+              const commandBus = new CommandBus();
+
+              // Discover and register all @CommandHandler decorated classes
+              commandBus.discoverHandlers();
+
+        custom-tags:
+          discovery-mechanism: 'Uses CQRSDiscoveryPlugin'
+          decorator-integration: '@CommandHandler decorated classes'
+
+      execute:
+        description: 'Executes a command through the registered handler with middleware pipeline'
+        business-context: 'Core command processing with full middleware support and error handling'
+        abstract: true
+
+        parameters:
+          - name: 'command'
+            type: 'T extends ICommand'
+            description: 'Command instance to execute'
+
+        returns:
+          type: 'Promise<TResult>'
+          description: 'Handler execution result (void for most commands)'
+
+        examples:
+          - id: 'command-execution'
+            code: |
+              const commandBus = new CommandBus();
+
+              // Execute void command
+              await commandBus.execute(
+                new CreateUserCommand("john@example.com", 25)
+              );
+
+              // Execute command with result
+              const result = await commandBus.execute(
+                new ProcessPaymentCommand(100, "USD")
+              );
+
+        custom-tags:
+          middleware-pipeline: 'Executes through full middleware chain'
+          error-propagation: 'Throws errors from handlers or middleware'
+          type-safety: 'Strongly typed command-result mapping'
+
+        throws:
+          - type: 'HandlerNotFoundError'
+            description: 'When no handler is registered for the command type'
+          - type: 'CommandExecutionError'
+            description: 'When command execution fails'
+          - type: 'CqrsValidationError'
+            description: 'When command validation fails'

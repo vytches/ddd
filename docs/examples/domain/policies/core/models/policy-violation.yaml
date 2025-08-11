@@ -1,0 +1,229 @@
+# policy-violation - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-violation'
+title: 'PolicyViolation - Policy Rule Violations'
+description: 'Represents business policy violations'
+business-context: 'Captures detailed information about policy rule violations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyViolation:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Represents a business policy violation with detailed context'
+      business-context: 'Provides structured information about failed business rules'
+
+      formats:
+        jsdoc:
+          description: 'Policy violation with code, message, severity and context'
+        cli:
+          description: |
+            ## PolicyViolation
+
+            Violation tracking:
+            - Error codes and messages
+            - Severity levels
+            - Field-level violations
+            - Nested violations
+            - Metadata support
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'Error'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates policy violation'
+        business-context: 'Captures violation details'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Violation code'
+          - name: 'message'
+            type: 'string'
+            description: 'Human-readable message'
+          - name: 'severity'
+            type: 'PolicySeverity'
+            description: 'Violation severity'
+            default: 'ERROR'
+          - name: 'field'
+            type: 'string'
+            description: 'Field that violated policy'
+            optional: true
+          - name: 'details'
+            type: 'Record<string, any>'
+            description: 'Additional details'
+            optional: true
+
+        examples:
+          - id: 'basic-violation'
+            code: |
+              const violation = new PolicyViolation(
+                'INVALID_AGE',
+                'User must be at least 18 years old',
+                'ERROR',
+                'age',
+                { actualAge: 16, requiredAge: 18 }
+              );
+
+      static fromSpecification:
+        description: 'Creates violation from specification'
+        business-context: 'Converts specification failures'
+
+        parameters:
+          - name: 'spec'
+            type: 'ISpecification<any>'
+            description: 'Failed specification'
+          - name: 'entity'
+            type: 'any'
+            description: 'Entity that failed'
+
+        returns:
+          type: 'PolicyViolation'
+          description: 'Violation instance'
+
+      static aggregate:
+        description: 'Aggregates multiple violations'
+        business-context: 'Combines related violations'
+
+        parameters:
+          - name: 'violations'
+            type: 'PolicyViolation[]'
+            description: 'Violations to aggregate'
+
+        returns:
+          type: 'PolicyViolation'
+          description: 'Aggregated violation'
+
+      toJSON:
+        description: 'Serializes violation'
+        business-context: 'Exports violation data'
+
+        returns:
+          type: 'ViolationData'
+          description: 'Serialized violation'
+
+      getSeverity:
+        description: 'Returns violation severity'
+        returns:
+          type: 'PolicySeverity'
+
+      getCode:
+        description: 'Returns violation code'
+        returns:
+          type: 'string'
+
+      getField:
+        description: 'Returns affected field'
+        returns:
+          type: 'string | undefined'
+
+      getDetails:
+        description: 'Returns violation details'
+        returns:
+          type: 'Record<string, any>'
+
+  PolicyViolationCollection:
+    class-doc:
+      description: 'Collection of policy violations'
+      business-context: 'Manages multiple violations as a unit'
+
+      custom-tags:
+        since: '1.0.0'
+
+    methods:
+      constructor:
+        description: 'Creates violation collection'
+        parameters:
+          - name: 'violations'
+            type: 'PolicyViolation[]'
+            description: 'Initial violations'
+            default: '[]'
+
+      add:
+        description: 'Adds violation to collection'
+        parameters:
+          - name: 'violation'
+            type: 'PolicyViolation'
+
+      addMany:
+        description: 'Adds multiple violations'
+        parameters:
+          - name: 'violations'
+            type: 'PolicyViolation[]'
+
+      getByField:
+        description: 'Gets violations for field'
+        parameters:
+          - name: 'field'
+            type: 'string'
+        returns: 'PolicyViolation[]'
+
+      getBySeverity:
+        description: 'Gets violations by severity'
+        parameters:
+          - name: 'severity'
+            type: 'PolicySeverity'
+        returns: 'PolicyViolation[]'
+
+      hasErrors:
+        description: 'Checks for error-level violations'
+        returns: 'boolean'
+
+      hasWarnings:
+        description: 'Checks for warning-level violations'
+        returns: 'boolean'
+
+      toArray:
+        description: 'Returns all violations'
+        returns: 'PolicyViolation[]'
+
+      count:
+        description: 'Returns violation count'
+        returns: 'number'
+
+# === TYPES ===
+types:
+  ViolationData:
+    description: 'Serialized violation data'
+    business-context: 'For persistence and transport'
+
+    properties:
+      - name: 'code'
+        type: 'string'
+        description: 'Violation code'
+
+      - name: 'message'
+        type: 'string'
+        description: 'Violation message'
+
+      - name: 'severity'
+        type: 'PolicySeverity'
+        description: 'Violation severity'
+
+      - name: 'field'
+        type: 'string'
+        description: 'Affected field'
+        optional: true
+
+      - name: 'details'
+        type: 'Record<string, any>'
+        description: 'Additional details'
+        optional: true
+
+      - name: 'timestamp'
+        type: 'string'
+        description: 'ISO timestamp'

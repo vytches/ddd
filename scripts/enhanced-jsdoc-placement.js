@@ -24,9 +24,9 @@ class EnhancedJSDocPlacer {
   getPlacementConfig(className, packageName = 'aggregates') {
     const defaults = {
       'placement-strategy': 'separate',
-      'class-documentation': 'enabled', 
+      'class-documentation': 'enabled',
       'constructor-documentation': 'enabled',
-      'content-strategy': 'distinct'
+      'content-strategy': 'distinct',
     };
 
     let config = { ...defaults };
@@ -36,7 +36,7 @@ class EnhancedJSDocPlacer {
       Object.assign(config, this.globalMetadata.jsdoc);
     }
 
-    // Apply package JSDoc configuration  
+    // Apply package JSDoc configuration
     const packageMeta = this.packageMetadata.get(packageName);
     if (packageMeta?.jsdoc) {
       Object.assign(config, packageMeta.jsdoc);
@@ -57,7 +57,7 @@ class EnhancedJSDocPlacer {
   getDocumentationTargets(className, fileContent, config) {
     const hasConstructor = this.classHasConstructor(className, fileContent);
     const strategy = config['placement-strategy'];
-    
+
     const targets = {
       class: false,
       constructor: false,
@@ -65,8 +65,8 @@ class EnhancedJSDocPlacer {
         hasConstructor,
         strategy,
         classDocEnabled: config['class-documentation'] === 'enabled',
-        constructorDocEnabled: config['constructor-documentation'] === 'enabled'
-      }
+        constructorDocEnabled: config['constructor-documentation'] === 'enabled',
+      },
     };
 
     switch (strategy) {
@@ -105,7 +105,7 @@ class EnhancedJSDocPlacer {
       class: targets.class,
       constructor: targets.constructor,
       strategy: strategy,
-      hasConstructor: hasConstructor
+      hasConstructor: hasConstructor,
     });
 
     return targets;
@@ -117,7 +117,7 @@ class EnhancedJSDocPlacer {
   getSmartPlacement(className, fileContent, config) {
     const hasConstructor = this.classHasConstructor(className, fileContent);
     const classMeta = this.getClassMetadata(className);
-    
+
     // Analyze description content to determine if it's constructor-like
     const description = classMeta?.description || '';
     const isConstructorDescription = this.isConstructorLikeDescription(description);
@@ -128,8 +128,8 @@ class EnhancedJSDocPlacer {
       metadata: {
         hasConstructor,
         isConstructorDescription,
-        contentAnalysis: 'smart'
-      }
+        contentAnalysis: 'smart',
+      },
     };
 
     // If description is constructor-like and constructor exists, prefer constructor
@@ -140,7 +140,9 @@ class EnhancedJSDocPlacer {
     } else if (!isConstructorDescription) {
       targets.class = true;
       targets.constructor = hasConstructor;
-      console.log(`  🧠 Smart placement: Class-like content detected, using separate documentation`);
+      console.log(
+        `  🧠 Smart placement: Class-like content detected, using separate documentation`
+      );
     }
 
     return targets;
@@ -156,7 +158,7 @@ class EnhancedJSDocPlacer {
       /initializes?\s+.*(?:aggregate|instance)/,
       /constructs?\s+.*(?:aggregate|instance)/,
       /constructor/,
-      /@param/
+      /@param/,
     ];
 
     return constructorIndicators.some(pattern => pattern.test(lowerDesc));
@@ -185,8 +187,8 @@ class EnhancedJSDocPlacer {
       }
     } else if (target === 'constructor') {
       // Use constructor method metadata
-      const constructorMeta = classMeta.classes?.[className]?.methods?.constructor ||
-                              classMeta.methods?.constructor;
+      const constructorMeta =
+        classMeta.classes?.[className]?.methods?.constructor || classMeta.methods?.constructor;
       if (constructorMeta) {
         metadata = this.resolveMetadata(className, 'constructor');
       } else {
@@ -204,8 +206,13 @@ class EnhancedJSDocPlacer {
    */
   cleanClassMetadata(metadata) {
     const methodSpecificKeys = [
-      'parameters', 'returns', 'throws', 'param-', 'visibility',
-      'internal-api', 'fluent'
+      'parameters',
+      'returns',
+      'throws',
+      'param-',
+      'visibility',
+      'internal-api',
+      'fluent',
     ];
 
     Object.keys(metadata).forEach(key => {
@@ -229,9 +236,9 @@ class EnhancedJSDocPlacer {
       case 'shared':
         // Both get the same content (prefer class metadata)
         const sharedContent = classMetadata || constructorMetadata;
-        return { 
-          classMetadata: sharedContent, 
-          constructorMetadata: sharedContent 
+        return {
+          classMetadata: sharedContent,
+          constructorMetadata: sharedContent,
         };
 
       case 'primary-secondary':
@@ -253,7 +260,7 @@ class EnhancedJSDocPlacer {
   createAbbreviatedMetadata(metadata) {
     return {
       description: `See class documentation for details.`,
-      ...metadata // Keep parameters, returns, etc.
+      ...metadata, // Keep parameters, returns, etc.
     };
   }
 
@@ -263,19 +270,20 @@ class EnhancedJSDocPlacer {
   async processFileWithPlacement(filePath) {
     const content = await fs.readFile(filePath, 'utf-8');
     console.log(`\n🔧 Processing: ${path.relative(this.rootDir, filePath)}`);
-    
+
     let modifiedContent = content;
     let hasChanges = false;
-    
+
     // Extract class name from file
     const classMatches = Array.from(content.matchAll(/export\s+(?:declare\s+)?class\s+(\w+)/g));
-    const className = classMatches.length > 0 ? classMatches[0][1] : this.guessClassNameFromFile(filePath);
-    
+    const className =
+      classMatches.length > 0 ? classMatches[0][1] : this.guessClassNameFromFile(filePath);
+
     if (!className) {
       console.log('⚠️  No class found in file');
       return content;
     }
-    
+
     console.log(`  📋 Detected class: ${className}`);
 
     // Get placement configuration
@@ -284,7 +292,7 @@ class EnhancedJSDocPlacer {
 
     // Determine documentation targets
     const targets = this.getDocumentationTargets(className, content, config);
-    
+
     // Process class documentation
     if (targets.class) {
       const classMetadata = this.getTargetMetadata(className, 'class', config);
@@ -295,11 +303,15 @@ class EnhancedJSDocPlacer {
       }
     }
 
-    // Process constructor documentation  
+    // Process constructor documentation
     if (targets.constructor) {
       const constructorMetadata = this.getTargetMetadata(className, 'constructor', config);
       if (constructorMetadata) {
-        const result = this.injectConstructorDocumentation(modifiedContent, className, constructorMetadata);
+        const result = this.injectConstructorDocumentation(
+          modifiedContent,
+          className,
+          constructorMetadata
+        );
         modifiedContent = result.content;
         hasChanges = hasChanges || result.hasChanges;
       }
@@ -340,9 +352,8 @@ class EnhancedJSDocPlacer {
     } else {
       // Add new JSDoc before class declaration
       const classStart = match.index;
-      newContent = content.substring(0, classStart) + 
-                  newJSDoc + '\n' + 
-                  content.substring(classStart);
+      newContent =
+        content.substring(0, classStart) + newJSDoc + '\n' + content.substring(classStart);
     }
 
     console.log(`  ✅ Injected class documentation for ${className}`);
@@ -367,7 +378,7 @@ class EnhancedJSDocPlacer {
 
     const leadingWhitespace = match[1];
     const newJSDoc = this.buildJSDoc(metadata, 'constructor', className);
-    
+
     // Format JSDoc with proper indentation
     const formattedJSDoc = newJSDoc
       .split('\n')
@@ -379,15 +390,18 @@ class EnhancedJSDocPlacer {
     if (match[2]) {
       // Replace existing JSDoc
       const existingJSDoc = match[2];
-      newContent = content.replace(match[0], 
-        leadingWhitespace + formattedJSDoc + '\n' + 
-        leadingWhitespace + 'constructor' + match[0].substring(match[0].lastIndexOf('constructor') + 11)
+      newContent = content.replace(
+        match[0],
+        leadingWhitespace +
+          formattedJSDoc +
+          '\n' +
+          leadingWhitespace +
+          'constructor' +
+          match[0].substring(match[0].lastIndexOf('constructor') + 11)
       );
     } else {
       // Add new JSDoc before constructor
-      newContent = content.replace(match[0], 
-        formattedJSDoc + '\n' + match[0]
-      );
+      newContent = content.replace(match[0], formattedJSDoc + '\n' + match[0]);
     }
 
     console.log(`  ✅ Injected constructor documentation for ${className}`);
@@ -400,10 +414,10 @@ class EnhancedJSDocPlacer {
       `export\\s+(?:declare\\s+)?class\\s+${className}[^{]*\\{([\\s\\S]*?)\\}\\s*(?:export|$)`,
       'm'
     );
-    
+
     const classMatch = classRegex.exec(fileContent);
     if (!classMatch) return false;
-    
+
     const classBody = classMatch[1];
     return /constructor\s*\(/.test(classBody);
   }
@@ -424,7 +438,7 @@ class EnhancedJSDocPlacer {
   // Include existing metadata loading and resolution methods
   async loadHierarchicalMetadata() {
     console.log('📂 Loading enhanced hierarchical metadata...');
-    
+
     // Load global metadata
     this.globalMetadata = await this.loadYamlFile(
       path.join(this.rootDir, 'docs', 'global-settings.yaml')
@@ -471,16 +485,16 @@ class EnhancedJSDocPlacer {
   resolveMetadata(className, methodName, packageName = 'aggregates') {
     // Simplified version - include full implementation from original script
     const resolved = {};
-    
+
     if (this.globalMetadata) {
       Object.assign(resolved, this.globalMetadata);
     }
-    
+
     const packageMeta = this.packageMetadata.get(packageName);
     if (packageMeta) {
       Object.assign(resolved, packageMeta);
     }
-    
+
     const classMeta = this.classMetadata.get(className.toLowerCase());
     if (classMeta) {
       if (methodName && classMeta.classes?.[className]?.methods?.[methodName]) {
@@ -497,12 +511,12 @@ class EnhancedJSDocPlacer {
 
   buildJSDoc(metadata, methodName = null, className = null) {
     const lines = ['/**'];
-    
+
     // Build JSDoc from metadata (simplified version)
     if (metadata.description) {
       lines.push(` * ${metadata.description}`);
     }
-    
+
     if (metadata['business-context']) {
       lines.push(` * @businessContext ${metadata['business-context']}`);
     }
@@ -547,33 +561,33 @@ async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
   const packageName = args.find(arg => arg.startsWith('--package='))?.split('=')[1] || 'aggregates';
-  
+
   console.log('🚀 Enhanced YAML JSDoc Injection with Flexible Placement');
   console.log('========================================================');
   console.log(`Package: ${packageName}`);
   console.log(`Dry run: ${dryRun}`);
-  
+
   const placer = new EnhancedJSDocPlacer(process.cwd());
-  
+
   try {
     await placer.loadHierarchicalMetadata();
-    
+
     // Process files with enhanced placement strategy
     const pattern = path.join(process.cwd(), 'packages', packageName, 'dist', '**', '*.d.ts');
     const files = globSync(pattern);
-    
+
     console.log(`Found ${files.length} .d.ts files`);
-    
+
     for (const file of files) {
       const processedContent = await placer.processFileWithPlacement(file);
-      
+
       if (!dryRun) {
         await fs.writeFile(file, processedContent);
       } else {
         console.log(`🔍 Dry run - would write to: ${file}`);
       }
     }
-    
+
     console.log('\n✅ Enhanced injection completed successfully!');
   } catch (error) {
     console.error('\n❌ Error:', error.message);

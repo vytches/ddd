@@ -1,0 +1,217 @@
+# IQueryBus - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'query-bus-abstract'
+title: 'IQueryBus - Abstract Query Bus Contract'
+description: 'Abstract base class defining the query bus interface for CQRS architecture'
+business-context: 'Core CQRS contract for query dispatching with type safety and middleware support'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  IQueryBus:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract query bus defining the contract for query dispatching in CQRS'
+      business-context: 'Base interface ensuring type-safe query handling with middleware support'
+
+      formats:
+        jsdoc:
+          description: 'Abstract query bus with handler registration and middleware support'
+        cli:
+          description: |
+            ## IQueryBus Abstract Class
+            Core CQRS component defining the query bus contract:
+            - Type-safe query handler registration
+            - Middleware pipeline integration
+            - Automatic handler discovery
+            - Generic query execution with return types
+
+    # Methods
+    methods:
+      register:
+        description: 'Registers query handler for specific query type'
+        business-context: 'Associate query types with their handlers for dispatching'
+
+        parameters:
+          - name: 'queryType'
+            type: 'QueryConstructor<T, R>'
+            description: 'Query constructor function for type association'
+          - name: 'handler'
+            type: 'IQueryHandler<T, R>'
+            description: 'Handler instance that processes the query'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'basic-registration'
+            code: |
+              class GetUserQuery implements IQuery<User> {
+                constructor(public readonly userId: string) {}
+              }
+
+              class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
+                async execute(query: GetUserQuery): Promise<User> {
+                  return await userRepository.findById(query.userId);
+                }
+              }
+
+              queryBus.register(GetUserQuery, new GetUserHandler());
+
+        custom-tags:
+          generic-constraints: 'T extends IQuery<R>, R = unknown'
+          handler-binding: 'Links query type to handler implementation'
+
+      registerFactory:
+        description: 'Registers query handler factory for lazy instantiation'
+        business-context: 'Enable dependency injection and lazy handler creation'
+
+        parameters:
+          - name: 'queryType'
+            type: 'QueryConstructor<T, R>'
+            description: 'Query constructor function for type association'
+          - name: 'factory'
+            type: '() => IQueryHandler<T, R>'
+            description: 'Factory function that creates handler instance'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'factory-registration'
+            code: |
+              queryBus.registerFactory(
+                GetOrdersQuery,
+                () => new GetOrdersHandler(orderRepository, userService)
+              );
+
+          - id: 'di-factory'
+            code: |
+              queryBus.registerFactory(
+                GetAnalyticsQuery,
+                () => container.resolve<GetAnalyticsHandler>('analyticsHandler')
+              );
+
+        custom-tags:
+          generic-constraints: 'T extends IQuery<R>, R = unknown'
+          dependency-injection: 'Supports DI container integration'
+          lazy-loading: 'Handler created only when needed'
+
+      use:
+        description: 'Adds middleware to query execution pipeline'
+        business-context: 'Enable cross-cutting concerns like caching, logging, validation'
+
+        parameters:
+          - name: 'middleware'
+            type: 'ICQRSMiddleware'
+            description: 'Middleware component for query processing pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Query bus instance for method chaining'
+
+        examples:
+          - id: 'caching-middleware'
+            code: |
+              const cachingMiddleware = new QueryCachingMiddleware();
+              queryBus.use(cachingMiddleware);
+
+          - id: 'middleware-chain'
+            code: |
+              queryBus
+                .use(new LoggingMiddleware())
+                .use(new ValidationMiddleware())
+                .use(new CachingMiddleware());
+
+        custom-tags:
+          fluent-interface: 'Returns this for method chaining'
+          pipeline-pattern: 'Middleware executes in registration order'
+
+      discoverHandlers:
+        description: 'Automatically discovers and registers query handlers'
+        business-context: 'Scan application for handlers using reflection or DI metadata'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'auto-discovery'
+            code: |
+              @QueryHandler(GetUserQuery)
+              class GetUserHandler {
+                async execute(query: GetUserQuery): Promise<User> {
+                  return await this.userService.findById(query.userId);
+                }
+              }
+
+              // Discovers all @QueryHandler decorated classes
+              queryBus.discoverHandlers();
+
+        custom-tags:
+          reflection: 'Uses metadata for handler discovery'
+          decorator-integration: 'Works with @QueryHandler decorator'
+
+      execute:
+        description: 'Executes query through registered handler with middleware pipeline'
+        business-context: 'Core query dispatching with type safety and middleware processing'
+
+        parameters:
+          - name: 'query'
+            type: 'T extends IQuery<R>'
+            description: 'Query instance to execute'
+
+        returns:
+          type: 'Promise<R>'
+          description: 'Query result from handler execution'
+
+        throws:
+          - type: 'HandlerNotFoundError'
+            description: 'When no handler is registered for query type'
+          - type: 'CQRSValidationError'
+            description: 'When query validation fails'
+
+        examples:
+          - id: 'basic-execution'
+            code: |
+              const query = new GetUserQuery('user-123');
+              const user = await queryBus.execute(query);
+              console.log('Retrieved user:', user.name);
+
+          - id: 'complex-query'
+            code: |
+              const query = new GetOrdersByDateQuery(
+                new Date('2023-01-01'),
+                new Date('2023-12-31')
+              );
+              const orders = await queryBus.execute(query);
+
+        custom-tags:
+          generic-constraints: 'T extends IQuery<R>, R = unknown'
+          type-safety: 'Compile-time type checking for query/result pairs'
+          middleware: 'Executes through middleware pipeline'
+          validation: 'Supports ICqrsValidatable queries'
+
+# === TYPES ===
+types:
+  QueryConstructor:
+    description: 'Constructor function type for query classes'
+    business-context: 'Type constraint ensuring proper query instantiation'
+
+    definition: 'new (...args: unknown[]) => T'
+
+    custom-tags:
+      generic-constraints: 'T extends IQuery<R>, R = unknown'
+      constructor-pattern: 'Ensures new() operator compatibility'

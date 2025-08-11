@@ -2,10 +2,7 @@
  * JSDoc-specific adapter for example injection
  */
 
-import type {
-  LayerType,
-  ComplexityLevel,
-} from '../types';
+import type { LayerType, ComplexityLevel } from '../types';
 import type { IJSDocAdapter } from '../interfaces';
 import { ExampleEngine } from '../engine';
 import { EnhancedJSDocAdapter } from './enhanced-jsdoc-adapter';
@@ -32,10 +29,7 @@ export class JSDocAdapter implements IJSDocAdapter {
   /**
    * Get description for method from example files
    */
-  async getDescriptionForMethod(
-    methodName: string,
-    packageName: string
-  ): Promise<string> {
+  async getDescriptionForMethod(methodName: string, packageName: string): Promise<string> {
     try {
       console.log(`[jsdoc-adapter] Looking for description: ${methodName} in ${packageName}`);
 
@@ -54,7 +48,9 @@ export class JSDocAdapter implements IJSDocAdapter {
         return `${methodName} method implementation`;
       }
 
-      console.log(`[jsdoc-adapter] Found description for ${methodName}: ${description.substring(0, 100)}...`);
+      console.log(
+        `[jsdoc-adapter] Found description for ${methodName}: ${description.substring(0, 100)}...`
+      );
       return description;
     } catch (error) {
       console.warn(`Failed to get description for ${methodName}:`, error);
@@ -65,10 +61,7 @@ export class JSDocAdapter implements IJSDocAdapter {
   /**
    * Get business context for method from example files
    */
-  async getBusinessContextForMethod(
-    methodName: string,
-    packageName: string
-  ): Promise<string> {
+  async getBusinessContextForMethod(methodName: string, packageName: string): Promise<string> {
     try {
       console.log(`[jsdoc-adapter] Looking for business context: ${methodName} in ${packageName}`);
 
@@ -87,7 +80,9 @@ export class JSDocAdapter implements IJSDocAdapter {
         return `Business logic implementation for ${methodName}`;
       }
 
-      console.log(`[jsdoc-adapter] Found business context for ${methodName}: ${businessContext.substring(0, 100)}...`);
+      console.log(
+        `[jsdoc-adapter] Found business context for ${methodName}: ${businessContext.substring(0, 100)}...`
+      );
       return businessContext;
     } catch (error) {
       console.warn(`Failed to get business context for ${methodName}:`, error);
@@ -107,65 +102,83 @@ export class JSDocAdapter implements IJSDocAdapter {
       console.log(`[jsdoc-adapter] Looking for enhanced metadata: ${methodName} in ${packageName}`);
 
       // Find example file for method
-      console.log(`[jsdoc-adapter] Searching for example file for method: ${methodName} in package: ${packageName}`);
+      console.log(
+        `[jsdoc-adapter] Searching for example file for method: ${methodName} in package: ${packageName}`
+      );
       const exampleFile = await this.engine.findExampleFileForMethod(methodName, packageName);
 
       // FALLBACK: For aggregates package AggregateRoot methods with hardcoded metadata
       if (!exampleFile && packageName === 'aggregates') {
-        console.log(`[jsdoc-adapter] No file found via engine, using hardcoded metadata for aggregates package`);
+        console.log(
+          `[jsdoc-adapter] No file found via engine, using hardcoded metadata for aggregates package`
+        );
 
         // Direct metadata for known AggregateRoot methods
         const aggregateRootMetadata: Record<string, any> = {
           getId: {
-            description: 'Get the aggregate\'s unique identifier',
-            'business-context': 'Used by repositories and event stores for aggregate identification',
-            example: '@example\n * ```typescript\n * // Get the aggregate\'s unique identifier\n * const order = new OrderAggregate({ id: orderId, version: 0 });\n * const aggregateId = order.getId();\n * // Returns: EntityId<TId> instance for aggregate identification\n * ```',
+            description: "Get the aggregate's unique identifier",
+            'business-context':
+              'Used by repositories and event stores for aggregate identification',
+            example:
+              "@example\n * ```typescript\n * // Get the aggregate's unique identifier\n * const order = new OrderAggregate({ id: orderId, version: 0 });\n * const aggregateId = order.getId();\n * // Returns: EntityId<TId> instance for aggregate identification\n * ```",
             author: 'DDD Team',
-            since: '1.0.0'
+            since: '1.0.0',
           },
           getVersion: {
             description: 'Get the current version number of the aggregate',
             'business-context': 'Used for optimistic concurrency control in repositories',
-            example: '@example\n * ```typescript\n * // Get current aggregate version for concurrency control\n * const order = new OrderAggregate({ id: orderId, version: 5 });\n * const currentVersion = order.getVersion();\n * // Returns: 5 (number) for version tracking\n * ```',
+            example:
+              '@example\n * ```typescript\n * // Get current aggregate version for concurrency control\n * const order = new OrderAggregate({ id: orderId, version: 5 });\n * const currentVersion = order.getVersion();\n * // Returns: 5 (number) for version tracking\n * ```',
             author: 'DDD Team',
-            since: '1.0.0'
+            since: '1.0.0',
           },
           hasChanges: {
             description: 'Check if aggregate has uncommitted domain events',
             'business-context': 'Performance optimization for conditional saves',
-            example: '@example\n * ```typescript\n * // Check for changes before expensive save operation\n * const order = await repository.findById(orderId);\n * order.updateStatus(newStatus); // May generate events\n * \n * if (order.hasChanges()) {\n *   await repository.save(order); // Only save when needed\n * }\n * ```',
+            example:
+              '@example\n * ```typescript\n * // Check for changes before expensive save operation\n * const order = await repository.findById(orderId);\n * order.updateStatus(newStatus); // May generate events\n * \n * if (order.hasChanges()) {\n *   await repository.save(order); // Only save when needed\n * }\n * ```',
             author: 'DDD Team',
-            since: '1.0.0'
+            since: '1.0.0',
           },
           getDomainEvents: {
             description: 'Get readonly array of uncommitted domain events',
             'business-context': 'Core part of event sourcing pattern for repositories',
-            example: '@example\n * ```typescript\n * // Get uncommitted events for repository save\n * const order = new OrderAggregate({ id: orderId, version: 0 });\n * order.addItem(itemData); // Generates domain events\n * \n * const events = order.getDomainEvents();\n * // Returns: ReadonlyArray with generated domain events\n * ```',
+            example:
+              '@example\n * ```typescript\n * // Get uncommitted events for repository save\n * const order = new OrderAggregate({ id: orderId, version: 0 });\n * order.addItem(itemData); // Generates domain events\n * \n * const events = order.getDomainEvents();\n * // Returns: ReadonlyArray with generated domain events\n * ```',
             author: 'DDD Team',
-            since: '1.0.0'
+            since: '1.0.0',
           },
           commit: {
             description: 'Clear uncommitted domain events after successful persistence',
             'business-context': 'Called by repositories after successful event persistence',
-            example: '@example\n * ```typescript\n * // Commit events after successful repository save\n * const order = new OrderAggregate({ id: orderId, version: 0 });\n * order.addItem(itemData); // Generates events\n * \n * await repository.save(order); // Persists events\n * order.commit(); // Clears uncommitted events\n * ```',
+            example:
+              '@example\n * ```typescript\n * // Commit events after successful repository save\n * const order = new OrderAggregate({ id: orderId, version: 0 });\n * order.addItem(itemData); // Generates events\n * \n * await repository.save(order); // Persists events\n * order.commit(); // Clears uncommitted events\n * ```',
             author: 'DDD Team',
-            since: '1.0.0'
-          }
+            since: '1.0.0',
+          },
         };
 
         const methodMetadata = aggregateRootMetadata[methodName];
         if (methodMetadata) {
-          console.log(`[jsdoc-adapter] Using hardcoded metadata for AggregateRoot method: ${methodName}`);
-          console.log(`[jsdoc-adapter] Hardcoded metadata keys: ${Object.keys(methodMetadata).join(', ')}`);
+          console.log(
+            `[jsdoc-adapter] Using hardcoded metadata for AggregateRoot method: ${methodName}`
+          );
+          console.log(
+            `[jsdoc-adapter] Hardcoded metadata keys: ${Object.keys(methodMetadata).join(', ')}`
+          );
           return methodMetadata;
         }
       }
 
       if (!exampleFile) {
-        console.log(`[jsdoc-adapter] No file found for ${methodName}, cannot get enhanced metadata`);
+        console.log(
+          `[jsdoc-adapter] No file found for ${methodName}, cannot get enhanced metadata`
+        );
         return null;
       }
-      console.log(`[jsdoc-adapter] Found example file: ${exampleFile.filePath} for method: ${methodName}`);
+      console.log(
+        `[jsdoc-adapter] Found example file: ${exampleFile.filePath} for method: ${methodName}`
+      );
 
       // Use Engine's enhanced method to get metadata with global settings hierarchy
       // Try different complexity levels in priority order
@@ -182,7 +195,9 @@ export class JSDocAdapter implements IJSDocAdapter {
           'jsdoc'
         );
         if (block) {
-          console.log(`[jsdoc-adapter] Found enhanced block for ${methodName} at complexity: ${complexity}`);
+          console.log(
+            `[jsdoc-adapter] Found enhanced block for ${methodName} at complexity: ${complexity}`
+          );
           break;
         }
       }
@@ -192,7 +207,10 @@ export class JSDocAdapter implements IJSDocAdapter {
         return null;
       }
 
-      console.log(`[jsdoc-adapter] Found enhanced metadata for ${methodName}:`, Object.keys(block.metadata));
+      console.log(
+        `[jsdoc-adapter] Found enhanced metadata for ${methodName}:`,
+        Object.keys(block.metadata)
+      );
       return block.metadata;
     } catch (error) {
       console.warn(`Failed to get enhanced metadata for ${methodName}:`, error);
@@ -207,7 +225,9 @@ export class JSDocAdapter implements IJSDocAdapter {
     complexity: ComplexityLevel = 'basic'
   ): Promise<string> {
     try {
-      console.log(`[jsdoc-adapter] Looking for example: ${methodName} in ${packageName} (${layer}:${complexity})`);
+      console.log(
+        `[jsdoc-adapter] Looking for example: ${methodName} in ${packageName} (${layer}:${complexity})`
+      );
       const example = await this.engine.getBestExampleForMethod(
         methodName,
         packageName,
@@ -220,7 +240,9 @@ export class JSDocAdapter implements IJSDocAdapter {
         return this.createFallbackExample(methodName, layer);
       }
 
-      console.log(`[jsdoc-adapter] Found example for ${methodName}: ${example.content.substring(0, 100)}...`);
+      console.log(
+        `[jsdoc-adapter] Found example for ${methodName}: ${example.content.substring(0, 100)}...`
+      );
       return this.engine.formatOutput(example.content, 'jsdoc');
     } catch (error) {
       console.warn(`Failed to get example for ${methodName}:`, error);
@@ -231,8 +253,17 @@ export class JSDocAdapter implements IJSDocAdapter {
   /**
    * Auto-inject all available metadata from Enhanced Metadata System for a method
    */
-  private async injectAllEnhancedMetadata(code: string, methodName: string, packageName: string, filePath: string): Promise<string> {
-    const enhancedMetadata = await this.getEnhancedMetadataForMethod(methodName, packageName, filePath);
+  private async injectAllEnhancedMetadata(
+    code: string,
+    methodName: string,
+    packageName: string,
+    filePath: string
+  ): Promise<string> {
+    const enhancedMetadata = await this.getEnhancedMetadataForMethod(
+      methodName,
+      packageName,
+      filePath
+    );
 
     if (!enhancedMetadata || Object.keys(enhancedMetadata).length === 0) {
       return code; // No enhanced metadata available
@@ -328,7 +359,9 @@ export class JSDocAdapter implements IJSDocAdapter {
    */
   async processEnhancedBlocks(filePath: string, methodName: string): Promise<string | null> {
     try {
-      console.log(`[processEnhancedBlocks] Starting for method: ${methodName} in file: ${filePath}`);
+      console.log(
+        `[processEnhancedBlocks] Starting for method: ${methodName} in file: ${filePath}`
+      );
 
       // Extract package name from file path
       const packageName = this.extractPackageFromPath(filePath);
@@ -336,48 +369,72 @@ export class JSDocAdapter implements IJSDocAdapter {
 
       // Add timeout to prevent hanging
       const timeoutPromise = new Promise<null>((_, reject) => {
-        setTimeout(() => reject(new Error('findExampleFileForMethod timed out after 5 seconds')), 5000);
+        setTimeout(
+          () => reject(new Error('findExampleFileForMethod timed out after 5 seconds')),
+          5000
+        );
       });
 
       // Read file content for extraction
-      console.log(`[processEnhancedBlocks] STEP 1: Calling findExampleFileForMethod for ${methodName} in package ${packageName}`);
+      console.log(
+        `[processEnhancedBlocks] STEP 1: Calling findExampleFileForMethod for ${methodName} in package ${packageName}`
+      );
 
       let exampleFile;
       try {
         exampleFile = await Promise.race([
           this.engine.findExampleFileForMethod(methodName, packageName),
-          timeoutPromise
+          timeoutPromise,
         ]);
       } catch (timeoutError) {
-        console.error(`[processEnhancedBlocks] TIMEOUT: findExampleFileForMethod took too long for ${methodName}:`, timeoutError);
+        console.error(
+          `[processEnhancedBlocks] TIMEOUT: findExampleFileForMethod took too long for ${methodName}:`,
+          timeoutError
+        );
         return null;
       }
 
-      console.log(`[processEnhancedBlocks] STEP 2: findExampleFileForMethod returned: ${exampleFile ? 'FILE FOUND' : 'NULL'}`);
+      console.log(
+        `[processEnhancedBlocks] STEP 2: findExampleFileForMethod returned: ${exampleFile ? 'FILE FOUND' : 'NULL'}`
+      );
 
       if (!exampleFile) {
-        console.log(`[processEnhancedBlocks] No example file found for ${methodName}, returning null`);
+        console.log(
+          `[processEnhancedBlocks] No example file found for ${methodName}, returning null`
+        );
         return null;
       }
 
       // Extract blocks using enhanced system
       console.log(`[processEnhancedBlocks] STEP 3: Calling extractAllBlocks`);
-      const blocks = await this.enhancedTagExtractor.extractAllBlocks(exampleFile.content, exampleFile.filePath, 'jsdoc');
-      console.log(`[processEnhancedBlocks] STEP 4: extractAllBlocks returned ${blocks.length} blocks`);
+      const blocks = await this.enhancedTagExtractor.extractAllBlocks(
+        exampleFile.content,
+        exampleFile.filePath,
+        'jsdoc'
+      );
+      console.log(
+        `[processEnhancedBlocks] STEP 4: extractAllBlocks returned ${blocks.length} blocks`
+      );
 
       // Find blocks for this method
       const methodBlocks = blocks.filter(block => block.target === methodName);
-      console.log(`[processEnhancedBlocks] STEP 5: Found ${methodBlocks.length} blocks for method ${methodName}`);
+      console.log(
+        `[processEnhancedBlocks] STEP 5: Found ${methodBlocks.length} blocks for method ${methodName}`
+      );
 
       if (methodBlocks.length === 0) {
-        console.log(`[processEnhancedBlocks] No blocks found for method ${methodName}, returning null`);
+        console.log(
+          `[processEnhancedBlocks] No blocks found for method ${methodName}, returning null`
+        );
         return null;
       }
 
       // Use enhanced adapter to format but strip JSDoc markers since we're inserting into existing JSDoc
       console.log(`[processEnhancedBlocks] STEP 6: Calling generateJSDocComment`);
       const fullJSDoc = this.enhancedAdapter.generateJSDocComment(methodBlocks, '  ');
-      console.log(`[processEnhancedBlocks] STEP 7: generateJSDocComment returned: ${fullJSDoc ? 'CONTENT' : 'NULL'}`);
+      console.log(
+        `[processEnhancedBlocks] STEP 7: generateJSDocComment returned: ${fullJSDoc ? 'CONTENT' : 'NULL'}`
+      );
 
       if (!fullJSDoc) {
         return null;
@@ -388,14 +445,20 @@ export class JSDocAdapter implements IJSDocAdapter {
       const contentLines = lines
         .filter(line => !line.trim().startsWith('/**') && !line.trim().endsWith('*/'))
         .map(line => line.replace(/^\s*\*\s?/, '')); // Remove leading "* " from each line
-      
+
       const result = contentLines.join('\n   * '); // Add JSDoc formatting for content lines
       console.log(`[processEnhancedBlocks] STEP 8: Stripped JSDoc markers, returning content only`);
 
       return result;
     } catch (error) {
-      console.error(`[processEnhancedBlocks] ERROR processing enhanced blocks for ${methodName}:`, error);
-      console.error(`[processEnhancedBlocks] Stack:`, error instanceof Error ? error.stack : 'No stack');
+      console.error(
+        `[processEnhancedBlocks] ERROR processing enhanced blocks for ${methodName}:`,
+        error
+      );
+      console.error(
+        `[processEnhancedBlocks] Stack:`,
+        error instanceof Error ? error.stack : 'No stack'
+      );
       return null;
     }
   }
@@ -425,38 +488,48 @@ export class JSDocAdapter implements IJSDocAdapter {
       console.log(`[jsdoc-adapter] Processing directives in reverse order`);
 
       let processedCode = code;
-      
+
       // CRITICAL: Track what metadata has been injected per method to prevent duplicates
       const injectedMetadataPerMethod = new Map<string, Set<string>>();
 
       // Process each directive individually (from end to beginning)
       for (let i = 0; i < directives.length; i++) {
         const directive = directives[i]!;
-        console.log(`[jsdoc-adapter] ============= STARTING LOOP ITERATION ${i + 1}/${directives.length} =============`);
-        console.log(`[jsdoc-adapter] Processing directive ${i + 1}/${directives.length} at position ${directive.position}: ${directive.directive}`);
+        console.log(
+          `[jsdoc-adapter] ============= STARTING LOOP ITERATION ${i + 1}/${directives.length} =============`
+        );
+        console.log(
+          `[jsdoc-adapter] Processing directive ${i + 1}/${directives.length} at position ${directive.position}: ${directive.directive}`
+        );
 
         // Check if this directive is for a class or method
         const isClass = this.isClassDeclaration(processedCode, directive.position);
-        console.log(`[jsdoc-adapter] Is class declaration: ${isClass} for directive: ${directive.directive}`);
+        console.log(
+          `[jsdoc-adapter] Is class declaration: ${isClass} for directive: ${directive.directive}`
+        );
 
         if (isClass) {
           // Handle class-level directives with global metadata
           console.log(`[jsdoc-adapter] Processing class directive: ${directive.directive}`);
           const packageName = this.extractPackageFromPath(filePath);
           const className = this.extractClassNameFromContext(processedCode, directive.position);
-          
+
           if (className) {
             console.log(`[jsdoc-adapter] Found class name: ${className}`);
-            const globalMetadata = await this.getGlobalMetadataForClass(className, packageName, filePath);
-            
+            const globalMetadata = await this.getGlobalMetadataForClass(
+              className,
+              packageName,
+              filePath
+            );
+
             if (globalMetadata && globalMetadata[directive.type]) {
               const metadataValue = globalMetadata[directive.type];
               const tagName = this.getJSDocTagName(directive.type);
-              
+
               // ENHANCED FIX: Check ENTIRE processed code for duplicates at class level
               const beforeDirective = processedCode.substring(0, directive.position);
               const expectedTagContent = `${tagName} ${metadataValue}`;
-              
+
               // ENHANCED: Check for MANY duplicate patterns at class level
               const duplicatePatterns = [
                 expectedTagContent, // Standard pattern
@@ -468,22 +541,26 @@ export class JSDocAdapter implements IJSDocAdapter {
                 `* @business Foundation for implementing aggregate pattern`, // JSDoc formatted
                 `* @business @business Foundation for implementing aggregate pattern`, // JSDoc double
                 `Foundation for implementing aggregate pattern\n  Base class for domain aggregates`, // Content duplication
-                `${metadataValue}\n   * Base class for domain aggregates` // Pattern with newline
+                `${metadataValue}\n   * Base class for domain aggregates`, // Pattern with newline
               ];
-              
+
               let foundClassDuplicate = false;
               for (const pattern of duplicatePatterns) {
                 if (beforeDirective.includes(pattern)) {
-                  console.log(`[jsdoc-adapter] GLOBAL CLASS DUPLICATE DETECTED: Pattern "${pattern}" already exists in processed code for class ${className}`);
+                  console.log(
+                    `[jsdoc-adapter] GLOBAL CLASS DUPLICATE DETECTED: Pattern "${pattern}" already exists in processed code for class ${className}`
+                  );
                   foundClassDuplicate = true;
                   break;
                 }
               }
-              
+
               let cleanedReplacementText;
               if (foundClassDuplicate) {
                 // Skip this directive completely - it's already been processed
-                console.log(`[jsdoc-adapter] Skipping duplicate global metadata: ${tagName} already exists in processed code for class ${className}`);
+                console.log(
+                  `[jsdoc-adapter] Skipping duplicate global metadata: ${tagName} already exists in processed code for class ${className}`
+                );
                 continue;
               } else if (metadataValue && metadataValue.trim().startsWith(tagName)) {
                 // Already formatted, use as-is
@@ -492,18 +569,30 @@ export class JSDocAdapter implements IJSDocAdapter {
                 // Add tag name
                 cleanedReplacementText = `${tagName} ${metadataValue}`;
               }
-              
+
               // Replace the directive with the global metadata
               const afterDirective = processedCode.substring(directive.position);
-              const directiveEndIndex = afterDirective.indexOf('\n') !== -1 ? afterDirective.indexOf('\n') : afterDirective.length;
+              const directiveEndIndex =
+                afterDirective.indexOf('\n') !== -1
+                  ? afterDirective.indexOf('\n')
+                  : afterDirective.length;
               const beforeDirectiveLines = beforeDirective.split('\n');
               const beforeWithoutCurrentLine = beforeDirectiveLines.slice(0, -1).join('\n');
               const lineStart = beforeDirectiveLines.length > 1 ? '\n' : '';
               const hasNewline = afterDirective.indexOf('\n') !== -1;
-              const newAfterDirective = afterDirective.substring(directiveEndIndex + (hasNewline ? 1 : 0));
-              
-              processedCode = beforeWithoutCurrentLine + lineStart + cleanedReplacementText + (hasNewline ? '\n' : '') + newAfterDirective;
-              console.log(`[jsdoc-adapter] Replaced class directive ${directive.type} with global metadata: ${metadataValue?.substring(0, 50)}...`);
+              const newAfterDirective = afterDirective.substring(
+                directiveEndIndex + (hasNewline ? 1 : 0)
+              );
+
+              processedCode =
+                beforeWithoutCurrentLine +
+                lineStart +
+                cleanedReplacementText +
+                (hasNewline ? '\n' : '') +
+                newAfterDirective;
+              console.log(
+                `[jsdoc-adapter] Replaced class directive ${directive.type} with global metadata: ${metadataValue?.substring(0, 50)}...`
+              );
               continue;
             }
           }
@@ -511,19 +600,33 @@ export class JSDocAdapter implements IJSDocAdapter {
 
         // Extract method name from CURRENT code context (after previous processing)
         const methodName = this.extractMethodNameFromContext(processedCode, directive.position);
-        console.log(`[jsdoc-adapter] Extracted method name: ${methodName} from directive: ${directive.directive} at position: ${directive.position}`);
+        console.log(
+          `[jsdoc-adapter] Extracted method name: ${methodName} from directive: ${directive.directive} at position: ${directive.position}`
+        );
 
         if (methodName) {
-          console.log(`[jsdoc-adapter] CONTINUE: Processing method ${methodName} from file ${filePath}`);
+          console.log(
+            `[jsdoc-adapter] CONTINUE: Processing method ${methodName} from file ${filePath}`
+          );
           // Try enhanced system first
-          console.log(`[jsdoc-adapter] STEP 1: About to call processEnhancedBlocks for ${methodName}`);
+          console.log(
+            `[jsdoc-adapter] STEP 1: About to call processEnhancedBlocks for ${methodName}`
+          );
           let enhancedContent = null;
           try {
             enhancedContent = await this.processEnhancedBlocks(filePath, methodName);
-            console.log(`[jsdoc-adapter] STEP 2: processEnhancedBlocks returned: ${enhancedContent ? 'CONTENT' : 'NULL'} for ${methodName}`);
+            console.log(
+              `[jsdoc-adapter] STEP 2: processEnhancedBlocks returned: ${enhancedContent ? 'CONTENT' : 'NULL'} for ${methodName}`
+            );
           } catch (error) {
-            console.error(`[jsdoc-adapter] ERROR in processEnhancedBlocks for ${methodName}:`, error);
-            console.error(`[jsdoc-adapter] Stack trace:`, error instanceof Error ? error.stack : 'No stack trace');
+            console.error(
+              `[jsdoc-adapter] ERROR in processEnhancedBlocks for ${methodName}:`,
+              error
+            );
+            console.error(
+              `[jsdoc-adapter] Stack trace:`,
+              error instanceof Error ? error.stack : 'No stack trace'
+            );
             // Continue with null enhancedContent
             enhancedContent = null;
           }
@@ -533,14 +636,24 @@ export class JSDocAdapter implements IJSDocAdapter {
             const beforeDirective = processedCode.substring(0, directive.position);
             const afterDirective = processedCode.substring(directive.position);
 
-            const directiveEndIndex = afterDirective.indexOf('\n') !== -1 ? afterDirective.indexOf('\n') : afterDirective.length;
+            const directiveEndIndex =
+              afterDirective.indexOf('\n') !== -1
+                ? afterDirective.indexOf('\n')
+                : afterDirective.length;
             const beforeDirectiveLines = beforeDirective.split('\n');
             const beforeWithoutCurrentLine = beforeDirectiveLines.slice(0, -1).join('\n');
             const lineStart = beforeDirectiveLines.length > 1 ? '\n' : '';
 
             const hasNewline = afterDirective.indexOf('\n') !== -1;
-            const newAfterDirective = afterDirective.substring(directiveEndIndex + (hasNewline ? 1 : 0));
-            processedCode = beforeWithoutCurrentLine + lineStart + enhancedContent + (hasNewline ? '\n' : '') + newAfterDirective;
+            const newAfterDirective = afterDirective.substring(
+              directiveEndIndex + (hasNewline ? 1 : 0)
+            );
+            processedCode =
+              beforeWithoutCurrentLine +
+              lineStart +
+              enhancedContent +
+              (hasNewline ? '\n' : '') +
+              newAfterDirective;
 
             console.log(`[jsdoc-adapter] Used enhanced content for ${methodName}`);
             continue;
@@ -558,36 +671,50 @@ export class JSDocAdapter implements IJSDocAdapter {
           // Match the directive at the start of the string
           const escapedDirective = directive.directive.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const directiveMatch = afterDirective.match(new RegExp(`^${escapedDirective}`));
-          console.log(`[jsdoc-adapter] Trying to match directive "${directive.directive}" against "${afterDirective.substring(0, 30)}..."`);
-          console.log(`[jsdoc-adapter] Directive match result: ${directiveMatch ? 'FOUND' : 'NOT FOUND'}`);
+          console.log(
+            `[jsdoc-adapter] Trying to match directive "${directive.directive}" against "${afterDirective.substring(0, 30)}..."`
+          );
+          console.log(
+            `[jsdoc-adapter] Directive match result: ${directiveMatch ? 'FOUND' : 'NOT FOUND'}`
+          );
 
           if (directiveMatch) {
             // Try Enhanced Metadata System first (supports global settings hierarchy)
-            let enhancedMetadata = await this.getEnhancedMetadataForMethod(methodName, packageName, filePath);
+            let enhancedMetadata = await this.getEnhancedMetadataForMethod(
+              methodName,
+              packageName,
+              filePath
+            );
             let cleanedReplacementText;
 
             if (enhancedMetadata) {
-              console.log(`[jsdoc-adapter] Enhanced metadata found for ${methodName}, directive: ${directive.type}`);
-              console.log(`[jsdoc-adapter] Available metadata keys: ${Object.keys(enhancedMetadata).join(', ')}`);
+              console.log(
+                `[jsdoc-adapter] Enhanced metadata found for ${methodName}, directive: ${directive.type}`
+              );
+              console.log(
+                `[jsdoc-adapter] Available metadata keys: ${Object.keys(enhancedMetadata).join(', ')}`
+              );
 
               // Build replacement text based on the specific directive type
               const metadataValue = enhancedMetadata[directive.type];
-              console.log(`[jsdoc-adapter] Metadata value for ${directive.type}: ${metadataValue ? 'FOUND' : 'NOT FOUND'}`);
+              console.log(
+                `[jsdoc-adapter] Metadata value for ${directive.type}: ${metadataValue ? 'FOUND' : 'NOT FOUND'}`
+              );
 
               if (metadataValue) {
                 // Get the JSDoc tag name for this directive type
                 const tagName = this.getJSDocTagName(directive.type);
-                
+
                 // CRITICAL FIX: Use method-based tracking to prevent duplicates
                 const methodKey = `${methodName}:${directive.type}`;
-                
+
                 // Check if we've already processed this metadata for this method
                 if (!injectedMetadataPerMethod.has(methodName)) {
                   injectedMetadataPerMethod.set(methodName, new Set());
                 }
-                
+
                 const injectedForMethod = injectedMetadataPerMethod.get(methodName)!;
-                
+
                 // ENHANCED: Check for cross-directive conflicts (both description-inject and business-context-inject can inject business-context)
                 const conflictingKeys = new Set<string>();
                 if (directive.type === 'description' && enhancedMetadata['business-context']) {
@@ -596,33 +723,37 @@ export class JSDocAdapter implements IJSDocAdapter {
                 if (directive.type === 'business-context') {
                   conflictingKeys.add('business-context');
                 }
-                
+
                 // Check if any conflicting metadata has already been injected
                 let hasConflict = false;
                 for (const conflictKey of conflictingKeys) {
                   if (injectedForMethod.has(conflictKey)) {
-                    console.log(`[jsdoc-adapter] METADATA CONFLICT DETECTED: ${conflictKey} already injected for method ${methodName} by previous directive`);
+                    console.log(
+                      `[jsdoc-adapter] METADATA CONFLICT DETECTED: ${conflictKey} already injected for method ${methodName} by previous directive`
+                    );
                     hasConflict = true;
                     break;
                   }
                 }
-                
+
                 if (hasConflict) {
                   // Skip this directive completely - the metadata has already been injected
-                  console.log(`[jsdoc-adapter] Skipping duplicate metadata injection: ${directive.type} conflicts with already injected metadata for method ${methodName}`);
+                  console.log(
+                    `[jsdoc-adapter] Skipping duplicate metadata injection: ${directive.type} conflicts with already injected metadata for method ${methodName}`
+                  );
                   continue;
                 }
-                
+
                 // Mark this metadata as injected
                 injectedForMethod.add(directive.type);
                 for (const conflictKey of conflictingKeys) {
                   injectedForMethod.add(conflictKey);
                 }
-                
+
                 if (directive.type === 'example') {
                   // Special handling for examples (multi-line)
                   const lines = metadataValue?.split('\n');
-                  const adjustedLines = lines?.map((line) => {
+                  const adjustedLines = lines?.map(line => {
                     const cleanLine = line.replace(/^\s*\*?\s*/, '');
                     if (cleanLine.trim() === '') {
                       return '';
@@ -656,16 +787,22 @@ export class JSDocAdapter implements IJSDocAdapter {
 
                 // Note: Global metadata (@author, @since) will be handled by their own specific directives
 
-                console.log(`[jsdoc-adapter] Used Enhanced Metadata for ${directive.type} in ${methodName}: ${metadataValue?.substring(0, 50)}...`);
+                console.log(
+                  `[jsdoc-adapter] Used Enhanced Metadata for ${directive.type} in ${methodName}: ${metadataValue?.substring(0, 50)}...`
+                );
               } else {
-                console.log(`[jsdoc-adapter] No enhanced metadata found for ${directive.type}, using legacy system`);
+                console.log(
+                  `[jsdoc-adapter] No enhanced metadata found for ${directive.type}, using legacy system`
+                );
                 enhancedMetadata = null; // Force fallback
               }
             }
 
             if (!enhancedMetadata || !enhancedMetadata[directive.type]) {
               // Fallback to legacy system for backward compatibility
-              console.log(`[jsdoc-adapter] Enhanced metadata not found for ${directive.type}, using legacy system`);
+              console.log(
+                `[jsdoc-adapter] Enhanced metadata not found for ${directive.type}, using legacy system`
+              );
 
               switch (directive.type) {
                 case 'description': {
@@ -674,14 +811,17 @@ export class JSDocAdapter implements IJSDocAdapter {
                   break;
                 }
                 case 'business-context': {
-                  const businessContext = await this.getBusinessContextForMethod(methodName, packageName);
+                  const businessContext = await this.getBusinessContextForMethod(
+                    methodName,
+                    packageName
+                  );
                   cleanedReplacementText = `@businessContext ${businessContext}`;
                   break;
                 }
                 case 'example': {
                   const exampleText = await this.getExampleForMethod(methodName, packageName);
                   const lines = exampleText.split('\n');
-                  const adjustedLines = lines.map((line) => {
+                  const adjustedLines = lines.map(line => {
                     const cleanLine = line.replace(/^\s*\*?\s*/, '');
                     if (cleanLine.trim() === '') return '';
                     return cleanLine;
@@ -693,16 +833,21 @@ export class JSDocAdapter implements IJSDocAdapter {
                   // For unknown directive types, create a generic JSDoc tag
                   const tagName = this.getJSDocTagName(directive.type);
                   cleanedReplacementText = `${tagName} ${directive.type} method implementation`;
-                  console.log(`[jsdoc-adapter] Unknown directive type: ${directive.type}, using generic fallback`);
+                  console.log(
+                    `[jsdoc-adapter] Unknown directive type: ${directive.type}, using generic fallback`
+                  );
                   break;
                 }
               }
             }
 
             // Find the end of this directive line (including newline)
-            const directiveEndIndex = afterDirective.indexOf('\n') !== -1 ? afterDirective.indexOf('\n') :
-                                      afterDirective.indexOf('\r') !== -1 ? afterDirective.indexOf('\r') :
-                                      afterDirective.length;
+            const directiveEndIndex =
+              afterDirective.indexOf('\n') !== -1
+                ? afterDirective.indexOf('\n')
+                : afterDirective.indexOf('\r') !== -1
+                  ? afterDirective.indexOf('\r')
+                  : afterDirective.length;
 
             // Get the directive text that will be replaced (just the line, not including newline)
             const directiveFullText = afterDirective.substring(0, directiveEndIndex);
@@ -710,39 +855,58 @@ export class JSDocAdapter implements IJSDocAdapter {
             // FIXED: Replace only the directive text, preserve line structure
             const directiveStart = afterDirective.indexOf(directive.directive);
             if (directiveStart === -1) {
-              console.error(`[jsdoc-adapter] ERROR: Directive "${directive.directive}" not found in afterDirective`);
+              console.error(
+                `[jsdoc-adapter] ERROR: Directive "${directive.directive}" not found in afterDirective`
+              );
               continue; // Skip this directive
             }
 
             // Find where the directive starts and ends on its line
             const linePrefix = afterDirective.substring(0, directiveStart); // Everything before directive on the line
-            const afterDirectiveEnd = afterDirective.substring(directiveStart + directive.directive.length); // Everything after directive
+            const afterDirectiveEnd = afterDirective.substring(
+              directiveStart + directive.directive.length
+            ); // Everything after directive
 
             // Find end of current line
             const newlineIndex = afterDirectiveEnd.indexOf('\n');
             const hasNewline = newlineIndex !== -1;
-            const lineSuffix = hasNewline ? afterDirectiveEnd.substring(0, newlineIndex) : afterDirectiveEnd;
+            const lineSuffix = hasNewline
+              ? afterDirectiveEnd.substring(0, newlineIndex)
+              : afterDirectiveEnd;
             const remainingCode = hasNewline ? afterDirectiveEnd.substring(newlineIndex + 1) : '';
 
             // Build the replacement line: prefix + replacement text + suffix
             const replacementLine = linePrefix + cleanedReplacementText + lineSuffix;
 
             // Reconstruct the code
-            processedCode = beforeDirective + replacementLine + (hasNewline ? `\n${  remainingCode}` : '');
+            processedCode =
+              beforeDirective + replacementLine + (hasNewline ? `\n${remainingCode}` : '');
 
-            console.log(`[jsdoc-adapter] REPLACED: "${directive.directive}" -> "${cleanedReplacementText?.substring(0, 50)}..."`);
+            console.log(
+              `[jsdoc-adapter] REPLACED: "${directive.directive}" -> "${cleanedReplacementText?.substring(0, 50)}..."`
+            );
             console.log(`[jsdoc-adapter] Line prefix: "${linePrefix}", suffix: "${lineSuffix}"`);
 
             // Debug: check if replacement was successful
             if (processedCode.includes(directive.directive)) {
-              console.error(`[jsdoc-adapter] ERROR: Directive "${directive.directive}" still exists after replacement!`);
-              console.error(`[jsdoc-adapter] DEBUG: BEFORE replacement (around position ${directive.position}):`);
-              console.error(`[jsdoc-adapter] DEBUG: "${beforeDirective.substring(Math.max(0, beforeDirective.length - 100))}"`);
+              console.error(
+                `[jsdoc-adapter] ERROR: Directive "${directive.directive}" still exists after replacement!`
+              );
+              console.error(
+                `[jsdoc-adapter] DEBUG: BEFORE replacement (around position ${directive.position}):`
+              );
+              console.error(
+                `[jsdoc-adapter] DEBUG: "${beforeDirective.substring(Math.max(0, beforeDirective.length - 100))}"`
+              );
               console.error(`[jsdoc-adapter] DEBUG: AFTER replacement (same area):`);
               const afterPosition = Math.max(0, directive.position - 100);
-              console.error(`[jsdoc-adapter] DEBUG: "${processedCode.substring(afterPosition, afterPosition + 200)}"`);
+              console.error(
+                `[jsdoc-adapter] DEBUG: "${processedCode.substring(afterPosition, afterPosition + 200)}"`
+              );
             } else {
-              console.log(`[jsdoc-adapter] SUCCESS: Directive "${directive.directive}" successfully replaced!`);
+              console.log(
+                `[jsdoc-adapter] SUCCESS: Directive "${directive.directive}" successfully replaced!`
+              );
             }
 
             // Validate that we didn't create duplicate */ tokens
@@ -751,7 +915,9 @@ export class JSDocAdapter implements IJSDocAdapter {
             for (let i = 0; i < lines.length - 1; i++) {
               if (lines?.[i]?.trim() === '*/' && lines?.[i + 1]?.trim() === '*/') {
                 hasMultipleCloseTokens = true;
-                console.error(`[jsdoc-adapter] ERROR: Duplicate */ tokens detected at lines ${i + 1} and ${i + 2}`);
+                console.error(
+                  `[jsdoc-adapter] ERROR: Duplicate */ tokens detected at lines ${i + 1} and ${i + 2}`
+                );
                 console.error(`[jsdoc-adapter] Line ${i + 1}: "${lines[i]}"`);
                 console.error(`[jsdoc-adapter] Line ${i + 2}: "${lines[i + 1]}"`);
                 break;
@@ -760,23 +926,33 @@ export class JSDocAdapter implements IJSDocAdapter {
 
             if (hasMultipleCloseTokens) {
               console.error(`[jsdoc-adapter] ABORTING: Invalid JSDoc structure created`);
-              console.error(`[jsdoc-adapter] ABORT: Processed ${i + 1}/${lines.length} directives before aborting`);
+              console.error(
+                `[jsdoc-adapter] ABORT: Processed ${i + 1}/${lines.length} directives before aborting`
+              );
               return code; // Return original code to prevent syntax errors
             }
 
-            console.log(`[jsdoc-adapter] Replaced directive "${directiveFullText.trim()}" with proper indentation: "${cleanedReplacementText?.trim()}"`);
+            console.log(
+              `[jsdoc-adapter] Replaced directive "${directiveFullText.trim()}" with proper indentation: "${cleanedReplacementText?.trim()}"`
+            );
           } else {
             console.log(`[jsdoc-adapter] No match found for directive: "${directive.directive}"`);
           }
         } else {
-          console.log(`[jsdoc-adapter] No method name extracted for directive: "${directive.directive}" at position: ${directive.position}`);
+          console.log(
+            `[jsdoc-adapter] No method name extracted for directive: "${directive.directive}" at position: ${directive.position}`
+          );
         }
 
         console.log(`[jsdoc-adapter] Completed processing directive ${i + 1}/${directives.length}`);
       }
 
-      console.log(`[jsdoc-adapter] COMPLETED processing all ${directives.length} directives for file: ${filePath}`);
-      console.log(`[jsdoc-adapter] FINAL: About to return processed code with length: ${processedCode.length}`);
+      console.log(
+        `[jsdoc-adapter] COMPLETED processing all ${directives.length} directives for file: ${filePath}`
+      );
+      console.log(
+        `[jsdoc-adapter] FINAL: About to return processed code with length: ${processedCode.length}`
+      );
       return processedCode;
     } catch (error) {
       console.warn(`Failed to process injection directives in ${filePath}:`, error);
@@ -832,7 +1008,9 @@ export class JSDocAdapter implements IJSDocAdapter {
   /**
    * Find all injection directives in code (enhanced to support any metadata key)
    */
-  private findInjectionDirectives(code: string): Array<{ position: number; directive: string; type: string }> {
+  private findInjectionDirectives(
+    code: string
+  ): Array<{ position: number; directive: string; type: string }> {
     const directives: Array<{ position: number; directive: string; type: string }> = [];
 
     // Enhanced pattern to match ANY *-inject directive
@@ -844,19 +1022,31 @@ export class JSDocAdapter implements IJSDocAdapter {
       directives.push({
         position: match.index,
         directive: fullMatch,
-        type: metadataKey ?? 'unknown' // e.g., 'example', 'description', 'business-context', 'since', 'author', etc.
+        type: metadataKey ?? 'unknown', // e.g., 'example', 'description', 'business-context', 'since', 'author', etc.
       });
     }
 
     console.log(`[jsdoc-adapter] DEBUG: Found ${directives.length} total directives`);
-    console.log(`[jsdoc-adapter] DEBUG: First 10 directives:`, directives.slice(0, 10).map(d => `pos:${d.position} ${d.directive}`));
-    console.log(`[jsdoc-adapter] DEBUG: Last 5 directives:`, directives.slice(-5).map(d => `pos:${d.position} ${d.directive}`));
+    console.log(
+      `[jsdoc-adapter] DEBUG: First 10 directives:`,
+      directives.slice(0, 10).map(d => `pos:${d.position} ${d.directive}`)
+    );
+    console.log(
+      `[jsdoc-adapter] DEBUG: Last 5 directives:`,
+      directives.slice(-5).map(d => `pos:${d.position} ${d.directive}`)
+    );
 
     // CRITICAL DEBUG: Check for missing getId/getVersion directives
     const getIdDirectives = directives.filter(d => d.position >= 1160 && d.position <= 1180);
     const getVersionDirectives = directives.filter(d => d.position >= 1370 && d.position <= 1390);
-    console.log(`[jsdoc-adapter] DEBUG: getId area directives (1160-1180):`, getIdDirectives.map(d => `pos:${d.position} ${d.directive}`));
-    console.log(`[jsdoc-adapter] DEBUG: getVersion area directives (1370-1390):`, getVersionDirectives.map(d => `pos:${d.position} ${d.directive}`));
+    console.log(
+      `[jsdoc-adapter] DEBUG: getId area directives (1160-1180):`,
+      getIdDirectives.map(d => `pos:${d.position} ${d.directive}`)
+    );
+    console.log(
+      `[jsdoc-adapter] DEBUG: getVersion area directives (1370-1390):`,
+      getVersionDirectives.map(d => `pos:${d.position} ${d.directive}`)
+    );
 
     return directives;
   }
@@ -868,7 +1058,7 @@ export class JSDocAdapter implements IJSDocAdapter {
     try {
       // Look for class declaration after the JSDoc comment
       const afterPosition = code.substring(position);
-      
+
       // Find the end of JSDoc comment first (look for "*/" pattern)
       const jsDocEndMatch = afterPosition.match(/\*\/\s*/);
       if (!jsDocEndMatch) {
@@ -878,13 +1068,10 @@ export class JSDocAdapter implements IJSDocAdapter {
       // Look only after the JSDoc comment ends
       const jsDocEndIndex = jsDocEndMatch.index ?? 0;
       const afterJSDoc = afterPosition.substring(jsDocEndIndex + jsDocEndMatch[0].length);
-      
+
       // Check if it's a class declaration (limited search area)
       const limitedSearch = afterJSDoc.substring(0, 100);
-      const classPatterns = [
-        /export\s+class\s+\w+/,
-        /class\s+\w+/,
-      ];
+      const classPatterns = [/export\s+class\s+\w+/, /class\s+\w+/];
 
       return classPatterns.some(pattern => pattern.test(limitedSearch));
     } catch (error) {
@@ -896,18 +1083,29 @@ export class JSDocAdapter implements IJSDocAdapter {
   /**
    * Get global metadata for a class from Enhanced Metadata System
    */
-  private async getGlobalMetadataForClass(className: string, packageName: string, filePath: string): Promise<Record<string, string> | null> {
+  private async getGlobalMetadataForClass(
+    className: string,
+    packageName: string,
+    filePath: string
+  ): Promise<Record<string, string> | null> {
     try {
-      console.log(`[jsdoc-adapter] Getting global metadata for class: ${className} in package: ${packageName}`);
-      
+      console.log(
+        `[jsdoc-adapter] Getting global metadata for class: ${className} in package: ${packageName}`
+      );
+
       // Look for the class-specific MD file (e.g., aggregate-root.md)
-      const classFileName = className.toLowerCase().replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-      console.log(`[jsdoc-adapter] Looking for class file: ${classFileName}.md in package: ${packageName}`);
-      
+      const classFileName = className
+        .toLowerCase()
+        .replace(/([a-z])([A-Z])/g, '$1-$2')
+        .toLowerCase();
+      console.log(
+        `[jsdoc-adapter] Looking for class file: ${classFileName}.md in package: ${packageName}`
+      );
+
       // Try to find the class documentation file directly
       const docsPath = `/home/node/projects/vytches-ddd/docs/examples/domain/${packageName}/${classFileName}.md`;
       console.log(`[jsdoc-adapter] Checking direct path: ${docsPath}`);
-      
+
       let classFile;
       try {
         const fs = await import('fs');
@@ -918,20 +1116,27 @@ export class JSDocAdapter implements IJSDocAdapter {
         console.log(`[jsdoc-adapter] Direct path failed, falling back to engine search`);
         classFile = await this.engine.findExampleFileForMethod(classFileName, packageName);
       }
-      
+
       if (!classFile) {
-        console.log(`[jsdoc-adapter] No example file found for class ${className}, trying with exact name`);
+        console.log(
+          `[jsdoc-adapter] No example file found for class ${className}, trying with exact name`
+        );
         return null;
       }
 
       // Parse the file content to extract global settings
-      const parser = new (await import('../parser/enhanced-metadata-parser')).EnhancedMetadataParser();
+      const parser = new (
+        await import('../parser/enhanced-metadata-parser')
+      ).EnhancedMetadataParser();
       const parsedMetadata = parser.parseMetadata(classFile.content);
-      
+
       // Look for global settings (metadata that applies to the whole class)
       const globalSettings = parser.parseGlobalSettings(classFile.content);
       if (globalSettings && globalSettings.length > 0 && globalSettings[0]?.metadata) {
-        console.log(`[jsdoc-adapter] Found global settings for class ${className}:`, Object.keys(globalSettings[0].metadata));
+        console.log(
+          `[jsdoc-adapter] Found global settings for class ${className}:`,
+          Object.keys(globalSettings[0].metadata)
+        );
         return globalSettings[0].metadata as unknown as Record<string, string>;
       }
 
@@ -950,7 +1155,9 @@ export class JSDocAdapter implements IJSDocAdapter {
     try {
       // Look for class declaration after the JSDoc comment
       const afterPosition = code.substring(position);
-      console.log(`[jsdoc-adapter] DEBUG: Looking for class after position ${position}, code snippet: ${afterPosition.substring(0, 200)}`);
+      console.log(
+        `[jsdoc-adapter] DEBUG: Looking for class after position ${position}, code snippet: ${afterPosition.substring(0, 200)}`
+      );
 
       // Find the end of JSDoc comment first (look for "*/" pattern)
       const jsDocEndMatch = afterPosition.match(/\*\/\s*/);
@@ -962,17 +1169,18 @@ export class JSDocAdapter implements IJSDocAdapter {
       // Look only after the JSDoc comment ends
       const jsDocEndIndex = jsDocEndMatch.index ?? 0;
       const afterJSDoc = afterPosition.substring(jsDocEndIndex + jsDocEndMatch[0].length);
-      console.log(`[jsdoc-adapter] DEBUG: Looking after JSDoc end for class: ${afterJSDoc.substring(0, 100)}`);
+      console.log(
+        `[jsdoc-adapter] DEBUG: Looking after JSDoc end for class: ${afterJSDoc.substring(0, 100)}`
+      );
 
       // Patterns to match class declarations
-      const patterns = [
-        /export\s+class\s+(\w+)/,
-        /class\s+(\w+)/,
-      ];
+      const patterns = [/export\s+class\s+(\w+)/, /class\s+(\w+)/];
 
       for (const pattern of patterns) {
         const match = afterJSDoc.match(pattern);
-        console.log(`[jsdoc-adapter] DEBUG: Class pattern ${pattern} matched: ${match ? match[1] : 'no match'}`);
+        console.log(
+          `[jsdoc-adapter] DEBUG: Class pattern ${pattern} matched: ${match ? match[1] : 'no match'}`
+        );
         if (match && match[1]) {
           const className = match[1];
           console.log(`[jsdoc-adapter] DEBUG: Found class name: ${className}`);
@@ -994,7 +1202,9 @@ export class JSDocAdapter implements IJSDocAdapter {
     try {
       // Look for method/function declaration after the JSDoc comment
       const afterPosition = code.substring(position);
-      console.log(`[jsdoc-adapter] DEBUG: Looking for method after position ${position}, code snippet: ${afterPosition.substring(0, 200)}`);
+      console.log(
+        `[jsdoc-adapter] DEBUG: Looking for method after position ${position}, code snippet: ${afterPosition.substring(0, 200)}`
+      );
 
       // Find the end of JSDoc comment first (look for "*/" pattern)
       const jsDocEndMatch = afterPosition.match(/\*\/\s*/);
@@ -1006,7 +1216,9 @@ export class JSDocAdapter implements IJSDocAdapter {
       // Look only after the JSDoc comment ends
       const jsDocEndIndex = jsDocEndMatch.index ?? 0;
       const afterJSDoc = afterPosition.substring(jsDocEndIndex + jsDocEndMatch[0].length);
-      console.log(`[jsdoc-adapter] DEBUG: Looking after JSDoc end: ${afterJSDoc.substring(0, 100)}`);
+      console.log(
+        `[jsdoc-adapter] DEBUG: Looking after JSDoc end: ${afterJSDoc.substring(0, 100)}`
+      );
 
       // Limit search to first 200 characters to avoid matching distant methods
       const limitedSearch = afterJSDoc.substring(0, 200);
@@ -1036,7 +1248,9 @@ export class JSDocAdapter implements IJSDocAdapter {
 
       for (const pattern of patterns) {
         const match = limitedSearch.match(pattern);
-        console.log(`[jsdoc-adapter] DEBUG: Pattern ${pattern} matched: ${match ? match[1] : 'no match'}`);
+        console.log(
+          `[jsdoc-adapter] DEBUG: Pattern ${pattern} matched: ${match ? match[1] : 'no match'}`
+        );
         if (match && match[1]) {
           // Validate method name (not constructor, etc.)
           const methodName = match[1];
@@ -1059,18 +1273,18 @@ export class JSDocAdapter implements IJSDocAdapter {
    */
   private getJSDocTagName(key: string): string {
     const mapping: Record<string, string> = {
-      'description': '@description',
+      description: '@description',
       'business-context': '@business',
-      'author': '@author',
-      'since': '@since',
-      'warning': '@warning',
-      'deprecated': '@deprecated',
-      'see': '@see',
+      author: '@author',
+      since: '@since',
+      warning: '@warning',
+      deprecated: '@deprecated',
+      see: '@see',
       'performance-note': '@performance',
       'complexity-note': '@complexity',
       'validation-rules': '@validation',
       'documentation-url': '@see',
-      'license': '@license',
+      license: '@license',
       'recommended-for': '@note',
       'learning-focus': '@note',
     };
@@ -1140,11 +1354,7 @@ export class JSDocAdapter implements IJSDocAdapter {
     } = {}
   ): Promise<string> {
     try {
-      const {
-        layer = 'domain',
-        complexity: _complexity = 'basic',
-        examples = 1,
-      } = params;
+      const { layer = 'domain', complexity: _complexity = 'basic', examples = 1 } = params;
 
       if (examples === 1) {
         // Single example
@@ -1152,16 +1362,17 @@ export class JSDocAdapter implements IJSDocAdapter {
       } else {
         // Multiple examples
         const allExamples = await this.engine.getExamplesForMethod(methodName, packageName);
-        const selectedExamples = allExamples
-          .filter(ex => ex.layer === layer)
-          .slice(0, examples);
+        const selectedExamples = allExamples.filter(ex => ex.layer === layer).slice(0, examples);
 
         const formattedExamples = selectedExamples
           .map(ex => this.engine.formatOutput(ex.content, 'jsdoc'))
           .join('\n *\n');
 
         const injectionPattern = /@example-inject(?:\s+[^\n]*)?/g; // Legacy pattern
-        return code.replace(injectionPattern, formattedExamples || this.createFallbackExample(methodName, layer));
+        return code.replace(
+          injectionPattern,
+          formattedExamples || this.createFallbackExample(methodName, layer)
+        );
       }
     } catch (error) {
       console.warn(`Failed to inject with parameters for ${methodName}:`, error);

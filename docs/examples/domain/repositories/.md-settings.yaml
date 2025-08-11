@@ -1,42 +1,42 @@
 # Package Settings - Inherits from global-settings.yaml
 
 # === PACKAGE IDENTITY ===
-package-name: "repositories"
-display-name: "DDD Repositories"
-description: "Repository pattern implementations with event sourcing and domain event integration"
-business-context: "Data access layer following repository pattern with automatic event persistence and publishing"
+package-name: 'repositories'
+display-name: 'DDD Repositories'
+description: 'Repository pattern implementations with event sourcing and domain event integration'
+business-context: 'Data access layer following repository pattern with automatic event persistence and publishing'
 
 # === HIERARCHICAL STRATEGY ===
 hierarchy:
-  strategy: "merge"
-  scope: "package"
+  strategy: 'merge'
+  scope: 'package'
 
 # === PACKAGE METADATA ===
-domain: "infrastructure"
-complexity: "intermediate"
+domain: 'infrastructure'
+complexity: 'intermediate'
 patterns:
-  - "repository-pattern"
-  - "event-sourcing"
-  - "unit-of-work"
-  - "optimistic-concurrency-control"
-  
+  - 'repository-pattern'
+  - 'event-sourcing'
+  - 'unit-of-work'
+  - 'optimistic-concurrency-control'
+
 # === PACKAGE DEFAULTS ===
-author: "VytchesDDD Team"
-since: "1.0.0"
+author: 'VytchesDDD Team'
+since: '1.0.0'
 
 # === JSDOC DEFAULTS ===
 jsdoc:
-  placement-strategy: "separate"
-  
+  placement-strategy: 'separate'
+
 # === FORMAT-SPECIFIC DEFAULTS ===
 formats:
   jsdoc:
-    description: "Repository pattern for data persistence with event sourcing"
-    business-context: "Manages aggregate persistence and domain event handling"
+    description: 'Repository pattern for data persistence with event sourcing'
+    business-context: 'Manages aggregate persistence and domain event handling'
   cli:
     description: |
       ## DDD Repositories Package
-      
+
       Complete repository pattern implementation with:
       - Event sourcing support
       - Optimistic concurrency control
@@ -44,7 +44,7 @@ formats:
       - Unit of Work pattern
     business-context: |
       ## Business Value
-      
+
       Provides enterprise-grade data access layer that:
       - Ensures data consistency through versioning
       - Automatically publishes domain events
@@ -53,8 +53,8 @@ formats:
 
 # === PACKAGE TAGS ===
 tags:
-  - "repository"
-  - "event-sourcing"
-  - "data-access"
-  - "infrastructure"
-  - "unit-of-work"
+  - 'repository'
+  - 'event-sourcing'
+  - 'data-access'
+  - 'infrastructure'
+  - 'unit-of-work'

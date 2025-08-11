@@ -12,7 +12,7 @@ class TestQuery {
 }
 
 class TestCommandHandler {
-  async execute(command: TestCommand): Promise<void> {
+  async execute(_command: TestCommand): Promise<void> {
     // Mock implementation
   }
 }
@@ -29,7 +29,7 @@ class UnhandledCommand {
 }
 
 class UnhandledHandler {
-  async execute(command: UnhandledCommand): Promise<void> {
+  async execute(_command: UnhandledCommand): Promise<void> {
     // Mock implementation
   }
 }

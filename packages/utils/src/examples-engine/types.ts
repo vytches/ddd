@@ -36,7 +36,11 @@ export interface ValidationResult {
 }
 
 export interface ValidationError {
-  type: 'max_lines_exceeded' | 'missing_required_element' | 'forbidden_element_found' | 'compilation_error';
+  type:
+    | 'max_lines_exceeded'
+    | 'missing_required_element'
+    | 'forbidden_element_found'
+    | 'compilation_error';
   message: string;
   line?: number;
   element?: string;

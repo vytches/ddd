@@ -1,22 +1,3 @@
-/**
- * @llm-summary Domain modeling workflow implementation
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Interactive domain modeling workflow that guides users through
- * domain discovery and modeling processes.
- *
- * @example
- * ```typescript
- * const workflow = new DomainModelingWorkflow();
- * const context = await workflow.start();
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 import type { WorkflowContext, DomainModelingOptions } from '../types';
 import { Colors } from '../../core/utils/colors';
 import { Prompts } from '../../core/utils/prompts';

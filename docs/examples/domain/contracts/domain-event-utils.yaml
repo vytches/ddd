@@ -1,0 +1,126 @@
+# Domain Event Utils - Foundation Layer Event Utilities
+# Utility functions for domain event creation and management
+
+# === FILE METADATA ===
+file-name: 'domain-event-utils'
+title: 'Domain Event Utils - Event Creation Utilities'
+description: 'Utility functions for creating and managing domain events with automatic metadata generation'
+business-context: 'Simplifies domain event creation with consistent metadata handling and UUID generation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FUNCTIONS ===
+functions:
+  createDomainEvent:
+    description: 'Factory function for creating domain events with automatic metadata generation'
+    business-context: 'Simplifies event creation by automatically generating event IDs and timestamps while allowing custom metadata'
+
+    formats:
+      jsdoc:
+        description: 'Domain event factory with automatic metadata generation'
+        business-context: 'Streamlined event creation for domain services'
+      cli:
+        description: |
+          ## createDomainEvent Function
+
+          Streamlined domain event creation:
+
+          **Automatic Generation:**
+          - Unique event ID via LibUtils.getUUID()
+          - Current timestamp for event occurrence
+          - Extended domain event structure
+
+          **Customization Support:**
+          - Custom metadata merging
+          - Type-safe payload handling
+          - Partial metadata override support
+
+          **Business Benefits:**
+          - Consistent event structure across domains
+          - Reduced boilerplate in domain services
+          - Automatic correlation ID support
+
+    generic-parameters:
+      - name: 'P'
+        description: 'Type of the event payload'
+        default: 'unknown'
+
+    parameters:
+      - name: 'eventType'
+        type: 'string'
+        description: 'Type identifier for the event'
+        business-context: 'Determines event routing and handler selection'
+
+      - name: 'payload'
+        type: 'P'
+        description: 'Event data payload'
+        business-context: 'Contains the business data associated with the event'
+
+      - name: 'metadata'
+        type: 'Partial<IEventMetadata>'
+        description: 'Optional custom metadata to merge with auto-generated metadata'
+        business-context: 'Allows override of auto-generated values and addition of custom context'
+        optional: true
+
+    returns:
+      type: 'IExtendedDomainEvent<P>'
+      description: 'Complete extended domain event with merged metadata'
+
+    examples:
+      - id: 'create-basic-event'
+        code: |
+          // Basic event creation
+          const orderCreated = createDomainEvent('OrderCreated', {
+            orderId: 'order-123',
+            customerId: 'customer-456',
+            amount: 99.99
+          });
+
+          // Event has auto-generated eventId and timestamp
+          console.log(orderCreated.metadata?.eventId); // Auto-generated UUID
+          console.log(orderCreated.metadata?.timestamp); // Current timestamp
+
+      - id: 'create-event-with-metadata'
+        code: |
+          // Event with custom metadata
+          const orderUpdated = createDomainEvent(
+            'OrderUpdated',
+            { orderId: 'order-123', status: 'shipped' },
+            {
+              correlationId: 'workflow-789',
+              actor: { userId: 'user-123', name: 'John Doe' },
+              aggregateId: 'order-123',
+              aggregateVersion: 2
+            }
+          );
+
+          // Custom metadata merged with auto-generated
+          console.log(orderUpdated.metadata?.correlationId); // 'workflow-789'
+          console.log(orderUpdated.metadata?.eventId); // Still auto-generated
+
+      - id: 'domain-service-usage'
+        code: |
+          // Usage in domain service
+          class OrderService {
+            processOrder(orderData: OrderData): IExtendedDomainEvent[] {
+              const events: IExtendedDomainEvent[] = [];
+              
+              // Create multiple related events
+              events.push(createDomainEvent('OrderValidated', orderData));
+              events.push(createDomainEvent('InventoryReserved', {
+                orderId: orderData.orderId,
+                items: orderData.items
+              }));
+              
+              return events;
+            }
+          }
+
+    custom-tags:
+      factory-function: 'true'
+      auto-generation: 'eventId,timestamp'
+      dependencies: 'LibUtils.getUUID'
+      metadata-merge: 'true'

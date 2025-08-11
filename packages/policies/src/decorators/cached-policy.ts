@@ -1,32 +1,13 @@
 import type { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
-  PolicyRequest,
   IPolicyComposer,
   IPolicyConditionalBuilder,
   PolicyCondition,
+  PolicyRequest,
 } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
-/**
- * @llm-summary Contract for policy cache config functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyCacheConfig interface implementing domain pattern implementation for policy cache config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyCacheConfig implements PolicyCacheConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyCacheConfig {
   /**
    * Time to live in milliseconds for cached policy results
@@ -159,23 +140,6 @@ class PolicyCache {
   }
 }
 
-/**
- * @llm-summary PolicyCachingBehavior class for policy caching behavior operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyCachingBehavior class implementing domain pattern implementation for policy caching behavior operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyCachingBehavior();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   private readonly cache = new PolicyCache();
 
@@ -363,23 +327,6 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   }
 }
 
-/**
- * @llm-summary PolicyCachingBehaviorFactory class for policy caching behavior factory operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyCachingBehaviorFactory class implementing domain pattern implementation for policy caching behavior factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyCachingBehaviorFactory();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyCachingBehaviorFactory {
   /**
    * Create cached policy with TTL

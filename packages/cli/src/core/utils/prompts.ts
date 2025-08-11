@@ -7,25 +7,6 @@ import * as readline from 'readline';
 import { Colors } from './colors';
 import { CLIError } from '../../types';
 
-/**
- * @llm-summary Contract for prompt options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * PromptOptions interface implementing infrastructure service for prompt options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePromptOptions implements PromptOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PromptOptions {
   message: string;
   default?: string;
@@ -33,72 +14,17 @@ export interface PromptOptions {
   mask?: boolean; // For password inputs
 }
 
-/**
- * @llm-summary Contract for select options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * SelectOptions interface implementing infrastructure service for select options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSelectOptions implements SelectOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface SelectOptions<T = unknown> {
   message: string;
   choices: Array<{ name: string; value: T; description?: string }>;
   default?: number;
 }
 
-/**
- * @llm-summary Contract for confirm options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ConfirmOptions interface implementing infrastructure service for confirm options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteConfirmOptions implements ConfirmOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ConfirmOptions {
   message: string;
   default?: boolean;
 }
 
-/**
- * @llm-summary Prompts class for prompts operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Prompts class implementing infrastructure service for prompts operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new Prompts();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class Prompts {
   private static rl: readline.Interface | null = null;
 
@@ -387,25 +313,6 @@ export class Prompts {
   }
 }
 
-/**
- * @llm-summary prompt for input function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * promptForInput function implementing infrastructure service for prompt for input operations.
- *
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = promptForInput();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export async function promptForInput(
   message: string,
   options: {
@@ -429,25 +336,6 @@ export async function promptForInput(
   return result;
 }
 
-/**
- * @llm-summary prompt for choice function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * promptForChoice function implementing infrastructure service for prompt for choice operations.
- *
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = promptForChoice();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export async function promptForChoice<T = unknown>(
   message: string,
   choices: Array<{ name: string; value: T; description?: string }>,
@@ -462,28 +350,6 @@ export async function promptForChoice<T = unknown>(
   return await Prompts.select(selectOptions);
 }
 
-/**
- * @llm-summary prompt for confirmation function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * promptForConfirmation function implementing infrastructure service for prompt for confirmation operations.
- *
- * @param {string} message - message parameter
- * @param {boolean} defaultValue? - defaultValue? parameter
- * @returns {Promise<boolean>} Returns Promise<boolean>
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = promptForConfirmation(message, defaultValue?);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export async function promptForConfirmation(
   message: string,
   defaultValue?: boolean
@@ -496,25 +362,6 @@ export async function promptForConfirmation(
   return await Prompts.confirm(confirmOptions);
 }
 
-/**
- * @llm-summary prompt for multi select function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * promptForMultiSelect function implementing infrastructure service for prompt for multi select operations.
- *
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = promptForMultiSelect();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export async function promptForMultiSelect<T = unknown>(
   message: string,
   choices: Array<{ name: string; value: T; description?: string }>

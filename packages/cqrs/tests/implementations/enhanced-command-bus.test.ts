@@ -12,7 +12,7 @@ class TestCommand implements ICommand {
 
 // Test command handler
 class TestCommandHandler implements ICommandHandler<TestCommand> {
-  async execute(command: TestCommand): Promise<void> {
+  async execute(_command: TestCommand): Promise<void> {
     // Mock implementation
   }
 }

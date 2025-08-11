@@ -3,39 +3,14 @@
  * Handles @extract tags with flexible format and metadata parsing
  */
 
-import type { ExtractBlock, ResolvedMetadata, ConfigLevel } from '../types/enhanced-metadata.types';
-import { EnhancedMetadataParser } from '../parser/enhanced-metadata-parser';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { EnhancedMetadataParser } from '../parser/enhanced-metadata-parser';
+import type { ConfigLevel, ExtractBlock } from '../types/enhanced-metadata.types';
 
-/**
- * @llm-summary EnhancedTagExtractor class for enhanced tag extractor operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EnhancedTagExtractor class implementing infrastructure service for enhanced tag extractor operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EnhancedTagExtractor();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EnhancedTagExtractor());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class EnhancedTagExtractor {
-  private static readonly EXTRACT_START_PATTERN = /@extract:\s*([^:\s]+)(?::([^:\s]+))?(?::([^:\s]+))?(?::([^:\s]+))?/;
+  private static readonly EXTRACT_START_PATTERN =
+    /@extract:\s*([^:\s]+)(?::([^:\s]+))?(?::([^:\s]+))?(?::([^:\s]+))?/;
   private static readonly EXTRACT_END_PATTERN = /@extract-end/;
   private static readonly GLOBAL_SETTINGS_FILE = 'global-settings.md';
   private static readonly PACKAGE_SETTINGS_FILE = '.md-settings.md';
@@ -64,12 +39,14 @@ export class EnhancedTagExtractor {
     // Parse file-level global settings
     const fileGlobalSettings = this.metadataParser.parseGlobalSettings(content);
     if (fileGlobalSettings.length > 0) {
-      configs.push(...fileGlobalSettings.map(settings => ({
-        source: 'file' as const,
-        strategy: settings.strategy,
-        scope: settings.scope || undefined,
-        metadata: settings.metadata,
-      })));
+      configs.push(
+        ...fileGlobalSettings.map(settings => ({
+          source: 'file' as const,
+          strategy: settings.strategy,
+          scope: settings.scope || undefined,
+          metadata: settings.metadata,
+        }))
+      );
     }
 
     let currentBlock: Partial<ExtractBlock> | null = null;
@@ -87,13 +64,9 @@ export class EnhancedTagExtractor {
       if (startMatch) {
         // Save previous block if exists
         if (currentBlock && blockContent.length > 0) {
-          blocks.push(this.finalizeBlock(
-            currentBlock,
-            blockContent,
-            blockMetadata,
-            configs,
-            format
-          ));
+          blocks.push(
+            this.finalizeBlock(currentBlock, blockContent, blockMetadata, configs, format)
+          );
         }
 
         // Parse tag components
@@ -121,13 +94,9 @@ export class EnhancedTagExtractor {
         currentBlock.endLine = i + 1;
 
         if (blockContent.length > 0) {
-          blocks.push(this.finalizeBlock(
-            currentBlock,
-            blockContent,
-            blockMetadata,
-            configs,
-            format
-          ));
+          blocks.push(
+            this.finalizeBlock(currentBlock, blockContent, blockMetadata, configs, format)
+          );
         }
 
         currentBlock = null;
@@ -161,13 +130,7 @@ export class EnhancedTagExtractor {
     // Handle unclosed block
     if (currentBlock && blockContent.length > 0) {
       currentBlock.endLine = lines.length;
-      blocks.push(this.finalizeBlock(
-        currentBlock,
-        blockContent,
-        blockMetadata,
-        configs,
-        format
-      ));
+      blocks.push(this.finalizeBlock(currentBlock, blockContent, blockMetadata, configs, format));
     }
 
     return blocks;
@@ -186,12 +149,11 @@ export class EnhancedTagExtractor {
   ): Promise<ExtractBlock | null> {
     const allBlocks = await this.extractAllBlocks(content, filePath, format);
 
-    return allBlocks.find(
-      block =>
-        block.target === target &&
-        block.context === context &&
-        block.level === level
-    ) || null;
+    return (
+      allBlocks.find(
+        block => block.target === target && block.context === context && block.level === level
+      ) || null
+    );
   }
 
   /**
@@ -208,34 +170,46 @@ export class EnhancedTagExtractor {
 
     // 1. Load library global settings
     try {
-      const globalPath = path.join(process.cwd(), 'docs', EnhancedTagExtractor.GLOBAL_SETTINGS_FILE);
+      const globalPath = path.join(
+        process.cwd(),
+        'docs',
+        EnhancedTagExtractor.GLOBAL_SETTINGS_FILE
+      );
       const globalContent = await fs.readFile(globalPath, 'utf-8');
       const globalSettings = this.metadataParser.parseGlobalSettings(globalContent);
 
-      configs.push(...globalSettings.map(settings => ({
-        source: 'library' as const,
-        strategy: settings.strategy,
-        scope: settings.scope || undefined,
-        metadata: settings.metadata,
-      })));
+      configs.push(
+        ...globalSettings.map(settings => ({
+          source: 'library' as const,
+          strategy: settings.strategy,
+          scope: settings.scope || undefined,
+          metadata: settings.metadata,
+        }))
+      );
     } catch (error) {
       // Global settings are optional
     }
 
     // 2. Load package settings
     let currentDir = path.dirname(filePath);
-    while (currentDir !== path.dirname(currentDir)) { // Not root
+    while (currentDir !== path.dirname(currentDir)) {
+      // Not root
       try {
-        const packageSettingsPath = path.join(currentDir, EnhancedTagExtractor.PACKAGE_SETTINGS_FILE);
+        const packageSettingsPath = path.join(
+          currentDir,
+          EnhancedTagExtractor.PACKAGE_SETTINGS_FILE
+        );
         const packageContent = await fs.readFile(packageSettingsPath, 'utf-8');
         const packageSettings = this.metadataParser.parseGlobalSettings(packageContent);
 
-        configs.push(...packageSettings.map(settings => ({
-          source: 'package' as const,
-          strategy: settings.strategy,
-          scope: settings.scope || undefined,
-          metadata: settings.metadata,
-        })));
+        configs.push(
+          ...packageSettings.map(settings => ({
+            source: 'package' as const,
+            strategy: settings.strategy,
+            scope: settings.scope || undefined,
+            metadata: settings.metadata,
+          }))
+        );
 
         break; // Found package settings
       } catch (error) {
@@ -304,10 +278,12 @@ export class EnhancedTagExtractor {
     if (nonEmptyLines.length === 0) return lines.join('\n');
 
     const minIndent = Math.min(
-      ...nonEmptyLines.map(line => {
-        const match = line.match(/^(\s*)/);
-        return match?.[1]?.length ?? 0;
-      }).filter(len => len !== undefined)
+      ...nonEmptyLines
+        .map(line => {
+          const match = line.match(/^(\s*)/);
+          return match?.[1]?.length ?? 0;
+        })
+        .filter(len => len !== undefined)
     );
 
     // Remove common indentation

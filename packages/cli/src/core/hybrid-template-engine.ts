@@ -28,48 +28,61 @@ export class HybridTemplateEngine {
     });
 
     // Helper to load YAML-based documentation content
-    this.hbs.registerHelper('yamlContent', (packageName: string, section: string, field: string, format: string = 'cli') => {
-      // Special handling for different section types
-      if (section === 'package') {
-        // Load package-level metadata
-        const yamlPath = path.join(process.cwd(), 'docs', 'examples', 'domain', packageName, '.md-settings.yaml');
-        try {
-          const content = require('fs').readFileSync(yamlPath, 'utf-8');
-          const metadata = require('js-yaml').load(content) as any;
-          
-          // Handle nested format-specific fields
-          let value = null;
-          
-          if (field.includes('.')) {
-            // Already format-specific like "description.cli"
-            const parts = field.split('.');
-            const [baseField, requestedFormat] = parts;
-            if (baseField && requestedFormat) {
-              value = metadata.formats?.[requestedFormat]?.[baseField] || metadata[baseField];
+    this.hbs.registerHelper(
+      'yamlContent',
+      (packageName: string, section: string, field: string, format = 'cli') => {
+        // Special handling for different section types
+        if (section === 'package') {
+          // Load package-level metadata
+          const yamlPath = path.join(
+            process.cwd(),
+            'docs',
+            'examples',
+            'domain',
+            packageName,
+            '.md-settings.yaml'
+          );
+          try {
+            const content = require('fs').readFileSync(yamlPath, 'utf-8');
+            const metadata = require('js-yaml').load(content) as any;
+
+            // Handle nested format-specific fields
+            let value = null;
+
+            if (field.includes('.')) {
+              // Already format-specific like "description.cli"
+              const parts = field.split('.');
+              const [baseField, requestedFormat] = parts;
+              if (baseField && requestedFormat) {
+                value = metadata.formats?.[requestedFormat]?.[baseField] || metadata[baseField];
+              }
+            } else {
+              // Look in formats first, then fallback to root
+              value = metadata.formats?.[format]?.[field] || metadata[field];
             }
-          } else {
-            // Look in formats first, then fallback to root
-            value = metadata.formats?.[format]?.[field] || metadata[field];
+
+            return new this.hbs.SafeString(value || '');
+          } catch (error) {
+            return new this.hbs.SafeString('');
           }
-          
-          return new this.hbs.SafeString(value || '');
-        } catch (error) {
-          return new this.hbs.SafeString('');
+        } else {
+          // For class/method level, use the resolver
+          const resolverPath = field ? `${section}/${field}.md` : `${section}.md`;
+          const content = YamlContentResolver.resolveContent(packageName, resolverPath);
+          return new this.hbs.SafeString(content);
         }
-      } else {
-        // For class/method level, use the resolver
-        const resolverPath = field ? `${section}/${field}.md` : `${section}.md`;
-        const content = YamlContentResolver.resolveContent(packageName, resolverPath);
-        return new this.hbs.SafeString(content);
       }
-    });
+    );
 
     // Helper to load YAML markdown with format awareness
-    this.hbs.registerHelper('loadYamlMarkdown', (packageName: string, filePath: string, format?: string) => {
-      // Use YamlContentResolver for YAML-aware content loading
-      const content = YamlContentResolver.resolveContent(packageName, filePath);
-      return new this.hbs.SafeString(content);
-    });
+    this.hbs.registerHelper(
+      'loadYamlMarkdown',
+      (packageName: string, filePath: string, format?: string) => {
+        // Use YamlContentResolver for YAML-aware content loading
+        const content = YamlContentResolver.resolveContent(packageName, filePath);
+        return new this.hbs.SafeString(content);
+      }
+    );
 
     // Helper to load framework-specific content
     this.hbs.registerHelper(
@@ -161,7 +174,7 @@ export class HybridTemplateEngine {
     });
 
     // Helper to find related examples
-    this.hbs.registerHelper('findRelatedExamples', (packageName: string, complexity: string) => {
+    this.hbs.registerHelper('findRelatedExamples', (_packageName: string, _complexity: string) => {
       return [];
     });
 

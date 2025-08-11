@@ -1,4 +1,4 @@
-import type { Arguments, CommandBuilder } from 'yargs';
+import type { Arguments } from 'yargs';
 import { UnifiedExampleParser } from '../../parsers/unified-parser';
 import { globalDocumentationRegistry } from '../../core/documentation-registry';
 

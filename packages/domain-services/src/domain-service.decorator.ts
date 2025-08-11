@@ -1,6 +1,6 @@
-import 'reflect-metadata';
 import { ServiceLifetime } from '@vytches/ddd-di';
-import type { EnhancedDomainServiceOptions, DIServiceMetadata } from './di-types';
+import 'reflect-metadata';
+import type { DIServiceMetadata, EnhancedDomainServiceOptions } from './di-types';
 import { DIDomainServiceMetadataRegistry } from './di-types';
 
 /**
@@ -21,25 +21,6 @@ const DOMAIN_SERVICE_METADATA_KEY = Symbol('DomainService');
  */
 const DI_DOMAIN_SERVICE_METADATA_KEY = Symbol('DIDomainService');
 
-/**
- * @llm-summary Contract for domain service options functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * DomainServiceOptions interface implementing domain pattern implementation for domain service options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteDomainServiceOptions implements DomainServiceOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface DomainServiceOptions {
   /**
    * Unique identifier for the service.
@@ -109,26 +90,6 @@ export interface DomainServiceOptions {
   };
 }
 
-/**
- * @llm-summary domain service function
- * @llm-domain Pattern
- * @llm-pure false
- *
- * @description
- * DomainService function implementing domain pattern implementation for domain service operations.
- *
- * @param {string | DomainServiceOptions | EnhancedDomainServiceOptions} options - options parameter
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = DomainService(options);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function DomainService(
   options: string | DomainServiceOptions | EnhancedDomainServiceOptions
 ) {
@@ -185,63 +146,14 @@ export function DomainService(
   };
 }
 
-/**
- * Retrieves domain service metadata from a class.
- * Used by frameworks and containers to discover and configure services.
- *
- * @param {unknown} target - The service class to inspect
- * @returns {DomainServiceOptions | undefined} The service metadata, or undefined if none exists
- * @example
- * const ServiceClass = require('./order-service');
- * const metadata = getDomainServiceMetadata(ServiceClass);
- *
- * if (metadata && metadata.transactional) {
- *   // Configure with Unit of Work
- * }
- */
 export function getDomainServiceMetadata(target: unknown): DomainServiceOptions | undefined {
   return Reflect.getMetadata(DOMAIN_SERVICE_METADATA_KEY, target as object);
 }
 
-/**
- * Retrieves DI-enhanced domain service metadata from a class.
- * Used by the DI system for auto-discovery and registration.
- *
- * @param {unknown} target - The service class to inspect
- * @returns {DIServiceMetadata | undefined} The DI service metadata, or undefined if none exists
- * @example
- * const ServiceClass = require('./order-service');
- * const diMetadata = getDIDomainServiceMetadata(ServiceClass);
- *
- * if (diMetadata && diMetadata.autoRegister) {
- *   // Auto-register with DI container
- * }
- */
 export function getDIDomainServiceMetadata(target: unknown): DIServiceMetadata | undefined {
   return Reflect.getMetadata(DI_DOMAIN_SERVICE_METADATA_KEY, target as object);
 }
 
-/**
- * @llm-summary is domain service pending d i registration function
- * @llm-domain Pattern
- * @llm-pure true
- *
- * @description
- * isDomainServicePendingDIRegistration function implementing domain pattern implementation for is domain service pending d i registration operations.
- *
- * @param {unknown} target - target parameter
- * @returns {boolean} Returns boolean
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = isDomainServicePendingDIRegistration(target);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function isDomainServicePendingDIRegistration(target: unknown): boolean {
   return Reflect.getMetadata('di:registration-pending', target as object) === true;
 }

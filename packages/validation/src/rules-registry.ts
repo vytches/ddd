@@ -10,25 +10,6 @@ export interface IRulesProvider {
   readonly name: string;
 }
 
-/**
- * @llm-summary Contract for core rules functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * CoreRules interface implementing domain pattern implementation for core rules operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteCoreRules implements ICoreRules {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ICoreRules {
   // Basic validation rules
   required: <T>(property: keyof T, message?: string) => RuleFunction<T>;
@@ -154,23 +135,6 @@ export class CoreRules implements ICoreRules, IRulesProvider {
       validator.when(condition, thenRules);
 }
 
-/**
- * @llm-summary RulesRegistry class for rules registry operations
- * @llm-domain Pattern
- * @llm-complexity Simple
- *
- * @description
- * RulesRegistry class implementing domain pattern implementation for rules registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new RulesRegistry();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class RulesRegistry {
   private static providers: Map<string, IRulesProvider> = new Map();
   private static core: CoreRules = new CoreRules();

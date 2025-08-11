@@ -1,23 +1,6 @@
 import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import type { IProjection } from './projection-interfaces';
 
-/**
- * @llm-summary BaseProjection class for base projection operations
- * @llm-domain Architecture
- * @llm-complexity Expert
- *
- * @description
- * BaseProjection class implementing architectural component for base projection operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseProjection();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseProjection<TReadModel> implements IProjection<TReadModel> {
   abstract readonly name: string;
   abstract readonly eventTypes: string[];

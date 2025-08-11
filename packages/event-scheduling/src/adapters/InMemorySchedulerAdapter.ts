@@ -1,32 +1,15 @@
-import { BaseSchedulerAdapter } from './BaseSchedulerAdapter';
 import type {
-  IScheduledEvent,
-  IScheduleOptions,
-  IScheduledJob,
   IJobFilter,
   IJobQueryResult,
+  IScheduledEvent,
+  IScheduledJob,
+  IScheduleOptions,
   ISchedulerConfig,
 } from '@vytches/ddd-contracts';
+import { BaseSchedulerAdapter } from './BaseSchedulerAdapter';
 
 import { JobStatus } from '@vytches/ddd-contracts';
 
-/**
- * @llm-summary InMemorySchedulerAdapter class for in memory scheduler adapter operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * InMemorySchedulerAdapter class implementing core domain functionality for in memory scheduler adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new InMemorySchedulerAdapter();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class InMemorySchedulerAdapter extends BaseSchedulerAdapter {
   private jobs: Map<string, IScheduledJob> = new Map();
   private timers: Map<string, NodeJS.Timeout> = new Map();

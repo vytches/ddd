@@ -2,25 +2,6 @@
 
 import { LibUtils } from '@vytches/ddd-utils';
 
-/**
- * @llm-summary Contract for resilience context functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ResilienceContext interface implementing infrastructure service for resilience context operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteResilienceContext implements ResilienceContext {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ResilienceContext {
   readonly signal: AbortSignal;
   readonly correlationId: string;
@@ -33,23 +14,6 @@ export interface ResilienceContext {
   withTimeout(timeoutMs: number): ResilienceContext;
 }
 
-/**
- * @llm-summary DefaultResilienceContext class for default resilience context operations
- * @llm-domain Infrastructure
- * @llm-complexity Expert
- *
- * @description
- * DefaultResilienceContext class implementing infrastructure service for default resilience context operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DefaultResilienceContext();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class DefaultResilienceContext implements ResilienceContext {
   private abortController: AbortController;
   private _metadata: Map<string, unknown>;
@@ -145,23 +109,6 @@ export class DefaultResilienceContext implements ResilienceContext {
   }
 }
 
-/**
- * @llm-summary TimeoutError class for timeout error operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * TimeoutError class implementing infrastructure service for timeout error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TimeoutError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class TimeoutError extends Error {
   constructor(message: string) {
     super(message);
@@ -169,23 +116,6 @@ export class TimeoutError extends Error {
   }
 }
 
-/**
- * @llm-summary OperationCancelledError class for operation cancelled error operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * OperationCancelledError class implementing infrastructure service for operation cancelled error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new OperationCancelledError();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class OperationCancelledError extends Error {
   constructor(message = 'Operation was cancelled') {
     super(message);

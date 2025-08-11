@@ -21,7 +21,10 @@ export { getBundleStrategy, createExternalFunction, getBuildAliases } from './bu
 import { createPackageConfig } from './config-builders';
 
 // Specialized configurations for common patterns
-export function createFoundationConfig(packagePath: string, options: Partial<PackageConfigOptions> = {}) {
+export function createFoundationConfig(
+  packagePath: string,
+  options: Partial<PackageConfigOptions> = {}
+) {
   return createPackageConfig(packagePath, {
     packageType: 'foundation',
     bundleStrategy: 'bundle-all',
@@ -46,7 +49,10 @@ export function createMetaPackageConfig(packagePath: string) {
   });
 }
 
-export function createPatternConfig(packagePath: string, customOptions: Partial<PackageConfigOptions> = {}) {
+export function createPatternConfig(
+  packagePath: string,
+  customOptions: Partial<PackageConfigOptions> = {}
+) {
   return createPackageConfig(packagePath, {
     packageType: 'pattern',
     bundleStrategy: 'externalize-workspace',

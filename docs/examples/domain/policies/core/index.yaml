@@ -1,0 +1,53 @@
+# core/index - Universal Enhanced Metadata System V2
+
+# === FOLDER METADATA ===
+folder-name: 'core'
+title: 'Core Policy Components'
+description: 'Core classes and interfaces for business policies'
+business-context: 'Foundation for policy pattern implementation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'folder'
+
+# === FOLDER STRUCTURE ===
+structure:
+  subfolders:
+    - name: 'base'
+      description: 'Base policy classes'
+      files:
+        - 'base-business-policy.yaml'
+
+    - name: 'interfaces'
+      description: 'Policy interfaces'
+      files:
+        - 'business-policy.interface.yaml'
+        - 'policy-registry.interface.yaml'
+
+    - name: 'models'
+      description: 'Policy data models'
+      files:
+        - 'policy-definition.yaml'
+        - 'policy-metadata.yaml'
+        - 'policy-violation.yaml'
+
+# === EXPORTS ===
+exports:
+  classes:
+    - 'BaseBusinessPolicy'
+    - 'CompositeBusinessPolicy'
+    - 'PolicyViolation'
+    - 'PolicyViolationCollection'
+    - 'PolicyDefinition'
+    - 'PolicyMetadata'
+
+  interfaces:
+    - 'IBusinessPolicy'
+    - 'IPolicyRegistry'
+    - 'PolicyRequest'
+    - 'PolicyContext'
+
+  types:
+    - 'PolicySeverity'
+    - 'PolicyMetadataData'

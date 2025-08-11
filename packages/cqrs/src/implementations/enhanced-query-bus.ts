@@ -3,23 +3,6 @@ import type { IQuery } from '../interfaces';
 import { LoggingMiddleware } from '../middleware';
 import { QueryBus } from './query-bus';
 
-/**
- * @llm-summary EnhancedQueryBus class for enhanced query bus operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * EnhancedQueryBus class implementing architectural component for enhanced query bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EnhancedQueryBus();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EnhancedQueryBus extends QueryBus {
   private metrics = {
     executionCount: 0,

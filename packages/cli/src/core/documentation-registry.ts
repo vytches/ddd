@@ -1,34 +1,3 @@
-/**
- * @llm-summary Documentation registry for managing example definitions
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Centralized registry for managing example definitions and providing query capabilities.
- * Replaces the old globalExampleRegistry with better naming and structure.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const registry = new DocumentationRegistry();
- * await registry.loadAll();
- * const example = registry.findById('user-service');
- * ```
- *
- * @example
- * ```typescript
- * // Query examples
- * const examples = registry.query({
- *   package: 'domain-services',
- *   complexity: 'intermediate',
- *   framework: 'nestjs'
- * });
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 import { promises as fs } from 'fs';
 import * as path from 'path';
 import type {

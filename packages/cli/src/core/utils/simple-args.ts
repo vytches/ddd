@@ -1,46 +1,9 @@
-/**
- * @llm-summary Contract for parsed args functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ParsedArgs interface implementing infrastructure service for parsed args operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteParsedArgs implements ParsedArgs {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 export interface ParsedArgs {
   command?: string | undefined;
   args: string[];
   options: Record<string, any>;
 }
 
-/**
- * @llm-summary SimpleArgsParser class for simple args parser operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * SimpleArgsParser class implementing infrastructure service for simple args parser operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SimpleArgsParser();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class SimpleArgsParser {
   static parse(argv: string[]): ParsedArgs {
     // Skip node and script path

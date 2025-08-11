@@ -48,8 +48,8 @@ export class SmartTagFinder {
     // Filter by framework if specified
     const frameworkFiltered = options?.framework
       ? complexityFiltered.filter(example =>
-          example.frameworkIntegrations?.some(integration => 
-            typeof integration === 'string' 
+          example.frameworkIntegrations?.some(integration =>
+            typeof integration === 'string'
               ? integration === options.framework
               : integration.name === options.framework
           )

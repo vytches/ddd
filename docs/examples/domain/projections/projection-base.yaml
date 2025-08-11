@@ -1,0 +1,384 @@
+# projection-base - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'projection-base'
+title: 'BaseProjection - Abstract Projection Foundation'
+description: 'Abstract base class for implementing event projections'
+business-context: 'Foundation for building read models from event streams'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseProjection:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class providing foundation for event projections'
+      business-context: 'Transforms domain events into optimized read models for querying'
+
+      formats:
+        jsdoc:
+          description: 'Base class for implementing event projections with helper methods'
+        cli:
+          description: |
+            ## BaseProjection
+
+            Abstract foundation for event projections providing:
+            - Event type filtering
+            - State transformation helpers
+            - Type-safe event handling
+            - Immutable state updates
+            - Array and nested state manipulation
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        generic-type: 'TReadModel - The read model type'
+
+    # Abstract Members
+    abstract-members:
+      name:
+        description: 'Unique name identifying this projection'
+        business-context: 'Used for persistence and event routing'
+        type: 'string'
+
+      eventTypes:
+        description: 'List of event types this projection handles'
+        business-context: 'Filters relevant events from event stream'
+        type: 'string[]'
+
+    # Methods
+    methods:
+      createInitialState:
+        description: 'Creates the initial state for the read model'
+        business-context: 'Establishes baseline state before applying events'
+
+        returns:
+          type: 'TReadModel | Promise<TReadModel>'
+          description: 'Initial read model state'
+
+        examples:
+          - id: 'sync-initial'
+            code: |
+              createInitialState(): UserReadModel {
+                return {
+                  users: new Map(),
+                  userCount: 0,
+                  lastUpdated: null
+                };
+              }
+
+          - id: 'async-initial'
+            code: |
+              async createInitialState(): Promise<OrderReadModel> {
+                const defaultCategories = await this.loadDefaultCategories();
+                return {
+                  orders: [],
+                  categories: defaultCategories,
+                  totalRevenue: 0
+                };
+              }
+
+        custom-tags:
+          abstract: 'true'
+          lifecycle: 'initialization'
+
+      apply:
+        description: 'Applies an event to transform the read model state'
+        business-context: 'Core transformation logic for event sourcing'
+
+        parameters:
+          - name: 'readModel'
+            type: 'TReadModel'
+            description: 'Current read model state'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to apply to the state'
+
+        returns:
+          type: 'TReadModel'
+          description: 'New transformed read model state'
+
+        examples:
+          - id: 'apply-implementation'
+            code: |
+              apply(readModel: UserReadModel, event: IExtendedDomainEvent): UserReadModel {
+                switch (event.eventType) {
+                  case 'UserCreated':
+                    return this.updateState(readModel, {
+                      users: new Map(readModel.users).set(event.payload.userId, event.payload),
+                      userCount: readModel.userCount + 1,
+                      lastUpdated: event.occurredAt
+                    });
+                    
+                  case 'UserDeleted':
+                    const users = new Map(readModel.users);
+                    users.delete(event.payload.userId);
+                    return this.updateState(readModel, {
+                      users,
+                      userCount: readModel.userCount - 1,
+                      lastUpdated: event.occurredAt
+                    });
+                    
+                  default:
+                    return readModel;
+                }
+              }
+
+        custom-tags:
+          abstract: 'true'
+          immutable: 'Must return new state, not mutate existing'
+
+      handles:
+        description: 'Checks if projection handles a specific event type'
+        business-context: 'Filters events for efficient processing'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if projection handles this event type'
+
+        examples:
+          - id: 'basic-usage'
+            code: |
+              const projection = new UserProjection();
+
+              if (projection.handles('UserCreated')) {
+                // Process UserCreated event
+              }
+
+        custom-tags:
+          performance: 'Used for event routing optimization'
+
+      when:
+        description: 'Helper for type-safe conditional event handling'
+        business-context: 'Simplifies event pattern matching with type safety'
+
+        parameters:
+          - name: 'readModel'
+            type: 'TReadModel'
+            description: 'Current state'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process'
+          - name: 'eventType'
+            type: 'string'
+            description: 'Expected event type'
+          - name: 'handler'
+            type: '(state: TReadModel, event: TEvent) => TReadModel'
+            description: 'Handler function for the event'
+
+        returns:
+          type: 'TReadModel'
+          description: "Transformed state or original if event type doesn't match"
+
+        examples:
+          - id: 'type-safe-handling'
+            code: |
+              apply(readModel: TReadModel, event: IExtendedDomainEvent): TReadModel {
+                return this.when(readModel, event, 'OrderPlaced', 
+                  (state, evt: OrderPlacedEvent) => ({
+                    ...state,
+                    orders: [...state.orders, evt.payload.order],
+                    totalOrders: state.totalOrders + 1
+                  })
+                );
+              }
+
+        custom-tags:
+          protected: 'true'
+          type-safety: 'Provides type inference for event payload'
+
+      whenAny:
+        description: 'Helper for handling multiple event types with same logic'
+        business-context: 'Reduces duplication when multiple events have similar handling'
+
+        parameters:
+          - name: 'readModel'
+            type: 'TReadModel'
+            description: 'Current state'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process'
+          - name: 'eventTypes'
+            type: 'string[]'
+            description: 'List of event types to match'
+          - name: 'handler'
+            type: '(state: TReadModel, event: TEvent) => TReadModel'
+            description: 'Handler function for matching events'
+
+        returns:
+          type: 'TReadModel'
+          description: 'Transformed state or original if no match'
+
+        examples:
+          - id: 'multiple-events'
+            code: |
+              apply(readModel: TReadModel, event: IExtendedDomainEvent): TReadModel {
+                // Handle multiple status change events
+                return this.whenAny(readModel, event, 
+                  ['OrderShipped', 'OrderDelivered', 'OrderCancelled'],
+                  (state, evt) => ({
+                    ...state,
+                    orderStatuses: new Map(state.orderStatuses).set(
+                      evt.aggregateId,
+                      evt.eventType.replace('Order', '').toLowerCase()
+                    ),
+                    lastStatusUpdate: evt.occurredAt
+                  })
+                );
+              }
+
+        custom-tags:
+          protected: 'true'
+          dry: 'Reduces code duplication'
+
+      applyIf:
+        description: 'Conditionally applies event based on custom predicate'
+        business-context: 'Enables complex filtering logic beyond event type'
+
+        parameters:
+          - name: 'readModel'
+            type: 'TReadModel'
+            description: 'Current state'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process'
+          - name: 'condition'
+            type: '(event: TEvent) => boolean'
+            description: 'Condition to evaluate'
+          - name: 'handler'
+            type: '(state: TReadModel, event: TEvent) => TReadModel'
+            description: 'Handler if condition is met'
+
+        returns:
+          type: 'TReadModel'
+          description: 'Transformed state or original if condition false'
+
+        examples:
+          - id: 'conditional-application'
+            code: |
+              apply(readModel: TReadModel, event: IExtendedDomainEvent): TReadModel {
+                // Only process high-value orders
+                return this.applyIf(readModel, event,
+                  (evt: OrderPlacedEvent) => evt.payload.amount > 1000,
+                  (state, evt) => ({
+                    ...state,
+                    highValueOrders: [...state.highValueOrders, evt.payload],
+                    highValueTotal: state.highValueTotal + evt.payload.amount
+                  })
+                );
+              }
+
+        custom-tags:
+          protected: 'true'
+          filtering: 'Advanced event filtering'
+
+      updateState:
+        description: 'Helper for safe immutable state updates'
+        business-context: 'Ensures immutability while updating read model'
+
+        parameters:
+          - name: 'readModel'
+            type: 'TReadModel'
+            description: 'Current state'
+          - name: 'updates'
+            type: 'Partial<Pick<TReadModel, K>>'
+            description: 'Properties to update'
+
+        returns:
+          type: 'TReadModel'
+          description: 'New state with updates applied'
+
+        examples:
+          - id: 'safe-update'
+            code: |
+              const newState = this.updateState(readModel, {
+                count: readModel.count + 1,
+                lastModified: new Date(),
+                status: 'active'
+              });
+
+        custom-tags:
+          protected: 'true'
+          immutable: 'Creates new object, preserves immutability'
+
+      updateNestedState:
+        description: 'Helper for updating nested properties immutably'
+        business-context: 'Handles complex nested state transformations'
+
+        parameters:
+          - name: 'readModel'
+            type: 'TReadModel'
+            description: 'Current state'
+          - name: 'key'
+            type: 'K extends keyof TReadModel'
+            description: 'Property key to update'
+          - name: 'updater'
+            type: '(current: TReadModel[K]) => TReadModel[K]'
+            description: 'Function to transform the nested value'
+
+        returns:
+          type: 'TReadModel'
+          description: 'New state with nested update applied'
+
+        examples:
+          - id: 'nested-update'
+            code: |
+              const newState = this.updateNestedState(readModel, 'statistics', 
+                stats => ({
+                  ...stats,
+                  totalViews: stats.totalViews + 1,
+                  lastViewedAt: new Date()
+                })
+              );
+
+        custom-tags:
+          protected: 'true'
+          deep-update: 'Handles nested object updates'
+
+      updateArrayState:
+        description: 'Helper for updating array properties immutably'
+        business-context: 'Manages collections within read models'
+
+        parameters:
+          - name: 'readModel'
+            type: 'TReadModel'
+            description: 'Current state'
+          - name: 'key'
+            type: 'K extends keyof TReadModel'
+            description: 'Array property key'
+          - name: 'updater'
+            type: '(current: U[]) => TReadModel[K]'
+            description: 'Function to transform the array'
+
+        returns:
+          type: 'TReadModel'
+          description: 'New state with array update applied'
+
+        examples:
+          - id: 'array-update'
+            code: |
+              const newState = this.updateArrayState(readModel, 'items',
+                items => items.filter(item => item.active)
+              );
+
+              const withNewItem = this.updateArrayState(readModel, 'items',
+                items => [...items, newItem].sort((a, b) => b.priority - a.priority)
+              );
+
+        custom-tags:
+          protected: 'true'
+          collections: 'Array manipulation helper'

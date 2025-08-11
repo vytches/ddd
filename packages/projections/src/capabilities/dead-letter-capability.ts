@@ -10,23 +10,6 @@ import type {
   IProjectionLifecycleCapability,
 } from '../projection-interfaces';
 
-/**
- * @llm-summary DeadLetterCapability class for dead letter capability operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * DeadLetterCapability class implementing architectural component for dead letter capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DeadLetterCapability();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class DeadLetterCapability<TReadModel>
   extends Capability<'deadLetter'>
   implements IProjectionCapability, IProjectionLifecycleCapability<TReadModel>

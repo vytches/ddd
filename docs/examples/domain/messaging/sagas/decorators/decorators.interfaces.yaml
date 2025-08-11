@@ -1,0 +1,388 @@
+# Decorator Interfaces - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'decorators.interfaces'
+title: 'Saga Decorator Interfaces - Configuration Types'
+description: 'TypeScript interfaces for configuring saga decorators and middleware'
+business-context: 'Provides type-safe configuration for declarative saga programming'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  SagaDecoratorOptions:
+    description: 'Configuration options for @Saga decorator'
+    business-context: 'Complete saga configuration for business process automation'
+
+    properties:
+      - name: 'sagaType'
+        type: 'string'
+        description: 'Type identifier for the saga'
+        required: true
+
+      - name: 'displayName'
+        type: 'string'
+        description: 'Display name for monitoring and debugging'
+        required: false
+
+      - name: 'description'
+        type: 'string'
+        description: 'Description of saga purpose'
+        required: false
+
+      - name: 'defaultTimeout'
+        type: 'number'
+        description: 'Default timeout for saga completion (milliseconds)'
+        required: false
+
+      - name: 'maxInstances'
+        type: 'number'
+        description: 'Maximum number of concurrent instances'
+        required: false
+
+      - name: 'startEvents'
+        type: 'string[]'
+        description: 'Events that can start this saga'
+        required: false
+
+      - name: 'autoRegister'
+        type: 'boolean'
+        description: 'Auto-register with DI container'
+        required: false
+
+      - name: 'lifetime'
+        type: "'transient' | 'singleton' | 'scoped'"
+        description: 'Service lifetime for DI registration'
+        required: false
+
+      - name: 'context'
+        type: 'string'
+        description: 'Bounded context for DI isolation'
+        required: false
+
+  SagaEventHandlerOptions:
+    description: 'Configuration options for @SagaEventHandler decorator'
+    business-context: 'Event routing configuration for saga orchestration'
+
+    properties:
+      - name: 'eventType'
+        type: 'string | string[]'
+        description: 'Event type(s) this handler processes'
+        required: true
+
+      - name: 'canStartSaga'
+        type: 'boolean'
+        description: 'Whether this handler can start a new saga'
+        required: false
+
+      - name: 'canCompleteSaga'
+        type: 'boolean'
+        description: 'Whether this handler can complete a saga'
+        required: false
+
+      - name: 'correlationProperties'
+        type: 'string[]'
+        description: 'Correlation property paths for event matching'
+        required: false
+
+      - name: 'stepName'
+        type: 'string'
+        description: 'Step name for this handler'
+        required: false
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Maximum execution time (milliseconds)'
+        required: false
+
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Maximum retry attempts'
+        required: false
+
+      - name: 'retryDelay'
+        type: '{ initial: number; multiplier: number; maximum: number; }'
+        description: 'Retry delay configuration'
+        required: false
+
+      - name: 'idempotent'
+        type: 'boolean'
+        description: 'Whether execution should be idempotent'
+        required: false
+
+      - name: 'order'
+        type: 'number'
+        description: 'Execution order (lower numbers execute first)'
+        required: false
+
+  CompensationHandlerOptions:
+    description: 'Configuration options for @CompensationHandler decorator'
+    business-context: 'Compensation logic configuration for rollback operations'
+
+    properties:
+      - name: 'stepName'
+        type: 'string'
+        description: 'Step name this compensation handler is for'
+        required: true
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Maximum execution time (milliseconds)'
+        required: false
+
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Maximum retry attempts'
+        required: false
+
+      - name: 'critical'
+        type: 'boolean'
+        description: 'Whether compensation is critical (saga fails if compensation fails)'
+        required: false
+
+      - name: 'order'
+        type: 'number'
+        description: 'Compensation execution order (lower numbers execute first)'
+        required: false
+
+  ISagaMiddleware:
+    description: 'Interface for saga middleware components'
+    business-context: 'Cross-cutting concerns for saga execution pipeline'
+
+    methods:
+      before:
+        description: 'Execute before saga step'
+        parameters:
+          - name: 'context'
+            type: 'ISagaMiddlewareContext'
+            description: 'Execution context'
+          - name: 'next'
+            type: '() => Promise<void>'
+            description: 'Next middleware in chain'
+        returns:
+          type: 'Promise<void>'
+          description: 'Completion promise'
+
+      after:
+        description: 'Execute after saga step'
+        parameters:
+          - name: 'context'
+            type: 'ISagaMiddlewareContext'
+            description: 'Execution context'
+          - name: 'result'
+            type: 'unknown'
+            description: 'Step execution result'
+          - name: 'next'
+            type: '(result: unknown) => Promise<void>'
+            description: 'Next middleware in chain'
+        returns:
+          type: 'Promise<void>'
+          description: 'Completion promise'
+
+      onError:
+        description: 'Handle saga step error'
+        parameters:
+          - name: 'context'
+            type: 'ISagaMiddlewareContext'
+            description: 'Execution context'
+          - name: 'error'
+            type: 'Error'
+            description: 'Error that occurred'
+          - name: 'next'
+            type: '(error: Error) => Promise<void>'
+            description: 'Next error handler in chain'
+        returns:
+          type: 'Promise<void>'
+          description: 'Completion promise'
+
+  ISagaMiddlewareContext:
+    description: 'Context information for saga middleware'
+    business-context: 'Runtime context for middleware execution'
+
+    properties:
+      - name: 'sagaId'
+        type: 'string'
+        description: 'Saga identifier'
+
+      - name: 'sagaType'
+        type: 'string'
+        description: 'Saga type'
+
+      - name: 'stepName'
+        type: 'string'
+        description: 'Current step name'
+
+      - name: 'event'
+        type: 'unknown'
+        description: 'Triggering event'
+
+      - name: 'executionContext'
+        type: 'ISagaExecutionContext'
+        description: 'Execution context'
+
+      - name: 'sagaState'
+        type: 'unknown'
+        description: 'Saga state'
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Middleware metadata'
+
+      - name: 'startTime'
+        type: 'Date'
+        description: 'Start time for performance tracking'
+
+  SagaMetadata:
+    description: 'Complete saga metadata structure aggregating all decorations'
+    business-context: 'Runtime access to all saga configuration and metadata'
+
+    properties:
+      - name: 'saga'
+        type: 'SagaDecoratorOptions'
+        description: 'Saga configuration'
+        required: false
+
+      - name: 'eventHandlers'
+        type: 'Map<string, SagaEventHandlerOptions>'
+        description: 'Event handler configurations'
+        required: false
+
+      - name: 'compensationHandlers'
+        type: 'Map<string, CompensationHandlerOptions>'
+        description: 'Compensation handler configurations'
+        required: false
+
+      - name: 'steps'
+        type: 'Map<string, SagaStepOptions>'
+        description: 'Step configurations'
+        required: false
+
+      - name: 'correlations'
+        type: 'Map<string, SagaCorrelationOptions>'
+        description: 'Correlation configurations'
+        required: false
+
+      - name: 'middleware'
+        type: 'SagaMiddlewareOptions[]'
+        description: 'Middleware configurations'
+        required: false
+
+      - name: 'timeouts'
+        type: 'Map<string, TimeoutHandlerOptions>'
+        description: 'Timeout configurations'
+        required: false
+
+      - name: 'validations'
+        type: 'Map<string, SagaValidationOptions>'
+        description: 'Validation configurations'
+        required: false
+
+      - name: 'startSaga'
+        type: 'Map<string, StartSagaOptions>'
+        description: 'Start saga configurations'
+        required: false
+
+      - name: 'endSaga'
+        type: 'Map<string, EndSagaOptions>'
+        description: 'End saga configurations'
+        required: false
+
+# === FUNCTIONS ===
+functions:
+  isSagaMetadata:
+    description: 'Type guard function to check if object is saga metadata'
+    business-context: 'Runtime validation of saga metadata structures'
+
+    parameters:
+      - name: 'metadata'
+        type: 'unknown'
+        description: 'Object to validate'
+
+    returns:
+      type: 'metadata is SagaMetadata'
+      description: 'True if object is valid saga metadata'
+
+    examples:
+      - id: 'metadata-validation'
+        code: |
+          const potentialMetadata = getSomeMetadata();
+
+          if (isSagaMetadata(potentialMetadata)) {
+            // TypeScript now knows this is SagaMetadata
+            console.log('Saga type:', potentialMetadata.saga?.sagaType);
+            console.log('Handler count:', potentialMetadata.eventHandlers?.size);
+          }
+
+# === ADDITIONAL TYPES ===
+types:
+  StartSagaOptions:
+    description: 'Configuration for saga start behavior'
+    business-context: 'Controls saga instance creation policies'
+
+    properties:
+      - name: 'correlationProperties'
+        type: 'string[]'
+        description: 'Properties to use for correlation'
+        required: false
+
+      - name: 'maxInstancesPerCorrelation'
+        type: 'number'
+        description: 'Maximum number of saga instances for this correlation'
+        required: false
+
+      - name: 'createIfExists'
+        type: 'boolean'
+        description: 'Whether to create new instance if one already exists'
+        required: false
+
+      - name: 'sagaIdGenerator'
+        type: '(event: unknown, context: ISagaExecutionContext) => string'
+        description: 'Custom saga ID generation function'
+        required: false
+
+  EndSagaOptions:
+    description: 'Configuration for saga completion behavior'
+    business-context: 'Controls saga finalization and cleanup'
+
+    properties:
+      - name: 'compensateOnEnd'
+        type: 'boolean'
+        description: 'Whether to execute compensation on saga completion'
+        required: false
+
+      - name: 'completionValidator'
+        type: '(sagaState: unknown) => boolean'
+        description: 'Custom completion validation function'
+        required: false
+
+      - name: 'publishEvents'
+        type: 'string[]'
+        description: 'Events to publish on saga completion'
+        required: false
+
+  SagaMiddlewareOptions:
+    description: 'Configuration for saga middleware application'
+    business-context: 'Controls middleware pipeline configuration'
+
+    properties:
+      - name: 'middleware'
+        type: 'Constructor<ISagaMiddleware>[]'
+        description: 'Middleware classes to apply'
+
+      - name: 'order'
+        type: 'number'
+        description: 'Execution order for middleware'
+        required: false
+
+      - name: 'applyToAllSteps'
+        type: 'boolean'
+        description: 'Whether middleware applies to all steps'
+        required: false
+
+      - name: 'steps'
+        type: 'string[]'
+        description: 'Specific steps to apply middleware to'
+        required: false

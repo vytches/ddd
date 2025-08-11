@@ -1,0 +1,269 @@
+# command-bus.abstract - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'command-bus-abstract'
+title: 'ICommandBus Abstract Class - Command Bus Contract'
+description: 'Abstract base class defining the contract for CQRS command bus implementations'
+business-context: 'Service token and interface for command bus dependency injection'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  CommandConstructor:
+    description: 'Type alias for command class constructors'
+    business-context: 'Enables type-safe command registration with constructors'
+
+    definition: 'new (...args: unknown[]) => T'
+    generic-parameters:
+      - name: 'T'
+        constraint: 'extends ICommand'
+        default: 'ICommand'
+        description: 'Command type for constructor'
+
+    examples:
+      - id: 'basic-usage'
+        code: |
+          type CreateUserCommandConstructor = CommandConstructor<CreateUserCommand>;
+
+          const commandConstructor: CreateUserCommandConstructor = CreateUserCommand;
+          const instance = new commandConstructor({ name: 'John', email: 'john@example.com' });
+
+# === CLASSES ===
+classes:
+  ICommandBus:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class and service token for CQRS command bus implementations'
+      business-context: 'Defines contract for command dispatching and provides DI service token'
+
+      formats:
+        jsdoc:
+          description: 'Abstract command bus interface for dependency injection'
+        cli:
+          description: |
+            ## ICommandBus
+
+            Abstract command bus providing:
+            - Service token for dependency injection
+            - Contract for command bus implementations
+            - Handler registration methods (legacy)
+            - Middleware support interface
+            - Command execution contract
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        service-token: 'Used as DI service token'
+        implementation: 'CommandBus class'
+
+    # Abstract Methods
+    methods:
+      register:
+        description: 'Abstract method for registering command handlers (legacy)'
+        business-context: 'Defines contract for handler registration (deprecated in current implementation)'
+
+        parameters:
+          - name: 'commandType'
+            type: 'CommandConstructor<T>'
+            description: 'Command class constructor'
+          - name: 'handler'
+            type: 'ICommandHandler<T, TResult>'
+            description: 'Handler instance for the command'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'abstract-contract'
+            code: |
+              // This is the abstract contract - implementations may vary
+              abstract register<T extends ICommand, TResult = void>(
+                commandType: CommandConstructor<T>,
+                handler: ICommandHandler<T, TResult>
+              ): void;
+
+              // Current implementation throws deprecation error
+              // Use @CommandHandler decorator instead
+
+        custom-tags:
+          abstract: 'true'
+          deprecated-in-implementation: 'Current implementation throws error'
+          generic-constraints: 'T extends ICommand, TResult = void'
+
+      registerFactory:
+        description: 'Abstract method for registering command handler factories (legacy)'
+        business-context: 'Defines contract for factory-based handler registration (deprecated)'
+
+        parameters:
+          - name: 'commandType'
+            type: 'CommandConstructor<T>'
+            description: 'Command class constructor'
+          - name: 'factory'
+            type: '() => ICommandHandler<T, TResult>'
+            description: 'Factory function that creates handler instances'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          abstract: 'true'
+          deprecated-in-implementation: 'Current implementation throws error'
+          generic-constraints: 'T extends ICommand, TResult = void'
+
+      use:
+        description: 'Abstract method for adding middleware to command pipeline'
+        business-context: 'Defines contract for middleware registration and chaining'
+
+        parameters:
+          - name: 'middleware'
+            type: 'ICQRSMiddleware'
+            description: 'Middleware to add to the execution pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Command bus instance for method chaining'
+
+        examples:
+          - id: 'middleware-contract'
+            code: |
+              // Abstract contract
+              abstract use(middleware: ICQRSMiddleware): this;
+
+              // Enables fluent interface
+              commandBus
+                .use(new LoggingMiddleware())
+                .use(new ValidationMiddleware());
+
+        custom-tags:
+          abstract: 'true'
+          fluent-interface: 'Returns this for method chaining'
+
+      discoverHandlers:
+        description: 'Abstract method for discovering command handlers (legacy)'
+        business-context: 'Defines contract for automatic handler discovery (superseded by DI auto-discovery)'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          abstract: 'true'
+          deprecated-in-implementation: 'Current implementation does nothing'
+          replacement: 'CQRSDiscoveryPlugin with VytchesDDD'
+
+      execute:
+        description: 'Abstract method for executing commands through handlers'
+        business-context: 'Core contract for command dispatch and execution'
+
+        parameters:
+          - name: 'command'
+            type: 'T extends ICommand'
+            description: 'Command instance to execute'
+
+        returns:
+          type: 'Promise<TResult>'
+          description: 'Promise resolving to handler execution result'
+
+        examples:
+          - id: 'execution-contract'
+            code: |
+              // Abstract contract
+              abstract execute<T extends ICommand, TResult = void>(command: T): Promise<TResult>;
+
+              // Type-safe execution
+              const command = new CreateUserCommand(userData);
+              await commandBus.execute(command); // Returns Promise<void>
+
+              const orderCommand = new CreateOrderCommand(orderData);
+              const result: OrderResult = await commandBus.execute(orderCommand);
+
+        custom-tags:
+          abstract: 'true'
+          async-required: 'Must return Promise'
+          generic-constraints: 'T extends ICommand, TResult = void'
+          type-safety: 'Provides compile-time type checking'
+
+# === DEPENDENCY INJECTION USAGE ===
+di-patterns:
+  service-token:
+    description: 'Using ICommandBus as service token for DI'
+    examples:
+      - pattern: 'Constructor injection'
+        code: |
+          class OrderService {
+            constructor(private commandBus: ICommandBus) {}
+            
+            async createOrder(orderData: CreateOrderData): Promise<void> {
+              const command = new CreateOrderCommand(orderData);
+              await this.commandBus.execute(command);
+            }
+          }
+
+      - pattern: 'VytchesDDD registration'
+        code: |
+          // Register concrete implementation
+          const container = new SimpleContainer();
+          const commandBus = new CommandBus(container);
+
+          container.registerInstance<ICommandBus>('commandBus', commandBus);
+
+          // Or use VytchesDDD
+          VytchesDDD.registerInstance<ICommandBus>('commandBus', commandBus);
+
+      - pattern: 'Factory registration'
+        code: |
+          container.registerFactory<ICommandBus>('commandBus', () => {
+            return new CommandBus(container);
+          });
+
+  implementation-binding:
+    description: 'Binding abstract class to concrete implementation'
+    examples:
+      - pattern: 'Service registration'
+        code: |
+          // Register the concrete CommandBus as ICommandBus
+          container.register<ICommandBus>('commandBus', CommandBus);
+
+          // Resolve using abstract type
+          const commandBus = container.resolve<ICommandBus>('commandBus');
+
+      - pattern: 'Enhanced CommandBus binding'
+        code: |
+          // Register enhanced implementation
+          container.register<ICommandBus>('commandBus', EnhancedCommandBus);
+
+          // Consumer code remains unchanged
+          class MyService {
+            constructor(private commandBus: ICommandBus) {}
+          }
+
+# === ARCHITECTURAL PATTERNS ===
+architectural-benefits:
+  abstraction:
+    - 'Enables dependency inversion principle'
+    - 'Allows switching between implementations'
+    - 'Provides stable contract for consumers'
+    - 'Enables testing with mock implementations'
+
+  service-locator:
+    - 'Acts as service token for DI container'
+    - 'Enables consistent command bus resolution'
+    - 'Supports multiple implementations'
+    - 'Integrates with VytchesDDD service locator'
+
+  interface-segregation:
+    - 'Separates command bus concerns from implementation details'
+    - 'Provides minimal interface for consumers'
+    - 'Enables focused testing and mocking'
+    - 'Reduces coupling to specific implementations'

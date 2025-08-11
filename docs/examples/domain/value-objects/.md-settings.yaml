@@ -2,23 +2,23 @@
 # Inherits from docs/global-settings.yaml
 
 # === PACKAGE IDENTITY ===
-package-name: "value-objects"
-display-name: "DDD Value Objects"
-description: "Core value object implementations with enhanced validation"
+package-name: 'value-objects'
+display-name: 'DDD Value Objects'
+description: 'Core value object implementations with enhanced validation'
 
 # === HIERARCHICAL STRATEGY ===
 hierarchy:
-  strategy: "merge"
-  scope: "package"
+  strategy: 'merge'
+  scope: 'package'
 
 # === PACKAGE METADATA ===
-domain: "domain-modeling"
-complexity: "intermediate"
+domain: 'domain-modeling'
+complexity: 'intermediate'
 patterns:
-  - "value-object-pattern"
-  - "entity-id-pattern"
-  - "validation-pattern"
-  
+  - 'value-object-pattern'
+  - 'entity-id-pattern'
+  - 'validation-pattern'
+
 # === BUSINESS CONTEXT ===
 business-context: |
   Value objects are fundamental building blocks in Domain-Driven Design that represent 
@@ -27,19 +27,19 @@ business-context: |
 
 # === DEPENDENCIES ===
 dependencies:
-  - "@vytches/ddd-contracts"
-  - "@vytches/ddd-utils" 
-  - "@vytches/ddd-domain-primitives"
+  - '@vytches/ddd-contracts'
+  - '@vytches/ddd-utils'
+  - '@vytches/ddd-domain-primitives'
 
 # === FORMAT-SPECIFIC OVERRIDES ===
 formats:
   jsdoc:
-    description: "Value object implementations with validation"
-    business-context: "DDD value objects for identity and validation"
+    description: 'Value object implementations with validation'
+    business-context: 'DDD value objects for identity and validation'
   cli:
     description: |
       ## Value Objects Package
-      
+
       Enterprise-grade value object implementations providing:
       - Base value object functionality with equality comparison
       - Enhanced EntityId with LibUtils validation
@@ -51,10 +51,10 @@ formats:
 
 # === PACKAGE STRUCTURE ===
 main-exports:
-  - "BaseValueObject"
-  - "ValueObjectValidator" 
-  - "EntityId"
-  - "EntityIdFactory"
-  - "IEntityId"
-  - "IEntityIdFactory"
-  - "IdType"
+  - 'BaseValueObject'
+  - 'ValueObjectValidator'
+  - 'EntityId'
+  - 'EntityIdFactory'
+  - 'IEntityId'
+  - 'IEntityIdFactory'
+  - 'IdType'

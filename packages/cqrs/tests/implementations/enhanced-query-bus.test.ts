@@ -512,7 +512,7 @@ describe('EnhancedQueryBus', () => {
       const middlewareError = new Error('Middleware error');
 
       const errorMiddleware = {
-        async handle(context: any, next: () => Promise<unknown>) {
+        async handle(_context: any, _next: () => Promise<unknown>) {
           throw middlewareError;
         },
       };
@@ -550,7 +550,7 @@ describe('EnhancedQueryBus', () => {
         try {
           const result = await enhancedQueryBus.execute(query);
           results.push(result);
-        } catch (error) {
+        } catch (_error) {
           errorCount++;
         }
       }

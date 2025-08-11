@@ -6,7 +6,6 @@
 import type { ResolvedMetadata } from './types';
 
 export class FormatSpecificResolver {
-
   /**
    * Resolve metadata for specific output format (jsdoc vs cli)
    */
@@ -76,7 +75,7 @@ export class FormatSpecificResolver {
       ['link', '@link'],
       ['todo', '@todo'],
       ['note', '@note'],
-      ['license', '@license']
+      ['license', '@license'],
     ];
 
     // Process standard fields
@@ -90,14 +89,14 @@ export class FormatSpecificResolver {
     // Add warnings (array field)
     if (metadata.warnings && Array.isArray(metadata.warnings) && metadata.warnings.length > 0) {
       metadata.warnings.forEach(warning => {
-        lines.push(` * @warning ${  warning}`);
+        lines.push(` * @warning ${warning}`);
       });
       processedFields.add('warnings');
     }
 
     // Add tags (array field)
     if (metadata.tags && Array.isArray(metadata.tags) && metadata.tags.length > 0) {
-      lines.push(` * @tags ${  metadata.tags.join(', ')}`);
+      lines.push(` * @tags ${metadata.tags.join(', ')}`);
       processedFields.add('tags');
     }
 
@@ -135,10 +134,26 @@ export class FormatSpecificResolver {
         lines.push(' * @example');
         lines.push(' * ```typescript');
 
+        // Handle both string examples and object examples with { id, code }
+        let exampleCode: string;
+        if (typeof example === 'string') {
+          exampleCode = example;
+        } else if (
+          example &&
+          typeof example === 'object' &&
+          'code' in example &&
+          typeof (example as any).code === 'string'
+        ) {
+          exampleCode = (example as any).code;
+        } else {
+          // Fallback for unexpected format
+          exampleCode = String(example);
+        }
+
         // Split example by lines and add proper indentation
-        const exampleLines = example.split('\n');
+        const exampleLines = exampleCode.split('\n');
         exampleLines.forEach(line => {
-          lines.push(` * ${  line}`);
+          lines.push(` * ${line}`);
         });
 
         lines.push(' * ```');
@@ -165,9 +180,7 @@ export class FormatSpecificResolver {
     }
 
     // Convert camelCase to kebab-case
-    const kebabCase = key
-      .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-      .toLowerCase();
+    const kebabCase = key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
 
     return `@${kebabCase}`;
   }

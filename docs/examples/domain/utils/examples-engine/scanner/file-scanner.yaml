@@ -1,0 +1,306 @@
+# file-scanner - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'file-scanner'
+title: 'FileScanner - Directory Scanner'
+description: 'File system scanner for markdown example files'
+business-context: 'Discovers and parses example documentation files for metadata extraction'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  FileScanner:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'File scanner for discovering and parsing example documentation'
+      business-context: 'Enables automatic discovery of example files in documentation structure'
+
+      formats:
+        jsdoc:
+          description: 'File system scanner implementation'
+        cli:
+          description: |
+            ## FileScanner
+
+            Scanning features:
+            - Recursive directory traversal
+            - Markdown file discovery
+            - Metadata extraction from headers
+            - Complexity level detection
+            - File accessibility checks
+            - Modification time tracking
+            - Timeout protection
+
+      custom-tags:
+        since: '2.0.0'
+        implements: 'IFileScanner'
+        pattern: 'Scanner'
+
+    # Methods
+    methods:
+      scanDirectory:
+        description: 'Scan directory recursively for markdown files with timeout protection'
+        business-context: 'Discovers all documentation files in directory structure'
+
+        parameters:
+          - name: 'path'
+            type: 'string'
+            description: 'Directory path to scan'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Array of markdown file paths'
+
+        examples:
+          - id: 'scan-dir'
+            code: |
+              const scanner = new FileScanner();
+              const files = await scanner.scanDirectory('/docs/examples');
+
+              console.log(`Found ${files.length} markdown files`);
+              // [
+              //   '/docs/examples/domain/aggregates/basic.md',
+              //   '/docs/examples/domain/aggregates/intermediate.md',
+              //   '/docs/examples/domain/repositories/usage.md'
+              // ]
+
+        custom-tags:
+          async: 'true'
+          public: 'true'
+
+      _scanDirectoryRecursive:
+        description: 'Internal recursive directory scanning method'
+        business-context: 'Implements actual recursive traversal logic'
+
+        parameters:
+          - name: 'dir'
+            type: 'string'
+            description: 'Directory to scan'
+          - name: 'files'
+            type: 'string[]'
+            description: 'Accumulator array'
+          - name: 'visited'
+            type: 'Set<string>'
+            description: 'Visited directories'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Populates files array'
+
+        custom-tags:
+          private: 'true'
+          recursive: 'true'
+
+      parseExampleFile:
+        description: 'Parse example file and extract metadata'
+        business-context: 'Converts markdown file into structured example data'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to markdown file'
+
+        returns:
+          type: 'Promise<ExampleFile>'
+          description: 'Parsed example file with metadata'
+
+        examples:
+          - id: 'parse-file'
+            code: |
+              const example = await scanner.parseExampleFile(
+                '/docs/examples/domain/aggregates/commit.md'
+              );
+
+              console.log(example);
+              // {
+              //   path: '/docs/examples/domain/aggregates/commit.md',
+              //   content: '# Commit Example...',
+              //   metadata: {
+              //     layer: 'domain',
+              //     package: 'aggregates',
+              //     methodName: 'commit',
+              //     complexity: 'intermediate',
+              //     version: '1.0.0'
+              //   }
+              // }
+
+        custom-tags:
+          async: 'true'
+          public: 'true'
+
+      extractMetadata:
+        description: 'Extract metadata from markdown file headers'
+        business-context: 'Parses YAML frontmatter and markdown headers for metadata'
+
+        parameters:
+          - name: 'content'
+            type: 'string'
+            description: 'File content'
+
+        returns:
+          type: "ExampleFile['metadata']"
+          description: 'Extracted metadata object'
+
+        examples:
+          - id: 'extract-meta'
+            code: |
+              const content = `
+              # Example Title
+
+              **Version**: 1.0.0
+              **Package**: @vytches/ddd-aggregates
+              **Complexity**: intermediate
+              **Domain**: domain-modeling
+
+              ## Description
+              Example description...
+              `;
+
+              const metadata = scanner.extractMetadata(content);
+              // {
+              //   version: '1.0.0',
+              //   package: '@vytches/ddd-aggregates',
+              //   complexity: 'intermediate',
+              //   domain: 'domain-modeling'
+              // }
+
+        custom-tags:
+          public: 'true'
+          parser: 'true'
+
+      extractComplexityFromPath:
+        description: 'Extract complexity level from file path'
+        business-context: 'Infers complexity from directory structure'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path'
+
+        returns:
+          type: 'ComplexityLevel'
+          description: 'Detected complexity level'
+
+        examples:
+          - id: 'extract-complexity'
+            code: |
+              // Path-based detection
+              extractComplexityFromPath('/examples/basic/usage.md')        // 'basic'
+              extractComplexityFromPath('/examples/intermediate/flow.md')  // 'intermediate'
+              extractComplexityFromPath('/examples/advanced/patterns.md')  // 'advanced'
+              extractComplexityFromPath('/examples/usage.md')              // 'basic' (default)
+
+        custom-tags:
+          private: 'true'
+          heuristic: 'true'
+
+      isFileAccessible:
+        description: 'Check if file exists and is readable'
+        business-context: 'Validates file accessibility before processing'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path to check'
+
+        returns:
+          type: 'Promise<boolean>'
+          description: 'True if accessible'
+
+        examples:
+          - id: 'check-access'
+            code: |
+              const accessible = await scanner.isFileAccessible('/docs/example.md');
+
+              if (accessible) {
+                const content = await scanner.parseExampleFile('/docs/example.md');
+              } else {
+                console.log('File not accessible');
+              }
+
+        custom-tags:
+          async: 'true'
+          public: 'true'
+
+      getFileModificationTime:
+        description: 'Get file modification time for caching'
+        business-context: 'Tracks file changes for cache invalidation'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path'
+
+        returns:
+          type: 'Promise<Date>'
+          description: 'Last modification time'
+
+        examples:
+          - id: 'mod-time'
+            code: |
+              const modTime = await scanner.getFileModificationTime('/docs/example.md');
+
+              console.log(`File last modified: ${modTime.toISOString()}`);
+
+              // Use for cache validation
+              if (modTime > cache.lastUpdate) {
+                // Invalidate cache
+                cache.clear(filePath);
+              }
+
+        custom-tags:
+          async: 'true'
+          public: 'true'
+          caching: 'true'
+
+# === EXAMPLES ===
+examples:
+  - id: 'complete-scanning'
+    description: 'Complete file scanning workflow'
+    code: |
+      const scanner = new FileScanner();
+
+      // Scan for all example files
+      const files = await scanner.scanDirectory('/docs/examples');
+      console.log(`Discovered ${files.length} example files`);
+
+      // Parse each file with metadata
+      const examples: ExampleFile[] = [];
+
+      for (const filePath of files) {
+        // Check accessibility
+        if (await scanner.isFileAccessible(filePath)) {
+          try {
+            const example = await scanner.parseExampleFile(filePath);
+            examples.push(example);
+            
+            // Track modification for caching
+            const modTime = await scanner.getFileModificationTime(filePath);
+            console.log(`Parsed: ${filePath} (modified: ${modTime.toISOString()})`);
+          } catch (error) {
+            console.error(`Failed to parse ${filePath}:`, error);
+          }
+        }
+      }
+
+      // Group by complexity
+      const byComplexity = examples.reduce((acc, ex) => {
+        const level = ex.metadata.complexity || 'basic';
+        if (!acc[level]) acc[level] = [];
+        acc[level].push(ex);
+        return acc;
+      }, {} as Record<string, ExampleFile[]>);
+
+      console.log('Examples by complexity:');
+      console.log(`Basic: ${byComplexity.basic?.length || 0}`);
+      console.log(`Intermediate: ${byComplexity.intermediate?.length || 0}`);
+      console.log(`Advanced: ${byComplexity.advanced?.length || 0}`);

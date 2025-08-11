@@ -1,19 +1,19 @@
 import type {
   IAdvancedEventReplay,
-  IReplaySession,
-  IReplayFilter,
+  IAdvancedEventStore,
   IReplayConfig,
-  IReplayResult,
+  IReplayFilter,
   IReplayProgress,
+  IReplayResult,
+  IReplaySession,
+  IStoredEvent,
+  ReplayErrorHandler,
   ReplayEventHandler,
   ReplayProgressHandler,
-  ReplayErrorHandler,
-  IStoredEvent,
-  IAdvancedEventStore,
 } from '@vytches/ddd-contracts';
 
-import { Logger } from '@vytches/ddd-logging';
 import type { ILogger } from '@vytches/ddd-logging';
+import { Logger } from '@vytches/ddd-logging';
 
 /**
  * Default replay configuration
@@ -29,23 +29,6 @@ const DEFAULT_REPLAY_CONFIG: Required<IReplayConfig> = {
   progressInterval: 1000,
 };
 
-/**
- * @llm-summary EventReplayEngine class for event replay engine operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EventReplayEngine class implementing infrastructure service for event replay engine operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventReplayEngine();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class EventReplayEngine implements IAdvancedEventReplay {
   private readonly logger: ILogger;
   private readonly activeSessions = new Map<string, ReplaySession>();

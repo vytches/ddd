@@ -1,23 +1,6 @@
-import type { ExecutionContext } from './middleware.interface';
 import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../interfaces';
+import type { ExecutionContext } from './middleware.interface';
 
-/**
- * @llm-summary CQRSExecutionContext class for c q r s execution context operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * CQRSExecutionContext class implementing architectural component for c q r s execution context operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CQRSExecutionContext();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class CQRSExecutionContext implements ExecutionContext {
   private _metadata = new Map<string, unknown>();
 

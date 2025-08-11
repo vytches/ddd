@@ -1,0 +1,28 @@
+# Sagas Middleware Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Sagas Middleware - Export Module'
+description: 'Re-exports saga middleware components'
+business-context: 'Cross-cutting concerns for saga execution'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  description: 'Saga middleware exports'
+  items:
+    - from: './saga-middleware'
+      exports:
+        [
+          'SagaMiddlewarePipeline',
+          'LoggingMiddleware',
+          'PerformanceMonitoringMiddleware',
+          'RetryMiddleware',
+          'CircuitBreakerMiddleware',
+          'SecurityMiddleware',
+          'AuditMiddleware',
+        ]

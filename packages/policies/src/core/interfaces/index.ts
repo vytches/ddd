@@ -1,12 +1,12 @@
 export {
-  type PolicyCondition,
   type IBusinessPolicy,
+  type IGroupedPolicyComposer,
   type IPolicyComposer,
-  type PolicyRequest,
-  type PolicyContext,
-  type PolicyDefinition,
   type IPolicyConditionalBuilder,
   type IPolicyConditionalElse,
-  type IGroupedPolicyComposer,
+  type PolicyCondition,
+  type PolicyContext,
+  type PolicyDefinition,
+  type PolicyRequest,
 } from './business-policy.interface';
-export type { IPolicyRegistry, PolicyQuery, IUnifiedRegistry } from './policy-registry.interface';
+export type { IPolicyRegistry, IUnifiedRegistry, PolicyQuery } from './policy-registry.interface';

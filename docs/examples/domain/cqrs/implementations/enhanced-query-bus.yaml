@@ -1,0 +1,417 @@
+# enhanced-query-bus - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'enhanced-query-bus'
+title: 'EnhancedQueryBus - Query Bus with Metrics'
+description: 'Enhanced query bus with built-in performance metrics and logging middleware'
+business-context: 'Production-ready query bus with observability and performance tracking for read operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  EnhancedQueryBus:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enhanced query bus with built-in metrics collection and logging middleware for read operations'
+      business-context: 'Production-ready query bus providing observability and performance monitoring specifically optimized for queries'
+
+      formats:
+        jsdoc:
+          description: 'EnhancedQueryBus with performance metrics and built-in logging for queries'
+        cli:
+          description: |
+            ## EnhancedQueryBus
+
+            Production-ready query bus featuring:
+            - Built-in performance metrics collection for read operations
+            - Automatic logging middleware integration
+            - Query execution time tracking and averages
+            - Read operation error rate monitoring
+            - Metrics reporting and reset capabilities optimized for queries
+            - All standard QueryBus functionality with type-safe results
+
+      custom-tags:
+        extends: 'QueryBus'
+        production-ready: 'Includes observability features for read operations'
+        read-optimized: 'Specifically designed for query performance monitoring'
+
+    # Private Properties (for documentation completeness)
+    properties:
+      metrics:
+        description: 'Internal metrics collection object for query operations'
+        type: '{ executionCount: number; totalExecutionTime: number; errors: number }'
+        readonly: false
+        private: true
+        business-context: 'Tracks query execution statistics for read operation monitoring and optimization'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates enhanced query bus with metrics and logging for read operations'
+        business-context: 'Initializes query bus with built-in observability features optimized for queries'
+
+        parameters:
+          - name: 'container'
+            type: 'IDependencyContainer'
+            description: 'Dependency injection container for query handler resolution'
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const container = new SimpleContainer();
+              const queryBus = new EnhancedQueryBus(container);
+
+              // Built-in logging middleware is automatically added for queries
+              // Metrics collection starts immediately for read operations
+
+          - id: 'with-caching-middleware'
+            code: |
+              const container = new SimpleContainer();
+              const enhancedQueryBus = new EnhancedQueryBus(container);
+
+              // Add query-specific middleware (logging is already included)
+              enhancedQueryBus
+                .use(new CacheMiddleware({ ttl: 300, maxSize: 1000 }))
+                .use(new ValidationMiddleware())
+                .use(new PerformanceMiddleware({ slowQueryThreshold: 500 }));
+
+          - id: 'read-model-optimization'
+            code: |
+              const container = new SimpleContainer();
+              const enhancedQueryBus = new EnhancedQueryBus(container);
+
+              // Add read-specific middleware
+              enhancedQueryBus
+                .use(new ReadModelRefreshMiddleware())
+                .use(new QueryCacheMiddleware())
+                .use(new ReadOnlyTransactionMiddleware());
+
+              // Monitor query performance for read model optimization
+              setInterval(() => {
+                const metrics = enhancedQueryBus.getMetrics();
+                if (metrics.averageExecutionTime > 200) {
+                  console.warn('Read model may need optimization:', {
+                    avgTime: metrics.averageExecutionTime,
+                    queryCount: metrics.executionCount
+                  });
+                }
+              }, 30000); // Check every 30 seconds
+
+        custom-tags:
+          automatic-features: 'Automatically includes LoggingMiddleware for queries'
+          metrics-start: 'Query metrics collection begins immediately'
+
+      execute:
+        description: 'Executes query with performance tracking and metrics collection for read operations'
+        business-context: 'Standard query execution enhanced with automatic metrics collection optimized for read patterns'
+
+        parameters:
+          - name: 'query'
+            type: 'T extends IQuery<R>'
+            description: 'Query instance to execute'
+
+        returns:
+          type: 'Promise<R>'
+          description: 'Promise resolving to query result with strong typing'
+
+        throws:
+          - type: 'HandlerNotFoundError'
+            description: 'When no handler is registered for query type'
+          - type: 'Any handler errors'
+            description: 'Re-throws errors from query handlers after updating error metrics'
+
+        examples:
+          - id: 'basic-query-execution-with-metrics'
+            code: |
+              const query = new GetUserQuery('user-123');
+
+              // Execute query - metrics are collected automatically
+              const user: User = await enhancedQueryBus.execute(query);
+
+              // Check metrics after execution
+              const metrics = enhancedQueryBus.getMetrics();
+              console.log(`Executed ${metrics.executionCount} queries`);
+              console.log(`Average query time: ${metrics.averageExecutionTime}ms`);
+
+          - id: 'performance-monitoring-for-queries'
+            code: |
+              // Monitor query performance patterns
+              const queries = [
+                new GetUserQuery('user-1'),
+                new GetOrdersQuery({ customerId: 'user-1' }),
+                new GetAnalyticsQuery({ dateRange: lastMonth })
+              ];
+
+              for (const query of queries) {
+                const startTime = performance.now();
+                
+                try {
+                  const result = await enhancedQueryBus.execute(query);
+                  const executionTime = performance.now() - startTime;
+                  
+                  // Log slow queries for optimization
+                  if (executionTime > 100) {
+                    console.warn('Slow query detected:', {
+                      queryType: query.constructor.name,
+                      executionTime,
+                      result: result ? 'success' : 'empty'
+                    });
+                  }
+                } catch (error) {
+                  console.error(`Query failed: ${query.constructor.name}`, error);
+                }
+              }
+
+              const metrics = enhancedQueryBus.getMetrics();
+              console.log('Query batch metrics:', metrics);
+
+          - id: 'caching-optimization-with-metrics'
+            code: |
+              class CacheOptimizedQueryExecution {
+                constructor(private queryBus: EnhancedQueryBus) {}
+                
+                async executeWithCacheMetrics<T extends IQuery<R>, R>(query: T): Promise<R> {
+                  const beforeMetrics = this.queryBus.getMetrics();
+                  
+                  const result = await this.queryBus.execute(query);
+                  
+                  const afterMetrics = this.queryBus.getMetrics();
+                  const executionTime = afterMetrics.totalExecutionTime - beforeMetrics.totalExecutionTime;
+                  
+                  // Log cache effectiveness
+                  if (executionTime < 10) { // Likely a cache hit
+                    console.log(`Cache hit for ${query.constructor.name}: ${executionTime}ms`);
+                  } else {
+                    console.log(`Cache miss for ${query.constructor.name}: ${executionTime}ms`);
+                  }
+                  
+                  return result;
+                }
+              }
+
+        custom-tags:
+          override: 'Overrides base QueryBus.execute method'
+          metrics-collection: 'Automatically collects query execution time and error statistics'
+          performance-tracking: 'Uses performance.now() for accurate query timing'
+          type-safety: 'Maintains strong typing for query results'
+
+      getMetrics:
+        description: 'Returns current query bus performance metrics for read operations'
+        business-context: 'Provides insights into query execution patterns for read model optimization and caching strategies'
+
+        returns:
+          type: '{ executionCount: number; totalExecutionTime: number; errors: number; averageExecutionTime: number }'
+          description: 'Current query metrics including calculated average execution time'
+
+        examples:
+          - id: 'query-performance-dashboard'
+            code: |
+              const metrics = enhancedQueryBus.getMetrics();
+
+              const queryDashboard = {
+                readOperations: {
+                  totalQueries: metrics.executionCount,
+                  successfulQueries: metrics.executionCount - metrics.errors,
+                  failedQueries: metrics.errors,
+                  successRate: `${(((metrics.executionCount - metrics.errors) / metrics.executionCount) * 100).toFixed(2)}%`,
+                  averageResponseTime: `${metrics.averageExecutionTime.toFixed(2)}ms`
+                },
+                performance: {
+                  status: metrics.averageExecutionTime > 100 ? 'SLOW' : 'OPTIMAL',
+                  cacheEffectiveness: metrics.averageExecutionTime < 50 ? 'HIGH' : 'LOW'
+                },
+                recommendations: this.generateReadOptimizationRecommendations(metrics)
+              };
+
+              console.log('Query Performance Dashboard:', queryDashboard);
+
+          - id: 'read-model-optimization-metrics'
+            code: |
+              class ReadModelOptimizer {
+                constructor(private queryBus: EnhancedQueryBus) {}
+                
+                generateOptimizationReport() {
+                  const metrics = this.queryBus.getMetrics();
+                  
+                  return {
+                    readPerformance: {
+                      totalReads: metrics.executionCount,
+                      averageReadTime: metrics.averageExecutionTime,
+                      readErrorRate: (metrics.errors / metrics.executionCount) * 100
+                    },
+                    optimizationSuggestions: [
+                      metrics.averageExecutionTime > 200 && 'Consider read model denormalization',
+                      metrics.averageExecutionTime > 100 && 'Implement query result caching',
+                      metrics.errors / metrics.executionCount > 0.05 && 'Review read model consistency',
+                      metrics.executionCount > 1000 && metrics.averageExecutionTime > 50 && 'Consider read replicas'
+                    ].filter(Boolean),
+                    cacheRecommendations: {
+                      enableCaching: metrics.averageExecutionTime > 50,
+                      suggestedTTL: Math.min(300, Math.max(60, metrics.averageExecutionTime)),
+                      maxCacheSize: Math.ceil(metrics.executionCount / 10)
+                    }
+                  };
+                }
+              }
+
+          - id: 'monitoring-integration-for-reads'
+            code: |
+              // Export query-specific metrics to monitoring system
+              class QueryMetricsExporter {
+                constructor(private enhancedQueryBus: EnhancedQueryBus) {}
+                
+                exportQueryMetrics() {
+                  const metrics = this.enhancedQueryBus.getMetrics();
+                  
+                  return {
+                    'query_bus_reads_total': metrics.executionCount,
+                    'query_bus_read_errors_total': metrics.errors,
+                    'query_bus_read_time_avg_ms': metrics.averageExecutionTime,
+                    'query_bus_read_time_total_ms': metrics.totalExecutionTime,
+                    'query_bus_cache_hit_rate': this.calculateCacheHitRate(metrics),
+                    'query_bus_read_throughput_per_sec': this.calculateReadThroughput(metrics)
+                  };
+                }
+                
+                private calculateCacheHitRate(metrics: any): number {
+                  // Assume cache hits have < 10ms execution time
+                  const estimatedCacheHits = metrics.executionCount * 0.7; // Estimate
+                  return (estimatedCacheHits / metrics.executionCount) * 100;
+                }
+                
+                private calculateReadThroughput(metrics: any): number {
+                  const timeWindowSeconds = 60; // Last minute
+                  return metrics.executionCount / timeWindowSeconds;
+                }
+              }
+
+        custom-tags:
+          calculated-field: 'averageExecutionTime is calculated from totalExecutionTime / executionCount'
+          immutable-snapshot: 'Returns snapshot of current query metrics'
+          read-optimized: 'Metrics designed for read operation analysis'
+
+      resetMetrics:
+        description: 'Resets all query performance metrics to zero'
+        business-context: 'Enables metrics reset for testing or periodic reporting cycles in read operations'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'periodic-read-metrics-reset'
+            code: |
+              // Reset query metrics hourly for fresh read performance tracking
+              setInterval(() => {
+                const metrics = enhancedQueryBus.getMetrics();
+                
+                // Log hourly read summary before reset
+                console.log('Hourly Query Performance Summary:', {
+                  totalQueries: metrics.executionCount,
+                  averageReadTime: metrics.averageExecutionTime,
+                  readErrorRate: (metrics.errors / metrics.executionCount) * 100,
+                  queryThroughput: metrics.executionCount / 3600 // per second
+                });
+                
+                // Reset for next period
+                enhancedQueryBus.resetMetrics();
+              }, 60 * 60 * 1000); // Hourly reset
+
+          - id: 'read-model-testing-reset'
+            code: |
+              // Reset metrics before each read model test
+              beforeEach(() => {
+                enhancedQueryBus.resetMetrics();
+                
+                const metrics = enhancedQueryBus.getMetrics();
+                expect(metrics.executionCount).toBe(0);
+                expect(metrics.errors).toBe(0);
+                expect(metrics.totalExecutionTime).toBe(0);
+                expect(metrics.averageExecutionTime).toBe(0);
+              });
+
+          - id: 'performance-benchmark-reset'
+            code: |
+              // Reset metrics for read performance benchmarking
+              class QueryPerformanceBenchmark {
+                constructor(private queryBus: EnhancedQueryBus) {}
+                
+                async benchmarkQueries(queries: IQuery<any>[]): Promise<BenchmarkResult> {
+                  // Reset metrics before benchmark
+                  this.queryBus.resetMetrics();
+                  
+                  const startTime = performance.now();
+                  
+                  // Execute all queries
+                  for (const query of queries) {
+                    try {
+                      await this.queryBus.execute(query);
+                    } catch (error) {
+                      // Errors are tracked in metrics
+                    }
+                  }
+                  
+                  const endTime = performance.now();
+                  const metrics = this.queryBus.getMetrics();
+                  
+                  return {
+                    totalQueries: queries.length,
+                    successfulQueries: metrics.executionCount - metrics.errors,
+                    averageQueryTime: metrics.averageExecutionTime,
+                    totalBenchmarkTime: endTime - startTime,
+                    queriesPerSecond: queries.length / ((endTime - startTime) / 1000)
+                  };
+                }
+              }
+
+        custom-tags:
+          side-effects: 'Resets internal query metrics state'
+          testing-utility: 'Useful for read operation test isolation'
+          benchmarking: 'Essential for query performance benchmarking'
+
+# === READ-SPECIFIC PATTERNS ===
+read-patterns:
+  caching-strategies:
+    description: 'Query bus optimization with caching middleware'
+    examples:
+      - pattern: 'Multi-level caching'
+        code: |
+          enhancedQueryBus
+            .use(new L1CacheMiddleware({ ttl: 60, maxSize: 100 }))
+            .use(new L2CacheMiddleware({ ttl: 300, maxSize: 1000 }))
+            .use(new DatabaseCacheMiddleware());
+
+      - pattern: 'Cache invalidation'
+        code: |
+          class SmartCacheMiddleware implements ICQRSMiddleware {
+            async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+              if (context.type === 'query') {
+                const cacheKey = this.generateCacheKey(context.commandOrQuery);
+                const cached = await this.cache.get(cacheKey);
+                
+                if (cached && !this.isStale(cached)) {
+                  return cached.data;
+                }
+              }
+              
+              return next();
+            }
+          }
+
+  read-model-optimization:
+    description: 'Using metrics to optimize read models'
+    strategies:
+      - 'Monitor slow queries to identify denormalization opportunities'
+      - 'Track query patterns to optimize indexing strategies'
+      - 'Analyze error rates to identify read model consistency issues'
+      - 'Use execution time trends for read replica scaling decisions'
+      - 'Benchmark query performance after read model changes'

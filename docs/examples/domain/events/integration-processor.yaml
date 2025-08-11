@@ -1,0 +1,99 @@
+# integration-processor - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'integration-processor'
+title: 'IntegrationEventProcessor - Domain to Integration Event Processor'
+description: 'Processes domain events and transforms them to integration events'
+business-context: 'Bridges domain events to cross-context integration events'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  IntegrationEventProcessor:
+    class-doc:
+      description: 'Processes domain events by transforming them to integration events'
+      business-context: 'Core component for domain-to-integration event transformation'
+
+      formats:
+        jsdoc:
+          description: 'Domain to integration event processor'
+          business-context: 'Cross-context event transformation'
+        cli:
+          description: |
+            ## IntegrationEventProcessor Class
+            Processes domain events and transforms them into integration
+            events using registered transformers for cross-context communication.
+          business-context: |
+            Essential component for bounded context integration. Automatically
+            converts internal domain events to external integration events.
+
+      implements: ['IEventProcessor']
+
+      custom-tags:
+        complexity: 'Complex'
+        transformation: 'Domain to integration event conversion'
+        cross-context: 'Bounded context bridge'
+
+    methods:
+      constructor:
+        description: 'Creates new integration event processor instance'
+        business-context: 'Initializes processor with transformer registry'
+
+        parameters:
+          - name: 'transformerRegistry'
+            type: 'IntegrationEventTransformerRegistry'
+            description: 'Registry of event transformers'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const transformerRegistry = new IntegrationEventTransformerRegistry();
+              const processor = new IntegrationEventProcessor(transformerRegistry);
+
+      process:
+        description: 'Processes domain event by transforming to integration events'
+        business-context: 'Core processing method for cross-context event transformation'
+
+        parameters:
+          - name: 'event'
+            type: 'IDomainEvent'
+            description: 'Domain event to process'
+          - name: 'eventBus'
+            type: 'UnifiedEventBus'
+            optional: true
+            description: 'Event bus for publishing integration events'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Resolves when processing is complete'
+
+        custom-tags:
+          async: 'Asynchronous operation'
+          transformation: 'Domain to integration conversion'
+          publishing: 'Publishes to event bus'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const domainEvent = new OrderCreatedEvent({
+                orderId: 'order-123',
+                customerId: 'customer-456'
+              });
+
+              await processor.process(domainEvent, eventBus);
+              // Domain event transformed and published as integration events
+
+          - id: 'with-multiple-targets'
+            code: |
+              // Single domain event may generate multiple integration events
+              const userEvent = new UserRegisteredEvent(userData);
+
+              await processor.process(userEvent, eventBus);
+              // May generate:
+              // - WelcomeEmailRequestEvent (to email service)
+              // - UserAccountCreatedEvent (to billing service)
+              // - NewUserAnalyticsEvent (to analytics service)

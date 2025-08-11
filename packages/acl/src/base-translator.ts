@@ -1,25 +1,8 @@
 import type { Result } from '@vytches/ddd-utils';
 
-import type { IModelTranslator } from './acl.interfaces';
 import { TranslationError } from './acl-errors';
+import type { IModelTranslator } from './acl.interfaces';
 
-/**
- * @llm-summary BaseModelTranslator class for base model translator operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * BaseModelTranslator class implementing integration layer component for base model translator operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseModelTranslator();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseModelTranslator<TDomain, TExternal>
   implements IModelTranslator<TDomain, TExternal>
 {

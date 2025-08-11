@@ -1,29 +1,29 @@
 // Export interfaces first (they contain the core definitions)
 export type {
-  PolicyCondition,
-  IPolicyRegistry,
-  PolicyQuery,
-  IUnifiedRegistry,
   IBusinessPolicy,
+  IGroupedPolicyComposer,
   IPolicyComposer,
-  PolicyRequest,
-  PolicyContext,
-  PolicyDefinition,
   IPolicyConditionalBuilder,
   IPolicyConditionalElse,
-  IGroupedPolicyComposer,
+  IPolicyRegistry,
+  IUnifiedRegistry,
+  PolicyCondition,
+  PolicyContext,
+  PolicyDefinition,
+  PolicyQuery,
+  PolicyRequest,
 } from './interfaces';
 
 // Export models (but avoid re-exporting types that are already in interfaces)
 export {
-  PolicyViolation,
-  PolicyViolationCollection,
   PolicyDefinitionBuilder,
   PolicyMetadataBuilder,
-  type PolicyViolationSeverity,
-  type PolicyViolationOptions,
-  type PolicyViolationData,
+  PolicyViolation,
+  PolicyViolationCollection,
   type PolicyMetadata,
+  type PolicyViolationData,
+  type PolicyViolationOptions,
+  type PolicyViolationSeverity,
 } from './models';
 
 // Export base implementations

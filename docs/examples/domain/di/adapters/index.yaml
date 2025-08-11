@@ -1,0 +1,74 @@
+# Adapters Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'DI Adapters Module Index'
+description: 'Container adapters for popular DI frameworks'
+business-context: 'Exports adapter implementations for external framework integration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  BaseContainerAdapter:
+    description: 'Abstract base class for external framework adapters'
+    business-context: 'Enables integration with NestJS, InversifyJS, TSyringe, and other DI frameworks'
+    source: './base-adapter'
+    export-type: 'class'
+
+    formats:
+      jsdoc:
+        description: 'Base adapter for DI framework integration'
+      cli:
+        description: |
+          ## BaseContainerAdapter
+          Abstract base class for creating framework-specific adapters:
+          - Implements IDependencyContainer interface
+          - Provides common adapter utilities
+          - Framework-agnostic service resolution patterns
+
+# === MODULE OVERVIEW ===
+module:
+  purpose: 'Framework Integration Adapters'
+  description: 'Container adapters that enable VytchesDDD to work with external DI frameworks'
+  patterns:
+    - 'Adapter Pattern for framework integration'
+    - 'Bridge Pattern to avoid double instances'
+    - 'Abstract base class for common functionality'
+
+  supported-frameworks:
+    - name: 'NestJS'
+      description: 'ModuleRef-based adapter for NestJS framework'
+      implementation-status: 'Reference implementation provided'
+    - name: 'InversifyJS'
+      description: 'Container-based adapter for InversifyJS'
+      implementation-status: 'Reference implementation provided'
+    - name: 'TSyringe'
+      description: 'Microsoft-style DI adapter'
+      implementation-status: 'Reference implementation provided'
+
+# === USAGE EXAMPLES ===
+examples:
+  - id: 'adapter-usage'
+    title: 'Using Framework Adapter'
+    code: |
+      import { BaseContainerAdapter } from '@vytches/ddd-di/adapters';
+
+      // Framework-specific adapter implementation
+      class CustomFrameworkAdapter extends BaseContainerAdapter {
+        resolve<T>(token: ServiceToken<T>): T {
+          this.validateToken(token);
+          return this.frameworkContainer.get(token);
+        }
+        
+        register<T>(token: ServiceToken<T>, implementation: Constructor<T>): void {
+          this.frameworkContainer.bind(token).to(implementation);
+        }
+      }
+
+      // Configure VytchesDDD with adapter
+      const adapter = new CustomFrameworkAdapter(frameworkContainer);
+      VytchesDDD.configure(adapter);

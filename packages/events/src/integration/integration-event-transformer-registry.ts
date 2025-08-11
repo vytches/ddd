@@ -5,23 +5,6 @@ import type {
   IIntegrationEvent,
 } from './integration-event-interfaces';
 
-/**
- * @llm-summary IntegrationEventTransformerRegistry class for integration event transformer registry operations
- * @llm-domain Architecture
- * @llm-complexity Simple
- *
- * @description
- * IntegrationEventTransformerRegistry class implementing architectural component for integration event transformer registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IntegrationEventTransformerRegistry();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class IntegrationEventTransformerRegistry {
   private readonly transformers: Map<
     string,

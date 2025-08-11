@@ -10,7 +10,12 @@ import type {
   ExampleValidationRules,
 } from '../types';
 import type { IExampleValidator } from '../interfaces';
-import { DEFAULT_VALIDATION_RULES, COMPILATION_PATTERNS, BEST_PRACTICES, LINE_COUNTING_RULES } from './rules';
+import {
+  DEFAULT_VALIDATION_RULES,
+  COMPILATION_PATTERNS,
+  BEST_PRACTICES,
+  LINE_COUNTING_RULES,
+} from './rules';
 
 export class ExampleValidator implements IExampleValidator {
   private rules: ExampleValidationRules;
@@ -28,7 +33,7 @@ export class ExampleValidator implements IExampleValidator {
   validateExample(example: ExtractedExample, rules?: ExampleValidationRules): ValidationResult {
     const validationRules = rules || this.rules;
     const layerRules = validationRules[example.layer];
-    
+
     const errors: ValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
@@ -93,7 +98,6 @@ export class ExampleValidator implements IExampleValidator {
       // Check forbidden patterns
       const forbiddenPatterns = this.checkForbiddenPatterns(content);
       warnings.push(...forbiddenPatterns);
-
     } catch (error) {
       errors.push({
         type: 'compilation_error',
@@ -157,12 +161,12 @@ export class ExampleValidator implements IExampleValidator {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      
+
       // Skip lines that don't count
-      const shouldExclude = LINE_COUNTING_RULES.excludeFromCount.some(pattern => 
+      const shouldExclude = LINE_COUNTING_RULES.excludeFromCount.some(pattern =>
         pattern.test(trimmed)
       );
-      
+
       if (!shouldExclude && trimmed.length > 0) {
         count++;
       }
@@ -180,7 +184,7 @@ export class ExampleValidator implements IExampleValidator {
 
     for (const element of required) {
       const elementCheck = element.toLowerCase();
-      
+
       // Special checks for different element types
       switch (elementCheck) {
         case 'setup':
@@ -247,7 +251,7 @@ export class ExampleValidator implements IExampleValidator {
       const line = lines[i];
       if (!line) continue;
       const lineLower = line.toLowerCase();
-      
+
       for (const element of forbidden) {
         if (lineLower.includes(element.toLowerCase())) {
           found.push({
@@ -293,7 +297,7 @@ export class ExampleValidator implements IExampleValidator {
   // Basic syntax validation
   private checkBasicSyntax(content: string): ValidationError[] {
     const errors: ValidationError[] = [];
-    
+
     // Check for unmatched braces
     const openBraces = (content.match(/{/g) || []).length;
     const closeBraces = (content.match(/}/g) || []).length;
@@ -319,7 +323,7 @@ export class ExampleValidator implements IExampleValidator {
 
   private checkTypeScriptPatterns(content: string): ValidationError[] {
     const errors: ValidationError[] = [];
-    
+
     // Check for common TypeScript issues
     if (/:\s*any\b/.test(content)) {
       errors.push({
@@ -333,7 +337,7 @@ export class ExampleValidator implements IExampleValidator {
 
   private checkForbiddenPatterns(content: string): ValidationWarning[] {
     const warnings: ValidationWarning[] = [];
-    
+
     COMPILATION_PATTERNS.forbiddenPatterns.forEach(pattern => {
       if (pattern.test(content)) {
         warnings.push({

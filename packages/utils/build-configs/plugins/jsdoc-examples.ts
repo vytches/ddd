@@ -11,27 +11,27 @@ export interface JSDocExamplesPluginOptions {
    * Enable/disable the plugin
    */
   enabled?: boolean;
-  
+
   /**
    * File patterns to process
    */
   include?: string[];
-  
+
   /**
    * File patterns to exclude
    */
   exclude?: string[];
-  
+
   /**
    * Log processed files
    */
   verbose?: boolean;
-  
+
   /**
    * Cache examples for better performance
    */
   cache?: boolean;
-  
+
   /**
    * Fallback behavior when examples not found
    */
@@ -47,11 +47,9 @@ const DEFAULT_OPTIONS: Required<JSDocExamplesPluginOptions> = {
   fallbackBehavior: 'generate',
 };
 
-export function createJSDocExamplesPlugin(
-  userOptions: JSDocExamplesPluginOptions = {}
-): Plugin {
+export function createJSDocExamplesPlugin(userOptions: JSDocExamplesPluginOptions = {}): Plugin {
   const options = { ...DEFAULT_OPTIONS, ...userOptions };
-  
+
   if (!options.enabled) {
     return {
       name: 'jsdoc-examples-disabled',
@@ -64,7 +62,7 @@ export function createJSDocExamplesPlugin(
 
   return {
     name: 'jsdoc-examples',
-    
+
     // CRITICAL FIX: Use 'load' hook instead of 'transform' to process BEFORE TypeScript transpilation
     async load(id: string) {
       try {
@@ -76,7 +74,7 @@ export function createJSDocExamplesPlugin(
         // Read the original TypeScript source file
         const fs = await import('fs/promises');
         let code: string;
-        
+
         try {
           code = await fs.readFile(id, 'utf-8');
         } catch (error) {
@@ -105,26 +103,31 @@ export function createJSDocExamplesPlugin(
 
         // Process the original TypeScript source
         const processedCode = await adapter.processInjectionDirectives(code, id);
-        
+
         // Debug: Log processing details
-        if (options.verbose || true) { // Always log for debugging
+        if (options.verbose) {
+          // Always log for debugging
           console.log(`[jsdoc-examples] LOAD HOOK - Original code length: ${code.length}`);
-          console.log(`[jsdoc-examples] LOAD HOOK - Processed code length: ${processedCode.length}`);
+          console.log(
+            `[jsdoc-examples] LOAD HOOK - Processed code length: ${processedCode.length}`
+          );
           console.log(`[jsdoc-examples] LOAD HOOK - File: ${id}`);
-          
+
           // Count directives in original vs processed
           const originalDirectives = (code.match(/@[\w-]+-inject/g) || []).length;
           const processedDirectives = (processedCode.match(/@[\w-]+-inject/g) || []).length;
-          console.log(`[jsdoc-examples] LOAD HOOK - Directives: ${originalDirectives} -> ${processedDirectives}`);
+          console.log(
+            `[jsdoc-examples] LOAD HOOK - Directives: ${originalDirectives} -> ${processedDirectives}`
+          );
         }
-        
+
         // Cache result
         if (options.cache) {
           exampleCache.set(cacheKey, processedCode);
         }
 
         processedFiles.add(id);
-        
+
         if (options.verbose) {
           console.log(`[jsdoc-examples] LOAD HOOK - Successfully processed ${id}`);
         }
@@ -132,15 +135,15 @@ export function createJSDocExamplesPlugin(
         return processedCode;
       } catch (error) {
         console.warn(`[jsdoc-examples] LOAD HOOK - Failed to process ${id}:`, error);
-        
+
         if (options.fallbackBehavior === 'error') {
           throw error;
         }
-        
+
         return null; // Let Vite handle normally
       }
     },
-    
+
     // Keep transform as fallback for edge cases where load hook didn't catch the file
     async transform(code: string, id: string) {
       try {
@@ -155,9 +158,9 @@ export function createJSDocExamplesPlugin(
 
         // Process the file (fallback)
         const processedCode = await adapter.processInjectionDirectives(code, id);
-        
+
         processedFiles.add(id);
-        
+
         return processedCode;
       } catch (error) {
         console.warn(`[jsdoc-examples] TRANSFORM HOOK - Failed to process ${id}:`, error);
@@ -184,7 +187,7 @@ export function createJSDocExamplesPlugin(
           console.log('[jsdoc-examples] Processed files:', Array.from(processedFiles));
         }
       }
-      
+
       // Clean up cache after successful build
       try {
         const { ExampleEngine } = require('../../src/examples-engine/engine');
@@ -243,26 +246,24 @@ function matchesPattern(filePath: string, pattern: string): boolean {
     // console.log(`[matchesPattern] Simplified TS check: ${filePath} -> ${result}`);
     return result;
   }
-  
+
   // For other patterns, use original logic
   const fileName = filePath.split('/').pop() || filePath;
-  const relativePath = filePath.includes('/src/') 
-    ? filePath.split('/src/')[1] 
-    : fileName;
-  
+  const relativePath = filePath.includes('/src/') ? filePath.split('/src/')[1] : fileName;
+
   // Convert glob pattern to regex
   const regexPattern = pattern
-    .replace(/\./g, '\\.')        // Escape dots first
+    .replace(/\./g, '\\.') // Escape dots first
     .replace(/\*\*\//g, '(.*/)?') // **/ matches any directory path (including none)
-    .replace(/\*\*/g, '.*')       // ** matches any characters including /
-    .replace(/\*/g, '[^/]*')      // * matches any characters except /
-    .replace(/\?/g, '.');         // ? matches single character
+    .replace(/\*\*/g, '.*') // ** matches any characters including /
+    .replace(/\*/g, '[^/]*') // * matches any characters except /
+    .replace(/\?/g, '.'); // ? matches single character
 
   const regex = new RegExp(`^${regexPattern}$`);
-  
+
   // Debug logging for non-TS patterns
   // console.log(`[matchesPattern] Testing pattern "${pattern}" against paths:`);
-  
+
   // Test against all variations
   return regex.test(filePath) || regex.test(relativePath) || regex.test(fileName);
 }
@@ -274,7 +275,7 @@ function getCodeHash(code: string): string {
   let hash = 0;
   for (let i = 0; i < code.length; i++) {
     const char = code.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash; // Convert to 32-bit integer
   }
   return hash.toString(36);
@@ -292,7 +293,7 @@ export function createAdvancedJSDocExamplesPlugin(
   } = {}
 ): Plugin {
   const options = { ...DEFAULT_OPTIONS, ...userOptions };
-  
+
   if (!options.enabled) {
     return {
       name: 'jsdoc-examples-advanced-disabled',
@@ -301,7 +302,7 @@ export function createAdvancedJSDocExamplesPlugin(
 
   return {
     name: 'jsdoc-examples-advanced',
-    
+
     async transform(code: string, id: string) {
       if (!shouldProcessFile(id, options)) {
         return null;
@@ -330,7 +331,7 @@ async function processWithTypeScriptAST(code: string, filePath: string): Promise
   // TODO: Implement TypeScript AST parsing
   // This would provide more accurate method detection
   console.warn('TypeScript AST processing not yet implemented, falling back to regex');
-  
+
   const adapter = new JSDocAdapter();
   return await adapter.processInjectionDirectives(code, filePath);
 }
@@ -338,9 +339,10 @@ async function processWithTypeScriptAST(code: string, filePath: string): Promise
 /**
  * Utility to validate plugin configuration
  */
-export function validatePluginConfig(
-  options: JSDocExamplesPluginOptions
-): { valid: boolean; errors: string[] } {
+export function validatePluginConfig(options: JSDocExamplesPluginOptions): {
+  valid: boolean;
+  errors: string[];
+} {
   const errors: string[] = [];
 
   if (options.include && !Array.isArray(options.include)) {
@@ -351,7 +353,10 @@ export function validatePluginConfig(
     errors.push('exclude option must be an array of strings');
   }
 
-  if (options.fallbackBehavior && !['generate', 'skip', 'error'].includes(options.fallbackBehavior)) {
+  if (
+    options.fallbackBehavior &&
+    !['generate', 'skip', 'error'].includes(options.fallbackBehavior)
+  ) {
     errors.push('fallbackBehavior must be one of: generate, skip, error');
   }
 

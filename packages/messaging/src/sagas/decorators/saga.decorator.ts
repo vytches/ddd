@@ -1,113 +1,16 @@
-import 'reflect-metadata';
 import type { Constructor } from '@vytches/ddd-di';
-import type { SagaDecoratorOptions, SagaMetadata } from '../interfaces';
+import 'reflect-metadata';
 import { SagaConfigurationError } from '../errors';
+import type { SagaDecoratorOptions, SagaMetadata } from '../interfaces';
 
-// Metadata keys for saga decorators
-
-/**
- * @llm-summary SAGA_METADATA_KEY constant
- * @llm-domain Integration
- *
- * @description
- * SAGA_METADATA_KEY constant implementing integration layer component for s a g a_ m e t a d a t a_ k e y operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(SAGA_METADATA_KEY);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const SAGA_METADATA_KEY = Symbol('saga:metadata');
 
-/**
- * @llm-summary SAGA_TYPE_METADATA_KEY constant
- * @llm-domain Integration
- *
- * @description
- * SAGA_TYPE_METADATA_KEY constant implementing integration layer component for s a g a_ t y p e_ m e t a d a t a_ k e y operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(SAGA_TYPE_METADATA_KEY);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const SAGA_TYPE_METADATA_KEY = Symbol('saga:type');
 
-/**
- * @llm-summary saga function
- * @llm-domain Integration
- * @llm-pure false
- *
- * @description
- * Saga function implementing integration layer component for saga operations.
- *
- * @param {SagaDecoratorOptions} options - options parameter
- * @returns {<T extends Constructor>(target: T) => T} Returns <T extends Constructor>(target: T) => T
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = Saga(options);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function Saga(options: SagaDecoratorOptions): <T extends Constructor>(target: T) => T;
 
-/**
- * @llm-summary saga function
- * @llm-domain Integration
- * @llm-pure false
- *
- * @description
- * Saga function implementing integration layer component for saga operations.
- *
- * @param {string} sagaType - sagaType parameter
- * @returns {<T extends Constructor>(target: T) => T} Returns <T extends Constructor>(target: T) => T
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = Saga(sagaType);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function Saga(sagaType: string): <T extends Constructor>(target: T) => T;
 
-/**
- * @llm-summary saga function
- * @llm-domain Integration
- * @llm-pure false
- *
- * @description
- * Saga function implementing integration layer component for saga operations.
- *
- * @param {SagaDecoratorOptions | string} optionsOrType - optionsOrType parameter
- * @returns {<T extends Constructor>(target: T) => T} Returns <T extends Constructor>(target: T) => T
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = Saga(optionsOrType);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function Saga(
   optionsOrType: SagaDecoratorOptions | string
 ): <T extends Constructor>(target: T) => T {
@@ -200,52 +103,10 @@ export function getSagaType(target: Constructor): string | undefined {
   return Reflect.getMetadata(SAGA_TYPE_METADATA_KEY, target);
 }
 
-/**
- * @llm-summary is saga class function
- * @llm-domain Integration
- * @llm-pure true
- *
- * @description
- * isSagaClass function implementing integration layer component for is saga class operations.
- *
- * @param {Constructor} target - target parameter
- * @returns {boolean} Returns boolean
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = isSagaClass(target);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function isSagaClass(target: Constructor): boolean {
   return Reflect.hasMetadata(SAGA_METADATA_KEY, target);
 }
 
-/**
- * @llm-summary get all saga types function
- * @llm-domain Integration
- * @llm-pure true
- *
- * @description
- * getAllSagaTypes function implementing integration layer component for get all saga types operations.
- *
- * @param {Constructor[]} targets - targets parameter
- * @returns {string[]} Returns string[]
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = getAllSagaTypes(targets);
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export function getAllSagaTypes(targets: Constructor[]): string[] {
   return targets.filter(isSagaClass).map(getSagaType).filter(Boolean) as string[];
 }

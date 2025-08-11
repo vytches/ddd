@@ -6,30 +6,27 @@ export { BaseProjection } from './projection-base';
 export { ProjectionBuilder } from './projection.builder';
 
 export {
-  ProjectionRebuilder,
   createProjectionRebuilder,
-  type IProjectionRebuilder,
+  ProjectionRebuilder,
   type IProjectionRebuildConfig,
+  type IProjectionRebuilder,
 } from './projection-rebuilder';
 
 export type {
-  IProjection,
-  IProjectionStore,
-  IProjectionCapability,
-  ICapabilityContext,
-  IProjectionEngine,
   ErrorProjectionState,
+  ICapabilityContext,
+  IProjection,
+  IProjectionCapability,
+  IProjectionEngine,
+  IProjectionStore,
 } from './projection-interfaces';
 
 export { ProjectionError } from './projection-errors';
 
 export {
   BaseIntervalCapability,
-  SnapshotProjectionCapability,
   CheckpointCapability,
   CircuitBreakerCapability,
   DeadLetterCapability,
+  SnapshotProjectionCapability,
 } from './capabilities';
-
-// For advanced usage - full exports removed for better tree-shaking
-// Import specific exports from subpaths when needed

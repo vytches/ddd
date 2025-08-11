@@ -1,31 +1,31 @@
 // Classes that can be instantiated
 export {
-  PolicyViolation,
-  PolicyViolationCollection,
-  PolicyDefinitionBuilder,
-  PolicyMetadataBuilder,
   AsyncSpecificationPolicy,
   BaseBusinessPolicy,
   BaseCompositePolicy,
+  PolicyDefinitionBuilder,
+  PolicyMetadataBuilder,
+  PolicyViolation,
+  PolicyViolationCollection,
   SpecificationPolicy,
 } from './core';
 
 // Types and interfaces
 export type {
-  PolicyViolationSeverity,
-  PolicyViolationOptions,
-  PolicyViolationData,
   IBusinessPolicy,
-  IPolicyComposer,
-  PolicyRequest,
-  PolicyContext,
-  PolicyDefinition,
   IGroupedPolicyComposer,
-  PolicyMetadata,
+  IPolicyComposer,
   IPolicyRegistry,
-  PolicyQuery,
   IUnifiedRegistry,
   PolicyCondition,
+  PolicyContext,
+  PolicyDefinition,
+  PolicyMetadata,
+  PolicyQuery,
+  PolicyRequest,
+  PolicyViolationData,
+  PolicyViolationOptions,
+  PolicyViolationSeverity,
 } from './core';
 
 // Registry
@@ -41,32 +41,32 @@ export {
 
 // Phase 2: Builder System
 export type {
-  IPolicyBuilder,
-  IPolicyStepBuilder,
-  IPolicyGroup,
-  IPolicyGroupStepBuilder,
   IConditionalPolicyBuilder,
   IConditionalPolicyElse,
-  IConditionalPolicyThenStepBuilder,
   IConditionalPolicyElseStepBuilder,
+  IConditionalPolicyThenStepBuilder,
+  IPolicyBuilder,
+  IPolicyGroup,
+  IPolicyGroupStepBuilder,
+  IPolicyStepBuilder,
   PolicyBuilderConfig,
 } from './builders';
 
 export {
+  ConditionalPolicyBuilder,
+  ConditionalPolicyElse,
+  ConditionalPolicyElseStepBuilder,
+  ConditionalPolicyThenStepBuilder,
   PolicyBuilder,
-  PolicyStepBuilder,
   PolicyGroup,
   PolicyGroupStepBuilder,
-  ConditionalPolicyBuilder,
-  ConditionalPolicyThenStepBuilder,
-  ConditionalPolicyElseStepBuilder,
-  ConditionalPolicyElse,
+  PolicyStepBuilder,
   type PolicyBuildStep,
   type PolicyGroupStep,
 } from './builders';
 
 // Re-export specification interfaces from contracts
-export type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
+export type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
 
 // Specification adapters for integration
 export {
@@ -85,40 +85,39 @@ export {
   PolicyTemporalBehavior,
   PolicyTemporalBehaviorBuilder,
   PolicyTemporalBehaviorFactory,
-
+  type BusinessCalendar,
   // Types
   type PolicyCacheConfig,
   type PolicyRetryConfig,
   type RetryAttempt,
   type RetryMetrics,
-  type TemporalPolicyConfig,
-  type BusinessCalendar,
   type TemporalCondition,
   type TemporalInfo,
+  type TemporalPolicyConfig,
 } from './decorators';
 
 // Phase 3: Events and Observability
 export type {
-  PolicyEvaluationEvent,
+  EventDrivenPolicyConfig,
   PolicyEvaluationErrorEvent,
+  PolicyEvaluationEvent,
   PolicyEvaluationStartedEvent,
   PolicyEvent,
-  PolicyExecutionMetrics,
-  PolicyEventHandler,
-  PolicyEventSubscription,
   PolicyEventBusConfig,
   PolicyEventBusMetrics,
-  EventDrivenPolicyConfig,
+  PolicyEventHandler,
+  PolicyEventSubscription,
+  PolicyExecutionMetrics,
 } from './events';
 
 export {
-  PolicyEventBuilder,
-  PolicyMetricsAggregator,
-  PolicyEventBus,
-  PolicyEventHandlers,
-  globalPolicyEventBus,
   EventDrivenPolicy,
   EventDrivenPolicyFactory,
+  globalPolicyEventBus,
+  PolicyEventBuilder,
+  PolicyEventBus,
+  PolicyEventHandlers,
+  PolicyMetricsAggregator,
   withEvents,
 } from './events';
 

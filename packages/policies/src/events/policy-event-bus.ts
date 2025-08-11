@@ -1,45 +1,9 @@
 import type { PolicyEvent } from './policy-evaluation-event';
 
-/**
- * @llm-summary Type definition for policy event handler
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * PolicyEventHandler type implementing domain pattern implementation for policy event handler operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: PolicyEventHandler = {} as PolicyEventHandler;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type PolicyEventHandler<T extends PolicyEvent = PolicyEvent> = (
   event: T
 ) => Promise<void> | void;
 
-/**
- * @llm-summary Contract for policy event subscription functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyEventSubscription interface implementing domain pattern implementation for policy event subscription operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyEventSubscription implements PolicyEventSubscription {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyEventSubscription {
   readonly id: string;
   readonly eventTypes: PolicyEvent['type'][];
@@ -51,25 +15,6 @@ export interface PolicyEventSubscription {
   readonly enabled?: boolean; // Can be disabled without unsubscribing
 }
 
-/**
- * @llm-summary Contract for policy event bus config functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyEventBusConfig interface implementing domain pattern implementation for policy event bus config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyEventBusConfig implements PolicyEventBusConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyEventBusConfig {
   readonly maxHandlers?: number; // Maximum number of event handlers
   readonly enableMetrics?: boolean; // Track event bus metrics
@@ -78,25 +23,6 @@ export interface PolicyEventBusConfig {
   readonly timeout?: number; // Handler execution timeout in milliseconds
 }
 
-/**
- * @llm-summary Contract for policy event bus metrics functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyEventBusMetrics interface implementing domain pattern implementation for policy event bus metrics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyEventBusMetrics implements PolicyEventBusMetrics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyEventBusMetrics {
   totalEvents: number;
   eventsByType: Map<PolicyEvent['type'], number>;
@@ -107,23 +33,6 @@ export interface PolicyEventBusMetrics {
   lastEventTime?: Date;
 }
 
-/**
- * @llm-summary PolicyEventBus class for policy event bus operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyEventBus class implementing domain pattern implementation for policy event bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyEventBus();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyEventBus {
   private readonly subscriptions = new Map<string, PolicyEventSubscription>();
   private readonly config: Required<PolicyEventBusConfig>;
@@ -390,45 +299,12 @@ export class PolicyEventBus {
   }
 }
 
-/**
- * @llm-summary globalPolicyEventBus constant
- * @llm-domain Pattern
- *
- * @description
- * globalPolicyEventBus constant implementing domain pattern implementation for global policy event bus operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(globalPolicyEventBus);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const globalPolicyEventBus = new PolicyEventBus({
   enableMetrics: true,
   parallelExecution: true,
   errorStrategy: 'log',
 });
 
-/**
- * @llm-summary PolicyEventHandlers class for policy event handlers operations
- * @llm-domain Pattern
- * @llm-complexity Complex
- *
- * @description
- * PolicyEventHandlers class implementing domain pattern implementation for policy event handlers operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyEventHandlers();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class PolicyEventHandlers {
   /**
    * Create a logging event handler

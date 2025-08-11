@@ -105,7 +105,7 @@ describe('CommandHandler decorator with type inference', () => {
         timeout: 5000,
         context: 'user-management',
       })
-      class CustomCreateUserHandler implements ICommandHandler<CreateUserCommand, UserDto> {
+      class _CustomCreateUserHandler implements ICommandHandler<CreateUserCommand, UserDto> {
         async execute(command: CreateUserCommand): Promise<UserDto> {
           return {
             id: '456',

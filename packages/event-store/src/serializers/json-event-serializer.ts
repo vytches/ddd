@@ -1,25 +1,8 @@
 import type { IEventSerializer, IStoredDomainEvent } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
 import type { ILogger } from '@vytches/ddd-logging';
-import { EventSerializationError, EventDeserializationError } from '../errors';
+import { Logger } from '@vytches/ddd-logging';
+import { EventDeserializationError, EventSerializationError } from '../errors';
 
-/**
- * @llm-summary JsonEventSerializer class for json event serializer operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * JsonEventSerializer class implementing infrastructure service for json event serializer operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new JsonEventSerializer();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class JsonEventSerializer implements IEventSerializer {
   private readonly logger: ILogger;
   private readonly pretty: boolean;

@@ -1,0 +1,423 @@
+# Capability Registry - Foundation Layer Registry
+# Capability registration and lookup system
+
+# === FILE METADATA ===
+file-name: 'capability-registry'
+title: 'CapabilityRegistry - Capability Management System'
+description: 'Type-safe capability registration and lookup system for dynamic behavior extension'
+business-context: 'Provides centralized capability management enabling runtime discovery and attachment of extensible behaviors'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  CapabilityRegistry:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Type-safe capability registration and lookup system for managing extensible behavior capabilities'
+      business-context: 'Enables centralized capability management with runtime discovery for dynamic behavior attachment to domain objects'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Capability registry with type-safe operations'
+          business-context: 'Central capability management for behavior extension'
+        cli:
+          description: |
+            ## CapabilityRegistry Class
+
+            The CapabilityRegistry provides:
+            - Type-safe capability registration and lookup
+            - Constructor-based and string-based access
+            - Capability existence checking
+            - Bulk operations for capability management
+
+            **Key Features:**
+            - Generic type safety for capability mapping
+            - Static capability type discovery
+            - Fluent registration interface
+            - Performance-optimized lookup operations
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'registry-pattern'
+        type-safety: 'full'
+
+    # Generic Parameters
+    generic-parameters:
+      - name: 'TCapabilities'
+        description: 'Record mapping capability type strings to capability instances'
+        constraint: 'Record<string, Capability>'
+        default: 'Record<string, Capability>'
+
+    # Properties
+    properties:
+      - name: 'size'
+        type: 'number'
+        description: 'The number of registered capabilities'
+        business-context: 'Enables monitoring and validation of capability registration state'
+        readonly: true
+        getter: true
+
+    # Methods
+    methods:
+      register:
+        description: 'Registers a capability instance in the registry'
+        business-context: 'Adds capability to available behaviors for runtime attachment to domain objects'
+
+        generic-parameters:
+          - name: 'T'
+            description: 'The specific capability type being registered'
+            constraint: 'Capability'
+
+        parameters:
+          - name: 'capability'
+            type: 'T'
+            description: 'The capability instance to register'
+
+        returns:
+          type: 'this'
+          description: 'Registry instance for method chaining'
+
+        examples:
+          - id: 'register-basic'
+            code: |
+              // Register capabilities fluently
+              const registry = new CapabilityRegistry()
+                .register(new AuditCapability())
+                .register(new VersioningCapability())
+                .register(new SnapshotCapability());
+
+              console.log(registry.size); // 3
+
+        custom-tags:
+          fluent-api: 'true'
+          side-effects: 'adds-capability'
+
+      get:
+        description: 'Retrieves a capability by its constructor class'
+        business-context: 'Provides type-safe capability lookup using constructor for compile-time type checking'
+
+        generic-parameters:
+          - name: 'T'
+            description: 'The capability type to retrieve'
+            constraint: 'Capability'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor class of the capability to retrieve'
+
+        returns:
+          type: 'T | undefined'
+          description: 'The capability instance or undefined if not found'
+
+        examples:
+          - id: 'get-by-constructor'
+            code: |
+              // Type-safe retrieval by constructor
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability());
+
+              const auditCap = registry.get(AuditCapability);
+              if (auditCap) {
+                // TypeScript knows this is AuditCapability
+                auditCap.startAudit();
+              }
+
+        custom-tags:
+          type-safety: 'compile-time'
+          lookup-method: 'constructor'
+
+      getByType:
+        description: 'Retrieves a capability by its type string identifier'
+        business-context: 'Enables runtime capability lookup when capability type is determined dynamically'
+
+        generic-parameters:
+          - name: 'K'
+            description: 'Key type from the capability record'
+            constraint: 'keyof TCapabilities'
+
+        parameters:
+          - name: 'type'
+            type: 'K'
+            description: 'String identifier of the capability type'
+
+        returns:
+          type: 'TCapabilities[K] | undefined'
+          description: 'The capability instance or undefined if not found'
+
+        examples:
+          - id: 'get-by-type'
+            code: |
+              // Runtime type-based lookup
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability()); // type: 'audit'
+
+              const capability = registry.getByType('audit');
+              if (capability) {
+                console.log('Audit capability found');
+              }
+
+              // Dynamic type lookup
+              const capType = getRequiredCapabilityType(); // runtime value
+              const dynamicCap = registry.getByType(capType);
+
+        custom-tags:
+          lookup-method: 'string-type'
+          runtime-safe: 'true'
+
+      has:
+        description: 'Checks if a capability is registered using its constructor class'
+        business-context: 'Enables conditional capability attachment based on availability without creating instances'
+
+        generic-parameters:
+          - name: 'T'
+            description: 'The capability type to check for'
+            constraint: 'Capability'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor class of the capability to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if the capability is registered'
+
+        examples:
+          - id: 'has-by-constructor'
+            code: |
+              // Check capability availability
+              const registry = new CapabilityRegistry();
+
+              if (!registry.has(AuditCapability)) {
+                registry.register(new AuditCapability());
+              }
+
+              // Conditional attachment
+              if (registry.has(SnapshotCapability)) {
+                const snapshot = registry.get(SnapshotCapability);
+                aggregate.attachCapability(snapshot);
+              }
+
+        custom-tags:
+          conditional-logic: 'true'
+          performance: 'no-instance-creation'
+
+      hasByType:
+        description: 'Checks if a capability is registered by type string identifier'
+        business-context: 'Supports dynamic capability checking when type is determined at runtime'
+
+        parameters:
+          - name: 'type'
+            type: 'string'
+            description: 'String identifier of the capability type'
+
+        returns:
+          type: 'boolean'
+          description: 'True if a capability with the given type exists'
+
+        examples:
+          - id: 'has-by-type'
+            code: |
+              // Runtime type checking
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability());
+
+              console.log(registry.hasByType('audit')); // true
+              console.log(registry.hasByType('versioning')); // false
+
+              // Dynamic checking
+              const requiredCaps = ['audit', 'versioning', 'snapshot'];
+              const missingCaps = requiredCaps.filter(type => !registry.hasByType(type));
+
+        custom-tags:
+          runtime-check: 'true'
+
+      remove:
+        description: 'Removes a capability from the registry by constructor class'
+        business-context: 'Enables capability deregistration for cleanup or dynamic behavior management'
+
+        generic-parameters:
+          - name: 'T'
+            description: 'The capability type to remove'
+            constraint: 'Capability'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor class of the capability to remove'
+
+        returns:
+          type: 'boolean'
+          description: 'True if the capability was removed, false if not found'
+
+        examples:
+          - id: 'remove-by-constructor'
+            code: |
+              // Remove specific capability
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability());
+
+              const removed = registry.remove(AuditCapability);
+              console.log(removed); // true
+
+              const removedAgain = registry.remove(AuditCapability);
+              console.log(removedAgain); // false (already removed)
+
+        custom-tags:
+          side-effects: 'removes-capability'
+
+      removeByType:
+        description: 'Removes a capability from the registry by type string'
+        business-context: 'Supports dynamic capability removal when type is determined at runtime'
+
+        parameters:
+          - name: 'type'
+            type: 'string'
+            description: 'String identifier of the capability type to remove'
+
+        returns:
+          type: 'boolean'
+          description: 'True if the capability was removed, false if not found'
+
+        examples:
+          - id: 'remove-by-type'
+            code: |
+              // Runtime capability removal
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability()); // type: 'audit'
+
+              const removed = registry.removeByType('audit');
+              console.log(removed); // true
+
+              // Bulk removal by type list
+              const typesToRemove = ['versioning', 'snapshot'];
+              typesToRemove.forEach(type => registry.removeByType(type));
+
+        custom-tags:
+          runtime-removal: 'true'
+
+      getAll:
+        description: 'Returns all registered capabilities as an array'
+        business-context: 'Enables bulk operations and capability introspection for debugging and monitoring'
+
+        returns:
+          type: 'Capability[]'
+          description: 'Array of all registered capability instances'
+
+        examples:
+          - id: 'get-all-basic'
+            code: |
+              // Get all capabilities for inspection
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability());
+              registry.register(new VersioningCapability());
+
+              const all = registry.getAll();
+              console.log(`Registered: ${all.length} capabilities`);
+
+              // Bulk operations
+              all.forEach(cap => {
+                console.log(`Capability: ${cap.type}`);
+              });
+
+        custom-tags:
+          bulk-operation: 'true'
+          introspection: 'true'
+
+      getTypes:
+        description: 'Returns all registered capability type identifiers as an array'
+        business-context: 'Supports capability discovery and validation for configuration and debugging'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of capability type strings'
+
+        examples:
+          - id: 'get-types-basic'
+            code: |
+              // Get capability types for validation
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability());
+              registry.register(new VersioningCapability());
+
+              const types = registry.getTypes();
+              console.log('Available types:', types); // ['audit', 'versioning']
+
+              // Validate required capabilities
+              const required = ['audit', 'snapshot'];
+              const missing = required.filter(type => !types.includes(type));
+
+        custom-tags:
+          discovery: 'capability-types'
+          validation: 'configuration'
+
+      clear:
+        description: 'Removes all capabilities from the registry'
+        business-context: 'Provides complete registry cleanup for testing or system reset scenarios'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'clear-basic'
+            code: |
+              // Complete registry cleanup
+              const registry = new CapabilityRegistry();
+              registry.register(new AuditCapability());
+              registry.register(new VersioningCapability());
+
+              console.log(registry.size); // 2
+
+              registry.clear();
+              console.log(registry.size); // 0
+              console.log(registry.getAll().length); // 0
+
+        custom-tags:
+          side-effects: 'clears-all-capabilities'
+          cleanup: 'true'
+
+# === FUNCTIONS ===
+functions:
+  createCapabilityRegistry:
+    description: 'Factory function for creating new CapabilityRegistry instances'
+    business-context: 'Provides convenient registry creation with proper generic typing for specific capability sets'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Record type mapping capability identifiers to capability types'
+        constraint: 'Record<string, Capability>'
+
+    returns:
+      type: 'CapabilityRegistry<T>'
+      description: 'New CapabilityRegistry instance with specified type constraints'
+
+    examples:
+      - id: 'create-registry-basic'
+        code: |
+          // Basic registry creation
+          const registry = createCapabilityRegistry();
+
+          // Typed registry creation
+          type MyCapabilities = {
+            audit: AuditCapability;
+            versioning: VersioningCapability;
+          };
+
+          const typedRegistry = createCapabilityRegistry<MyCapabilities>();
+          // TypeScript ensures only audit and versioning capabilities
+
+    custom-tags:
+      factory-function: 'true'
+      type-safety: 'generic-constraints'

@@ -5,27 +5,8 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { Performance } from './performance';
+// import { Performance } from './performance';
 
-/**
- * @llm-summary Contract for chat message functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ChatMessage interface implementing infrastructure service for chat message operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteChatMessage implements ChatMessage {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -40,25 +21,6 @@ export interface ChatMessage {
   };
 }
 
-/**
- * @llm-summary Contract for chat session functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ChatSession interface implementing infrastructure service for chat session operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteChatSession implements ChatSession {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ChatSession {
   id: string;
   title: string;
@@ -73,25 +35,6 @@ export interface ChatSession {
   };
 }
 
-/**
- * @llm-summary Contract for chat history config functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ChatHistoryConfig interface implementing infrastructure service for chat history config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteChatHistoryConfig implements ChatHistoryConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ChatHistoryConfig {
   enabled: boolean;
   maxSessions: number;
@@ -113,23 +56,6 @@ const DEFAULT_CONFIG: ChatHistoryConfig = {
   autoCleanup: true,
 };
 
-/**
- * @llm-summary ChatHistory class for chat history operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * ChatHistory class implementing infrastructure service for chat history operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ChatHistory();
- * ```
- * *
- * @since 1.0.0
- * @public
- */
 export class ChatHistory {
   private config: ChatHistoryConfig;
   private currentSession: ChatSession | null = null;
@@ -568,20 +494,4 @@ export class ChatHistory {
   }
 }
 
-/**
- * @llm-summary chatHistory constant
- * @llm-domain Infrastructure
- *
- * @description
- * chatHistory constant implementing infrastructure service for chat history operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(chatHistory);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const chatHistory = new ChatHistory();

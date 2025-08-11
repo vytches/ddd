@@ -1,0 +1,305 @@
+# cqrs-configuration.error - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'cqrs-configuration.error'
+title: 'CQRSConfigurationError - Configuration Setup Error'
+description: 'Error thrown when CQRS configuration or setup fails'
+business-context: 'Critical configuration error for CQRS system initialization and setup issues'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  CQRSConfigurationError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when CQRS system configuration or initialization fails'
+      business-context: 'Indicates critical configuration issues that prevent CQRS system from operating correctly'
+
+      formats:
+        jsdoc:
+          description: 'CQRSConfigurationError for CQRS system configuration failures'
+        cli:
+          description: |
+            ## CQRSConfigurationError
+
+            CQRS configuration error indicating:
+            - Invalid CQRS setup or initialization
+            - Missing required configuration components
+            - Incompatible configuration options
+            - Handler registration or discovery failures
+            - Dependency injection container issues
+            - Legacy method usage (deprecated methods)
+
+      custom-tags:
+        extends: 'BaseError'
+        error-category: 'Configuration Error'
+        system-critical: 'Prevents CQRS system initialization'
+
+    # Properties
+    properties:
+      component:
+        description: 'Name of the CQRS component where the configuration error occurred'
+        type: 'string'
+        readonly: true
+        business-context: 'Identifies which part of the CQRS system has the configuration issue'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates CQRSConfigurationError with component context and descriptive message'
+        business-context: 'Provides specific configuration error details for troubleshooting CQRS setup'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Descriptive error message explaining the configuration issue'
+          - name: 'component'
+            type: 'string'
+            description: 'Name of the CQRS component where the error occurred'
+
+        examples:
+          - id: 'deprecated-method-usage'
+            code: |
+              // Thrown when deprecated manual registration methods are used
+              try {
+                commandBus.register(CreateUserCommand, handler);
+              } catch (error) {
+                // Error: CQRS Configuration Error in CommandBus: Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.
+                console.log(error instanceof CQRSConfigurationError); // true
+                console.log(error.component); // "CommandBus"
+                console.log(error.message); // Full error message with context
+              }
+
+          - id: 'missing-handler-metadata'
+            code: |
+              // Thrown when handler metadata is missing or invalid
+              const configError = new CQRSConfigurationError(
+                'No handler registered for command CreateUserCommand. Did you forget @CommandHandler decorator?',
+                'CommandBus'
+              );
+
+              // Error message: "CQRS Configuration Error in CommandBus: No handler registered for command CreateUserCommand. Did you forget @CommandHandler decorator?"
+
+          - id: 'invalid-di-configuration'
+            code: |
+              // Thrown when DI container configuration is invalid
+              const configError = new CQRSConfigurationError(
+                'Dependency injection container is not properly configured for CQRS handlers',
+                'CQRSConfiguration'
+              );
+
+          - id: 'middleware-configuration-error'
+            code: |
+              // Example of middleware configuration error
+              class CQRSMiddlewareValidator {
+                static validateMiddleware(middlewares: ICQRSMiddleware[]): void {
+                  for (const middleware of middlewares) {
+                    if (!middleware.handle || typeof middleware.handle !== 'function') {
+                      throw new CQRSConfigurationError(
+                        `Invalid middleware: missing or invalid handle method in ${middleware.constructor.name}`,
+                        'MiddlewareConfiguration'
+                      );
+                    }
+                  }
+                }
+              }
+
+          - id: 'bus-setup-configuration-error'
+            code: |
+              // In CommandBus or QueryBus when configuration is invalid
+              class CommandBus extends ICommandBus {
+                constructor(container: IDependencyContainer) {
+                  super();
+                  
+                  if (!container) {
+                    throw new CQRSConfigurationError(
+                      'IDependencyContainer is required for CommandBus initialization',
+                      'CommandBus'
+                    );
+                  }
+                  
+                  this.container = container;
+                }
+                
+                execute<T extends ICommand>(command: T): Promise<void> {
+                  if (!command) {
+                    throw new CQRSConfigurationError(
+                      'Command instance is required for execution',
+                      'CommandBus'
+                    );
+                  }
+                  
+                  // Continue with execution...
+                }
+              }
+
+          - id: 'handler-discovery-configuration'
+            code: |
+              // Configuration error during handler discovery
+              class CQRSDiscoveryPlugin {
+                async discoverHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]> {
+                  if (!assemblies || assemblies.length === 0) {
+                    throw new CQRSConfigurationError(
+                      'No assemblies provided for handler discovery. Cannot auto-discover CQRS handlers.',
+                      'CQRSDiscoveryPlugin'
+                    );
+                  }
+                  
+                  // Continue with discovery...
+                }
+              }
+
+          - id: 'enhanced-bus-configuration'
+            code: |
+              // Configuration validation in enhanced buses
+              class EnhancedCommandBus extends CommandBus {
+                constructor(container: IDependencyContainer, options?: EnhancedBusOptions) {
+                  super(container);
+                  
+                  if (options?.metricsEnabled === false && options?.requireMetrics === true) {
+                    throw new CQRSConfigurationError(
+                      'Conflicting configuration: metrics disabled but required',
+                      'EnhancedCommandBus'
+                    );
+                  }
+                }
+              }
+
+        custom-tags:
+          error-message-format: 'CQRS Configuration Error in {component}: {message}'
+          prevention: 'Validate configuration during system startup'
+          troubleshooting: 'Check component-specific configuration requirements'
+
+# === CONFIGURATION ERROR SCENARIOS ===
+configuration-errors:
+  common-scenarios:
+    - scenario: 'Deprecated method usage'
+      description: 'Using legacy registration methods instead of decorators'
+      components: ['CommandBus', 'QueryBus']
+      message: 'Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.'
+      solution: 'Replace manual registration with @CommandHandler/@QueryHandler decorators'
+
+    - scenario: 'Missing handler metadata'
+      description: 'Handler not decorated or metadata missing'
+      components: ['CommandBus', 'QueryBus']
+      message: 'No handler registered for command/query. Did you forget decorator?'
+      solution: 'Add @CommandHandler or @QueryHandler decorator to handler class'
+
+    - scenario: 'Invalid DI container'
+      description: 'DI container not provided or improperly configured'
+      components: ['CommandBus', 'QueryBus', 'CQRSConfiguration']
+      message: 'IDependencyContainer is required for initialization'
+      solution: 'Provide valid IDependencyContainer instance'
+
+    - scenario: 'Handler discovery failure'
+      description: 'No assemblies provided for handler discovery'
+      components: ['CQRSDiscoveryPlugin']
+      message: 'No assemblies provided for handler discovery'
+      solution: 'Provide modules/assemblies containing handlers'
+
+    - scenario: 'Invalid middleware'
+      description: 'Middleware missing required handle method'
+      components: ['MiddlewareConfiguration']
+      message: 'Invalid middleware: missing or invalid handle method'
+      solution: 'Ensure middleware implements ICQRSMiddleware interface'
+
+  prevention-strategies:
+    description: 'Preventing CQRS configuration errors'
+    strategies:
+      - strategy: 'Configuration validation'
+        implementation: 'Validate configuration objects during startup'
+        benefit: 'Catch configuration issues before runtime'
+
+      - strategy: 'Type safety'
+        implementation: 'Use TypeScript interfaces and strict typing'
+        benefit: 'Compile-time validation of configuration'
+
+      - strategy: 'Builder patterns'
+        implementation: 'Use builders for complex configuration'
+        benefit: 'Guided configuration with validation'
+
+      - strategy: 'Configuration tests'
+        implementation: 'Unit tests for configuration scenarios'
+        benefit: 'Verify configuration works as expected'
+
+# === TROUBLESHOOTING GUIDE ===
+troubleshooting:
+  diagnostic-steps:
+    steps:
+      1: 'Identify the component mentioned in error message'
+      2: 'Check configuration requirements for that component'
+      3: 'Verify all required dependencies are provided'
+      4: 'Validate handler decorators and registration'
+      5: 'Check DI container setup and assembly inclusion'
+      6: 'Review middleware configuration if applicable'
+
+  component-specific-checks:
+    CommandBus:
+      - 'Check IDependencyContainer is provided'
+      - 'Verify command handlers have @CommandHandler decorator'
+      - 'Ensure handler classes are in discoverable assemblies'
+      - 'Validate middleware implements ICQRSMiddleware'
+
+    QueryBus:
+      - 'Check IDependencyContainer is provided'
+      - 'Verify query handlers have @QueryHandler decorator'
+      - 'Ensure handler classes are in discoverable assemblies'
+      - 'Validate middleware implements ICQRSMiddleware'
+
+    CQRSConfiguration:
+      - 'Verify container is provided and configured'
+      - 'Check CQRSOptions are valid'
+      - 'Validate middleware array if provided'
+      - "Ensure bus types are 'basic' or 'enhanced'"
+
+    CQRSDiscoveryPlugin:
+      - 'Provide assemblies array with handler modules'
+      - 'Check assemblies contain decorated handlers'
+      - 'Verify reflect-metadata is imported'
+      - 'Validate handler metadata is applied correctly'
+
+  common-fixes:
+    - fix: 'Add missing decorator'
+      problem: 'Handler not registered'
+      solution: '@CommandHandler(CommandClass) or @QueryHandler(QueryClass)'
+
+    - fix: 'Provide DI container'
+      problem: 'Container not provided'
+      solution: 'new CommandBus(container) or new QueryBus(container)'
+
+    - fix: 'Include handler modules'
+      problem: 'Handlers not discovered'
+      solution: 'Add handler modules to assemblies array'
+
+    - fix: 'Replace deprecated methods'
+      problem: 'Using manual registration'
+      solution: 'Use decorators instead of register() methods'
+
+# === BEST PRACTICES ===
+best-practices:
+  configuration-validation:
+    - 'Validate configuration during application startup'
+    - 'Use TypeScript for compile-time configuration validation'
+    - 'Implement configuration health checks'
+    - 'Log configuration details during initialization'
+
+  error-prevention:
+    - 'Use consistent naming conventions for handlers'
+    - 'Create configuration templates or builders'
+    - 'Implement integration tests for CQRS setup'
+    - 'Document configuration requirements clearly'
+
+  error-handling:
+    - 'Catch CQRSConfigurationError during startup'
+    - 'Provide helpful error messages with solutions'
+    - 'Implement graceful degradation where possible'
+    - 'Log configuration errors with full context'
