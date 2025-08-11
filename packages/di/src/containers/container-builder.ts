@@ -1,40 +1,14 @@
 // Removed logging dependency for Phase 1 simplification
 import type {
+  Constructor,
   IContainerBuilder,
   IDependencyContainer,
-  ServiceToken,
-  Constructor,
   ServiceFactory,
   ServiceRegistrationOptions,
+  ServiceToken,
 } from '../types';
 import { SimpleContainer } from './simple-container';
 
-/**
- * @llm-summary ContainerBuilder class for container builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * ContainerBuilder class implementing infrastructure service for container builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ContainerBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ContainerBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ContainerBuilder implements IContainerBuilder {
   // Simple Phase 1 implementation without logging
   private readonly container: SimpleContainer;

@@ -1,0 +1,316 @@
+# query-execution.error - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'query-execution.error'
+title: 'QueryExecutionError - Query Processing Error'
+description: 'Error thrown when query handler execution fails'
+business-context: 'Wraps query handler execution errors with query context for debugging read operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  QueryExecutionError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error wrapper for query handler execution failures with context information for read operations'
+      business-context: 'Provides query context and original error details for debugging read operations and optimizing data retrieval'
+
+      formats:
+        jsdoc:
+          description: 'QueryExecutionError for wrapping query handler failures in read operations'
+        cli:
+          description: |
+            ## QueryExecutionError
+
+            Query execution error wrapper providing:
+            - Original error preservation for read operation failures
+            - Query type identification for read optimization
+            - Structured error information for query monitoring
+            - Error chain maintenance for read troubleshooting
+            - Integration with caching and read model strategies
+
+      custom-tags:
+        extends: 'BaseError'
+        error-category: 'Read Operation Error'
+        cqrs-side: 'Query (read) side'
+
+    # Properties
+    properties:
+      queryType:
+        description: 'Name of the query type that failed during execution'
+        type: 'string'
+        readonly: true
+        business-context: 'Identifies which query handler encountered the error for read optimization'
+
+      originalError:
+        description: 'The original error thrown by the query handler'
+        type: 'Error'
+        readonly: true
+        business-context: 'Preserves the actual error for debugging read operations and data access issues'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates QueryExecutionError wrapping original error with query context'
+        business-context: 'Captures query execution failure with full context for debugging read operations'
+
+        parameters:
+          - name: 'queryType'
+            type: 'string'
+            description: 'Name of the query type that failed (usually query class name)'
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Original error thrown by the query handler'
+
+        examples:
+          - id: 'query-handler-error-wrapping'
+            code: |
+              // In QueryBus when handler throws an error
+              try {
+                const result = await handler.execute(query);
+                return result;
+              } catch (originalError) {
+                throw new QueryExecutionError(
+                  query.constructor.name,
+                  originalError as Error
+                );
+              }
+
+          - id: 'read-operation-error'
+            code: |
+              // Example of how this error might be created for read operations
+              const queryType = 'GetUserQuery';
+              const originalError = new Error('Database connection timeout');
+
+              const executionError = new QueryExecutionError(queryType, originalError);
+
+              // Error message: "Query execution failed: GetUserQuery - Database connection timeout"
+              console.log(executionError.message);
+              console.log(executionError.queryType); // "GetUserQuery"
+              console.log(executionError.originalError); // Error instance
+
+          - id: 'caching-middleware-error-handling'
+            code: |
+              class CacheAwareErrorMiddleware implements ICQRSMiddleware {
+                async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+                  if (context.type === 'query') {
+                    try {
+                      const result = await next();
+                      
+                      // Cache successful query results
+                      await this.cacheResult(context.commandOrQuery, result);
+                      return result;
+                      
+                    } catch (error) {
+                      // Wrap query errors with context
+                      if (!(error instanceof QueryExecutionError)) {
+                        const queryName = context.commandOrQuery.constructor.name;
+                        throw new QueryExecutionError(queryName, error as Error);
+                      }
+                      
+                      // For read errors, check if we have cached fallback
+                      const fallback = await this.getCachedFallback(context.commandOrQuery);
+                      if (fallback) {
+                        console.warn(`Using cached fallback for ${error.queryType} due to error:`, error.originalError.message);
+                        return fallback;
+                      }
+                      
+                      throw error;
+                    }
+                  }
+                  return next();
+                }
+                
+                private async cacheResult(query: unknown, result: unknown): Promise<void> {
+                  // Cache implementation for successful queries
+                }
+                
+                private async getCachedFallback(query: unknown): Promise<unknown | null> {
+                  // Return cached result if available
+                  return null;
+                }
+              }
+
+          - id: 'read-model-error-monitoring'
+            code: |
+              try {
+                const query = new GetOrderAnalyticsQuery({ dateRange: lastMonth });
+                const analytics = await queryBus.execute(query);
+                return analytics;
+              } catch (error) {
+                if (error instanceof QueryExecutionError) {
+                  // Log structured error information for read operations
+                  logger.error('Query execution failed - read operation error', {
+                    queryType: error.queryType,
+                    originalError: {
+                      name: error.originalError.name,
+                      message: error.originalError.message,
+                      stack: error.originalError.stack
+                    },
+                    readContext: {
+                      timestamp: new Date().toISOString(),
+                      queryCategory: this.categorizeQuery(error.queryType),
+                      readModelStatus: await this.checkReadModelHealth(),
+                      cacheStatus: await this.checkCacheHealth()
+                    }
+                  });
+                  
+                  // Send read-specific metrics
+                  metrics.incrementCounter('query_execution_errors', {
+                    query_type: error.queryType,
+                    error_type: error.originalError.name,
+                    read_model: this.getReadModelName(error.queryType)
+                  });
+                  
+                  // Check if read model needs refresh
+                  if (this.isReadModelError(error.originalError)) {
+                    await this.scheduleReadModelRefresh(error.queryType);
+                  }
+                }
+                throw error;
+              }
+
+          - id: 'query-retry-with-fallback'
+            code: |
+              class QueryExecutionService {
+                async executeQueryWithFallback<T extends IQuery<R>, R>(
+                  query: T,
+                  fallbackStrategy: 'cache' | 'stale' | 'default'
+                ): Promise<R> {
+                  try {
+                    return await this.queryBus.execute(query);
+                  } catch (error) {
+                    if (error instanceof QueryExecutionError) {
+                      console.warn(`Query failed: ${error.queryType}, trying fallback: ${fallbackStrategy}`);
+                      
+                      switch (fallbackStrategy) {
+                        case 'cache':
+                          const cached = await this.getCachedResult<R>(query);
+                          if (cached) return cached;
+                          break;
+                          
+                        case 'stale':
+                          const stale = await this.getStaleResult<R>(query);
+                          if (stale) return stale;
+                          break;
+                          
+                        case 'default':
+                          const defaultResult = await this.getDefaultResult<R>(query);
+                          if (defaultResult) return defaultResult;
+                          break;
+                      }
+                    }
+                    throw error;
+                  }
+                }
+                
+                private async getCachedResult<R>(query: IQuery<R>): Promise<R | null> {
+                  // Return cached result even if expired
+                  return null;
+                }
+                
+                private async getStaleResult<R>(query: IQuery<R>): Promise<R | null> {
+                  // Return stale read model data
+                  return null;
+                }
+                
+                private async getDefaultResult<R>(query: IQuery<R>): Promise<R | null> {
+                  // Return sensible default or empty result
+                  return null;
+                }
+              }
+
+        custom-tags:
+          error-message-format: 'Query execution failed: {queryType} - {originalError.message}'
+          error-wrapping: 'Preserves original error in originalError property'
+          inheritance: 'Extends BaseError from @vytches/ddd-core'
+          read-operations: 'Specific to query/read side of CQRS'
+
+# === READ-SPECIFIC ERROR HANDLING ===
+read-error-patterns:
+  common-query-failures:
+    - scenario: 'Data not found'
+      description: 'Requested data does not exist in read model'
+      original-errors: ['NotFoundError', 'EntityNotFoundError']
+      handling: 'Return null, empty result, or cached fallback'
+
+    - scenario: 'Read model out of sync'
+      description: 'Read model is stale or inconsistent with write model'
+      original-errors: ['ReadModelOutOfSyncError', 'ConsistencyError']
+      handling: 'Refresh read model or use eventually consistent fallback'
+
+    - scenario: 'Database read timeout'
+      description: 'Read operation exceeded timeout threshold'
+      original-errors: ['TimeoutError', 'DatabaseTimeoutError']
+      handling: 'Use cached result or retry with shorter timeout'
+
+    - scenario: 'Cache miss with source failure'
+      description: 'Cache empty and primary data source unavailable'
+      original-errors: ['CacheMissError', 'DatabaseUnavailableError']
+      handling: 'Use stale cache, backup read replica, or default data'
+
+    - scenario: 'Query parameter validation'
+      description: 'Invalid parameters or constraints for query'
+      original-errors: ['ValidationError', 'QueryParameterError']
+      handling: 'Return validation error to client with suggestions'
+
+  read-optimization-strategies:
+    description: 'Using QueryExecutionError for read optimization'
+    strategies:
+      - strategy: 'Cache warming'
+        trigger: 'Frequent cache miss errors'
+        action: 'Pre-load frequently accessed data'
+
+      - strategy: 'Read model refresh'
+        trigger: 'Consistency errors in queries'
+        action: 'Rebuild read model from event store'
+
+      - strategy: 'Query route optimization'
+        trigger: 'Timeout errors on specific queries'
+        action: 'Route to read replicas or optimized indexes'
+
+      - strategy: 'Fallback hierarchy'
+        trigger: 'Primary read source failures'
+        action: 'Implement cache → stale → default fallback chain'
+
+  monitoring-and-alerting:
+    description: 'Monitoring read operation health'
+    metrics:
+      - 'Query error rates by type and read model'
+      - 'Cache hit/miss ratios for failed queries'
+      - 'Read model consistency lag indicators'
+      - 'Query timeout frequency by complexity'
+
+    alerts:
+      - 'High query error rates indicating read model issues'
+      - 'Cache effectiveness degradation'
+      - 'Read model refresh failures'
+      - 'Critical business queries failing consistently'
+
+# === RECOVERY PATTERNS ===
+recovery-patterns:
+  read-specific-recovery:
+    - pattern: 'Graceful degradation'
+      description: 'Return partial or cached data when full query fails'
+      implementation: 'Layered fallback with quality indicators'
+
+    - pattern: 'Read model healing'
+      description: 'Automatically refresh inconsistent read models'
+      implementation: 'Background refresh triggered by consistency errors'
+
+    - pattern: 'Multi-source reads'
+      description: 'Query multiple read sources and merge results'
+      implementation: 'Parallel queries with result consolidation'
+
+    - pattern: 'Query circuit breaker'
+      description: 'Prevent cascading read failures'
+      implementation: 'Fail fast with cached results after threshold'

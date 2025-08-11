@@ -1,21 +1,21 @@
 // Core exports
 export {
-  LOG_LEVELS,
-  isLogLevelEnabled,
-  parseLogLevel,
   DefaultLogContextBuilder,
   DefaultLogEventBuilder,
+  isLogLevelEnabled,
+  LOG_LEVELS,
+  parseLogLevel,
 } from './core';
 
 export type {
-  LogLevel,
+  Logger as ILogger,
   LogContext,
   LogContextBuilder,
   LogEvent,
   LogEventBuilder,
-  LogProvider,
-  Logger as ILogger,
   LoggerConfiguration,
+  LogLevel,
+  LogProvider,
 } from './core';
 
 // Main logger
@@ -31,12 +31,12 @@ export type { ContextDetectionResult, MaskingOptions } from './utils';
 
 // Integration
 export {
-  LogCQRS,
-  LogCommands,
-  LogQueries,
-  EnhancedLoggingMiddleware,
   AggregateLoggingMixin,
+  EnhancedLoggingMiddleware,
+  LogCommands,
+  LogCQRS,
   LogDomainEvents,
+  LogQueries,
   LogStateChanges,
 } from './integration';
 
@@ -49,25 +49,9 @@ export type {
 } from './integration';
 
 // Convenience exports
-import { DefaultLogger } from './logger';
 import type { LoggerConfiguration } from './core';
+import { DefaultLogger } from './logger';
 
-/**
- * @llm-summary Logger constant
- * @llm-domain Infrastructure
- *
- * @description
- * Logger constant implementing infrastructure service for logger operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(Logger);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const Logger = {
   create: (contextName?: string) => DefaultLogger.create(contextName),
   forContext: (contextName?: string) => DefaultLogger.forContext(contextName),

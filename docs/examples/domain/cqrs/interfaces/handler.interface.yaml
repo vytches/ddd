@@ -1,0 +1,420 @@
+# handler.interface - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'handler.interface'
+title: 'Handler Interfaces - Command and Query Handler Contracts'
+description: 'Core interfaces defining contracts for CQRS command and query handlers'
+business-context: 'Foundation for implementing business logic handlers in CQRS architecture'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ICommandHandler:
+    description: 'Interface for command handlers that process write operations'
+    business-context: 'Defines contract for handlers that execute business logic for state-changing operations'
+
+    formats:
+      jsdoc:
+        description: 'Interface for CQRS command handlers with typed commands and results'
+      cli:
+        description: |
+          ## ICommandHandler<TCommand, TResult>
+
+          Command handler interface providing:
+          - Type-safe command processing
+          - Support for void and typed return values
+          - Integration with dependency injection
+          - Automatic discovery via @CommandHandler decorator
+          - Business logic encapsulation
+
+    # Generic parameters
+    generic-parameters:
+      - name: 'TCommand'
+        description: 'Type of command this handler processes'
+        constraint: 'extends ICommand'
+        usage: 'Ensures type safety for command parameter'
+      - name: 'TResult'
+        description: 'Type of result returned by handler'
+        constraint: 'any'
+        default: 'void'
+        usage: 'Most commands return void, but some may return results'
+
+    methods:
+      execute:
+        description: 'Executes the business logic for the specified command'
+        business-context: 'Core method containing the business logic that processes the command'
+
+        parameters:
+          - name: 'command'
+            type: 'TCommand'
+            description: 'Command instance containing the data and intent'
+
+        returns:
+          type: 'Promise<TResult>'
+          description: 'Promise resolving to the handler result (often void for commands)'
+
+        examples:
+          - id: 'void-command-handler'
+            code: |
+              @CommandHandler(CreateUserCommand)
+              class CreateUserHandler implements ICommandHandler<CreateUserCommand, void> {
+                constructor(
+                  private userRepository: UserRepository,
+                  private eventBus: EventBus
+                ) {}
+                
+                async execute(command: CreateUserCommand): Promise<void> {
+                  // Validate business rules
+                  await this.validateUserCreation(command);
+                  
+                  // Create domain entity
+                  const user = User.create({
+                    name: command.userData.name,
+                    email: command.userData.email,
+                    role: command.userData.role
+                  });
+                  
+                  // Persist
+                  await this.userRepository.save(user);
+                  
+                  // Publish domain event
+                  await this.eventBus.publish(new UserCreatedEvent(user.id, user.email));
+                }
+                
+                private async validateUserCreation(command: CreateUserCommand): Promise<void> {
+                  const existingUser = await this.userRepository.findByEmail(command.userData.email);
+                  if (existingUser) {
+                    throw new BusinessRuleViolationError('User with this email already exists');
+                  }
+                }
+              }
+
+          - id: 'result-returning-handler'
+            code: |
+              interface CreateOrderResult {
+                orderId: string;
+                orderNumber: string;
+                estimatedDelivery: Date;
+              }
+
+              @CommandHandler(CreateOrderCommand)
+              class CreateOrderHandler implements ICommandHandler<CreateOrderCommand, CreateOrderResult> {
+                constructor(
+                  private orderRepository: OrderRepository,
+                  private inventoryService: InventoryService,
+                  private shippingService: ShippingService
+                ) {}
+                
+                async execute(command: CreateOrderCommand): Promise<CreateOrderResult> {
+                  // Business logic
+                  await this.reserveInventory(command.items);
+                  
+                  const order = Order.create({
+                    customerId: command.customerId,
+                    items: command.items,
+                    shippingAddress: command.shippingAddress
+                  });
+                  
+                  await this.orderRepository.save(order);
+                  
+                  // Calculate delivery estimate
+                  const deliveryEstimate = await this.shippingService.calculateDelivery(
+                    command.shippingAddress
+                  );
+                  
+                  return {
+                    orderId: order.id,
+                    orderNumber: order.orderNumber,
+                    estimatedDelivery: deliveryEstimate
+                  };
+                }
+                
+                private async reserveInventory(items: OrderItem[]): Promise<void> {
+                  for (const item of items) {
+                    await this.inventoryService.reserve(item.productId, item.quantity);
+                  }
+                }
+              }
+
+          - id: 'aggregate-command-handler'
+            code: |
+              @CommandHandler(UpdateUserProfileCommand)
+              class UpdateUserProfileHandler implements ICommandHandler<UpdateUserProfileCommand, void> {
+                constructor(
+                  private userRepository: UserRepository
+                ) {}
+                
+                async execute(command: UpdateUserProfileCommand): Promise<void> {
+                  // Load aggregate
+                  const user = await this.userRepository.getById(command.userId);
+                  if (!user) {
+                    throw new AggregateNotFoundError('User', command.userId);
+                  }
+                  
+                  // Check optimistic concurrency
+                  if (user.version !== command.expectedVersion) {
+                    throw new ConcurrencyConflictError('User', command.userId);
+                  }
+                  
+                  // Execute business logic on aggregate
+                  user.updateProfile({
+                    firstName: command.profileData.firstName,
+                    lastName: command.profileData.lastName,
+                    bio: command.profileData.bio
+                  });
+                  
+                  // Save with new events
+                  await this.userRepository.save(user);
+                }
+              }
+
+        custom-tags:
+          async-required: 'Must return Promise for CQRS bus compatibility'
+          business-logic: 'Contains core business logic and rules'
+          side-effects: 'May modify system state and publish events'
+          error-handling: 'Should throw domain-specific exceptions'
+
+  IQueryHandler:
+    description: 'Interface for query handlers that process read operations'
+    business-context: 'Defines contract for handlers that retrieve data without modifying system state'
+
+    formats:
+      jsdoc:
+        description: 'Interface for CQRS query handlers with typed queries and results'
+      cli:
+        description: |
+          ## IQueryHandler<TQuery, TResult>
+
+          Query handler interface providing:
+          - Type-safe query processing with return types
+          - Read-only data retrieval operations
+          - Integration with caching middleware
+          - Automatic discovery via @QueryHandler decorator
+          - Read model optimization support
+
+    # Generic parameters
+    generic-parameters:
+      - name: 'TQuery'
+        description: 'Type of query this handler processes'
+        constraint: 'extends IQuery<TResult>'
+        usage: 'Ensures type safety for query parameter and return type consistency'
+      - name: 'TResult'
+        description: 'Type of data returned by the query handler'
+        constraint: 'any'
+        usage: 'Must match the TResult type parameter of the query'
+
+    methods:
+      execute:
+        description: 'Executes the data retrieval logic for the specified query'
+        business-context: 'Core method containing the logic to fetch and return requested data'
+
+        parameters:
+          - name: 'query'
+            type: 'TQuery'
+            description: 'Query instance containing the parameters and filters'
+
+        returns:
+          type: 'Promise<TResult>'
+          description: 'Promise resolving to the requested data'
+
+        examples:
+          - id: 'simple-entity-query-handler'
+            code: |
+              @QueryHandler(GetUserQuery)
+              class GetUserHandler implements IQueryHandler<GetUserQuery, User | null> {
+                constructor(private userRepository: UserRepository) {}
+                
+                async execute(query: GetUserQuery): Promise<User | null> {
+                  return await this.userRepository.findById(query.userId);
+                }
+              }
+
+          - id: 'list-query-handler'
+            code: |
+              @QueryHandler(GetUsersQuery)
+              class GetUsersHandler implements IQueryHandler<GetUsersQuery, User[]> {
+                constructor(private userRepository: UserRepository) {}
+                
+                async execute(query: GetUsersQuery): Promise<User[]> {
+                  const filter = this.buildFilter(query);
+                  const sortOptions = this.buildSortOptions(query.sortBy);
+                  
+                  return await this.userRepository.findMany({
+                    filter,
+                    sort: sortOptions,
+                    limit: query.pagination?.size || 50,
+                    offset: ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 50)
+                  });
+                }
+                
+                private buildFilter(query: GetUsersQuery): UserFilter {
+                  const filter: UserFilter = {};
+                  
+                  if (query.filter?.active !== undefined) {
+                    filter.active = query.filter.active;
+                  }
+                  
+                  if (query.filter?.role) {
+                    filter.role = query.filter.role;
+                  }
+                  
+                  if (query.filter?.searchTerm) {
+                    filter.searchTerm = query.filter.searchTerm;
+                  }
+                  
+                  return filter;
+                }
+                
+                private buildSortOptions(sortBy?: UserSortOptions): SortOptions {
+                  return {
+                    field: sortBy?.field || 'createdAt',
+                    direction: sortBy?.direction || 'desc'
+                  };
+                }
+              }
+
+          - id: 'complex-analytics-handler'
+            code: |
+              @QueryHandler(GetOrderAnalyticsQuery)
+              class GetOrderAnalyticsHandler implements IQueryHandler<GetOrderAnalyticsQuery, OrderAnalytics> {
+                constructor(
+                  private orderRepository: OrderRepository,
+                  private analyticsService: AnalyticsService,
+                  private cacheService: CacheService
+                ) {}
+                
+                async execute(query: GetOrderAnalyticsQuery): Promise<OrderAnalytics> {
+                  // Check cache first (queries are ideal for caching)
+                  const cacheKey = this.generateCacheKey(query);
+                  const cached = await this.cacheService.get<OrderAnalytics>(cacheKey);
+                  
+                  if (cached) {
+                    return cached;
+                  }
+                  
+                  // Fetch and calculate analytics
+                  const orders = await this.orderRepository.findInDateRange(
+                    query.dateRange.startDate,
+                    query.dateRange.endDate
+                  );
+                  
+                  const analytics: OrderAnalytics = {
+                    totalOrders: orders.length,
+                    totalRevenue: this.calculateTotalRevenue(orders),
+                    averageOrderValue: this.calculateAverageOrderValue(orders),
+                    ordersByStatus: this.groupOrdersByStatus(orders),
+                    topProducts: await this.getTopProducts(orders),
+                    revenueByPeriod: this.calculateRevenueByPeriod(orders, query.groupBy)
+                  };
+                  
+                  // Cache the result
+                  await this.cacheService.set(cacheKey, analytics, 300); // 5 minutes
+                  
+                  return analytics;
+                }
+                
+                private generateCacheKey(query: GetOrderAnalyticsQuery): string {
+                  return `order-analytics:${query.dateRange.startDate.toISOString()}:${query.dateRange.endDate.toISOString()}:${query.groupBy}`;
+                }
+                
+                private calculateTotalRevenue(orders: Order[]): number {
+                  return orders.reduce((sum, order) => sum + order.totalAmount, 0);
+                }
+              }
+
+          - id: 'read-model-handler'
+            code: |
+              @QueryHandler(GetCustomerDashboardQuery)
+              class GetCustomerDashboardHandler implements IQueryHandler<GetCustomerDashboardQuery, CustomerDashboard> {
+                constructor(
+                  private dashboardReadModel: CustomerDashboardReadModel,
+                  private eventStore: EventStore
+                ) {}
+                
+                async execute(query: GetCustomerDashboardQuery): Promise<CustomerDashboard> {
+                  // Try to get from read model first
+                  let dashboard = await this.dashboardReadModel.findByCustomerId(query.customerId);
+                  
+                  // Check if read model is stale or missing
+                  if (!dashboard || this.isStale(dashboard)) {
+                    dashboard = await this.rebuildFromEvents(query.customerId);
+                    await this.dashboardReadModel.save(dashboard);
+                  }
+                  
+                  return dashboard;
+                }
+                
+                private isStale(dashboard: CustomerDashboard): boolean {
+                  const maxAge = 1000 * 60 * 10; // 10 minutes
+                  return Date.now() - dashboard.lastUpdated.getTime() > maxAge;
+                }
+                
+                private async rebuildFromEvents(customerId: string): Promise<CustomerDashboard> {
+                  const events = await this.eventStore.getEventsForAggregate(customerId);
+                  return this.projectDashboardFromEvents(events);
+                }
+              }
+
+        custom-tags:
+          async-required: 'Must return Promise for CQRS bus compatibility'
+          side-effect-free: 'Should not modify system state (idempotent)'
+          cacheable: 'Results can be safely cached'
+          read-optimized: 'Can use read models and specialized data stores'
+
+# === IMPLEMENTATION PATTERNS ===
+implementation-patterns:
+  command-handler-patterns:
+    description: 'Common patterns for implementing command handlers'
+    patterns:
+      - pattern: 'Repository pattern'
+        usage: 'Load/save aggregates and entities'
+        benefit: 'Separates persistence concerns from business logic'
+
+      - pattern: 'Domain event publishing'
+        usage: 'Publish events after successful command execution'
+        benefit: 'Enables event-driven architecture and eventual consistency'
+
+      - pattern: 'Business rule validation'
+        usage: 'Validate business invariants before execution'
+        benefit: 'Ensures domain integrity and consistency'
+
+      - pattern: 'Optimistic concurrency'
+        usage: 'Check version numbers when updating aggregates'
+        benefit: 'Prevents lost update problems in concurrent scenarios'
+
+  query-handler-patterns:
+    description: 'Common patterns for implementing query handlers'
+    patterns:
+      - pattern: 'Read model optimization'
+        usage: 'Use specialized read models for complex queries'
+        benefit: 'Optimizes query performance and decouples read/write models'
+
+      - pattern: 'Caching strategy'
+        usage: 'Cache frequently accessed query results'
+        benefit: 'Improves performance and reduces database load'
+
+      - pattern: 'Projection rebuilding'
+        usage: 'Rebuild read models from event store when stale'
+        benefit: 'Maintains data consistency in eventually consistent systems'
+
+      - pattern: 'Filtering and pagination'
+        usage: 'Support flexible querying with filters and pagination'
+        benefit: 'Handles large datasets efficiently'
+
+  error-handling:
+    description: 'Error handling patterns for handlers'
+    command-errors:
+      - 'BusinessRuleViolationError': 'When business rules are violated'
+      - 'AggregateNotFoundError': "When required aggregate doesn't exist"
+      - 'ConcurrencyConflictError': 'When optimistic concurrency check fails'
+      - 'ValidationError': 'When command data is invalid'
+
+    query-errors:
+      - 'QueryValidationError': 'When query parameters are invalid'
+      - 'DataNotFoundError': "When requested data doesn't exist (if applicable)"
+      - 'QueryTimeoutError': 'When query execution exceeds time limits'
+      - 'ReadModelOutOfDateError': 'When read model needs rebuilding'

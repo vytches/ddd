@@ -1,0 +1,239 @@
+# handler-not-found.error - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'handler-not-found.error'
+title: 'HandlerNotFoundError - Handler Resolution Error'
+description: 'Error thrown when no handler is registered for a command or query type'
+business-context: 'Critical error for CQRS handler registration and discovery issues'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  HandlerNotFoundError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when command or query handler cannot be found during execution'
+      business-context: 'Indicates missing handler registration or discovery configuration issues'
+
+      formats:
+        jsdoc:
+          description: 'HandlerNotFoundError for missing CQRS handler registration'
+        cli:
+          description: |
+            ## HandlerNotFoundError
+
+            CQRS handler resolution error indicating:
+            - Missing @CommandHandler or @QueryHandler decorator
+            - Handler not registered with DI container
+            - CQRSDiscoveryPlugin not configured
+            - Handler discovery issues
+            - Service ID mismatch in registration
+
+      custom-tags:
+        extends: 'BaseError'
+        error-category: 'Configuration/Registration Error'
+
+    # Properties
+    properties:
+      handlerType:
+        description: 'Name of the handler type that could not be found'
+        type: 'string'
+        readonly: true
+        business-context: 'Identifies which command or query handler is missing'
+
+      busType:
+        description: 'Type of CQRS bus where the handler was not found'
+        type: "'command' | 'query'"
+        readonly: true
+        business-context: 'Distinguishes between command and query handler resolution errors'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates HandlerNotFoundError with handler and bus type information'
+        business-context: 'Provides specific error details for troubleshooting handler registration'
+
+        parameters:
+          - name: 'handlerType'
+            type: 'string'
+            description: 'Name of the missing handler type (usually command/query class name)'
+          - name: 'busType'
+            type: "'command' | 'query'"
+            description: 'Type of bus where handler resolution failed'
+
+        examples:
+          - id: 'command-handler-error'
+            code: |
+              // Thrown when command handler is not found
+              const error = new HandlerNotFoundError('CreateUserCommand', 'command');
+
+              // Error message: "No command handler registered for: CreateUserCommand"
+              console.log(error.message);
+              console.log(error.handlerType); // "CreateUserCommand"
+              console.log(error.busType); // "command"
+
+          - id: 'query-handler-error'
+            code: |
+              // Thrown when query handler is not found
+              const error = new HandlerNotFoundError('GetUserQuery', 'query');
+
+              // Error message: "No query handler registered for: GetUserQuery"
+              console.log(error.message);
+
+          - id: 'error-handling-in-bus'
+            code: |
+              // How CommandBus throws this error
+              async execute<T extends ICommand, TResult = void>(command: T): Promise<TResult> {
+                try {
+                  const handler = this.container.resolve<ICommandHandler<T, TResult>>(handlerToken);
+                } catch (_error) {
+                  throw new HandlerNotFoundError(command.constructor.name, 'command');
+                }
+                
+                // Continue with handler execution...
+              }
+
+          - id: 'error-catching-and-handling'
+            code: |
+              try {
+                const command = new CreateUserCommand(userData);
+                await commandBus.execute(command);
+              } catch (error) {
+                if (error instanceof HandlerNotFoundError) {
+                  console.error(`Handler registration issue: ${error.message}`);
+                  console.error(`Missing ${error.busType} handler for: ${error.handlerType}`);
+                  
+                  // Possible solutions:
+                  // 1. Add @CommandHandler(CreateUserCommand) decorator
+                  // 2. Ensure handler is in scanned assemblies
+                  // 3. Check CQRSDiscoveryPlugin configuration
+                  // 4. Verify DI container registration
+                }
+                throw error;
+              }
+
+        custom-tags:
+          error-message-format: 'No {busType} handler registered for: {handlerType}'
+          inheritance: 'Extends BaseError from @vytches/ddd-core'
+
+# === TROUBLESHOOTING GUIDE ===
+troubleshooting:
+  common-causes:
+    - cause: 'Missing decorator'
+      description: 'Handler class not decorated with @CommandHandler or @QueryHandler'
+      solution: |
+        @CommandHandler(CreateUserCommand)
+        class CreateUserHandler implements ICommandHandler<CreateUserCommand, void> {
+          async execute(command: CreateUserCommand): Promise<void> {
+            // Implementation
+          }
+        }
+
+    - cause: 'Handler not discovered'
+      description: 'Handler class not included in scanned assemblies'
+      solution: |
+        // Include handler module in discovery
+        VytchesDDD.configure(container, {
+          discoveryPlugins: [new CQRSDiscoveryPlugin()],
+          assemblies: [
+            await import('./handlers/user-handlers'), // Include this module
+            await import('./handlers/order-handlers')
+          ]
+        });
+
+    - cause: 'Service ID mismatch'
+      description: 'Handler registered with different service ID than expected'
+      solution: |
+        // Option 1: Use consistent service ID
+        @CommandHandler(CreateUserCommand, { serviceId: 'createUserHandler' })
+        class CreateUserHandler { ... }
+
+        // Option 2: Use default naming (handler class name)
+        @CommandHandler(CreateUserCommand)
+        class CreateUserHandler { ... } // Registered as 'CreateUserHandler'
+
+    - cause: 'DI container not configured'
+      description: 'Command/Query bus not provided with DI container'
+      solution: |
+        const container = new SimpleContainer();
+
+        // Configure CQRS with container
+        VytchesDDD.configure(container);
+
+        // Create buses with container
+        const commandBus = new CommandBus(container);
+        const queryBus = new QueryBus(container);
+
+    - cause: 'Metadata missing'
+      description: 'Reflect-metadata not imported or handler metadata lost'
+      solution: |
+        // Ensure reflect-metadata is imported at application entry point
+        import 'reflect-metadata';
+
+        // Check that decorators are applied correctly
+        const metadata = Reflect.getMetadata('di:command-handler', CreateUserCommand);
+        console.log('Handler metadata:', metadata);
+
+  debugging-steps:
+    steps:
+      1: 'Verify decorator is applied to handler class'
+      2: 'Check that handler module is included in assemblies'
+      3: 'Confirm CQRSDiscoveryPlugin is registered'
+      4: 'Validate DI container configuration'
+      5: 'Check reflect-metadata is imported'
+      6: 'Verify service ID consistency'
+      7: 'Test handler discovery in isolation'
+
+    debug-commands:
+      - description: 'Check handler metadata'
+        code: |
+          const metadata = Reflect.getMetadata('di:command-handler', CreateUserCommand);
+          console.log('Command handler metadata:', metadata);
+
+      - description: 'Test handler discovery'
+        code: |
+          const plugin = new CQRSDiscoveryPlugin();
+          const handlers = await plugin.discoverHandlers([
+            await import('./handlers')
+          ]);
+          console.log('Discovered handlers:', handlers);
+
+      - description: 'Check DI container registration'
+        code: |
+          try {
+            const handler = container.resolve('CreateUserHandler');
+            console.log('Handler resolved successfully:', handler);
+          } catch (error) {
+            console.error('Handler not registered in container:', error);
+          }
+
+# === PREVENTION STRATEGIES ===
+prevention:
+  development-practices:
+    - 'Use consistent naming conventions for commands, queries, and handlers'
+    - 'Create handlers in same module or well-organized handler directories'
+    - 'Include comprehensive tests that exercise command/query execution'
+    - 'Use TypeScript strict mode to catch registration issues early'
+    - 'Implement health checks that verify handler registration'
+
+  configuration-validation:
+    - 'Validate CQRSDiscoveryPlugin registration during startup'
+    - 'Log discovered handlers during application initialization'
+    - 'Create integration tests for each command/query handler'
+    - 'Use factory methods or builders for consistent handler creation'
+    - 'Implement custom error handling for registration diagnostics'
+
+  monitoring:
+    - 'Log HandlerNotFoundError occurrences for monitoring'
+    - 'Create alerts for handler registration failures'
+    - 'Track handler discovery metrics during deployment'
+    - 'Implement health endpoints that verify handler availability'

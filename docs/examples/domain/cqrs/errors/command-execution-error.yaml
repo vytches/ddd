@@ -1,0 +1,273 @@
+# command-execution.error - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'command-execution.error'
+title: 'CommandExecutionError - Command Processing Error'
+description: 'Error thrown when command handler execution fails'
+business-context: 'Wraps handler execution errors with command context for debugging'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  CommandExecutionError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error wrapper for command handler execution failures with context information'
+      business-context: 'Provides command context and original error details for debugging and monitoring'
+
+      formats:
+        jsdoc:
+          description: 'CommandExecutionError for wrapping command handler failures'
+        cli:
+          description: |
+            ## CommandExecutionError
+
+            Command execution error wrapper providing:
+            - Original error preservation and context
+            - Command type identification for debugging
+            - Structured error information for monitoring
+            - Error chain maintenance for troubleshooting
+            - Integration with error handling middleware
+
+      custom-tags:
+        extends: 'BaseError'
+        error-category: 'Execution Error'
+
+    # Properties
+    properties:
+      commandType:
+        description: 'Name of the command type that failed during execution'
+        type: 'string'
+        readonly: true
+        business-context: 'Identifies which command handler encountered the error'
+
+      originalError:
+        description: 'The original error thrown by the command handler'
+        type: 'Error'
+        readonly: true
+        business-context: 'Preserves the actual error for debugging and analysis'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates CommandExecutionError wrapping original error with command context'
+        business-context: 'Captures command execution failure with full context for debugging'
+
+        parameters:
+          - name: 'commandType'
+            type: 'string'
+            description: 'Name of the command type that failed (usually command class name)'
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Original error thrown by the command handler'
+
+        examples:
+          - id: 'handler-error-wrapping'
+            code: |
+              // In CommandBus when handler throws an error
+              try {
+                await handler.execute(command);
+              } catch (originalError) {
+                throw new CommandExecutionError(
+                  command.constructor.name,
+                  originalError as Error
+                );
+              }
+
+          - id: 'business-logic-error'
+            code: |
+              // Example of how this error might be created
+              const commandType = 'CreateUserCommand';
+              const originalError = new ValidationError('Email already exists');
+
+              const executionError = new CommandExecutionError(commandType, originalError);
+
+              // Error message: "Command execution failed: CreateUserCommand - Email already exists"
+              console.log(executionError.message);
+              console.log(executionError.commandType); // "CreateUserCommand"
+              console.log(executionError.originalError); // ValidationError instance
+
+          - id: 'error-handling-middleware'
+            code: |
+              class ErrorHandlingMiddleware implements ICQRSMiddleware {
+                async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
+                  try {
+                    return await next();
+                  } catch (error) {
+                    // Wrap handler errors with command context
+                    if (!(error instanceof CommandExecutionError)) {
+                      const commandName = context.commandOrQuery.constructor.name;
+                      throw new CommandExecutionError(commandName, error as Error);
+                    }
+                    throw error;
+                  }
+                }
+              }
+
+          - id: 'error-logging-and-monitoring'
+            code: |
+              try {
+                await commandBus.execute(command);
+              } catch (error) {
+                if (error instanceof CommandExecutionError) {
+                  // Log structured error information
+                  logger.error('Command execution failed', {
+                    commandType: error.commandType,
+                    originalError: {
+                      name: error.originalError.name,
+                      message: error.originalError.message,
+                      stack: error.originalError.stack
+                    },
+                    executionContext: {
+                      timestamp: new Date().toISOString(),
+                      correlationId: getCurrentCorrelationId()
+                    }
+                  });
+                  
+                  // Send to monitoring system
+                  metrics.incrementCounter('command_execution_errors', {
+                    command_type: error.commandType,
+                    error_type: error.originalError.name
+                  });
+                }
+                throw error;
+              }
+
+          - id: 'error-recovery-patterns'
+            code: |
+              class CommandExecutionService {
+                async executeWithRetry<T extends ICommand>(
+                  command: T,
+                  maxRetries: number = 3
+                ): Promise<void> {
+                  let lastError: CommandExecutionError | null = null;
+                  
+                  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                      await this.commandBus.execute(command);
+                      return; // Success
+                    } catch (error) {
+                      if (error instanceof CommandExecutionError) {
+                        lastError = error;
+                        
+                        // Check if error is retryable
+                        if (this.isRetryableError(error.originalError) && attempt < maxRetries) {
+                          await this.delay(attempt * 1000); // Exponential backoff
+                          continue;
+                        }
+                      }
+                      throw error;
+                    }
+                  }
+                  
+                  throw lastError;
+                }
+                
+                private isRetryableError(error: Error): boolean {
+                  // Define which errors are retryable
+                  return error.name === 'TimeoutError' || 
+                         error.name === 'NetworkError' ||
+                         error.message.includes('temporary');
+                }
+                
+                private delay(ms: number): Promise<void> {
+                  return new Promise(resolve => setTimeout(resolve, ms));
+                }
+              }
+
+        custom-tags:
+          error-message-format: 'Command execution failed: {commandType} - {originalError.message}'
+          error-wrapping: 'Preserves original error in originalError property'
+          inheritance: 'Extends BaseError from @vytches/ddd-core'
+
+# === ERROR HANDLING PATTERNS ===
+error-handling-patterns:
+  common-scenarios:
+    - scenario: 'Validation errors in handlers'
+      description: 'Business rule violations during command processing'
+      original-errors: ['ValidationError', 'BusinessRuleViolationError', 'DomainError']
+      handling: 'Log and return appropriate HTTP status or domain event'
+
+    - scenario: 'Infrastructure failures'
+      description: 'Database, network, or external service failures'
+      original-errors: ['DatabaseError', 'NetworkError', 'TimeoutError']
+      handling: 'Retry logic, circuit breaker, or fallback mechanism'
+
+    - scenario: 'Concurrency conflicts'
+      description: 'Optimistic concurrency control violations'
+      original-errors: ['ConcurrencyConflictError', 'OptimisticLockError']
+      handling: 'Retry with fresh data or conflict resolution'
+
+    - scenario: 'Resource exhaustion'
+      description: 'System resource limits exceeded'
+      original-errors: ['OutOfMemoryError', 'ThreadPoolExhaustionError']
+      handling: 'Throttling, backpressure, or graceful degradation'
+
+  monitoring-integration:
+    description: 'Integrating CommandExecutionError with monitoring systems'
+    metrics:
+      - 'Command execution error rates by command type'
+      - 'Distribution of original error types'
+      - 'Error recovery success rates'
+      - 'Time-to-failure patterns'
+
+    alerting:
+      - 'High error rates for specific commands'
+      - 'New types of errors appearing'
+      - 'Critical business process failures'
+      - 'Infrastructure error spikes'
+
+  recovery-strategies:
+    description: 'Common patterns for recovering from command execution errors'
+    strategies:
+      - strategy: 'Retry with backoff'
+        applicable: 'Transient infrastructure errors'
+        implementation: 'Exponential backoff with jitter'
+
+      - strategy: 'Circuit breaker'
+        applicable: 'Persistent external service failures'
+        implementation: 'Fail fast after threshold reached'
+
+      - strategy: 'Compensation'
+        applicable: 'Partial failure in distributed operations'
+        implementation: 'Execute compensating commands'
+
+      - strategy: 'Dead letter queue'
+        applicable: 'Unrecoverable processing errors'
+        implementation: 'Store for manual processing or investigation'
+
+# === DEBUGGING GUIDE ===
+debugging:
+  error-analysis:
+    steps:
+      1: 'Identify the command type from commandType property'
+      2: 'Examine the original error type and message'
+      3: 'Check error stack trace for failure location'
+      4: 'Review command data and business context'
+      5: 'Analyze system state and resource availability'
+      6: 'Verify handler registration and DI configuration'
+
+  common-root-causes:
+    - 'Invalid command data or missing required properties'
+    - 'Business rule violations in domain logic'
+    - 'Database connection or transaction failures'
+    - 'External service unavailability or timeouts'
+    - 'Insufficient system resources (memory, CPU, connections)'
+    - 'Concurrency conflicts in shared resources'
+
+  prevention:
+    - 'Implement comprehensive command validation'
+    - 'Add business rule checks before state changes'
+    - 'Use connection pooling and timeout configurations'
+    - 'Implement circuit breakers for external dependencies'
+    - 'Monitor system resources and set appropriate limits'
+    - 'Design for concurrent access patterns'

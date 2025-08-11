@@ -1,0 +1,184 @@
+# Outbox Interfaces - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'outbox-interfaces'
+title: 'Outbox Pattern Interfaces and Types'
+description: 'Core interfaces and enums for reliable message delivery'
+business-context: 'Outbox pattern ensures reliable message delivery in distributed systems'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === ENUMS ===
+enums:
+  MessageStatus:
+    description: 'Message processing status enumeration'
+    business-context: 'Tracks message lifecycle from creation to completion'
+
+    values:
+      - name: 'PENDING'
+        value: "'PENDING'"
+        description: 'Message created and awaiting processing'
+
+      - name: 'PROCESSING'
+        value: "'PROCESSING'"
+        description: 'Message currently being processed'
+
+      - name: 'PROCESSED'
+        value: "'PROCESSED'"
+        description: 'Message successfully processed'
+
+      - name: 'FAILED'
+        value: "'FAILED'"
+        description: 'Message processing failed after all retries'
+
+  MessagePriority:
+    description: 'Message priority levels for processing order'
+    business-context: 'Enables prioritized message processing in high-throughput scenarios'
+
+    values:
+      - name: 'LOW'
+        value: "'low'"
+        description: 'Low priority messages processed last'
+
+      - name: 'NORMAL'
+        value: "'normal'"
+        description: 'Standard priority messages'
+
+      - name: 'HIGH'
+        value: "'high'"
+        description: 'High priority messages processed first'
+
+      - name: 'CRITICAL'
+        value: "'critical'"
+        description: 'Critical messages processed immediately'
+
+# === INTERFACES ===
+interfaces:
+  IOutboxMessage:
+    description: 'Core outbox message contract with generic payload support'
+    business-context: 'Represents a message in the outbox pattern for reliable delivery'
+
+    generic-parameters:
+      - name: 'T'
+        default: 'unknown'
+        description: 'Type of the message payload'
+
+    properties:
+      - name: 'id'
+        type: 'string'
+        description: 'Unique identifier for the message'
+        required: true
+
+      - name: 'messageType'
+        type: 'string'
+        description: 'Type of message for handler routing'
+        required: true
+
+      - name: 'payload'
+        type: 'T'
+        description: 'Message payload data'
+        required: true
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Additional metadata for message processing'
+        required: true
+
+      - name: 'status'
+        type: 'MessageStatus'
+        description: 'Current processing status'
+        required: true
+
+      - name: 'attempts'
+        type: 'number'
+        description: 'Number of processing attempts made'
+        required: true
+
+      - name: 'createdAt'
+        type: 'Date'
+        description: 'When the message was created'
+        required: true
+
+      - name: 'processAfter'
+        type: 'Date'
+        description: 'Delayed processing timestamp'
+        required: false
+
+      - name: 'priority'
+        type: 'MessagePriority'
+        description: 'Message priority level'
+        required: false
+
+      - name: 'lastError'
+        type: 'string'
+        description: 'Last error message if processing failed'
+        required: false
+
+  OutboxMessageOptions:
+    description: 'Options for creating outbox messages'
+    business-context: 'Configuration options for message creation and scheduling'
+
+    properties:
+      - name: 'processAfter'
+        type: 'Date'
+        description: 'Delayed processing timestamp'
+        required: false
+
+      - name: 'priority'
+        type: 'MessagePriority'
+        description: 'Message priority level'
+        required: false
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Additional metadata'
+        required: false
+
+  IOutboxMessageHandler:
+    description: 'Handler interface for processing outbox messages'
+    business-context: 'Enables pluggable message processing strategies'
+
+    generic-parameters:
+      - name: 'T'
+        default: 'unknown'
+        description: 'Type of the message payload'
+
+    methods:
+      handle:
+        description: 'Processes a message from the outbox'
+        business-context: 'Core processing logic for message delivery'
+
+        parameters:
+          - name: 'message'
+            type: 'IOutboxMessage<T>'
+            description: 'Message to process'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when message is processed'
+
+        throws:
+          - type: 'Error'
+            description: 'When message processing fails'
+
+# === TYPES ===
+types:
+  OutboxMiddleware:
+    description: 'Middleware function for message processing pipeline'
+    business-context: 'Enables cross-cutting concerns like logging, validation, transformation'
+
+    type-definition: |
+      (next: (message: IOutboxMessage) => Promise<void>) => 
+        (message: IOutboxMessage) => Promise<void>
+
+    examples:
+      - id: 'logging-middleware'
+        code: |
+          const loggingMiddleware: OutboxMiddleware = (next) => async (message) => {
+            console.log('Processing message:', message.id);
+            await next(message);
+            console.log('Message processed:', message.id);
+          };

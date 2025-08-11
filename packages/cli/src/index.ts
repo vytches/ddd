@@ -7,38 +7,25 @@
 
 // Core engines
 export { CommandRegistry } from './core/engines/command-registry';
+export { ConfigManager } from './core/engines/config-manager';
+export { PatternRegistry } from './core/engines/pattern-registry';
+export { StructureManager } from './core/engines/structure-manager';
 export { TemplateEngine } from './core/engines/template-engine';
 export { WorkflowEngine } from './core/engines/workflow-engine';
-export { ConfigManager } from './core/engines/config-manager';
-export { StructureManager } from './core/engines/structure-manager';
-export { PatternRegistry } from './core/engines/pattern-registry';
 
 // Utilities
-export { FileSystem } from './core/utils/file-system';
-export { Prompts } from './core/utils/prompts';
 export { Colors } from './core/utils/colors';
-export { Validation } from './core/utils/validation';
+export { FileSystem } from './core/utils/file-system';
 export { Performance } from './core/utils/performance';
+export { Prompts } from './core/utils/prompts';
+export { Validation } from './core/utils/validation';
 
 // Types
 export * from './types';
 
+// CLI Main
+export { main } from './cli';
+
 // Version
 
-/**
- * @llm-summary CLI_VERSION constant
- * @llm-domain Infrastructure
- *
- * @description
- * CLI_VERSION constant implementing infrastructure service for c l i_ v e r s i o n operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(CLI_VERSION);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const CLI_VERSION = '1.0.0';

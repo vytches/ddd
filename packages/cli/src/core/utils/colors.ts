@@ -76,32 +76,6 @@ function colorize(text: string, code: string): string {
   return `${code}${text}${ANSI.reset}`;
 }
 
-/**
- * @llm-summary Colors class for colors operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Colors class implementing infrastructure service for colors operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new Colors();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new Colors());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class Colors {
   // Basic colors
   static black(text: string): string {

@@ -1,22 +1,3 @@
-/**
- * @llm-summary Contract for log context functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * LogContext interface implementing infrastructure service for log context operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteLogContext implements LogContext {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface LogContext {
   readonly name: string;
   readonly boundedContext?: string | undefined;
@@ -28,25 +9,6 @@ export interface LogContext {
   readonly metadata?: Record<string, unknown> | undefined;
 }
 
-/**
- * @llm-summary Contract for log context builder functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * LogContextBuilder interface implementing infrastructure service for log context builder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteLogContextBuilder implements LogContextBuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface LogContextBuilder {
   withBoundedContext(context: string): LogContextBuilder;
   withCorrelationId(id: string): LogContextBuilder;
@@ -59,32 +21,6 @@ export interface LogContextBuilder {
   build(): LogContext;
 }
 
-/**
- * @llm-summary DefaultLogContextBuilder class for default log context builder operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * DefaultLogContextBuilder class implementing infrastructure service for default log context builder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DefaultLogContextBuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultLogContextBuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class DefaultLogContextBuilder implements LogContextBuilder {
   private context: {
     name: string;

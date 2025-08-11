@@ -100,7 +100,7 @@ describe('CQRS Decorators', () => {
       @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand, {
         serviceId: 'customTestHandler',
       })
-      class TestCommandHandler implements ICommandHandler<TestCommand> {
+      class _TestCommandHandler implements ICommandHandler<TestCommand> {
         async execute(_command: TestCommand): Promise<void> {
           // Implementation
         }
@@ -199,7 +199,7 @@ describe('CQRS Decorators', () => {
       @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery, {
         serviceId: 'customTestQueryHandler',
       })
-      class TestQueryHandler implements IQueryHandler<TestQuery, string> {
+      class _TestQueryHandler implements IQueryHandler<TestQuery, string> {
         async execute(_query: TestQuery): Promise<string> {
           return 'result';
         }

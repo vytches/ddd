@@ -1,0 +1,410 @@
+# SpecificationOperators - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'specification-operators'
+title: 'Specification Operators - Pre-built Specification Classes'
+description: 'Collection of pre-built specification classes and factory utilities'
+business-context: 'Common specification patterns and utilities for domain validation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  AlwaysTrueSpecification:
+    class-doc:
+      description: 'Specification that always returns true regardless of candidate'
+      business-context: 'Useful as default specification or for testing scenarios'
+
+      formats:
+        jsdoc:
+          description: 'Specification that always evaluates to true'
+        cli:
+          description: |
+            ## AlwaysTrueSpecification
+
+            A specification that always returns true, regardless of the candidate being evaluated.
+            Useful for default cases, testing, or as a neutral element in specification composition.
+
+    methods:
+      isSatisfiedBy:
+        description: 'Always returns true regardless of candidate'
+        business-context: 'Represents an always-satisfied business rule condition'
+
+        parameters:
+          - name: '_candidate'
+            type: 'T'
+            description: 'Any candidate entity (ignored)'
+
+        returns:
+          type: 'boolean'
+          description: 'Always returns true'
+
+        examples:
+          - id: 'always-true-usage'
+            code: |
+              const alwaysTrue = new AlwaysTrueSpecification<User>();
+              const result = alwaysTrue.isSatisfiedBy(anyUser); // Always true
+
+  AlwaysFalseSpecification:
+    class-doc:
+      description: 'Specification that always returns false regardless of candidate'
+      business-context: 'Useful for disabled features or restrictive default policies'
+
+      formats:
+        jsdoc:
+          description: 'Specification that always evaluates to false'
+
+    methods:
+      isSatisfiedBy:
+        description: 'Always returns false regardless of candidate'
+        business-context: 'Represents a never-satisfied business rule condition'
+
+        parameters:
+          - name: '_candidate'
+            type: 'T'
+            description: 'Any candidate entity (ignored)'
+
+        returns:
+          type: 'boolean'
+          description: 'Always returns false'
+
+        examples:
+          - id: 'always-false-usage'
+            code: |
+              const alwaysFalse = new AlwaysFalseSpecification<User>();
+              const result = alwaysFalse.isSatisfiedBy(anyUser); // Always false
+
+  PredicateSpecification:
+    class-doc:
+      description: 'Specification that wraps a predicate function'
+      business-context: 'Converts lambda functions to specification objects for composition'
+
+      formats:
+        jsdoc:
+          description: 'Specification wrapper for predicate functions'
+
+    methods:
+      constructor:
+        description: 'Creates specification from predicate function'
+        business-context: 'Enables lambda-based business rule definitions'
+
+        parameters:
+          - name: 'predicate'
+            type: '(candidate: T) => boolean'
+            description: 'Function that evaluates candidate and returns boolean'
+
+        examples:
+          - id: 'predicate-constructor'
+            code: |
+              const activeUserSpec = new PredicateSpecification<User>(
+                user => user.isActive && user.emailVerified
+              );
+
+      isSatisfiedBy:
+        description: 'Executes the wrapped predicate function'
+        business-context: 'Evaluates business rule using the provided lambda function'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'Entity to evaluate with the predicate function'
+
+        returns:
+          type: 'boolean'
+          description: 'Result of predicate function execution'
+
+  PropertyEqualsSpecification:
+    class-doc:
+      description: 'Specification that checks if object property equals expected value'
+      business-context: 'Validates specific property values in domain objects'
+
+      formats:
+        jsdoc:
+          description: 'Property equality specification'
+
+    methods:
+      constructor:
+        description: 'Creates property equality specification'
+        business-context: 'Sets up validation for specific property value matching'
+
+        parameters:
+          - name: 'propertyName'
+            type: 'keyof T'
+            description: 'Name of property to check'
+          - name: 'expectedValue'
+            type: 'T[keyof T]'
+            description: 'Expected value for the property'
+
+        examples:
+          - id: 'property-equals-constructor'
+            code: |
+              const statusSpec = new PropertyEqualsSpecification<User>('status', 'active');
+              const roleSpec = new PropertyEqualsSpecification<User>('role', 'admin');
+
+      isSatisfiedBy:
+        description: 'Checks if candidate property matches expected value'
+        business-context: 'Validates that domain object property has correct business value'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'Object containing the property to validate'
+
+        returns:
+          type: 'boolean'
+          description: 'True if property value equals expected value, false otherwise'
+
+  PropertyInSpecification:
+    class-doc:
+      description: 'Specification that checks if object property is in allowed values set'
+      business-context: 'Validates property against whitelist of acceptable values'
+
+      formats:
+        jsdoc:
+          description: 'Property in-set specification'
+
+    methods:
+      constructor:
+        description: 'Creates property inclusion specification'
+        business-context: 'Sets up validation for property value against allowed set'
+
+        parameters:
+          - name: 'propertyName'
+            type: 'keyof T'
+            description: 'Name of property to check'
+          - name: 'possibleValues'
+            type: 'T[keyof T][]'
+            description: 'Array of allowed values for the property'
+
+        examples:
+          - id: 'property-in-constructor'
+            code: |
+              const statusSpec = new PropertyInSpecification<User>(
+                'status', 
+                ['active', 'pending', 'suspended']
+              );
+
+      isSatisfiedBy:
+        description: 'Checks if candidate property value is in allowed set'
+        business-context: 'Validates that domain object property has approved business value'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'Object containing the property to validate'
+
+        returns:
+          type: 'boolean'
+          description: 'True if property value is in allowed set, false otherwise'
+
+  PropertyBetweenSpecification:
+    class-doc:
+      description: 'Specification that checks if numeric property is within range'
+      business-context: 'Validates numeric properties against business value ranges'
+
+      formats:
+        jsdoc:
+          description: 'Property range specification for numeric values'
+
+    methods:
+      constructor:
+        description: 'Creates property range specification'
+        business-context: 'Sets up validation for numeric property value ranges'
+
+        parameters:
+          - name: 'propertyName'
+            type: 'keyof T'
+            description: 'Name of numeric property to check'
+          - name: 'min'
+            type: 'number'
+            description: 'Minimum allowed value (inclusive)'
+          - name: 'max'
+            type: 'number'
+            description: 'Maximum allowed value (inclusive)'
+
+        examples:
+          - id: 'property-between-constructor'
+            code: |
+              const ageSpec = new PropertyBetweenSpecification<User>('age', 18, 120);
+              const salarySpec = new PropertyBetweenSpecification<Employee>('salary', 30000, 200000);
+
+      isSatisfiedBy:
+        description: 'Checks if candidate property value is within specified range'
+        business-context: 'Validates that numeric domain property meets business constraints'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'Object containing the numeric property to validate'
+
+        returns:
+          type: 'boolean'
+          description: 'True if property value is between min and max (inclusive), false otherwise'
+
+# === CONSTANTS ===
+constants:
+  Specification:
+    description: 'Factory utilities for creating common specifications'
+    business-context: 'Convenient methods for building specifications without class instantiation'
+
+    formats:
+      jsdoc:
+        description: 'Specification factory utilities with fluent API'
+      cli:
+        description: |
+          ## Specification Factory
+
+          Provides convenient factory methods for creating specifications without manual class instantiation.
+          Supports fluent composition and common specification patterns.
+
+    methods:
+      alwaysTrue:
+        description: 'Creates specification that always returns true'
+        business-context: 'Factory for unconditionally satisfied business rules'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'AlwaysTrueSpecification instance'
+
+        examples:
+          - id: 'always-true-factory'
+            code: |
+              const defaultSpec = Specification.alwaysTrue<User>();
+              const isValid = defaultSpec.isSatisfiedBy(user); // Always true
+
+      alwaysFalse:
+        description: 'Creates specification that always returns false'
+        business-context: 'Factory for unconditionally rejected business rules'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'AlwaysFalseSpecification instance'
+
+      create:
+        description: 'Creates specification from predicate function'
+        business-context: 'Factory for lambda-based business rule specifications'
+
+        parameters:
+          - name: 'predicate'
+            type: '(candidate: T) => boolean'
+            description: 'Function that evaluates candidate and returns boolean'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'PredicateSpecification wrapping the predicate'
+
+        examples:
+          - id: 'create-factory'
+            code: |
+              const activeSpec = Specification.create<User>(user => user.isActive);
+              const eligibleSpec = Specification.create<User>(user => 
+                user.age >= 18 && user.emailVerified
+              );
+
+      propertyEquals:
+        description: 'Creates property equality specification'
+        business-context: 'Factory for property value matching business rules'
+
+        parameters:
+          - name: 'propertyName'
+            type: 'keyof T'
+            description: 'Name of property to check'
+          - name: 'expectedValue'
+            type: 'T[keyof T]'
+            description: 'Expected value for the property'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'PropertyEqualsSpecification instance'
+
+        examples:
+          - id: 'property-equals-factory'
+            code: |
+              const adminSpec = Specification.propertyEquals<User>('role', 'admin');
+              const activeSpec = Specification.propertyEquals<User>('status', 'active');
+
+      propertyIn:
+        description: 'Creates property inclusion specification'
+        business-context: 'Factory for property whitelist validation rules'
+
+        parameters:
+          - name: 'propertyName'
+            type: 'keyof T'
+            description: 'Name of property to check'
+          - name: 'possibleValues'
+            type: 'T[keyof T][]'
+            description: 'Array of allowed values'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'PropertyInSpecification instance'
+
+      propertyBetween:
+        description: 'Creates property range specification'
+        business-context: 'Factory for numeric property range validation rules'
+
+        parameters:
+          - name: 'propertyName'
+            type: 'keyof T'
+            description: 'Name of numeric property to check'
+          - name: 'min'
+            type: 'number'
+            description: 'Minimum allowed value'
+          - name: 'max'
+            type: 'number'
+            description: 'Maximum allowed value'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'PropertyBetweenSpecification instance'
+
+      and:
+        description: 'Combines multiple specifications with AND logic'
+        business-context: 'Factory for creating composite AND specifications from multiple rules'
+
+        parameters:
+          - name: '...specifications'
+            type: 'ISpecification<T>[]'
+            description: 'Array of specifications to combine with AND'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'Combined specification where all must be satisfied'
+
+        examples:
+          - id: 'and-factory'
+            code: |
+              const eligibleSpec = Specification.and<User>(
+                Specification.propertyEquals('status', 'active'),
+                Specification.propertyBetween('age', 18, 65),
+                Specification.create(user => user.emailVerified)
+              );
+
+      or:
+        description: 'Combines multiple specifications with OR logic'
+        business-context: 'Factory for creating composite OR specifications from multiple rules'
+
+        parameters:
+          - name: '...specifications'
+            type: 'ISpecification<T>[]'
+            description: 'Array of specifications to combine with OR'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'Combined specification where at least one must be satisfied'
+
+      not:
+        description: 'Negates a specification'
+        business-context: 'Factory for creating negated business rule specifications'
+
+        parameters:
+          - name: 'specification'
+            type: 'ISpecification<T>'
+            description: 'Specification to negate'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'NotSpecification that negates the input specification'

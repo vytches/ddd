@@ -1,0 +1,199 @@
+# Domain Event Interfaces - Foundation Layer Event Contracts
+# Core event interface definitions for domain event system
+
+# === FILE METADATA ===
+file-name: 'domain-event-interfaces'
+title: 'Domain Event Interfaces - Foundation Event Contracts'
+description: 'Core interface definitions for domain events and event metadata in the DDD framework'
+business-context: 'Provides standardized contracts for domain event publishing, handling, and metadata management across all bounded contexts'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  IEventMetadata:
+    description: 'Interface defining metadata structure for domain events'
+    business-context: 'Provides comprehensive event context including correlation tracking, aggregate information, and audit trails'
+
+    formats:
+      jsdoc:
+        description: 'Event metadata interface with correlation and audit support'
+        business-context: 'Complete event context for tracing and debugging'
+      cli:
+        description: |
+          ## IEventMetadata Interface
+
+          Comprehensive event metadata structure:
+
+          **Core Identification:**
+          - Event ID and timestamps for tracking
+          - Correlation and causation IDs for event chains
+          - Aggregate context for source identification
+
+          **Audit and Versioning:**
+          - Event and aggregate versioning
+          - Actor and owner information
+          - Previous state capture for audit trails
+
+          **Extensibility:**
+          - Index signature for custom metadata fields
+          - Application-specific data support
+
+    properties:
+      - name: 'eventId'
+        type: 'string'
+        description: 'Unique identifier for the event'
+        business-context: 'Enables event deduplication and tracking across systems'
+        optional: true
+
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'When the event occurred'
+        business-context: 'Provides temporal context for event ordering and audit trails'
+        optional: true
+
+      - name: 'correlationId'
+        type: 'string'
+        description: 'Correlation ID for related events'
+        business-context: 'Links related events in complex business workflows and sagas'
+        optional: true
+
+      - name: 'causationId'
+        type: 'string'
+        description: 'ID of the event that caused this event'
+        business-context: 'Tracks causal relationships between events for debugging and analysis'
+        optional: true
+
+      - name: 'aggregateId'
+        type: 'unknown'
+        description: 'ID of the aggregate that generated the event'
+        business-context: 'Links events to their source aggregates for event sourcing'
+        optional: true
+
+      - name: 'aggregateType'
+        type: 'string'
+        description: 'Type of the aggregate that generated the event'
+        business-context: 'Enables type-specific event handling and aggregate reconstruction'
+        optional: true
+
+      - name: 'aggregateVersion'
+        type: 'number'
+        description: 'Version of the aggregate after applying the event'
+        business-context: 'Supports optimistic concurrency control and event ordering'
+        optional: true
+
+      - name: 'eventVersion'
+        type: 'number'
+        description: 'Version of the event structure (used for versioning)'
+        business-context: 'Enables event schema evolution and backward compatibility'
+        optional: true
+
+      - name: 'actor'
+        type: 'unknown'
+        description: 'Actor who performed the action that led to this event'
+        business-context: 'Provides audit trail for compliance and security tracking'
+        optional: true
+
+      - name: 'owner'
+        type: 'unknown'
+        description: 'Owner of the resource affected by the event'
+        business-context: 'Supports multi-tenancy and resource ownership tracking'
+        optional: true
+
+      - name: '_previousState'
+        type: 'unknown'
+        description: 'Previous state captured for audit purposes'
+        business-context: 'Enables state change tracking and audit compliance'
+        optional: true
+        private: true
+
+    index-signature:
+      key: 'string'
+      value: 'unknown'
+      description: 'Additional application-specific metadata'
+      business-context: 'Allows custom metadata fields for domain-specific requirements'
+
+  IDomainEvent:
+    description: 'Core interface contract for domain events'
+    business-context: 'Standardizes domain event structure across all domain contexts, enabling consistent event-driven architecture'
+
+    formats:
+      jsdoc:
+        description: 'Basic domain event interface with type and payload'
+        business-context: 'Foundation contract for all domain events'
+      cli:
+        description: |
+          ## IDomainEvent Interface
+
+          Minimal domain event structure:
+
+          **Core Fields:**
+          - Event type for handler routing
+          - Optional payload for event data
+          - Generic type support for payload safety
+
+          **Design Principles:**
+          - Minimal surface area for maximum flexibility
+          - Type-safe payload handling
+          - Framework-agnostic event structure
+
+    generic-parameters:
+      - name: 'P'
+        description: 'Type of the event payload'
+        default: 'unknown'
+
+    properties:
+      - name: 'eventType'
+        type: 'string'
+        description: 'Type identifier of the event'
+        business-context: 'Enables event routing to appropriate handlers and event type filtering'
+
+      - name: 'payload'
+        type: 'P | undefined'
+        description: 'Event data payload'
+        business-context: 'Contains the actual business data associated with the event'
+        optional: true
+
+  IExtendedDomainEvent:
+    description: 'Enhanced domain event interface with comprehensive metadata support'
+    business-context: 'Extends basic domain events with rich metadata for enterprise-grade event processing and audit trails'
+
+    formats:
+      jsdoc:
+        description: 'Extended domain event with metadata support'
+        business-context: 'Enterprise event structure with full context'
+      cli:
+        description: |
+          ## IExtendedDomainEvent Interface
+
+          Enterprise-grade domain event structure:
+
+          **Extends IDomainEvent with:**
+          - Complete metadata support
+          - Correlation and causation tracking
+          - Aggregate context information
+          - Audit trail capabilities
+
+          **Enterprise Features:**
+          - Multi-tenant support through owner tracking
+          - Event sourcing integration via aggregate metadata
+          - Debugging support through correlation chains
+          - Compliance support through audit fields
+
+    generic-parameters:
+      - name: 'P'
+        description: 'Type of the event payload'
+        default: 'unknown'
+
+    extends:
+      - 'IDomainEvent<P>'
+
+    properties:
+      - name: 'metadata'
+        type: 'IEventMetadata'
+        description: 'Event metadata containing context and audit information'
+        business-context: 'Provides comprehensive event context for enterprise processing requirements'
+        optional: true

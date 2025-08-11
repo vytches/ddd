@@ -34,23 +34,6 @@ interface DIHandlerInfo {
   [key: string]: unknown;
 }
 
-/**
- * @llm-summary Type definition for unified event handler
- * @llm-domain Architecture
- * @llm-usage Frequent
- *
- * @description
- * UnifiedEventHandler type implementing architectural component for unified event handler operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: UnifiedEventHandler = {} as UnifiedEventHandler;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type UnifiedEventHandler<T extends BaseEvent = BaseEvent> = (
   event: T
 ) => Promise<void> | void;
@@ -63,32 +46,6 @@ interface HandlerEntry {
   contexts?: string | string[] | undefined;
 }
 
-/**
- * @llm-summary UnifiedEventBus class for unified event bus operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * UnifiedEventBus class implementing architectural component for unified event bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new UnifiedEventBus();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UnifiedEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBus<BaseEvent> {
   private readonly handlerRegistry = new Map<string, HandlerEntry[]>();
 

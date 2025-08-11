@@ -5,42 +5,16 @@
 
 import { Logger } from '@vytches/ddd-logging';
 import type {
-  Metric,
   HistogramMetric,
-  TimerMetric,
+  Metric,
   MetricCollector,
   MetricRegistry,
   ObservabilityEvent,
-  ObservabilityEventListener,
   ObservabilityEventBus,
+  ObservabilityEventListener,
+  TimerMetric,
 } from './metrics-interfaces';
 
-/**
- * @llm-summary DefaultMetricRegistry class for default metric registry operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * DefaultMetricRegistry class implementing infrastructure service for default metric registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DefaultMetricRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultMetricRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class DefaultMetricRegistry implements MetricRegistry {
   private collectors = new Map<string, MetricCollector>();
   private logger = Logger.create('MetricRegistry');
@@ -96,32 +70,6 @@ export class DefaultMetricRegistry implements MetricRegistry {
   }
 }
 
-/**
- * @llm-summary DefaultObservabilityEventBus class for default observability event bus operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * DefaultObservabilityEventBus class implementing infrastructure service for default observability event bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DefaultObservabilityEventBus();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DefaultObservabilityEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class DefaultObservabilityEventBus implements ObservabilityEventBus {
   private listeners = new Map<string, Set<ObservabilityEventListener>>();
   private globalListeners = new Set<ObservabilityEventListener>();
@@ -195,32 +143,6 @@ export class DefaultObservabilityEventBus implements ObservabilityEventBus {
   }
 }
 
-/**
- * @llm-summary GlobalMetricRegistry class for global metric registry operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * GlobalMetricRegistry class implementing infrastructure service for global metric registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new GlobalMetricRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new GlobalMetricRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class GlobalMetricRegistry {
   private static instance: DefaultMetricRegistry;
 
@@ -238,32 +160,6 @@ export class GlobalMetricRegistry {
   }
 }
 
-/**
- * @llm-summary GlobalObservabilityEventBus class for global observability event bus operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * GlobalObservabilityEventBus class implementing infrastructure service for global observability event bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new GlobalObservabilityEventBus();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new GlobalObservabilityEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class GlobalObservabilityEventBus {
   private static instance: DefaultObservabilityEventBus;
 
@@ -281,32 +177,6 @@ export class GlobalObservabilityEventBus {
   }
 }
 
-/**
- * @llm-summary ObservabilityEventFactory class for observability event factory operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * ObservabilityEventFactory class implementing infrastructure service for observability event factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ObservabilityEventFactory();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ObservabilityEventFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ObservabilityEventFactory {
   /**
    * Create a resilience pattern execution event

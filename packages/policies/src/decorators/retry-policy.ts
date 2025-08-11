@@ -1,32 +1,13 @@
 import { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
-  PolicyRequest,
   IPolicyComposer,
   IPolicyConditionalBuilder,
   PolicyCondition,
+  PolicyRequest,
 } from '../core/interfaces/business-policy.interface';
 import { PolicyViolation } from '../core/models/policy-violation';
 
-/**
- * @llm-summary Contract for policy retry config functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyRetryConfig interface implementing domain pattern implementation for policy retry config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyRetryConfig implements PolicyRetryConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyRetryConfig {
   /**
    * Maximum number of retry attempts for policy evaluation
@@ -80,25 +61,6 @@ export interface PolicyRetryConfig {
   contextModifier?: <U>(request: PolicyRequest<U>, attempt: number) => PolicyRequest<U>;
 }
 
-/**
- * @llm-summary Contract for retry attempt functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RetryAttempt interface implementing domain pattern implementation for retry attempt operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRetryAttempt implements RetryAttempt {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface RetryAttempt {
   attempt: number;
   delay?: number;
@@ -106,25 +68,6 @@ export interface RetryAttempt {
   error?: PolicyViolation | Error;
 }
 
-/**
- * @llm-summary Contract for retry metrics functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RetryMetrics interface implementing domain pattern implementation for retry metrics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRetryMetrics implements RetryMetrics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface RetryMetrics {
   totalAttempts: number;
   successfulEvaluations: number;
@@ -134,32 +77,6 @@ export interface RetryMetrics {
   maxAttemptsReached: number;
 }
 
-/**
- * @llm-summary PolicyRetryBehavior class for policy retry behavior operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyRetryBehavior class implementing domain pattern implementation for policy retry behavior operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyRetryBehavior();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyRetryBehavior());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class PolicyRetryBehavior<T> implements IBusinessPolicy<T> {
   private readonly metrics: RetryMetrics = {
     totalAttempts: 0,
@@ -473,32 +390,6 @@ export class PolicyRetryBehavior<T> implements IBusinessPolicy<T> {
   }
 }
 
-/**
- * @llm-summary PolicyRetryBehaviorFactory class for policy retry behavior factory operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicyRetryBehaviorFactory class implementing domain pattern implementation for policy retry behavior factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicyRetryBehaviorFactory();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicyRetryBehaviorFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class PolicyRetryBehaviorFactory {
   /**
    * Create retry policy for transient failures

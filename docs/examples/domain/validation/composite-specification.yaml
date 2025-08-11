@@ -1,0 +1,282 @@
+# CompositeSpecification - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'composite-specification'
+title: 'CompositeSpecification - Specification Pattern Foundation'
+description: 'Abstract base class for building complex specifications using Composite pattern'
+business-context: 'Enables composable business rule specifications with AND/OR/NOT logic'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  CompositeSpecification:
+    class-doc:
+      description: 'Abstract base class for building complex specifications using Composite pattern'
+      business-context: 'Foundation for all domain specifications enabling fluent composition'
+
+      formats:
+        jsdoc:
+          description: 'Abstract composite specification with fluent composition API'
+        cli:
+          description: |
+            ## CompositeSpecification
+
+            Abstract base class for building complex specifications using the Composite pattern.
+            Provides standard logical operators (and, or, not) for combining specifications.
+
+            **Key Features:**
+            - Fluent composition API with `and()`, `or()`, `not()` methods
+            - Type-safe specification building
+            - Predicate factory method for simple specifications
+            - Abstract `isSatisfiedBy()` requires implementation
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Composite pattern for specification composition'
+        domain: 'Domain specification building blocks'
+
+    methods:
+      isSatisfiedBy:
+        description: 'Abstract method to check if candidate satisfies specification'
+        business-context: 'Core business rule evaluation method - must be implemented by concrete specifications'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'The entity or value object to validate against specification'
+
+        returns:
+          type: 'boolean'
+          description: 'True if candidate satisfies specification, false otherwise'
+
+        custom-tags:
+          abstract: 'Must be implemented by concrete specifications'
+          pattern: 'Specification pattern core method'
+
+        examples:
+          - id: 'abstract-implementation'
+            code: |
+              class AgeSpecification extends CompositeSpecification<User> {
+                constructor(private minAge: number) {
+                  super();
+                }
+                
+                isSatisfiedBy(candidate: User): boolean {
+                  return candidate.age >= this.minAge;
+                }
+              }
+
+      and:
+        description: 'Combines this specification with another using AND logic'
+        business-context: 'Creates composite specification where both conditions must be true'
+
+        parameters:
+          - name: 'other'
+            type: 'ISpecification<T>'
+            description: 'Another specification to combine with AND logic'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'New AndSpecification combining both specifications'
+
+        examples:
+          - id: 'and-composition'
+            code: |
+              const ageSpec = new AgeSpecification(18);
+              const emailSpec = new EmailSpecification();
+              const combined = ageSpec.and(emailSpec);
+
+              const isValid = combined.isSatisfiedBy(user);
+
+      or:
+        description: 'Combines this specification with another using OR logic'
+        business-context: 'Creates composite specification where at least one condition must be true'
+
+        parameters:
+          - name: 'other'
+            type: 'ISpecification<T>'
+            description: 'Another specification to combine with OR logic'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'New OrSpecification combining both specifications'
+
+        examples:
+          - id: 'or-composition'
+            code: |
+              const adminSpec = new AdminSpecification();
+              const ownerSpec = new OwnerSpecification();
+              const hasAccess = adminSpec.or(ownerSpec);
+
+              const canAccess = hasAccess.isSatisfiedBy(user);
+
+      not:
+        description: 'Negates this specification'
+        business-context: 'Creates specification that is satisfied when this specification fails'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'New NotSpecification that negates this specification'
+
+        examples:
+          - id: 'not-negation'
+            code: |
+              const activeSpec = new ActiveUserSpecification();
+              const inactiveSpec = activeSpec.not();
+
+              const isInactive = inactiveSpec.isSatisfiedBy(user);
+
+      create:
+        description: 'Static factory method to create specification from predicate function'
+        business-context: 'Quick way to create specifications without defining full classes'
+
+        parameters:
+          - name: 'predicate'
+            type: '(candidate: T) => boolean'
+            description: 'Function that returns boolean for specification evaluation'
+
+        returns:
+          type: 'ISpecification<T>'
+          description: 'New PredicateSpecification wrapping the predicate function'
+
+        custom-tags:
+          static: 'Static factory method'
+          pattern: 'Factory pattern for simple specifications'
+
+        examples:
+          - id: 'predicate-factory'
+            code: |
+              // Create specification from lambda
+              const activeSpec = CompositeSpecification.create<User>(
+                user => user.isActive
+              );
+
+              // Use in combination
+              const eligibleSpec = activeSpec.and(
+                CompositeSpecification.create<User>(user => user.age >= 18)
+              );
+
+  AndSpecification:
+    class-doc:
+      description: 'Specification that combines two specifications with AND logic'
+      business-context: 'Both specifications must be satisfied for result to be true'
+
+      formats:
+        jsdoc:
+          description: 'AND composition of two specifications'
+        cli:
+          description: |
+            ## AndSpecification
+
+            Combines two specifications with AND logic. Both specifications must be satisfied
+            for the composite specification to return true.
+
+    methods:
+      constructor:
+        description: 'Creates AND specification with two component specifications'
+        business-context: 'Combines two business rules that must both be satisfied'
+
+        parameters:
+          - name: 'left'
+            type: 'ISpecification<T>'
+            description: 'First specification to evaluate'
+          - name: 'right'
+            type: 'ISpecification<T>'
+            description: 'Second specification to evaluate'
+
+        examples:
+          - id: 'and-constructor'
+            code: |
+              const ageSpec = new AgeSpecification(18);
+              const emailSpec = new EmailSpecification();
+              const andSpec = new AndSpecification(ageSpec, emailSpec);
+
+      isSatisfiedBy:
+        description: 'Evaluates both specifications and returns true only if both are satisfied'
+        business-context: 'Enforces that user meets all combined business rules'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'Entity to evaluate against both specifications'
+
+        returns:
+          type: 'boolean'
+          description: 'True only if both left and right specifications are satisfied'
+
+  OrSpecification:
+    class-doc:
+      description: 'Specification that combines two specifications with OR logic'
+      business-context: 'At least one specification must be satisfied for result to be true'
+
+      formats:
+        jsdoc:
+          description: 'OR composition of two specifications'
+
+    methods:
+      constructor:
+        description: 'Creates OR specification with two component specifications'
+        business-context: 'Combines two business rules where either can be satisfied'
+
+        parameters:
+          - name: 'left'
+            type: 'ISpecification<T>'
+            description: 'First specification to evaluate'
+          - name: 'right'
+            type: 'ISpecification<T>'
+            description: 'Second specification to evaluate'
+
+      isSatisfiedBy:
+        description: 'Evaluates both specifications and returns true if either is satisfied'
+        business-context: 'Allows flexibility where user can meet alternative business rules'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'Entity to evaluate against both specifications'
+
+        returns:
+          type: 'boolean'
+          description: 'True if at least one of left or right specifications is satisfied'
+
+  NotSpecification:
+    class-doc:
+      description: 'Specification that negates another specification'
+      business-context: 'Specification is satisfied when wrapped specification fails'
+
+      formats:
+        jsdoc:
+          description: 'NOT negation of a specification'
+
+    methods:
+      constructor:
+        description: 'Creates NOT specification that negates another specification'
+        business-context: 'Inverts business rule logic for exclusion scenarios'
+
+        parameters:
+          - name: 'spec'
+            type: 'ISpecification<T>'
+            description: 'Specification to negate'
+
+      isSatisfiedBy:
+        description: 'Returns negation of wrapped specification result'
+        business-context: 'Enforces that user does NOT meet the wrapped business rule'
+
+        parameters:
+          - name: 'candidate'
+            type: 'T'
+            description: 'Entity to evaluate against negated specification'
+
+        returns:
+          type: 'boolean'
+          description: 'True if wrapped specification is NOT satisfied, false otherwise'
+
+# === PRIVATE CLASSES ===
+types:
+  PredicateSpecification:
+    description: 'Internal specification implementation for predicate functions'
+    business-context: 'Wrapper for lambda-based specifications created via factory method'

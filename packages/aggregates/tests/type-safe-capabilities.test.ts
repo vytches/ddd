@@ -1,15 +1,16 @@
-import { describe, it, expect } from 'vitest';
 import { EntityId } from '@vytches/ddd-contracts';
-import { AggregateRoot } from '../src/aggregate-root';
-import { aggregateBuilder } from '../src/aggregate-root.builder';
+import { describe, expect, it } from 'vitest';
+import { AggregateRoot } from '../src/core/aggregate-root';
+import { aggregateBuilder } from '../src/core/aggregate-root.builder';
+
+import { AuditCapability } from '../src/capabilities/audit-capability';
 import { SnapshotCapability } from '../src/capabilities/snapshot-capability';
 import { VersioningCapability } from '../src/capabilities/versioning-capability';
-import { AuditCapability } from '../src/capabilities/audit-capability';
 import {
+  hasAuditCapability,
   hasSnapshotCapability,
   hasVersioningCapability,
-  hasAuditCapability,
-} from '../src/aggregate-utilities';
+} from '../src/core/aggregate-utilities';
 
 class TestAggregate extends AggregateRoot<string> {
   private value = '';

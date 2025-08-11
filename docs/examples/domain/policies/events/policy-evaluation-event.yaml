@@ -1,0 +1,85 @@
+# policy-evaluation-event - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-evaluation-event'
+title: 'PolicyEvaluationEvent - Policy Event Models'
+description: 'Event models for policy evaluation lifecycle'
+business-context: 'Standardizes policy event structure for observability'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyEvaluationEvent:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Base event for policy evaluations'
+      business-context: 'Captures policy execution for audit and monitoring'
+
+      custom-tags:
+        since: '2.0.0'
+        abstract: 'true'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates evaluation event'
+        parameters:
+          - name: 'data'
+            type: 'PolicyEventData'
+            description: 'Event data'
+
+  PolicyEvaluatedEvent:
+    class-doc:
+      description: 'Event emitted after policy evaluation'
+      business-context: 'Records evaluation outcome'
+
+      custom-tags:
+        since: '2.0.0'
+        extends: 'PolicyEvaluationEvent'
+
+  PolicyViolationEvent:
+    class-doc:
+      description: 'Event for policy violations'
+      business-context: 'Tracks policy failures'
+
+      custom-tags:
+        since: '2.0.0'
+        extends: 'PolicyEvaluationEvent'
+
+# === INTERFACES ===
+interfaces:
+  PolicyEventData:
+    description: 'Policy event data'
+    business-context: 'Standardized event payload'
+
+    properties:
+      - name: 'policyId'
+        type: 'string'
+        description: 'Policy identifier'
+
+      - name: 'policyName'
+        type: 'string'
+        description: 'Policy name'
+
+      - name: 'result'
+        type: "'success' | 'failure'"
+        description: 'Evaluation result'
+
+      - name: 'violations'
+        type: 'PolicyViolation[]'
+        description: 'Any violations'
+        optional: true
+
+      - name: 'duration'
+        type: 'number'
+        description: 'Execution time in ms'
+        optional: true

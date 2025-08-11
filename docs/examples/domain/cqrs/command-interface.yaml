@@ -1,0 +1,218 @@
+# Command Interface - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'command.interface'
+title: 'ICommand Interface - Command Contract'
+description: 'Core interface defining the contract for CQRS commands'
+business-context: 'Foundation for all command operations in CQRS architecture'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ICommand:
+    description: 'Marker interface for CQRS commands representing write operations'
+    business-context: 'Defines the contract for commands that modify system state'
+
+    formats:
+      jsdoc:
+        description: 'Base interface for all CQRS commands'
+      cli:
+        description: |
+          ## ICommand
+
+          Core command interface in CQRS architecture:
+          - Marker interface for command identification
+          - Represents intent to change system state
+          - Used by CommandBus for type safety
+          - Foundation for command handler registration
+          - Supports command validation patterns
+
+    # Empty interface - marker interface pattern
+    custom-tags:
+      interface-type: 'Marker interface'
+      cqrs-role: 'Write operations (state modification)'
+      handler-binding: 'Linked to handlers via @CommandHandler decorator'
+      validation: 'Can be extended with validation methods'
+      serialization: 'Should be serializable for messaging/queuing'
+
+    examples:
+      - id: 'basic-command'
+        code: |
+          interface CreateUserCommand extends ICommand {
+            readonly userData: {
+              name: string;
+              email: string;
+              role: UserRole;
+            };
+          }
+
+          class CreateUserCommandImpl implements CreateUserCommand {
+            constructor(public readonly userData: {
+              name: string;
+              email: string;
+              role: UserRole;
+            }) {}
+          }
+
+      - id: 'command-with-validation'
+        code: |
+          interface UpdateOrderCommand extends ICommand {
+            readonly orderId: string;
+            readonly updates: Partial<OrderData>;
+            validate(): Promise<void>;
+          }
+
+          class UpdateOrderCommandImpl implements UpdateOrderCommand {
+            constructor(
+              public readonly orderId: string,
+              public readonly updates: Partial<OrderData>
+            ) {}
+            
+            async validate(): Promise<void> {
+              if (!this.orderId) {
+                throw new ValidationError('Order ID is required');
+              }
+              
+              if (Object.keys(this.updates).length === 0) {
+                throw new ValidationError('At least one update field is required');
+              }
+              
+              // Additional validation logic
+              if (this.updates.amount && this.updates.amount <= 0) {
+                throw new ValidationError('Amount must be positive');
+              }
+            }
+          }
+
+      - id: 'complex-command'
+        code: |
+          interface ProcessPaymentCommand extends ICommand {
+            readonly paymentId: string;
+            readonly amount: Money;
+            readonly paymentMethod: PaymentMethod;
+            readonly billingAddress: Address;
+            readonly metadata: Record<string, unknown>;
+          }
+
+          class ProcessPaymentCommandImpl implements ProcessPaymentCommand {
+            constructor(
+              public readonly paymentId: string,
+              public readonly amount: Money,
+              public readonly paymentMethod: PaymentMethod,
+              public readonly billingAddress: Address,
+              public readonly metadata: Record<string, unknown> = {}
+            ) {
+              // Immutable command - all properties readonly
+            }
+            
+            // Optional: Add business methods
+            isHighValue(): boolean {
+              return this.amount.value > 10000;
+            }
+            
+            getPaymentType(): string {
+              return this.paymentMethod.type;
+            }
+          }
+
+      - id: 'command-with-correlation'
+        code: |
+          interface SendEmailCommand extends ICommand {
+            readonly emailId: string;
+            readonly recipient: string;
+            readonly subject: string;
+            readonly body: string;
+            readonly correlationId?: string;
+            readonly causationId?: string;
+            readonly timestamp: Date;
+          }
+
+          class SendEmailCommandImpl implements SendEmailCommand {
+            public readonly timestamp = new Date();
+            
+            constructor(
+              public readonly emailId: string,
+              public readonly recipient: string,
+              public readonly subject: string,
+              public readonly body: string,
+              public readonly correlationId?: string,
+              public readonly causationId?: string
+            ) {}
+          }
+
+      - id: 'aggregate-command'
+        code: |
+          interface UpdateAggregateCommand extends ICommand {
+            readonly aggregateId: string;
+            readonly expectedVersion: number;
+            readonly changes: AggregateChanges;
+          }
+
+          class UpdateUserAggregateCommand implements UpdateAggregateCommand {
+            constructor(
+              public readonly aggregateId: string,
+              public readonly expectedVersion: number,
+              public readonly changes: UserAggregateChanges
+            ) {}
+            
+            // Business logic helpers
+            hasProfileChanges(): boolean {
+              return this.changes.profile !== undefined;
+            }
+            
+            hasPermissionChanges(): boolean {
+              return this.changes.permissions !== undefined;
+            }
+          }
+
+    design-patterns:
+      - pattern: 'Immutability'
+        description: 'Commands should be immutable once created'
+        benefit: 'Ensures command integrity throughout processing'
+
+      - pattern: 'Self-validation'
+        description: 'Commands can implement validation methods'
+        benefit: 'Encapsulates validation logic with command data'
+
+      - pattern: 'Rich commands'
+        description: 'Commands can include business helper methods'
+        benefit: 'Provides domain-specific operations on command data'
+
+      - pattern: 'Correlation tracking'
+        description: 'Include correlation and causation IDs'
+        benefit: 'Enables distributed tracing and event sourcing'
+
+    best-practices:
+      naming:
+        - 'Use imperative verb + noun (CreateUser, UpdateOrder, ProcessPayment)'
+        - 'Be specific and descriptive about the intent'
+        - "Avoid generic names like 'ExecuteCommand'"
+
+      structure:
+        - 'Use readonly properties for immutability'
+        - 'Include all necessary data for execution'
+        - 'Avoid references to external services or repositories'
+        - 'Keep commands focused and cohesive'
+
+      validation:
+        - 'Validate structure and format, not business rules'
+        - 'Business rule validation belongs in handlers or domain'
+        - 'Use validation libraries for complex validation'
+        - 'Provide clear, actionable error messages'
+
+    common-extensions:
+      - extension: 'ICqrsValidatable'
+        purpose: 'Add validation support'
+        method: 'validate(): Promise<void>'
+
+      - extension: 'ICorrelatedCommand'
+        purpose: 'Add correlation tracking'
+        properties: 'correlationId, causationId, timestamp'
+
+      - extension: 'IVersionedCommand'
+        purpose: 'Add optimistic concurrency control'
+        properties: 'expectedVersion, aggregateId'

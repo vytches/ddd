@@ -1,37 +1,11 @@
-import { LibUtils } from '@vytches/ddd-utils';
-import { InvalidParameterError, MissingValueError } from '@vytches/ddd-domain-primitives';
 import {
   EntityId as BaseEntityId,
   type IEntityIdFactory,
   type IdType,
 } from '@vytches/ddd-contracts';
+import { InvalidParameterError, MissingValueError } from '@vytches/ddd-domain-primitives';
+import { LibUtils } from '@vytches/ddd-utils';
 
-/**
- * @llm-summary EntityId class for entity id operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * EntityId class implementing core domain functionality for entity id operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EntityId();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EntityId());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class EntityId<T = string> extends BaseEntityId<T> {
   constructor(value: T, type: IdType) {
     super(value, type);
@@ -52,13 +26,15 @@ export class EntityId<T = string> extends BaseEntityId<T> {
     }
   }
 
-  /**
-   * Enhanced factory methods with strict validation
-   */
   static override createWithRandomUUID(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
   }
 
+  /**
+   * @returns EntityId instance
+   * @throws {MissingValueError} if value is empty
+   * @throws {InvalidParameterError} if value is not a valid UUID
+   */
   static override fromUUID(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
@@ -102,37 +78,15 @@ export class EntityId<T = string> extends BaseEntityId<T> {
   }
 }
 
-/**
- * @llm-summary EntityIdFactory class for entity id factory operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * EntityIdFactory class implementing core domain functionality for entity id factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EntityIdFactory();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EntityIdFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class EntityIdFactory implements IEntityIdFactory {
   static createWithRandomUUID(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
   }
 
+  /**
+   * @throws {MissingValueError} if value is empty
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromUUID(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
@@ -145,6 +99,9 @@ export class EntityIdFactory implements IEntityIdFactory {
     return new EntityId(value, 'uuid');
   }
 
+  /**
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromInteger(value: number): EntityId<string> {
     if (!LibUtils.isValidInteger(value)) {
       throw InvalidParameterError.withParameter('entity identifier must be a non-negative integer');
@@ -153,6 +110,9 @@ export class EntityIdFactory implements IEntityIdFactory {
     return new EntityId(value.toString(), 'integer');
   }
 
+  /**
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromBigInt(value: string | bigint): EntityId<string> {
     const stringValue = LibUtils.normalizeIdToString(value);
 
@@ -163,6 +123,10 @@ export class EntityIdFactory implements IEntityIdFactory {
     return new EntityId(stringValue, 'bigint');
   }
 
+  /**
+   * @throws {MissingValueError} if value is empty
+   * @throws {InvalidParameterError} if value is empty
+   */
   static fromText(value: string): EntityId<string> {
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
@@ -175,7 +139,6 @@ export class EntityIdFactory implements IEntityIdFactory {
     return new EntityId(value, 'text');
   }
 
-  // Instance methods implementing IEntityIdFactory
   createWithRandomUUID(): EntityId<string> {
     return EntityIdFactory.createWithRandomUUID();
   }

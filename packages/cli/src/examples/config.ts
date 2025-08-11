@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '@vytches/ddd-contracts';
+import type { PackageExampleConfig } from '../types/legacy-contracts';
 
 /**
  * CLI Package Examples Configuration

@@ -1,0 +1,29 @@
+# decorators/index - Universal Enhanced Metadata System V2
+
+# === FOLDER METADATA ===
+folder-name: 'decorators'
+title: 'Policy Decorators'
+description: 'Decorator patterns for policy enhancement'
+business-context: 'Adds cross-cutting concerns to policies'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'folder'
+
+# === EXPORTS ===
+exports:
+  classes:
+    - 'PolicyRetryBehavior'
+    - 'PolicyCachingBehavior'
+    - 'PolicyTemporalBehavior'
+
+  factories:
+    - 'PolicyRetryBehaviorFactory'
+    - 'PolicyCachingBehaviorFactory'
+    - 'PolicyTemporalBehaviorFactory'
+
+  aliases:
+    - 'RetryPolicy'
+    - 'CachedPolicy'
+    - 'TemporalPolicy'

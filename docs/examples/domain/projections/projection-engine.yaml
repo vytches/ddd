@@ -1,0 +1,524 @@
+# projection-engine - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'projection-engine'
+title: 'ProjectionEngine - Event Processing Engine'
+description: 'Core engine for processing events through projections'
+business-context: 'Orchestrates event processing, state management, and capability execution'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ProjectionEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Core projection engine managing event processing and state persistence'
+      business-context: 'Processes event streams through projections to build read models'
+
+      formats:
+        jsdoc:
+          description: 'Projection engine with capability support and state management'
+        cli:
+          description: |
+            ## ProjectionEngine
+
+            Event processing engine providing:
+            - Event routing and processing
+            - State persistence management
+            - Capability system integration
+            - Lifecycle hooks execution
+            - Projection rebuilding support
+
+      custom-tags:
+        since: '1.0.0'
+        generic-type: 'TReadModel - The read model type'
+        implements: 'IProjectionEngine<TReadModel>'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates projection engine with store and capabilities'
+        business-context: 'Initializes engine for event processing'
+
+        parameters:
+          - name: 'projection'
+            type: 'IProjection<TReadModel>'
+            description: 'Projection to execute'
+          - name: 'store'
+            type: 'IProjectionStore<TReadModel>'
+            description: 'Store for persisting read model state'
+          - name: 'capabilities'
+            type: '(Capability & IProjectionCapability)[]'
+            description: 'Optional capabilities to enhance projection'
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const projection = new UserProjection();
+              const store = new InMemoryProjectionStore();
+              const engine = new ProjectionEngine(projection, store);
+
+          - id: 'with-capabilities'
+            code: |
+              const engine = new ProjectionEngine(
+                projection,
+                store,
+                [
+                  new CheckpointCapability(checkpointStore),
+                  new CircuitBreakerCapability(config),
+                  new DeadLetterCapability(deadLetterStore)
+                ]
+              );
+
+      getProjectionName:
+        description: 'Returns the name of the managed projection'
+        business-context: 'Identifies projection for routing and persistence'
+
+        returns:
+          type: 'string'
+          description: 'Projection name'
+
+        examples:
+          - id: 'basic-usage'
+            code: |
+              const name = engine.getProjectionName();
+              console.log(`Processing for projection: ${name}`);
+
+      getEventTypes:
+        description: 'Returns list of event types handled by projection'
+        business-context: 'Used for event routing and filtering'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of handled event types'
+
+        examples:
+          - id: 'event-routing'
+            code: |
+              const eventTypes = engine.getEventTypes();
+
+              // Route events to appropriate engines
+              if (eventTypes.includes(event.eventType)) {
+                await engine.processEvent(event);
+              }
+
+      isInterestedIn:
+        description: 'Checks if engine should process an event'
+        business-context: 'Filters events for efficient processing'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if projection handles this event'
+
+        examples:
+          - id: 'event-filtering'
+            code: |
+              events.forEach(async event => {
+                if (engine.isInterestedIn(event)) {
+                  await engine.processEvent(event);
+                }
+              });
+
+      processEvent:
+        description: 'Processes an event through the projection'
+        business-context: 'Core event processing with state transformation and persistence'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when event is processed'
+
+        examples:
+          - id: 'event-processing'
+            code: |
+              // Process single event
+              await engine.processEvent(userCreatedEvent);
+
+              // Process event stream
+              for await (const event of eventStream) {
+                await engine.processEvent(event);
+              }
+
+          - id: 'error-handling'
+            code: |
+              try {
+                await engine.processEvent(event);
+              } catch (error) {
+                console.error(`Failed to process event: ${error.message}`);
+                // Error handled by capabilities (retry, dead letter, etc.)
+              }
+
+        custom-tags:
+          async: 'true'
+          hooks: 'Executes onBeforeApply and onAfterApply hooks'
+          persistence: 'Automatically saves state after processing'
+
+      getState:
+        description: 'Retrieves current read model state'
+        business-context: 'Accesses the current projection state for queries'
+
+        returns:
+          type: 'Promise<TReadModel | null>'
+          description: 'Current state or null if not initialized'
+
+        examples:
+          - id: 'query-state'
+            code: |
+              const state = await engine.getState();
+
+              if (state) {
+                console.log(`Total users: ${state.userCount}`);
+              }
+
+        custom-tags:
+          async: 'true'
+          cached: 'May use cached state for performance'
+
+      saveState:
+        description: 'Persists current read model state'
+        business-context: 'Saves projection state to durable storage'
+
+        parameters:
+          - name: 'state'
+            type: 'TReadModel'
+            description: 'State to persist'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when state is saved'
+
+        examples:
+          - id: 'manual-save'
+            code: |
+              const state = await engine.getState();
+              const updatedState = { ...state, lastSaved: new Date() };
+              await engine.saveState(updatedState);
+
+        custom-tags:
+          async: 'true'
+          persistence: 'Delegates to configured store'
+
+      reset:
+        description: 'Resets projection to initial state'
+        business-context: 'Clears projection for rebuilding or recovery'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when projection is reset'
+
+        examples:
+          - id: 'rebuild-preparation'
+            code: |
+              // Reset before rebuilding
+              await engine.reset();
+              await engine.rebuildFromEvents(eventHistory);
+
+        custom-tags:
+          async: 'true'
+          destructive: 'Removes all projection state'
+
+      rebuildFromEvents:
+        description: 'Rebuilds projection from event stream'
+        business-context: 'Reconstructs read model from event history'
+
+        parameters:
+          - name: 'events'
+            type: 'AsyncIterable<IExtendedDomainEvent>'
+            description: 'Stream of events to process'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when rebuild is finished'
+
+        examples:
+          - id: 'full-rebuild'
+            code: |
+              // Rebuild from event store
+              const events = eventStore.getAllEvents();
+              await engine.reset();
+              await engine.rebuildFromEvents(events);
+
+          - id: 'incremental-rebuild'
+            code: |
+              // Rebuild from checkpoint
+              const checkpoint = await getLastCheckpoint();
+              const events = eventStore.getEventsAfter(checkpoint.position);
+              await engine.rebuildFromEvents(events);
+
+        custom-tags:
+          async: 'true'
+          streaming: 'Processes events as stream'
+
+      addCapability:
+        description: 'Adds a capability to enhance projection functionality'
+        business-context: 'Extends projection with cross-cutting concerns'
+
+        parameters:
+          - name: 'capability'
+            type: 'T extends Capability & IProjectionCapability'
+            description: 'Capability to add'
+
+        returns:
+          type: 'this'
+          description: 'Engine instance for chaining'
+
+        examples:
+          - id: 'add-capabilities'
+            code: |
+              engine
+                .addCapability(new CheckpointCapability(store))
+                .addCapability(new SnapshotCapability(store))
+                .addCapability(new CircuitBreakerCapability(config));
+
+        custom-tags:
+          fluent: 'Supports method chaining'
+          extensible: 'Runtime capability addition'
+
+      getCapability:
+        description: 'Retrieves a specific capability by type'
+        business-context: 'Accesses capability for configuration or monitoring'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Capability class constructor'
+
+        returns:
+          type: 'T | undefined'
+          description: 'Capability instance or undefined'
+
+        examples:
+          - id: 'access-capability'
+            code: |
+              const checkpoint = engine.getCapability(CheckpointCapability);
+
+              if (checkpoint) {
+                const position = await checkpoint.getLastPosition();
+                console.log(`Last checkpoint at position: ${position}`);
+              }
+
+        custom-tags:
+          type-safe: 'Returns typed capability'
+
+      hasCapability:
+        description: 'Checks if engine has a specific capability'
+        business-context: 'Determines available features at runtime'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Capability class to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if capability is present'
+
+        examples:
+          - id: 'check-capability'
+            code: |
+              if (engine.hasCapability(CircuitBreakerCapability)) {
+                console.log('Circuit breaker protection enabled');
+              }
+
+      removeCapability:
+        description: 'Removes a capability from the engine'
+        business-context: 'Disables specific functionality at runtime'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Capability class to remove'
+
+        returns:
+          type: 'this'
+          description: 'Engine instance for chaining'
+
+        examples:
+          - id: 'remove-capability'
+            code: |
+              // Disable circuit breaker for testing
+              engine.removeCapability(CircuitBreakerCapability);
+
+        custom-tags:
+          fluent: 'Supports method chaining'
+
+      rebuild:
+        description: 'Rebuilds projection from event store'
+        business-context: 'Full reconstruction from persistent event history'
+
+        parameters:
+          - name: 'eventStore'
+            type: 'IEventStore'
+            description: 'Event store to read from'
+          - name: 'filter'
+            type: 'IReplayFilter'
+            description: 'Optional filter for events'
+          - name: 'config'
+            type: 'IProjectionRebuildConfig'
+            description: 'Rebuild configuration'
+
+        returns:
+          type: 'Promise<IReplayResult>'
+          description: 'Result with statistics'
+
+        examples:
+          - id: 'full-rebuild'
+            code: |
+              const result = await engine.rebuild(eventStore, {
+                fromPosition: 0,
+                eventTypes: engine.getEventTypes()
+              });
+
+              console.log(`Rebuilt with ${result.eventsProcessed} events`);
+
+      rebuildFromStream:
+        description: 'Rebuilds projection from specific aggregate stream'
+        business-context: 'Targeted rebuild for single aggregate'
+
+        parameters:
+          - name: 'eventStore'
+            type: 'IEventStore'
+            description: 'Event store to read from'
+          - name: 'streamId'
+            type: 'string'
+            description: 'Aggregate stream ID'
+          - name: 'filter'
+            type: 'IReplayFilter'
+            description: 'Optional filter'
+          - name: 'config'
+            type: 'IProjectionRebuildConfig'
+            description: 'Rebuild configuration'
+
+        returns:
+          type: 'Promise<IReplayResult>'
+          description: 'Result with statistics'
+
+        examples:
+          - id: 'stream-rebuild'
+            code: |
+              // Rebuild for specific user
+              const result = await engine.rebuildFromStream(
+                eventStore,
+                'user-123',
+                { eventTypes: ['UserCreated', 'UserUpdated'] }
+              );
+
+  EnhancedProjectionEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enhanced projection engine with retry and error handling'
+      business-context: 'Adds resilience patterns to projection processing'
+
+      formats:
+        jsdoc:
+          description: 'ProjectionEngine with built-in retry and error strategies'
+        cli:
+          description: |
+            ## EnhancedProjectionEngine
+
+            Enhanced engine with:
+            - Automatic retry with backoff
+            - Configurable error strategies
+            - Dead letter queue support
+            - Circuit breaker integration
+            - Detailed error metrics
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ProjectionEngine<TReadModel>'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates enhanced engine with retry configuration'
+        business-context: 'Initializes resilient projection processing'
+
+        parameters:
+          - name: 'projection'
+            type: 'IProjection<TReadModel>'
+            description: 'Projection to execute'
+          - name: 'store'
+            type: 'IProjectionStore<TReadModel>'
+            description: 'State persistence store'
+          - name: 'retryConfigOrCapabilities'
+            type: 'IProjectionRetryConfig | (Capability & IProjectionCapability)[]'
+            description: 'Retry config or capabilities array'
+          - name: 'errorStrategy'
+            type: 'IProjectionErrorStrategy'
+            description: 'Optional error handling strategy'
+
+        examples:
+          - id: 'with-retry'
+            code: |
+              const engine = new EnhancedProjectionEngine(
+                projection,
+                store,
+                {
+                  maxAttempts: 3,
+                  baseDelayMs: 1000,
+                  maxDelayMs: 30000,
+                  backoffMultiplier: 2,
+                  retryableErrors: ['TRANSIENT_ERROR'],
+                  nonRetryableErrors: ['INVALID_EVENT']
+                }
+              );
+
+          - id: 'with-custom-strategy'
+            code: |
+              const engine = new EnhancedProjectionEngine(
+                projection,
+                store,
+                retryConfig,
+                new ExponentialBackoffStrategy()
+              );
+
+      processEvent:
+        description: 'Processes event with retry and error handling'
+        business-context: 'Resilient event processing with automatic recovery'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when processed or exhausted retries'
+
+        examples:
+          - id: 'with-retry'
+            code: |
+              try {
+                await engine.processEvent(event);
+              } catch (error) {
+                // Only thrown after all retries exhausted
+                console.error('Event processing failed after retries', error);
+              }
+
+        custom-tags:
+          override: 'true'
+          resilient: 'Includes retry logic'
+          error-handling: 'Applies error strategy'

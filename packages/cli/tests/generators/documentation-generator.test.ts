@@ -3,7 +3,7 @@ import { safeRun } from '@vytches/ddd-utils';
 import { DocumentationGenerator } from '../../src/generators/documentation-generator';
 import { HybridTemplateEngine } from '../../src/core/hybrid-template-engine';
 import { SmartTagFinder } from '../../src/core/smart-tag-finder';
-import { PackageConfigLoader } from '../../src/core/package-config-loader';
+import { YamlPackageConfigLoader } from '../../src/core/yaml-package-config-loader';
 import type {
   GenerateDocumentationOptions,
   GenerateDocumentationResult,
@@ -15,7 +15,7 @@ import * as path from 'path';
 // Mock dependencies
 vi.mock('../../src/core/hybrid-template-engine');
 vi.mock('../../src/core/smart-tag-finder');
-vi.mock('../../src/core/package-config-loader');
+vi.mock('../../src/core/yaml-package-config-loader');
 vi.mock('../../src/core/utils/logger', () => ({
   logger: {
     info: vi.fn(),
@@ -129,7 +129,7 @@ describe('DocumentationGenerator', () => {
     // Mock constructors
     vi.mocked(HybridTemplateEngine).mockImplementation(() => mockTemplateEngine);
     vi.mocked(SmartTagFinder).mockImplementation(() => mockTagFinder);
-    vi.mocked(PackageConfigLoader).mockImplementation(() => mockConfigLoader);
+    vi.mocked(YamlPackageConfigLoader).mockImplementation(() => mockConfigLoader);
 
     // Mock path operations
     vi.mocked(path.join).mockImplementation((...args) => args.join('/'));
@@ -162,7 +162,7 @@ describe('DocumentationGenerator', () => {
       expect(generator).toBeInstanceOf(DocumentationGenerator);
       expect(HybridTemplateEngine).toHaveBeenCalled();
       expect(SmartTagFinder).toHaveBeenCalled();
-      expect(PackageConfigLoader).toHaveBeenCalled();
+      expect(YamlPackageConfigLoader).toHaveBeenCalled();
     });
   });
 
@@ -486,12 +486,10 @@ describe('DocumentationGenerator', () => {
     });
 
     it('should handle package config without tagFinder', async () => {
-      const configWithoutTagFinder: PackageExampleConfig = {
-        ...mockPackageConfig,
-        tagFinder: undefined,
-      };
+      const { tagFinder, ...configWithoutTagFinder } = mockPackageConfig;
+      const finalConfig: PackageExampleConfig = configWithoutTagFinder;
 
-      mockConfigLoader.loadPackageConfig.mockResolvedValue(configWithoutTagFinder);
+      mockConfigLoader.loadPackageConfig.mockResolvedValue(finalConfig);
 
       const [error] = await safeRun(
         async () =>

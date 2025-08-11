@@ -3,32 +3,6 @@ import { LibUtils } from '@vytches/ddd-utils';
 
 import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration-event-interfaces';
 
-/**
- * @llm-summary IntegrationEvent class for integration event operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * IntegrationEvent class implementing architectural component for integration event operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IntegrationEvent();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IntegrationEvent());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent<T> {
   /**
    * Unique identifier for the event

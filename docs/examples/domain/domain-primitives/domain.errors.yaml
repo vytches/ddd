@@ -1,0 +1,273 @@
+# Domain Errors - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'domain.errors'
+title: 'Domain Error Classes'
+description: 'Core domain error classes for DDD error handling'
+business-context: 'Provides comprehensive error hierarchy for domain-driven design with specific error types for common scenarios'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  DomainErrorOptions:
+    description: 'Type definition for domain error options'
+    business-context: 'Flexible error configuration supporting domain context, error codes, and custom data'
+
+    formats:
+      jsdoc:
+        description: 'Options for configuring domain errors'
+      cli:
+        description: |
+          ## DomainErrorOptions
+          Type for configuring domain errors with optional:
+          - Domain context
+          - Error codes
+          - Custom data
+          - Wrapped errors
+
+# === CLASSES ===
+classes:
+  IDomainError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for all domain errors in DDD'
+      business-context: 'Central error type providing consistent error handling across domain boundaries'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Base domain error with rich context'
+        cli:
+          description: |
+            ## IDomainError
+            Abstract domain error providing:
+            - Error code classification
+            - Domain context tracking
+            - Data attachment capability
+            - Timestamp recording
+            - Error wrapping
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        extends: 'BaseError'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new domain error with message and options'
+        business-context: 'Initialize domain error with comprehensive context for debugging'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the problem'
+          - name: 'options'
+            type: 'DomainErrorOptions | Error'
+            description: 'Configuration options or wrapped error'
+            optional: true
+
+        examples:
+          - id: 'basic'
+            code: |
+              class CustomError extends IDomainError {
+                constructor(message: string) {
+                  super(message, {
+                    code: DomainErrorCode.VALIDATION_ERROR,
+                    domain: 'UserManagement'
+                  });
+                }
+              }
+
+  MissingValueError:
+    class-doc:
+      description: 'Error thrown when a required value is missing'
+      business-context: 'Validates presence of required data in domain operations'
+
+      formats:
+        jsdoc:
+          description: 'Error for missing required values'
+        cli:
+          description: |
+            ## MissingValueError
+            Thrown when required values are absent
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'IDomainError'
+
+    methods:
+      withValue:
+        description: 'Creates a MissingValueError with specific message and data'
+        business-context: 'Factory method for consistent missing value error creation'
+
+        parameters:
+          - name: 'msg'
+            type: 'string'
+            description: 'Error message describing what value is missing'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
+            optional: true
+
+        returns:
+          type: 'MissingValueError'
+          description: 'Configured error instance'
+
+        examples:
+          - id: 'missing-field'
+            code: |
+              throw MissingValueError.withValue('user name', { 
+                field: 'name',
+                context: { userId: 123 } 
+              });
+
+        custom-tags:
+          static: 'true'
+
+  InvalidParameterError:
+    class-doc:
+      description: 'Error thrown when a parameter value is invalid'
+      business-context: 'Validates parameter constraints and business rules'
+
+      formats:
+        jsdoc:
+          description: 'Error for invalid parameter values'
+        cli:
+          description: |
+            ## InvalidParameterError
+            Thrown when parameters violate constraints
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'IDomainError'
+
+    methods:
+      withParameter:
+        description: 'Creates an InvalidParameterError for a specific parameter'
+        business-context: 'Factory method for parameter validation errors'
+
+        parameters:
+          - name: 'parameter'
+            type: 'string'
+            description: 'Parameter name that is invalid'
+          - name: 'msg'
+            type: 'string'
+            description: 'Optional custom error message'
+            optional: true
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error data'
+            optional: true
+
+        returns:
+          type: 'InvalidParameterError'
+          description: 'Configured error instance'
+
+        examples:
+          - id: 'invalid-email'
+            code: |
+              const error = InvalidParameterError.withParameter('email', 'Invalid format');
+              throw error;
+
+        custom-tags:
+          static: 'true'
+
+  DuplicateError:
+    class-doc:
+      description: 'Error thrown when attempting to create a duplicate entity'
+      business-context: 'Ensures uniqueness constraints in domain aggregates'
+
+      formats:
+        jsdoc:
+          description: 'Error for duplicate entity creation'
+        cli:
+          description: |
+            ## DuplicateError
+            Prevents duplicate entity creation
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'IDomainError'
+
+    methods:
+      withEntityId:
+        description: 'Creates a DuplicateError for a specific entity ID'
+        business-context: 'Factory method for duplicate entity errors'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Entity ID that already exists'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
+            optional: true
+
+        returns:
+          type: 'DuplicateError'
+          description: 'Configured error instance'
+
+        examples:
+          - id: 'duplicate-id'
+            code: |
+              throw DuplicateError.withEntityId(
+                'user-123',
+                { entity: 'User', field: 'id' }
+              );
+
+        custom-tags:
+          static: 'true'
+
+  NotFoundError:
+    class-doc:
+      description: 'Error thrown when an entity cannot be found'
+      business-context: 'Handles missing entity scenarios in repositories'
+
+      formats:
+        jsdoc:
+          description: 'Error for entity not found'
+        cli:
+          description: |
+            ## NotFoundError
+            Entity lookup failure error
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'IDomainError'
+
+    methods:
+      withEntityId:
+        description: 'Creates a NotFoundError for a specific entity ID'
+        business-context: 'Factory method for entity not found errors'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Entity ID that was not found'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error data'
+            optional: true
+
+        returns:
+          type: 'NotFoundError'
+          description: 'Configured error instance'
+
+        examples:
+          - id: 'user-not-found'
+            code: |
+              const error = NotFoundError.withEntityId('user-123');
+              throw error;
+
+        custom-tags:
+          static: 'true'

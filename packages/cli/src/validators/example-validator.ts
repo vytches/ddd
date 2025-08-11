@@ -1,22 +1,3 @@
-/**
- * @llm-summary Example validator for validating documentation examples
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Validator for documentation examples that checks file existence,
- * syntax, and configuration consistency.
- *
- * @example
- * ```typescript
- * const validator = new ExampleValidator();
- * const result = await validator.validatePackage('domain-services');
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 import { existsSync } from 'fs';
 import { join } from 'path';
 import type { PackageExampleConfig, ExampleDefinition } from '../types/example-types';

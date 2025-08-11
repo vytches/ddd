@@ -1,54 +1,54 @@
 // Events - Updated for dependency sync 2025-07-27
 export type {
-  IEventMetadata,
-  IDomainEvent,
-  IExtendedDomainEvent,
   BaseEventBusOptions,
-  IEventProcessor,
-  IEventHandler,
-  EventHandlerMetadata,
-  IEventUpcaster,
-  IAuditEvent,
-  IEventStore,
   EventBusMiddleware,
-  EventMiddleware,
   EventHandlerFn,
+  EventHandlerMetadata,
+  EventMiddleware,
+  IAdvancedEventReplay,
   // Advanced Event Store interfaces
   IAdvancedEventStore,
-  IEventStoreConfig,
   IAppendResult,
-  IStoredEvent,
-  IStoredDomainEvent,
-  IEventStream,
-  IGlobalEventStream,
-  IReadStreamOptions,
-  IReadAllOptions,
-  IStreamMetadata,
-  IEventSerializer,
-  IEventStoreAdapter,
+  IAuditEvent,
+  IDomainEvent,
+  IEventHandler,
+  IEventMetadata,
+  IEventProcessor,
   // Event Replay interfaces
   IEventReplay,
-  IAdvancedEventReplay,
   IEventReplayFactory,
-  IReplaySession,
-  IReplayFilter,
+  IEventSerializer,
+  IEventStore,
+  IEventStoreAdapter,
+  IEventStoreConfig,
+  IEventStream,
+  IEventUpcaster,
+  IExtendedDomainEvent,
+  IGlobalEventStream,
+  IReadAllOptions,
+  IReadStreamOptions,
   IReplayConfig,
-  IReplayResult,
+  IReplayFilter,
   IReplayProgress,
+  IReplayResult,
+  IReplaySession,
+  IStoredDomainEvent,
+  IStoredEvent,
+  IStreamMetadata,
+  ReplayErrorHandler,
   ReplayEventHandler,
   ReplayProgressHandler,
-  ReplayErrorHandler,
 } from './events';
 
 export {
-  IEventBus,
-  IEventDispatcher,
-  IEnhancedEventDispatcher,
-  IEventPersistenceHandler,
   createDomainEvent,
-  isEventHandler,
   EVENT_HANDLER_METADATA,
   EVENT_HANDLER_OPTIONS,
+  IEnhancedEventDispatcher,
+  IEventBus,
+  IEventDispatcher,
+  IEventPersistenceHandler,
+  isEventHandler,
 } from './events';
 
 // Aggregates
@@ -56,70 +56,52 @@ export type { IAggregateWithEvents } from './aggregates';
 
 // Validation
 export type {
+  IAsyncSpecification,
+  ISpecification,
   IValidationError,
   IValidationErrors,
-  IValidator,
   IValidationRule,
-  ISpecification,
-  IAsyncSpecification,
+  IValidator,
 } from './validation';
 
 // Capabilities
 export { Capability, CapabilityRegistry, createCapabilityRegistry } from './capabilities';
 
 export type {
-  IAggregateCapability,
-  IProjectionCapability,
-  CapabilityType,
   CapabilityConstructor,
   CapabilityMap,
-  ISnapshotCapability,
-  IVersioningCapability,
-  IEventSourcingCapability,
+  CapabilityType,
+  IAggregateCapability,
+  IAggregateSnapshot,
   IAuditCapability,
   ICheckpointCapability,
   ICircuitBreakerCapability,
   IDeadLetterCapability,
-  IAggregateSnapshot,
+  IEventSourcingCapability,
+  IProjectionCapability,
+  ISnapshotCapability,
+  IVersioningCapability,
 } from './capabilities';
 
 // Domain
-export type { IEntityId, IEntityIdConstructorParams, IEntityIdFactory, IdType } from './domain';
+export type { IdType, IEntityId, IEntityIdConstructorParams, IEntityIdFactory } from './domain';
 
 export { EntityId } from './domain';
 
 // Scheduling
 export type {
-  IScheduledEvent,
-  IScheduleOptions,
-  IScheduledJob,
+  IEventScheduler,
   IJobFilter,
   IJobQueryResult,
-  IEventScheduler,
+  IRecurringPattern,
+  IScheduledEvent,
+  IScheduledJob,
+  IScheduleOptions,
   ISchedulerConfig,
   ISchedulerLifecycle,
-  IRecurringPattern,
 } from './scheduling';
 
-export { JobStatus, SchedulePriority, BackoffStrategy } from './scheduling';
+export { BackoffStrategy, JobStatus, SchedulePriority } from './scheduling';
 
-// Examples Types
-export type {
-  BundleGenerationOptions,
-  BundleResult,
-  ComplexityLevel,
-  ContentConfig,
-  ExampleDefinition,
-  FindOptions,
-  FrameworkIntegration,
-  GenerateDocumentationOptions,
-  GenerateDocumentationResult,
-  LLMSupport,
-  PackageExampleConfig,
-  RelatedPackage,
-  TagSystem,
-  ValidationError,
-  ValidationFix,
-  ValidationResult,
-  ValidationWarning,
-} from './examples';
+// Examples Types - removed, use new YAML system instead
+// Legacy examples system has been replaced with YAML-based metadata system

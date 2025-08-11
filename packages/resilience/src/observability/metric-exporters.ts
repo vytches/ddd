@@ -5,39 +5,13 @@
  */
 
 import type {
-  Metric,
   HistogramMetric,
-  TimerMetric,
+  Metric,
   MetricExporter,
   MetricLabels,
+  TimerMetric,
 } from './metrics-interfaces';
 
-/**
- * @llm-summary JsonMetricExporter class for json metric exporter operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * JsonMetricExporter class implementing infrastructure service for json metric exporter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new JsonMetricExporter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new JsonMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class JsonMetricExporter implements MetricExporter {
   private readonly pretty: boolean;
 
@@ -93,32 +67,6 @@ export class JsonMetricExporter implements MetricExporter {
   }
 }
 
-/**
- * @llm-summary PrometheusMetricExporter class for prometheus metric exporter operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * PrometheusMetricExporter class implementing infrastructure service for prometheus metric exporter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PrometheusMetricExporter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PrometheusMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class PrometheusMetricExporter implements MetricExporter {
   export(metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>): string {
     const lines: string[] = [];
@@ -232,32 +180,6 @@ export class PrometheusMetricExporter implements MetricExporter {
   }
 }
 
-/**
- * @llm-summary CsvMetricExporter class for csv metric exporter operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * CsvMetricExporter class implementing infrastructure service for csv metric exporter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CsvMetricExporter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CsvMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class CsvMetricExporter implements MetricExporter {
   private readonly includeHeaders: boolean;
 
@@ -329,32 +251,6 @@ export class CsvMetricExporter implements MetricExporter {
   }
 }
 
-/**
- * @llm-summary TextMetricExporter class for text metric exporter operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * TextMetricExporter class implementing infrastructure service for text metric exporter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new TextMetricExporter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new TextMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class TextMetricExporter implements MetricExporter {
   export(metrics: ReadonlyArray<Metric | HistogramMetric | TimerMetric>): string {
     const lines: string[] = [];
@@ -421,32 +317,6 @@ export class TextMetricExporter implements MetricExporter {
   }
 }
 
-/**
- * @llm-summary CompositeMetricExporter class for composite metric exporter operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * CompositeMetricExporter class implementing infrastructure service for composite metric exporter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CompositeMetricExporter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CompositeMetricExporter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class CompositeMetricExporter implements MetricExporter {
   private readonly exporters: Map<string, MetricExporter> = new Map();
 
@@ -513,32 +383,6 @@ export class CompositeMetricExporter implements MetricExporter {
   }
 }
 
-/**
- * @llm-summary MetricExporterFactory class for metric exporter factory operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * MetricExporterFactory class implementing infrastructure service for metric exporter factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new MetricExporterFactory();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new MetricExporterFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class MetricExporterFactory {
   /**
    * Create an exporter by format name

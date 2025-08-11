@@ -4,32 +4,6 @@ import type {
   IHandlerDiscoveryRegistry,
 } from './handler-discovery.interface';
 
-/**
- * @llm-summary HandlerDiscoveryRegistry class for handler discovery registry operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * HandlerDiscoveryRegistry class implementing infrastructure service for handler discovery registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new HandlerDiscoveryRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new HandlerDiscoveryRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class HandlerDiscoveryRegistry implements IHandlerDiscoveryRegistry {
   private plugins = new Map<string, IHandlerDiscoveryPlugin>();
 

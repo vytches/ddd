@@ -1,0 +1,400 @@
+# Base Adapter - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base-adapter'
+title: 'BaseContainerAdapter - Framework Integration Base'
+description: 'Base class for integrating external DI frameworks with VytchesDDD'
+business-context: 'Enables adapter pattern for NestJS, InversifyJS, TSyringe, and other enterprise DI frameworks'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseContainerAdapter:
+    class-doc:
+      description: 'Abstract base class for external framework adapters'
+      business-context: 'Enables seamless integration with enterprise DI frameworks while maintaining VytchesDDD compatibility'
+
+      formats:
+        jsdoc:
+          description: 'Base adapter for external DI framework integration'
+        cli:
+          description: |
+            ## BaseContainerAdapter
+            Abstract base class for framework adapters:
+            - Implements IDependencyContainer interface
+            - Provides common adapter functionality
+            - Token key normalization utilities
+            - Service validation helpers
+            - Framework-agnostic abstractions
+
+    methods:
+      resolve:
+        description: 'Resolve a service by token (abstract)'
+        business-context: 'Framework-specific service resolution must be implemented by concrete adapters'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service token to resolve'
+        returns:
+          type: 'T'
+          description: 'Resolved service instance'
+        custom-tags:
+          abstract: true
+          framework-specific: 'Implementation varies by target DI framework'
+        examples:
+          - id: 'adapter-usage'
+            code: |
+              // Using adapter in application
+              const adapter = new NestJSContainerAdapter(moduleRef);
+              VytchesDDD.configure(adapter);
+
+              const userService = VytchesDDD.resolve<UserService>('userService');
+
+      register:
+        description: 'Register a service with the container (abstract)'
+        business-context: 'Framework-specific service registration implementation'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'implementation'
+            type: 'Constructor<T>'
+            description: 'Service implementation constructor'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        custom-tags:
+          abstract: true
+          framework-specific: 'Must adapt VytchesDDD registration to target framework'
+
+      registerFactory:
+        description: 'Register a service using a factory function (abstract)'
+        business-context: 'Framework-specific factory registration for custom service creation'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'factory'
+            type: 'ServiceFactory<T>'
+            description: 'Factory function to create service instances'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        custom-tags:
+          abstract: true
+
+      registerInstance:
+        description: 'Register a service instance (abstract)'
+        business-context: 'Framework-specific instance registration for pre-created services'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'instance'
+            type: 'T'
+            description: 'Pre-created service instance'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        custom-tags:
+          abstract: true
+
+      isRegistered:
+        description: 'Check if a service is registered (abstract)'
+        business-context: 'Framework-specific service registration validation'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service token to check'
+        returns:
+          type: 'boolean'
+          description: 'True if service is registered'
+        custom-tags:
+          abstract: true
+
+      getServices:
+        description: 'Get all registered services (abstract)'
+        business-context: 'Framework-specific service discovery and introspection'
+        returns:
+          type: 'ServiceDescriptor[]'
+          description: 'Array of all service descriptors'
+        custom-tags:
+          abstract: true
+
+      getServicesByTag:
+        description: 'Get services by tag (default implementation)'
+        business-context: 'Tag-based service discovery with default filtering logic'
+        parameters:
+          - name: 'tag'
+            type: 'string'
+            description: 'Tag to filter by'
+        returns:
+          type: 'ServiceDescriptor[]'
+          description: 'Array of matching service descriptors'
+        custom-tags:
+          default-implementation: 'Uses getServices() and filters by tag'
+        examples:
+          - id: 'tag-filtering'
+            code: |
+              // Default implementation filters by tag
+              getServicesByTag(tag: string): ServiceDescriptor[] {
+                return this.getServices().filter(service => 
+                  service.tags?.includes(tag)
+                );
+              }
+
+      getTokenKey:
+        description: 'Get a consistent string key for a service token (protected utility)'
+        business-context: 'Normalizes different token types (string, symbol, constructor) to consistent string keys'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken'
+            description: 'Service token to normalize'
+        returns:
+          type: 'string'
+          description: 'Normalized string key for the token'
+        custom-tags:
+          protected: true
+          utility: 'Helper method for concrete adapter implementations'
+        examples:
+          - id: 'token-normalization'
+            code: |
+              // Token normalization examples
+              const stringKey = this.getTokenKey('userService');        // 'userService'
+              const symbolKey = this.getTokenKey(Symbol('userService')); // 'Symbol(userService)'  
+              const constructorKey = this.getTokenKey(UserService);      // 'UserService'
+
+      validateToken:
+        description: 'Validate that a token is not null or undefined (protected utility)'
+        business-context: 'Common validation logic for service tokens across all adapter implementations'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken'
+            description: 'Service token to validate'
+        throws:
+          - type: 'Error'
+            description: 'When token is null or undefined'
+        custom-tags:
+          protected: true
+          utility: 'Helper method for concrete adapter implementations'
+        examples:
+          - id: 'token-validation'
+            code: |
+              // Used in concrete adapter implementations
+              public resolve<T>(token: ServiceToken<T>): T {
+                this.validateToken(token);
+                // Framework-specific resolution logic...
+              }
+
+# === ADAPTER IMPLEMENTATION PATTERNS ===
+implementation-patterns:
+  nestjs-adapter:
+    title: 'NestJS Container Adapter'
+    description: 'Example adapter implementation for NestJS framework'
+    example: |
+      import { ModuleRef } from '@nestjs/core';
+      import { BaseContainerAdapter } from '@vytches/ddd-di';
+
+      export class NestJSContainerAdapter extends BaseContainerAdapter {
+        constructor(private readonly moduleRef: ModuleRef) {
+          super();
+        }
+        
+        resolve<T>(token: ServiceToken<T>): T {
+          this.validateToken(token);
+          
+          if (typeof token === 'string') {
+            return this.moduleRef.get(token, { strict: false });
+          }
+          
+          if (typeof token === 'function') {
+            return this.moduleRef.get(token, { strict: false });
+          }
+          
+          throw new Error(`Unsupported token type: ${typeof token}`);
+        }
+        
+        register<T>(token: ServiceToken<T>, implementation: Constructor<T>, options?: ServiceRegistrationOptions): void {
+          // NestJS uses module-based registration, so this might be a no-op
+          // or could register with a dynamic module
+          console.warn('Direct registration not supported in NestJS adapter. Use @Injectable() decorators.');
+        }
+        
+        isRegistered<T>(token: ServiceToken<T>): boolean {
+          this.validateToken(token);
+          try {
+            this.moduleRef.get(token as any, { strict: false });
+            return true;
+          } catch {
+            return false;
+          }
+        }
+        
+        getServices(): ServiceDescriptor[] {
+          // NestJS doesn't provide easy access to all services
+          // This would need custom implementation
+          return [];
+        }
+      }
+
+  inversify-adapter:
+    title: 'InversifyJS Container Adapter'
+    description: 'Example adapter implementation for InversifyJS framework'
+    example: |
+      import { Container } from 'inversify';
+      import { BaseContainerAdapter } from '@vytches/ddd-di';
+
+      export class InversifyContainerAdapter extends BaseContainerAdapter {
+        constructor(private readonly container: Container) {
+          super();
+        }
+        
+        resolve<T>(token: ServiceToken<T>): T {
+          this.validateToken(token);
+          
+          if (typeof token === 'string') {
+            return this.container.get<T>(token);
+          }
+          
+          if (typeof token === 'symbol') {
+            return this.container.get<T>(token);
+          }
+          
+          if (typeof token === 'function') {
+            return this.container.get<T>(token);
+          }
+          
+          throw new Error(`Unsupported token type: ${typeof token}`);
+        }
+        
+        register<T>(token: ServiceToken<T>, implementation: Constructor<T>, options?: ServiceRegistrationOptions): void {
+          this.validateToken(token);
+          
+          let binding = this.container.bind<T>(token as any).to(implementation);
+          
+          if (options?.lifetime === ServiceLifetime.Singleton) {
+            binding = binding.inSingletonScope();
+          } else if (options?.lifetime === ServiceLifetime.Transient) {
+            binding = binding.inTransientScope();
+          }
+          
+          if (options?.tags) {
+            options.tags.forEach(tag => binding.whenTargetTagged('tag', tag));
+          }
+        }
+        
+        isRegistered<T>(token: ServiceToken<T>): boolean {
+          this.validateToken(token);
+          return this.container.isBound(token as any);
+        }
+        
+        getServices(): ServiceDescriptor[] {
+          // InversifyJS doesn't provide direct access to all bindings
+          // Custom implementation would be needed
+          return [];
+        }
+      }
+
+# === INTEGRATION GUIDELINES ===
+integration:
+  bridge-pattern:
+    title: 'Bridge Pattern for Framework Integration'
+    description: 'Use bridge pattern to avoid double instance risk'
+    example: |
+      // NestJS Integration with Bridge Pattern
+      @Injectable()
+      export class UserController {
+        private readonly userService: UserService;
+        
+        constructor() {
+          // Bridge to VytchesDDD - no double instances
+          this.userService = VytchesDDD.resolve<UserService>('userService');
+        }
+      }
+
+      @Module({})
+      export class AppModule implements OnModuleInit {
+        constructor(private readonly moduleRef: ModuleRef) {}
+        
+        async onModuleInit() {
+          // Setup VytchesDDD with NestJS adapter
+          const adapter = new NestJSContainerAdapter(this.moduleRef);
+          VytchesDDD.configure(adapter);
+        }
+      }
+
+  adapter-factory:
+    title: 'Adapter Factory Pattern'
+    description: 'Factory for creating appropriate adapters based on framework detection'
+    example: |
+      export class ContainerAdapterFactory {
+        static createAdapter(): IDependencyContainer {
+          // Auto-detect framework and create appropriate adapter
+          if (this.isNestJSAvailable()) {
+            const moduleRef = this.getNestJSModuleRef();
+            return new NestJSContainerAdapter(moduleRef);
+          }
+          
+          if (this.isInversifyAvailable()) {
+            const container = this.getInversifyContainer();
+            return new InversifyContainerAdapter(container);
+          }
+          
+          // Fallback to built-in container
+          return new SimpleContainer();
+        }
+        
+        private static isNestJSAvailable(): boolean {
+          try {
+            require('@nestjs/core');
+            return true;
+          } catch {
+            return false;
+          }
+        }
+      }
+
+# === FRAMEWORK SPECIFICS ===
+frameworks:
+  nestjs:
+    description: 'NestJS integration considerations'
+    features:
+      - 'ModuleRef-based service resolution'
+      - 'Decorator-based service registration (@Injectable)'
+      - 'Module-based organization'
+      - 'Guards, interceptors, and middleware integration'
+    limitations:
+      - 'Limited runtime registration capabilities'
+      - 'No direct access to service registry'
+      - 'Circular dependency handling differs from VytchesDDD'
+
+  inversifyjs:
+    description: 'InversifyJS integration considerations'
+    features:
+      - 'Symbol and string-based service tokens'
+      - 'Lifetime scope management'
+      - 'Tag-based service filtering'
+      - 'Decorator-based registration (@injectable)'
+    advantages:
+      - 'Full programmatic container control'
+      - 'Advanced binding features'
+      - 'Middleware and interception support'
+
+  tsyringe:
+    description: 'TSyringe integration considerations'
+    features:
+      - 'Microsoft-style DI patterns'
+      - 'Constructor-based injection'
+      - 'Singleton and transient lifetimes'
+      - 'Token-based service registration'
+    advantages:
+      - 'Lightweight and familiar to .NET developers'
+      - 'Good TypeScript integration'
+      - 'Simple registration patterns'

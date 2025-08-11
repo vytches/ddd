@@ -7,25 +7,6 @@ import type { ProjectStructure } from '../../types';
 import { CLIError } from '../../types';
 import { FileSystem } from '../utils/file-system';
 
-/**
- * @llm-summary Contract for structure config functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * StructureConfig interface implementing infrastructure service for structure config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteStructureConfig implements StructureConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface StructureConfig {
   name: ProjectStructure;
   description: string;
@@ -39,32 +20,6 @@ export interface StructureConfig {
   };
 }
 
-/**
- * @llm-summary StructureManager class for structure manager operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * StructureManager class implementing infrastructure service for structure manager operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new StructureManager();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new StructureManager());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class StructureManager {
   private structures = new Map<ProjectStructure, StructureConfig>();
 

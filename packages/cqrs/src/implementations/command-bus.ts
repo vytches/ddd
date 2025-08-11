@@ -1,40 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
-import 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
+import 'reflect-metadata';
 
 import { ICommandBus } from '../abstracts';
+import { CQRSConfigurationError, HandlerNotFoundError } from '../errors';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
-import { HandlerNotFoundError, CQRSConfigurationError } from '../errors';
 
-/**
- * @llm-summary CommandBus class for command bus operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * CommandBus class implementing architectural component for command bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CommandBus();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CommandBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class CommandBus extends ICommandBus {
   private middlewares: ICQRSMiddleware[] = [];
 

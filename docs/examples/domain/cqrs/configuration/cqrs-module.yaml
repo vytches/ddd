@@ -1,0 +1,221 @@
+# CQRSModule - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'cqrs-module'
+title: 'CQRSModule - CQRS Module Factory'
+description: 'Factory class for creating and configuring CQRS instances with dependency injection'
+business-context: 'Centralized CQRS setup with support for different bus types and configurations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  CQRSModule:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Static factory class for creating CQRS configurations with DI container integration'
+      business-context: 'Simplifies CQRS module setup with convenient factory methods for common scenarios'
+
+      formats:
+        jsdoc:
+          description: 'Factory class for CQRS module configuration with DI container support'
+        cli:
+          description: |
+            ## CQRSModule Factory
+            Centralized CQRS configuration factory providing:
+            - Flexible CQRS configuration creation
+            - Basic and enhanced bus type presets
+            - DI container integration
+            - Convenient factory methods for common scenarios
+
+      custom-tags:
+        pattern: 'Factory Method Pattern'
+
+    # Methods
+    methods:
+      create:
+        description: 'Creates CQRS configuration with custom options and DI container'
+        business-context: 'Flexible CQRS setup allowing full customization of bus types and middleware'
+
+        parameters:
+          - name: 'container'
+            type: 'IDependencyContainer'
+            description: 'Dependency injection container for handler resolution'
+          - name: 'options'
+            type: 'CQRSOptions'
+            description: 'Configuration options for CQRS setup (optional, defaults to empty)'
+            required: false
+
+        returns:
+          type: 'CQRSConfiguration'
+          description: 'Configured CQRS instance ready for use'
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const container = new SimpleContainer();
+              const cqrs = CQRSModule.create(container);
+
+          - id: 'custom-configuration'
+            code: |
+              const container = new SimpleContainer();
+              const options: CQRSOptions = {
+                commandBusType: 'enhanced',
+                queryBusType: 'enhanced',
+                middlewares: [
+                  new LoggingMiddleware(),
+                  new ValidationMiddleware()
+                ]
+              };
+
+              const cqrs = CQRSModule.create(container, options);
+
+          - id: 'enterprise-setup'
+            code: |
+              const cqrs = CQRSModule.create(enterpriseContainer, {
+                commandBusType: 'enhanced',
+                queryBusType: 'enhanced',
+                middlewares: [
+                  new LoggingMiddleware({ logLevel: 'debug' }),
+                  new ValidationMiddleware({ strict: true }),
+                  new RetryMiddleware({ maxAttempts: 3 }),
+                  new CircuitBreakerMiddleware()
+                ]
+              });
+
+        custom-tags:
+          factory-method: 'Static factory for flexible configuration'
+          dependency-injection: 'Requires IDependencyContainer'
+          default-options: 'Empty options object when not provided'
+
+      createBasic:
+        description: 'Creates basic CQRS configuration with simple bus implementations'
+        business-context: 'Quick setup for applications needing basic command/query dispatching'
+
+        parameters:
+          - name: 'container'
+            type: 'IDependencyContainer'
+            description: 'Dependency injection container for handler resolution'
+
+        returns:
+          type: 'CQRSConfiguration'
+          description: 'CQRS configuration with basic command and query buses'
+
+        examples:
+          - id: 'simple-application'
+            code: |
+              const container = new SimpleContainer();
+              const basicCQRS = CQRSModule.createBasic(container);
+
+              // Register handlers
+              @CommandHandler(CreateUserCommand)
+              class CreateUserHandler {
+                async execute(cmd: CreateUserCommand): Promise<void> {
+                  // Simple command handling
+                }
+              }
+
+          - id: 'microservice-setup'
+            code: |
+              // Ideal for microservices with simple CQRS needs
+              const container = createMicroserviceContainer();
+              const cqrs = CQRSModule.createBasic(container);
+
+              // Minimal overhead, fast startup
+              await cqrs.initialize();
+
+        custom-tags:
+          preset-configuration: "commandBusType: 'basic', queryBusType: 'basic'"
+          performance: 'Minimal overhead for simple scenarios'
+          recommended-for: 'Microservices, simple applications'
+
+      createEnhanced:
+        description: 'Creates enhanced CQRS configuration with advanced bus features'
+        business-context: 'Enterprise setup with full middleware support and advanced features'
+
+        parameters:
+          - name: 'container'
+            type: 'IDependencyContainer'
+            description: 'Dependency injection container for handler resolution'
+
+        returns:
+          type: 'CQRSConfiguration'
+          description: 'CQRS configuration with enhanced command and query buses'
+
+        examples:
+          - id: 'enterprise-application'
+            code: |
+              const container = new EnterpriseContainer();
+              const enhancedCQRS = CQRSModule.createEnhanced(container);
+
+              // Full middleware support available
+              enhancedCQRS.commandBus.use(new LoggingMiddleware());
+              enhancedCQRS.queryBus.use(new CachingMiddleware());
+
+          - id: 'complex-domain'
+            code: |
+              // For complex domains needing advanced patterns
+              const cqrs = CQRSModule.createEnhanced(domainContainer);
+
+              // Supports complex middleware chains
+              cqrs.commandBus
+                .use(new ValidationMiddleware())
+                .use(new RetryMiddleware())
+                .use(new EventPublishingMiddleware());
+
+        custom-tags:
+          preset-configuration: "commandBusType: 'enhanced', queryBusType: 'enhanced'"
+          enterprise-features: 'Full middleware pipeline support'
+          recommended-for: 'Enterprise applications, complex domains'
+          performance-note: 'Higher overhead but more features'
+
+# === USAGE PATTERNS ===
+usage-patterns:
+  progressive-enhancement:
+    description: 'Start basic and upgrade to enhanced as needed'
+    code: |
+      // Start with basic for MVP
+      let cqrs = CQRSModule.createBasic(container);
+
+      // Upgrade to enhanced when complexity grows
+      if (requiresAdvancedFeatures) {
+        cqrs = CQRSModule.createEnhanced(container);
+      }
+
+  framework-integration:
+    description: 'Integration with application frameworks'
+    code: |
+      // NestJS integration example
+      @Module({
+        providers: [
+          {
+            provide: 'CQRS',
+            useFactory: (container: IDependencyContainer) => {
+              return CQRSModule.createEnhanced(container);
+            },
+            inject: ['DI_CONTAINER']
+          }
+        ]
+      })
+      export class CQRSModule {}
+
+  testing-configuration:
+    description: 'Test-specific CQRS setup'
+    code: |
+      // Test container with mocks
+      const testContainer = new TestContainer();
+      const testCQRS = CQRSModule.create(testContainer, {
+        commandBusType: 'basic', // Faster for tests
+        queryBusType: 'basic'
+      });
+
+      // Register test handlers
+      testContainer.register('testHandler', new MockHandler());

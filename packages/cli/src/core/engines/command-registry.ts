@@ -13,32 +13,6 @@ import { suggestCommand } from '../../commands/suggest';
 import { domainBuilderCommand } from '../../commands/domain-builder';
 import { generateCommand } from '../../commands/generate';
 
-/**
- * @llm-summary CommandRegistry class for command registry operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * CommandRegistry class implementing infrastructure service for command registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CommandRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CommandRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class CommandRegistry {
   private commands = new Map<string, Command>();
   private program: CommanderCommand;

@@ -8,4 +8,4 @@ export {
 
 export { PolicyDefinitionBuilder, type PolicyDefinition } from './policy-definition';
 
-export { type PolicyMetadata, PolicyMetadataBuilder } from './policy-metadata';
+export { PolicyMetadataBuilder, type PolicyMetadata } from './policy-metadata';

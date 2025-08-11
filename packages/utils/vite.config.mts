@@ -67,7 +67,11 @@ export default defineConfig({
       fileName: format => `index.${format === 'es' ? 'js' : format}`,
     },
     rollupOptions: {
-      external: () => false, // Utils bundles everything
+      external: id => {
+        // Keep Node.js built-ins external
+        const nodeBuiltins = ['fs', 'fs/promises', 'path', 'os', 'crypto', 'util'];
+        return nodeBuiltins.some(builtin => id === builtin || id.startsWith(builtin + '/'));
+      },
     },
     sourcemap: false,
     target: 'ES2020',

@@ -1,0 +1,267 @@
+# snapshot-capability - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'snapshot-capability'
+title: 'SnapshotCapability - State Snapshot Management'
+description: 'Manages periodic snapshots of projection state'
+business-context: 'Optimizes recovery with complete state snapshots'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  SnapshotCapability:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Manages projection state snapshots for fast recovery'
+      business-context: 'Reduces rebuild time with periodic full state captures'
+
+      formats:
+        jsdoc:
+          description: 'Snapshot capability for projection state management'
+        cli:
+          description: |
+            ## SnapshotCapability
+
+            Snapshot management:
+            - Periodic state snapshots
+            - Compression support
+            - Version management
+            - Fast recovery
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseProjectionCapability<TReadModel>'
+        implements: 'ISnapshotProjectionCapability<TReadModel>'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates snapshot capability'
+        business-context: 'Initializes snapshot management'
+
+        parameters:
+          - name: 'store'
+            type: 'IProjectionSnapshotStore<TReadModel>'
+            description: 'Snapshot storage'
+          - name: 'options'
+            type: 'ISnapshotOptions'
+            description: 'Snapshot configuration'
+            optional: true
+
+        examples:
+          - id: 'setup'
+            code: |
+              const capability = new SnapshotCapability(
+                snapshotStore,
+                {
+                  interval: 5000,
+                  maxSnapshots: 10,
+                  compressionEnabled: true
+                }
+              );
+
+      createSnapshot:
+        description: 'Creates projection state snapshot'
+        business-context: 'Captures complete state for recovery'
+
+        parameters:
+          - name: 'state'
+            type: 'TReadModel'
+            description: 'Current projection state'
+          - name: 'position'
+            type: 'number'
+            description: 'Event stream position'
+          - name: 'metadata'
+            type: 'ISnapshotMetadata'
+            description: 'Snapshot metadata'
+            optional: true
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Snapshot created'
+
+        examples:
+          - id: 'create-snapshot'
+            code: |
+              await capability.createSnapshot(
+                currentState,
+                eventPosition,
+                {
+                  version: '2.0.0',
+                  eventCount: 5000,
+                  compressed: true
+                }
+              );
+
+      loadLatestSnapshot:
+        description: 'Loads most recent snapshot'
+        business-context: 'Retrieves latest state for recovery'
+
+        returns:
+          type: 'Promise<ISnapshot<TReadModel> | null>'
+          description: 'Latest snapshot or null'
+
+        examples:
+          - id: 'load-latest'
+            code: |
+              const snapshot = await capability.loadLatestSnapshot();
+
+              if (snapshot) {
+                console.log(`Restoring from snapshot at position ${snapshot.position}`);
+                await engine.restoreFromSnapshot(snapshot);
+              }
+
+      loadSnapshotByVersion:
+        description: 'Loads specific snapshot version'
+        business-context: 'Retrieves specific state version'
+
+        parameters:
+          - name: 'version'
+            type: 'string'
+            description: 'Snapshot version'
+
+        returns:
+          type: 'Promise<ISnapshot<TReadModel> | null>'
+          description: 'Snapshot or null'
+
+      deleteOldSnapshots:
+        description: 'Removes old snapshots'
+        business-context: 'Manages storage space'
+
+        parameters:
+          - name: 'keepCount'
+            type: 'number'
+            description: 'Number to retain'
+            optional: true
+
+        returns:
+          type: 'Promise<number>'
+          description: 'Number deleted'
+
+      compressState:
+        description: 'Compresses state before storage'
+        business-context: 'Reduces storage requirements'
+
+        parameters:
+          - name: 'state'
+            type: 'TReadModel'
+            description: 'State to compress'
+
+        returns:
+          type: 'any'
+          description: 'Compressed state'
+
+        custom-tags:
+          protected: 'true'
+
+      decompressState:
+        description: 'Decompresses stored state'
+        business-context: 'Restores original state format'
+
+        parameters:
+          - name: 'compressed'
+            type: 'any'
+            description: 'Compressed state'
+
+        returns:
+          type: 'TReadModel'
+          description: 'Original state'
+
+        custom-tags:
+          protected: 'true'
+
+# === INTERFACES ===
+interfaces:
+  ISnapshotOptions:
+    description: 'Snapshot configuration'
+    business-context: 'Controls snapshot behavior'
+
+    properties:
+      - name: 'interval'
+        type: 'number'
+        description: 'Events between snapshots'
+        default: '5000'
+        optional: true
+
+      - name: 'maxSnapshots'
+        type: 'number'
+        description: 'Maximum snapshots to retain'
+        default: '5'
+        optional: true
+
+      - name: 'compressionEnabled'
+        type: 'boolean'
+        description: 'Enable compression'
+        default: 'false'
+        optional: true
+
+      - name: 'compressionLevel'
+        type: 'number'
+        description: 'Compression level (1-9)'
+        default: '6'
+        optional: true
+
+  ISnapshot:
+    description: 'Snapshot data structure'
+    business-context: 'Complete state capture'
+
+    properties:
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Associated projection'
+
+      - name: 'position'
+        type: 'number'
+        description: 'Event stream position'
+
+      - name: 'state'
+        type: 'TReadModel'
+        description: 'Complete projection state'
+
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'Creation time'
+
+      - name: 'version'
+        type: 'string'
+        description: 'Snapshot version'
+        optional: true
+
+      - name: 'compressed'
+        type: 'boolean'
+        description: 'Is state compressed'
+        optional: true
+
+      - name: 'metadata'
+        type: 'ISnapshotMetadata'
+        description: 'Additional metadata'
+        optional: true
+
+  ISnapshotMetadata:
+    description: 'Snapshot metadata'
+    business-context: 'Snapshot context information'
+
+    properties:
+      - name: 'eventCount'
+        type: 'number'
+        description: 'Events in snapshot'
+        optional: true
+
+      - name: 'size'
+        type: 'number'
+        description: 'Snapshot size in bytes'
+        optional: true
+
+      - name: 'checksum'
+        type: 'string'
+        description: 'State checksum'
+        optional: true

@@ -8,20 +8,8 @@ import type { IAuditEvent, IAuditEventMetadata } from './audit-event.interface';
 import { AuditActionType, AuditStatus } from './audit-event.interface';
 
 /**
- * @llm-summary Contract for audit event processor options functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * AuditEventProcessorOptions interface implementing architectural component for audit event processor options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAuditEventProcessorOptions implements AuditEventProcessorOptions {
- *   // Implementation
- * }
- * ```
+ * Configuration options for audit event processor.
+ * Controls which events are audited and default metadata.
  *
  * @since 1.0.0
  * @public
@@ -38,27 +26,8 @@ export interface AuditEventProcessorOptions {
 }
 
 /**
- * @llm-summary AuditEventProcessor class for audit event processor operations
- * @llm-domain Architecture
- * @llm-complexity Complex
- *
- * @description
- * AuditEventProcessor class implementing architectural component for audit event processor operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AuditEventProcessor();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AuditEventProcessor());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
+ * Processes domain events and creates corresponding audit events for compliance.
+ * Automatically transforms domain events into structured audit records.
  *
  * @since 1.0.0
  * @public

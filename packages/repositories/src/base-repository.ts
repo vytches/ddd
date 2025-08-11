@@ -1,37 +1,12 @@
 import type {
+  EntityId,
+  IAggregateWithEvents,
   IEnhancedEventDispatcher,
   IEventPersistenceHandler,
-  IAggregateWithEvents,
-  EntityId,
 } from '@vytches/ddd-contracts';
-import { IDomainError, DomainErrorCode } from '@vytches/ddd-domain-primitives';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
+import type { Result } from '@vytches/ddd-utils';
 
-/**
- * @llm-summary VersionError class for version error operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * VersionError class implementing domain pattern implementation for version error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new VersionError();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new VersionError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class VersionError extends IDomainError {
   static withEntityIdAndVersions(
     id: string | number,
@@ -47,63 +22,25 @@ export class VersionError extends IDomainError {
   }
 }
 
-/**
- * @llm-summary Contract for repository aggregate functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RepositoryAggregate interface implementing domain pattern implementation for repository aggregate operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRepositoryAggregate implements IRepositoryAggregate {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IRepositoryAggregate extends IAggregateWithEvents {
   getId(): EntityId;
   getInitialVersion(): number;
 }
 
-/**
- * @llm-summary BaseRepository class for base repository operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BaseRepository class implementing domain pattern implementation for base repository operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IBaseRepository();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IBaseRepository());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class IBaseRepository {
   constructor(
     protected readonly eventDispatcher: IEnhancedEventDispatcher,
     protected readonly eventPersistenceHandler: IEventPersistenceHandler
   ) {}
 
-  async save(aggregate: IRepositoryAggregate): Promise<void> {
+  /**
+   * Saves an aggregate by persisting its domain events
+   * @param aggregate The aggregate to save
+   * @throws VersionError if version conflict occurs
+   */
+  async save(
+    aggregate: IRepositoryAggregate
+  ): Promise<void | Result<void, VersionError | any> | any> {
     const events = aggregate.getDomainEvents();
 
     if (events.length === 0) return;
@@ -120,15 +57,18 @@ export abstract class IBaseRepository {
       );
     }
 
-    let version = currentVersion;
-
     for (const event of events) {
-      version = await this.eventPersistenceHandler.handleEvent(event);
+      await this.eventPersistenceHandler.handleEvent(event);
     }
 
     // Publish events
     await this.eventDispatcher.dispatchEventsForAggregate(aggregate);
   }
 
+  /**
+   * Finds an aggregate by its identifier
+   * @param id The entity identifier
+   * @returns The aggregate or null if not found
+   */
   abstract findById(id: unknown): Promise<unknown | null>;
 }

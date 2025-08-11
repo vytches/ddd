@@ -16,32 +16,6 @@ interface IHandlerDiscoveryPlugin {
   isAvailable(): boolean;
 }
 
-/**
- * @llm-summary CQRSDiscoveryPlugin class for c q r s discovery plugin operations
- * @llm-domain Architecture
- * @llm-complexity Simple
- *
- * @description
- * CQRSDiscoveryPlugin class implementing architectural component for c q r s discovery plugin operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CQRSDiscoveryPlugin();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CQRSDiscoveryPlugin());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
   readonly name = 'CQRS';
 

@@ -1,0 +1,500 @@
+# EntityId - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'entity-id'
+title: 'EntityId - Enhanced Entity Identifier with Validation'
+description: 'Enhanced EntityId implementation with LibUtils validation and factory methods'
+business-context: 'Type-safe entity identification with comprehensive validation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  EntityId:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enhanced EntityId implementation with strict validation'
+      business-context: 'Primary identifier for domain entities with type safety'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'EntityId with LibUtils validation and factory methods'
+        cli:
+          description: |
+            ## EntityId
+
+            Enhanced entity identifier that extends the base EntityId from contracts
+            with comprehensive validation using LibUtils. Supports UUID, integer,
+            bigint, and text identifier types with proper error handling.
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseEntityId<T>'
+        generic-parameters: 'T - Type of the identifier value (defaults to string)'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new EntityId with specified value and type'
+        business-context: 'Initializes entity identifier with validation'
+
+        parameters:
+          - name: 'value'
+            type: 'T'
+            description: 'The identifier value'
+            required: true
+          - name: 'type'
+            type: 'IdType'
+            description: 'The type of identifier (uuid, integer, bigint, text)'
+            required: true
+
+        examples:
+          - id: 'constructor-basic'
+            code: |
+              // Create different types of EntityId
+              const uuidId = new EntityId('550e8400-e29b-41d4-a716-446655440000', 'uuid');
+              const textId = new EntityId('user-123', 'text');
+              const integerId = new EntityId('42', 'integer');
+
+      validate:
+        description: 'Validates the identifier value based on its type using LibUtils'
+        business-context: 'Ensures identifier meets type-specific validation rules'
+
+        parameters:
+          - name: 'value'
+            type: 'T'
+            description: 'Value to validate'
+            required: true
+
+        returns:
+          type: 'boolean'
+          description: 'True if value is valid for the identifier type'
+
+        custom-tags:
+          override: 'true'
+          throws: 'InvalidParameterError for unsupported IdType'
+
+        examples:
+          - id: 'validate-types'
+            code: |
+              const uuidId = new EntityId('550e8400-e29b-41d4-a716-446655440000', 'uuid');
+              console.log(uuidId.validate(uuidId.getValue())); // true
+
+              const textId = new EntityId('user-123', 'text');
+              console.log(textId.validate('invalid@chars')); // false
+
+      createWithRandomUUID:
+        description: 'Creates a new EntityId with a randomly generated UUID'
+        business-context: 'Generate unique identifiers for new entities'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'New EntityId with random UUID'
+
+        custom-tags:
+          static: 'true'
+          override: 'true'
+
+        examples:
+          - id: 'random-uuid'
+            code: |
+              const newId = EntityId.createWithRandomUUID();
+
+              console.log(newId.getType()); // 'uuid'
+              console.log(newId.getValue()); // '550e8400-e29b-41d4-a716-446655440000'
+
+              // Use in entity creation
+              const user = new User(newId, 'John Doe');
+
+      fromUUID:
+        description: 'Creates EntityId from UUID string with enhanced validation'
+        business-context: 'Create identifiers from existing UUID strings'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'UUID string value'
+            required: true
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with UUID type'
+
+        custom-tags:
+          static: 'true'
+          override: 'true'
+          throws: 'MissingValueError if value is empty, InvalidParameterError if invalid UUID'
+
+        examples:
+          - id: 'fromUUID-validation'
+            code: |
+              // Valid UUID
+              const validId = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+              console.log(validId.getType()); // 'uuid'
+
+              // Will throw InvalidParameterError
+              try {
+                EntityId.fromUUID('invalid-uuid');
+              } catch (error) {
+                console.log(error.message); // 'entity identifier'
+              }
+
+      fromInteger:
+        description: 'Creates EntityId from integer number with validation'
+        business-context: 'Create identifiers from database auto-incremented IDs'
+
+        parameters:
+          - name: 'value'
+            type: 'number'
+            description: 'Integer value (must be non-negative)'
+            required: true
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with integer type'
+
+        custom-tags:
+          static: 'true'
+          override: 'true'
+          throws: 'InvalidParameterError if not a valid integer'
+
+        examples:
+          - id: 'fromInteger-database'
+            code: |
+              // Create from database ID
+              const dbId = EntityId.fromInteger(12345);
+              console.log(dbId.getValue()); // '12345'
+              console.log(dbId.getType()); // 'integer'
+
+              // Use with repository
+              const user = await userRepository.findById(dbId);
+
+      fromBigInt:
+        description: 'Creates EntityId from bigint value with validation'
+        business-context: 'Handle large integer identifiers from external systems'
+
+        parameters:
+          - name: 'value'
+            type: 'string | bigint'
+            description: 'BigInt value or string representation'
+            required: true
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with bigint type'
+
+        custom-tags:
+          static: 'true'
+          override: 'true'
+          throws: 'InvalidParameterError if not a valid bigint'
+
+        examples:
+          - id: 'fromBigInt-large'
+            code: |
+              // From BigInt literal
+              const bigId1 = EntityId.fromBigInt(123456789012345678901234567890n);
+
+              // From string
+              const bigId2 = EntityId.fromBigInt('123456789012345678901234567890');
+
+              console.log(bigId1.getType()); // 'bigint'
+
+      fromText:
+        description: 'Creates EntityId from text string with enhanced validation'
+        business-context: 'Create human-readable identifiers with character validation'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'Text string value'
+            required: true
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with text type'
+
+        custom-tags:
+          static: 'true'
+          override: 'true'
+          throws: 'MissingValueError if empty, InvalidParameterError if invalid characters'
+
+        examples:
+          - id: 'fromText-readable'
+            code: |
+              // Valid text identifiers
+              const userId = EntityId.fromText('user-123');
+              const orderId = EntityId.fromText('ORDER_2024_001');
+              const productCode = EntityId.fromText('LAPTOP-DELL-XPS13');
+
+              console.log(userId.getValue()); // 'user-123'
+              console.log(userId.getType()); // 'text'
+
+              // Will throw InvalidParameterError for special characters
+              try {
+                EntityId.fromText('user@domain.com'); // Contains @
+              } catch (error) {
+                console.log(error.message); // 'entity identifier contains invalid characters'
+              }
+
+  EntityIdFactory:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Factory class for creating EntityId instances with various validation strategies'
+      business-context: 'Provides both static and instance methods for flexible EntityId creation patterns'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Factory for EntityId creation with validation'
+        cli:
+          description: |
+            ## EntityIdFactory
+
+            Factory class providing dual interfaces:
+            - Static methods for direct usage
+            - Instance methods for dependency injection
+
+            Implements IEntityIdFactory interface for contract compliance.
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'IEntityIdFactory'
+        pattern: 'factory-pattern'
+
+    # Methods
+    methods:
+      createWithRandomUUID:
+        description: 'Static factory method to create EntityId with random UUID'
+        business-context: 'Generate unique identifiers for new entity creation'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'New EntityId with random UUID'
+
+        examples:
+          - id: 'factory-static-uuid'
+            code: |
+              // Static method usage
+              const id = EntityIdFactory.createWithRandomUUID();
+              console.log(id.getType()); // 'uuid'
+
+        custom-tags:
+          static: 'true'
+
+      fromUUID:
+        description: 'Static factory method to create EntityId from UUID string'
+        business-context: 'Convert existing UUID strings to EntityId instances'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'UUID string to validate and convert'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with UUID type'
+
+        examples:
+          - id: 'factory-static-from-uuid'
+            code: |
+              const id = EntityIdFactory.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+              console.log(id.getValue()); // UUID string
+
+        custom-tags:
+          static: 'true'
+          throws: 'MissingValueError if empty, InvalidParameterError if invalid UUID'
+
+      fromInteger:
+        description: 'Static factory method to create EntityId from integer'
+        business-context: 'Convert numeric IDs from databases to EntityId'
+
+        parameters:
+          - name: 'value'
+            type: 'number'
+            description: 'Integer value to convert'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with integer type'
+
+        examples:
+          - id: 'factory-static-from-int'
+            code: |
+              const id = EntityIdFactory.fromInteger(12345);
+              console.log(id.getValue()); // '12345'
+
+        custom-tags:
+          static: 'true'
+          throws: 'InvalidParameterError if not a valid integer'
+
+      fromBigInt:
+        description: 'Static factory method to create EntityId from BigInt'
+        business-context: 'Handle large numeric identifiers beyond Number.MAX_SAFE_INTEGER'
+
+        parameters:
+          - name: 'value'
+            type: 'string | bigint'
+            description: 'BigInt value or string representation'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with bigint type'
+
+        examples:
+          - id: 'factory-static-from-bigint'
+            code: |
+              const id = EntityIdFactory.fromBigInt('999999999999999999999');
+              console.log(id.getType()); // 'bigint'
+
+        custom-tags:
+          static: 'true'
+          throws: 'InvalidParameterError if not a valid bigint'
+
+      fromText:
+        description: 'Static factory method to create EntityId from text'
+        business-context: 'Create readable identifiers from text strings'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'Text string to validate and convert'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with text type'
+
+        examples:
+          - id: 'factory-static-from-text'
+            code: |
+              const id = EntityIdFactory.fromText('user-123');
+              console.log(id.getValue()); // 'user-123'
+
+        custom-tags:
+          static: 'true'
+          throws: 'MissingValueError if empty, InvalidParameterError if invalid characters'
+
+      # Instance methods (non-static versions)
+      'createWithRandomUUID (instance)':
+        description: 'Instance method to create EntityId with random UUID'
+        business-context: 'For dependency injection scenarios where factory is injected'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'New EntityId with random UUID'
+
+        examples:
+          - id: 'factory-instance-uuid'
+            code: |
+              // Instance method usage (DI pattern)
+              const factory = new EntityIdFactory();
+              const id = factory.createWithRandomUUID();
+              console.log(id.getType()); // 'uuid'
+
+        custom-tags:
+          instance: 'true'
+
+      'fromUUID (instance)':
+        description: 'Instance method to create EntityId from UUID string'
+        business-context: 'For dependency injection patterns'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'UUID string to validate and convert'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with UUID type'
+
+        examples:
+          - id: 'factory-instance-from-uuid'
+            code: |
+              const factory = new EntityIdFactory();
+              const id = factory.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+
+        custom-tags:
+          instance: 'true'
+          throws: 'MissingValueError if empty, InvalidParameterError if invalid UUID'
+
+      'fromInteger (instance)':
+        description: 'Instance method to create EntityId from integer'
+        business-context: 'For dependency injection patterns'
+
+        parameters:
+          - name: 'value'
+            type: 'number'
+            description: 'Integer value to convert'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with integer type'
+
+        examples:
+          - id: 'factory-instance-from-int'
+            code: |
+              const factory = new EntityIdFactory();
+              const id = factory.fromInteger(12345);
+
+        custom-tags:
+          instance: 'true'
+          throws: 'InvalidParameterError if not a valid integer'
+
+      'fromBigInt (instance)':
+        description: 'Instance method to create EntityId from BigInt'
+        business-context: 'For dependency injection patterns'
+
+        parameters:
+          - name: 'value'
+            type: 'string | bigint'
+            description: 'BigInt value or string representation'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with bigint type'
+
+        examples:
+          - id: 'factory-instance-from-bigint'
+            code: |
+              const factory = new EntityIdFactory();
+              const id = factory.fromBigInt('999999999999999999999');
+
+        custom-tags:
+          instance: 'true'
+          throws: 'InvalidParameterError if not a valid bigint'
+
+      'fromText (instance)':
+        description: 'Instance method to create EntityId from text'
+        business-context: 'For dependency injection patterns'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'Text string to validate and convert'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId instance with text type'
+
+        examples:
+          - id: 'factory-instance-from-text'
+            code: |
+              const factory = new EntityIdFactory();
+              const id = factory.fromText('user-123');
+
+        custom-tags:
+          instance: 'true'
+          throws: 'MissingValueError if empty, InvalidParameterError if invalid characters'

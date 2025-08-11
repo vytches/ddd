@@ -1,0 +1,103 @@
+# index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Policies Package - Main Export'
+description: 'Main export file for business policies package'
+business-context: 'Provides unified API for policy pattern implementation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === PACKAGE EXPORTS ===
+exports:
+  # Core
+  from-core:
+    - 'BaseBusinessPolicy'
+    - 'CompositeBusinessPolicy'
+    - 'PolicyViolation'
+    - 'PolicyViolationCollection'
+    - 'PolicyDefinition'
+    - 'PolicyMetadata'
+    - 'IBusinessPolicy'
+    - 'IPolicyRegistry'
+    - 'PolicyRequest'
+    - 'PolicyContext'
+    - 'PolicySeverity'
+
+  # Builders
+  from-builders:
+    - 'PolicyBuilder'
+    - 'ConditionalPolicyBuilder'
+    - 'PolicyGroup'
+    - 'PolicyGroupBuilder'
+    - 'PolicyStepBuilder'
+    - 'IPolicyBuilder'
+    - 'IPolicyStepBuilder'
+    - 'IConditionalPolicyBuilder'
+
+  # Decorators
+  from-decorators:
+    - 'PolicyRetryBehavior'
+    - 'PolicyCachingBehavior'
+    - 'PolicyTemporalBehavior'
+    - 'PolicyRetryBehaviorFactory'
+    - 'PolicyCachingBehaviorFactory'
+    - 'PolicyTemporalBehaviorFactory'
+    # Aliases for backward compatibility
+    - 'RetryPolicy'
+    - 'CachedPolicy'
+    - 'TemporalPolicy'
+
+  # Adapters
+  from-adapters:
+    - 'SpecificationAdapter'
+    - 'CompositeSpecificationAdapter'
+    - 'SpecificationPolicyBuilder'
+
+  # Events
+  from-events:
+    - 'EventDrivenPolicy'
+    - 'PolicyEvaluationEvent'
+    - 'PolicyEvaluatedEvent'
+    - 'PolicyViolationEvent'
+    - 'PolicyEventBus'
+    - 'IPolicyEventBus'
+
+  # Registry
+  from-registry:
+    - 'PolicyRegistry'
+
+  # Utils
+  from-utils:
+    - 'PolicyContextBuilder'
+    - 'PolicyRequestBuilder'
+
+# === PACKAGE INFO ===
+package-info:
+  name: '@vytches/ddd-policies'
+  version: '2.1.0'
+  description: 'Business policy pattern implementation for DDD'
+  main-features:
+    - 'Fluent policy builder API'
+    - 'Specification pattern integration'
+    - 'Policy decorators (retry, cache, temporal)'
+    - 'Event-driven policies'
+    - 'Central policy registry'
+    - 'Conditional and group policies'
+    - 'Promise-based async API'
+    - 'Enterprise context system'
+
+  patterns:
+    - 'Policy Pattern'
+    - 'Specification Pattern'
+    - 'Decorator Pattern'
+    - 'Builder Pattern'
+    - 'Registry Pattern'
+    - 'Adapter Pattern'
+
+  dependencies:
+    - '@vytches/ddd-utils'
+    - '@vytches/ddd-validation'

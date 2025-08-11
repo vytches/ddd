@@ -1,0 +1,130 @@
+# cqrs-options.interface - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'cqrs-options.interface'
+title: 'CQRSOptions Interface - Configuration Contract'
+description: 'Configuration interface for CQRS module initialization'
+business-context: 'Defines available configuration options for CQRS command and query buses'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  CQRSOptions:
+    description: 'Configuration options for CQRS module initialization'
+    business-context: 'Provides flexible configuration for command/query bus types and middleware setup'
+
+    formats:
+      jsdoc:
+        description: 'CQRS module configuration options'
+      cli:
+        description: |
+          ## CQRSOptions Interface
+
+          Configuration contract for CQRS module that enables:
+          - Selection of basic or enhanced bus implementations
+          - Middleware pipeline configuration
+          - Legacy auto-discovery support (deprecated)
+          - Flexible initialization patterns
+
+    properties:
+      - name: 'commandBusType'
+        type: "'basic' | 'enhanced'"
+        description: 'Type of command bus implementation to use'
+        optional: true
+        default: "'basic'"
+        business-context: 'Choose basic for simple scenarios, enhanced for advanced metrics and features'
+
+      - name: 'queryBusType'
+        type: "'basic' | 'enhanced'"
+        description: 'Type of query bus implementation to use'
+        optional: true
+        default: "'basic'"
+        business-context: 'Choose basic for simple scenarios, enhanced for advanced metrics and features'
+
+      - name: 'autoDiscovery'
+        type: 'boolean'
+        description: 'Whether to automatically discover handlers (deprecated)'
+        optional: true
+        deprecated: true
+        deprecation-message: 'Use DI container auto-discovery instead'
+        business-context: 'Legacy feature replaced by VytchesDDD service locator discovery'
+
+      - name: 'middlewares'
+        type: 'ICQRSMiddleware[]'
+        description: 'Array of middleware to apply to CQRS operations'
+        optional: true
+        business-context: 'Custom middleware pipeline for cross-cutting concerns like logging, validation, caching'
+
+    examples:
+      - id: 'basic-configuration'
+        code: |
+          const basicOptions: CQRSOptions = {
+            commandBusType: 'basic',
+            queryBusType: 'basic'
+          };
+
+          const cqrsModule = CQRSModule.create(basicOptions);
+
+      - id: 'enhanced-configuration'
+        code: |
+          const enhancedOptions: CQRSOptions = {
+            commandBusType: 'enhanced',
+            queryBusType: 'enhanced',
+            middlewares: [
+              new LoggingMiddleware(),
+              new ValidationMiddleware(),
+              new MetricsMiddleware()
+            ]
+          };
+
+          const cqrsModule = CQRSModule.create(enhancedOptions);
+
+      - id: 'middleware-configuration'
+        code: |
+          const middlewareOptions: CQRSOptions = {
+            middlewares: [
+              new LoggingMiddleware({
+                log: (message) => Logger.forContext('CQRS').info(message)
+              }),
+              new ValidationMiddleware(),
+              new CircuitBreakerMiddleware({
+                failureThreshold: 5,
+                resetTimeout: 30000
+              })
+            ]
+          };
+
+          const cqrsModule = CQRSModule.create(middlewareOptions);
+
+      - id: 'production-configuration'
+        code: |
+          const productionOptions: CQRSOptions = {
+            commandBusType: 'enhanced', // Advanced metrics
+            queryBusType: 'enhanced',   // Performance monitoring
+            middlewares: [
+              new LoggingMiddleware(),
+              new MetricsMiddleware(),
+              new ErrorHandlingMiddleware(),
+              new SecurityMiddleware(),
+              new CachingMiddleware()
+            ]
+          };
+
+          // Enhanced buses provide metrics and monitoring
+          const cqrsModule = CQRSModule.create(productionOptions);
+
+    custom-tags:
+      configuration-flexibility: 'Supports both basic and advanced CQRS patterns'
+      middleware-pipeline: 'Extensible middleware system for cross-cutting concerns'
+      deprecation-notice: 'autoDiscovery property deprecated in favor of DI container patterns'
+
+    implementation-notes:
+      - 'Basic bus types provide simple command/query handling'
+      - 'Enhanced bus types add metrics, monitoring, and advanced features'
+      - 'Middleware pipeline executes in array order'
+      - 'autoDiscovery is deprecated - use VytchesDDD.configure() instead'
+      - 'Configuration is immutable after CQRSModule creation'

@@ -3,32 +3,6 @@ import type { ISnapshotCapability, IAggregateSnapshot } from '@vytches/ddd-contr
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
-/**
- * @llm-summary SnapshotCapability class for snapshot capability operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * SnapshotCapability class implementing domain pattern implementation for snapshot capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SnapshotCapability();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SnapshotCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class SnapshotCapability<TState = unknown, TMeta = unknown>
   extends Capability<'snapshot'>
   implements ISnapshotCapability<TState, TMeta>
@@ -41,6 +15,9 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
   private aggregate!: IAggregateRoot;
   private _snapshot: IAggregateSnapshot<TState, TMeta> | null = null;
 
+  /**
+   * @param {unknown} aggregate - Aggregate to attach this capability to
+   */
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
   }
@@ -50,6 +27,11 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
     this._snapshot = null;
   }
 
+  /**
+   * @param {() => TState} serializer - Function to serialize aggregate state
+   * @param {() => TMeta} metadataCreator - Optional function to create snapshot metadata
+   * @returns {IAggregateSnapshot<TState, TMeta>} Created snapshot with state and metadata
+   */
   createSnapshot(
     serializer: () => TState,
     metadataCreator?: () => TMeta
@@ -73,6 +55,12 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
     return snapshot;
   }
 
+  /**
+   * @param {IAggregateSnapshot<TState, TMeta>} snapshot - Snapshot to restore from
+   * @param {(state: TState) => void} deserializer - Function to deserialize state into aggregate
+   * @param {(metadata: TMeta) => void} metadataRestorer - Optional function to restore metadata
+   * @throws {AggregateError} When snapshot is invalid or IDs don't match
+   */
   restoreFromSnapshot(
     snapshot: IAggregateSnapshot<TState, TMeta>,
     deserializer: (state: TState) => void,
@@ -117,23 +105,30 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
     }
   }
 
+  /**
+   * @param {TState} state - State to save temporarily
+   */
   saveTemporaryState?(state: TState): void {
     this._snapshot = this.createSnapshot(() => state);
   }
 
+  /**
+   * @returns {Date | null} Timestamp of last snapshot or null if none exists
+   */
   getLastSnapshotTimestamp?(): Date | null {
     return this._snapshot?.timestamp || null;
   }
 
   /**
-   * Helper method to save a snapshot
+   * @param {() => TState} serializer - Function to serialize aggregate state
+   * @param {() => TMeta} metadataCreator - Optional metadata creator function
    */
   saveSnapshot(serializer: () => TState, metadataCreator?: () => TMeta): void {
     this._snapshot = this.createSnapshot(serializer, metadataCreator);
   }
 
   /**
-   * Helper method to get previous state
+   * @returns {IAggregateSnapshot<TState, TMeta> | null} Previous snapshot state if exists
    */
   getPreviousState(): IAggregateSnapshot<TState, TMeta> | null {
     const snapshot = this._snapshot;

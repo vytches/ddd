@@ -1,0 +1,317 @@
+# hierarchical-metadata-resolver - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'hierarchical-metadata-resolver'
+title: 'HierarchicalMetadataResolver - Core Resolution Engine'
+description: 'Core engine for hierarchical metadata resolution with performance optimization'
+business-context: 'Implements efficient metadata hierarchy resolution with caching and batch optimization'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  HierarchicalMetadataResolver:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Core metadata resolver implementing hierarchical resolution with batch optimization'
+      business-context: 'Solves N×M performance problem by batch processing methods from single file read'
+
+      formats:
+        jsdoc:
+          description: 'Hierarchical metadata resolver with caching'
+        cli:
+          description: |
+            ## HierarchicalMetadataResolver
+
+            Performance-optimized resolver features:
+            - Hierarchical metadata resolution (Global→Package→Class→Method)
+            - Batch method processing (1 read for N methods)
+            - Pre-warming cache capabilities
+            - Performance monitoring and statistics
+            - Smart caching with FileCache integration
+            - Format-specific resolution support
+            - Markdown fallback parsing
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Strategy'
+        optimization: 'Batch Processing'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates resolver instance with optional base directory'
+        business-context: 'Initializes resolver with cache and base path configuration'
+
+        parameters:
+          - name: 'baseDir'
+            type: 'string'
+            description: 'Base directory for metadata files'
+            optional: true
+
+        examples:
+          - id: 'create-resolver'
+            code: |
+              const resolver = new HierarchicalMetadataResolver('/project/root');
+              // Ready for metadata resolution
+
+      preWarmClassCache:
+        description: 'Pre-warm cache for class with multiple methods to optimize batch operations'
+        business-context: 'Optimizes performance by pre-loading all method metadata for a class'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name'
+          - name: 'className'
+            type: 'string'
+            description: 'Class name'
+          - name: 'methodNames'
+            type: 'string[]'
+            description: 'Methods to pre-warm'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when cache is warmed'
+
+        examples:
+          - id: 'pre-warm'
+            code: |
+              await resolver.preWarmClassCache(
+                'aggregates',
+                'AggregateRoot',
+                ['constructor', 'commit', 'apply', 'loadFromHistory']
+              );
+
+              // All methods now cached for fast access
+
+        custom-tags:
+          async: 'true'
+          optimization: 'batch'
+
+      getCacheStats:
+        description: 'Get cache statistics for performance monitoring'
+        business-context: 'Provides visibility into cache effectiveness'
+
+        returns:
+          type: 'object'
+          description: 'Cache performance statistics'
+
+        examples:
+          - id: 'cache-stats'
+            code: |
+              const stats = resolver.getCacheStats();
+              console.log(`Cache hit rate: ${(stats.hitRate * 100).toFixed(1)}%`);
+              console.log(`Files cached: ${stats.cacheSize}`);
+
+        custom-tags:
+          monitoring: 'true'
+
+      clearCache:
+        description: 'Clear cache for specific file or entire cache'
+        business-context: 'Manages cache lifecycle for testing or memory management'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Specific file to clear, or all if omitted'
+            optional: true
+
+        examples:
+          - id: 'clear-cache'
+            code: |
+              // Clear specific file
+              resolver.clearCache('/docs/examples/domain/aggregates/aggregate-root.yaml');
+
+              // Clear all cache
+              resolver.clearCache();
+
+        custom-tags:
+          management: 'true'
+
+      resolveAllMethodsForClass:
+        description: 'BATCH OPTIMIZATION: Resolve ALL methods for a class at once'
+        business-context: 'Addresses performance issue of N methods × operations by batching'
+
+        parameters:
+          - name: 'config'
+            type: "Omit<HierarchyConfig, 'methodName'>"
+            description: 'Config without methodName'
+
+        returns:
+          type: 'Promise<Record<string, ResolvedMetadata | null>>'
+          description: 'Map of method names to resolved metadata'
+
+        examples:
+          - id: 'batch-resolve'
+            code: |
+              const allMethods = await resolver.resolveAllMethodsForClass({
+                packageName: 'repositories',
+                className: 'BaseRepository',
+                format: 'jsdoc'
+              });
+
+              // Single file read + parse for all methods!
+              // Returns:
+              // {
+              //   'save': { description: '...', ... },
+              //   'findById': { description: '...', ... },
+              //   'delete': { description: '...', ... }
+              // }
+
+        custom-tags:
+          async: 'true'
+          optimization: 'critical'
+          performance: 'O(1) file reads'
+
+      resolveForMethod:
+        description: 'Resolve metadata for specific method with hierarchy'
+        business-context: 'Standard single-method resolution with full hierarchy'
+
+        parameters:
+          - name: 'config'
+            type: 'HierarchyConfig'
+            description: 'Hierarchy configuration'
+
+        returns:
+          type: 'Promise<ResolvedMetadata | null>'
+          description: 'Resolved metadata or null'
+
+        examples:
+          - id: 'resolve-method'
+            code: |
+              const metadata = await resolver.resolveForMethod({
+                packageName: 'events',
+                className: 'DomainEvent',
+                methodName: 'getAggregateId',
+                format: 'jsdoc'
+              });
+
+              // Resolves through hierarchy:
+              // Global → Package → Class → Method
+
+        custom-tags:
+          async: 'true'
+          standard: 'true'
+
+      collectMetadataSources:
+        description: 'Collect all metadata sources in hierarchy'
+        business-context: 'Gathers metadata from all levels for resolution'
+
+        parameters:
+          - name: 'config'
+            type: 'HierarchyConfig'
+            description: 'Configuration'
+
+        returns:
+          type: 'Promise<MetadataSource[]>'
+          description: 'Ordered metadata sources'
+
+        custom-tags:
+          private: 'true'
+          async: 'true'
+
+      collectBaseMetadataSources:
+        description: 'Collect base metadata sources (global, package, class) - shared for all methods'
+        business-context: 'Optimizes by collecting shared sources once'
+
+        parameters:
+          - name: 'config'
+            type: "Omit<HierarchyConfig, 'methodName'>"
+            description: 'Config without method'
+
+        returns:
+          type: 'Promise<MetadataSource[]>'
+          description: 'Base sources'
+
+        custom-tags:
+          private: 'true'
+          optimization: 'shared'
+
+      loadAllMethodsMetadata:
+        description: 'Load ALL methods metadata from class file at once - KEY OPTIMIZATION'
+        business-context: 'Read file ONCE and parse all methods instead of N reads'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name'
+          - name: 'className'
+            type: 'string'
+            description: 'Class name'
+
+        returns:
+          type: 'Promise<Map<string, MetadataParseResult>>'
+          description: 'All methods metadata'
+
+        custom-tags:
+          private: 'true'
+          optimization: 'critical'
+
+      parseAllMethodsFromClassFile:
+        description: 'BATCH OPTIMIZATION: Parse ALL methods from class file at once'
+        business-context: 'KEY performance optimization - parse once extract all'
+
+        parameters:
+          - name: 'content'
+            type: 'string'
+            description: 'File content'
+
+        returns:
+          type: 'Map<string, MetadataParseResult>'
+          description: 'All methods parsed'
+
+        custom-tags:
+          private: 'true'
+          parser: 'batch'
+
+# === EXAMPLES ===
+examples:
+  - id: 'performance-comparison'
+    description: 'Before and after batch optimization'
+    code: |
+      const resolver = new HierarchicalMetadataResolver();
+
+      // === BEFORE: N methods × operations ===
+      // For 13 methods in aggregate-root.d.ts:
+      // - 13 file reads
+      // - 13 parse operations
+      // - 13 hierarchy resolutions
+      // Total: ~650ms
+
+      // === AFTER: Batch optimization ===
+      const allMethods = await resolver.resolveAllMethodsForClass({
+        packageName: 'aggregates',
+        className: 'AggregateRoot',
+        format: 'jsdoc'
+      });
+
+      // For same 13 methods:
+      // - 1 file read
+      // - 1 parse operation (extracts all)
+      // - 1 hierarchy resolution (shared base)
+      // Total: ~50ms (13x faster!)
+
+      // Performance monitoring
+      const stats = resolver.getCacheStats();
+      console.log('Performance Report:');
+      console.log(`Cache Size: ${stats.cacheSize} files`);
+      console.log(`Hit Rate: ${(stats.hitRate * 100).toFixed(1)}%`);
+      console.log(`Reads Saved: ${stats.hits}`);
+
+      // Pre-warm for even better performance
+      await resolver.preWarmClassCache(
+        'repositories',
+        'BaseRepository',
+        ['save', 'findById', 'delete', 'update', 'exists']
+      );
+
+      // Now all subsequent access is from cache!

@@ -1,0 +1,118 @@
+# event-handler.decorator - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'event-handler.decorator'
+title: 'EventHandler Decorator - Event Handler Registration Decorator'
+description: 'Decorator for marking classes and methods as event handlers with DI support'
+business-context: 'Enables declarative event handler registration and auto-discovery'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FUNCTIONS ===
+functions:
+  EventHandler:
+    description: 'Decorator for marking classes and methods as event handlers'
+    business-context: 'Core decorator for event-driven architecture with DI integration'
+
+    formats:
+      jsdoc:
+        description: 'Event handler decorator with DI support'
+        business-context: 'Declarative event handler registration'
+      cli:
+        description: |
+          ## EventHandler Decorator
+          Decorator that marks classes or methods as event handlers
+          with full dependency injection integration and auto-discovery.
+        business-context: |
+          Essential decorator for event-driven architecture. Provides
+          declarative handler registration with automatic DI integration.
+
+    generic-parameters:
+      - name: 'T'
+        constraint: 'IDomainEvent'
+        description: 'Event type that this handler processes'
+
+    parameters:
+      - name: 'eventType'
+        type: 'new (...args: any[]) => T'
+        description: 'Constructor of the event type to handle'
+      - name: 'options'
+        type: 'EventHandlerOptions'
+        optional: true
+        description: 'Handler configuration options'
+        default: '{}'
+
+    returns:
+      type: 'ClassDecorator | MethodDecorator'
+      description: 'Decorator function for classes or methods'
+
+    custom-tags:
+      decorator: 'Class and method decorator'
+      di-integration: 'Automatic DI registration'
+      auto-discovery: 'Supports plugin-based discovery'
+
+    examples:
+      - id: 'class-handler'
+        code: |
+          @EventHandler(OrderCreatedEvent)
+          class OrderEmailHandler implements IEventHandler<OrderCreatedEvent> {
+            async handle(event: OrderCreatedEvent): Promise<void> {
+              // Send order confirmation email
+            }
+          }
+
+      - id: 'class-with-options'
+        code: |
+          @EventHandler(UserRegisteredEvent, {
+            lifetime: 'singleton',
+            priority: 100,
+            context: 'UserManagement',
+            tags: ['user', 'notification'],
+            autoRegister: true
+          })
+          class UserNotificationHandler implements IEventHandler<UserRegisteredEvent> {
+            async handle(event: UserRegisteredEvent): Promise<void> {
+              // Handle user registration
+            }
+          }
+
+      - id: 'method-handler'
+        code: |
+          class EventHandlers {
+            @EventHandler(PaymentProcessedEvent, { priority: 200 })
+            async handlePayment(event: PaymentProcessedEvent): Promise<void> {
+              // Handle payment processing
+            }
+            
+            @EventHandler(OrderCancelledEvent)
+            handleCancellation(event: OrderCancelledEvent): void {
+              // Handle order cancellation
+            }
+          }
+
+      - id: 'context-filtering'
+        code: |
+          @EventHandler(InventoryUpdatedEvent, {
+            eventContext: ['warehouse', 'inventory'],
+            lifetime: 'singleton'
+          })
+          class WarehouseInventoryHandler implements IEventHandler<InventoryUpdatedEvent> {
+            async handle(event: InventoryUpdatedEvent): Promise<void> {
+              // Only handles events from warehouse/inventory contexts
+            }
+          }
+
+      - id: 'conditional-registration'
+        code: |
+          @EventHandler(AuditEvent, {
+            autoRegister: false,  // Manual registration required
+            availableFrom: '2.0.0'
+          })
+          class AuditHandler implements IEventHandler<AuditEvent> {
+            async handle(event: AuditEvent): Promise<void> {
+              // Must be manually registered with DI
+            }
+          }

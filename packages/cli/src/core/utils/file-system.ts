@@ -7,32 +7,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { CLIError } from '../../types';
 
-/**
- * @llm-summary FileSystem class for file system operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * FileSystem class implementing infrastructure service for file system operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new FileSystem();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new FileSystem());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class FileSystem {
   /**
    * Check if path exists

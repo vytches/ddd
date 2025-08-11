@@ -1,24 +1,5 @@
 import type { IBusinessPolicy, PolicyDefinition } from './business-policy.interface';
 
-/**
- * @llm-summary Contract for policy query functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyQuery interface implementing domain pattern implementation for policy query operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyQuery implements PolicyQuery {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface PolicyQuery {
   /**
    * Domain to search in
@@ -41,25 +22,6 @@ export interface PolicyQuery {
   readonly tags?: string[];
 }
 
-/**
- * @llm-summary Contract for policy registry functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * PolicyRegistry interface implementing domain pattern implementation for policy registry operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretePolicyRegistry implements IPolicyRegistry {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IPolicyRegistry {
   /**
    * Register a policy definition
@@ -140,33 +102,9 @@ export interface IPolicyRegistry {
   findByTags<T>(domain: string, tags: string[]): PolicyDefinition<T>[];
 }
 
-/**
- * @llm-summary Contract for unified registry functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * UnifiedRegistry interface implementing domain pattern implementation for unified registry operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteUnifiedRegistry implements IUnifiedRegistry {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IUnifiedRegistry {
   /**
    * Policy registry instance
    */
   readonly policies: IPolicyRegistry;
-
-  // Future expansions:
-  // readonly events: IEventRegistry;
-  // readonly services: IServiceRegistry;
-  // readonly handlers: IHandlerRegistry;
 }

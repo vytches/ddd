@@ -1,0 +1,333 @@
+# context-router - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'context-router'
+title: 'Context Router - Event Routing Between Bounded Contexts'
+description: 'Flexible router for directing events to appropriate bounded contexts'
+business-context: 'Enables intelligent event distribution across domain boundaries'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  IContextRouter:
+    description: 'Interface for routing events to appropriate contexts based on business rules'
+    business-context: 'Determines which bounded contexts should receive specific events'
+
+    formats:
+      jsdoc:
+        description: 'Event context routing interface'
+      cli:
+        description: |
+          ## IContextRouter Interface
+          Routes domain events to appropriate bounded contexts
+          based on configurable business rules.
+
+    methods:
+      determineTargetContexts:
+        description: 'Determines target contexts for given event'
+        business-context: 'Core routing logic for cross-context communication'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Domain event to route'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of target context names'
+
+# === CLASSES ===
+classes:
+  ContextRouter:
+    class-doc:
+      description: 'Flexible context router implementation with multiple configuration options'
+      business-context: 'Supports routing rules based on event types, specifications, and predicates'
+
+      formats:
+        jsdoc:
+          description: 'Context router with flexible configuration'
+          business-context: 'Multi-strategy event routing system'
+        cli:
+          description: |
+            ## ContextRouter Class
+            Sophisticated context router supporting multiple configuration
+            strategies for event routing between bounded contexts.
+          business-context: |
+            Essential component for microservices and domain-driven architectures.
+            Enables intelligent event distribution with complex routing rules.
+
+      implements: ['IContextRouter']
+
+      custom-tags:
+        complexity: 'Medium'
+        routing: 'Multi-strategy routing system'
+        bounded-contexts: 'Cross-context communication'
+
+    methods:
+      constructor:
+        description: 'Creates new context router with optional initial configuration'
+        business-context: 'Initializes router with flexible configuration options'
+
+        parameters:
+          - name: 'initialConfig'
+            type: 'ContextRouterConfig'
+            optional: true
+            description: 'Optional initial routing configuration'
+
+        examples:
+          - id: 'basic'
+            code: |
+              // Simple context list - all events to all contexts
+              const router = new ContextRouter(['orders', 'inventory', 'billing']);
+
+          - id: 'event-mapping'
+            code: |
+              // Event type mapping
+              const router = new ContextRouter({
+                'orders': ['OrderCreated', 'OrderUpdated'],
+                'inventory': ['ProductAdded', 'StockChanged'],
+                'billing': ['PaymentProcessed']
+              });
+
+          - id: 'complex-rules'
+            code: |
+              // Complex routing with specifications
+              const config = new Map([
+                ['high-value-orders', new HighValueOrderSpec()],
+                ['european-customers', new EuropeanCustomerSpec()]
+              ]);
+              const router = new ContextRouter(config);
+
+      configure:
+        description: 'Configures router with new routing rules'
+        business-context: 'Flexible configuration supporting multiple patterns'
+
+        parameters:
+          - name: 'config'
+            type: 'ContextRouterConfig'
+            description: 'Routing configuration (array, Map, or object)'
+
+        returns:
+          type: 'this'
+          description: 'Router instance for fluent configuration'
+
+        custom-tags:
+          fluent: 'Chainable configuration method'
+
+        examples:
+          - id: 'array-config'
+            code: |
+              router.configure(['context1', 'context2', 'context3']);
+              // All events routed to all three contexts
+
+          - id: 'map-config'
+            code: |
+              const rules = new Map([
+                ['orders', event => event.eventType.includes('Order')],
+                ['inventory', new InventoryEventSpec()]
+              ]);
+              router.configure(rules);
+
+          - id: 'object-config'
+            code: |
+              router.configure({
+                'orders': ['OrderCreated', 'OrderUpdated', 'OrderCancelled'],
+                'payments': event => event.payload.amount > 1000,
+                'audit': () => true  // All events
+              });
+
+      sendAllEventsTo:
+        description: 'Adds rule to send all events to specified contexts'
+        business-context: 'Broadcast pattern for universal event distribution'
+
+        parameters:
+          - name: 'contexts'
+            type: 'string[]'
+            variadic: true
+            description: 'Target context names'
+
+        returns:
+          type: 'this'
+          description: 'Router instance for chaining'
+
+        examples:
+          - id: 'basic'
+            code: |
+              router.sendAllEventsTo('audit', 'analytics', 'monitoring');
+
+      sendEventTypeTo:
+        description: 'Adds rule for specific event type routing'
+        business-context: 'Type-based routing for specific event handling'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type to match'
+          - name: 'contexts'
+            type: 'string[]'
+            variadic: true
+            description: 'Target context names'
+
+        returns:
+          type: 'this'
+          description: 'Router instance for chaining'
+
+        examples:
+          - id: 'basic'
+            code: |
+              router
+                .sendEventTypeTo('OrderCreated', 'orders', 'inventory')
+                .sendEventTypeTo('PaymentProcessed', 'billing', 'orders');
+
+      sendEventsMatchingSpecificationTo:
+        description: 'Adds specification-based routing rule'
+        business-context: 'Complex business logic routing using domain specifications'
+
+        parameters:
+          - name: 'specification'
+            type: 'ISpecification<IExtendedDomainEvent>'
+            description: 'Specification for event matching'
+          - name: 'contexts'
+            type: 'string[]'
+            variadic: true
+            description: 'Target context names'
+
+        returns:
+          type: 'this'
+          description: 'Router instance for chaining'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const highValueOrderSpec = new HighValueOrderSpecification(10000);
+              const europeanCustomerSpec = new EuropeanCustomerSpecification();
+
+              router
+                .sendEventsMatchingSpecificationTo(highValueOrderSpec, 'premium-orders')
+                .sendEventsMatchingSpecificationTo(europeanCustomerSpec, 'eu-compliance');
+
+      sendEventsMatchingPredicateTo:
+        description: 'Adds predicate-based routing rule'
+        business-context: 'Custom logic routing using predicate functions'
+
+        parameters:
+          - name: 'predicate'
+            type: '(event: IExtendedDomainEvent) => boolean'
+            description: 'Predicate function for event matching'
+          - name: 'contexts'
+            type: 'string[]'
+            variadic: true
+            description: 'Target context names'
+
+        returns:
+          type: 'this'
+          description: 'Router instance for chaining'
+
+        examples:
+          - id: 'basic'
+            code: |
+              router
+                .sendEventsMatchingPredicateTo(
+                  event => event.payload?.urgent === true,
+                  'urgent-processing'
+                )
+                .sendEventsMatchingPredicateTo(
+                  event => event.metadata?.actor?.type === 'admin',
+                  'admin-audit'
+                );
+
+      determineTargetContexts:
+        description: 'Determines target contexts for given event using configured rules'
+        business-context: 'Main routing logic applying all configured rules'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to route'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of unique target context names'
+
+        custom-tags:
+          core-logic: 'Primary routing method'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const orderEvent = new OrderCreatedEvent({ orderId: '123' });
+              const contexts = router.determineTargetContexts(orderEvent);
+              console.log('Route to contexts:', contexts);
+              // Output: ['orders', 'inventory', 'billing']
+
+      clear:
+        description: 'Removes all routing rules'
+        business-context: 'Resets router to clean state for reconfiguration'
+
+        returns:
+          type: 'this'
+          description: 'Router instance for chaining'
+
+        examples:
+          - id: 'basic'
+            code: |
+              router.clear().configure(newRules);
+
+# === TYPES ===
+types:
+  EventRoutingCondition:
+    description: 'Union type for event routing conditions'
+    business-context: 'Flexible condition types for routing rules'
+
+    type-definition: |
+      string |
+      ((event: IExtendedDomainEvent) => boolean) |
+      ISpecification<IExtendedDomainEvent> |
+      boolean
+
+    formats:
+      jsdoc:
+        description: 'Routing condition union type'
+      cli:
+        description: |
+          ## EventRoutingCondition Type
+          Flexible union type supporting multiple routing strategies.
+
+    values:
+      - name: 'string'
+        description: 'Event type name matching'
+      - name: 'function'
+        description: 'Predicate function for custom logic'
+      - name: 'ISpecification'
+        description: 'Domain specification pattern'
+      - name: 'boolean'
+        description: 'Constant true/false value'
+
+  ContextRouterConfig:
+    description: 'Configuration type for context router initialization'
+    business-context: 'Flexible configuration supporting multiple patterns'
+
+    type-definition: |
+      string[] |
+      Map<string, EventRoutingCondition> |
+      Record<string, EventRoutingCondition | string[]>
+
+    formats:
+      jsdoc:
+        description: 'Router configuration union type'
+      cli:
+        description: |
+          ## ContextRouterConfig Type
+          Flexible configuration type supporting arrays, Maps, or objects.
+
+    values:
+      - name: 'string[]'
+        description: 'Simple array of context names'
+      - name: 'Map'
+        description: 'Map of context to routing condition'
+      - name: 'Record'
+        description: 'Object with context keys and conditions'

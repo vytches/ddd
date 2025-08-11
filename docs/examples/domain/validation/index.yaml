@@ -1,0 +1,263 @@
+# ValidationIndex - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Validation Package - Main Exports'
+description: 'Main entry point for validation package with all exported classes and utilities'
+business-context: 'Central access point for all domain validation patterns and utilities'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  specifications:
+    description: 'Specification pattern classes and utilities'
+    business-context: 'Core specification pattern implementation for domain business rules'
+
+    items:
+      - name: 'Specification'
+        type: 'const'
+        description: 'Factory utilities for creating common specifications'
+        business-context: 'Convenient methods for building specifications without class instantiation'
+
+      - name: 'CompositeSpecification'
+        type: 'abstract class'
+        description: 'Abstract base class for building complex specifications using Composite pattern'
+        business-context: 'Foundation for all domain specifications enabling fluent composition'
+
+      - name: 'AsyncCompositeSpecification'
+        type: 'abstract class'
+        description: 'Abstract base class for building complex asynchronous specifications'
+        business-context: 'Foundation for async domain specifications requiring external data sources'
+
+      - name: 'NotSpecification'
+        type: 'class'
+        description: 'Specification that negates another specification'
+        business-context: 'Inverts business rule logic for exclusion scenarios'
+
+      - name: 'AndSpecification'
+        type: 'class'
+        description: 'Specification that combines two specifications with AND logic'
+        business-context: 'Both specifications must be satisfied for result to be true'
+
+      - name: 'OrSpecification'
+        type: 'class'
+        description: 'Specification that combines two specifications with OR logic'
+        business-context: 'At least one specification must be satisfied for result to be true'
+
+      - name: 'AndAsyncSpecification'
+        type: 'class'
+        description: 'Combines two async specifications with AND logic - both must be satisfied'
+        business-context: 'Both async business rules must pass for composite validation to succeed'
+
+      - name: 'OrAsyncSpecification'
+        type: 'class'
+        description: 'Combines two async specifications with OR logic - at least one must be satisfied'
+        business-context: 'Either async business rule can pass for composite validation to succeed'
+
+      - name: 'NotAsyncSpecification'
+        type: 'class'
+        description: 'Negates an async specification - satisfied when wrapped specification fails'
+        business-context: 'Async specification is satisfied when wrapped async business rule fails'
+
+      - name: 'AlwaysFalseSpecification'
+        type: 'class'
+        description: 'Specification that always returns false regardless of candidate'
+        business-context: 'Useful for disabled features or restrictive default policies'
+
+      - name: 'AlwaysTrueSpecification'
+        type: 'class'
+        description: 'Specification that always returns true regardless of candidate'
+        business-context: 'Useful as default specification or for testing scenarios'
+
+      - name: 'SpecificationValidator'
+        type: 'class'
+        description: 'Validator implementation focused on specification pattern with Result pattern integration'
+        business-context: 'Lightweight validator for specification-based domain business rules'
+
+      - name: 'PredicateSpecification'
+        type: 'class'
+        description: 'Specification that wraps a predicate function'
+        business-context: 'Converts lambda functions to specification objects for composition'
+
+      - name: 'PropertyBetweenSpecification'
+        type: 'class'
+        description: 'Specification that checks if numeric property is within range'
+        business-context: 'Validates numeric properties against business value ranges'
+
+      - name: 'PropertyInSpecification'
+        type: 'class'
+        description: 'Specification that checks if object property is in allowed values set'
+        business-context: 'Validates property against whitelist of acceptable values'
+
+      - name: 'PropertyEqualsSpecification'
+        type: 'class'
+        description: 'Specification that checks if object property equals expected value'
+        business-context: 'Validates specific property values in domain objects'
+
+  business-rules:
+    description: 'Business rule validation classes'
+    business-context: 'Comprehensive business rule validation with fluent API and Result pattern'
+
+    items:
+      - name: 'BusinessRuleValidator'
+        type: 'class'
+        description: 'Comprehensive business rule validator implementing IValidator with Result pattern'
+        business-context: 'Core domain validation engine supporting specifications, nested validation, and conditional rules'
+
+  validation-error:
+    description: 'Validation error classes for structured error handling'
+    business-context: 'Structured error reporting for domain validation failures'
+
+    items:
+      - name: 'ValidationError'
+        type: 'class'
+        description: 'Represents a single validation error with property, message and context'
+        business-context: 'Individual validation failure with detailed context for error reporting'
+
+      - name: 'ValidationErrors'
+        type: 'class'
+        description: 'Collection of validation errors extending Error for comprehensive validation failure reporting'
+        business-context: 'Aggregated validation failures for comprehensive error handling and reporting'
+
+  validation-facade:
+    description: 'Simplified validation API facade'
+    business-context: 'One-stop validation API for common validation scenarios and patterns'
+
+    items:
+      - name: 'ValidationFacade'
+        type: 'const'
+        description: 'Facade providing simplified validation API and utilities'
+        business-context: 'Central access point for all validation patterns and utilities in the domain'
+        alias: 'Validation'
+
+  rules-registry:
+    description: 'Domain-specific validation rules registry'
+    business-context: 'Centralized registry for domain validation rules with core and custom rule providers'
+
+    items:
+      - name: 'RulesRegistry'
+        type: 'class'
+        description: 'Central registry for managing domain-specific validation rule providers'
+        business-context: 'Centralized access point for all validation rules across different domains'
+
+  adapters:
+    description: 'External validation library integration utilities'
+    business-context: 'Adapter pattern for integrating third-party validation libraries into domain validation'
+
+    items:
+      - name: 'BaseValidationAdapter'
+        type: 'abstract class'
+        description: 'Abstract base class for creating adapters to external validation libraries'
+        business-context: 'Foundation for integrating external validation libraries using adapter pattern'
+
+      - name: 'AdapterUtils'
+        type: 'class'
+        description: 'Utility class providing factory methods for creating validation adapters'
+        business-context: 'Convenient utilities for quickly creating adapters without full class definitions'
+
+# === USAGE EXAMPLES ===
+examples:
+  basic-specification:
+    description: 'Basic specification pattern usage'
+    business-context: 'Simple domain business rule validation using specifications'
+    code: |
+      import { Specification } from '@vytches/ddd-validation';
+
+      // Create specifications
+      const activeSpec = Specification.propertyEquals<User>('status', 'active');
+      const adultSpec = Specification.propertyBetween<User>('age', 18, 120);
+
+      // Combine specifications
+      const eligibleSpec = activeSpec.and(adultSpec);
+
+      // Use specification
+      const isEligible = eligibleSpec.isSatisfiedBy(user);
+
+  business-rule-validator:
+    description: 'Comprehensive business rule validation'
+    business-context: 'Complex domain validation with multiple rules and conditions'
+    code: |
+      import { BusinessRuleValidator, RulesRegistry } from '@vytches/ddd-validation';
+
+      const validator = BusinessRuleValidator.create<User>()
+        .apply(RulesRegistry.Rules.required('name'))
+        .apply(RulesRegistry.Rules.email('email'))
+        .apply(RulesRegistry.Rules.range('age', 18, 120))
+        .when(user => user.type === 'premium',
+          v => v.addRule('creditLimit', user => user.creditLimit >= 10000, 'Premium credit required')
+        );
+
+      const result = validator.validate(user);
+      if (result.isFailure) {
+        result.error.errors.forEach(err => console.log(err.toString()));
+      }
+
+  validation-facade:
+    description: 'Using validation facade for common scenarios'
+    business-context: 'Simplified API for quick validation tasks'
+    code: |
+      import { ValidationFacade as Validation } from '@vytches/ddd-validation';
+
+      // Direct validation with specification
+      const ageSpec = Specification.propertyBetween<User>('age', 18, 65);
+      const result = Validation.validateWithSpecification(user, ageSpec, 'Age must be 18-65');
+
+      // Validate with multiple rules
+      const result2 = Validation.validateWithRules(user, [
+        { specification: new EmailSpec(), message: 'Invalid email', property: 'email' },
+        { specification: new ActiveUserSpec(), message: 'User must be active' }
+      ]);
+
+  external-adapter:
+    description: 'Integrating external validation library'
+    business-context: 'Adapter pattern for third-party validation integration'
+    code: |
+      import { BaseValidationAdapter, AdapterUtils } from '@vytches/ddd-validation';
+
+      // Simple adapter from function
+      const simpleValidator = AdapterUtils.create<User>(
+        user => ({
+          success: user.email && user.name,
+          errors: !user.email || !user.name ? ['Name and email required'] : undefined
+        })
+      );
+
+      // Custom adapter class
+      class ZodAdapter extends BaseValidationAdapter<User, ZodSchema<User>> {
+        validate(value: User): Result<User, ValidationErrors> {
+          const result = this.schema.safeParse(value);
+          if (result.success) return this.success(result.data);
+          
+          const errors = result.error.issues.map(issue =>
+            this.createValidationError(issue.path.join('.'), issue.message)
+          );
+          return this.failWithErrors(errors);
+        }
+      }
+
+# === PACKAGE SUMMARY ===
+package-summary:
+  description: 'Comprehensive validation framework for domain-driven design'
+  business-context: 'Complete validation toolkit supporting specification patterns, business rules, and external library integration'
+
+  key-features:
+    - 'Specification pattern with fluent composition (AND/OR/NOT)'
+    - 'Business rule validator with conditional logic'
+    - 'Async specifications for external data validation'
+    - 'Result pattern integration for error handling'
+    - 'External validation library adapter pattern'
+    - 'Domain-specific rules registry system'
+    - 'Nested object validation with path tracking'
+    - 'Comprehensive error reporting with context'
+
+  patterns:
+    - 'Specification Pattern - Composable business rule definitions'
+    - 'Composite Pattern - Complex specification building'
+    - 'Adapter Pattern - External library integration'
+    - 'Registry Pattern - Domain-specific rule organization'
+    - 'Result Pattern - Functional error handling'
+    - 'Facade Pattern - Simplified validation API'

@@ -1,0 +1,110 @@
+# Base Error - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base.error'
+title: 'Base Error Classes'
+description: 'Foundation error classes for the entire library'
+business-context: 'Provides the base error infrastructure that all domain errors extend from'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base error class extending native JavaScript Error'
+      business-context: 'Foundation for all library errors ensuring consistent error handling'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Base error class for all domain errors'
+        cli:
+          description: |
+            ## BaseError
+            Foundation error class that:
+            - Extends native Error
+            - Preserves stack traces
+            - Provides consistent error interface
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        extends: 'Error'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new base error with message'
+        business-context: 'Initialize error with message and proper stack trace'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+
+        examples:
+          - id: 'basic'
+            code: |
+              class CustomError extends BaseError {
+                constructor() {
+                  super('Something went wrong');
+                }
+              }
+
+              const error = new CustomError();
+              console.log(error.message); // 'Something went wrong'
+              console.log(error.stack); // Stack trace preserved
+
+# === INTERFACES ===
+interfaces:
+  ErrorOptions:
+    description: 'Contract for error configuration options'
+    business-context: 'Flexible error configuration supporting custom properties'
+
+    formats:
+      jsdoc:
+        description: 'Error configuration options interface'
+      cli:
+        description: |
+          ## ErrorOptions
+          Interface for error options allowing:
+          - Custom properties with any key
+          - Flexible error metadata
+          - Extension for specific error types
+
+    properties:
+      - name: '[key: string]'
+        type: 'unknown'
+        description: 'Index signature allowing any custom properties'
+
+    examples:
+      - id: 'custom-options'
+        code: |
+          const options: ErrorOptions = {
+            code: 'ERR_001',
+            severity: 'high',
+            timestamp: new Date(),
+            context: { userId: 123 },
+            metadata: { source: 'UserService' }
+          };
+
+          class DomainError extends BaseError {
+            constructor(message: string, options?: ErrorOptions) {
+              super(message);
+              Object.assign(this, options);
+            }
+          }
+
+    custom-tags:
+      since: '1.0.0'
+      extensible: 'true'

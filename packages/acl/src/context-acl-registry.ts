@@ -1,32 +1,6 @@
 import type { IACLAdapter } from './acl.interfaces';
 import { BaseACLRegistry, type ACLRegistrationMetadata } from './base-acl-registry';
 
-/**
- * @llm-summary ContextACLRegistry class for context a c l registry operations
- * @llm-domain Integration
- * @llm-complexity Simple
- *
- * @description
- * ContextACLRegistry class implementing integration layer component for context a c l registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ContextACLRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ContextACLRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ContextACLRegistry extends BaseACLRegistry {
   constructor(private readonly contextName: string) {
     super();

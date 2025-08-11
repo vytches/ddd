@@ -1,0 +1,429 @@
+# BusinessRuleValidator - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'business-rule-validator'
+title: 'BusinessRuleValidator - Domain Business Rule Validation'
+description: 'Comprehensive business rule validator with Result pattern integration'
+business-context: 'Central validation engine for complex domain business rules and nested validation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BusinessRuleValidator:
+    class-doc:
+      description: 'Comprehensive business rule validator implementing IValidator with Result pattern'
+      business-context: 'Core domain validation engine supporting specifications, nested validation, and conditional rules'
+
+      formats:
+        jsdoc:
+          description: 'Business rule validator with fluent API and Result pattern integration'
+        cli:
+          description: |
+            ## BusinessRuleValidator<T>
+
+            Comprehensive business rule validator that implements IValidator<T> interface.
+            Provides fluent API for building complex validation rules using specifications,
+            conditional logic, nested validation, and Result pattern integration.
+
+            **Key Features:**
+            - Fluent validation rule building
+            - Specification pattern integration
+            - Nested object validation with path tracking
+            - Conditional validation (when/otherwise)
+            - Result pattern for error handling
+            - Stop-on-first-failure mode
+            - Rich error context and reporting
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Business rule validation with Result pattern'
+        domain: 'Domain validation and business rules'
+        fluent: 'Supports fluent API for rule building'
+
+    methods:
+      constructor:
+        description: 'Creates new business rule validator instance'
+        business-context: 'Initializes validator for building domain business rules'
+
+        examples:
+          - id: 'basic-constructor'
+            code: |
+              const validator = new BusinessRuleValidator<User>();
+
+              // Add validation rules
+              validator
+                .addRule('email', user => !!user.email, 'Email is required')
+                .addRule('age', user => user.age >= 18, 'Must be at least 18 years old');
+
+      addRule:
+        description: 'Adds validation rule with custom validation function'
+        business-context: 'Builds domain business rule using custom validation logic'
+
+        parameters:
+          - name: 'property'
+            type: 'string'
+            description: 'Property name for error reporting (can be empty for global rules)'
+          - name: 'validationFn'
+            type: '(value: T) => boolean'
+            description: 'Function that validates the entity and returns boolean'
+          - name: 'message'
+            type: 'string'
+            description: 'Error message when validation fails'
+          - name: 'context'
+            type: 'Record<string, any> | undefined'
+            description: 'Optional additional context for error reporting'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'add-rule-basic'
+            code: |
+              validator.addRule('email', 
+                user => user.email && user.email.includes('@'),
+                'Valid email required',
+                { priority: 'high' }
+              );
+          - id: 'add-rule-complex'
+            code: |
+              validator
+                .addRule('', 
+                  user => user.firstName && user.lastName,
+                  'Both first and last name required'
+                )
+                .addRule('age',
+                  user => user.age >= 18 && user.age <= 120,
+                  'Age must be between 18 and 120'
+                );
+
+      addSpecification:
+        description: 'Adds validation rule using specification pattern'
+        business-context: 'Integrates reusable specification-based business rules'
+
+        parameters:
+          - name: 'property'
+            type: 'string'
+            description: 'Property name for error reporting'
+          - name: 'specification'
+            type: 'ISpecification<T>'
+            description: 'Specification that defines the validation rule'
+          - name: 'message'
+            type: 'string'
+            description: 'Error message when specification is not satisfied'
+          - name: 'context'
+            type: 'Record<string, any> | undefined'
+            description: 'Optional additional context for error reporting'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'add-specification'
+            code: |
+              const ageSpec = new AgeRangeSpecification(18, 65);
+              const emailSpec = new EmailFormatSpecification();
+
+              validator
+                .addSpecification('age', ageSpec, 'Age must be between 18-65')
+                .addSpecification('email', emailSpec, 'Invalid email format');
+
+      mustSatisfy:
+        description: 'Adds global specification that applies to entire object'
+        business-context: 'Enforces object-level business rule using specification pattern'
+
+        parameters:
+          - name: 'specification'
+            type: 'ISpecification<T>'
+            description: 'Specification that validates the entire object'
+          - name: 'message'
+            type: 'string'
+            description: 'Error message when specification fails'
+          - name: 'context'
+            type: 'Record<string, any> | undefined'
+            description: 'Optional additional context for error reporting'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'must-satisfy'
+            code: |
+              const eligibleUserSpec = new EligibleUserSpecification();
+              validator.mustSatisfy(eligibleUserSpec, 'User is not eligible for this operation');
+
+      propertyMustSatisfy:
+        description: 'Adds property-specific validation using specification with value extractor'
+        business-context: 'Validates specific property using specification with custom value extraction'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T & string'
+            description: 'Property name to validate'
+          - name: 'specification'
+            type: 'ISpecification<P>'
+            description: 'Specification for the property value'
+          - name: 'message'
+            type: 'string'
+            description: 'Error message when specification fails'
+          - name: 'getValue'
+            type: '(obj: T) => P'
+            description: 'Function to extract property value from object'
+          - name: 'context'
+            type: 'Record<string, any> | undefined'
+            description: 'Optional additional context'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'property-must-satisfy'
+            code: |
+              const emailSpec = new EmailSpecification();
+              validator.propertyMustSatisfy(
+                'email',
+                emailSpec,
+                'Email format is invalid',
+                user => user.email
+              );
+
+      addNested:
+        description: 'Adds validation for nested object with path tracking'
+        business-context: 'Validates complex nested domain objects with full error path reporting'
+
+        parameters:
+          - name: 'property'
+            type: 'string'
+            description: 'Property path for nested object'
+          - name: 'validator'
+            type: 'IValidator<P>'
+            description: 'Validator for the nested object'
+          - name: 'getValue'
+            type: '(obj: T) => P | undefined | null'
+            description: 'Function to extract nested object from parent'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'add-nested'
+            code: |
+              const addressValidator = new BusinessRuleValidator<Address>()
+                .addRule('street', addr => !!addr.street, 'Street is required')
+                .addRule('city', addr => !!addr.city, 'City is required');
+
+              validator.addNested('address', addressValidator, user => user.address);
+
+      when:
+        description: 'Adds conditional validation rules'
+        business-context: 'Applies business rules only when specific conditions are met'
+
+        parameters:
+          - name: 'condition'
+            type: '(value: T) => boolean'
+            description: 'Condition function that determines when to apply rules'
+          - name: 'thenValidator'
+            type: '(validator: BusinessRuleValidator<T>) => void'
+            description: 'Function that adds rules when condition is true'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'when-conditional'
+            code: |
+              validator.when(
+                user => user.type === 'premium',
+                v => v.addRule('creditLimit', 
+                  user => user.creditLimit >= 10000,
+                  'Premium users need minimum credit limit of 10000'
+                )
+              );
+
+      otherwise:
+        description: 'Adds validation rules for when previous condition is false'
+        business-context: 'Applies alternative business rules when main condition fails'
+
+        parameters:
+          - name: 'elseValidator'
+            type: '(validator: BusinessRuleValidator<T>) => void'
+            description: 'Function that adds rules when previous condition is false'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'otherwise-alternative'
+            code: |
+              validator
+                .when(user => user.type === 'premium',
+                  v => v.addRule('creditLimit', user => user.creditLimit >= 10000, 'High limit required')
+                )
+                .otherwise(
+                  v => v.addRule('creditLimit', user => user.creditLimit <= 5000, 'Standard limit exceeded')
+                );
+
+      whenSatisfies:
+        description: 'Adds conditional validation based on specification'
+        business-context: 'Applies business rules when domain object satisfies given specification'
+
+        parameters:
+          - name: 'specification'
+            type: 'ISpecification<T>'
+            description: 'Specification that determines when to apply rules'
+          - name: 'thenValidator'
+            type: '(validator: BusinessRuleValidator<T>) => void'
+            description: 'Function that adds rules when specification is satisfied'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'when-satisfies'
+            code: |
+              const premiumSpec = new PremiumUserSpecification();
+              validator.whenSatisfies(premiumSpec, 
+                v => v.addRule('benefits', user => user.benefits.length > 0, 'Premium users must have benefits')
+              );
+
+      setStopOnFirstFailure:
+        description: 'Configures validator to stop on first validation failure'
+        business-context: 'Optimizes validation performance by failing fast on first error'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'Self for fluent chaining'
+
+        examples:
+          - id: 'stop-on-first-failure'
+            code: |
+              const fastValidator = new BusinessRuleValidator<User>()
+                .setStopOnFirstFailure()
+                .addRule('email', user => !!user.email, 'Email required')
+                .addRule('age', user => user.age >= 18, 'Must be adult');
+
+      validate:
+        description: 'Performs validation and returns Result with ValidationErrors'
+        business-context: 'Executes all configured business rules and reports validation results'
+
+        parameters:
+          - name: 'value'
+            type: 'T'
+            description: 'Object to validate against configured business rules'
+
+        returns:
+          type: 'Result<T, ValidationErrors>'
+          description: 'Result containing validated object or collection of validation errors'
+
+        examples:
+          - id: 'validate-execution'
+            code: |
+              const result = validator.validate(user);
+
+              if (result.isSuccess) {
+                console.log('Validation passed:', result.value);
+              } else {
+                console.log('Validation failed:');
+                result.error.errors.forEach(err => 
+                  console.log(`${err.property}: ${err.message}`)
+                );
+              }
+          - id: 'validate-with-error-handling'
+            code: |
+              const result = validator.validate(user);
+
+              if (result.isFailure) {
+                // Access detailed error information
+                const errors = result.error.errors;
+                const errorCount = result.error.length;
+                const errorMessage = result.error.message;
+                
+                // Process validation errors
+                return { success: false, errors, count: errorCount };
+              }
+
+              return { success: true, data: result.value };
+
+      and:
+        description: 'Combines this validator with another validator'
+        business-context: 'Merges business rules from multiple validators into composite validation'
+
+        parameters:
+          - name: 'other'
+            type: 'IValidator<T>'
+            description: 'Another validator to combine with this one'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'New combined validator with rules from both validators'
+
+        examples:
+          - id: 'combine-validators'
+            code: |
+              const basicValidator = new BusinessRuleValidator<User>()
+                .addRule('name', user => !!user.name, 'Name required');
+                
+              const emailValidator = new BusinessRuleValidator<User>()
+                .addRule('email', user => !!user.email, 'Email required');
+                
+              const combinedValidator = basicValidator.and(emailValidator);
+
+      fromSpecification:
+        description: 'Static factory method to create validator from single specification'
+        business-context: 'Quick factory for creating validator from single business rule specification'
+
+        parameters:
+          - name: 'specification'
+            type: 'ISpecification<T>'
+            description: 'Specification to use for validation'
+          - name: 'message'
+            type: 'string'
+            description: 'Error message when specification fails'
+          - name: 'context'
+            type: 'Record<string, any> | undefined'
+            description: 'Optional additional context'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'New validator with single specification rule'
+
+        custom-tags:
+          static: 'Static factory method'
+
+        examples:
+          - id: 'from-specification'
+            code: |
+              const ageSpec = new AgeRangeSpecification(18, 65);
+              const validator = BusinessRuleValidator.fromSpecification(
+                ageSpec, 
+                'Age must be between 18-65 for eligibility'
+              );
+
+      create:
+        description: 'Static factory method to create empty validator'
+        business-context: 'Factory method for starting validator configuration'
+
+        returns:
+          type: 'BusinessRuleValidator<T>'
+          description: 'New empty validator ready for rule configuration'
+
+        custom-tags:
+          static: 'Static factory method'
+
+        examples:
+          - id: 'create-factory'
+            code: |
+              const validator = BusinessRuleValidator.create<User>()
+                .addRule('email', user => !!user.email, 'Email required')
+                .mustSatisfy(new ActiveUserSpec(), 'User must be active');

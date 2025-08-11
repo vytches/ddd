@@ -18,3 +18,4 @@
 - [16. 0016-publish-individual-packages-to-github-packages](0016-publish-individual-packages-to-github-packages.md)
 - [17. 0017-vytches-organization-naming-convention](0017-vytches-organization-naming-convention.md)
 - [18. 0018-intelligent-ci-cd-workflow-optimization](0018-intelligent-ci-cd-workflow-optimization.md)
+- [19. 0019-jsdoc-example-injection-system-docs-v2](0019-jsdoc-example-injection-system-docs-v2.md)

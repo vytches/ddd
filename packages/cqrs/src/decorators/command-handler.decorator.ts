@@ -3,36 +3,6 @@ import 'reflect-metadata';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
 
-/**
- * @description
- * CommandHandler decorator that automatically infers types from the handler class implementation.
- * When type parameters are not provided, it will infer them from the handler's ICommandHandler interface.
- *
- * @param {new (...args: unknown[]} commandType - commandType parameter
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage with explicit types (when handler returns void)
- * @CommandHandler(CreateUserCommand)
- * class CreateUserHandler implements ICommandHandler<CreateUserCommand, void> {
- *   async execute(command: CreateUserCommand): Promise<void> {
- *     // implementation
- *   }
- * }
- * ```
- *
- * @example
- * ```typescript
- * // Auto-inferred types (when handler returns a value)
- * @CommandHandler(RegisterUserCommand)
- * class RegisterUserHandler implements ICommandHandler<RegisterUserCommand, AuthenticationResultDto> {
- *   async execute(command: RegisterUserCommand): Promise<AuthenticationResultDto> {
- *     // implementation - result type is automatically inferred
- *   }
- * }
- * ```
- */
 export function CommandHandler<TCommand extends ICommand>(
   commandType: new (...args: any[]) => TCommand,
   options?: CommandHandlerOptions

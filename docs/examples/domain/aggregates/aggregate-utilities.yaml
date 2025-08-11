@@ -1,0 +1,608 @@
+# Aggregate Utilities - Enhanced Metadata System V2
+# Provides type utilities, guards, and helper functions for aggregate capabilities
+
+# === FILE METADATA ===
+file-name: 'aggregate-utilities'
+title: 'Aggregate Utilities - Capability System Helpers'
+description: 'Type utilities, guards, and helper functions for working with aggregate capabilities'
+business-context: 'Essential utilities for type-safe capability operations and aggregate management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+complexity: 'intermediate'
+patterns:
+  - 'type-guards'
+  - 'utility-functions'
+  - 'capability-system'
+  - 'type-safety'
+
+dependencies:
+  - '@vytches/ddd-logging'
+  - '@vytches/ddd-contracts'
+
+# === TYPE ALIASES ===
+types:
+  AggregateWithCapability:
+    description: 'Type utility for aggregates with specific capability requirements'
+    business-context: 'Provides compile-time type safety for capability-dependent operations'
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+      - name: 'TCap'
+        extends: 'Capability'
+        description: 'Specific capability type required'
+
+  AggregateWithSnapshotCapability:
+    description: 'Type alias for aggregates with snapshot capability'
+    business-context: 'Ensures aggregate has snapshot functionality for state persistence optimization'
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+  AggregateWithVersioningCapability:
+    description: 'Type alias for aggregates with versioning capability'
+    business-context: 'Ensures aggregate has event versioning and upcasting functionality for schema evolution'
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+  AggregateWithAuditCapability:
+    description: 'Type alias for aggregates with audit capability'
+    business-context: 'Ensures aggregate has audit logging functionality for compliance requirements'
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+  AggregateWithEventSourcingCapability:
+    description: 'Type alias for aggregates with event sourcing capability'
+    business-context: 'Ensures aggregate has event store integration for persistence and replay'
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+# === FUNCTIONS ===
+functions:
+  # Type Guard Functions
+  hasSnapshotCapability:
+    description: 'Type guard to check if aggregate has snapshot capability'
+    business-context: 'Runtime type checking for snapshot operations, ensuring type safety'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to check for snapshot capability'
+
+    returns:
+      type: 'aggregate is AggregateWithSnapshotCapability<TId>'
+      description: 'Type predicate indicating snapshot capability presence'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+    examples:
+      - id: 'basic-type-guard'
+        code: |
+          const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
+
+          if (hasSnapshotCapability(aggregate)) {
+            // TypeScript knows aggregate has snapshot capability here
+            const snapshot = aggregate.getCapability(SnapshotCapability);
+            snapshot?.createSnapshot(() => ({ status: 'completed' }));
+          }
+
+  hasVersioningCapability:
+    description: 'Type guard to check if aggregate has versioning capability'
+    business-context: 'Runtime verification for event versioning operations and schema migrations'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to check for versioning capability'
+
+    returns:
+      type: 'aggregate is AggregateWithVersioningCapability<TId>'
+      description: 'Type predicate indicating versioning capability presence'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+  hasAuditCapability:
+    description: 'Type guard to check if aggregate has audit capability'
+    business-context: 'Compliance checking for audit trail requirements and regulatory purposes'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to check for audit capability'
+
+    returns:
+      type: 'aggregate is AggregateWithAuditCapability<TId>'
+      description: 'Type predicate indicating audit capability presence'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+  hasEventSourcingCapability:
+    description: 'Type guard to check if aggregate has event sourcing capability'
+    business-context: 'Verification for event store operations and persistence requirements'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to check for event sourcing capability'
+
+    returns:
+      type: 'aggregate is AggregateWithEventSourcingCapability<TId>'
+      description: 'Type predicate indicating event sourcing capability presence'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+  # Casting Utilities
+  asSnapshotAggregate:
+    description: 'Safely casts aggregate to snapshot-capable type'
+    business-context: 'Type-safe access to snapshot operations with runtime validation'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to cast to snapshot-capable type'
+
+    returns:
+      type: 'AggregateWithSnapshotCapability<TId>'
+      description: 'Aggregate with guaranteed snapshot capability'
+
+    throws:
+      - type: 'AggregateError'
+        description: "When aggregate doesn't have snapshot capability enabled"
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+    examples:
+      - id: 'safe-casting'
+        code: |
+          const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
+
+          try {
+            const snapshotAggregate = asSnapshotAggregate(aggregate);
+            const snapshot = snapshotAggregate.getCapability(SnapshotCapability);
+            // Now guaranteed to have snapshot capability
+          } catch (error) {
+            console.log('Snapshot capability not enabled');
+          }
+
+  asVersioningAggregate:
+    description: 'Safely casts aggregate to versioning-capable type'
+    business-context: 'Type-safe access to versioning operations for schema evolution'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to cast to versioning-capable type'
+
+    returns:
+      type: 'AggregateWithVersioningCapability<TId>'
+      description: 'Aggregate with guaranteed versioning capability'
+
+    throws:
+      - type: 'AggregateError'
+        description: "When aggregate doesn't have versioning capability enabled"
+
+  asAuditAggregate:
+    description: 'Safely casts aggregate to audit-capable type'
+    business-context: 'Type-safe access to audit operations for compliance requirements'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to cast to audit-capable type'
+
+    returns:
+      type: 'AggregateWithAuditCapability<TId>'
+      description: 'Aggregate with guaranteed audit capability'
+
+    throws:
+      - type: 'AggregateError'
+        description: "When aggregate doesn't have audit capability enabled"
+
+  asEventSourcingAggregate:
+    description: 'Safely casts aggregate to event sourcing-capable type'
+    business-context: 'Type-safe access to event store operations and persistence'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<TId>'
+        description: 'Aggregate instance to cast to event sourcing-capable type'
+
+    returns:
+      type: 'AggregateWithEventSourcingCapability<TId>'
+      description: 'Aggregate with guaranteed event sourcing capability'
+
+    throws:
+      - type: 'AggregateError'
+        description: "When aggregate doesn't have event sourcing capability enabled"
+
+  # Capability Inspection Utilities
+  getAggregateCapabilities:
+    description: 'Returns list of capability types present on aggregate'
+    business-context: 'Runtime introspection for debugging and capability discovery'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate instance to inspect for capabilities'
+
+    returns:
+      type: 'string[]'
+      description: 'Array of capability type names present on aggregate'
+
+    examples:
+      - id: 'capability-inspection'
+        code: |
+          const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
+          aggregate.addCapability(new SnapshotCapability());
+          aggregate.addCapability(new AuditCapability());
+
+          const capabilities = getAggregateCapabilities(aggregate);
+          console.log('Available capabilities:', capabilities);
+          // Output: ['SnapshotCapability', 'AuditCapability']
+
+  hasAllCapabilities:
+    description: 'Checks if aggregate has all specified capabilities'
+    business-context: 'Validation for operations requiring multiple capabilities'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate instance to check'
+      - name: 'capabilities'
+        type: 'CapabilityConstructor<T>[]'
+        description: 'Array of capability constructors to check for'
+
+    returns:
+      type: 'boolean'
+      description: 'True if aggregate has all specified capabilities'
+
+    generic-parameters:
+      - name: 'T'
+        extends: 'Capability & IAggregateCapability'
+        description: 'Capability type constraint'
+
+  hasAnyCapability:
+    description: 'Checks if aggregate has any of the specified capabilities'
+    business-context: 'Flexible validation for optional capability features'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate instance to check'
+      - name: 'capabilities'
+        type: 'CapabilityConstructor<T>[]'
+        description: 'Array of capability constructors to check for'
+
+    returns:
+      type: 'boolean'
+      description: 'True if aggregate has at least one specified capability'
+
+  getAggregateInfo:
+    description: 'Returns comprehensive information about aggregate state'
+    business-context: 'Debugging and monitoring tool for aggregate inspection'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate instance to get information about'
+
+    returns:
+      type: 'object'
+      description: 'Comprehensive aggregate information object'
+      properties:
+        - name: 'id'
+          type: 'unknown'
+          description: 'Aggregate identifier value'
+        - name: 'type'
+          type: 'string'
+          description: 'Aggregate constructor name'
+        - name: 'version'
+          type: 'number'
+          description: 'Current aggregate version'
+        - name: 'hasChanges'
+          type: 'boolean'
+          description: 'Whether aggregate has uncommitted changes'
+        - name: 'capabilities'
+          type: 'string[]'
+          description: 'List of enabled capabilities'
+        - name: 'events'
+          type: 'number'
+          description: 'Number of pending domain events'
+
+    examples:
+      - id: 'aggregate-inspection'
+        code: |
+          const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
+          aggregate.addCapability(new SnapshotCapability());
+          aggregate.apply('OrderCreated', { customerId: 'cust-456' });
+
+          const info = getAggregateInfo(aggregate);
+          console.log('Aggregate Info:', info);
+          // Shows: id, type, version, hasChanges, capabilities, and event count
+
+  # Snapshot Utilities
+  createSnapshotIfCapable:
+    description: 'Creates snapshot if aggregate has snapshot capability'
+    business-context: 'Safe snapshot creation with capability validation'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to create snapshot for'
+      - name: 'serializer'
+        type: '() => TState'
+        description: 'Function to serialize aggregate state'
+      - name: 'metadataCreator'
+        type: '() => unknown'
+        description: 'Optional metadata creator function'
+        optional: true
+
+    returns:
+      type: 'unknown | null'
+      description: 'Snapshot object if capability exists, null otherwise'
+
+    generic-parameters:
+      - name: 'TState'
+        description: 'Type of serialized state'
+
+  restoreFromSnapshotIfCapable:
+    description: 'Restores from snapshot if aggregate has snapshot capability'
+    business-context: 'Safe snapshot restoration with capability validation'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to restore snapshot to'
+      - name: 'snapshot'
+        type: 'IAggregateSnapshot<unknown, unknown>'
+        description: 'Snapshot to restore from'
+      - name: 'deserializer'
+        type: '(state: TState) => void'
+        description: 'Function to deserialize aggregate state'
+      - name: 'metadataRestorer'
+        type: '(metadata: unknown) => void'
+        description: 'Optional metadata restorer function'
+        optional: true
+
+    returns:
+      type: 'boolean'
+      description: 'True if restoration was performed, false if capability missing'
+
+  # Audit Utilities
+  getAuditLogIfCapable:
+    description: 'Gets audit log if aggregate has audit capability'
+    business-context: 'Safe audit log access for compliance and debugging'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to get audit log from'
+
+    returns:
+      type: 'unknown[]'
+      description: 'Audit log entries if capability exists, empty array otherwise'
+
+  getAuditStatsIfCapable:
+    description: 'Gets audit statistics if aggregate has audit capability'
+    business-context: 'Performance and compliance metrics for audit operations'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to get audit statistics from'
+
+    returns:
+      type: 'unknown | null'
+      description: 'Audit statistics if capability exists, null otherwise'
+
+  # Event Sourcing Utilities
+  loadFromEventStoreIfCapable:
+    description: 'Loads aggregate from event store if capability is available'
+    business-context: 'Safe event store loading with capability validation'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to load events into'
+      - name: 'aggregateId'
+        type: 'string | number'
+        description: 'Identifier for event stream to load'
+
+    returns:
+      type: 'Promise<boolean>'
+      description: 'True if loading was performed, false if capability missing'
+
+    examples:
+      - id: 'event-store-loading'
+        code: |
+          const aggregate = new AggregateRoot({ id: EntityId.fromText('order-123') });
+
+          const loaded = await loadFromEventStoreIfCapable(aggregate, 'order-123');
+          if (loaded) {
+            console.log('Aggregate loaded from event store');
+          } else {
+            console.log('Event sourcing capability not available');
+          }
+
+  saveToEventStoreIfCapable:
+    description: 'Saves aggregate to event store if capability is available'
+    business-context: 'Safe event store persistence with capability validation'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to save events from'
+
+    returns:
+      type: 'Promise<boolean>'
+      description: 'True if saving was performed, false if capability missing'
+
+  # Versioning Utilities
+  registerUpcasterIfCapable:
+    description: 'Registers upcaster if aggregate has versioning capability'
+    business-context: 'Safe upcaster registration for event schema evolution'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to register upcaster with'
+      - name: 'eventType'
+        type: 'string'
+        description: 'Event type to register upcaster for'
+      - name: 'sourceVersion'
+        type: 'number'
+        description: 'Source version of events to upcast'
+      - name: 'upcaster'
+        type: '{ upcast(payload: TFrom, metadata?: unknown): TTo }'
+        description: 'Upcaster implementation'
+
+    returns:
+      type: 'boolean'
+      description: 'True if registration was performed, false if capability missing'
+
+    generic-parameters:
+      - name: 'TFrom'
+        description: 'Source event payload type'
+      - name: 'TTo'
+        description: 'Target event payload type'
+
+  getVersioningInfoIfCapable:
+    description: 'Gets versioning information if aggregate has versioning capability'
+    business-context: 'Introspection for event versioning and schema management'
+
+    parameters:
+      - name: 'aggregate'
+        type: 'AggregateRoot<unknown>'
+        description: 'Aggregate to get versioning info from'
+
+    returns:
+      type: 'unknown | null'
+      description: 'Versioning information if capability exists, null otherwise'
+
+  # Bulk Operations
+  processAggregatesWithCapabilities:
+    description: 'Processes multiple aggregates with capability-specific operations'
+    business-context: 'Batch processing with type-safe capability operations'
+
+    parameters:
+      - name: 'aggregates'
+        type: 'AggregateRoot<TId>[]'
+        description: 'Array of aggregates to process'
+      - name: 'processors'
+        type: 'object'
+        description: 'Capability-specific processor functions'
+        properties:
+          - name: 'snapshot'
+            type: '(aggregate: AggregateWithSnapshotCapability<TId>) => void'
+            description: 'Optional snapshot processor function'
+            optional: true
+          - name: 'audit'
+            type: '(aggregate: AggregateWithAuditCapability<TId>) => void'
+            description: 'Optional audit processor function'
+            optional: true
+          - name: 'versioning'
+            type: '(aggregate: AggregateWithVersioningCapability<TId>) => void'
+            description: 'Optional versioning processor function'
+            optional: true
+          - name: 'eventSourcing'
+            type: '(aggregate: AggregateWithEventSourcingCapability<TId>) => Promise<void>'
+            description: 'Optional event sourcing processor function'
+            optional: true
+
+    returns:
+      type: 'Promise<void>'
+      description: 'Completes when all processing is finished'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+
+    examples:
+      - id: 'bulk-processing'
+        code: |
+          const aggregates = [orderAggregate, customerAggregate, productAggregate];
+
+          await processAggregatesWithCapabilities(aggregates, {
+            snapshot: (aggregate) => {
+              // Process aggregates with snapshot capability
+              const snap = aggregate.getCapability(SnapshotCapability);
+              snap?.saveSnapshot(() => aggregate.getState());
+            },
+            audit: (aggregate) => {
+              // Process aggregates with audit capability
+              const audit = aggregate.getCapability(AuditCapability);
+              console.log('Audit entries:', audit?.getAuditLog().length);
+            }
+          });
+
+  cloneAggregateCapabilities:
+    description: 'Clones capabilities from source aggregate to target aggregate'
+    business-context: 'Capability replication for aggregate copying and migration'
+
+    parameters:
+      - name: 'sourceAggregate'
+        type: 'AggregateRoot<TIdFrom>'
+        description: 'Source aggregate to copy capabilities from'
+      - name: 'targetAggregate'
+        type: 'AggregateRoot<TIdTo>'
+        description: 'Target aggregate to copy capabilities to'
+      - name: 'options'
+        type: 'object'
+        description: 'Options controlling which capabilities to clone'
+        optional: true
+        default: '{}'
+        properties:
+          - name: 'includeSnapshot'
+            type: 'boolean'
+            description: 'Whether to clone snapshot capability'
+            optional: true
+            default: 'true'
+          - name: 'includeVersioning'
+            type: 'boolean'
+            description: 'Whether to clone versioning capability'
+            optional: true
+            default: 'true'
+          - name: 'includeAudit'
+            type: 'boolean'
+            description: 'Whether to clone audit capability'
+            optional: true
+            default: 'true'
+          - name: 'includeEventSourcing'
+            type: 'boolean'
+            description: 'Whether to clone event sourcing capability'
+            optional: true
+            default: 'true'
+
+    returns:
+      type: 'void'
+      description: 'Modifies target aggregate by adding capabilities'
+
+    generic-parameters:
+      - name: 'TIdFrom'
+        description: 'Source aggregate identifier type'
+      - name: 'TIdTo'
+        description: 'Target aggregate identifier type'
+
+# === CUSTOM TAGS ===
+custom-tags:
+  capability-system: 'Uses the extensible capability system for aggregate functionality'
+  type-safety: 'Provides compile-time and runtime type safety for capability operations'
+  utility-functions: 'Collection of utility functions for common aggregate operations'
+  performance: 'Optimized for bulk operations and efficient capability checking'

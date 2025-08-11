@@ -1,25 +1,3 @@
-/**
- * @llm-summary Logger instance from @vytches/ddd-logging for CLI operations
- * @llm-domain Infrastructure
- * @llm-complexity Simple
- *
- * @description
- * Re-export of Logger from @vytches/ddd-logging package with additional
- * success method for CLI operations.
- *
- * @example
- * ```typescript
- * import { logger } from './logger';
- *
- * logger.info('Processing started');
- * logger.error('An error occurred', error);
- * logger.success('Operation completed successfully');
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 import { Logger } from '@vytches/ddd-logging';
 
 // Create logger instance for CLI context

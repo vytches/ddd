@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/vytches/ddd/compare/@vytches/ddd-aggregates@0.4.0...@vytches/ddd-aggregates@0.5.0) (2025-08-11)
+
+### Features
+
+- **docs:** implement YAML-based JSDoc injection system for TypeScript
+  declarations
+  ([5e93aa4](https://github.com/vytches/ddd/commit/5e93aa46d63368e06b31860a26d7f3b70f5568ab))
+- **docs:** yaml files updated
+  ([abeb16b](https://github.com/vytches/ddd/commit/abeb16bdd4abb9b7991dd9a391bc90ebd4167fed))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.4.2](https://github.com/vytches/ddd/compare/@vytches/ddd-aggregates@0.4.0...@vytches/ddd-aggregates@0.4.2) (2025-08-07)
 
 **Note:** Version bump only for package @vytches/ddd-aggregates

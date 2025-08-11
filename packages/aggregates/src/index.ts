@@ -1,6 +1,6 @@
 // Core classes - most commonly used
-export { AggregateRoot } from './aggregate-root';
-export { AggregateBuilder, aggregateBuilder } from './aggregate-root.builder';
+export { AggregateRoot } from './core/aggregate-root';
+export { AggregateBuilder, aggregateBuilder } from './core/aggregate-root.builder';
 
 // Capabilities
 export * from './capabilities';
@@ -23,7 +23,7 @@ export type {
   AggregateWithVersioningCapability,
   AggregateWithAuditCapability,
   AggregateWithEventSourcingCapability,
-} from './aggregate-utilities';
+} from './core/aggregate-utilities';
 export {
   asSnapshotAggregate,
   asVersioningAggregate,
@@ -31,4 +31,4 @@ export {
   asEventSourcingAggregate,
   getAggregateCapabilities,
   hasAllCapabilities,
-} from './aggregate-utilities';
+} from './core/aggregate-utilities';

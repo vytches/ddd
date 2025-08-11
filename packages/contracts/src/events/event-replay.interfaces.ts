@@ -1,24 +1,5 @@
 import type { IStoredEvent } from './event-store-advanced.interfaces';
 
-/**
- * @llm-summary Contract for replay filter functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * ReplayFilter interface implementing core domain functionality for replay filter operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteReplayFilter implements IReplayFilter {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IReplayFilter {
   /** Start from specific timestamp */
   fromTimestamp?: Date;
@@ -57,25 +38,6 @@ export interface IReplayFilter {
   direction?: 'forward' | 'backward';
 }
 
-/**
- * @llm-summary Contract for replay config functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * ReplayConfig interface implementing core domain functionality for replay config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteReplayConfig implements IReplayConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IReplayConfig {
   /** Batch size for processing events */
   batchSize?: number;
@@ -102,25 +64,6 @@ export interface IReplayConfig {
   progressInterval?: number;
 }
 
-/**
- * @llm-summary Contract for replay progress functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * ReplayProgress interface implementing core domain functionality for replay progress operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteReplayProgress implements IReplayProgress {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IReplayProgress {
   /** Total events to replay */
   totalEvents: number;
@@ -153,25 +96,6 @@ export interface IReplayProgress {
   lastUpdate: Date;
 }
 
-/**
- * @llm-summary Contract for replay result functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * ReplayResult interface implementing core domain functionality for replay result operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteReplayResult implements IReplayResult {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IReplayResult {
   /** Number of events replayed */
   eventsReplayed: number;
@@ -198,82 +122,12 @@ export interface IReplayResult {
   success: boolean;
 }
 
-/**
- * @llm-summary Type definition for replay event handler
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * ReplayEventHandler type implementing core domain functionality for replay event handler operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: ReplayEventHandler = {} as ReplayEventHandler;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type ReplayEventHandler = (event: IStoredEvent) => Promise<void>;
 
-/**
- * @llm-summary Type definition for replay progress handler
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * ReplayProgressHandler type implementing core domain functionality for replay progress handler operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: ReplayProgressHandler = {} as ReplayProgressHandler;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type ReplayProgressHandler = (progress: IReplayProgress) => void;
 
-/**
- * @llm-summary Type definition for replay error handler
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * ReplayErrorHandler type implementing core domain functionality for replay error handler operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: ReplayErrorHandler = {} as ReplayErrorHandler;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type ReplayErrorHandler = (error: Error, event: IStoredEvent) => Promise<boolean>; // return true to continue
 
-/**
- * @llm-summary Contract for event replay functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * EventReplay interface implementing core domain functionality for event replay operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEventReplay implements IEventReplay {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEventReplay {
   /**
    * Replay events from a specific stream
@@ -319,25 +173,6 @@ export interface IEventReplay {
   estimateReplayDuration(filter?: IReplayFilter, config?: IReplayConfig): Promise<number>;
 }
 
-/**
- * @llm-summary Contract for advanced event replay functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * AdvancedEventReplay interface implementing core domain functionality for advanced event replay operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAdvancedEventReplay implements IAdvancedEventReplay {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IAdvancedEventReplay extends IEventReplay {
   /**
    * Start a replay session that can be controlled
@@ -349,25 +184,6 @@ export interface IAdvancedEventReplay extends IEventReplay {
   ): Promise<IReplaySession>;
 }
 
-/**
- * @llm-summary Contract for replay session functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * ReplaySession interface implementing core domain functionality for replay session operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteReplaySession implements IReplaySession {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IReplaySession {
   /** Session ID */
   readonly sessionId: string;
@@ -397,25 +213,6 @@ export interface IReplaySession {
   onError(handler: ReplayErrorHandler): () => void;
 }
 
-/**
- * @llm-summary Contract for event replay factory functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * EventReplayFactory interface implementing core domain functionality for event replay factory operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEventReplayFactory implements IEventReplayFactory {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEventReplayFactory {
   /**
    * Create a basic event replay

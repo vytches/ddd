@@ -1,0 +1,382 @@
+# base-business-policy - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base-business-policy'
+title: 'BaseBusinessPolicy - Abstract Policy Foundation'
+description: 'Abstract base class for business policies'
+business-context: 'Foundation for implementing business rules and domain invariants'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseBusinessPolicy:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class providing foundation for business policy implementation'
+      business-context: 'Enforces business rules with consistent evaluation pattern'
+
+      formats:
+        jsdoc:
+          description: 'Base class for implementing business policies with Result pattern'
+        cli:
+          description: |
+            ## BaseBusinessPolicy
+
+            Foundation for business policies:
+            - Result pattern integration
+            - Violation tracking
+            - Context-aware evaluation
+            - Async support
+            - Metadata management
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        generic-type: 'TEntity - The entity type to validate'
+        implements: 'IBusinessPolicy<TEntity>'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates policy with metadata'
+        business-context: 'Initializes policy with identification and configuration'
+
+        parameters:
+          - name: 'metadata'
+            type: 'PolicyMetadata'
+            description: 'Policy metadata including ID, name, domain'
+            optional: true
+
+        examples:
+          - id: 'basic-constructor'
+            code: |
+              class UserValidationPolicy extends BaseBusinessPolicy<User> {
+                constructor() {
+                  super({
+                    id: 'user-validation',
+                    name: 'User Validation Policy',
+                    domain: 'authentication',
+                    version: '1.0.0'
+                  });
+                }
+              }
+
+      check:
+        description: 'Evaluates entity against policy rules'
+        business-context: 'Core method for policy evaluation'
+
+        parameters:
+          - name: 'request'
+            type: 'PolicyRequest<TEntity>'
+            description: 'Policy evaluation request with entity and context'
+
+        returns:
+          type: 'Promise<Result<TEntity, PolicyViolation>>'
+          description: 'Success with entity or failure with violations'
+
+        examples:
+          - id: 'check-implementation'
+            code: |
+              async check(request: PolicyRequest<User>): Promise<Result<User, PolicyViolation>> {
+                const violations: PolicyViolation[] = [];
+                
+                if (!request.entity.email) {
+                  violations.push(new PolicyViolation(
+                    'MISSING_EMAIL',
+                    'Email is required',
+                    'ERROR',
+                    'email'
+                  ));
+                }
+                
+                if (violations.length > 0) {
+                  return this.failure(violations[0]);
+                }
+                
+                return this.success(request.entity);
+              }
+
+        custom-tags:
+          abstract: 'true'
+          async: 'true'
+
+      evaluate:
+        description: 'Alternative evaluation method'
+        business-context: 'Synonym for check method for compatibility'
+
+        parameters:
+          - name: 'entity'
+            type: 'TEntity'
+            description: 'Entity to evaluate'
+          - name: 'context'
+            type: 'PolicyContext'
+            description: 'Evaluation context'
+            optional: true
+
+        returns:
+          type: 'Promise<Result<TEntity, PolicyViolation>>'
+          description: 'Evaluation result'
+
+        examples:
+          - id: 'evaluate-usage'
+            code: |
+              const result = await policy.evaluate(user, {
+                userId: 'user-123',
+                correlationId: 'req-456',
+                metadata: { source: 'registration' }
+              });
+
+      success:
+        description: 'Creates successful policy result'
+        business-context: 'Helper for returning success'
+
+        parameters:
+          - name: 'entity'
+            type: 'TEntity'
+            description: 'Valid entity'
+
+        returns:
+          type: 'Result<TEntity, PolicyViolation>'
+          description: 'Success result'
+
+        custom-tags:
+          protected: 'true'
+
+      failure:
+        description: 'Creates failed policy result'
+        business-context: 'Helper for returning violations'
+
+        parameters:
+          - name: 'violation'
+            type: 'PolicyViolation | PolicyViolation[]'
+            description: 'Policy violations'
+
+        returns:
+          type: 'Result<TEntity, PolicyViolation>'
+          description: 'Failure result'
+
+        custom-tags:
+          protected: 'true'
+
+      createViolation:
+        description: 'Factory method for violations'
+        business-context: 'Standardizes violation creation'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Violation code'
+          - name: 'message'
+            type: 'string'
+            description: 'Violation message'
+          - name: 'severity'
+            type: 'PolicySeverity'
+            description: 'Violation severity'
+            default: 'ERROR'
+          - name: 'field'
+            type: 'string'
+            description: 'Field that violated policy'
+            optional: true
+
+        returns:
+          type: 'PolicyViolation'
+          description: 'Policy violation instance'
+
+        custom-tags:
+          protected: 'true'
+
+      getMetadata:
+        description: 'Returns policy metadata'
+        business-context: 'Accesses policy identification'
+
+        returns:
+          type: 'PolicyMetadata'
+          description: 'Policy metadata'
+
+      getName:
+        description: 'Returns policy name'
+        business-context: 'Gets human-readable name'
+
+        returns:
+          type: 'string'
+          description: 'Policy name'
+
+      getDomain:
+        description: 'Returns policy domain'
+        business-context: 'Gets business domain'
+
+        returns:
+          type: 'string'
+          description: 'Domain name'
+
+      getId:
+        description: 'Returns policy ID'
+        business-context: 'Gets unique identifier'
+
+        returns:
+          type: 'string'
+          description: 'Policy ID'
+
+  CompositeBusinessPolicy:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Composite policy combining multiple policies'
+      business-context: 'Enables complex business rules through policy composition'
+
+      formats:
+        jsdoc:
+          description: 'Combines multiple policies with AND/OR logic'
+        cli:
+          description: |
+            ## CompositeBusinessPolicy
+
+            Policy composition features:
+            - AND/OR combination logic
+            - Policy aggregation
+            - Violation merging
+            - Short-circuit evaluation
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseBusinessPolicy<TEntity>'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates composite policy'
+        business-context: 'Initializes with multiple sub-policies'
+
+        parameters:
+          - name: 'policies'
+            type: 'IBusinessPolicy<TEntity>[]'
+            description: 'Policies to combine'
+          - name: 'operator'
+            type: "'AND' | 'OR'"
+            description: 'Combination operator'
+            default: 'AND'
+          - name: 'metadata'
+            type: 'PolicyMetadata'
+            description: 'Composite policy metadata'
+            optional: true
+
+        examples:
+          - id: 'composite-setup'
+            code: |
+              const compositePolicy = new CompositeBusinessPolicy(
+                [emailPolicy, agePolicy, creditPolicy],
+                'AND',
+                {
+                  id: 'user-registration-policy',
+                  name: 'Complete User Registration Policy'
+                }
+              );
+
+      addPolicy:
+        description: 'Adds policy to composite'
+        business-context: 'Dynamically extends policy set'
+
+        parameters:
+          - name: 'policy'
+            type: 'IBusinessPolicy<TEntity>'
+            description: 'Policy to add'
+
+        returns:
+          type: 'this'
+          description: 'Composite policy for chaining'
+
+      removePolicy:
+        description: 'Removes policy from composite'
+        business-context: 'Dynamically reduces policy set'
+
+        parameters:
+          - name: 'policyId'
+            type: 'string'
+            description: 'ID of policy to remove'
+
+        returns:
+          type: 'boolean'
+          description: 'True if removed'
+
+# === INTERFACES ===
+interfaces:
+  PolicyRequest:
+    description: 'Policy evaluation request'
+    business-context: 'Encapsulates evaluation input'
+
+    properties:
+      - name: 'entity'
+        type: 'TEntity'
+        description: 'Entity to evaluate'
+
+      - name: 'context'
+        type: 'PolicyContext'
+        description: 'Evaluation context'
+        optional: true
+
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Additional metadata'
+        optional: true
+
+  PolicyContext:
+    description: 'Policy evaluation context'
+    business-context: 'Provides contextual information'
+
+    properties:
+      - name: 'userId'
+        type: 'string'
+        description: 'User performing action'
+        optional: true
+
+      - name: 'correlationId'
+        type: 'string'
+        description: 'Request correlation ID'
+        optional: true
+
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'Evaluation time'
+        optional: true
+
+      - name: 'environment'
+        type: 'string'
+        description: 'Execution environment'
+        optional: true
+
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Additional context'
+        optional: true
+
+# === ENUMS ===
+enums:
+  PolicySeverity:
+    description: 'Policy violation severity levels'
+    business-context: 'Categorizes violation importance'
+
+    values:
+      - name: 'ERROR'
+        value: "'ERROR'"
+        description: 'Critical violation, must be fixed'
+
+      - name: 'WARNING'
+        value: "'WARNING'"
+        description: 'Important issue, should be addressed'
+
+      - name: 'INFO'
+        value: "'INFO'"
+        description: 'Informational message'

@@ -1,0 +1,383 @@
+# Container Builder - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'container-builder'
+title: 'ContainerBuilder - Fluent Container Configuration'
+description: 'Fluent builder for configuring dependency injection containers'
+business-context: 'Type-safe container setup with method chaining and enterprise configuration patterns'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ContainerBuilder:
+    class-doc:
+      description: 'Fluent builder for configuring dependency injection containers'
+      business-context: 'Enterprise container configuration with fluent API and method chaining'
+
+      formats:
+        jsdoc:
+          description: 'Fluent builder for DI container configuration'
+        cli:
+          description: |
+            ## ContainerBuilder
+            Fluent builder pattern for dependency injection setup:
+            - Method chaining for readable configuration
+            - Type-safe service registration
+            - Support for all registration types (constructor, factory, instance)
+            - Builds to SimpleContainer with full enterprise features
+
+    constructor:
+      description: 'Create a new ContainerBuilder instance'
+      business-context: 'Initialize builder for fluent container configuration'
+      examples:
+        - id: 'basic-builder'
+          code: |
+            const builder = new ContainerBuilder();
+
+    methods:
+      register:
+        description: 'Register a service (fluent API)'
+        business-context: 'Chainable service registration for readable container configuration'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'implementation'
+            type: 'Constructor<T>'
+            description: 'Service implementation constructor'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options including lifetime and tags'
+            optional: true
+        returns:
+          type: 'IContainerBuilder'
+          description: 'Builder instance for method chaining'
+        examples:
+          - id: 'fluent-registration'
+            code: |
+              const container = new ContainerBuilder()
+                .register('userService', UserService, { 
+                  lifetime: ServiceLifetime.Singleton,
+                  tags: ['domain-service']
+                })
+                .register('orderService', OrderService, {
+                  lifetime: ServiceLifetime.Transient,
+                  context: 'OrderManagement'
+                })
+                .build();
+
+          - id: 'service-chain'
+            code: |
+              const container = new ContainerBuilder()
+                // Core services
+                .register('logger', ConsoleLogger, { 
+                  lifetime: ServiceLifetime.Singleton 
+                })
+                .register('config', Configuration, { 
+                  lifetime: ServiceLifetime.Singleton 
+                })
+                // Domain services
+                .register('userRepository', UserRepository, {
+                  tags: ['repository', 'user-domain']
+                })
+                .register('orderRepository', OrderRepository, {
+                  tags: ['repository', 'order-domain']
+                })
+                // Business services
+                .register('userService', UserService, {
+                  lifetime: ServiceLifetime.Scoped,
+                  tags: ['domain-service']
+                })
+                .build();
+
+      registerFactory:
+        description: 'Register a service factory (fluent API)'
+        business-context: 'Chainable factory registration for complex service creation scenarios'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'factory'
+            type: 'ServiceFactory<T>'
+            description: 'Factory function to create service instances'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        returns:
+          type: 'IContainerBuilder'
+          description: 'Builder instance for method chaining'
+        examples:
+          - id: 'factory-chain'
+            code: |
+              const container = new ContainerBuilder()
+                .register('databaseConfig', DatabaseConfig)
+                .registerFactory('databaseConnection', (container) => {
+                  const config = container.resolve<DatabaseConfig>('databaseConfig');
+                  return new DatabaseConnection(config.connectionString);
+                }, { lifetime: ServiceLifetime.Singleton })
+                .registerFactory('userRepository', (container) => {
+                  const connection = container.resolve<DatabaseConnection>('databaseConnection');
+                  return new UserRepository(connection);
+                })
+                .build();
+
+          - id: 'environment-factory'
+            code: |
+              const container = new ContainerBuilder()
+                .register('environment', Environment)
+                .registerFactory('paymentProcessor', (container) => {
+                  const env = container.resolve<Environment>('environment');
+                  return env.isProduction()
+                    ? new StripePaymentProcessor(env.stripeApiKey)
+                    : new MockPaymentProcessor();
+                }, { 
+                  lifetime: ServiceLifetime.Singleton,
+                  tags: ['payment', 'external-service']
+                })
+                .build();
+
+      registerInstance:
+        description: 'Register a service instance (fluent API)'
+        business-context: 'Chainable instance registration for pre-configured services and singletons'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'instance'
+            type: 'T'
+            description: 'Pre-created service instance'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        returns:
+          type: 'IContainerBuilder'
+          description: 'Builder instance for method chaining'
+        examples:
+          - id: 'instance-chain'
+            code: |
+              const logger = new ConsoleLogger();
+              const cache = new MemoryCache();
+
+              const container = new ContainerBuilder()
+                .registerInstance('logger', logger, { 
+                  tags: ['infrastructure'] 
+                })
+                .registerInstance('cache', cache, { 
+                  tags: ['infrastructure', 'performance'] 
+                })
+                .register('userService', UserService)
+                .build();
+
+          - id: 'configuration-instances'
+            code: |
+              const apiConfig = {
+                baseUrl: 'https://api.example.com',
+                timeout: 5000,
+                retries: 3
+              };
+
+              const dbConfig = {
+                host: 'localhost',
+                port: 5432,
+                database: 'myapp'
+              };
+
+              const container = new ContainerBuilder()
+                .registerInstance('apiConfig', apiConfig)
+                .registerInstance('dbConfig', dbConfig)
+                .registerFactory('apiClient', (container) => {
+                  const config = container.resolve<ApiConfig>('apiConfig');
+                  return new ApiClient(config);
+                })
+                .build();
+
+      build:
+        description: 'Build the configured container'
+        business-context: 'Finalizes container configuration and returns ready-to-use DI container'
+        returns:
+          type: 'IDependencyContainer'
+          description: 'Configured SimpleContainer instance with all registered services'
+        examples:
+          - id: 'build-container'
+            code: |
+              const container = new ContainerBuilder()
+                .register('userService', UserService)
+                .register('orderService', OrderService)
+                .build();
+                
+              // Container is ready to use
+              const userService = container.resolve<UserService>('userService');
+
+# === USAGE PATTERNS ===
+patterns:
+  layered-registration:
+    title: 'Layered Service Registration'
+    description: 'Organize service registration by architectural layers'
+    example: |
+      const container = new ContainerBuilder()
+        // Infrastructure Layer
+        .register('logger', ConsoleLogger, { 
+          lifetime: ServiceLifetime.Singleton,
+          tags: ['infrastructure'] 
+        })
+        .register('cache', MemoryCache, { 
+          lifetime: ServiceLifetime.Singleton,
+          tags: ['infrastructure'] 
+        })
+        
+        // Data Access Layer
+        .register('userRepository', UserRepository, {
+          tags: ['repository', 'data-access']
+        })
+        .register('orderRepository', OrderRepository, {
+          tags: ['repository', 'data-access']
+        })
+        
+        // Domain Layer
+        .register('userService', UserService, {
+          tags: ['domain-service', 'business-logic']
+        })
+        .register('orderService', OrderService, {
+          tags: ['domain-service', 'business-logic']
+        })
+        
+        // Application Layer
+        .register('userController', UserController, {
+          tags: ['controller', 'api']
+        })
+        .build();
+
+  environment-configuration:
+    title: 'Environment-Based Configuration'
+    description: 'Configure services differently based on environment'
+    example: |
+      const environment = new Environment();
+
+      const builder = new ContainerBuilder()
+        .registerInstance('environment', environment);
+        
+      if (environment.isProduction()) {
+        builder
+          .registerFactory('logger', () => new FileLogger('/var/log/app.log'))
+          .registerFactory('database', (container) => {
+            const config = container.resolve<DatabaseConfig>('dbConfig');
+            return new PostgreSQLDatabase(config);
+          });
+      } else {
+        builder
+          .registerFactory('logger', () => new ConsoleLogger())
+          .registerFactory('database', () => new InMemoryDatabase());
+      }
+
+      const container = builder.build();
+
+  module-based-registration:
+    title: 'Module-Based Service Registration'
+    description: 'Group related services into configuration modules'
+    example: |
+      // User Management Module
+      function registerUserModule(builder: ContainerBuilder): ContainerBuilder {
+        return builder
+          .register('userRepository', UserRepository, { tags: ['user-module'] })
+          .register('userService', UserService, { tags: ['user-module'] })
+          .register('userController', UserController, { tags: ['user-module'] });
+      }
+
+      // Order Management Module
+      function registerOrderModule(builder: ContainerBuilder): ContainerBuilder {
+        return builder
+          .register('orderRepository', OrderRepository, { tags: ['order-module'] })
+          .register('orderService', OrderService, { tags: ['order-module'] })
+          .register('orderController', OrderController, { tags: ['order-module'] });
+      }
+
+      // Application Configuration
+      const container = registerUserModule(
+        registerOrderModule(
+          new ContainerBuilder()
+            .register('logger', ConsoleLogger, { lifetime: ServiceLifetime.Singleton })
+        )
+      ).build();
+
+  factory-composition:
+    title: 'Complex Factory Composition'
+    description: 'Build complex services using multiple dependencies through factories'
+    example: |
+      const container = new ContainerBuilder()
+        // Configuration
+        .registerInstance('apiConfig', { baseUrl: 'https://api.example.com' })
+        .registerInstance('dbConfig', { connectionString: 'Server=localhost;Database=MyApp' })
+        
+        // Infrastructure
+        .registerFactory('httpClient', (container) => {
+          const config = container.resolve<ApiConfig>('apiConfig');
+          return new HttpClient(config.baseUrl);
+        }, { lifetime: ServiceLifetime.Singleton })
+        
+        .registerFactory('database', (container) => {
+          const config = container.resolve<DatabaseConfig>('dbConfig');
+          return new Database(config.connectionString);
+        }, { lifetime: ServiceLifetime.Singleton })
+        
+        // Services with complex dependencies
+        .registerFactory('userService', (container) => {
+          const httpClient = container.resolve<HttpClient>('httpClient');
+          const database = container.resolve<Database>('database');
+          const logger = container.resolve<Logger>('logger');
+          return new UserService(httpClient, database, logger);
+        })
+        
+        .build();
+
+# === ENTERPRISE PATTERNS ===
+enterprise:
+  configuration-validation:
+    title: 'Configuration Validation Pattern'
+    description: 'Validate container configuration at build time'
+    example: |
+      class ValidatedContainerBuilder extends ContainerBuilder {
+        build(): IDependencyContainer {
+          const container = super.build();
+          
+          // Validate required services are registered
+          const requiredServices = ['logger', 'database', 'userService'];
+          for (const service of requiredServices) {
+            if (!container.isRegistered(service)) {
+              throw new Error(`Required service '${service}' is not registered`);
+            }
+          }
+          
+          return container;
+        }
+      }
+
+  conditional-registration:
+    title: 'Conditional Registration Pattern'
+    description: 'Register services conditionally based on runtime conditions'
+    example: |
+      const builder = new ContainerBuilder();
+
+      // Always register core services
+      builder.register('logger', Logger, { lifetime: ServiceLifetime.Singleton });
+
+      // Conditional registration based on feature flags
+      if (featureFlags.enableCaching) {
+        builder.register('cache', RedisCache, { lifetime: ServiceLifetime.Singleton });
+      } else {
+        builder.register('cache', NoOpCache, { lifetime: ServiceLifetime.Singleton });
+      }
+
+      // Environment-specific services
+      if (process.env.NODE_ENV === 'test') {
+        builder.register('emailService', MockEmailService);
+      } else {
+        builder.register('emailService', SmtpEmailService);
+      }
+
+      const container = builder.build();

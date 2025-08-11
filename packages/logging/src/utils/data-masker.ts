@@ -1,22 +1,3 @@
-/**
- * @llm-summary Contract for masking options functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * MaskingOptions interface implementing infrastructure service for masking options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteMaskingOptions implements MaskingOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface MaskingOptions {
   enabled: boolean;
   patterns: string[];
@@ -24,32 +5,6 @@ export interface MaskingOptions {
   sensitiveKeys: string[];
 }
 
-/**
- * @llm-summary DataMasker class for data masker operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * DataMasker class implementing infrastructure service for data masker operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DataMasker();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DataMasker());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class DataMasker {
   private static readonly DEFAULT_SENSITIVE_KEYS: string[] = [];
 

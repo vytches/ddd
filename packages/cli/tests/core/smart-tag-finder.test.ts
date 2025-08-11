@@ -41,7 +41,7 @@ describe('SmartTagFinder', () => {
         tags: ['aggregate', 'entity'],
         dependencies: [],
         diSupport: false,
-        frameworkIntegrations: ['nestjs'],
+        frameworkIntegrations: [{ name: 'nestjs' }],
       },
       {
         id: 'events-intermediate-example',
@@ -69,7 +69,7 @@ describe('SmartTagFinder', () => {
         tags: ['commands', 'queries'],
         dependencies: ['core', 'events'],
         diSupport: true,
-        frameworkIntegrations: ['express'],
+        frameworkIntegrations: [{ name: 'express' }],
       },
     ];
 

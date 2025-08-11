@@ -1,0 +1,280 @@
+# cached-policy - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'cached-policy'
+title: 'CachedPolicy - Policy Caching Decorator'
+description: 'Decorator adding caching capability to policies'
+business-context: 'Improves performance by caching policy evaluation results'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyCachingBehavior:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Wraps business policy with caching capabilities for performance optimization'
+      business-context: 'Reduces redundant policy evaluations through intelligent result caching'
+
+      formats:
+        jsdoc:
+          description: 'Caching decorator for business policies following MediatR pattern'
+        cli:
+          description: |
+            ## PolicyCachingBehavior
+
+            Caching features:
+            - TTL-based expiration
+            - Custom key generation
+            - Cache invalidation
+            - Hit/miss metrics
+            - Namespace isolation
+            - Size limits
+
+      custom-tags:
+        since: '2.1.0'
+        pattern: 'Decorator'
+        implements: 'IBusinessPolicy<TEntity>'
+        note: 'Renamed from CachedPolicy for clarity'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates caching decorator'
+        business-context: 'Wraps policy with cache'
+
+        parameters:
+          - name: 'innerPolicy'
+            type: 'IBusinessPolicy<TEntity>'
+            description: 'Policy to wrap'
+          - name: 'config'
+            type: 'CacheConfig'
+            description: 'Cache configuration'
+
+        examples:
+          - id: 'basic-cache'
+            code: |
+              const cachedPolicy = new PolicyCachingBehavior(
+                basePolicy,
+                {
+                  ttl: 60000, // 1 minute
+                  maxSize: 100,
+                  keyGenerator: entity => entity.id
+                }
+              );
+
+      static create:
+        description: 'Factory method for cached policy'
+        business-context: 'Simplified creation'
+
+        parameters:
+          - name: 'policy'
+            type: 'IBusinessPolicy<TEntity>'
+            description: 'Policy to cache'
+          - name: 'ttl'
+            type: 'number'
+            description: 'Time to live in ms'
+            default: '60000'
+
+        returns:
+          type: 'PolicyCachingBehavior<TEntity>'
+          description: 'Cached policy'
+
+      check:
+        description: 'Evaluates with caching'
+        business-context: 'Returns cached or fresh result'
+
+        parameters:
+          - name: 'request'
+            type: 'PolicyRequest<TEntity>'
+            description: 'Evaluation request'
+
+        returns:
+          type: 'Promise<Result<TEntity, PolicyViolation>>'
+          description: 'Cached or computed result'
+
+        examples:
+          - id: 'cached-check'
+            code: |
+              // First call - cache miss, evaluates policy
+              const result1 = await cachedPolicy.check({ entity: user });
+
+              // Second call - cache hit, returns cached
+              const result2 = await cachedPolicy.check({ entity: user });
+
+              // After TTL expires - cache miss again
+              await delay(61000);
+              const result3 = await cachedPolicy.check({ entity: user });
+
+      invalidate:
+        description: 'Invalidates cache entry'
+        business-context: 'Forces re-evaluation'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Cache key'
+
+        returns:
+          type: 'boolean'
+          description: 'True if invalidated'
+
+      invalidateAll:
+        description: 'Clears entire cache'
+        business-context: 'Full cache reset'
+
+        returns:
+          type: 'void'
+
+      getCacheMetrics:
+        description: 'Returns cache statistics'
+        business-context: 'Performance monitoring'
+
+        returns:
+          type: 'CacheMetrics'
+          description: 'Cache statistics'
+
+        examples:
+          - id: 'cache-metrics'
+            code: |
+              const metrics = cachedPolicy.getCacheMetrics();
+              console.log(`Hit rate: ${metrics.hitRate}%`);
+              console.log(`Cache size: ${metrics.size}/${metrics.maxSize}`);
+
+  PolicyCachingBehaviorFactory:
+    class-doc:
+      description: 'Factory for creating cached policies'
+      business-context: 'Provides common cache configurations'
+
+      custom-tags:
+        since: '2.1.0'
+        static: 'true'
+
+    methods:
+      static withTTL:
+        description: 'Creates with simple TTL'
+        parameters:
+          - name: 'policy'
+            type: 'IBusinessPolicy<TEntity>'
+          - name: 'ttl'
+            type: 'number'
+        returns: 'PolicyCachingBehavior<TEntity>'
+
+      static withCustomKey:
+        description: 'Creates with custom key generator'
+        parameters:
+          - name: 'policy'
+            type: 'IBusinessPolicy<TEntity>'
+          - name: 'ttl'
+            type: 'number'
+          - name: 'keyGenerator'
+            type: '(request: PolicyRequest<TEntity>) => string'
+        returns: 'PolicyCachingBehavior<TEntity>'
+
+      static withMetrics:
+        description: 'Creates with metrics enabled'
+        parameters:
+          - name: 'policy'
+            type: 'IBusinessPolicy<TEntity>'
+          - name: 'ttl'
+            type: 'number'
+          - name: 'onMetrics'
+            type: '(metrics: CacheMetrics) => void'
+        returns: 'PolicyCachingBehavior<TEntity>'
+
+# === ALIASES ===
+alias es:
+  CachedPolicy:
+    description: 'Backward compatibility alias'
+    aliasFor: 'PolicyCachingBehavior'
+    deprecated: '2.1.0'
+    deprecationMessage: 'Use PolicyCachingBehavior instead'
+
+  PolicyCacheDecorator:
+    description: 'Alternative naming'
+    aliasFor: 'PolicyCachingBehavior'
+
+# === INTERFACES ===
+interfaces:
+  CacheConfig:
+    description: 'Cache configuration'
+    business-context: 'Controls caching behavior'
+
+    properties:
+      - name: 'ttl'
+        type: 'number'
+        description: 'Time to live in ms'
+        default: '60000'
+
+      - name: 'maxSize'
+        type: 'number'
+        description: 'Maximum cache entries'
+        default: '100'
+        optional: true
+
+      - name: 'keyGenerator'
+        type: '(request: PolicyRequest<TEntity>) => string'
+        description: 'Custom key generation'
+        optional: true
+
+      - name: 'namespace'
+        type: 'string'
+        description: 'Cache namespace'
+        optional: true
+
+      - name: 'onHit'
+        type: '(key: string) => void'
+        description: 'Cache hit callback'
+        optional: true
+
+      - name: 'onMiss'
+        type: '(key: string) => void'
+        description: 'Cache miss callback'
+        optional: true
+
+      - name: 'onEvict'
+        type: '(key: string, reason: string) => void'
+        description: 'Eviction callback'
+        optional: true
+
+  CacheMetrics:
+    description: 'Cache performance metrics'
+    business-context: 'Monitoring and optimization'
+
+    properties:
+      - name: 'hits'
+        type: 'number'
+        description: 'Total cache hits'
+
+      - name: 'misses'
+        type: 'number'
+        description: 'Total cache misses'
+
+      - name: 'hitRate'
+        type: 'number'
+        description: 'Hit rate percentage'
+
+      - name: 'size'
+        type: 'number'
+        description: 'Current cache size'
+
+      - name: 'maxSize'
+        type: 'number'
+        description: 'Maximum cache size'
+
+      - name: 'evictions'
+        type: 'number'
+        description: 'Total evictions'
+
+      - name: 'avgComputeTime'
+        type: 'number'
+        description: 'Average compute time in ms'
+        optional: true

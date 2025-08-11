@@ -1,0 +1,349 @@
+# Data Masker - Enterprise Data Protection for Logging
+
+# === FILE METADATA ===
+file-name: 'data-masker'
+title: 'DataMasker - Enterprise PII and Sensitive Data Protection'
+description: 'Comprehensive data masking system for protecting sensitive information in log output'
+business-context: 'Enterprise-grade data protection ensuring compliance with privacy regulations (GDPR, CCPA, HIPAA) by automatically masking PII and sensitive data in logs'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  MaskingOptions:
+    description: 'Configuration interface for data masking behavior and sensitivity detection'
+    business-context: 'Comprehensive configuration enabling enterprise compliance with customizable masking patterns and sensitivity rules'
+
+    formats:
+      jsdoc:
+        description: 'Data masking configuration options'
+      cli:
+        description: |
+          ## MaskingOptions Interface
+
+          Enterprise masking configuration providing:
+          - **Global Control**: Enable/disable masking system-wide
+          - **Pattern Matching**: Custom regex patterns for data detection
+          - **Key-based Masking**: Automatic masking by object key names
+          - **Custom Replacement**: Configurable replacement text
+          - **Compliance Ready**: Built-in patterns for common PII types
+
+    properties:
+      - name: 'enabled'
+        type: 'boolean'
+        description: 'Global flag to enable/disable all data masking functionality'
+
+      - name: 'patterns'
+        type: 'string[]'
+        description: 'Custom regex patterns for detecting sensitive data in strings'
+
+      - name: 'replacement'
+        type: 'string'
+        description: "Text to replace masked data with (default: '[MASKED]')"
+
+      - name: 'sensitiveKeys'
+        type: 'string[]'
+        description: 'Object property names to mask automatically regardless of content'
+
+    custom-tags:
+      since: '1.0.0'
+      compliance: 'Supports GDPR, CCPA, HIPAA data protection requirements'
+
+# === CLASSES ===
+classes:
+  DataMasker:
+    # Class Documentation
+    class-doc:
+      description: 'Enterprise data masker with built-in PII detection, circular reference protection, and customizable masking rules'
+      business-context: 'Production-ready data protection system ensuring enterprise compliance by automatically masking sensitive data in logs while preserving log structure and debugging capability'
+
+      formats:
+        jsdoc:
+          description: 'Enterprise data masker with PII protection and compliance features'
+        cli:
+          description: |
+            ## DataMasker - Enterprise Data Protection
+
+            Production data masking system providing:
+            - **Built-in PII Detection**: Email, SSN, credit cards, phone numbers
+            - **Custom Pattern Support**: Configurable regex patterns for domain-specific data
+            - **Key-based Masking**: Automatic masking by property names (password, token, etc.)
+            - **Circular Reference Safe**: Prevents infinite loops with object references
+            - **Performance Optimized**: Efficient recursive masking with memory management
+            - **Compliance Ready**: GDPR, CCPA, HIPAA compliance support
+            - **Structure Preserving**: Maintains object structure for debugging
+
+      custom-tags:
+        since: '1.0.0'
+        compliance: 'GDPR, CCPA, HIPAA compliant'
+        performance: 'Optimized for production logging hot paths'
+
+    # Constants
+    constants:
+      DEFAULT_SENSITIVE_KEYS:
+        description: 'Default list of property names considered sensitive (currently empty, allowing opt-in configuration)'
+        type: 'string[]'
+        value: '[]'
+
+      DEFAULT_PATTERNS:
+        description: 'Built-in regex patterns for detecting common PII types'
+        type: 'RegExp[]'
+        patterns:
+          - pattern: 'Email addresses'
+            regex: "/\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b/g"
+          - pattern: 'Social Security Numbers'
+            regex: "/\\b\\d{3}-?\\d{2}-?\\d{4}\\b/g"
+          - pattern: 'Credit Card Numbers'
+            regex: "/\\b\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}[-\\s]?\\d{4}\\b/g"
+          - pattern: 'Phone Numbers'
+            regex: "/\\b\\d{3}-?\\d{3}-?\\d{4}\\b/g"
+
+    methods:
+      constructor:
+        description: 'Creates new data masker with customizable masking configuration'
+        business-context: 'Initializes enterprise data protection with intelligent pattern compilation and default fallbacks for compliance'
+
+        parameters:
+          - name: 'options'
+            type: 'Partial<MaskingOptions>'
+            description: 'Optional masking configuration, uses secure defaults when not specified'
+            optional: true
+
+        examples:
+          - id: 'default-configuration'
+            code: |
+              // Uses built-in patterns for common PII
+              const masker = new DataMasker();
+
+          - id: 'enterprise-configuration'
+            code: |
+              const masker = new DataMasker({
+                enabled: true,
+                replacement: '[REDACTED]',
+                sensitiveKeys: ['password', 'token', 'apiKey', 'ssn', 'creditCard'],
+                patterns: [
+                  '\\b\\d{9}\\b',  // Tax ID numbers
+                  'sk_live_[a-zA-Z0-9]{24}',  // Stripe live keys
+                ]
+              });
+
+          - id: 'compliance-configuration'
+            code: |
+              // GDPR/HIPAA compliant setup
+              const gdprMasker = new DataMasker({
+                enabled: true,
+                replacement: '[PII_MASKED]',
+                sensitiveKeys: [
+                  'email', 'phone', 'ssn', 'dob', 'address', 'name',
+                  'medicalRecord', 'patientId', 'diagnosis'
+                ]
+              });
+
+      maskData:
+        description: 'Recursively masks sensitive data in any data structure while preserving object structure'
+        business-context: 'Primary masking method ensuring comprehensive data protection across all log data types while maintaining debuggability'
+
+        parameters:
+          - name: 'data'
+            type: 'unknown'
+            description: 'Data to mask - supports objects, arrays, primitives, and nested structures'
+
+        returns:
+          type: 'unknown'
+          description: 'Masked version of input data with same structure but sensitive values replaced'
+
+        examples:
+          - id: 'object-masking'
+            code: |
+              const sensitiveData = {
+                user: {
+                  id: 123,
+                  email: 'user@example.com',
+                  phone: '555-123-4567',
+                  metadata: {
+                    apiToken: 'sk_live_abcd1234',
+                    preferences: { theme: 'dark' }
+                  }
+                },
+                order: {
+                  amount: 99.99,
+                  creditCard: '4532-1234-5678-9012'
+                }
+              };
+
+              const masker = new DataMasker({
+                sensitiveKeys: ['email', 'phone', 'apiToken', 'creditCard']
+              });
+
+              const masked = masker.maskData(sensitiveData);
+              // Result: {
+              //   user: {
+              //     id: 123,
+              //     email: '[MASKED]',
+              //     phone: '[MASKED]',
+              //     metadata: {
+              //       apiToken: '[MASKED]',
+              //       preferences: { theme: 'dark' }
+              //     }
+              //   },
+              //   order: {
+              //     amount: 99.99,
+              //     creditCard: '[MASKED]'
+              //   }
+              // }
+
+          - id: 'array-masking'
+            code: |
+              const users = [
+                { name: 'John', email: 'john@example.com' },
+                { name: 'Jane', email: 'jane@example.com' }
+              ];
+
+              const masked = masker.maskData(users);
+              // Masks email in all array elements
+
+          - id: 'string-pattern-masking'
+            code: |
+              const logMessage = 'User john@example.com called from 555-123-4567';
+              const masked = masker.maskData(logMessage);
+              // Result: 'User [MASKED] called from [MASKED]'
+
+          - id: 'circular-reference-safety'
+            code: |
+              const obj: any = { name: 'test' };
+              obj.self = obj; // Circular reference
+
+              const masked = masker.maskData(obj);
+              // Result: { name: 'test', self: '[Circular Reference]' }
+
+      # Private methods for completeness
+      private-methods:
+        maskRecursive:
+          description: 'Internal recursive masking with circular reference protection'
+          business-context: 'Core masking algorithm handling all data types with memory-safe circular reference detection'
+          parameters:
+            - name: 'value'
+              type: 'unknown'
+              description: 'Value to mask recursively'
+            - name: 'visitedObjects'
+              type: 'WeakSet<object>'
+              description: 'Set tracking visited objects to prevent circular references'
+          returns:
+            type: 'unknown'
+            description: 'Masked value with preserved structure'
+
+        maskString:
+          description: 'Applies pattern-based masking to string values'
+          business-context: 'String-specific masking using compiled regex patterns for PII detection'
+          parameters:
+            - name: 'str'
+              type: 'string'
+              description: 'String to scan and mask'
+          returns:
+            type: 'string'
+            description: 'String with sensitive patterns replaced'
+
+        isSensitiveKey:
+          description: 'Determines if an object property name is considered sensitive'
+          business-context: 'Key-based sensitivity detection with intelligent matching to avoid false positives'
+          parameters:
+            - name: 'key'
+              type: 'string'
+              description: 'Object property name to evaluate'
+          returns:
+            type: 'boolean'
+            description: 'True if key matches sensitive key patterns'
+
+# === EXAMPLES ===
+examples:
+  production-logging-setup:
+    description: 'Enterprise production logging setup with comprehensive data masking'
+    code: |
+      // Configure logger with data masking for production
+      Logger.configure({
+        level: 'info',
+        masking: {
+          enabled: true,
+          replacement: '[REDACTED]',
+          sensitiveKeys: [
+            // Authentication
+            'password', 'token', 'apiKey', 'secretKey', 'privateKey',
+            // Personal Information
+            'email', 'phone', 'ssn', 'dob', 'address', 'zipCode',
+            // Financial
+            'creditCard', 'bankAccount', 'routingNumber', 'cvv',
+            // Healthcare (HIPAA)
+            'medicalRecord', 'patientId', 'diagnosis', 'treatment',
+            // Custom business
+            'customerSecret', 'internalId', 'licenseKey'
+          ],
+          patterns: [
+            'sk_live_[a-zA-Z0-9]{24}',  // Stripe live keys  
+            'sk_test_[a-zA-Z0-9]{24}',  // Stripe test keys
+            '\\b[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}([A-Z0-9]?){0,16}\\b', // IBAN
+            '\\b\\d{1,2}\\/\\d{1,2}\\/\\d{4}\\b'  // Date patterns
+          ]
+        }
+      });
+
+  healthcare-compliance:
+    description: 'HIPAA-compliant logging configuration for healthcare applications'
+    code: |
+      const hipaaLogger = Logger.configure({
+        masking: {
+          enabled: true,
+          replacement: '[PHI_REDACTED]',
+          sensitiveKeys: [
+            'patientId', 'medicalRecordNumber', 'ssn', 'dob',
+            'diagnosis', 'treatment', 'medication', 'symptoms',
+            'doctorNotes', 'labResults', 'allergies', 'emergencyContact'
+          ],
+          patterns: [
+            '\\b\\d{3}-\\d{2}-\\d{4}\\b',  // SSN
+            '\\b\\d{1,2}/\\d{1,2}/\\d{4}\\b',  // Dates
+            'MRN\\d{6,10}',  // Medical record numbers
+            'Patient\\d{4,8}'  // Patient IDs
+          ]
+        }
+      });
+
+  financial-compliance:
+    description: 'PCI DSS compliant logging for financial applications'
+    code: |
+      const pciCompliantLogger = Logger.configure({
+        masking: {
+          enabled: true,
+          replacement: '[CARD_DATA_REDACTED]',
+          sensitiveKeys: [
+            'creditCard', 'cardNumber', 'cvv', 'expirationDate',
+            'bankAccount', 'routingNumber', 'iban', 'swift',
+            'pin', 'securityCode', 'accountBalance'
+          ],
+          patterns: [
+            '\\b\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}[\\s-]?\\d{4}\\b',  // Credit cards
+            '\\b\\d{3,4}\\b(?=.*cvv)',  // CVV codes
+            '\\b[A-Z]{2}\\d{2}[A-Z0-9]{4}\\d{7}([A-Z0-9]?){0,16}\\b'  // IBAN
+          ]
+        }
+      });
+
+  performance-optimized-masking:
+    description: 'Performance-optimized masking for high-throughput applications'
+    code: |
+      // Minimal masking for performance-critical applications
+      const performanceMasker = new DataMasker({
+        enabled: true,
+        replacement: '[X]',  // Short replacement for performance
+        sensitiveKeys: ['pwd', 'key', 'tkn'],  // Abbreviated keys
+        patterns: []  // No pattern matching for maximum performance
+      });
+
+      // Use in high-frequency logging
+      logger.info('User action', performanceMasker.maskData({
+        userId: user.id,
+        action: 'login',
+        apiKey: request.headers.authorization  // Will be masked
+      }));

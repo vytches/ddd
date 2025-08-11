@@ -1,0 +1,311 @@
+# Saga Event Handler Decorator - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'saga-event-handler.decorator'
+title: '@SagaEventHandler Decorator - Event Handler Registration'
+description: 'Decorator for marking methods as saga event handlers with routing configuration'
+business-context: 'Enables declarative event-to-method mapping for saga orchestration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FUNCTIONS ===
+functions:
+  SagaEventHandler:
+    description: 'Decorator for marking methods as saga event handlers'
+    business-context: 'Declarative event routing with customizable handler behavior'
+
+    parameters:
+      - name: 'optionsOrEventType'
+        type: 'SagaEventHandlerOptions | string | string[]'
+        description: 'Event handler configuration, single event type, or array of event types'
+
+    returns:
+      type: 'MethodDecorator'
+      description: 'Method decorator for event handler registration'
+
+    examples:
+      - id: 'simple-event-handler'
+        code: |
+          @Saga('OrderProcessingSaga')
+          class OrderProcessingSaga extends BaseSaga {
+            @SagaEventHandler('OrderCreated')
+            async handleOrderCreated(event: OrderCreatedEvent): Promise<ISagaActionResult> {
+              // Handle order creation event
+              return {
+                success: true,
+                events: [new PaymentRequestedEvent({ orderId: event.payload.orderId })]
+              };
+            }
+          }
+
+      - id: 'multiple-event-types'
+        code: |
+          @SagaEventHandler(['PaymentCompleted', 'PaymentFailed'])
+          async handlePaymentResult(event: PaymentEvent): Promise<ISagaActionResult> {
+            if (event.eventType === 'PaymentCompleted') {
+              return await this.handlePaymentSuccess(event);
+            } else {
+              return await this.handlePaymentFailure(event);
+            }
+          }
+
+      - id: 'advanced-handler-options'
+        code: |
+          @SagaEventHandler({
+            eventType: 'InventoryReserved',
+            canStartSaga: false,
+            canCompleteSaga: false,
+            stepName: 'ReserveInventory',
+            timeout: 30000,
+            maxRetries: 3,
+            retryDelay: {
+              initial: 1000,
+              multiplier: 2,
+              maximum: 10000
+            },
+            correlationProperties: ['orderId', 'customerId'],
+            order: 100,
+            idempotent: true
+          })
+          async handleInventoryReserved(event: InventoryReservedEvent): Promise<ISagaActionResult> {
+            // Complex handler with full configuration
+            return { success: true };
+          }
+
+    custom-tags:
+      decorator-type: 'method'
+      metadata-key: 'saga:eventHandler'
+
+  StartSaga:
+    description: 'Decorator modifier to mark event handler as saga starter'
+    business-context: 'Identifies handlers that can initiate new saga instances'
+
+    parameters:
+      - name: 'options'
+        type: 'Partial<SagaEventHandlerOptions>'
+        description: 'Additional handler options'
+        required: false
+        default: '{}'
+
+    returns:
+      type: 'MethodDecorator'
+      description: 'Method decorator for saga start capability'
+
+    examples:
+      - id: 'saga-starter'
+        code: |
+          @SagaEventHandler('OrderCreated')
+          @StartSaga({
+            correlationProperties: ['orderId', 'customerId'],
+            timeout: 60000
+          })
+          async handleOrderCreated(event: OrderCreatedEvent): Promise<ISagaActionResult> {
+            // This handler can start new saga instances
+            return {
+              success: true,
+              events: [new SagaStartedEvent({ sagaId: this.state.sagaId })]
+            };
+          }
+
+  EndSaga:
+    description: 'Decorator modifier to mark event handler as saga finisher'
+    business-context: 'Identifies handlers that can complete saga instances'
+
+    parameters:
+      - name: 'options'
+        type: 'Partial<SagaEventHandlerOptions>'
+        description: 'Additional handler options'
+        required: false
+        default: '{}'
+
+    returns:
+      type: 'MethodDecorator'
+      description: 'Method decorator for saga completion capability'
+
+    examples:
+      - id: 'saga-finisher'
+        code: |
+          @SagaEventHandler('OrderCompleted')
+          @EndSaga({
+            correlationProperties: ['orderId']
+          })
+          async handleOrderCompleted(event: OrderCompletedEvent): Promise<ISagaActionResult> {
+            // This handler completes the saga
+            return {
+              success: true,
+              events: [new SagaCompletedEvent({ sagaId: this.state.sagaId })]
+            };
+          }
+
+  getEventHandlerMetadata:
+    description: 'Retrieves event handler metadata from decorated method'
+    business-context: 'Runtime access to handler configuration for orchestration'
+
+    parameters:
+      - name: 'target'
+        type: 'any'
+        description: 'Target class or instance'
+
+      - name: 'methodName'
+        type: 'string'
+        description: 'Name of the handler method'
+
+    returns:
+      type: 'SagaEventHandlerOptions | undefined'
+      description: 'Handler options if method is decorated, undefined otherwise'
+
+    examples:
+      - id: 'get-handler-metadata'
+        code: |
+          const metadata = getEventHandlerMetadata(
+            OrderProcessingSaga.prototype, 
+            'handleOrderCreated'
+          );
+
+          if (metadata) {
+            console.log('Event type:', metadata.eventType);
+            console.log('Can start saga:', metadata.canStartSaga);
+            console.log('Timeout:', metadata.timeout);
+          }
+
+  getEventHandlerMethods:
+    description: 'Gets all event handler methods from saga class'
+    business-context: 'Discovery of all event handlers for orchestrator registration'
+
+    parameters:
+      - name: 'target'
+        type: 'any'
+        description: 'Target class or constructor'
+
+    returns:
+      type: 'Map<string, SagaEventHandlerOptions>'
+      description: 'Map of method names to handler options'
+
+    examples:
+      - id: 'get-all-handlers'
+        code: |
+          const handlers = getEventHandlerMethods(OrderProcessingSaga);
+
+          handlers.forEach((options, methodName) => {
+            console.log(`Handler: ${methodName}`);
+            console.log(`- Event: ${options.eventType}`);
+            console.log(`- Step: ${options.stepName}`);
+            console.log(`- Can start: ${options.canStartSaga}`);
+          });
+
+  isEventHandlerMethod:
+    description: 'Checks if method is decorated as event handler'
+    business-context: 'Type guard for event handler method identification'
+
+    parameters:
+      - name: 'target'
+        type: 'any'
+        description: 'Target class or instance'
+
+      - name: 'methodName'
+        type: 'string'
+        description: 'Method name to check'
+
+    returns:
+      type: 'boolean'
+      description: 'True if method is decorated as event handler'
+
+    examples:
+      - id: 'is-handler-check'
+        code: |
+          if (isEventHandlerMethod(OrderProcessingSaga.prototype, 'handleOrderCreated')) {
+            console.log('handleOrderCreated is an event handler');
+            
+            const metadata = getEventHandlerMetadata(
+              OrderProcessingSaga.prototype,
+              'handleOrderCreated'
+            );
+            // Process handler metadata...
+          }
+
+# === TYPES ===
+types:
+  SagaEventHandlerOptions:
+    description: 'Configuration options for @SagaEventHandler decorator'
+    business-context: 'Comprehensive event handler configuration'
+
+    properties:
+      - name: 'eventType'
+        type: 'string | string[]'
+        description: 'Event type(s) this handler can process'
+        required: true
+
+      - name: 'canStartSaga'
+        type: 'boolean'
+        description: 'Whether this handler can start new saga instances'
+        required: false
+        default: 'false'
+
+      - name: 'canCompleteSaga'
+        type: 'boolean'
+        description: 'Whether this handler can complete saga instances'
+        required: false
+        default: 'false'
+
+      - name: 'correlationProperties'
+        type: 'string[]'
+        description: 'Event properties used for saga correlation'
+        required: false
+        default: '[]'
+
+      - name: 'stepName'
+        type: 'string'
+        description: 'Name of saga step this handler represents'
+        required: false
+        default: 'method name'
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Handler execution timeout in milliseconds'
+        required: false
+
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Maximum retry attempts on failure'
+        required: false
+        default: '0'
+
+      - name: 'retryDelay'
+        type: 'RetryDelayConfig'
+        description: 'Retry delay configuration'
+        required: false
+
+      - name: 'idempotent'
+        type: 'boolean'
+        description: 'Whether handler is idempotent'
+        required: false
+        default: 'true'
+
+      - name: 'order'
+        type: 'number'
+        description: 'Execution order when multiple handlers match'
+        required: false
+        default: '0'
+
+  RetryDelayConfig:
+    description: 'Configuration for retry delay strategy'
+    business-context: 'Controls backoff behavior for failed handler retries'
+
+    properties:
+      - name: 'initial'
+        type: 'number'
+        description: 'Initial delay in milliseconds'
+        default: '1000'
+
+      - name: 'multiplier'
+        type: 'number'
+        description: 'Exponential backoff multiplier'
+        default: '2'
+
+      - name: 'maximum'
+        type: 'number'
+        description: 'Maximum delay in milliseconds'
+        default: '30000'

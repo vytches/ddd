@@ -2,32 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDomainEvent } from './domain-event-interfaces';
 
-/**
- * @llm-summary EventBus class for event bus operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * EventBus class implementing core domain functionality for event bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IEventBus();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class IEventBus<TEvent = IDomainEvent> {
   /**
    * Publish an event to all subscribed handlers
@@ -68,25 +42,6 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
   abstract publishMany(events: TEvent[]): Promise<void>;
 }
 
-/**
- * @llm-summary Contract for base event bus options functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * BaseEventBusOptions interface implementing core domain functionality for base event bus options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteBaseEventBusOptions implements BaseEventBusOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface BaseEventBusOptions {
   /**
    * Enable or disable event processing logging
@@ -109,23 +64,6 @@ export interface BaseEventBusOptions {
   logger?: (message: string) => void;
 }
 
-/**
- * @llm-summary Type definition for event bus middleware
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * EventBusMiddleware type implementing core domain functionality for event bus middleware operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: EventBusMiddleware = {} as EventBusMiddleware;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type EventBusMiddleware = (
   next: (event: unknown) => Promise<void>
 ) => (event: unknown) => Promise<void>;

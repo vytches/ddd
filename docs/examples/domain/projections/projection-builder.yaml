@@ -1,0 +1,650 @@
+# projection-builder - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'projection-builder'
+title: 'ProjectionBuilder - Fluent Projection Configuration'
+description: 'Fluent builder for configuring projections with capabilities'
+business-context: 'Simplifies projection setup with chainable configuration API'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ProjectionBuilder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Fluent builder for creating configured projection engines'
+      business-context: 'Provides intuitive API for complex projection configuration'
+
+      formats:
+        jsdoc:
+          description: 'Builder pattern for projection engine configuration'
+        cli:
+          description: |
+            ## ProjectionBuilder
+
+            Fluent configuration builder:
+            - Chainable API design
+            - Capability composition
+            - Validation and defaults
+            - Type-safe configuration
+            - Immutable builder pattern
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Fluent Builder'
+        generic-type: 'TReadModel - The read model type'
+
+    # Methods
+    methods:
+      create:
+        description: 'Creates new projection builder instance'
+        business-context: 'Initiates fluent configuration chain'
+
+        parameters:
+          - name: 'projection'
+            type: 'IProjection<TReadModel>'
+            description: 'Base projection to configure'
+
+        returns:
+          type: 'ProjectionBuilder<TReadModel>'
+          description: 'New builder instance'
+
+        examples:
+          - id: 'create-builder'
+            code: |
+              const builder = ProjectionBuilder.create(userProjection);
+
+          - id: 'type-safe'
+            code: |
+              interface UserReadModel {
+                users: Map<string, User>;
+                count: number;
+              }
+
+              const builder = ProjectionBuilder.create<UserReadModel>(
+                new UserProjection()
+              );
+
+        custom-tags:
+          static: 'true'
+          factory: 'true'
+
+      withStore:
+        description: 'Configures projection store'
+        business-context: 'Sets persistence layer for read model'
+
+        parameters:
+          - name: 'store'
+            type: 'IProjectionStore<TReadModel>'
+            description: 'Store implementation'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'with-store'
+            code: |
+              const engine = ProjectionBuilder
+                .create(userProjection)
+                .withStore(new MongoProjectionStore())
+                .build();
+
+          - id: 'in-memory-store'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(new InMemoryProjectionStore())
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          required: 'true'
+
+      withCheckpoints:
+        description: 'Adds checkpoint capability to projection'
+        business-context: 'Enables incremental rebuilding from checkpoints'
+
+        parameters:
+          - name: 'checkpointStore'
+            type: 'IProjectionCheckpointStore<TReadModel>'
+            description: 'Checkpoint store'
+          - name: 'options'
+            type: 'CheckpointOptions'
+            description: 'Checkpoint configuration'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'basic-checkpoints'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withCheckpoints(checkpointStore)
+                .build();
+
+          - id: 'configured-checkpoints'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withCheckpoints(checkpointStore, {
+                  interval: 1000, // Every 1000 events
+                  saveOnRebuildComplete: true,
+                  compressionEnabled: true
+                })
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          capability: 'CheckpointCapability'
+
+      withSnapshots:
+        description: 'Adds snapshot capability to projection'
+        business-context: 'Optimizes recovery with periodic state snapshots'
+
+        parameters:
+          - name: 'snapshotStore'
+            type: 'IProjectionSnapshotStore<TReadModel>'
+            description: 'Snapshot store'
+          - name: 'options'
+            type: 'SnapshotOptions'
+            description: 'Snapshot configuration'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'basic-snapshots'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withSnapshots(snapshotStore)
+                .build();
+
+          - id: 'advanced-snapshots'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withSnapshots(snapshotStore, {
+                  interval: 5000,
+                  maxSnapshots: 10,
+                  compressState: state => compress(state),
+                  decompressState: compressed => decompress(compressed)
+                })
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          capability: 'SnapshotCapability'
+
+      withRetry:
+        description: 'Configures retry strategy for errors'
+        business-context: 'Adds resilience with automatic retry'
+
+        parameters:
+          - name: 'config'
+            type: 'IProjectionRetryConfig'
+            description: 'Retry configuration'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'retry-config'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withRetry({
+                  maxAttempts: 3,
+                  baseDelayMs: 1000,
+                  maxDelayMs: 30000,
+                  backoffMultiplier: 2,
+                  retryableErrors: ['TRANSIENT_ERROR', 'TIMEOUT'],
+                  nonRetryableErrors: ['INVALID_EVENT']
+                })
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          resilience: 'true'
+
+      withCircuitBreaker:
+        description: 'Adds circuit breaker protection'
+        business-context: 'Prevents cascading failures'
+
+        parameters:
+          - name: 'config'
+            type: 'ICircuitBreakerConfig'
+            description: 'Circuit breaker configuration'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'circuit-breaker'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withCircuitBreaker({
+                  failureThreshold: 5,
+                  recoveryTimeoutMs: 60000,
+                  halfOpenMaxAttempts: 3
+                })
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          capability: 'CircuitBreakerCapability'
+          resilience: 'true'
+
+      withDeadLetterQueue:
+        description: 'Configures dead letter queue for failed events'
+        business-context: 'Handles permanently failed events'
+
+        parameters:
+          - name: 'deadLetterStore'
+            type: 'IDeadLetterStore'
+            description: 'Dead letter storage'
+          - name: 'options'
+            type: 'DeadLetterOptions'
+            description: 'Dead letter configuration'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'dead-letter'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withDeadLetterQueue(deadLetterStore, {
+                  maxRetries: 5,
+                  retentionDays: 30,
+                  alertOnFailure: true
+                })
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          capability: 'DeadLetterCapability'
+
+      withCustomCapability:
+        description: 'Adds custom capability to projection'
+        business-context: 'Extends with domain-specific capabilities'
+
+        parameters:
+          - name: 'capability'
+            type: 'T extends Capability & IProjectionCapability'
+            description: 'Custom capability instance'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'custom-capability'
+            code: |
+              class MetricsCapability extends Capability {
+                onAfterApply(state, event) {
+                  metrics.increment('events.processed');
+                }
+              }
+
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withCustomCapability(new MetricsCapability())
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          extensible: 'true'
+
+      withLifecycleHooks:
+        description: 'Configures lifecycle event handlers'
+        business-context: 'Adds cross-cutting concerns via hooks'
+
+        parameters:
+          - name: 'hooks'
+            type: 'IProjectionLifecycleHooks<TReadModel>'
+            description: 'Lifecycle hooks'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'lifecycle-hooks'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withLifecycleHooks({
+                  onBeforeApply: async (state, event) => {
+                    logger.debug(`Processing ${event.eventType}`);
+                  },
+                  onAfterApply: async (state, event) => {
+                    metrics.recordProcessing(event);
+                  },
+                  onError: async (error, event) => {
+                    alerting.notifyError(error, event);
+                  }
+                })
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          hooks: 'true'
+
+      withErrorStrategy:
+        description: 'Sets custom error handling strategy'
+        business-context: 'Customizes error recovery behavior'
+
+        parameters:
+          - name: 'strategy'
+            type: 'IProjectionErrorStrategy'
+            description: 'Error strategy implementation'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'error-strategy'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withErrorStrategy(new ExponentialBackoffStrategy())
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+          error-handling: 'true'
+
+      withOptions:
+        description: 'Sets general projection options'
+        business-context: 'Configures projection behavior'
+
+        parameters:
+          - name: 'options'
+            type: 'IProjectionOptions'
+            description: 'Projection options'
+
+        returns:
+          type: 'this'
+          description: 'Builder for chaining'
+
+        examples:
+          - id: 'general-options'
+            code: |
+              const engine = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withOptions({
+                  name: 'user-projection-v2',
+                  version: '2.0.0',
+                  timeout: 5000,
+                  batchSize: 100
+                })
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+
+      validate:
+        description: 'Validates current configuration'
+        business-context: 'Ensures valid configuration before building'
+
+        returns:
+          type: 'IValidationResult'
+          description: 'Validation result'
+
+        examples:
+          - id: 'validate-config'
+            code: |
+              const builder = ProjectionBuilder
+                .create(projection)
+                .withStore(store);
+
+              const validation = builder.validate();
+              if (!validation.valid) {
+                console.error('Invalid configuration:', validation.errors);
+              }
+
+        custom-tags:
+          validation: 'true'
+
+      build:
+        description: 'Builds configured projection engine'
+        business-context: 'Creates final projection engine instance'
+
+        returns:
+          type: 'IProjectionEngine<TReadModel>'
+          description: 'Configured projection engine'
+
+        examples:
+          - id: 'simple-build'
+            code: |
+              const engine = ProjectionBuilder
+                .create(userProjection)
+                .withStore(mongoStore)
+                .build();
+
+          - id: 'complex-build'
+            code: |
+              const engine = ProjectionBuilder
+                .create(orderProjection)
+                .withStore(postgresStore)
+                .withCheckpoints(checkpointStore, { interval: 1000 })
+                .withSnapshots(snapshotStore, { interval: 5000 })
+                .withRetry(retryConfig)
+                .withCircuitBreaker(circuitConfig)
+                .withDeadLetterQueue(deadLetterStore)
+                .withLifecycleHooks(hooks)
+                .build();
+
+        custom-tags:
+          terminal: 'true'
+          validates: 'Validates before building'
+
+      reset:
+        description: 'Resets builder to initial state'
+        business-context: 'Clears all configuration'
+
+        returns:
+          type: 'this'
+          description: 'Reset builder'
+
+        examples:
+          - id: 'reset-builder'
+            code: |
+              const builder = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withCheckpoints(checkpointStore);
+
+              // Start over
+              builder.reset()
+                .withStore(differentStore)
+                .build();
+
+        custom-tags:
+          fluent: 'true'
+
+      clone:
+        description: 'Creates copy of current builder'
+        business-context: 'Enables configuration branching'
+
+        returns:
+          type: 'ProjectionBuilder<TReadModel>'
+          description: 'Cloned builder'
+
+        examples:
+          - id: 'clone-builder'
+            code: |
+              const baseBuilder = ProjectionBuilder
+                .create(projection)
+                .withStore(store)
+                .withCheckpoints(checkpointStore);
+
+              const prodBuilder = baseBuilder
+                .clone()
+                .withRetry(prodRetryConfig)
+                .withCircuitBreaker(prodCircuitConfig);
+
+              const devBuilder = baseBuilder
+                .clone()
+                .withOptions({ debug: true });
+
+# === INTERFACES ===
+interfaces:
+  IProjectionOptions:
+    description: 'General projection configuration'
+    business-context: 'Common projection settings'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Override projection name'
+        optional: true
+
+      - name: 'version'
+        type: 'string'
+        description: 'Projection version'
+        optional: true
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Processing timeout in ms'
+        optional: true
+
+      - name: 'batchSize'
+        type: 'number'
+        description: 'Event batch size'
+        optional: true
+
+      - name: 'debug'
+        type: 'boolean'
+        description: 'Enable debug mode'
+        optional: true
+
+  CheckpointOptions:
+    description: 'Checkpoint capability options'
+    business-context: 'Controls checkpoint behavior'
+
+    properties:
+      - name: 'interval'
+        type: 'number'
+        description: 'Events between checkpoints'
+        optional: true
+
+      - name: 'saveOnRebuildComplete'
+        type: 'boolean'
+        description: 'Checkpoint after rebuild'
+        optional: true
+
+      - name: 'compressionEnabled'
+        type: 'boolean'
+        description: 'Compress checkpoint data'
+        optional: true
+
+  SnapshotOptions:
+    description: 'Snapshot capability options'
+    business-context: 'Controls snapshot behavior'
+
+    properties:
+      - name: 'interval'
+        type: 'number'
+        description: 'Events between snapshots'
+        optional: true
+
+      - name: 'maxSnapshots'
+        type: 'number'
+        description: 'Maximum snapshots to keep'
+        optional: true
+
+      - name: 'compressState'
+        type: '(state: TReadModel) => any'
+        description: 'State compression function'
+        optional: true
+
+      - name: 'decompressState'
+        type: '(compressed: any) => TReadModel'
+        description: 'State decompression function'
+        optional: true
+
+  DeadLetterOptions:
+    description: 'Dead letter queue options'
+    business-context: 'Failed event handling'
+
+    properties:
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Max retries before dead letter'
+        optional: true
+
+      - name: 'retentionDays'
+        type: 'number'
+        description: 'Dead letter retention period'
+        optional: true
+
+      - name: 'alertOnFailure'
+        type: 'boolean'
+        description: 'Send alerts for failures'
+        optional: true
+
+  IProjectionLifecycleHooks:
+    description: 'Lifecycle event handlers'
+    business-context: 'Cross-cutting concerns'
+
+    properties:
+      - name: 'onBeforeApply'
+        type: '(state: TReadModel, event: IExtendedDomainEvent) => Promise<void> | void'
+        description: 'Before event application'
+        optional: true
+
+      - name: 'onAfterApply'
+        type: '(state: TReadModel, event: IExtendedDomainEvent) => Promise<void> | void'
+        description: 'After event application'
+        optional: true
+
+      - name: 'onError'
+        type: '(error: Error, event?: IExtendedDomainEvent) => Promise<void> | void'
+        description: 'On processing error'
+        optional: true
+
+      - name: 'onRebuildStart'
+        type: '() => Promise<void> | void'
+        description: 'Before rebuild starts'
+        optional: true
+
+      - name: 'onRebuildComplete'
+        type: '(result: IRebuildResult) => Promise<void> | void'
+        description: 'After rebuild completes'
+        optional: true

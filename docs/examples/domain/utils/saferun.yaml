@@ -1,0 +1,263 @@
+# saferun - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'saferun'
+title: 'safeRun - Safe Function Execution for Testing'
+description: 'Utility function for safe execution with tuple-based error handling'
+business-context: 'Provides explicit error handling for test scenarios without try/catch blocks'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FUNCTIONS ===
+functions:
+  safeRun:
+    description: 'Executes a function safely and returns a tuple containing either an error or the result'
+    business-context: 'Designed specifically for testing scenarios where explicit error handling is needed without try/catch blocks'
+
+    # Overload 1: Async function
+    overloads:
+      - id: 'async'
+        description: 'Handles asynchronous functions'
+
+        parameters:
+          - name: 'fn'
+            type: '() => Promise<T>'
+            description: 'Async function to execute safely'
+
+        returns:
+          type: 'Promise<readonly [Error | undefined, T | undefined]>'
+          description: 'Promise of tuple with error or result'
+
+        examples:
+          - id: 'async-execution'
+            code: |
+              // Async function - await unwraps Promise<tuple> to tuple
+              const [error, user] = await safeRun(async () => 
+                await userService.findById('123')
+              );
+
+              if (error) {
+                expect(error).toBeInstanceOf(NotFoundError);
+              } else if (user) {
+                // user is properly typed as User, not Promise<User>
+                expect(user.email).toBe('user@example.com');
+                expect(user.role).toBe('admin');
+              }
+
+      - id: 'sync'
+        description: 'Handles synchronous functions'
+
+        parameters:
+          - name: 'fn'
+            type: '() => T'
+            description: 'Synchronous function to execute safely'
+
+        returns:
+          type: 'readonly [Error | undefined, T | undefined]'
+          description: 'Tuple with error or result'
+
+        examples:
+          - id: 'sync-execution'
+            code: |
+              // Synchronous function - returns tuple directly
+              const [error, result] = safeRun(() => 
+                validateUser(userData)
+              );
+
+              if (error) {
+                expect(error).toBeInstanceOf(ValidationError);
+                expect(error.message).toContain('Invalid email');
+              } else {
+                expect(result).toBeDefined();
+                expect(result.id).toBe('123');
+              }
+
+    # General properties
+    formats:
+      jsdoc:
+        description: 'Safe function execution utility for testing'
+      cli:
+        description: |
+          ## safeRun Function
+
+          Testing utility features:
+          - Tuple-based error handling [error, result]
+          - Automatic Promise unwrapping
+          - Type-safe error and result handling
+          - No try/catch boilerplate in tests
+          - Proper TypeScript inference
+          - Supports both sync and async functions
+
+    custom-tags:
+      since: '1.0.0'
+      testing-only: 'true'
+      warning: 'Use only in test files, not in production code'
+      generic-types: |
+        - T: Return type of the function
+        - E: Error type (extends Error)
+
+    # Additional examples
+    examples:
+      - id: 'test-validation-errors'
+        description: 'Testing validation errors without try/catch'
+        code: |
+          describe('UserService', () => {
+            it('should handle validation errors', () => {
+              const [validationError] = safeRun(() =>
+                userService.createUser({ email: 'invalid' })
+              );
+              
+              expect(validationError).toBeInstanceOf(ValidationError);
+              expect(validationError?.code).toBe('INVALID_EMAIL');
+            });
+            
+            it('should create user successfully', () => {
+              const [error, user] = safeRun(() =>
+                userService.createUser({ 
+                  email: 'valid@example.com',
+                  name: 'John Doe'
+                })
+              );
+              
+              expect(error).toBeUndefined();
+              expect(user).toBeDefined();
+              expect(user?.id).toBeTruthy();
+            });
+          });
+
+      - id: 'test-async-operations'
+        description: 'Testing async operations with proper typing'
+        code: |
+          describe('Repository', () => {
+            it('should handle database errors', async () => {
+              const [dbError, result] = await safeRun(async () =>
+                await repository.save(entity)
+              );
+              
+              if (dbError) {
+                expect(dbError).toBeInstanceOf(DatabaseError);
+                expect(dbError.message).toContain('Connection failed');
+              }
+            });
+            
+            it('should fetch entities successfully', async () => {
+              const [error, entities] = await safeRun(async () =>
+                await repository.findAll()
+              );
+              
+              expect(error).toBeUndefined();
+              expect(entities).toHaveLength(3);
+              // entities is properly typed as Entity[], not Promise<Entity[]>
+              entities?.forEach(entity => {
+                expect(entity.id).toBeDefined();
+              });
+            });
+          });
+
+      - id: 'compare-with-trycatch'
+        description: 'Comparison with traditional try/catch approach'
+        code: |
+          // Traditional try/catch approach (verbose)
+          it('should handle errors - try/catch', () => {
+            let error: Error | undefined;
+            let result: User | undefined;
+            
+            try {
+              result = validateUser(userData);
+            } catch (e) {
+              error = e as Error;
+            }
+            
+            expect(error).toBeInstanceOf(ValidationError);
+            expect(result).toBeUndefined();
+          });
+
+          // With safeRun (cleaner)
+          it('should handle errors - safeRun', () => {
+            const [error, result] = safeRun(() => 
+              validateUser(userData)
+            );
+            
+            expect(error).toBeInstanceOf(ValidationError);
+            expect(result).toBeUndefined();
+          });
+
+      - id: 'multiple-error-checks'
+        description: 'Testing multiple error conditions'
+        code: |
+          describe('Validation', () => {
+            const testCases = [
+              { input: null, errorType: RequiredError },
+              { input: '', errorType: EmptyError },
+              { input: 'ab', errorType: MinLengthError },
+              { input: 'a'.repeat(101), errorType: MaxLengthError }
+            ];
+            
+            testCases.forEach(({ input, errorType }) => {
+              it(`should throw ${errorType.name} for input: ${input}`, () => {
+                const [error] = safeRun(() => 
+                  validator.validate(input)
+                );
+                
+                expect(error).toBeInstanceOf(errorType);
+              });
+            });
+          });
+
+      - id: 'destructuring-patterns'
+        description: 'Different destructuring patterns with safeRun'
+        code: |
+          // Only interested in error
+          const [error] = safeRun(() => riskyOperation());
+          expect(error).toBeInstanceOf(ExpectedError);
+
+          // Only interested in result (when no error expected)
+          const [, result] = safeRun(() => safeOperation());
+          expect(result).toBe('success');
+
+          // Named destructuring for clarity
+          const [validationError, validUser] = safeRun(() => 
+            validateAndTransform(input)
+          );
+
+          // Use in conditional logic
+          const [err, data] = safeRun(() => fetchData());
+          if (err) {
+            handleError(err);
+          } else if (data) {
+            processData(data);
+          }
+
+# === USAGE NOTES ===
+usage-notes:
+  testing-only: |
+    **IMPORTANT**: safeRun is specifically designed for testing scenarios.
+    In production code, use standard error handling patterns:
+    - Try/catch blocks for imperative code
+    - Result<T, E> pattern for functional error handling
+    - Domain exceptions for business rule violations
+
+  type-inference: |
+    The function provides excellent TypeScript inference:
+    - Automatically unwraps Promise types
+    - Maintains proper typing for both error and result
+    - Supports generic type parameters
+
+  tuple-pattern: |
+    Returns a readonly tuple [error, result] where:
+    - If operation succeeds: [undefined, T]
+    - If operation fails: [Error, undefined]
+    - Exactly one element is always defined
+
+  migration-guide: |
+    When migrating tests from expect().toThrow() to safeRun:
+
+    // Old pattern
+    expect(() => someFunction()).toThrow(ErrorType);
+
+    // New pattern
+    const [error] = safeRun(() => someFunction());
+    expect(error).toBeInstanceOf(ErrorType);

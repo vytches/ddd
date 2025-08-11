@@ -2,41 +2,15 @@ import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type {
   ISaga,
-  ISagaState,
-  ISagaExecutionContext,
   ISagaActionResult,
-  ISagaStep,
+  ISagaExecutionContext,
   ISagaMiddleware,
+  ISagaState,
+  ISagaStep,
 } from '../interfaces';
 import { SagaStatus } from '../interfaces';
 import { SagaMiddlewarePipeline } from '../middleware';
 
-/**
- * @llm-summary BaseSaga class for base saga operations
- * @llm-domain Integration
- * @llm-complexity Expert
- *
- * @description
- * BaseSaga class implementing integration layer component for base saga operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseSaga();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseSaga());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseSaga implements ISaga {
   protected readonly logger: ReturnType<typeof Logger.forContext>;
   protected readonly steps: Map<string, ISagaStep> = new Map();

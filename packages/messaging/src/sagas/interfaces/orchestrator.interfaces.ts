@@ -1,25 +1,6 @@
 import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
-import type { ISaga, ISagaExecutionContext, ISagaDefinition } from './saga.interfaces';
+import type { ISaga, ISagaDefinition, ISagaExecutionContext } from './saga.interfaces';
 
-/**
- * @llm-summary Contract for saga orchestrator functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaOrchestrator interface implementing integration layer component for saga orchestrator operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaOrchestrator implements ISagaOrchestrator {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISagaOrchestrator {
   /**
    * Start a new saga instance
@@ -102,25 +83,6 @@ export interface ISagaOrchestrator {
   getStatistics(): ISagaOrchestratorStatistics;
 }
 
-/**
- * @llm-summary Contract for saga processing result functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaProcessingResult interface implementing integration layer component for saga processing result operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaProcessingResult implements ISagaProcessingResult {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISagaProcessingResult {
   /** Saga that processed the event */
   sagaId: string;
@@ -159,25 +121,6 @@ export interface ISagaProcessingResult {
   };
 }
 
-/**
- * @llm-summary Contract for saga orchestrator config functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaOrchestratorConfig interface implementing integration layer component for saga orchestrator config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaOrchestratorConfig implements ISagaOrchestratorConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISagaOrchestratorConfig {
   /** Maximum number of concurrent saga executions */
   maxConcurrentExecutions?: number;
@@ -230,25 +173,6 @@ export interface ISagaOrchestratorConfig {
   };
 }
 
-/**
- * @llm-summary Contract for saga orchestrator statistics functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaOrchestratorStatistics interface implementing integration layer component for saga orchestrator statistics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaOrchestratorStatistics implements ISagaOrchestratorStatistics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISagaOrchestratorStatistics {
   /** Total number of active sagas */
   activeSagas: number;
@@ -295,25 +219,6 @@ export interface ISagaOrchestratorStatistics {
   timestamp: Date;
 }
 
-/**
- * @llm-summary Contract for saga monitor functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaMonitor interface implementing integration layer component for saga monitor operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaMonitor implements ISagaMonitor {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISagaMonitor {
   /**
    * Record saga started event
@@ -364,25 +269,6 @@ export interface ISagaMonitor {
   exportMetrics(format: 'json' | 'csv' | 'prometheus', filter?: ISagaMetricsFilter): string;
 }
 
-/**
- * @llm-summary Contract for saga metrics filter functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaMetricsFilter interface implementing integration layer component for saga metrics filter operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaMetricsFilter implements ISagaMetricsFilter {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISagaMetricsFilter {
   /** Saga type filter */
   sagaType?: string;
@@ -406,25 +292,6 @@ export interface ISagaMetricsFilter {
   minDuration?: number;
 }
 
-/**
- * @llm-summary Contract for saga metrics functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * SagaMetrics interface implementing integration layer component for saga metrics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSagaMetrics implements ISagaMetrics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISagaMetrics {
   /** Summary statistics */
   summary: {

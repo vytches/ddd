@@ -1,0 +1,394 @@
+# usage-example - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'usage-example'
+title: 'Usage Example - Event Handler DI Integration Examples'
+description: 'Comprehensive examples of event handlers with DI integration'
+business-context: 'Demonstrates real-world event handler patterns and DI usage'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  UserRegisteredEvent:
+    class-doc:
+      description: 'Domain event for user registration'
+      business-context: 'Triggered when new user registers in system'
+
+      formats:
+        jsdoc:
+          description: 'User registration domain event'
+        cli:
+          description: |
+            ## UserRegisteredEvent Class
+            Domain event representing user registration in the system.
+
+      implements: ['IDomainEvent']
+
+      custom-tags:
+        complexity: 'Simple'
+        event-type: 'Domain event'
+
+    properties:
+      - name: 'eventType'
+        type: 'string'
+        readonly: true
+        value: "'UserRegisteredEvent'"
+        description: 'Event type identifier'
+      - name: 'id'
+        type: 'string'
+        readonly: true
+        description: 'Event unique identifier'
+      - name: 'userId'
+        type: 'string'
+        readonly: true
+        description: 'Registered user ID'
+      - name: 'email'
+        type: 'string'
+        readonly: true
+        description: 'User email address'
+      - name: 'occurredOn'
+        type: 'Date'
+        readonly: true
+        default: 'new Date()'
+        description: 'Event occurrence timestamp'
+      - name: 'version'
+        type: 'number'
+        readonly: true
+        default: '1'
+        description: 'Event schema version'
+
+    methods:
+      constructor:
+        description: 'Creates new user registered event'
+        business-context: 'Event creation for user registration'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Event unique identifier'
+          - name: 'userId'
+            type: 'string'
+            description: 'Registered user ID'
+          - name: 'email'
+            type: 'string'
+            description: 'User email address'
+          - name: 'occurredOn'
+            type: 'Date'
+            optional: true
+            default: 'new Date()'
+            description: 'Event occurrence timestamp'
+          - name: 'version'
+            type: 'number'
+            optional: true
+            default: '1'
+            description: 'Event schema version'
+
+  OrderCreatedEvent:
+    class-doc:
+      description: 'Domain event for order creation'
+      business-context: 'Triggered when customer creates new order'
+
+      formats:
+        jsdoc:
+          description: 'Order creation domain event'
+        cli:
+          description: |
+            ## OrderCreatedEvent Class
+            Domain event representing order creation in the system.
+
+      implements: ['IDomainEvent']
+
+      custom-tags:
+        complexity: 'Medium'
+        event-type: 'Domain event'
+
+    properties:
+      - name: 'eventType'
+        type: 'string'
+        readonly: true
+        value: "'OrderCreatedEvent'"
+        description: 'Event type identifier'
+      - name: 'id'
+        type: 'string'
+        readonly: true
+        description: 'Event unique identifier'
+      - name: 'orderId'
+        type: 'string'
+        readonly: true
+        description: 'Created order ID'
+      - name: 'customerId'
+        type: 'string'
+        readonly: true
+        description: 'Customer who created order'
+      - name: 'amount'
+        type: 'number'
+        readonly: true
+        description: 'Order total amount'
+
+  PaymentProcessedEvent:
+    class-doc:
+      description: 'Domain event for payment processing'
+      business-context: 'Triggered when payment is successfully processed'
+
+      formats:
+        jsdoc:
+          description: 'Payment processing domain event'
+        cli:
+          description: |
+            ## PaymentProcessedEvent Class
+            Domain event representing successful payment processing.
+
+      implements: ['IDomainEvent']
+
+      custom-tags:
+        complexity: 'Complex'
+        event-type: 'Domain event'
+        financial: 'Payment-related event'
+
+  UserRegistrationNotificationHandler:
+    class-doc:
+      description: 'Event handler for user registration notifications'
+      business-context: 'Sends welcome emails to newly registered users'
+
+      formats:
+        jsdoc:
+          description: 'User registration notification handler'
+          business-context: 'Handles welcome email sending'
+        cli:
+          description: |
+            ## UserRegistrationNotificationHandler Class
+            Event handler that sends welcome notifications to newly
+            registered users. Uses DI for email service resolution.
+
+      implements: ['IEventHandler<UserRegisteredEvent>']
+      decorators: ['@EventHandler(UserRegisteredEvent, options)']
+
+      custom-tags:
+        complexity: 'Simple'
+        di-integration: 'Singleton with auto-registration'
+        tags: ['user', 'notification']
+        priority: '100'
+
+    methods:
+      handle:
+        description: 'Handles user registration event'
+        business-context: 'Sends welcome email to new user'
+
+        parameters:
+          - name: 'event'
+            type: 'UserRegisteredEvent'
+            description: 'User registration event'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Resolves when notification is sent'
+
+        examples:
+          - id: 'basic'
+            code: |
+              // Handler automatically receives event
+              async handle(event: UserRegisteredEvent): Promise<void> {
+                const emailService = VytchesDDD.resolve<EmailService>('EmailService');
+                await emailService.sendWelcomeEmail(event.email);
+              }
+
+  OrderInventoryUpdateHandler:
+    class-doc:
+      description: 'Event handler for order inventory updates'
+      business-context: 'Updates inventory when orders are created'
+
+      formats:
+        jsdoc:
+          description: 'Order inventory update handler'
+          business-context: 'Context-aware inventory management'
+        cli:
+          description: |
+            ## OrderInventoryUpdateHandler Class
+            Context-specific event handler for inventory updates
+            when orders are created. Uses scoped DI context.
+
+      implements: ['IEventHandler<OrderCreatedEvent>']
+      decorators: ['@EventHandler(OrderCreatedEvent, contextOptions)']
+
+      custom-tags:
+        complexity: 'Complex'
+        di-integration: 'Singleton with context scope'
+        context: 'OrderManagement'
+        priority: '200'
+
+  PaymentConfirmationHandler:
+    class-doc:
+      description: 'High-priority handler for payment confirmations'
+      business-context: 'Immediately processes payment confirmations'
+
+      formats:
+        jsdoc:
+          description: 'Payment confirmation handler'
+          business-context: 'High-priority payment processing'
+        cli:
+          description: |
+            ## PaymentConfirmationHandler Class
+            High-priority event handler for immediate payment
+            confirmation processing. Uses transient lifetime.
+
+      implements: ['IEventHandler<PaymentProcessedEvent>']
+      decorators: ['@EventHandler(PaymentProcessedEvent, highPriorityOptions)']
+
+      custom-tags:
+        complexity: 'Complex'
+        di-integration: 'Transient with high priority'
+        priority: '500'
+        financial: 'Payment processing'
+
+  OrderAnalyticsHandler:
+    class-doc:
+      description: 'Analytics handler for order events'
+      business-context: 'Records order metrics for business intelligence'
+
+      formats:
+        jsdoc:
+          description: 'Order analytics handler'
+          business-context: 'Business intelligence data collection'
+        cli:
+          description: |
+            ## OrderAnalyticsHandler Class
+            Lower-priority handler for collecting order analytics
+            data. Runs after critical order processing.
+
+      implements: ['IEventHandler<OrderCreatedEvent>']
+      decorators: ['@EventHandler(OrderCreatedEvent, analyticsOptions)']
+
+      custom-tags:
+        complexity: 'Complex'
+        di-integration: 'Singleton with lower priority'
+        priority: '50'
+        analytics: 'Business intelligence'
+
+  LegacyUserHandler:
+    class-doc:
+      description: 'Legacy event handler for backward compatibility'
+      business-context: 'Maintains backward compatibility with existing systems'
+
+      formats:
+        jsdoc:
+          description: 'Legacy user event handler'
+          business-context: 'Backward compatibility support'
+        cli:
+          description: |
+            ## LegacyUserHandler Class
+            Legacy event handler demonstrating backward compatibility
+            with minimal decorator configuration.
+
+      implements: ['IEventHandler<UserRegisteredEvent>']
+      decorators: ['@EventHandler(UserRegisteredEvent)']
+
+      custom-tags:
+        complexity: 'Complex'
+        legacy: 'Backward compatibility'
+        minimal-config: 'Default DI behavior'
+
+  ManualPaymentHandler:
+    class-doc:
+      description: 'Manually registered payment handler'
+      business-context: 'Requires manual DI registration for custom scenarios'
+
+      formats:
+        jsdoc:
+          description: 'Manual payment handler'
+          business-context: 'Custom registration pattern'
+        cli:
+          description: |
+            ## ManualPaymentHandler Class
+            Event handler that requires manual registration with
+            the DI container. Used for custom registration scenarios.
+
+      implements: ['IEventHandler<PaymentProcessedEvent>']
+      decorators: ['@EventHandler(PaymentProcessedEvent, { autoRegister: false })']
+
+      custom-tags:
+        complexity: 'Complex'
+        manual-registration: 'Requires manual DI setup'
+        auto-register: 'false'
+
+# === FUNCTIONS ===
+functions:
+  setupEventHandlersExample:
+    description: 'Example setup for event handlers with DI integration'
+    business-context: 'Demonstrates application startup configuration'
+
+    formats:
+      jsdoc:
+        description: 'Event handler DI setup example'
+      cli:
+        description: |
+          ## setupEventHandlersExample Function
+          Demonstrates how to configure event handlers with
+          DI auto-discovery during application startup.
+
+    returns:
+      type: 'void'
+      description: 'Side effect function for configuration'
+
+    custom-tags:
+      setup: 'Application startup configuration'
+      di-integration: 'Auto-discovery setup'
+
+    examples:
+      - id: 'basic'
+        code: |
+          export function setupEventHandlersExample() {
+            // Register event discovery plugin
+            VytchesDDD.registerDiscoveryPlugin(eventDiscoveryPlugin);
+            
+            // Discover and register all event handlers
+            await VytchesDDD.discoverAndRegisterHandlers();
+            
+            // Auto-registered: UserRegistrationNotificationHandler,
+            // OrderInventoryUpdateHandler, PaymentConfirmationHandler,
+            // OrderAnalyticsHandler, LegacyUserHandler
+            
+            // Manual registration needed: ManualPaymentHandler
+            console.log('Event handlers configured with DI integration');
+          }
+
+  exampleEventHandling:
+    description: 'Example of event handling workflow'
+    business-context: 'Demonstrates how events flow through handlers'
+
+    formats:
+      jsdoc:
+        description: 'Event handling workflow example'
+      cli:
+        description: |
+          ## exampleEventHandling Function
+          Demonstrates the complete event handling workflow
+          from event creation to handler execution.
+
+    returns:
+      type: 'Promise<void>'
+      description: 'Async example function'
+
+    custom-tags:
+      workflow: 'Event handling demonstration'
+      async: 'Asynchronous operation'
+
+    examples:
+      - id: 'basic'
+        code: |
+          export async function exampleEventHandling() {
+            // Create sample events
+            const userEvent = new UserRegisteredEvent('evt-1', 'user-123', 'user@example.com');
+            const orderEvent = new OrderCreatedEvent('evt-2', 'order-456', 'user-123', 99.99);
+            
+            // Events flow through:
+            // 1. Event published to event bus
+            // 2. Event bus finds handlers by type
+            // 3. Handlers resolved from DI container
+            // 4. Handlers executed by priority order
+            
+            console.log('Events processed through DI-integrated handlers');
+          }

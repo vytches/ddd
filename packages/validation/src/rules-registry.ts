@@ -2,71 +2,14 @@ import type { ISpecification } from '@vytches/ddd-contracts';
 
 import type { BusinessRuleValidator } from './business-rules/business-rule-validator';
 
-/**
- * @llm-summary Contract for rule function functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RuleFunction interface implementing domain pattern implementation for rule function operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRuleFunction implements RuleFunction {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface RuleFunction<T> {
   (validator: BusinessRuleValidator<T>): BusinessRuleValidator<T>;
 }
 
-/**
- * @llm-summary Contract for rules provider functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * RulesProvider interface implementing domain pattern implementation for rules provider operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteRulesProvider implements IRulesProvider {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IRulesProvider {
   readonly name: string;
 }
 
-/**
- * @llm-summary Contract for core rules functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * CoreRules interface implementing domain pattern implementation for core rules operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteCoreRules implements ICoreRules {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ICoreRules {
   // Basic validation rules
   required: <T>(property: keyof T, message?: string) => RuleFunction<T>;
@@ -99,32 +42,6 @@ export interface ICoreRules {
   otherwise: <T>(elseRules: (validator: BusinessRuleValidator<T>) => void) => RuleFunction<T>;
 }
 
-/**
- * @llm-summary CoreRules class for core rules operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * CoreRules class implementing domain pattern implementation for core rules operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new CoreRules();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new CoreRules());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class CoreRules implements ICoreRules, IRulesProvider {
   readonly name = 'core';
 
@@ -218,32 +135,6 @@ export class CoreRules implements ICoreRules, IRulesProvider {
       validator.when(condition, thenRules);
 }
 
-/**
- * @llm-summary RulesRegistry class for rules registry operations
- * @llm-domain Pattern
- * @llm-complexity Simple
- *
- * @description
- * RulesRegistry class implementing domain pattern implementation for rules registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new RulesRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new RulesRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class RulesRegistry {
   private static providers: Map<string, IRulesProvider> = new Map();
   private static core: CoreRules = new CoreRules();

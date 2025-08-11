@@ -2,32 +2,6 @@ import { Capability } from '@vytches/ddd-contracts';
 import type { IAuditCapability, IAuditEvent, IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
-/**
- * @llm-summary AuditCapability class for audit capability operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * AuditCapability class implementing domain pattern implementation for audit capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AuditCapability();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AuditCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class AuditCapability extends Capability<'audit'> implements IAuditCapability {
   override readonly type = 'audit' as const;
 
@@ -38,6 +12,9 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   private auditLog: IAuditEvent[] = [];
   private originalApply?: ((...args: unknown[]) => void) | undefined;
 
+  /**
+   * @param {unknown} aggregate - Aggregate to attach this capability to
+   */
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
 
@@ -74,6 +51,9 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     this.originalApply = undefined;
   }
 
+  /**
+   * @returns {IAuditEvent[]} Copy of the current audit log
+   */
   getAuditLog(): IAuditEvent[] {
     return [...this.auditLog];
   }
@@ -82,6 +62,9 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     this.auditLog = [];
   }
 
+  /**
+   * @returns {{totalEvents: number, eventsByType: Record<string, number>, averageTimeBetweenEvents: number}} Audit statistics summary
+   */
   getAuditStatistics(): {
     totalEvents: number;
     eventsByType: Record<string, number>;
@@ -126,7 +109,7 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * Manually record a domain event for auditing
+   * @param {IExtendedDomainEvent} event - Domain event to record in audit log
    */
   recordEvent(event: IExtendedDomainEvent): void {
     const auditEvent: IAuditEvent = {
@@ -148,14 +131,17 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * Get audit events by type
+   * @param {string} eventType - Type of events to filter by
+   * @returns {IAuditEvent[]} Array of audit events matching the specified type
    */
   getEventsByType(eventType: string): IAuditEvent[] {
     return this.auditLog.filter(event => event.eventType === eventType);
   }
 
   /**
-   * Get audit events within a time range
+   * @param {Date} startDate - Start date for time range filter
+   * @param {Date} endDate - End date for time range filter
+   * @returns {IAuditEvent[]} Array of audit events within the specified time range
    */
   getEventsByTimeRange(startDate: Date, endDate: Date): IAuditEvent[] {
     return this.auditLog.filter(event => {
@@ -165,14 +151,14 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * Get the first audit event
+   * @returns {IAuditEvent | null} First audit event in chronological order or null if none exists
    */
   getFirstEvent(): IAuditEvent | null {
     return this.auditLog[0] || null;
   }
 
   /**
-   * Get the last audit event
+   * @returns {IAuditEvent | null} Last audit event in chronological order or null if none exists
    */
   getLastEvent(): IAuditEvent | null {
     return this.auditLog[this.auditLog.length - 1] || null;

@@ -1,0 +1,424 @@
+# DI Types - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'types'
+title: 'DI Types & Interfaces - Core Dependency Injection Contracts'
+description: 'Core types and interfaces for enterprise dependency injection system'
+business-context: 'Type-safe contracts for service registration, resolution, and lifecycle management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === ENUMS ===
+enums:
+  ServiceLifetime:
+    description: 'Service lifetime management strategies'
+    business-context: 'Controls instance creation, sharing, and disposal in enterprise applications'
+
+    values:
+      - name: 'Transient'
+        value: "'transient'"
+        description: 'New instance created for each resolution'
+        business-context: 'Use for stateless services and short-lived operations'
+
+      - name: 'Singleton'
+        value: "'singleton'"
+        description: 'Single instance shared across all resolutions'
+        business-context: 'Use for shared resources, configurations, and stateful services'
+
+      - name: 'Scoped'
+        value: "'scoped'"
+        description: 'Instance scoped to a specific context or request'
+        business-context: 'Use for request-scoped services and bounded context isolation'
+
+# === TYPE ALIASES ===
+types:
+  ServiceToken:
+    description: 'Union type for service identification tokens'
+    business-context: 'Flexible service identification supporting strings, symbols, and constructors'
+    definition: 'string | symbol | Constructor<T>'
+    examples:
+      - id: 'string-token'
+        code: |
+          // String-based service tokens
+          container.register('userService', UserService);
+          const service = container.resolve<UserService>('userService');
+
+      - id: 'constructor-token'
+        code: |
+          // Constructor-based service tokens
+          container.register(UserService, UserService);
+          const service = container.resolve<UserService>(UserService);
+
+      - id: 'symbol-token'
+        code: |
+          // Symbol-based service tokens (unique identifiers)
+          const USER_SERVICE = Symbol('userService');
+          container.register(USER_SERVICE, UserService);
+          const service = container.resolve<UserService>(USER_SERVICE);
+
+  Constructor:
+    description: 'Generic constructor type for service implementations'
+    business-context: 'Type-safe constructor reference for dependency injection registration'
+    definition: 'new (...args: any[]) => T'
+    examples:
+      - id: 'constructor-usage'
+        code: |
+          // Type-safe constructor registration
+          const serviceConstructor: Constructor<UserService> = UserService;
+          container.register('userService', serviceConstructor);
+
+  ServiceFactory:
+    description: 'Factory function for creating service instances'
+    business-context: 'Custom service instantiation with access to DI container'
+    definition: '(container: IDependencyContainer) => T'
+    examples:
+      - id: 'factory-registration'
+        code: |
+          // Factory with container access
+          container.registerFactory('configService', (container) => {
+            const env = container.resolve<Environment>('environment');
+            return new ConfigurationService(env.getSettings());
+          });
+
+      - id: 'complex-factory'
+        code: |
+          // Factory with multiple dependencies
+          container.registerFactory('paymentProcessor', (container) => {
+            const config = container.resolve<PaymentConfig>('paymentConfig');
+            const logger = container.resolve<Logger>('logger');
+            return new PaymentProcessor(config, logger);
+          });
+
+# === INTERFACES ===
+interfaces:
+  ServiceRegistrationOptions:
+    description: 'Options for service registration configuration'
+    business-context: 'Flexible service registration with lifetime, context, and tagging support'
+
+    properties:
+      - name: 'lifetime'
+        type: 'ServiceLifetime'
+        description: 'Service lifetime management strategy'
+        optional: true
+        business-context: 'Defaults to Transient if not specified'
+
+      - name: 'context'
+        type: 'string'
+        description: 'Optional bounded context for scoped services'
+        optional: true
+        business-context: 'Enables service isolation by bounded context'
+
+      - name: 'tags'
+        type: 'string[]'
+        description: 'Optional tags for service organization and querying'
+        optional: true
+        business-context: 'Supports service discovery and grouping by feature'
+
+    examples:
+      - id: 'registration-options'
+        code: |
+          // Full registration options
+          container.register('orderService', OrderService, {
+            lifetime: ServiceLifetime.Singleton,
+            context: 'OrderManagement',
+            tags: ['domain-service', 'order-processing']
+          });
+
+  ServiceDescriptor:
+    description: 'Complete service registration metadata'
+    business-context: 'Internal representation of registered services with full configuration'
+
+    properties:
+      - name: 'token'
+        type: 'ServiceToken<T>'
+        description: 'Service identification token'
+
+      - name: 'implementation'
+        type: 'Constructor<T>'
+        description: 'Service implementation constructor'
+        optional: true
+
+      - name: 'factory'
+        type: 'ServiceFactory<T>'
+        description: 'Service factory function'
+        optional: true
+
+      - name: 'instance'
+        type: 'T'
+        description: 'Pre-created service instance'
+        optional: true
+
+      - name: 'lifetime'
+        type: 'ServiceLifetime'
+        description: 'Service lifetime strategy'
+
+      - name: 'context'
+        type: 'string'
+        description: 'Bounded context name'
+        optional: true
+
+      - name: 'tags'
+        type: 'string[]'
+        description: 'Service organization tags'
+        optional: true
+
+  IDependencyContainer:
+    description: 'Core container abstraction for dependency injection'
+    business-context: 'Framework-agnostic container interface for enterprise DI systems'
+
+    methods:
+      resolve:
+        description: 'Resolve a service by token'
+        business-context: 'Primary service resolution method with type safety'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service token to resolve'
+        returns:
+          type: 'T'
+          description: 'Resolved service instance'
+        examples:
+          - id: 'basic-resolution'
+            code: |
+              const userService = container.resolve<UserService>('userService');
+              const configService = container.resolve<ConfigService>(ConfigService);
+
+      register:
+        description: 'Register a service with the container'
+        business-context: 'Primary service registration for constructor-based services'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'implementation'
+            type: 'Constructor<T>'
+            description: 'Service implementation constructor'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        examples:
+          - id: 'service-registration'
+            code: |
+              // Basic registration
+              container.register('userService', UserService);
+
+              // With options
+              container.register('orderService', OrderService, {
+                lifetime: ServiceLifetime.Singleton,
+                tags: ['domain-service']
+              });
+
+      registerFactory:
+        description: 'Register a service using a factory function'
+        business-context: 'Custom service instantiation with container dependency access'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'factory'
+            type: 'ServiceFactory<T>'
+            description: 'Factory function to create service instances'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        examples:
+          - id: 'factory-registration'
+            code: |
+              container.registerFactory('databaseConnection', (container) => {
+                const config = container.resolve<DatabaseConfig>('dbConfig');
+                return new DatabaseConnection(config.connectionString);
+              });
+
+      registerInstance:
+        description: 'Register a pre-created service instance'
+        business-context: 'Direct instance registration for singletons and shared resources'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'instance'
+            type: 'T'
+            description: 'Pre-created service instance'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        examples:
+          - id: 'instance-registration'
+            code: |
+              // Register existing instance
+              const logger = new ConsoleLogger();
+              container.registerInstance('logger', logger);
+
+      isRegistered:
+        description: 'Check if a service is registered'
+        business-context: 'Service registration validation and conditional logic'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service token to check'
+        returns:
+          type: 'boolean'
+          description: 'True if service is registered'
+        examples:
+          - id: 'registration-check'
+            code: |
+              if (container.isRegistered('userService')) {
+                const service = container.resolve<UserService>('userService');
+              }
+
+      getServices:
+        description: 'Get all registered services'
+        business-context: 'Service discovery and container introspection'
+        returns:
+          type: 'ServiceDescriptor[]'
+          description: 'Array of all service descriptors'
+
+      getServicesByTag:
+        description: 'Get services by tag'
+        business-context: 'Service discovery by feature or category grouping'
+        parameters:
+          - name: 'tag'
+            type: 'string'
+            description: 'Tag to filter by'
+        returns:
+          type: 'ServiceDescriptor[]'
+          description: 'Array of matching service descriptors'
+        examples:
+          - id: 'tag-based-discovery'
+            code: |
+              // Find all domain services
+              const domainServices = container.getServicesByTag('domain-service');
+
+              // Find all repositories
+              const repositories = container.getServicesByTag('repository');
+
+  IContainerBuilder:
+    description: 'Fluent builder interface for container configuration'
+    business-context: 'Type-safe container setup with method chaining and fluent API'
+
+    methods:
+      register:
+        description: 'Register a service (fluent)'
+        business-context: 'Chainable service registration for builder pattern'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'implementation'
+            type: 'Constructor<T>'
+            description: 'Service implementation constructor'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        returns:
+          type: 'IContainerBuilder'
+          description: 'Builder instance for chaining'
+        examples:
+          - id: 'fluent-registration'
+            code: |
+              const container = new ContainerBuilder()
+                .register('userService', UserService, { 
+                  lifetime: ServiceLifetime.Singleton 
+                })
+                .register('orderService', OrderService, {
+                  tags: ['domain-service']
+                })
+                .build();
+
+      registerFactory:
+        description: 'Register a service factory (fluent)'
+        business-context: 'Chainable factory registration for complex service creation'
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identification token'
+          - name: 'factory'
+            type: 'ServiceFactory<T>'
+            description: 'Factory function'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        returns:
+          type: 'IContainerBuilder'
+          description: 'Builder instance for chaining'
+
+      build:
+        description: 'Build the configured container'
+        business-context: 'Finalizes container configuration and returns usable container'
+        returns:
+          type: 'IDependencyContainer'
+          description: 'Configured container instance'
+
+  ResolutionContext:
+    description: 'Context information for service resolution'
+    business-context: 'Provides metadata and tracking for dependency resolution process'
+
+    properties:
+      - name: 'token'
+        type: 'ServiceToken'
+        description: 'Token being resolved'
+
+      - name: 'resolutionChain'
+        type: 'ServiceToken[]'
+        description: 'Resolution chain for dependency tracking'
+        business-context: 'Enables circular dependency detection'
+
+      - name: 'context'
+        type: 'string'
+        description: 'Context name if applicable'
+        optional: true
+
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'Timestamp of resolution'
+        business-context: 'Enables performance monitoring and debugging'
+
+# === USAGE PATTERNS ===
+patterns:
+  service-lifetimes:
+    title: 'Service Lifetime Patterns'
+    description: 'Best practices for choosing appropriate service lifetimes'
+    examples:
+      - id: 'lifetime-patterns'
+        code: |
+          // Transient: Stateless services, DTOs, temporary objects
+          container.register('validator', DataValidator, { 
+            lifetime: ServiceLifetime.Transient 
+          });
+
+          // Singleton: Shared resources, configurations, caches
+          container.register('cache', MemoryCache, { 
+            lifetime: ServiceLifetime.Singleton 
+          });
+
+          // Scoped: Request-scoped services, unit of work
+          container.register('unitOfWork', UnitOfWork, { 
+            lifetime: ServiceLifetime.Scoped 
+          });
+
+  token-strategies:
+    title: 'Service Token Strategies'
+    description: 'Different approaches for service identification'
+    examples:
+      - id: 'token-strategies'
+        code: |
+          // String tokens: Simple, readable, but risk of collisions
+          container.register('userRepository', UserRepository);
+
+          // Constructor tokens: Type-safe, but limited flexibility
+          container.register(IUserRepository, UserRepository);
+
+          // Symbol tokens: Unique, avoid collisions
+          export const TOKENS = {
+            UserRepository: Symbol('UserRepository'),
+            OrderService: Symbol('OrderService')
+          };
+          container.register(TOKENS.UserRepository, UserRepository);

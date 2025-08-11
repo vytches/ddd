@@ -1,35 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { ISpecification, IValidator } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
-import type { IValidator, ISpecification } from '@vytches/ddd-contracts';
 
 import { ValidationError, ValidationErrors } from '../validation-error';
 
-/**
- * @llm-summary SpecificationValidator class for specification validator operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * SpecificationValidator class implementing domain pattern implementation for specification validator operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SpecificationValidator();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SpecificationValidator());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class SpecificationValidator<T> implements IValidator<T> {
   private validationRules: Array<{
     specification: ISpecification<T>;

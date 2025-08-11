@@ -2,32 +2,6 @@ import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import { BaseProjection } from './projection-base';
 import type { ErrorProjectionState } from './projection-interfaces';
 
-/**
- * @llm-summary ErrorProjection class for error projection operations
- * @llm-domain Architecture
- * @llm-complexity Expert
- *
- * @description
- * ErrorProjection class implementing architectural component for error projection operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ErrorProjection();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ErrorProjection());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ErrorProjection extends BaseProjection<ErrorProjectionState> {
   readonly name = 'system-errors';
   readonly eventTypes = ['ProjectionErrorOccurred']; // Custom event

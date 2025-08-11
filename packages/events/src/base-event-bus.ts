@@ -22,50 +22,8 @@ const VytchesDDD = {
 import { IEventBus, isEventHandler } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 
-/**
- * @llm-summary CUSTOM_MIDDLEWARE_SYMBOL constant
- * @llm-domain Architecture
- *
- * @description
- * CUSTOM_MIDDLEWARE_SYMBOL constant implementing architectural component for c u s t o m_ m i d d l e w a r e_ s y m b o l operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * console.log(CUSTOM_MIDDLEWARE_SYMBOL);
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export const CUSTOM_MIDDLEWARE_SYMBOL = Symbol('CUSTOM_MIDDLEWARE');
 
-/**
- * @llm-summary BaseEventBus class for base event bus operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * BaseEventBus class implementing architectural component for base event bus operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseEventBus();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseEventBus());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseEventBus<
   TEvent extends IDomainEvent = IDomainEvent,
 > extends IEventBus<TEvent> {

@@ -10,6 +10,31 @@ Complete aggregate root implementation with built-in event sourcing, capability
 system, and automatic event management. Designed for complex domain models with
 strong consistency boundaries.
 
+## 📚 Detailed Documentation
+
+**NEW**: Enhanced Metadata System V2 with YAML Front Matter for AI-optimized
+documentation:
+
+- 🎯 **Generated JSDoc**: Full API documentation with hierarchical metadata
+  system
+- 📊 **Live Documentation**: View at `/docs/api/aggregates/index.html` after
+  running `pnpm jsdoc:publish`
+- 🧠 **AI-Optimized**: Structured metadata for LLM consumption and code
+  generation
+- ⚡ **Performance**: ~12s initial build, ~2s incremental, ~0.5s no changes
+
+**Core Documentation:**
+
+- 📖 **AggregateRoot Class** - Base aggregate implementation with event sourcing
+- 🔧 **AggregateBuilder Class** - Fluent builder for aggregates with
+  capabilities
+- 🛠️ **Utility Functions** - Type-safe capability management and utilities
+- 📋 **Error Classes** - Comprehensive aggregate-specific error handling
+
+> **Enhanced Metadata System V2** provides hierarchical documentation (Global →
+> Package → Class → Method) with format-specific content, custom tags, and
+> automatic example injection.
+
 ## 📋 Table of Contents
 
 - [Installation](#installation)

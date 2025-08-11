@@ -2,18 +2,8 @@
 import type { IActor } from '@vytches/ddd-core';
 
 /**
- * @llm-summary Enumeration of audit action type values
- * @llm-domain Architecture
- * @llm-usage Frequent
- *
- * @description
- * AuditActionType enum implementing architectural component for audit action type operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AuditActionType = AuditActionType.VALUE;
- * ```
+ * Standard audit action types for compliance and monitoring.
+ * Covers CRUD operations plus security and permission actions.
  *
  * @since 1.0.0
  * @public
@@ -42,18 +32,8 @@ export enum AuditActionType {
 }
 
 /**
- * @llm-summary Enumeration of audit status values
- * @llm-domain Architecture
- * @llm-usage Frequent
- *
- * @description
- * AuditStatus enum implementing architectural component for audit status operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: AuditStatus = AuditStatus.VALUE;
- * ```
+ * Audit status values indicating operation outcome.
+ * Used to track success, failure, or attempt status.
  *
  * @since 1.0.0
  * @public
@@ -70,20 +50,8 @@ export enum AuditStatus {
 }
 
 /**
- * @llm-summary Contract for audit event metadata functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * AuditEventMetadata interface implementing architectural component for audit event metadata operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAuditEventMetadata implements IAuditEventMetadata {
- *   // Implementation
- * }
- * ```
+ * Comprehensive metadata interface for audit events.
+ * Provides rich context including actors, resources, and operation details.
  *
  * @since 1.0.0
  * @public
@@ -145,20 +113,8 @@ export interface IAuditEventMetadata {
 }
 
 /**
- * @llm-summary Contract for audit event functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * AuditEvent interface implementing architectural component for audit event operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAuditEvent implements IAuditEvent {
- *   // Implementation
- * }
- * ```
+ * Standard structure for all audit events in the system.
+ * Provides consistent format for compliance and monitoring.
  *
  * @since 1.0.0
  * @public
@@ -175,20 +131,8 @@ export interface IAuditEvent<P = unknown> {
 }
 
 /**
- * @llm-summary Contract for domain to audit event transformer functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * DomainToAuditEventTransformer interface implementing architectural component for domain to audit event transformer operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteDomainToAuditEventTransformer implements IDomainToAuditEventTransformer {
- *   // Implementation
- * }
- * ```
+ * Transformer interface for converting domain events to audit events.
+ * Enables automatic audit trail generation from domain events.
  *
  * @since 1.0.0
  * @public
@@ -203,20 +147,8 @@ export interface IDomainToAuditEventTransformer<D = unknown, A = unknown> {
 }
 
 /**
- * @llm-summary Contract for audit event filter functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * AuditEventFilter interface implementing architectural component for audit event filter operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAuditEventFilter implements IAuditEventFilter {
- *   // Implementation
- * }
- * ```
+ * Filter interface for controlling which audit events are processed.
+ * Enables selective audit processing based on business rules.
  *
  * @since 1.0.0
  * @public
@@ -231,20 +163,8 @@ export interface IAuditEventFilter {
 }
 
 /**
- * @llm-summary Contract for audit service functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * AuditService interface implementing architectural component for audit service operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteAuditService implements IAuditService {
- *   // Implementation
- * }
- * ```
+ * Main audit service interface for recording audit events.
+ * Provides high-level audit recording and management capabilities.
  *
  * @since 1.0.0
  * @public

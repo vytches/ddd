@@ -9,32 +9,6 @@ import type {
 } from './integration-event-interfaces';
 import { createIntegrationEvent } from './integration-event.utils';
 
-/**
- * @llm-summary DomainToIntegrationTransformer class for domain to integration transformer operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * DomainToIntegrationTransformer class implementing architectural component for domain to integration transformer operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DomainToIntegrationTransformer();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DomainToIntegrationTransformer());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
   implements IDomainToIntegrationEventTransformer<IExtendedDomainEvent<D>, I>
 {

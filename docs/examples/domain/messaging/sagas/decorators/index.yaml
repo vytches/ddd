@@ -1,0 +1,23 @@
+# Sagas Decorators Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Sagas Decorators - Export Module'
+description: 'Re-exports saga decorator functions'
+business-context: 'Decorator-based saga configuration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  description: 'Saga decorator exports'
+  items:
+    - from: './saga.decorator'
+      exports: ['Saga']
+    - from: './saga-event-handler.decorator'
+      exports: ['SagaEventHandler']
+    - from: './compensation-handler.decorator'
+      exports: ['CompensationHandler']

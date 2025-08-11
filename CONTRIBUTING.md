@@ -197,49 +197,11 @@ describe('UserService', () => {
 
 All public APIs must have comprehensive JSDoc documentation:
 
-````typescript
-/**
- * @llm-summary Creates a new user with validation and domain events
- * @llm-domain Core
- * @llm-complexity Simple
- *
- * @description
- * Creates a new user entity with email validation, generates domain events,
- * and ensures data consistency through domain rules.
- *
- * @param userData - User data containing name and email
- * @returns Newly created User entity
- *
- * @throws {ValidationError} When email format is invalid
- * @throws {DomainError} When business rules are violated
- *
- * @example
- * ```typescript
- * // Basic usage
- * const user = userService.createUser({
- *   name: 'John Doe',
- *   email: 'john@example.com'
- * });
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * try {
- *   const user = userService.createUser(userData);
- *   console.log('User created:', user.getId());
- * } catch (error) {
- *   console.error('Failed to create user:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
+```typescript
 export function createUser(userData: CreateUserData): User {
   // Implementation
 }
-````
+```
 
 ### README Updates
 

@@ -1,0 +1,196 @@
+# dead-letter-capability - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'dead-letter-capability'
+title: 'DeadLetterCapability - Failed Event Management'
+description: 'Manages events that fail processing permanently'
+business-context: 'Handles unprocessable events to prevent blocking'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  DeadLetterCapability:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Manages dead letter queue for failed events'
+      business-context: 'Stores and manages events that cannot be processed'
+
+      formats:
+        jsdoc:
+          description: 'Dead letter queue capability for failed events'
+        cli:
+          description: |
+            ## DeadLetterCapability
+
+            Failed event management:
+            - Dead letter storage
+            - Retry mechanisms
+            - Error tracking
+            - Manual intervention support
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseProjectionCapability<TReadModel>'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates dead letter capability'
+        business-context: 'Initializes failed event management'
+
+        parameters:
+          - name: 'store'
+            type: 'IDeadLetterStore'
+            description: 'Dead letter storage'
+          - name: 'options'
+            type: 'IDeadLetterOptions'
+            description: 'Configuration options'
+            optional: true
+
+        examples:
+          - id: 'setup'
+            code: |
+              const capability = new DeadLetterCapability(
+                deadLetterStore,
+                {
+                  maxRetries: 5,
+                  retentionDays: 30,
+                  alertOnFailure: true
+                }
+              );
+
+      sendToDeadLetter:
+        description: 'Sends failed event to dead letter queue'
+        business-context: 'Stores permanently failed events'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Failed event'
+          - name: 'error'
+            type: 'Error'
+            description: 'Processing error'
+          - name: 'metadata'
+            type: 'IDeadLetterMetadata'
+            description: 'Additional context'
+            optional: true
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Event stored'
+
+        examples:
+          - id: 'store-failed'
+            code: |
+              await capability.sendToDeadLetter(
+                event,
+                error,
+                {
+                  attemptCount: 5,
+                  lastAttempt: new Date(),
+                  projectionName: 'user-projection'
+                }
+              );
+
+      retryFromDeadLetter:
+        description: 'Retries event from dead letter queue'
+        business-context: 'Manual retry of failed events'
+
+        parameters:
+          - name: 'deadLetterId'
+            type: 'string'
+            description: 'Dead letter entry ID'
+
+        returns:
+          type: 'Promise<boolean>'
+          description: 'True if retry successful'
+
+        examples:
+          - id: 'manual-retry'
+            code: |
+              const success = await capability.retryFromDeadLetter('dl-123');
+              if (success) {
+                console.log('Event successfully reprocessed');
+              }
+
+      getDeadLetters:
+        description: 'Retrieves dead letter entries'
+        business-context: 'Lists failed events for review'
+
+        parameters:
+          - name: 'filter'
+            type: 'IDeadLetterFilter'
+            description: 'Filter criteria'
+            optional: true
+
+        returns:
+          type: 'Promise<IDeadLetter[]>'
+          description: 'Dead letter entries'
+
+      purgeOldEntries:
+        description: 'Removes old dead letter entries'
+        business-context: 'Maintains storage size'
+
+        parameters:
+          - name: 'olderThan'
+            type: 'Date'
+            description: 'Cutoff date'
+
+        returns:
+          type: 'Promise<number>'
+          description: 'Number of entries purged'
+
+# === INTERFACES ===
+interfaces:
+  IDeadLetterOptions:
+    description: 'Dead letter configuration'
+    business-context: 'Controls dead letter behavior'
+
+    properties:
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Max retries before dead letter'
+        default: '3'
+        optional: true
+
+      - name: 'retentionDays'
+        type: 'number'
+        description: 'Days to retain entries'
+        default: '30'
+        optional: true
+
+      - name: 'alertOnFailure'
+        type: 'boolean'
+        description: 'Send alerts for failures'
+        default: 'false'
+        optional: true
+
+  IDeadLetterMetadata:
+    description: 'Dead letter entry metadata'
+    business-context: 'Context for failed events'
+
+    properties:
+      - name: 'projectionName'
+        type: 'string'
+        description: 'Failed projection'
+
+      - name: 'attemptCount'
+        type: 'number'
+        description: 'Processing attempts'
+
+      - name: 'firstFailedAt'
+        type: 'Date'
+        description: 'First failure time'
+
+      - name: 'lastFailedAt'
+        type: 'Date'
+        description: 'Last failure time'

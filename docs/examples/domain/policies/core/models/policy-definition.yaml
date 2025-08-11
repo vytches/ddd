@@ -1,0 +1,475 @@
+# policy-definition - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-definition'
+title: 'PolicyDefinition - Policy Structure Model'
+description: 'Models for defining policy structure and behavior'
+business-context: 'Provides structured representation of business policies'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyDefinitionBuilder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Defines the structure and behavior of a business policy'
+      business-context: 'Enables declarative policy definition with rules and conditions'
+
+      formats:
+        jsdoc:
+          description: 'Structured policy definition model'
+        cli:
+          description: |
+            ## PolicyDefinition
+
+            Policy structure features:
+            - Rule definitions
+            - Execution conditions
+            - Metadata configuration
+            - Priority settings
+            - Version management
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Definition Model'
+
+    # Methods
+    methods:
+      withId:
+        description: 'Sets policy identifier'
+        business-context: 'Defines unique policy ID'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Policy identifier'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withDomain:
+        description: 'Sets policy domain'
+        business-context: 'Categorizes policy by domain'
+
+        parameters:
+          - name: 'domain'
+            type: 'string'
+            description: 'Policy domain'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withName:
+        description: 'Sets policy name'
+        business-context: 'Provides human-readable name'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Policy name'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withDescription:
+        description: 'Sets policy description'
+        business-context: 'Documents policy purpose'
+
+        parameters:
+          - name: 'description'
+            type: 'string'
+            description: 'Policy description'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withVersion:
+        description: 'Sets policy version'
+        business-context: 'Enables policy versioning'
+
+        parameters:
+          - name: 'version'
+            type: 'string'
+            description: 'Policy version'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withPolicy:
+        description: 'Sets policy implementation'
+        business-context: 'Associates actual policy logic'
+
+        parameters:
+          - name: 'policy'
+            type: 'IBusinessPolicy<T>'
+            description: 'Policy implementation'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withTags:
+        description: 'Sets policy tags'
+        business-context: 'Enables policy categorization'
+
+        parameters:
+          - name: 'tags'
+            type: 'string[]'
+            description: 'Policy tags'
+            rest: true
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withMetadata:
+        description: 'Sets policy metadata'
+        business-context: 'Attaches additional information'
+
+        parameters:
+          - name: 'metadata'
+            type: 'Record<string, unknown>'
+            description: 'Policy metadata'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withCreatedBy:
+        description: 'Sets policy creator'
+        business-context: 'Tracks policy ownership'
+
+        parameters:
+          - name: 'createdBy'
+            type: 'string'
+            description: 'Policy creator'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withIsActive:
+        description: 'Sets policy active state'
+        business-context: 'Controls policy execution'
+
+        parameters:
+          - name: 'isActive'
+            type: 'boolean'
+            description: 'Active state'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      withPriority:
+        description: 'Sets execution priority'
+        business-context: 'Controls policy ordering'
+
+        parameters:
+          - name: 'priority'
+            type: 'number'
+            description: 'Execution priority'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'Builder for chaining'
+
+      build:
+        description: 'Builds policy definition'
+        business-context: 'Creates final policy definition'
+
+        returns:
+          type: 'PolicyDefinition<T>'
+          description: 'Complete policy definition'
+
+      create:
+        description: 'Creates new builder'
+        business-context: 'Factory method for builder'
+
+        returns:
+          type: 'PolicyDefinitionBuilder<T>'
+          description: 'New builder instance'
+
+        custom-tags:
+          static: 'true'
+
+        parameters:
+          - name: 'config'
+            type: 'PolicyDefinitionConfig'
+            description: 'Definition configuration'
+
+        examples:
+          - id: 'create-definition'
+            code: |
+              const definition = new PolicyDefinition({
+                id: 'order-validation',
+                name: 'Order Validation Policy',
+                domain: 'orders',
+                version: '1.0.0',
+                rules: [
+                  {
+                    id: 'min-amount',
+                    evaluate: order => order.amount >= 10,
+                    violationCode: 'MIN_AMOUNT',
+                    violationMessage: 'Order amount too low'
+                  }
+                ],
+                conditions: [
+                  {
+                    type: 'context',
+                    field: 'environment',
+                    operator: 'equals',
+                    value: 'production'
+                  }
+                ]
+              });
+
+      addRule:
+        description: 'Adds rule to definition'
+        business-context: 'Extends policy with new rule'
+
+        parameters:
+          - name: 'rule'
+            type: 'PolicyRule'
+            description: 'Rule to add'
+
+        returns:
+          type: 'this'
+          description: 'Definition for chaining'
+
+      removeRule:
+        description: 'Removes rule from definition'
+        business-context: 'Removes existing rule'
+
+        parameters:
+          - name: 'ruleId'
+            type: 'string'
+            description: 'Rule ID to remove'
+
+        returns:
+          type: 'boolean'
+          description: 'True if removed'
+
+      addCondition:
+        description: 'Adds execution condition'
+        business-context: 'Adds conditional execution'
+
+        parameters:
+          - name: 'condition'
+            type: 'PolicyCondition'
+            description: 'Condition to add'
+
+        returns:
+          type: 'this'
+          description: 'Definition for chaining'
+
+      getRules:
+        description: 'Returns all rules'
+        business-context: 'Accesses policy rules'
+
+        returns:
+          type: 'PolicyRule[]'
+          description: 'Policy rules'
+
+      getConditions:
+        description: 'Returns execution conditions'
+        business-context: 'Accesses conditions'
+
+        returns:
+          type: 'PolicyCondition[]'
+          description: 'Execution conditions'
+
+      getMetadata:
+        description: 'Returns definition metadata'
+        business-context: 'Accesses metadata'
+
+        returns:
+          type: 'PolicyMetadata'
+          description: 'Policy metadata'
+
+      validate:
+        description: 'Validates definition'
+        business-context: 'Ensures definition validity'
+
+        returns:
+          type: 'ValidationResult'
+          description: 'Validation result'
+
+      toPolicy:
+        description: 'Converts to executable policy'
+        business-context: 'Creates policy instance'
+
+        returns:
+          type: 'IBusinessPolicy<any>'
+          description: 'Executable policy'
+
+        examples:
+          - id: 'definition-to-policy'
+            code: |
+              const definition = new PolicyDefinition(config);
+              const policy = definition.toPolicy();
+
+              // Use the generated policy
+              const result = await policy.check({ entity: order });
+
+  PolicyRuleDefinition:
+    class-doc:
+      description: 'Defines individual policy rule'
+      business-context: 'Represents atomic business rule'
+
+      custom-tags:
+        since: '2.0.0'
+
+    methods:
+      constructor:
+        description: 'Creates rule definition'
+        parameters:
+          - name: 'config'
+            type: 'RuleConfig'
+            description: 'Rule configuration'
+
+      evaluate:
+        description: 'Evaluates rule against entity'
+        parameters:
+          - name: 'entity'
+            type: 'any'
+            description: 'Entity to evaluate'
+          - name: 'context'
+            type: 'PolicyContext'
+            description: 'Evaluation context'
+            optional: true
+        returns: 'boolean | Promise<boolean>'
+
+      getViolation:
+        description: 'Creates violation for failed rule'
+        parameters:
+          - name: 'entity'
+            type: 'any'
+            description: 'Entity that failed'
+        returns: 'PolicyViolation'
+
+# === INTERFACES ===
+interfaces:
+  PolicyDefinitionConfig:
+    description: 'Policy definition configuration'
+    business-context: 'Structures policy definition'
+
+    properties:
+      - name: 'id'
+        type: 'string'
+        description: 'Policy identifier'
+
+      - name: 'name'
+        type: 'string'
+        description: 'Policy name'
+
+      - name: 'domain'
+        type: 'string'
+        description: 'Business domain'
+
+      - name: 'version'
+        type: 'string'
+        description: 'Policy version'
+        optional: true
+
+      - name: 'description'
+        type: 'string'
+        description: 'Policy description'
+        optional: true
+
+      - name: 'rules'
+        type: 'PolicyRule[]'
+        description: 'Policy rules'
+
+      - name: 'conditions'
+        type: 'PolicyCondition[]'
+        description: 'Execution conditions'
+        optional: true
+
+      - name: 'priority'
+        type: 'number'
+        description: 'Policy priority'
+        optional: true
+
+      - name: 'tags'
+        type: 'string[]'
+        description: 'Policy tags'
+        optional: true
+
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Additional metadata'
+        optional: true
+
+  RuleConfig:
+    description: 'Rule configuration'
+    business-context: 'Defines rule behavior'
+
+    properties:
+      - name: 'id'
+        type: 'string'
+        description: 'Rule identifier'
+
+      - name: 'name'
+        type: 'string'
+        description: 'Rule name'
+        optional: true
+
+      - name: 'description'
+        type: 'string'
+        description: 'Rule description'
+        optional: true
+
+      - name: 'evaluate'
+        type: '(entity: any, context?: PolicyContext) => boolean | Promise<boolean>'
+        description: 'Evaluation function'
+
+      - name: 'violationCode'
+        type: 'string'
+        description: 'Violation code'
+
+      - name: 'violationMessage'
+        type: 'string'
+        description: 'Violation message'
+
+      - name: 'severity'
+        type: 'PolicySeverity'
+        description: 'Violation severity'
+        default: 'ERROR'
+
+      - name: 'field'
+        type: 'string'
+        description: 'Affected field'
+        optional: true
+
+  ValidationResult:
+    description: 'Definition validation result'
+    business-context: 'Reports definition validity'
+
+    properties:
+      - name: 'valid'
+        type: 'boolean'
+        description: 'Is definition valid'
+
+      - name: 'errors'
+        type: 'string[]'
+        description: 'Validation errors'
+
+      - name: 'warnings'
+        type: 'string[]'
+        description: 'Validation warnings'
+        optional: true

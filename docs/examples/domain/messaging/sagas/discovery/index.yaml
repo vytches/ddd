@@ -1,0 +1,19 @@
+# Sagas Discovery Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Sagas Discovery - Export Module'
+description: 'Re-exports saga discovery plugin'
+business-context: 'Auto-discovery for saga registration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  description: 'Saga discovery exports'
+  items:
+    - from: './saga-discovery-plugin'
+      exports: ['SagaDiscoveryPlugin']

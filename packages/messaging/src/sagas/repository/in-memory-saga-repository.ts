@@ -1,40 +1,14 @@
 import { Logger } from '@vytches/ddd-logging';
 import type {
-  ISagaRepository,
   ISaga,
-  ISagaState,
   ISagaQuery,
   ISagaQueryResult,
+  ISagaRepository,
   ISagaRepositoryConfig,
+  ISagaState,
 } from '../interfaces';
-import { SagaStatus, SagaConcurrencyError, SagaNotFoundError } from '../interfaces';
+import { SagaConcurrencyError, SagaNotFoundError, SagaStatus } from '../interfaces';
 
-/**
- * @llm-summary InMemorySagaRepository class for in memory saga repository operations
- * @llm-domain Integration
- * @llm-complexity Expert
- *
- * @description
- * InMemorySagaRepository class implementing integration layer component for in memory saga repository operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new InMemorySagaRepository();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new InMemorySagaRepository());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class InMemorySagaRepository implements ISagaRepository {
   private readonly logger: ReturnType<typeof Logger.forContext>;
   private readonly sagas: Map<string, ISaga> = new Map();

@@ -1,0 +1,1046 @@
+# Aggregate Interfaces - Enhanced Metadata System V2
+# Core interfaces for aggregate functionality, capabilities, and supporting types
+
+# === FILE METADATA ===
+file-name: 'aggregate-interfaces'
+title: 'Aggregate Interfaces - Core Contracts and Capabilities'
+description: 'Core interfaces for aggregate root functionality, capability system, and supporting contracts'
+business-context: 'Foundation contracts for aggregate behavior, capability management, and type safety'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+complexity: 'intermediate'
+patterns:
+  - 'interface-contracts'
+  - 'capability-system'
+  - 'generic-types'
+  - 'builder-pattern'
+  - 'factory-pattern'
+
+dependencies:
+  - '@vytches/ddd-contracts'
+
+# === INTERFACES ===
+interfaces:
+  # Core Aggregate Interfaces
+  IAggregateRoot:
+    description: 'Core interface for aggregate root functionality'
+    business-context: 'Foundation for domain aggregates with event sourcing, versioning, and capability management'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Type of the aggregate identifier'
+        default: 'string'
+
+    extends: []
+
+    methods:
+      getId:
+        description: 'Returns the aggregate identifier'
+        business-context: 'Unique identification for aggregate instances'
+
+        returns:
+          type: 'EntityId<TId>'
+          description: 'The unique identifier for this aggregate'
+
+        examples:
+          - id: 'get-aggregate-id'
+            code: |
+              const aggregate: IAggregateRoot<string> = new OrderAggregate({
+                id: EntityId.fromText('order-123')
+              });
+
+              const id = aggregate.getId();
+              console.log('Aggregate ID:', id.getValue()); // 'order-123'
+
+      getVersion:
+        description: 'Returns the current version of the aggregate'
+        business-context: 'Version tracking for optimistic locking and concurrency control'
+
+        returns:
+          type: 'number'
+          description: 'Current version number for optimistic locking'
+
+        custom-tags:
+          concurrency: 'Used for optimistic concurrency control'
+
+      getInitialVersion:
+        description: 'Returns the initial version when the aggregate was loaded'
+        business-context: 'Baseline version for detecting changes and conflicts'
+
+        returns:
+          type: 'number'
+          description: 'Initial version number when loaded from storage'
+
+      hasChanges:
+        description: 'Checks if the aggregate has uncommitted changes'
+        business-context: 'Change detection for persistence and transaction management'
+
+        returns:
+          type: 'boolean'
+          description: 'True if there are uncommitted domain events'
+
+      getDomainEvents:
+        description: 'Returns uncommitted domain events'
+        business-context: 'Event retrieval for publishing and persistence operations'
+
+        returns:
+          type: 'ReadonlyArray<IExtendedDomainEvent>'
+          description: 'Readonly array of uncommitted domain events'
+
+        custom-tags:
+          event-sourcing: 'Central to event-driven architecture'
+
+      commit:
+        description: 'Clears all uncommitted domain events and updates initial version'
+        business-context: 'Transaction finalization after successful persistence'
+
+        returns:
+          type: 'void'
+          description: 'No return value, modifies aggregate state'
+
+        examples:
+          - id: 'commit-changes'
+            code: |
+              const aggregate = new OrderAggregate({ id: EntityId.fromText('order-123') });
+              aggregate.apply('OrderCreated', { customerId: 'cust-456' });
+
+              console.log('Has changes:', aggregate.hasChanges()); // true
+              console.log('Events:', aggregate.getDomainEvents().length); // 1
+
+              aggregate.commit();
+              console.log('Has changes:', aggregate.hasChanges()); // false
+              console.log('Events:', aggregate.getDomainEvents().length); // 0
+
+      addCapability:
+        description: 'Adds a capability to the aggregate'
+        business-context: 'Runtime capability enhancement for specialized functionality'
+
+        parameters:
+          - name: 'capability'
+            type: 'T'
+            description: 'The capability instance to add'
+
+        returns:
+          type: 'this'
+          description: 'The aggregate instance for method chaining'
+
+        generic-parameters:
+          - name: 'T'
+            extends: 'Capability & IAggregateCapability'
+            description: 'Capability type with aggregate integration'
+
+      getCapability:
+        description: 'Gets a specific capability by its constructor'
+        business-context: 'Type-safe capability access for specialized operations'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor of the capability to retrieve'
+
+        returns:
+          type: 'T | undefined'
+          description: 'The capability instance or undefined if not found'
+
+        generic-parameters:
+          - name: 'T'
+            extends: 'Capability & IAggregateCapability'
+            description: 'Capability type constraint'
+
+      hasCapability:
+        description: 'Checks if aggregate has a specific capability'
+        business-context: 'Feature availability checking before capability operations'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor of the capability to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if the capability is present'
+
+      removeCapability:
+        description: 'Removes a capability from the aggregate'
+        business-context: 'Dynamic capability management and cleanup'
+
+        parameters:
+          - name: 'CapabilityClass'
+            type: 'CapabilityConstructor<T>'
+            description: 'Constructor of the capability to remove'
+
+        returns:
+          type: 'this'
+          description: 'The aggregate instance for method chaining'
+
+  IAggregateConstructorParams:
+    description: 'Parameters for aggregate construction'
+    business-context: 'Defines minimal required data to create an aggregate instance'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Type of the aggregate identifier'
+
+    properties:
+      - name: 'id'
+        type: 'EntityId<TId>'
+        description: 'Unique identifier for the aggregate'
+        required: true
+      - name: 'version'
+        type: 'number'
+        description: 'Initial version number, defaults to 0'
+        required: false
+        default: '0'
+
+  # Capability System Interfaces
+  IAggregateCapability:
+    description: 'Base interface for all aggregate capabilities'
+    business-context: 'Foundation for extending aggregate functionality with pluggable features'
+
+    methods:
+      attach:
+        description: 'Called when capability is attached to an aggregate'
+        business-context: 'Initialization hook for capability setup and binding'
+
+        parameters:
+          - name: 'aggregate'
+            type: 'IAggregateRoot<unknown>'
+            description: 'The aggregate to attach to'
+
+        returns:
+          type: 'void'
+          description: 'No return value, performs setup'
+
+      detach:
+        description: 'Called when capability is detached from an aggregate'
+        business-context: 'Cleanup hook for capability teardown and resource release'
+        optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value, performs cleanup'
+
+  ISnapshotCapability:
+    description: 'Capability for creating and restoring aggregate snapshots'
+    business-context: 'Performance optimization by periodically saving aggregate state'
+
+    extends: ['IAggregateCapability']
+
+    generic-parameters:
+      - name: 'TState'
+        description: 'Type of the aggregate state'
+        default: 'unknown'
+      - name: 'TMeta'
+        description: 'Type of the snapshot metadata'
+        default: 'unknown'
+
+    methods:
+      createSnapshot:
+        description: 'Creates a snapshot of the current aggregate state'
+        business-context: 'State capture for performance optimization and recovery'
+
+        parameters:
+          - name: 'serializer'
+            type: '() => TState'
+            description: 'Function to serialize aggregate state'
+          - name: 'metadataCreator'
+            type: '() => TMeta'
+            description: 'Optional function to create snapshot metadata'
+            optional: true
+
+        returns:
+          type: 'IAggregateSnapshot<TState, TMeta>'
+          description: 'Complete snapshot with state and metadata'
+
+      restoreFromSnapshot:
+        description: 'Restores aggregate state from a snapshot'
+        business-context: 'State restoration for performance optimization and recovery'
+
+        parameters:
+          - name: 'snapshot'
+            type: 'IAggregateSnapshot<TState, TMeta>'
+            description: 'Snapshot to restore from'
+          - name: 'deserializer'
+            type: '(state: TState) => void'
+            description: 'Function to deserialize state into aggregate'
+          - name: 'metadataRestorer'
+            type: '(metadata: TMeta) => void'
+            description: 'Optional function to restore metadata'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value, modifies aggregate state'
+
+      saveSnapshot:
+        description: 'Saves current state temporarily (for audit purposes)'
+        business-context: 'Temporary state preservation for audit and rollback scenarios'
+
+        parameters:
+          - name: 'serializer'
+            type: '() => TState'
+            description: 'Function to serialize current state'
+          - name: 'metadataCreator'
+            type: '() => TMeta'
+            description: 'Optional metadata creator'
+            optional: true
+
+      getPreviousState:
+        description: 'Gets and clears the previous state'
+        business-context: 'State comparison and audit trail functionality'
+
+        returns:
+          type: 'unknown | null'
+          description: 'Previous state if available, null otherwise'
+
+  IVersioningCapability:
+    description: 'Capability for handling event versioning and upcasting'
+    business-context: 'Backward compatibility when event schemas evolve'
+
+    extends: ['IAggregateCapability']
+
+    methods:
+      registerUpcaster:
+        description: 'Registers an upcaster for a specific event type and version'
+        business-context: 'Schema evolution support for event compatibility'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Type of event to upcast'
+          - name: 'sourceVersion'
+            type: 'number'
+            description: 'Source version of events to transform'
+          - name: 'upcaster'
+            type: 'IEventUpcaster<TFrom, TTo>'
+            description: 'Upcaster implementation for transformation'
+
+        returns:
+          type: 'this'
+          description: 'Capability instance for method chaining'
+
+        generic-parameters:
+          - name: 'TFrom'
+            description: 'Source event payload type'
+            default: 'unknown'
+          - name: 'TTo'
+            description: 'Target event payload type'
+            default: 'unknown'
+
+      handleVersionedEvent:
+        description: 'Handles versioned event processing'
+        business-context: 'Event processing with automatic version transformation'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process with version handling'
+          - name: 'handlers'
+            type: 'Map<string, IAggregateEventHandler>'
+            description: 'Map of event handlers by event type'
+
+  IEventSourcingCapability:
+    description: 'Capability for event store integration'
+    business-context: 'Loading and saving aggregates from/to event stores'
+
+    extends: ['IAggregateCapability']
+
+    methods:
+      loadFromEventStore:
+        description: 'Loads aggregate from event store'
+        business-context: 'Aggregate reconstruction from persisted events'
+
+        parameters:
+          - name: 'aggregateId'
+            type: 'unknown'
+            description: 'Identifier for the aggregate to load'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when aggregate is loaded and reconstructed'
+
+      saveToEventStore:
+        description: 'Saves aggregate events to event store'
+        business-context: 'Event persistence for durability and replay'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when events are persisted'
+
+      replayEvents:
+        description: 'Replays events to rebuild aggregate state'
+        business-context: 'State reconstruction from historical events'
+
+        parameters:
+          - name: 'events'
+            type: 'IExtendedDomainEvent[]'
+            description: 'Array of events to replay in order'
+
+  IAuditCapability:
+    description: 'Capability for maintaining audit logs of aggregate changes'
+    business-context: 'Compliance tracking and debugging support'
+
+    extends: ['IAggregateCapability']
+
+    methods:
+      getAuditLog:
+        description: 'Gets the audit log for this aggregate'
+        business-context: 'Audit trail access for compliance and investigation'
+
+        returns:
+          type: 'ReadonlyArray<IAuditEvent>'
+          description: 'Readonly array of audit events'
+
+      clearAuditLog:
+        description: 'Clears the audit log'
+        business-context: 'Audit log maintenance and cleanup operations'
+
+        returns:
+          type: 'void'
+          description: 'No return value, clears audit history'
+
+  IMiddlewareCapability:
+    description: 'Capability for adding middleware to event processing pipeline'
+    business-context: 'Cross-cutting concerns like validation, logging, and transformation'
+
+    extends: ['IAggregateCapability']
+
+    methods:
+      use:
+        description: 'Adds middleware to the event processing pipeline'
+        business-context: 'Pipeline customization for cross-cutting concerns'
+
+        parameters:
+          - name: 'middleware'
+            type: 'EventAggregateMiddleware'
+            description: 'Middleware function to add to pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Capability instance for method chaining'
+
+  # Builder Interface
+  IAggregateBuilder:
+    description: 'Builder interface for creating aggregates with capabilities'
+    business-context: 'Fluent API for configuring aggregate features before construction'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Type of the aggregate identifier'
+
+    methods:
+      withSnapshots:
+        description: 'Adds snapshot capability to the aggregate'
+        business-context: 'Performance optimization configuration'
+
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+        generic-parameters:
+          - name: 'TState'
+            description: 'Type of snapshot state'
+            default: 'unknown'
+          - name: 'TMeta'
+            description: 'Type of snapshot metadata'
+            default: 'unknown'
+
+      withVersioning:
+        description: 'Adds versioning capability to the aggregate'
+        business-context: 'Event schema evolution support configuration'
+
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+      withEventSourcing:
+        description: 'Adds event sourcing capability to the aggregate'
+        business-context: 'Event store integration configuration'
+
+        parameters:
+          - name: 'eventStore'
+            type: 'IEventStore'
+            description: 'Optional event store instance'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+      withAudit:
+        description: 'Adds audit capability to the aggregate'
+        business-context: 'Compliance and audit trail configuration'
+
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+      withCustomCapability:
+        description: 'Adds custom capability to the aggregate'
+        business-context: 'Extensibility for domain-specific capabilities'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Name identifier for the custom capability'
+          - name: 'capability'
+            type: 'T'
+            description: 'Custom capability instance'
+
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+        generic-parameters:
+          - name: 'T'
+            extends: 'IAggregateCapability'
+            description: 'Custom capability type'
+
+      build:
+        description: 'Builds the aggregate with all configured capabilities'
+        business-context: 'Final construction step with all configured features'
+
+        returns:
+          type: 'IAggregateRoot<TId>'
+          description: 'Fully configured aggregate instance'
+
+        examples:
+          - id: 'aggregate-builder-usage'
+            code: |
+              const aggregate = new AggregateBuilder(EntityId.fromText('order-123'))
+                .withSnapshots<OrderState>()
+                .withEventSourcing(eventStore)
+                .withAudit()
+                .withVersioning()
+                .build();
+
+              console.log('Capabilities:', aggregate.getCapabilityTypes());
+
+  # Supporting Interfaces
+  IAggregateEventHandler:
+    description: 'Handler function for processing aggregate events'
+    business-context: 'Internal event handling within aggregates'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Type of event payload'
+        default: 'unknown'
+
+    call-signature:
+      parameters:
+        - name: 'payload'
+          type: 'T'
+          description: 'Event payload data'
+        - name: 'metadata'
+          type: 'IEventMetadata'
+          description: 'Event metadata and context'
+          optional: true
+
+      returns:
+        type: 'void'
+        description: 'No return value, handles event'
+
+  IAggregateSnapshot:
+    description: 'Represents a point-in-time snapshot of aggregate state'
+    business-context: 'Performance optimization and audit purposes'
+
+    generic-parameters:
+      - name: 'TState'
+        description: 'Type of the aggregate state'
+        default: 'unknown'
+      - name: 'TMeta'
+        description: 'Type of snapshot metadata'
+        default: 'unknown'
+
+    properties:
+      - name: 'id'
+        type: 'unknown'
+        description: 'Aggregate identifier'
+        required: true
+      - name: 'version'
+        type: 'number'
+        description: 'Aggregate version when snapshot was taken'
+        required: true
+      - name: 'aggregateType'
+        type: 'string'
+        description: 'Type name of the aggregate'
+        required: true
+      - name: 'state'
+        type: 'TState'
+        description: 'Serialized aggregate state'
+        required: true
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'When the snapshot was created'
+        required: true
+      - name: 'metadata'
+        type: 'TMeta | undefined'
+        description: 'Optional snapshot metadata'
+        required: false
+      - name: 'lastEventId'
+        type: 'string | undefined'
+        description: 'ID of the last event included in snapshot'
+        required: false
+
+  # Factory Interface
+  IAggregateFactory:
+    description: 'Factory interface for creating and rebuilding aggregates'
+    business-context: 'Standard methods for aggregate lifecycle management'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Type of aggregate identifier'
+      - name: 'TAggregate'
+        extends: 'IAggregateRoot<TId>'
+        description: 'Type of aggregate to create'
+
+    methods:
+      create:
+        description: 'Creates a new aggregate instance'
+        business-context: 'Fresh aggregate creation for new business entities'
+
+        parameters:
+          - name: 'id'
+            type: 'EntityId<TId>'
+            description: 'Unique identifier for new aggregate'
+          - name: 'args'
+            type: 'unknown[]'
+            description: 'Variable arguments for aggregate construction'
+            rest: true
+
+        returns:
+          type: 'TAggregate'
+          description: 'New aggregate instance'
+
+      fromEvents:
+        description: 'Rebuilds aggregate from events'
+        business-context: 'Event sourcing reconstruction from event history'
+
+        parameters:
+          - name: 'id'
+            type: 'EntityId<TId>'
+            description: 'Aggregate identifier'
+          - name: 'events'
+            type: 'IExtendedDomainEvent[]'
+            description: 'Historical events to replay'
+
+        returns:
+          type: 'TAggregate'
+          description: 'Reconstructed aggregate instance'
+
+      fromSnapshot:
+        description: 'Rebuilds aggregate from snapshot and subsequent events'
+        business-context: 'Optimized reconstruction using snapshot plus incremental events'
+
+        parameters:
+          - name: 'snapshot'
+            type: 'IAggregateSnapshot<TState, TMeta>'
+            description: 'Base snapshot to restore from'
+          - name: 'events'
+            type: 'IExtendedDomainEvent[]'
+            description: 'Events that occurred after snapshot'
+
+        returns:
+          type: 'TAggregate'
+          description: 'Reconstructed aggregate instance'
+
+        generic-parameters:
+          - name: 'TState'
+            description: 'Type of snapshot state'
+          - name: 'TMeta'
+            description: 'Type of snapshot metadata'
+
+  # Validation Interfaces
+  IAggregateValidator:
+    description: 'Interface for validating aggregate state and operations'
+    business-context: 'Business rule validation at the aggregate level'
+
+    generic-parameters:
+      - name: 'TAggregate'
+        extends: 'IAggregateRoot<unknown>'
+        description: 'Type of aggregate to validate'
+
+    methods:
+      validate:
+        description: 'Validates aggregate state'
+        business-context: 'Comprehensive state validation for business rules'
+
+        parameters:
+          - name: 'aggregate'
+            type: 'TAggregate'
+            description: 'Aggregate instance to validate'
+
+        returns:
+          type: 'ValidationResult'
+          description: 'Validation result with status and errors'
+
+      validateBeforeEvent:
+        description: 'Validates aggregate before applying event'
+        business-context: 'Pre-event validation to ensure business rule compliance'
+
+        parameters:
+          - name: 'aggregate'
+            type: 'TAggregate'
+            description: 'Aggregate to validate'
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event about to be applied'
+
+        returns:
+          type: 'ValidationResult'
+          description: 'Validation result for event application'
+
+  ValidationResult:
+    description: 'Result of aggregate validation operation'
+    business-context: 'Validation status and error details for business rule checking'
+
+    properties:
+      - name: 'isValid'
+        type: 'boolean'
+        description: 'Whether the validation passed'
+        required: true
+      - name: 'errors'
+        type: 'IValidationError[]'
+        description: 'List of validation errors if any'
+        required: true
+
+  IValidationError:
+    description: 'Represents a single validation error'
+    business-context: 'Detailed information about validation failures'
+
+    properties:
+      - name: 'field'
+        type: 'string'
+        description: 'The field or property that failed validation'
+        required: true
+      - name: 'message'
+        type: 'string'
+        description: 'Human-readable error message'
+        required: true
+      - name: 'code'
+        type: 'string'
+        description: 'Optional error code for programmatic handling'
+        required: false
+
+  # Advanced Capability Interfaces
+  ICachingCapability:
+    description: 'Capability for caching aggregate data'
+    business-context: 'Key-value storage with TTL support for performance optimization'
+
+    extends: ['IAggregateCapability']
+
+    methods:
+      get:
+        description: 'Gets cached value by key'
+        business-context: 'Fast data retrieval from cache'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Cache key to retrieve'
+
+        returns:
+          type: 'T | undefined'
+          description: 'Cached value or undefined if not found/expired'
+
+        generic-parameters:
+          - name: 'T'
+            description: 'Type of cached value'
+
+      set:
+        description: 'Sets cached value with optional TTL'
+        business-context: 'Cache storage with expiration control'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Cache key to store under'
+          - name: 'value'
+            type: 'T'
+            description: 'Value to cache'
+          - name: 'ttl'
+            type: 'number'
+            description: 'Time to live in milliseconds'
+            optional: true
+
+        generic-parameters:
+          - name: 'T'
+            description: 'Type of value to cache'
+
+      clear:
+        description: 'Clears all cached values'
+        business-context: 'Cache invalidation and cleanup'
+
+      invalidate:
+        description: 'Invalidates specific cached value'
+        business-context: 'Selective cache invalidation'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Cache key to invalidate'
+
+  IMetricsCapability:
+    description: 'Capability for collecting aggregate metrics'
+    business-context: 'Monitoring and observability of aggregate operations'
+
+    extends: ['IAggregateCapability']
+
+    methods:
+      record:
+        description: 'Records a metric value'
+        business-context: 'Custom metric collection for monitoring'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Metric name'
+          - name: 'value'
+            type: 'number'
+            description: 'Metric value'
+          - name: 'tags'
+            type: 'Record<string, string>'
+            description: 'Optional metric tags'
+            optional: true
+
+      increment:
+        description: 'Increments a counter metric'
+        business-context: 'Event counting and frequency tracking'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Counter name'
+          - name: 'tags'
+            type: 'Record<string, string>'
+            description: 'Optional counter tags'
+            optional: true
+
+      timing:
+        description: 'Records timing information'
+        business-context: 'Performance measurement and optimization'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Timing metric name'
+          - name: 'duration'
+            type: 'number'
+            description: 'Duration in milliseconds'
+          - name: 'tags'
+            type: 'Record<string, string>'
+            description: 'Optional timing tags'
+            optional: true
+
+      getMetrics:
+        description: 'Gets recorded metrics'
+        business-context: 'Metric retrieval for monitoring systems'
+
+        returns:
+          type: 'MetricData[]'
+          description: 'Array of collected metrics'
+
+  ISecurityCapability:
+    description: 'Capability for security features like encryption and authorization'
+    business-context: 'Security controls for sensitive aggregate operations'
+
+    extends: ['IAggregateCapability']
+
+    methods:
+      encrypt:
+        description: 'Encrypts sensitive data'
+        business-context: 'Data protection for sensitive aggregate state'
+
+        parameters:
+          - name: 'data'
+            type: 'unknown'
+            description: 'Data to encrypt'
+
+        returns:
+          type: 'string'
+          description: 'Encrypted data as string'
+
+      decrypt:
+        description: 'Decrypts sensitive data'
+        business-context: 'Data decryption for accessing sensitive state'
+
+        parameters:
+          - name: 'encryptedData'
+            type: 'string'
+            description: 'Encrypted data to decrypt'
+
+        returns:
+          type: 'unknown'
+          description: 'Decrypted original data'
+
+      hasPermission:
+        description: 'Checks if user has permission to perform action'
+        business-context: 'Authorization checking for aggregate operations'
+
+        parameters:
+          - name: 'action'
+            type: 'string'
+            description: 'Action to check permission for'
+          - name: 'user'
+            type: 'unknown'
+            description: 'User context for authorization'
+            optional: true
+
+        returns:
+          type: 'boolean'
+          description: 'True if permission is granted'
+
+      logSecurityEvent:
+        description: 'Logs security events for audit'
+        business-context: 'Security audit trail and monitoring'
+
+        parameters:
+          - name: 'event'
+            type: 'SecurityEvent'
+            description: 'Security event to log'
+
+# === TYPE DEFINITIONS ===
+types:
+  EventAggregateMiddleware:
+    description: 'Middleware function for event processing pipeline'
+    business-context: 'Interception and modification of events before handling'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Type of event payload'
+        default: 'unknown'
+
+    function-signature:
+      parameters:
+        - name: 'event'
+          type: 'IExtendedDomainEvent<T>'
+          description: 'Event being processed'
+        - name: 'next'
+          type: '(event: IExtendedDomainEvent<T>) => void'
+          description: 'Function to continue pipeline'
+
+      returns:
+        type: 'void'
+        description: 'No return value, processes event'
+
+  MetricData:
+    description: 'Represents a single metric data point'
+    business-context: 'Metric information with optional tags and timestamp'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Metric name'
+      - name: 'value'
+        type: 'number'
+        description: 'Metric value'
+      - name: 'type'
+        type: "'counter' | 'gauge' | 'timing'"
+        description: 'Type of metric'
+      - name: 'tags'
+        type: 'Record<string, string>'
+        description: 'Optional tags for metric categorization'
+        optional: true
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'When the metric was recorded'
+
+  SecurityEvent:
+    description: 'Represents a security-related event'
+    business-context: 'Security audit trails and monitoring'
+
+    properties:
+      - name: 'type'
+        type: "'access' | 'modification' | 'failure'"
+        description: 'Type of security event'
+      - name: 'action'
+        type: 'string'
+        description: 'Action that was performed'
+      - name: 'user'
+        type: 'unknown'
+        description: 'User who performed the action'
+        optional: true
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'When the event occurred'
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Additional event metadata'
+        optional: true
+
+  # Utility Types
+  AggregateIdType:
+    description: 'Utility type to extract the ID type from an aggregate type'
+    business-context: 'Type extraction for generic aggregate operations'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Aggregate type to extract ID from'
+
+    type-definition: 'T extends IAggregateRoot<infer TId> ? TId : never'
+
+  # Deprecated Types
+  CapabilityName:
+    description: 'Union type of all standard capability names'
+    business-context: 'Legacy capability identification by string names'
+    deprecated: true
+    deprecation-message: 'Use capability constructors directly instead of string names'
+
+    type-definition: '(typeof CAPABILITY_NAMES)[keyof typeof CAPABILITY_NAMES]'
+
+  AggregateWithCapabilities:
+    description: 'Utility type for aggregates with specific capabilities'
+    business-context: 'Legacy type for capability-enhanced aggregates'
+    deprecated: true
+    deprecation-message: 'Use capability constructors directly instead of string-based capabilities'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Aggregate identifier type'
+      - name: 'TCapabilities'
+        extends: 'CapabilityName[]'
+        description: 'Array of capability names'
+
+# === CONSTANTS ===
+constants:
+  CAPABILITY_NAMES:
+    description: 'Constants for standard capability names'
+    business-context: 'Legacy capability identification constants'
+    deprecated: true
+    deprecation-message: 'Use capability constructors directly instead of string names'
+
+    type: 'const object'
+    properties:
+      - name: 'SNAPSHOT'
+        value: "'snapshot'"
+        description: 'Snapshot capability identifier'
+      - name: 'VERSIONING'
+        value: "'versioning'"
+        description: 'Versioning capability identifier'
+      - name: 'EVENT_SOURCING'
+        value: "'eventSourcing'"
+        description: 'Event sourcing capability identifier'
+      - name: 'AUDIT'
+        value: "'audit'"
+        description: 'Audit capability identifier'
+      - name: 'MIDDLEWARE'
+        value: "'middleware'"
+        description: 'Middleware capability identifier'
+
+# === CUSTOM TAGS ===
+custom-tags:
+  interface-contracts: 'Pure TypeScript interfaces defining behavioral contracts'
+  capability-system: 'Extensible capability system for aggregate functionality'
+  generic-types: 'Type-safe generic programming with proper constraints'
+  builder-pattern: 'Fluent builder interfaces for complex object construction'
+  factory-pattern: 'Factory interfaces for aggregate lifecycle management'
+  type-safety: 'Compile-time type checking and runtime type guards'
+  event-sourcing: 'Event sourcing patterns and event store integration'
+  performance: 'Performance optimization through snapshots and caching'
+  security: 'Security capabilities for encryption and authorization'
+  monitoring: 'Observability and metrics collection capabilities'

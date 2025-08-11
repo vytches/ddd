@@ -1,0 +1,35 @@
+# Sagas Errors Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Sagas Errors - Export Module'
+description: 'Re-exports saga error classes'
+business-context: 'Error handling for saga operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  description: 'Saga error class exports'
+  items:
+    - from: './saga-errors'
+      exports:
+        [
+          'SagaError',
+          'SagaExecutionError',
+          'SagaCompensationError',
+          'SagaTimeoutError',
+          'SagaStepNotFoundError',
+          'SagaAlreadyExistsError',
+          'SagaNotFoundError',
+          'SagaInvalidStateError',
+          'SagaDefinitionError',
+          'SagaConfigurationError',
+          'SagaDefinitionNotFoundError',
+          'SagaInstanceLimitExceededError',
+          'SagaValidationError',
+          'OptimisticLockError',
+        ]

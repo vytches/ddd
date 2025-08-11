@@ -1,20 +1,3 @@
-/**
- * @llm-summary Enumeration of domain error code values
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * DomainErrorCode enum implementing core domain functionality for domain error code operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: DomainErrorCode = DomainErrorCode.VALUE;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export enum DomainErrorCode {
   Default = 'D_ERROR',
   UnknownError = 'D_UNKNOWN_ERROR',
@@ -38,23 +21,6 @@ export enum DomainErrorCode {
   InsufficientPermissions = 'D_INSUFFICIENT_PERMISSIONS',
 }
 
-/**
- * @llm-summary Enumeration of application error code values
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * ApplicationErrorCode enum implementing core domain functionality for application error code operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: ApplicationErrorCode = ApplicationErrorCode.VALUE;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export enum ApplicationErrorCode {
   Default = 'A_ERROR_OCCURED',
   UnknownError = 'A_UNKNOWN_ERROR',
@@ -79,23 +45,6 @@ export enum ApplicationErrorCode {
   Unavailable = 'A_UNAVAILABLE',
 }
 
-/**
- * @llm-summary Enumeration of framework error code values
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * FrameworkErrorCode enum implementing core domain functionality for framework error code operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: FrameworkErrorCode = FrameworkErrorCode.VALUE;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export enum FrameworkErrorCode {
   Default = 'F_SERVER_ERROR',
   UnknownError = 'F_UNKNOWN_ERROR',

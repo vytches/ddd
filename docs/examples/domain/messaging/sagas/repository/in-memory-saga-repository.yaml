@@ -1,0 +1,572 @@
+# In-Memory Saga Repository - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'in-memory-saga-repository'
+title: 'InMemorySagaRepository - In-Memory Persistence'
+description: 'In-memory implementation of saga repository for development and testing'
+business-context: 'Provides saga persistence for development, testing, and small-scale deployments'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  InMemorySagaRepository:
+    class-doc:
+      description: 'In-memory saga repository with full query capabilities and optimistic locking'
+      business-context: 'Development and testing repository with production-like features'
+
+      formats:
+        jsdoc:
+          description: 'In-memory saga repository with query and locking support'
+        cli:
+          description: |
+            ## InMemorySagaRepository
+
+            Development repository providing:
+            - Full saga persistence and retrieval
+            - Advanced querying and filtering
+            - Optimistic concurrency control
+            - Audit logging support
+            - Performance monitoring
+            - Bulk operations
+            - Data export capabilities
+
+    methods:
+      constructor:
+        description: 'Creates in-memory repository with optional configuration'
+        business-context: 'Initializes repository for development or testing scenarios'
+
+        parameters:
+          - name: 'config'
+            type: 'InMemoryRepositoryConfig'
+            description: 'Repository configuration options'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'repository-creation'
+            code: |
+              const repository = new InMemorySagaRepository({
+                enableOptimisticLocking: true,
+                enableAuditLog: true,
+                maxRetentionCount: 10000,
+                enableMetrics: true,
+                retentionPolicy: {
+                  completedAfterDays: 30,
+                  compensatedAfterDays: 60,
+                  failedAfterDays: 90
+                }
+              });
+
+      save:
+        description: 'Saves saga instance with optimistic locking support'
+        business-context: 'Persists saga state with concurrency protection'
+
+        parameters:
+          - name: 'saga'
+            type: 'ISaga'
+            description: 'Saga instance to save'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when saga is saved'
+
+        throws:
+          - type: 'OptimisticLockingError'
+            description: 'When version conflict is detected'
+
+        examples:
+          - id: 'save-saga'
+            code: |
+              try {
+                await repository.save(saga);
+                console.log('Saga saved successfully');
+              } catch (error) {
+                if (error instanceof OptimisticLockingError) {
+                  console.log('Concurrency conflict, retry with latest version');
+                  // Handle optimistic locking conflict
+                }
+              }
+
+      findById:
+        description: 'Finds saga by unique identifier'
+        business-context: 'Retrieves specific saga instance for processing or monitoring'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Unique saga identifier'
+
+        returns:
+          type: 'Promise<ISaga | null>'
+          description: 'Saga instance if found, null otherwise'
+
+        examples:
+          - id: 'find-by-id'
+            code: |
+              const saga = await repository.findById('saga-123');
+              if (saga) {
+                console.log('Found saga:', saga.sagaType);
+                console.log('Current status:', saga.status);
+                console.log('Current step:', saga.state.currentStep);
+              }
+
+      findByCorrelation:
+        description: 'Finds sagas by correlation data for event routing'
+        business-context: 'Enables event routing to appropriate saga instances'
+
+        parameters:
+          - name: 'correlationData'
+            type: 'Record<string, unknown>'
+            description: 'Correlation criteria to match'
+
+        returns:
+          type: 'Promise<ISaga[]>'
+          description: 'Array of matching saga instances'
+
+        examples:
+          - id: 'find-by-correlation'
+            code: |
+              const sagas = await repository.findByCorrelation({
+                orderId: 'order-123'
+              });
+
+              console.log(`Found ${sagas.length} sagas for order-123`);
+              sagas.forEach(saga => {
+                console.log(`- Saga ${saga.sagaId}: ${saga.status}`);
+              });
+
+      findByTypeAndStatus:
+        description: 'Finds sagas by type and optional status'
+        business-context: 'Enables filtering for monitoring and management'
+
+        parameters:
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Type of saga to find'
+
+          - name: 'status'
+            type: 'string'
+            description: 'Optional status filter'
+            required: false
+
+        returns:
+          type: 'Promise<ISaga[]>'
+          description: 'Array of matching sagas'
+
+        examples:
+          - id: 'find-by-type-status'
+            code: |
+              const activeSagas = await repository.findByTypeAndStatus(
+                'OrderProcessingSaga',
+                SagaStatus.EXECUTING
+              );
+              console.log(`Found ${activeSagas.length} active order sagas`);
+
+      findTimedOut:
+        description: 'Finds sagas that have timed out'
+        business-context: 'Identifies stale workflows for cleanup or recovery'
+
+        parameters:
+          - name: 'beforeDate'
+            type: 'Date'
+            description: 'Find sagas with timeout before this date'
+            required: false
+            default: 'new Date()'
+
+        returns:
+          type: 'Promise<ISaga[]>'
+          description: 'Array of timed-out sagas'
+
+        examples:
+          - id: 'find-timed-out'
+            code: |
+              const timedOutSagas = await repository.findTimedOut();
+              for (const saga of timedOutSagas) {
+                console.log(`Saga ${saga.sagaId} timed out`);
+                await orchestrator.handleTimeout(saga.sagaId, context);
+              }
+
+      remove:
+        description: 'Removes a saga from the repository'
+        business-context: 'Enables cleanup of completed or cancelled workflows'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to remove'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when saga is removed'
+
+        throws:
+          - type: 'SagaNotFoundError'
+            description: "When saga doesn't exist"
+
+        examples:
+          - id: 'remove-saga'
+            code: |
+              await repository.remove('saga-123');
+              console.log('Saga removed from repository');
+
+      updateState:
+        description: 'Updates saga state with optimistic locking'
+        business-context: 'Enables atomic state updates with version control'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to update'
+
+          - name: 'updates'
+            type: 'Partial<ISagaState>'
+            description: 'State changes to apply'
+
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected version for optimistic locking'
+            required: false
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when state is updated'
+
+        throws:
+          - type: 'SagaNotFoundError'
+            description: "When saga doesn't exist"
+          - type: 'OptimisticLockError'
+            description: 'When version conflict occurs'
+
+        examples:
+          - id: 'update-state'
+            code: |
+              await repository.updateState(
+                'saga-123',
+                {
+                  status: SagaStatus.COMPLETED,
+                  completedAt: new Date()
+                },
+                5 // Expected version
+              );
+
+      query:
+        description: 'Executes advanced query with filtering and pagination'
+        business-context: 'Provides flexible saga discovery for monitoring and operations'
+
+        parameters:
+          - name: 'queryOptions'
+            type: 'ISagaQuery'
+            description: 'Query criteria and options'
+
+        returns:
+          type: 'Promise<ISagaQueryResult>'
+          description: 'Query results with pagination info'
+
+        examples:
+          - id: 'advanced-query'
+            code: |
+              const result = await repository.query({
+                sagaType: 'OrderProcessingSaga',
+                status: [SagaStatus.EXECUTING, SagaStatus.WAITING],
+                createdBetween: {
+                  start: new Date('2023-01-01'),
+                  end: new Date('2023-12-31')
+                },
+                correlationData: {
+                  customerId: 'customer-456'
+                },
+                sortBy: 'createdAt',
+                sortOrder: 'desc',
+                limit: 50,
+                offset: 0
+              });
+
+              console.log(`Found ${result.totalCount} matching sagas`);
+              console.log(`Returned ${result.items.length} in this page`);
+
+      count:
+        description: 'Counts sagas matching specified criteria'
+        business-context: 'Provides statistics for monitoring and instance limit enforcement'
+
+        parameters:
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Saga type to count'
+            required: false
+
+          - name: 'status'
+            type: 'SagaStatus'
+            description: 'Status to filter by'
+            required: false
+
+        returns:
+          type: 'Promise<number>'
+          description: 'Count of matching sagas'
+
+        examples:
+          - id: 'count-sagas'
+            code: |
+              // Count all active sagas of a type
+              const activeCount = await repository.count(
+                'OrderProcessingSaga', 
+                SagaStatus.EXECUTING
+              );
+
+              // Check against instance limits
+              if (activeCount >= maxInstances) {
+                throw new SagaInstanceLimitExceededError(
+                  'OrderProcessingSaga',
+                  maxInstances,
+                  activeCount
+                );
+              }
+
+      delete:
+        description: 'Deletes saga instance by ID'
+        business-context: 'Removes saga for cleanup or administrative purposes'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to delete'
+
+        returns:
+          type: 'Promise<boolean>'
+          description: 'True if saga was deleted, false if not found'
+
+        examples:
+          - id: 'delete-saga'
+            code: |
+              const deleted = await repository.delete('saga-123');
+              if (deleted) {
+                console.log('Saga deleted successfully');
+              } else {
+                console.log('Saga not found');
+              }
+
+      cleanup:
+        description: 'Removes old saga instances based on retention policy'
+        business-context: 'Maintenance operation to prevent memory bloat'
+
+        parameters:
+          - name: 'options'
+            type: 'CleanupOptions'
+            description: 'Cleanup configuration'
+            required: false
+
+        returns:
+          type: 'Promise<CleanupResult>'
+          description: 'Results of cleanup operation'
+
+        examples:
+          - id: 'cleanup-old-sagas'
+            code: |
+              const result = await repository.cleanup({
+                removeCompletedOlderThanDays: 30,
+                removeFailedOlderThanDays: 90,
+                dryRun: false
+              });
+
+              console.log(`Cleaned up ${result.removedCount} old sagas`);
+              console.log(`${result.remainingCount} sagas remain`);
+
+      exportData:
+        description: 'Exports saga data for backup or analysis'
+        business-context: 'Provides data export capabilities for operations and analytics'
+
+        parameters:
+          - name: 'options'
+            type: 'ExportOptions'
+            description: 'Export configuration'
+            required: false
+
+        returns:
+          type: 'Promise<SagaExportData>'
+          description: 'Exported saga data'
+
+        examples:
+          - id: 'export-data'
+            code: |
+              const exportData = await repository.exportData({
+                format: 'json',
+                includeCompleted: false,
+                includeFailed: true,
+                dateRange: {
+                  start: new Date('2023-01-01'),
+                  end: new Date('2023-12-31')
+                }
+              });
+
+              // Save to file or send to analytics system
+              await fs.writeFile('saga-export.json', JSON.stringify(exportData, null, 2));
+
+      importData:
+        description: 'Imports saga data from backup or migration'
+        business-context: 'Supports data migration and disaster recovery scenarios'
+
+        parameters:
+          - name: 'data'
+            type: 'SagaExportData'
+            description: 'Data to import'
+
+          - name: 'options'
+            type: 'ImportOptions'
+            description: 'Import configuration'
+            required: false
+
+        returns:
+          type: 'Promise<ImportResult>'
+          description: 'Results of import operation'
+
+        examples:
+          - id: 'import-data'
+            code: |
+              const backupData = JSON.parse(await fs.readFile('saga-backup.json', 'utf8'));
+
+              const result = await repository.importData(backupData, {
+                overwriteExisting: false,
+                validateData: true,
+                skipInvalid: true
+              });
+
+              console.log(`Imported ${result.importedCount} sagas`);
+              console.log(`Skipped ${result.skippedCount} duplicates`);
+
+      getStatistics:
+        description: 'Gets repository statistics for monitoring'
+        business-context: 'Provides operational metrics and health information'
+
+        returns:
+          type: 'RepositoryStatistics'
+          description: 'Current repository statistics'
+
+        examples:
+          - id: 'get-statistics'
+            code: |
+              const stats = await repository.getStatistics();
+
+              console.log('Repository Statistics:');
+              console.log(`- Total sagas: ${stats.totalCount}`);
+              console.log(`- Active sagas: ${stats.activeCount}`);
+              console.log(`- Failed sagas: ${stats.failedCount}`);
+              console.log(`- Memory usage: ${stats.memoryUsage} MB`);
+              console.log(`- Average query time: ${stats.averageQueryTime} ms`);
+
+# === TYPES ===
+types:
+  InMemoryRepositoryConfig:
+    description: 'Configuration options for in-memory repository'
+    business-context: 'Customizes repository behavior for different scenarios'
+
+    properties:
+      - name: 'enableOptimisticLocking'
+        type: 'boolean'
+        description: 'Enable version-based optimistic locking'
+        default: 'true'
+
+      - name: 'enableAuditLog'
+        type: 'boolean'
+        description: 'Enable audit logging for changes'
+        default: 'false'
+
+      - name: 'maxRetentionCount'
+        type: 'number'
+        description: 'Maximum number of sagas to retain'
+        default: '10000'
+
+      - name: 'enableMetrics'
+        type: 'boolean'
+        description: 'Enable performance metrics collection'
+        default: 'false'
+
+      - name: 'retentionPolicy'
+        type: 'RetentionPolicy'
+        description: 'Automatic cleanup configuration'
+        required: false
+
+  RetentionPolicy:
+    description: 'Policy for automatic saga cleanup'
+    business-context: 'Prevents unlimited memory growth'
+
+    properties:
+      - name: 'completedAfterDays'
+        type: 'number'
+        description: 'Days to retain completed sagas'
+        default: '30'
+
+      - name: 'compensatedAfterDays'
+        type: 'number'
+        description: 'Days to retain compensated sagas'
+        default: '60'
+
+      - name: 'failedAfterDays'
+        type: 'number'
+        description: 'Days to retain failed sagas'
+        default: '90'
+
+  SagaExportData:
+    description: 'Structure for saga data export'
+    business-context: 'Standardized format for backup and migration'
+
+    properties:
+      - name: 'version'
+        type: 'string'
+        description: 'Export format version'
+
+      - name: 'exportDate'
+        type: 'Date'
+        description: 'When export was created'
+
+      - name: 'sagas'
+        type: 'ISaga[]'
+        description: 'Exported saga instances'
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Export metadata'
+
+  ImportResult:
+    description: 'Result of saga data import operation'
+    business-context: 'Provides feedback on import success and issues'
+
+    properties:
+      - name: 'importedCount'
+        type: 'number'
+        description: 'Number of sagas imported'
+
+      - name: 'skippedCount'
+        type: 'number'
+        description: 'Number of sagas skipped'
+
+      - name: 'errors'
+        type: 'string[]'
+        description: 'Import errors encountered'
+
+  RepositoryStatistics:
+    description: 'Repository performance and usage statistics'
+    business-context: 'Provides operational insights'
+
+    properties:
+      - name: 'totalCount'
+        type: 'number'
+        description: 'Total number of sagas'
+
+      - name: 'activeCount'
+        type: 'number'
+        description: 'Number of active sagas'
+
+      - name: 'failedCount'
+        type: 'number'
+        description: 'Number of failed sagas'
+
+      - name: 'memoryUsage'
+        type: 'number'
+        description: 'Estimated memory usage in MB'
+
+      - name: 'averageQueryTime'
+        type: 'number'
+        description: 'Average query execution time in ms'

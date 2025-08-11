@@ -101,7 +101,7 @@ describe('LoggingMiddleware', () => {
         const durationMatch = completionLogCall?.match(/(\d+)ms$/);
         expect(durationMatch).toBeTruthy();
 
-        const actualDuration = parseInt(durationMatch![1]!, 10);
+        const actualDuration = parseInt(durationMatch?.[1] ?? '0', 10);
         expect(actualDuration).toBeGreaterThanOrEqual(delay - 10); // Allow for timing variance
       });
     });
@@ -166,7 +166,7 @@ describe('LoggingMiddleware', () => {
         const durationMatch = errorLogCall?.match(/failed after (\d+)ms:/);
         expect(durationMatch).toBeTruthy();
 
-        const actualDuration = parseInt(durationMatch![1]!, 10);
+        const actualDuration = parseInt(durationMatch?.[1] ?? '0', 10);
         expect(actualDuration).toBeGreaterThanOrEqual(delay - 10); // Allow for timing variance
       });
     });

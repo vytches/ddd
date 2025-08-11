@@ -1,24 +1,5 @@
 /* eslint-disable no-useless-escape */
 
-/**
- * @llm-summary Contract for context detection result functionality
- * @llm-domain Infrastructure
- * @llm-contract Required
- *
- * @description
- * ContextDetectionResult interface implementing infrastructure service for context detection result operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteContextDetectionResult implements ContextDetectionResult {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ContextDetectionResult {
   contextName: string;
   boundedContext?: string | undefined;
@@ -34,32 +15,6 @@ interface StackTraceFrame {
   filePath?: string | undefined;
 }
 
-/**
- * @llm-summary ContextDetector class for context detector operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * ContextDetector class implementing infrastructure service for context detector operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ContextDetector();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ContextDetector());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ContextDetector {
   private static readonly BOUNDED_CONTEXT_PATTERNS = [
     /packages\/([^\/]+)\/src/,

@@ -4,23 +4,6 @@ import type { ErrorOptions } from './base.error';
 import { BaseError } from './base.error';
 import { DomainErrorCode } from './error.enum';
 
-/**
- * @llm-summary Type definition for domain error options
- * @llm-domain Core
- * @llm-usage Frequent
- *
- * @description
- * DomainErrorOptions type implementing core domain functionality for domain error options operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: DomainErrorOptions = {} as DomainErrorOptions;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type DomainErrorOptions = ErrorOptions & {
   domain?: string | object | undefined;
   code?: DomainErrorCode;
@@ -28,32 +11,6 @@ export type DomainErrorOptions = ErrorOptions & {
   error?: Error | undefined;
 };
 
-/**
- * @llm-summary DomainError class for domain error operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * DomainError class implementing core domain functionality for domain error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IDomainError();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IDomainError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class IDomainError extends BaseError implements DomainErrorOptions {
   domain?: string | object | undefined;
 
@@ -94,32 +51,6 @@ export abstract class IDomainError extends BaseError implements DomainErrorOptio
   }
 }
 
-/**
- * @llm-summary MissingValueError class for missing value error operations
- * @llm-domain Core
- * @llm-complexity Simple
- *
- * @description
- * MissingValueError class implementing core domain functionality for missing value error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new MissingValueError();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new MissingValueError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class MissingValueError extends IDomainError {
   static withValue(msg: string, data?: DomainErrorOptions): MissingValueError {
     const message = msg ?? 'Missing value';
@@ -131,32 +62,6 @@ export class MissingValueError extends IDomainError {
   }
 }
 
-/**
- * @llm-summary InvalidParameterError class for invalid parameter error operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * InvalidParameterError class implementing core domain functionality for invalid parameter error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new InvalidParameterError();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new InvalidParameterError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class InvalidParameterError extends IDomainError {
   static withParameter(
     parameter: string,
@@ -173,32 +78,6 @@ export class InvalidParameterError extends IDomainError {
   }
 }
 
-/**
- * @llm-summary DuplicateError class for duplicate error operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * DuplicateError class implementing core domain functionality for duplicate error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DuplicateError();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DuplicateError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class DuplicateError extends IDomainError {
   static withEntityId(id: string, data?: DomainErrorOptions): DuplicateError {
     const message = `Entity with id ${id} already exists`;
@@ -210,39 +89,13 @@ export class DuplicateError extends IDomainError {
   }
 }
 
-/**
- * @llm-summary NotFoundError class for not found error operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * NotFoundError class implementing core domain functionality for not found error operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new NotFoundError();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new NotFoundError());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class NotFoundError extends IDomainError {
-  static withEntityId(id: string, data?: DomainErrorOptions): DuplicateError {
-    const message = `Entity with id ${id} already exists`;
+  static withEntityId(id: string, data?: DomainErrorOptions): NotFoundError {
+    const message = `Entity with id ${id} not found`;
     const options = {
-      code: DomainErrorCode.DuplicateEntry,
+      code: DomainErrorCode.NotFound,
       data,
     };
-    return new DuplicateError(message, options);
+    return new NotFoundError(message, options);
   }
 }

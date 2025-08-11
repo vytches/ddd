@@ -1,24 +1,5 @@
 import type { IDomainService } from './domain-service.interface';
 
-/**
- * @llm-summary Contract for domain service registry functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * DomainServiceRegistry interface implementing domain pattern implementation for domain service registry operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteDomainServiceRegistry implements IDomainServiceRegistry {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IDomainServiceRegistry {
   /**
    * Registers a domain service in the registry.

@@ -1,0 +1,367 @@
+# Base Saga - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base-saga'
+title: 'BaseSaga - Abstract Saga Implementation'
+description: 'Abstract base class for implementing saga patterns in distributed systems'
+business-context: 'Provides foundation for long-running business processes with compensation support'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseSaga:
+    class-doc:
+      description: 'Abstract base class for implementing saga patterns with enterprise features'
+      business-context: 'Foundation for long-running business processes that require coordination and compensation'
+
+      formats:
+        jsdoc:
+          description: 'Abstract saga implementation with middleware and compensation support'
+        cli:
+          description: |
+            ## BaseSaga
+
+            Enterprise saga foundation providing:
+            - Event-driven step execution
+            - Middleware pipeline support
+            - Automatic compensation handling
+            - State management and persistence
+            - Comprehensive logging and monitoring
+            - Timeout and error handling
+
+    methods:
+      constructor:
+        description: 'Creates a new saga instance with initial state'
+        business-context: 'Initializes saga with unique identity and processing capabilities'
+
+        parameters:
+          - name: '_state'
+            type: 'ISagaState'
+            description: 'Initial saga state'
+
+          - name: 'sagaTypeName'
+            type: 'string'
+            description: 'Type identifier for the saga definition'
+
+        examples:
+          - id: 'saga-construction'
+            code: |
+              export class OrderProcessingSaga extends BaseSaga {
+                constructor(state: ISagaState) {
+                  super(state, 'OrderProcessingSaga');
+                }
+                
+                protected initializeSteps(): void {
+                  this.addStep(new ProcessPaymentStep());
+                  this.addStep(new ReserveInventoryStep());
+                }
+              }
+
+      sagaId:
+        description: 'Gets the unique identifier for the saga instance'
+        business-context: 'Provides saga tracking and correlation across system components'
+
+        returns:
+          type: 'string'
+          description: 'Unique saga identifier'
+
+        custom-tags:
+          getter: 'true'
+          immutable: 'true'
+
+        examples:
+          - id: 'get-saga-id'
+            code: |
+              const sagaId = saga.sagaId;
+              console.log('Processing saga:', sagaId);
+
+      sagaType:
+        description: 'Gets the type identifier for the saga definition'
+        business-context: 'Enables saga classification and discovery'
+
+        returns:
+          type: 'string'
+          description: 'Saga type identifier'
+
+        custom-tags:
+          getter: 'true'
+
+        examples:
+          - id: 'get-saga-type'
+            code: |
+              const type = saga.sagaType;
+              console.log('Saga type:', type);
+
+      status:
+        description: 'Gets the current status of the saga'
+        business-context: 'Tracks saga lifecycle state for monitoring and decision making'
+
+        returns:
+          type: 'SagaStatus'
+          description: 'Current saga status'
+
+        custom-tags:
+          getter: 'true'
+
+        examples:
+          - id: 'check-status'
+            code: |
+              if (saga.status === SagaStatus.FAILED) {
+                await saga.compensate(failedStep, context);
+              }
+
+      state:
+        description: 'Gets immutable copy of current saga state'
+        business-context: 'Provides access to saga state for persistence and debugging'
+
+        returns:
+          type: 'ISagaState'
+          description: 'Immutable copy of saga state'
+
+        custom-tags:
+          getter: 'true'
+          immutable: 'Returns defensive copy'
+
+        examples:
+          - id: 'get-state'
+            code: |
+              const currentState = saga.state;
+              console.log('Current step:', currentState.currentStep);
+              console.log('Version:', currentState.version);
+
+      handleEvent:
+        description: 'Handles incoming domain event through middleware pipeline'
+        business-context: 'Core event processing with enterprise features like logging and error handling'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Domain event to process'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context with correlation data'
+
+        returns:
+          type: 'Promise<ISagaActionResult>'
+          description: 'Result of event processing with next steps'
+
+        examples:
+          - id: 'handle-event'
+            code: |
+              const orderCreatedEvent = new OrderCreatedEvent({
+                orderId: 'order-123',
+                customerId: 'customer-456'
+              });
+
+              const context: ISagaExecutionContext = {
+                correlationId: 'req-789',
+                userId: 'user-123'
+              };
+
+              const result = await saga.handleEvent(orderCreatedEvent, context);
+              if (result.success) {
+                console.log('Event processed successfully');
+              }
+
+      compensate:
+        description: 'Executes compensation for a specific step'
+        business-context: 'Implements saga compensation pattern for transaction rollback'
+
+        parameters:
+          - name: 'stepName'
+            type: 'string'
+            description: 'Name of the step to compensate'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context for compensation'
+
+        returns:
+          type: 'Promise<ISagaActionResult>'
+          description: 'Result of compensation execution'
+
+        examples:
+          - id: 'compensate-step'
+            code: |
+              // Compensate failed payment step
+              const result = await saga.compensate('ProcessPayment', context);
+              if (result.success) {
+                console.log('Payment compensation completed');
+              }
+
+      canHandle:
+        description: 'Checks if saga can handle the given event'
+        business-context: 'Event filtering for saga instance routing'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Domain event to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if saga can handle the event'
+
+        examples:
+          - id: 'can-handle-check'
+            code: |
+              const event = new PaymentProcessedEvent({ orderId: 'order-123' });
+
+              if (saga.canHandle(event)) {
+                await saga.handleEvent(event, context);
+              }
+
+      getCorrelationData:
+        description: 'Gets correlation data for event filtering'
+        business-context: 'Enables event routing and saga instance correlation'
+
+        returns:
+          type: 'Record<string, unknown>'
+          description: 'Correlation data for event filtering'
+
+        examples:
+          - id: 'get-correlation'
+            code: |
+              const correlationData = saga.getCorrelationData();
+              console.log('Saga ID:', correlationData.sagaId);
+              console.log('Order ID:', correlationData.orderId);
+
+      initializeSteps:
+        description: 'Initialize saga steps - must be implemented by concrete sagas'
+        business-context: 'Defines saga workflow by adding executable steps'
+
+        custom-tags:
+          abstract: 'true'
+          protected: 'true'
+
+        examples:
+          - id: 'initialize-steps'
+            code: |
+              protected initializeSteps(): void {
+                this.addStep(new ProcessPaymentStep());
+                this.addStep(new ReserveInventoryStep());
+                this.addStep(new ShipOrderStep());
+                this.addStep(new SendConfirmationStep());
+              }
+
+      addStep:
+        description: 'Adds a step to the saga workflow'
+        business-context: 'Builds saga workflow by registering executable steps'
+
+        parameters:
+          - name: 'step'
+            type: 'ISagaStep'
+            description: 'Step to add to workflow'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          protected: 'true'
+
+        examples:
+          - id: 'add-step'
+            code: |
+              protected initializeSteps(): void {
+                const paymentStep = new ProcessPaymentStep();
+                this.addStep(paymentStep);
+                
+                const inventoryStep = new ReserveInventoryStep();
+                this.addStep(inventoryStep);
+              }
+
+      updateState:
+        description: 'Updates saga state with version increment'
+        business-context: 'Maintains saga state consistency with optimistic locking'
+
+        parameters:
+          - name: 'updates'
+            type: 'Partial<ISagaState>'
+            description: 'State updates to apply'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          protected: 'true'
+          versioning: 'Automatically increments version for optimistic locking'
+
+        examples:
+          - id: 'update-state'
+            code: |
+              // Update saga state
+              this.updateState({
+                currentStep: 'ProcessPayment',
+                status: SagaStatus.EXECUTING,
+                stepData: { orderId: 'order-123' }
+              });
+
+      addMiddleware:
+        description: 'Adds middleware to the saga processing pipeline'
+        business-context: 'Enables cross-cutting concerns like logging, monitoring, and validation'
+
+        parameters:
+          - name: 'middleware'
+            type: 'ISagaMiddleware'
+            description: 'Middleware to add to pipeline'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          protected: 'true'
+
+        examples:
+          - id: 'add-middleware'
+            code: |
+              protected configureDefaultMiddleware(): void {
+                this.addMiddleware(new LoggingMiddleware());
+                this.addMiddleware(new PerformanceMonitoringMiddleware());
+                this.addMiddleware(new RetryMiddleware({ maxAttempts: 3 }));
+              }
+
+      getMiddlewareNames:
+        description: 'Gets list of configured middleware names'
+        business-context: 'Provides visibility into saga middleware configuration'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of middleware names'
+
+        custom-tags:
+          protected: 'true'
+
+        examples:
+          - id: 'get-middleware-names'
+            code: |
+              const middlewareNames = this.getMiddlewareNames();
+              console.log('Active middleware:', middlewareNames);
+
+      configureDefaultMiddleware:
+        description: 'Configure default middleware for enterprise features'
+        business-context: 'Override point for saga-specific middleware configuration'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          protected: 'true'
+          hook: 'Override in concrete sagas to add specific middleware'
+
+        examples:
+          - id: 'configure-middleware'
+            code: |
+              protected configureDefaultMiddleware(): void {
+                // Add saga-specific middleware
+                this.addMiddleware(new SecurityMiddleware());
+                this.addMiddleware(new AuditMiddleware());
+              }

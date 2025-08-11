@@ -1,0 +1,312 @@
+# policy-request-builder - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-request-builder'
+title: 'PolicyRequestBuilder - Request Construction'
+description: 'Fluent builder for policy evaluation requests'
+business-context: 'Simplifies request creation for policy evaluations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PolicyRequestBuilder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Fluent builder for constructing policy evaluation requests'
+      business-context: 'Provides consistent request creation with validation'
+
+      formats:
+        jsdoc:
+          description: 'Builder for PolicyRequest objects'
+        cli:
+          description: |
+            ## PolicyRequestBuilder
+
+            Request builder features:
+            - Entity configuration
+            - Context setup
+            - Metadata attachment
+            - Correlation tracking
+            - Validation on build
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Builder Pattern'
+        generic-type: 'TEntity - Entity type to validate'
+
+    # Methods
+    methods:
+      withEntity:
+        description: 'Sets entity to evaluate'
+        business-context: 'Configures the target of policy evaluation'
+
+        parameters:
+          - name: 'entity'
+            type: 'T'
+            description: 'Entity to evaluate'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      withContext:
+        description: 'Sets evaluation context'
+        business-context: 'Provides execution context'
+
+        parameters:
+          - name: 'context'
+            type: 'PolicyContext'
+            description: 'Evaluation context'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      withContextBuilder:
+        description: 'Sets context using builder'
+        business-context: 'Fluent context configuration'
+
+        parameters:
+          - name: 'builderFn'
+            type: '(builder: PolicyContextBuilder) => PolicyContextBuilder'
+            description: 'Context builder function'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      withMetadata:
+        description: 'Sets policy metadata'
+        business-context: 'Attaches additional information'
+
+        parameters:
+          - name: 'metadata'
+            type: 'PolicyMetadata'
+            description: 'Request metadata'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      withCorrelationId:
+        description: 'Adds correlation ID'
+        business-context: 'Request tracking'
+
+        parameters:
+          - name: 'correlationId'
+            type: 'string'
+            description: 'Correlation identifier'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      withSource:
+        description: 'Sets source system'
+        business-context: 'Origin tracking'
+
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Source system'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      withOperation:
+        description: 'Sets operation name'
+        business-context: 'Operation context'
+
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      addMetadata:
+        description: 'Adds metadata property'
+        business-context: 'Custom metadata'
+
+        parameters:
+          - name: 'key'
+            type: 'keyof PolicyMetadata'
+            description: 'Metadata key'
+          - name: 'value'
+            type: 'unknown'
+            description: 'Metadata value'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      addCustomMetadata:
+        description: 'Adds custom metadata'
+        business-context: 'Extended metadata'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Custom key'
+          - name: 'value'
+            type: 'unknown'
+            description: 'Custom value'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder for chaining'
+
+      build:
+        description: 'Builds the request'
+        business-context: 'Creates final request object'
+
+        returns:
+          type: 'PolicyRequest<T>'
+          description: 'Complete policy request'
+
+        custom-tags:
+          throws: 'Error if required fields are missing'
+
+      create:
+        description: 'Creates new builder instance'
+        business-context: 'Factory method for builder creation'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'New builder instance'
+
+        custom-tags:
+          static: 'true'
+
+      forEntity:
+        description: 'Creates builder with entity'
+        business-context: 'Quick builder initialization'
+
+        parameters:
+          - name: 'entity'
+            type: 'T'
+            description: 'Initial entity'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder with entity'
+
+        custom-tags:
+          static: 'true'
+
+      forEntityAndContext:
+        description: 'Creates builder with entity and context'
+        business-context: 'Complete initialization'
+
+        parameters:
+          - name: 'entity'
+            type: 'T'
+            description: 'Entity to evaluate'
+          - name: 'context'
+            type: 'PolicyContext'
+            description: 'Evaluation context'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Configured builder'
+
+        custom-tags:
+          static: 'true'
+
+      forEntityAndUser:
+        description: 'Creates builder with entity and user'
+        business-context: 'User-scoped initialization'
+
+        parameters:
+          - name: 'entity'
+            type: 'T'
+            description: 'Entity to evaluate'
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+
+        returns:
+          type: 'PolicyRequestBuilder<T>'
+          description: 'Builder with user context'
+
+        custom-tags:
+          static: 'true'
+
+  PolicyRequestFactory:
+    class-doc:
+      description: 'Factory for creating policy requests'
+      business-context: 'Provides pre-configured request patterns'
+
+      custom-tags:
+        since: '2.0.0'
+        static: 'true'
+
+    methods:
+      minimal:
+        description: 'Creates minimal request'
+        business-context: 'Basic request pattern'
+
+        parameters:
+          - name: 'entity'
+            type: 'T'
+            description: 'Entity to evaluate'
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+
+        returns:
+          type: 'PolicyRequest<T>'
+          description: 'Minimal request'
+
+        custom-tags:
+          static: 'true'
+
+      withTenant:
+        description: 'Creates tenant-scoped request'
+        business-context: 'Multi-tenant request'
+
+        parameters:
+          - name: 'entity'
+            type: 'T'
+            description: 'Entity to evaluate'
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier'
+          - name: 'tenantId'
+            type: 'string'
+            description: 'Tenant identifier'
+
+        returns:
+          type: 'PolicyRequest<T>'
+          description: 'Tenant-scoped request'
+
+        custom-tags:
+          static: 'true'
+
+      webRequest:
+        description: 'Creates web request'
+        business-context: 'HTTP context request'
+
+        parameters:
+          - name: 'options'
+            type: 'WebRequestOptions<T>'
+            description: 'Web request options'
+
+        returns:
+          type: 'PolicyRequest<T>'
+          description: 'Web-context request'
+
+        custom-tags:
+          static: 'true'

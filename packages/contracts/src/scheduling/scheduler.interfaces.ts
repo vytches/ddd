@@ -1,30 +1,11 @@
 import type {
-  IScheduledEvent,
-  IScheduleOptions,
-  IScheduledJob,
   IJobFilter,
   IJobQueryResult,
+  IScheduledEvent,
+  IScheduledJob,
+  IScheduleOptions,
 } from './scheduled-event.interfaces';
 
-/**
- * @llm-summary Contract for event scheduler functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * EventScheduler interface implementing core domain functionality for event scheduler operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEventScheduler implements IEventScheduler {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IEventScheduler {
   /**
    * Schedule an event for future processing
@@ -79,25 +60,6 @@ export interface IEventScheduler {
   isRunning(): boolean;
 }
 
-/**
- * @llm-summary Contract for bulk event scheduler functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * BulkEventScheduler interface implementing core domain functionality for bulk event scheduler operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteBulkEventScheduler implements IBulkEventScheduler {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IBulkEventScheduler extends IEventScheduler {
   /**
    * Schedule multiple events at once
@@ -114,25 +76,6 @@ export interface IBulkEventScheduler extends IEventScheduler {
   cancelBulk(jobIds: string[]): Promise<number>;
 }
 
-/**
- * @llm-summary Contract for scheduler lifecycle functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * SchedulerLifecycle interface implementing core domain functionality for scheduler lifecycle operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSchedulerLifecycle implements ISchedulerLifecycle {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISchedulerLifecycle {
   /**
    * Called when scheduler is starting
@@ -160,25 +103,6 @@ export interface ISchedulerLifecycle {
   onError?(job: IScheduledJob, error: Error): Promise<void>;
 }
 
-/**
- * @llm-summary Contract for scheduler config functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * SchedulerConfig interface implementing core domain functionality for scheduler config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSchedulerConfig implements ISchedulerConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISchedulerConfig {
   /**
    * Maximum number of concurrent jobs to process
@@ -211,25 +135,6 @@ export interface ISchedulerConfig {
   lifecycle?: ISchedulerLifecycle;
 }
 
-/**
- * @llm-summary Contract for scheduler factory functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * SchedulerFactory interface implementing core domain functionality for scheduler factory operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSchedulerFactory implements ISchedulerFactory {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISchedulerFactory {
   /**
    * Create a scheduler instance with the given configuration

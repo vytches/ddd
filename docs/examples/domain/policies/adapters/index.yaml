@@ -1,0 +1,19 @@
+# adapters/index - Universal Enhanced Metadata System V2
+
+# === FOLDER METADATA ===
+folder-name: 'adapters'
+title: 'Policy Adapters'
+description: 'Adapters for external pattern integration'
+business-context: 'Bridges specifications and other patterns with policies'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'folder'
+
+# === EXPORTS ===
+exports:
+  classes:
+    - 'SpecificationAdapter'
+    - 'CompositeSpecificationAdapter'
+    - 'SpecificationPolicyBuilder'

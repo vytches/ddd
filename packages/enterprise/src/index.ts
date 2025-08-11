@@ -10,194 +10,176 @@
 // Core contracts and primitives (export first to establish base types)
 // Selective exports from contracts to avoid conflicts
 export type {
-  IEventMetadata,
-  IDomainEvent,
-  IExtendedDomainEvent,
   BaseEventBusOptions,
-  IEventProcessor,
-  IEventHandler,
-  EventHandlerMetadata,
-  IEventUpcaster,
-  IAuditEvent,
-  IEventStore,
-  EventBusMiddleware,
-  EventMiddleware,
-  EventHandlerFn,
-  IAdvancedEventStore,
-  IEventStoreConfig,
-  IAppendResult,
-  IStoredEvent,
-  IStoredDomainEvent,
-  IEventStream,
-  IGlobalEventStream,
-  IReadStreamOptions,
-  IReadAllOptions,
-  IStreamMetadata,
-  IEventSerializer,
-  IEventStoreAdapter,
-  IEventReplay,
-  IAdvancedEventReplay,
-  IEventReplayFactory,
-  IReplaySession,
-  IReplayFilter,
-  IReplayConfig,
-  IReplayResult,
-  IReplayProgress,
-  ReplayEventHandler,
-  ReplayProgressHandler,
-  ReplayErrorHandler,
-  IAggregateWithEvents,
-  IValidationError,
-  IValidationErrors,
-  IValidator,
-  IValidationRule,
-  ISpecification,
-  IAsyncSpecification,
-  IAggregateCapability,
-  IProjectionCapability,
-  CapabilityType,
   CapabilityConstructor,
   CapabilityMap,
-  ISnapshotCapability,
-  IVersioningCapability,
-  IEventSourcingCapability,
+  CapabilityType,
+  EventBusMiddleware,
+  EventHandlerFn,
+  EventHandlerMetadata,
+  EventMiddleware,
+  IAdvancedEventReplay,
+  IAdvancedEventStore,
+  IAggregateCapability,
+  IAggregateSnapshot,
+  IAggregateWithEvents,
+  IAppendResult,
+  IAsyncSpecification,
   IAuditCapability,
+  IAuditEvent,
   ICheckpointCapability,
   ICircuitBreakerCapability,
   IDeadLetterCapability,
-  IAggregateSnapshot,
+  IDomainEvent,
+  IdType,
   IEntityId,
   IEntityIdConstructorParams,
   IEntityIdFactory,
-  IdType,
-  IScheduledEvent,
-  IScheduleOptions,
-  IScheduledJob,
+  IEventHandler,
+  IEventMetadata,
+  IEventProcessor,
+  IEventReplay,
+  IEventReplayFactory,
+  IEventScheduler,
+  IEventSerializer,
+  IEventSourcingCapability,
+  IEventStore,
+  IEventStoreAdapter,
+  IEventStoreConfig,
+  IEventStream,
+  IEventUpcaster,
+  IExtendedDomainEvent,
+  IGlobalEventStream,
   IJobFilter,
   IJobQueryResult,
-  IEventScheduler,
+  IProjectionCapability,
+  IReadAllOptions,
+  IReadStreamOptions,
+  IRecurringPattern,
+  IReplayConfig,
+  IReplayFilter,
+  IReplayProgress,
+  IReplayResult,
+  IReplaySession,
+  IScheduledEvent,
+  IScheduledJob,
+  IScheduleOptions,
   ISchedulerConfig,
   ISchedulerLifecycle,
-  IRecurringPattern,
-  BundleGenerationOptions,
-  BundleResult,
-  ComplexityLevel,
-  ContentConfig,
-  ExampleDefinition,
-  FindOptions,
-  FrameworkIntegration,
-  GenerateDocumentationOptions,
-  GenerateDocumentationResult,
-  LLMSupport,
-  PackageExampleConfig,
-  RelatedPackage,
-  TagSystem,
-  ValidationFix,
-  ValidationResult,
-  ValidationWarning,
+  ISnapshotCapability,
+  ISpecification,
+  IStoredDomainEvent,
+  IStoredEvent,
+  IStreamMetadata,
+  IValidationError,
+  IValidationErrors,
+  IValidationRule,
+  IValidator,
+  IVersioningCapability,
+  ReplayErrorHandler,
+  ReplayEventHandler,
+  ReplayProgressHandler,
 } from '@vytches/ddd-contracts';
 
 export {
-  IEventBus,
-  IEventDispatcher,
-  IEnhancedEventDispatcher,
-  IEventPersistenceHandler,
-  createDomainEvent,
-  isEventHandler,
-  EVENT_HANDLER_METADATA,
-  EVENT_HANDLER_OPTIONS,
+  BackoffStrategy,
   Capability,
   CapabilityRegistry,
   createCapabilityRegistry,
+  createDomainEvent,
+  EVENT_HANDLER_METADATA,
+  EVENT_HANDLER_OPTIONS,
+  IEnhancedEventDispatcher,
+  IEventBus,
+  IEventDispatcher,
+  IEventPersistenceHandler,
+  isEventHandler,
   JobStatus,
   SchedulePriority,
-  BackoffStrategy,
 } from '@vytches/ddd-contracts';
 
 // Export contracts EntityId as base type
 export { EntityId as BaseEntityId } from '@vytches/ddd-contracts';
 
-// Export contracts ValidationError as foundation type
-export type { ValidationError as ContractsValidationError } from '@vytches/ddd-contracts';
+// ValidationError removed from contracts - use IValidationError instead
 
 // Domain primitives exports
 export * from '@vytches/ddd-domain-primitives';
 
 // Enhanced value objects and repositories (inherit from contracts)
 // Export value-objects EntityId as primary enhanced version
-export { EntityId, EntityIdFactory } from '@vytches/ddd-value-objects';
-export { BaseValueObject } from '@vytches/ddd-value-objects';
+export { BaseValueObject, EntityId, EntityIdFactory } from '@vytches/ddd-value-objects';
 export type { ValueObjectValidator } from '@vytches/ddd-value-objects';
 
-export * from '@vytches/ddd-repositories';
 export * from '@vytches/ddd-aggregates';
+export * from '@vytches/ddd-repositories';
 
 // ===== PATTERN LAYER =====
-export * from '@vytches/ddd-validation';
 export * from '@vytches/ddd-domain-services';
 export * from '@vytches/ddd-policies';
+export * from '@vytches/ddd-validation';
 
 // ===== ARCHITECTURE LAYER =====
 // Events exports with explicit key classes
 export {
-  UniversalEventDispatcher,
-  UnifiedEventBus,
   BaseEventBus,
   CUSTOM_MIDDLEWARE_SYMBOL,
   DomainEvent,
-  IntegrationEvent,
-  IntegrationEventProcessor,
   DomainToIntegrationTransformer,
-  EventHandler,
   EventDiscoveryPlugin,
   eventDiscoveryPlugin,
+  EventHandler,
+  IntegrationEvent,
+  IntegrationEventProcessor,
+  UnifiedEventBus,
+  UniversalEventDispatcher,
 } from '@vytches/ddd-events';
 
 export type {
+  DIHandlerMetadata,
+  EventHandlerOptions,
+  IAuditEventBus,
   IDomainEventBus,
   IIntegrationEventBus,
-  IAuditEventBus,
   UnifiedEventHandler,
-  EventHandlerOptions,
-  DIHandlerMetadata,
 } from '@vytches/ddd-events';
 
 // CQRS exports with ExecutionContext resolution
 export {
   CommandBus,
-  QueryBus,
+  CommandExecutionError,
+  CommandHandler,
+  CQRSConfiguration,
+  CQRSConfigurationError,
+  CQRSDiscoveryPlugin,
+  CQRSExecutionContext,
+  CQRSModule,
+  CqrsValidationError,
   EnhancedCommandBus,
   EnhancedQueryBus,
-  CommandExecutionError,
-  QueryExecutionError,
   HandlerNotFoundError,
-  CQRSConfigurationError,
-  CqrsValidationError,
-  CQRSConfiguration,
-  CQRSModule,
   ICommandBus,
   IQueryBus,
-  CommandHandler,
-  QueryHandler,
-  CQRSExecutionContext,
   LoggingMiddleware,
-  CQRSDiscoveryPlugin,
+  QueryBus,
+  QueryExecutionError,
+  QueryHandler,
 } from '@vytches/ddd-cqrs';
 
 // Export CQRS ExecutionContext as primary version
 export type {
-  ExecutionContext,
-  ICQRSMiddleware,
-  ICommand,
-  IQuery,
-  ICommandHandler,
-  IQueryHandler,
-  ICqrsValidatable,
   CQRSOptions,
+  ExecutionContext,
+  ICommand,
+  ICommandHandler,
+  ICQRSMiddleware,
+  ICqrsValidatable,
+  IQuery,
+  IQueryHandler,
 } from '@vytches/ddd-cqrs';
 
-export * from '@vytches/ddd-projections';
 export * from '@vytches/ddd-event-store';
+export * from '@vytches/ddd-projections';
 
 // ===== INTEGRATION LAYER =====
 export * from '@vytches/ddd-acl';
@@ -206,33 +188,33 @@ export * from '@vytches/ddd-messaging';
 // ===== INFRASTRUCTURE LAYER =====
 // DI exports (ServiceNotFoundError conflict resolved - domain-services version takes precedence)
 export {
-  VytchesDDD,
-  SimpleContainer,
+  BaseContainerAdapter,
   ContainerBuilder,
   ServiceLifetime,
-  BaseContainerAdapter,
+  SimpleContainer,
+  VytchesDDD,
 } from '@vytches/ddd-di';
 
 export type {
-  ServiceToken,
   Constructor,
-  ServiceFactory,
-  ServiceRegistrationOptions,
-  ServiceDescriptor,
-  IDependencyContainer,
-  ResolutionContext,
+  HandlerInfo,
   IContainerBuilder,
+  IDependencyContainer,
   IHandlerDiscoveryPlugin,
   IHandlerDiscoveryRegistry,
-  HandlerInfo,
+  ResolutionContext,
+  ServiceDescriptor,
+  ServiceFactory,
+  ServiceRegistrationOptions,
+  ServiceToken,
 } from '@vytches/ddd-di';
+export * from '@vytches/ddd-event-scheduling';
 export * from '@vytches/ddd-logging';
 export * from '@vytches/ddd-resilience';
-export * from '@vytches/ddd-event-scheduling';
 
 // ===== UTILITY LAYER =====
 // Utils exports with safeRun resolution
-export { safeRun, Result, LibUtils } from '@vytches/ddd-utils';
+export { LibUtils, Result, safeRun } from '@vytches/ddd-utils';
 
 // Testing utilities are now internal to library development
 // Users should use production utilities from @vytches/ddd-utils

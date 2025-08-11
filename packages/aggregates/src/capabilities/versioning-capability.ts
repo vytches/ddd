@@ -6,32 +6,6 @@ import type {
 } from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
 
-/**
- * @llm-summary VersioningCapability class for versioning capability operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * VersioningCapability class implementing domain pattern implementation for versioning capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new VersioningCapability();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new VersioningCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class VersioningCapability
   extends Capability<'versioning'>
   implements IVersioningCapability
@@ -44,6 +18,9 @@ export class VersioningCapability
   private aggregate!: IAggregateRoot;
   private upcasters = new Map<string, Map<number, IEventUpcaster>>();
 
+  /**
+   * @param {unknown} aggregate - Aggregate to attach this capability to
+   */
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
   }
@@ -53,6 +30,11 @@ export class VersioningCapability
     this.upcasters.clear();
   }
 
+  /**
+   * @param {string} eventType - Type of event to register upcaster for
+   * @param {number} sourceVersion - Source version number to upcast from
+   * @param {IEventUpcaster<TFrom, TTo>} upcaster - Upcaster instance to transform events
+   */
   registerUpcaster<TFrom = unknown, TTo = unknown>(
     eventType: string,
     sourceVersion: number,
@@ -64,6 +46,10 @@ export class VersioningCapability
     this.upcasters.get(eventType)!.set(sourceVersion, upcaster);
   }
 
+  /**
+   * @param {IExtendedDomainEvent} event - Event to process with version handling
+   * @param {Map<string, IAggregateEventHandler>} handlers - Map of event handlers
+   */
   handleVersionedEvent(
     event: IExtendedDomainEvent,
     handlers: Map<string, IAggregateEventHandler>
@@ -101,30 +87,39 @@ export class VersioningCapability
     }
   }
 
+  /**
+   * @returns {string[]} Array of event types that have registered upcasters
+   */
   getRegisteredEventTypes(): string[] {
     return Array.from(this.upcasters.keys());
   }
 
+  /**
+   * @param {string} eventType - Event type to check
+   * @param {number} version - Version number to check for upcaster
+   * @returns {boolean} True if upcaster exists for specified event type and version
+   */
   hasUpcaster(eventType: string, version: number): boolean {
     return this.upcasters.get(eventType)?.has(version) || false;
   }
 
   /**
-   * Get all upcasters for an event type
+   * @param {string} eventType - Event type to get upcasters for
+   * @returns {Map<number, IEventUpcaster> | undefined} Map of upcasters by version or undefined
    */
   getUpcastersForType(eventType: string): Map<number, IEventUpcaster> | undefined {
     return this.upcasters.get(eventType);
   }
 
   /**
-   * Clear all upcasters for an event type
+   * @param {string} eventType - Event type to clear upcasters for
    */
   clearUpcastersForType(eventType: string): void {
     this.upcasters.delete(eventType);
   }
 
   /**
-   * Get total number of registered upcasters
+   * @returns {number} Total count of all registered upcasters across all event types
    */
   getTotalUpcasterCount(): number {
     let count = 0;

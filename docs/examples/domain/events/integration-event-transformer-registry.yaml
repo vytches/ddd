@@ -1,0 +1,250 @@
+# integration-event-transformer-registry - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'integration-event-transformer-registry'
+title: 'Integration Event Transformer Registry - Transformer Management'
+description: 'Registry for managing domain to integration event transformers'
+business-context: 'Central registry for event transformation strategies'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  IntegrationEventTransformerRegistry:
+    class-doc:
+      description: 'Registry for managing domain to integration event transformers'
+      business-context: 'Central management of transformation strategies for cross-context events'
+
+      formats:
+        jsdoc:
+          description: 'Event transformer registry and management'
+          business-context: 'Centralized transformation strategy registry'
+        cli:
+          description: |
+            ## IntegrationEventTransformerRegistry Class
+            Manages registration and retrieval of transformers that convert
+            domain events to integration events for cross-context communication.
+          business-context: |
+            Essential registry for bounded context integration. Provides centralized
+            management of transformation strategies for different event types.
+
+      custom-tags:
+        complexity: 'Simple'
+        registry: 'Transformer management system'
+        transformation: 'Domain to integration event conversion'
+
+    methods:
+      constructor:
+        description: 'Creates new transformer registry instance'
+        business-context: 'Initializes empty registry for transformer registration'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const registry = new IntegrationEventTransformerRegistry();
+
+              // Registry ready for transformer registration
+              console.log('Transformer registry initialized');
+
+      register:
+        description: 'Registers transformer for specific domain event type'
+        business-context: 'Associates transformation strategy with event type'
+
+        generic-parameters:
+          - name: 'D'
+            default: 'unknown'
+            description: 'Domain event payload type'
+          - name: 'I'
+            default: 'unknown'
+            description: 'Integration event payload type'
+
+        parameters:
+          - name: 'domainEventType'
+            type: 'string'
+            description: 'Domain event type identifier'
+          - name: 'transformer'
+            type: 'IDomainToIntegrationEventTransformer<D, I>'
+            description: 'Transformer implementation for this type'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          registration: 'Transformer registration'
+          type-mapping: 'Event type to transformer mapping'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const orderTransformer = new OrderToIntegrationTransformer();
+              registry.register('OrderCreatedEvent', orderTransformer);
+
+              const userTransformer = new UserToIntegrationTransformer();
+              registry.register('UserRegisteredEvent', userTransformer);
+
+          - id: 'multiple-transformers'
+            code: |
+              // Register transformers for different event types
+              registry.register('OrderCreatedEvent', new OrderCreatedTransformer());
+              registry.register('OrderUpdatedEvent', new OrderUpdatedTransformer());
+              registry.register('OrderCancelledEvent', new OrderCancelledTransformer());
+              registry.register('PaymentProcessedEvent', new PaymentTransformer());
+
+      find:
+        description: 'Finds transformer for specific domain event type'
+        business-context: 'Retrieves appropriate transformation strategy'
+
+        generic-parameters:
+          - name: 'D'
+            default: 'unknown'
+            description: 'Domain event payload type'
+          - name: 'I'
+            default: 'unknown'
+            description: 'Integration event payload type'
+
+        parameters:
+          - name: 'domainEventType'
+            type: 'string'
+            description: 'Domain event type to find transformer for'
+
+        returns:
+          type: 'IDomainToIntegrationEventTransformer<D, I> | undefined'
+          description: 'Transformer or undefined if not found'
+
+        custom-tags:
+          lookup: 'Transformer lookup'
+          optional: 'May return undefined'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const transformer = registry.find('OrderCreatedEvent');
+              if (transformer) {
+                console.log('Transformer found for OrderCreatedEvent');
+              } else {
+                console.log('No transformer registered for this event type');
+              }
+
+          - id: 'type-safe'
+            code: |
+              const transformer = registry.find<OrderData, OrderIntegrationData>(
+                'OrderCreatedEvent'
+              );
+
+              if (transformer) {
+                const integrationEvent = transformer.transform(domainEvent);
+                console.log('Transformed event:', integrationEvent);
+              }
+
+      transform:
+        description: 'Transforms domain event to integration event using registered transformer'
+        business-context: 'Applies registered transformation strategy to domain event'
+
+        generic-parameters:
+          - name: 'D'
+            default: 'unknown'
+            description: 'Domain event payload type'
+          - name: 'I'
+            default: 'unknown'
+            description: 'Integration event payload type'
+
+        parameters:
+          - name: 'domainEvent'
+            type: 'IExtendedDomainEvent<D>'
+            description: 'Domain event to transform'
+
+        returns:
+          type: 'IIntegrationEvent<I> | undefined'
+          description: 'Integration event or undefined if no transformer'
+
+        custom-tags:
+          transformation: 'Direct event transformation'
+          convenience: 'Convenience method combining find and transform'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const orderEvent = new OrderCreatedEvent(orderData);
+              const integrationEvent = registry.transform(orderEvent);
+
+              if (integrationEvent) {
+                console.log('Event transformed:', integrationEvent.eventType);
+                await eventBus.publish(integrationEvent);
+              } else {
+                console.log('No transformer found, domain event not converted');
+              }
+
+          - id: 'batch-processing'
+            code: |
+              const domainEvents = await eventStore.getUnprocessedEvents();
+              const integrationEvents: IIntegrationEvent[] = [];
+
+              for (const domainEvent of domainEvents) {
+                const integrationEvent = registry.transform(domainEvent);
+                if (integrationEvent) {
+                  integrationEvents.push(integrationEvent);
+                }
+              }
+
+              await eventBus.publishMany(integrationEvents);
+
+      clear:
+        description: 'Clears all registered transformers'
+        business-context: 'Resets registry for reconfiguration or testing'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          reset: 'Registry reset'
+          testing: 'Useful for test cleanup'
+
+        examples:
+          - id: 'basic'
+            code: |
+              registry.clear();
+              console.log('All transformers cleared');
+
+          - id: 'test-cleanup'
+            code: |
+              afterEach(() => {
+                registry.clear();
+                // Clean state for each test
+              });
+
+      getAllEventTypes:
+        description: 'Returns all registered event types'
+        business-context: 'Provides visibility into registered transformation strategies'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of registered event type names'
+
+        custom-tags:
+          introspection: 'Registry introspection'
+          monitoring: 'Useful for monitoring and debugging'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const eventTypes = registry.getAllEventTypes();
+              console.log('Registered transformers for:', eventTypes);
+              // Output: ['OrderCreatedEvent', 'UserRegisteredEvent', ...]
+
+          - id: 'health-check'
+            code: |
+              const registeredTypes = registry.getAllEventTypes();
+              const requiredTypes = ['OrderCreatedEvent', 'PaymentProcessedEvent'];
+
+              const missing = requiredTypes.filter(type => 
+                !registeredTypes.includes(type)
+              );
+
+              if (missing.length > 0) {
+                console.warn('Missing transformers for:', missing);
+              }

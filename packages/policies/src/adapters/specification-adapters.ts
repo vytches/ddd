@@ -1,40 +1,14 @@
-import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
+import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
 import type { Result } from '@vytches/ddd-utils';
 import type { BusinessRuleValidator } from '@vytches/ddd-validation';
 import {
+  AsyncSpecificationPolicy,
   BaseBusinessPolicy,
   SpecificationPolicy,
-  AsyncSpecificationPolicy,
 } from '../core/base/base-business-policy';
 import type { PolicyRequest } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
-/**
- * @llm-summary BusinessRuleValidatorAdapter class for business rule validator adapter operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BusinessRuleValidatorAdapter class implementing domain pattern implementation for business rule validator adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BusinessRuleValidatorAdapter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BusinessRuleValidatorAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class BusinessRuleValidatorAdapter<T> implements ISpecification<T> {
   public readonly name?: string;
   public readonly description?: string;
@@ -127,32 +101,6 @@ export class BusinessRuleValidatorAdapter<T> implements ISpecification<T> {
   }
 }
 
-/**
- * @llm-summary BusinessRuleValidatorPolicy class for business rule validator policy operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BusinessRuleValidatorPolicy class implementing domain pattern implementation for business rule validator policy operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BusinessRuleValidatorPolicy();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BusinessRuleValidatorPolicy());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class BusinessRuleValidatorPolicy<T> extends BaseBusinessPolicy<T> {
   constructor(
     id: string,
@@ -228,32 +176,6 @@ export class BusinessRuleValidatorPolicy<T> extends BaseBusinessPolicy<T> {
   }
 }
 
-/**
- * @llm-summary PolicySpecificationFactory class for policy specification factory operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * PolicySpecificationFactory class implementing domain pattern implementation for policy specification factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new PolicySpecificationFactory();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new PolicySpecificationFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class PolicySpecificationFactory {
   /**
    * Create policy from ISpecification

@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { ContentResolver } from './content-resolver';
+import { YamlContentResolver } from './yaml-content-resolver';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,11 +21,68 @@ export class HybridTemplateEngine {
   }
 
   private registerHelpers(): void {
-    // Helper to load markdown content
+    // Helper to load markdown content (YAML-aware)
     this.hbs.registerHelper('loadMarkdown', (packageName: string, filePath: string) => {
       const content = this.loadMarkdownContent(packageName, filePath);
       return new this.hbs.SafeString(content);
     });
+
+    // Helper to load YAML-based documentation content
+    this.hbs.registerHelper(
+      'yamlContent',
+      (packageName: string, section: string, field: string, format = 'cli') => {
+        // Special handling for different section types
+        if (section === 'package') {
+          // Load package-level metadata
+          const yamlPath = path.join(
+            process.cwd(),
+            'docs',
+            'examples',
+            'domain',
+            packageName,
+            '.md-settings.yaml'
+          );
+          try {
+            const content = require('fs').readFileSync(yamlPath, 'utf-8');
+            const metadata = require('js-yaml').load(content) as any;
+
+            // Handle nested format-specific fields
+            let value = null;
+
+            if (field.includes('.')) {
+              // Already format-specific like "description.cli"
+              const parts = field.split('.');
+              const [baseField, requestedFormat] = parts;
+              if (baseField && requestedFormat) {
+                value = metadata.formats?.[requestedFormat]?.[baseField] || metadata[baseField];
+              }
+            } else {
+              // Look in formats first, then fallback to root
+              value = metadata.formats?.[format]?.[field] || metadata[field];
+            }
+
+            return new this.hbs.SafeString(value || '');
+          } catch (error) {
+            return new this.hbs.SafeString('');
+          }
+        } else {
+          // For class/method level, use the resolver
+          const resolverPath = field ? `${section}/${field}.md` : `${section}.md`;
+          const content = YamlContentResolver.resolveContent(packageName, resolverPath);
+          return new this.hbs.SafeString(content);
+        }
+      }
+    );
+
+    // Helper to load YAML markdown with format awareness
+    this.hbs.registerHelper(
+      'loadYamlMarkdown',
+      (packageName: string, filePath: string, format?: string) => {
+        // Use YamlContentResolver for YAML-aware content loading
+        const content = YamlContentResolver.resolveContent(packageName, filePath);
+        return new this.hbs.SafeString(content);
+      }
+    );
 
     // Helper to load framework-specific content
     this.hbs.registerHelper(
@@ -88,6 +146,11 @@ export class HybridTemplateEngine {
       return str.charAt(0).toUpperCase() + str.slice(1);
     });
 
+    // Helper for equality comparisons
+    this.hbs.registerHelper('eq', (a: unknown, b: unknown) => {
+      return a === b;
+    });
+
     // Helper to concatenate strings
     this.hbs.registerHelper('concat', (...args: unknown[]) => {
       // Remove the last argument which is the Handlebars options object
@@ -111,7 +174,7 @@ export class HybridTemplateEngine {
     });
 
     // Helper to find related examples
-    this.hbs.registerHelper('findRelatedExamples', (packageName: string, complexity: string) => {
+    this.hbs.registerHelper('findRelatedExamples', (_packageName: string, _complexity: string) => {
       return [];
     });
 
@@ -158,8 +221,8 @@ export class HybridTemplateEngine {
       return this.contentCache.get(cacheKey)!;
     }
 
-    // Use the new ContentResolver for intelligent content resolution
-    const content = ContentResolver.resolveContent(packageName, filePath);
+    // Try YamlContentResolver first, then fall back to ContentResolver
+    const content = YamlContentResolver.resolveContent(packageName, filePath);
     this.contentCache.set(cacheKey, content);
     return content;
   }

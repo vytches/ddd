@@ -2,81 +2,17 @@ import type { IACLAdapter, IEnhancedACLAdapter } from './acl.interfaces';
 import { BaseACLRegistry, type ACLRegistrationMetadata } from './base-acl-registry';
 import type { ContextACLRegistry } from './context-acl-registry';
 
-/**
- * @llm-summary Contract for import options functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * ImportOptions interface implementing integration layer component for import options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretemportOptions implements ImportOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ImportOptions {
   overwriteConflicts?: boolean;
   validateAdapters?: boolean;
 }
 
-/**
- * @llm-summary Contract for import result functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * ImportResult interface implementing integration layer component for import result operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcretemportResult implements ImportResult {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ImportResult {
   imported: string[];
   skipped: string[];
   conflicts: Array<{ contextName: string; reason: string }>;
 }
 
-/**
- * @llm-summary ACLRegistry class for a c l registry operations
- * @llm-domain Integration
- * @llm-complexity Simple
- *
- * @description
- * ACLRegistry class implementing integration layer component for a c l registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ACLRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ACLRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ACLRegistry extends BaseACLRegistry {
   protected getRegistryName(): string {
     return 'GlobalACLRegistry';

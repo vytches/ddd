@@ -1,0 +1,24 @@
+# models/index - Universal Enhanced Metadata System V2
+
+# === FOLDER METADATA ===
+folder-name: 'models'
+title: 'Policy Models'
+description: 'Data models for policies'
+business-context: 'Structures for policy data'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'folder'
+
+# === EXPORTS ===
+exports:
+  classes:
+    - 'PolicyDefinition'
+    - 'PolicyMetadata'
+    - 'PolicyViolation'
+    - 'PolicyViolationCollection'
+
+  types:
+    - 'PolicySeverity'
+    - 'PolicyMetadataData'

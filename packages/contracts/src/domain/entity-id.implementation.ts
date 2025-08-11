@@ -3,44 +3,36 @@
  * This is the fundamental building block for all entity identifiers in the DDD framework
  */
 
-import type { IEntityId, IEntityIdConstructorParams, IdType } from './entity-id.interfaces';
+import type { IEntityId, IdType } from './entity-id.interfaces';
 
-/**
- * @llm-summary EntityId class for entity id operations
- * @llm-domain Core
- * @llm-complexity Medium
- *
- * @description
- * EntityId class implementing core domain functionality for entity id operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EntityId();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EntityId());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class EntityId<T = string> implements IEntityId<T> {
   constructor(
     public readonly value: T,
     private readonly type: IdType = 'text'
   ) {}
 
+  /**
+   * Returns the stored identifier value
+   * @returns The identifier value
+   * @example
+   * ```typescript
+   * const id = EntityId.fromText('user-123');
+   * const value = id.getValue(); // Returns: 'user-123'
+   * ```
+   */
   getValue(): T {
     return this.value;
   }
 
+  /**
+   * Returns the identifier type (text, uuid, integer, bigint)
+   * @returns The identifier type
+   * @example
+   * ```typescript
+   * const id = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+   * const type = id.getType(); // Returns: 'uuid'
+   * ```
+   */
   getType(): IdType {
     return this.type;
   }
@@ -50,6 +42,16 @@ export class EntityId<T = string> implements IEntityId<T> {
     return value != null && value !== undefined;
   }
 
+  /**
+   * Compares this EntityId with another for equality
+   * @returns True if entities have same value and type
+   * @example
+   * ```typescript
+   * const id1 = EntityId.fromText('user-123');
+   * const id2 = EntityId.fromText('user-123');
+   * const isEqual = id1.equals(id2); // Returns: true
+   * ```
+   */
   equals(other: IEntityId<T>): boolean {
     return other.getValue() === this.value && other.getType() === this.type;
   }
@@ -90,6 +92,15 @@ export class EntityId<T = string> implements IEntityId<T> {
   }
 
   // Compatibility methods for existing code
+  /**
+   * Creates a new EntityId with a randomly generated UUID
+   * @returns New EntityId with random UUID
+   * @example
+   * ```typescript
+   * const id = EntityId.createWithRandomUUID();
+   * console.log(id.getValue()); // Returns: '550e8400-e29b-41d4-a716-446655440000'
+   * ```
+   */
   static createWithRandomUUID(): EntityId<string> {
     // Simple UUID generation without external dependencies
     const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -100,6 +111,15 @@ export class EntityId<T = string> implements IEntityId<T> {
     return new EntityId(uuid, 'uuid');
   }
 
+  /**
+   * Creates an EntityId from a UUID string with validation
+   * @returns EntityId from UUID string
+   * @example
+   * ```typescript
+   * const id = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+   * console.log(id.getType()); // Returns: 'uuid'
+   * ```
+   */
   static fromUUID(value: string): EntityId<string> {
     if (!value || typeof value !== 'string') {
       throw new Error('entity identifier must be provided');
@@ -127,6 +147,15 @@ export class EntityId<T = string> implements IEntityId<T> {
     return new EntityId(stringValue, 'bigint');
   }
 
+  /**
+   * Creates an EntityId from a text string with validation
+   * @returns EntityId from text string
+   * @example
+   * ```typescript
+   * const id = EntityId.fromText('user-123');
+   * console.log(id.getValue()); // Returns: 'user-123'
+   * ```
+   */
   static fromText(value: string): EntityId<string> {
     if (!value || typeof value !== 'string') {
       throw new Error('entity identifier must be provided');

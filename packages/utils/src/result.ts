@@ -1,29 +1,3 @@
-/**
- * @llm-summary Result class for result operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Result class implementing infrastructure service for result operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new Result();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new Result());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class Result<TValue, TError = Error> {
   private readonly _isSuccess: boolean;
   private readonly _value: TValue | undefined;

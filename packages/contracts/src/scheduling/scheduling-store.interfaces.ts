@@ -1,29 +1,10 @@
 import type {
-  IScheduledJob,
   IJobFilter,
   IJobQueryResult,
+  IScheduledJob,
   JobStatus,
 } from './scheduled-event.interfaces';
 
-/**
- * @llm-summary Contract for scheduled event store functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * ScheduledEventStore interface implementing core domain functionality for scheduled event store operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteScheduledEventStore implements IScheduledEventStore {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IScheduledEventStore {
   /**
    * Save a scheduled job
@@ -80,25 +61,6 @@ export interface IScheduledEventStore {
   clear(): Promise<void>;
 }
 
-/**
- * @llm-summary Contract for transactional scheduled event store functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * TransactionalScheduledEventStore interface implementing core domain functionality for transactional scheduled event store operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteTransactionalScheduledEventStore implements ITransactionalScheduledEventStore {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ITransactionalScheduledEventStore extends IScheduledEventStore {
   /**
    * Begin a transaction
@@ -121,25 +83,6 @@ export interface ITransactionalScheduledEventStore extends IScheduledEventStore 
   withTransaction<T>(operation: () => Promise<T>): Promise<T>;
 }
 
-/**
- * @llm-summary Contract for scheduler metrics functionality
- * @llm-domain Core
- * @llm-contract Required
- *
- * @description
- * SchedulerMetrics interface implementing core domain functionality for scheduler metrics operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteSchedulerMetrics implements ISchedulerMetrics {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface ISchedulerMetrics {
   /**
    * Get total number of jobs by status

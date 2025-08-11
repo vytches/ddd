@@ -1,0 +1,407 @@
+# types - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'types'
+title: 'Example Engine Types - Core Type Definitions'
+description: 'Type definitions for the JSDoc examples extraction and validation system'
+business-context: 'Defines data structures used throughout the example processing pipeline'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  LayerType:
+    description: 'Documentation layer classification'
+    business-context: 'Categorizes examples by architectural layer'
+
+    values:
+      - name: 'domain'
+        value: "'domain'"
+        description: 'Domain layer examples (pure business logic)'
+      - name: 'service'
+        value: "'service'"
+        description: 'Service layer examples (application services)'
+      - name: 'integration'
+        value: "'integration'"
+        description: 'Integration layer examples (framework integration)'
+
+    custom-tags:
+      since: '2.0.0'
+      usage: 'Example categorization'
+
+  ComplexityLevel:
+    description: 'Example complexity classification'
+    business-context: 'Indicates difficulty and comprehensiveness of examples'
+
+    values:
+      - name: 'basic'
+        value: "'basic'"
+        description: 'Simple, beginner-friendly examples'
+      - name: 'intermediate'
+        value: "'intermediate'"
+        description: 'Standard usage examples with moderate complexity'
+      - name: 'advanced'
+        value: "'advanced'"
+        description: 'Complex examples with advanced patterns'
+
+    custom-tags:
+      since: '2.0.0'
+      usage: 'Example difficulty rating'
+
+  OutputType:
+    description: 'Target output format for examples'
+    business-context: 'Specifies how examples should be formatted for display'
+
+    values:
+      - name: 'jsdoc'
+        value: "'jsdoc'"
+        description: 'Format for JSDoc comments'
+      - name: 'cli'
+        value: "'cli'"
+        description: 'Format for command-line display'
+
+    custom-tags:
+      since: '2.0.0'
+      extensible: 'Can be extended with more formats'
+
+# === INTERFACES ===
+interfaces:
+  ExampleFile:
+    description: 'Represents a parsed example documentation file'
+    business-context: 'Contains all information about a documentation file'
+
+    properties:
+      - name: 'filePath'
+        type: 'string'
+        description: 'Absolute path to the file'
+
+      - name: 'packageName'
+        type: 'string'
+        description: 'Package this example belongs to'
+
+      - name: 'complexity'
+        type: 'ComplexityLevel'
+        description: 'Complexity level of examples in file'
+
+      - name: 'content'
+        type: 'string'
+        description: 'Raw file content'
+
+      - name: 'metadata'
+        type: 'ExampleMetadata'
+        description: 'Extracted metadata from file header'
+
+    custom-tags:
+      since: '2.0.0'
+      category: 'data-structure'
+
+  ExampleMetadata:
+    description: 'Metadata extracted from example file headers'
+    business-context: 'Provides context and categorization for examples'
+
+    properties:
+      - name: 'title'
+        type: 'string'
+        description: 'Example title'
+
+      - name: 'description'
+        type: 'string'
+        description: 'Example description'
+
+      - name: 'patterns'
+        type: 'string[]'
+        description: 'Design patterns demonstrated'
+
+      - name: 'dependencies'
+        type: 'string[]'
+        description: 'Required dependencies'
+
+    custom-tags:
+      embedded: 'true'
+
+  ExtractedExample:
+    description: 'Single extracted example from documentation'
+    business-context: 'Represents an individual code example ready for injection'
+
+    properties:
+      - name: 'methodName'
+        type: 'string'
+        description: 'Method this example demonstrates'
+
+      - name: 'layer'
+        type: 'LayerType'
+        description: 'Architectural layer'
+
+      - name: 'complexity'
+        type: 'ComplexityLevel'
+        description: 'Example complexity'
+
+      - name: 'content'
+        type: 'string'
+        description: 'Example code content'
+
+      - name: 'lineCount'
+        type: 'number'
+        description: 'Number of lines in example'
+
+      - name: 'packageName'
+        type: 'string'
+        description: 'Source package'
+
+    custom-tags:
+      since: '2.0.0'
+      validated: 'true'
+
+  ValidationResult:
+    description: 'Result of example validation'
+    business-context: 'Provides detailed validation feedback'
+
+    properties:
+      - name: 'isValid'
+        type: 'boolean'
+        description: 'Overall validation status'
+
+      - name: 'errors'
+        type: 'ValidationError[]'
+        description: 'List of validation errors'
+
+      - name: 'warnings'
+        type: 'ValidationWarning[]'
+        description: 'List of validation warnings'
+
+    custom-tags:
+      since: '2.0.0'
+      category: 'validation'
+
+  ValidationError:
+    description: 'Validation error details'
+    business-context: 'Describes specific validation failures'
+
+    properties:
+      - name: 'type'
+        type: 'ValidationErrorType'
+        description: 'Error classification'
+
+      - name: 'message'
+        type: 'string'
+        description: 'Error description'
+
+      - name: 'line'
+        type: 'number'
+        description: 'Line number where error occurred'
+        optional: true
+
+      - name: 'element'
+        type: 'string'
+        description: 'Code element causing error'
+        optional: true
+
+    custom-tags:
+      severity: 'error'
+
+  ValidationWarning:
+    description: 'Validation warning details'
+    business-context: 'Describes non-critical issues or suggestions'
+
+    properties:
+      - name: 'type'
+        type: 'ValidationWarningType'
+        description: 'Warning classification'
+
+      - name: 'message'
+        type: 'string'
+        description: 'Warning description'
+
+      - name: 'line'
+        type: 'number'
+        description: 'Line number'
+        optional: true
+
+    custom-tags:
+      severity: 'warning'
+
+  ExampleValidationRules:
+    description: 'Validation rules per layer'
+    business-context: 'Defines layer-specific validation constraints'
+
+    properties:
+      - name: 'domain'
+        type: 'LayerRules'
+        description: 'Domain layer rules'
+
+      - name: 'service'
+        type: 'LayerRules'
+        description: 'Service layer rules'
+
+      - name: 'integration'
+        type: 'LayerRules'
+        description: 'Integration layer rules'
+
+    custom-tags:
+      configurable: 'true'
+
+  LayerRules:
+    description: 'Rules for specific layer'
+    business-context: 'Layer-specific validation constraints'
+
+    properties:
+      - name: 'maxLines'
+        type: 'number'
+        description: 'Maximum lines allowed'
+
+      - name: 'required'
+        type: 'string[]'
+        description: 'Required elements'
+
+      - name: 'forbidden'
+        type: 'string[]'
+        description: 'Forbidden elements'
+
+    custom-tags:
+      embedded: 'true'
+
+  ExtractionTag:
+    description: 'Tag marking example boundaries'
+    business-context: 'Identifies example location in source files'
+
+    properties:
+      - name: 'methodName'
+        type: 'string'
+        description: 'Method being demonstrated'
+
+      - name: 'layer'
+        type: 'LayerType'
+        description: 'Target layer'
+
+      - name: 'complexity'
+        type: 'ComplexityLevel'
+        description: 'Example complexity'
+
+      - name: 'startLine'
+        type: 'number'
+        description: 'Starting line number'
+
+      - name: 'endLine'
+        type: 'number'
+        description: 'Ending line number'
+
+    custom-tags:
+      parser: 'true'
+
+  GenerationOptions:
+    description: 'Options for documentation generation'
+    business-context: 'Configures documentation output generation'
+
+    properties:
+      - name: 'packageName'
+        type: 'string'
+        description: 'Target package'
+        optional: true
+
+      - name: 'framework'
+        type: "'nestjs' | 'express' | 'fastify'"
+        description: 'Framework context'
+        optional: true
+
+      - name: 'complexity'
+        type: 'ComplexityLevel'
+        description: 'Preferred complexity'
+        optional: true
+
+      - name: 'outputType'
+        type: 'OutputType'
+        description: 'Output format'
+
+      - name: 'maxExamples'
+        type: 'number'
+        description: 'Maximum examples to include'
+        optional: true
+
+    custom-tags:
+      since: '2.0.0'
+      cli: 'true'
+
+# === ENUMS ===
+enums:
+  ValidationErrorType:
+    description: 'Types of validation errors'
+    business-context: 'Categorizes validation failures'
+
+    values:
+      - name: 'max_lines_exceeded'
+        value: "'max_lines_exceeded'"
+        description: 'Example exceeds line limit'
+
+      - name: 'missing_required_element'
+        value: "'missing_required_element'"
+        description: 'Required element not found'
+
+      - name: 'forbidden_element_found'
+        value: "'forbidden_element_found'"
+        description: 'Forbidden element detected'
+
+      - name: 'compilation_error'
+        value: "'compilation_error'"
+        description: 'Code does not compile'
+
+  ValidationWarningType:
+    description: 'Types of validation warnings'
+    business-context: 'Categorizes non-critical issues'
+
+    values:
+      - name: 'style_suggestion'
+        value: "'style_suggestion'"
+        description: 'Code style improvement suggestion'
+
+      - name: 'best_practice'
+        value: "'best_practice'"
+        description: 'Best practice recommendation'
+
+# === EXAMPLES ===
+examples:
+  - id: 'example-file-structure'
+    description: 'ExampleFile structure'
+    code: |
+      const exampleFile: ExampleFile = {
+        filePath: '/examples/domain/user-service.md',
+        packageName: 'domain-services',
+        complexity: 'intermediate',
+        content: '# User Service Example\\n...',
+        metadata: {
+          title: 'User Service - Domain Layer',
+          description: 'Shows user management patterns',
+          patterns: ['Repository', 'Factory', 'Specification'],
+          dependencies: ['@vytches/ddd-core']
+        }
+      };
+
+  - id: 'validation-result'
+    description: 'Validation result handling'
+    code: |
+      const result: ValidationResult = {
+        isValid: false,
+        errors: [
+          {
+            type: 'max_lines_exceeded',
+            message: 'Example exceeds 5 line limit for domain layer',
+            line: 6
+          }
+        ],
+        warnings: [
+          {
+            type: 'style_suggestion',
+            message: 'Consider using arrow functions',
+            line: 3
+          }
+        ]
+      };
+
+      if (!result.isValid) {
+        console.error('Validation failed:');
+        result.errors.forEach(err => {
+          console.error(`  - ${err.message} at line ${err.line}`);
+        });
+      }

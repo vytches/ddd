@@ -1,0 +1,486 @@
+# DefaultLogger - DDD-First Structured Logging Implementation
+
+# === FILE METADATA ===
+file-name: 'logger'
+title: 'DefaultLogger - Enterprise DDD Logging'
+description: 'Main logger implementation with DDD-first design and enterprise features'
+business-context: 'Central logging infrastructure for DDD applications with automatic bounded context detection and correlation tracking'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  DefaultLogger:
+    # Class Documentation
+    class-doc:
+      description: 'DDD-first structured logger with smart context detection and enterprise features'
+      business-context: 'Core logging infrastructure designed specifically for Domain-Driven Design applications, providing automatic bounded context detection, correlation tracking, and comprehensive DDD pattern integration'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Enterprise structured logger with DDD-first design'
+        cli:
+          description: |
+            ## DefaultLogger - DDD-First Enterprise Logging
+
+            The main logger implementation providing:
+            - **Smart Context Detection**: Automatic class and bounded context detection from stack traces
+            - **DDD Integration**: Built-in support for domain events, aggregates, and bounded contexts
+            - **Enterprise Features**: Correlation tracking, multi-tenancy, data masking
+            - **Zero Configuration**: Works out of the box with sensible defaults
+
+      custom-tags:
+        since: '1.0.0'
+        enterprise-features: 'Context detection, data masking, correlation tracking, multi-tenancy'
+        ddd-integration: 'Bounded context detection, aggregate state logging, domain event correlation'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new logger instance with optional configuration overrides'
+        business-context: 'Initializes logger with context and enterprise features like data masking'
+
+        parameters:
+          - name: 'context'
+            type: 'LogContext'
+            description: 'Log context containing name, bounded context, and correlation data'
+          - name: 'config'
+            type: 'Partial<LoggerConfiguration>'
+            description: 'Optional configuration overrides for this instance'
+            optional: true
+
+        examples:
+          - id: 'basic'
+            code: |
+              const context = new DefaultLogContextBuilder('OrderService')
+                .withBoundedContext('OrderManagement')
+                .withCorrelationId('req-123')
+                .build();
+              const logger = new DefaultLogger(context);
+
+          - id: 'with-config'
+            code: |
+              const logger = new DefaultLogger(context, {
+                level: 'debug',
+                masking: { enabled: true, sensitiveKeys: ['password', 'email'] }
+              });
+
+      configure:
+        description: 'Configures global logger settings for all instances'
+        business-context: 'Sets enterprise-wide logging policies including data masking, levels, and providers'
+
+        parameters:
+          - name: 'config'
+            type: 'LoggerConfiguration'
+            description: 'Global configuration for all logger instances'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'enterprise-config'
+            code: |
+              DefaultLogger.configure({
+                level: 'info',
+                provider: 'console',
+                contextDetection: { enabled: true },
+                masking: {
+                  enabled: true,
+                  sensitiveKeys: ['password', 'email', 'ssn', 'creditCard'],
+                  replacement: '[REDACTED]'
+                }
+              });
+
+        custom-tags:
+          static: true
+          global-effect: 'Affects all logger instances'
+
+      create:
+        description: 'Creates a new logger with smart context detection or explicit context name'
+        business-context: 'Factory method providing automatic DDD bounded context detection from stack traces'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Explicit context name, or undefined for auto-detection'
+            optional: true
+
+        returns:
+          type: 'Logger'
+          description: 'Configured logger instance with detected or specified context'
+
+        examples:
+          - id: 'auto-detect'
+            code: |
+              // Auto-detects context from calling class
+              class OrderService {
+                private logger = DefaultLogger.create(); // Detects "OrderService"
+                
+                processOrder() {
+                  this.logger.info('Processing order');
+                }
+              }
+
+          - id: 'explicit-context'
+            code: |
+              const logger = DefaultLogger.create('PaymentGateway');
+              logger.info('Payment gateway initialized');
+
+        custom-tags:
+          static: true
+          ddd-feature: 'Automatic bounded context detection'
+
+      forContext:
+        description: 'Alias for create() method providing fluent API for context creation'
+        business-context: 'Provides developer-friendly API for creating contextual loggers'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name for the logger'
+            optional: true
+
+        returns:
+          type: 'Logger'
+          description: 'Logger instance with specified or auto-detected context'
+
+        examples:
+          - id: 'fluent-api'
+            code: |
+              const logger = DefaultLogger.forContext('AggregateService')
+                .withCorrelationId('trace-456')
+                .withUserId('user-789');
+              logger.info('Aggregate operation started');
+
+        custom-tags:
+          static: true
+          alias-for: 'create'
+
+      trace:
+        description: 'Logs trace-level message with optional structured data'
+        business-context: 'Detailed debugging information for development and troubleshooting'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Optional structured data (will be masked if sensitive)'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'basic-trace'
+            code: |
+              logger.trace('Entering method', { method: 'processOrder', params: { orderId: '123' } });
+
+      debug:
+        description: 'Logs debug-level message with optional structured data'
+        business-context: 'Development and debugging information for troubleshooting issues'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Optional structured data (will be masked if sensitive)'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'debug-with-data'
+            code: |
+              logger.debug('Order validation completed', {
+                orderId: order.id,
+                validationResult: 'passed',
+                duration: '45ms'
+              });
+
+      info:
+        description: 'Logs informational message with optional structured data'
+        business-context: 'General application flow information for monitoring and auditing'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Optional structured data (will be masked if sensitive)'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'business-event'
+            code: |
+              logger.info('Order processed successfully', {
+                orderId: order.id,
+                amount: order.totalAmount,
+                customerId: order.customerId
+              });
+
+      warn:
+        description: 'Logs warning message with optional structured data'
+        business-context: 'Potential issues or deprecated functionality that needs attention'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Warning message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Optional structured data (will be masked if sensitive)'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'business-warning'
+            code: |
+              logger.warn('Order processing taking longer than expected', {
+                orderId: order.id,
+                processingTime: '5000ms',
+                threshold: '3000ms'
+              });
+
+      error:
+        description: 'Logs error message with optional error object and structured data'
+        business-context: 'Error conditions that need immediate attention and investigation'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+          - name: 'error'
+            type: 'Error'
+            description: 'Error object with stack trace'
+            optional: true
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Optional structured data (will be masked if sensitive)'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'error-with-context'
+            code: |
+              try {
+                await orderService.processPayment(order);
+              } catch (error) {
+                logger.error('Payment processing failed', error, {
+                  orderId: order.id,
+                  paymentMethod: order.paymentMethod,
+                  amount: order.totalAmount
+                });
+              }
+
+      fatal:
+        description: 'Logs fatal error message that may require application shutdown'
+        business-context: 'Critical system failures that prevent normal application operation'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Fatal error message'
+          - name: 'error'
+            type: 'Error'
+            description: 'Error object with stack trace'
+            optional: true
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Optional structured data (will be masked if sensitive)'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'fatal-system-error'
+            code: |
+              logger.fatal('Database connection pool exhausted', dbError, {
+                connectionCount: 0,
+                maxConnections: 10,
+                activeRequests: 50
+              });
+
+      log:
+        description: 'Generic logging method supporting all log levels with full parameter control'
+        business-context: 'Flexible logging method for custom log level handling and advanced scenarios'
+
+        parameters:
+          - name: 'level'
+            type: 'LogLevel'
+            description: 'Log level (trace, debug, info, warn, error, fatal)'
+          - name: 'message'
+            type: 'string'
+            description: 'Log message'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Optional structured data (will be masked if sensitive)'
+            optional: true
+          - name: 'error'
+            type: 'Error'
+            description: 'Optional error object'
+            optional: true
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'dynamic-level'
+            code: |
+              const level = isProduction ? 'info' : 'debug';
+              logger.log(level, 'Operation completed', { 
+                operation: 'processOrder',
+                duration: performance.now() - startTime
+              });
+
+      isLevelEnabled:
+        description: 'Checks if a specific log level is enabled based on current configuration'
+        business-context: 'Performance optimization to avoid expensive log data preparation when level is disabled'
+
+        parameters:
+          - name: 'level'
+            type: 'LogLevel'
+            description: 'Log level to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if level is enabled, false otherwise'
+
+        examples:
+          - id: 'performance-check'
+            code: |
+              if (logger.isLevelEnabled('debug')) {
+                // Expensive operation only when debug is enabled
+                const complexData = generateDetailedDiagnostics();
+                logger.debug('Complex operation details', complexData);
+              }
+
+      child:
+        description: 'Creates a child logger inheriting current context with new context name'
+        business-context: 'Creates specialized loggers for sub-operations while maintaining correlation context'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Name for the child logger context'
+
+        returns:
+          type: 'Logger'
+          description: 'New logger instance inheriting parent context'
+
+        examples:
+          - id: 'child-logger'
+            code: |
+              class OrderService {
+                private logger = DefaultLogger.forContext('OrderService');
+                
+                async processOrder(order: Order) {
+                  const paymentLogger = this.logger.child('PaymentProcessor');
+                  paymentLogger.info('Processing payment', { amount: order.total });
+                }
+              }
+
+      withContext:
+        description: 'Creates new logger instance with merged context information'
+        business-context: 'Adds or updates correlation data while preserving existing context'
+
+        parameters:
+          - name: 'context'
+            type: 'Partial<LogContext>'
+            description: 'Context updates to merge with current context'
+
+        returns:
+          type: 'Logger'
+          description: 'New logger instance with merged context'
+
+        examples:
+          - id: 'context-enrichment'
+            code: |
+              const enrichedLogger = logger.withContext({
+                userId: 'user-123',
+                tenantId: 'tenant-456',
+                requestId: 'req-789'
+              });
+              enrichedLogger.info('User action performed');
+
+      withCorrelationId:
+        description: 'Creates new logger instance with correlation ID for request tracing'
+        business-context: 'Enables distributed tracing and request correlation across service boundaries'
+
+        parameters:
+          - name: 'correlationId'
+            type: 'string'
+            description: 'Correlation ID for request tracking'
+
+        returns:
+          type: 'Logger'
+          description: 'New logger instance with correlation ID'
+
+        examples:
+          - id: 'correlation-tracking'
+            code: |
+              const correlatedLogger = logger.withCorrelationId(req.headers['x-correlation-id']);
+              correlatedLogger.info('Request processing started');
+
+      withUserId:
+        description: 'Creates new logger instance with user ID for user action tracking'
+        business-context: 'Associates log entries with specific users for audit trails and troubleshooting'
+
+        parameters:
+          - name: 'userId'
+            type: 'string'
+            description: 'User identifier for log context'
+
+        returns:
+          type: 'Logger'
+          description: 'New logger instance with user ID'
+
+        examples:
+          - id: 'user-tracking'
+            code: |
+              const userLogger = logger.withUserId(authenticatedUser.id);
+              userLogger.info('User performed action', { action: 'updateProfile' });
+
+      withTenantId:
+        description: 'Creates new logger instance with tenant ID for multi-tenant applications'
+        business-context: 'Enables tenant-specific log filtering and compliance in multi-tenant systems'
+
+        parameters:
+          - name: 'tenantId'
+            type: 'string'
+            description: 'Tenant identifier for multi-tenant context'
+
+        returns:
+          type: 'Logger'
+          description: 'New logger instance with tenant ID'
+
+        examples:
+          - id: 'multi-tenant'
+            code: |
+              const tenantLogger = logger.withTenantId(request.tenantId);
+              tenantLogger.info('Tenant-specific operation', { operation: 'dataExport' });

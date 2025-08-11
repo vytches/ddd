@@ -1,38 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDomainEvent, IEventProcessor, IExtendedDomainEvent } from '@vytches/ddd-contracts';
-import { LibUtils } from '@vytches/ddd-utils';
 import { Logger } from '@vytches/ddd-logging';
+import { LibUtils } from '@vytches/ddd-utils';
 
 import type { IProjectionEngine } from './projection-interfaces';
 import type { ProjectionEngineRegistry } from './projection-registry';
 
-/**
- * @llm-summary ProjectionProcessor class for projection processor operations
- * @llm-domain Architecture
- * @llm-complexity Complex
- *
- * @description
- * ProjectionProcessor class implementing architectural component for projection processor operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ProjectionProcessor();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ProjectionProcessor());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ProjectionProcessor implements IEventProcessor {
   private logger = Logger.create('ProjectionProcessor');
 

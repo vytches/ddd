@@ -3,32 +3,6 @@ import type { IEventSourcingCapability, IEventStore } from '@vytches/ddd-contrac
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
-/**
- * @llm-summary EventSourcingCapability class for event sourcing capability operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * EventSourcingCapability class implementing domain pattern implementation for event sourcing capability operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventSourcingCapability();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventSourcingCapability());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class EventSourcingCapability
   extends Capability<'eventSourcing'>
   implements IEventSourcingCapability
@@ -41,6 +15,9 @@ export class EventSourcingCapability
   private aggregate!: IAggregateRoot;
   private eventStore: IEventStore | null = null;
 
+  /**
+   * @param {unknown} aggregate - Aggregate to attach this capability to
+   */
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
   }
@@ -50,14 +27,24 @@ export class EventSourcingCapability
     this.eventStore = null;
   }
 
+  /**
+   * @param {IEventStore} eventStore - Event store instance to use for persistence
+   */
   setEventStore(eventStore: IEventStore): void {
     this.eventStore = eventStore;
   }
 
+  /**
+   * @returns {IEventStore | null} Currently configured event store or null
+   */
   getEventStore(): IEventStore | null {
     return this.eventStore;
   }
 
+  /**
+   * @param {string | number} aggregateId - ID of aggregate to load events for
+   * @throws {AggregateError} When event store is not configured
+   */
   async loadFromEventStore(aggregateId: string | number): Promise<void> {
     if (!this.eventStore) {
       throw AggregateError.configurationError(
@@ -82,6 +69,9 @@ export class EventSourcingCapability
     }
   }
 
+  /**
+   * @throws {AggregateError} When event store is not configured
+   */
   async saveToEventStore(): Promise<void> {
     if (!this.eventStore) {
       throw AggregateError.configurationError(
@@ -103,21 +93,23 @@ export class EventSourcingCapability
   }
 
   /**
-   * Check if event store is configured
+   * @returns {boolean} True if event store is configured
    */
   hasEventStore(): boolean {
     return this.eventStore !== null;
   }
 
   /**
-   * Get aggregate stream name for event store
+   * @returns {string} Stream name combining aggregate type and ID
    */
   getStreamName(): string {
     return `${this.aggregate.constructor.name}-${this.aggregate.getId().getValue()}`;
   }
 
   /**
-   * Load events from a specific version
+   * @param {string | number} aggregateId - ID of aggregate to load events for
+   * @param {number} fromVersion - Version number to start loading from
+   * @throws {AggregateError} When event store is not configured
    */
   async loadFromVersion(aggregateId: string | number, fromVersion: number): Promise<void> {
     if (!this.eventStore) {

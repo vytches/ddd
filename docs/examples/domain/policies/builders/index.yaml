@@ -1,0 +1,26 @@
+# builders/index - Universal Enhanced Metadata System V2
+
+# === FOLDER METADATA ===
+folder-name: 'builders'
+title: 'Policy Builders'
+description: 'Fluent builders for policy construction'
+business-context: 'Simplifies complex policy creation with readable API'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'folder'
+
+# === EXPORTS ===
+exports:
+  classes:
+    - 'PolicyBuilder'
+    - 'ConditionalPolicyBuilder'
+    - 'PolicyGroup'
+    - 'PolicyGroupBuilder'
+    - 'PolicyStepBuilder'
+
+  interfaces:
+    - 'IPolicyBuilder'
+    - 'IPolicyStepBuilder'
+    - 'IConditionalPolicyBuilder'

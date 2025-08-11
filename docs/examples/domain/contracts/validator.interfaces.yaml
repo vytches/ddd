@@ -1,0 +1,286 @@
+# Validator Interfaces - Foundation Layer Validation Contracts
+# Core validator interface definitions for domain validation
+
+# === FILE METADATA ===
+file-name: 'validator.interfaces'
+title: 'Validator Interfaces - Domain Validation Contracts'
+description: 'Core interface definitions for validator pattern implementation enabling structured domain validation with error reporting'
+business-context: 'Provides standardized contracts for input validation and business rule enforcement with detailed error reporting'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  IValidationError:
+    description: 'Interface defining structure of validation error information'
+    business-context: 'Standardizes error reporting for validation failures enabling consistent error handling across domain operations'
+
+    formats:
+      jsdoc:
+        description: 'Validation error structure with context support'
+        business-context: 'Standard error reporting for validation failures'
+      cli:
+        description: |
+          ## IValidationError Interface
+
+          Structure for validation error reporting:
+
+          **Core Fields:**
+          - Property identification for failed validation
+          - Human-readable error message
+          - Optional context for debugging
+
+          **Error Reporting:**
+          - User-friendly messages
+          - Field-specific errors
+          - Debug context support
+
+    properties:
+      - name: 'property'
+        type: 'string'
+        description: 'Name or path of the property that failed validation'
+        business-context: 'Identifies which field caused the validation failure'
+
+      - name: 'message'
+        type: 'string'
+        description: 'Human-readable error message describing the validation failure'
+        business-context: 'Provides clear feedback to users about what went wrong'
+
+      - name: 'context'
+        type: 'Record<string, unknown>'
+        description: 'Optional additional context about the validation failure'
+        business-context: 'Enables rich error reporting with debugging information'
+        optional: true
+
+  IValidationErrors:
+    description: 'Interface for collections of validation errors'
+    business-context: 'Aggregates multiple validation errors for comprehensive validation feedback'
+
+    formats:
+      jsdoc:
+        description: 'Collection interface for multiple validation errors'
+        business-context: 'Aggregated validation error reporting'
+      cli:
+        description: |
+          ## IValidationErrors Interface
+
+          Collection of validation errors:
+
+          **Aggregation Features:**
+          - Array of individual validation errors
+          - Count of total errors
+          - Structured error collection
+
+          **Usage Patterns:**
+          - Form validation results
+          - Bulk operation errors
+          - Comprehensive validation reporting
+
+    properties:
+      - name: 'errors'
+        type: 'IValidationError[]'
+        description: 'Array of individual validation errors'
+        business-context: 'Complete collection of all validation failures'
+
+      - name: 'length'
+        type: 'number'
+        description: 'Number of validation errors in the collection'
+        business-context: 'Quick access to error count for summary reporting'
+
+  IValidator:
+    description: 'Core interface contract for domain validators'
+    business-context: 'Standardizes validation behavior across domain objects enabling consistent input validation with Result pattern'
+
+    formats:
+      jsdoc:
+        description: 'Validator interface with Result pattern integration'
+        business-context: 'Standard validation contract with error handling'
+      cli:
+        description: |
+          ## IValidator Interface
+
+          Standard validation contract:
+
+          **Validation Features:**
+          - Result pattern integration
+          - Type-safe validation
+          - Comprehensive error reporting
+          - Success/failure handling
+
+          **Integration Benefits:**
+          - Consistent error handling
+          - Railway-oriented programming
+          - Composable validation chains
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Type of value to validate'
+
+    methods:
+      validate:
+        description: 'Validates a value and returns Result with success or validation errors'
+        business-context: 'Core validation method using Result pattern to handle success and error cases consistently'
+
+        parameters:
+          - name: 'value'
+            type: 'T'
+            description: 'Value to validate'
+
+        returns:
+          type: 'Result<T, IValidationErrors>'
+          description: 'Result containing validated value on success or validation errors on failure'
+
+        examples:
+          - id: 'basic-validation'
+            code: |
+              // Email validator implementation
+              class EmailValidator implements IValidator<string> {
+                validate(value: string): Result<string, IValidationErrors> {
+                  if (!value) {
+                    return Result.failure({
+                      errors: [{ property: 'email', message: 'Email is required' }],
+                      length: 1
+                    });
+                  }
+                  
+                  if (!this.isValidEmailFormat(value)) {
+                    return Result.failure({
+                      errors: [{ property: 'email', message: 'Invalid email format' }],
+                      length: 1
+                    });
+                  }
+                  
+                  return Result.success(value);
+                }
+              }
+
+          - id: 'usage-pattern'
+            code: |
+              // Using validator with Result pattern
+              const emailValidator = new EmailValidator();
+              const result = emailValidator.validate('user@example.com');
+
+              if (result.isSuccess()) {
+                console.log('Valid email:', result.value);
+              } else {
+                result.error.errors.forEach(error => {
+                  console.log(`${error.property}: ${error.message}`);
+                });
+              }
+
+  IValidationRule:
+    description: 'Interface contract for individual validation rules'
+    business-context: 'Defines structure for reusable validation rules that can be composed into complex validators'
+
+    formats:
+      jsdoc:
+        description: 'Validation rule interface with conditional application'
+        business-context: 'Composable validation rule definition'
+      cli:
+        description: |
+          ## IValidationRule Interface
+
+          Individual validation rule contract:
+
+          **Rule Components:**
+          - Property targeting
+          - Validation function
+          - Conditional application
+          - Error generation
+
+          **Composition Benefits:**
+          - Reusable validation logic
+          - Conditional rule application  
+          - Modular validation design
+          - Rule-based validation systems
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Type of value the rule validates'
+
+    properties:
+      - name: 'property'
+        type: 'string'
+        description: 'Name or path of the property this rule validates'
+        business-context: 'Identifies which property the rule applies to'
+
+      - name: 'validate'
+        type: '(value: T) => Result<true, IValidationError>'
+        description: 'Function that performs the validation'
+        business-context: 'Core validation logic returning success or detailed error'
+
+      - name: 'condition'
+        type: '(value: T) => boolean'
+        description: 'Optional condition determining when to apply this rule'
+        business-context: 'Enables conditional validation based on business logic'
+        optional: true
+
+    examples:
+      - id: 'validation-rule-implementation'
+        code: |
+          // Required field validation rule
+          const requiredRule: IValidationRule<string> = {
+            property: 'username',
+            validate: (value: string) => {
+              if (!value || value.trim().length === 0) {
+                return Result.failure({
+                  property: 'username',
+                  message: 'Username is required'
+                });
+              }
+              return Result.success(true);
+            }
+          };
+
+      - id: 'conditional-rule'
+        code: |
+          // Conditional validation rule
+          const passwordRule: IValidationRule<User> = {
+            property: 'password',
+            condition: (user: User) => user.isNewUser, // Only for new users
+            validate: (user: User) => {
+              if (!user.password || user.password.length < 8) {
+                return Result.failure({
+                  property: 'password',
+                  message: 'Password must be at least 8 characters',
+                  context: { minLength: 8 }
+                });
+              }
+              return Result.success(true);
+            }
+          };
+
+      - id: 'rule-composition'
+        code: |
+          // Composing rules into validator
+          class UserValidator implements IValidator<User> {
+            private rules: IValidationRule<User>[] = [
+              requiredUsernameRule,
+              emailFormatRule,
+              passwordRule
+            ];
+            
+            validate(user: User): Result<User, IValidationErrors> {
+              const errors: IValidationError[] = [];
+              
+              for (const rule of this.rules) {
+                if (rule.condition && !rule.condition(user)) {
+                  continue; // Skip conditional rules
+                }
+                
+                const result = rule.validate(user);
+                if (result.isFailure()) {
+                  errors.push(result.error);
+                }
+              }
+              
+              if (errors.length > 0) {
+                return Result.failure({ errors, length: errors.length });
+              }
+              
+              return Result.success(user);
+            }
+          }

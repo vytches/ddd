@@ -1,33 +1,14 @@
 import type {
   IEventStore,
-  IReplayFilter,
-  IReplayConfig,
-  IReplayResult,
   IExtendedDomainEvent,
+  IReplayConfig,
+  IReplayFilter,
+  IReplayResult,
 } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
-import type { IProjectionEngine, IProjectionStore } from './projection-interfaces';
 import { ProjectionError } from './projection-errors';
+import type { IProjectionEngine, IProjectionStore } from './projection-interfaces';
 
-/**
- * @llm-summary Contract for projection rebuild config functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * ProjectionRebuildConfig interface implementing architectural component for projection rebuild config operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteProjectionRebuildConfig implements IProjectionRebuildConfig {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IProjectionRebuildConfig extends IReplayConfig {
   /**
    * Clear projection state before rebuilding
@@ -35,25 +16,6 @@ export interface IProjectionRebuildConfig extends IReplayConfig {
   clearBeforeReplay?: boolean;
 }
 
-/**
- * @llm-summary Contract for projection rebuilder functionality
- * @llm-domain Architecture
- * @llm-contract Required
- *
- * @description
- * ProjectionRebuilder interface implementing architectural component for projection rebuilder operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteProjectionRebuilder implements IProjectionRebuilder {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IProjectionRebuilder<TReadModel> {
   /**
    * Rebuild projection from event history
@@ -84,32 +46,6 @@ export interface IProjectionRebuilder<TReadModel> {
   clearProjectionState(): Promise<void>;
 }
 
-/**
- * @llm-summary ProjectionRebuilder class for projection rebuilder operations
- * @llm-domain Architecture
- * @llm-complexity Medium
- *
- * @description
- * ProjectionRebuilder class implementing architectural component for projection rebuilder operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ProjectionRebuilder();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ProjectionRebuilder());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TReadModel> {
   private logger = Logger.forContext(this.constructor.name);
 
@@ -356,36 +292,6 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
   }
 }
 
-/**
- * @llm-summary create projection rebuilder function
- * @llm-domain Architecture
- * @llm-pure false
- *
- * @description
- * createProjectionRebuilder function implementing architectural component for create projection rebuilder operations.
- *
- *
- * @param {IEventStore} eventStore - eventStore parameter
- * @param {IProjectionEngine<TReadModel>} projectionEngine - projectionEngine parameter
- * @param {IProjectionStore<TReadModel>} projectionStore - projectionStore parameter
- * @returns {IProjectionRebuilder<TReadModel>} Returns IProjectionRebuilder<TReadModel>
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = createProjectionRebuilder(eventStore, projectionEngine, projectionStore);
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createProjectionRebuilder(eventStore, projectionEngine, projectionStore));
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export function createProjectionRebuilder<TReadModel>(
   eventStore: IEventStore,
   projectionEngine: IProjectionEngine<TReadModel>,

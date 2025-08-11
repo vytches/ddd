@@ -1,40 +1,14 @@
 import type {
-  IEventReplayFactory,
-  IEventReplay,
   IAdvancedEventReplay,
   IAdvancedEventStore,
+  IEventReplay,
+  IEventReplayFactory,
 } from '@vytches/ddd-contracts';
 
-import { EventReplayEngine } from './event-replay-engine';
-import { Logger } from '@vytches/ddd-logging';
 import type { ILogger } from '@vytches/ddd-logging';
+import { Logger } from '@vytches/ddd-logging';
+import { EventReplayEngine } from './event-replay-engine';
 
-/**
- * @llm-summary EventReplayFactory class for event replay factory operations
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * EventReplayFactory class implementing infrastructure service for event replay factory operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventReplayFactory();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventReplayFactory());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class EventReplayFactory implements IEventReplayFactory {
   private readonly logger: ILogger;
 
@@ -87,99 +61,15 @@ export class EventReplayFactory implements IEventReplayFactory {
   }
 }
 
-/**
- * @llm-summary create event replay factory function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * createEventReplayFactory function implementing infrastructure service for create event replay factory operations.
- *
- *
- * @param {IAdvancedEventStore} eventStore - eventStore parameter
- * @returns {IEventReplayFactory} Returns IEventReplayFactory
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = createEventReplayFactory(eventStore);
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createEventReplayFactory(eventStore));
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export function createEventReplayFactory(eventStore: IAdvancedEventStore): IEventReplayFactory {
   return new EventReplayFactory(eventStore);
 }
 
-/**
- * @llm-summary create event replay function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * createEventReplay function implementing infrastructure service for create event replay operations.
- *
- *
- * @param {IAdvancedEventStore} eventStore - eventStore parameter
- * @returns {IEventReplay} Returns IEventReplay
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = createEventReplay(eventStore);
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createEventReplay(eventStore));
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export function createEventReplay(eventStore: IAdvancedEventStore): IEventReplay {
   const factory = new EventReplayFactory(eventStore);
   return factory.createBasicReplay();
 }
 
-/**
- * @llm-summary create advanced event replay function
- * @llm-domain Infrastructure
- * @llm-pure false
- *
- * @description
- * createAdvancedEventReplay function implementing infrastructure service for create advanced event replay operations.
- *
- *
- * @param {IAdvancedEventStore} eventStore - eventStore parameter
- * @returns {IAdvancedEventReplay} Returns IAdvancedEventReplay
- * @throws {Error} When validation fails
- *
- * @example
- * ```typescript
- * // Basic usage
- * const result = createAdvancedEventReplay(eventStore);
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, result] = safeRun(() => createAdvancedEventReplay(eventStore));
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export function createAdvancedEventReplay(eventStore: IAdvancedEventStore): IAdvancedEventReplay {
   const factory = new EventReplayFactory(eventStore);
   return factory.createAdvancedReplay();

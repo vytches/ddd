@@ -1,25 +1,6 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
 import type { IRepository } from './base-repository.interface';
 
-/**
- * @llm-summary Contract for unit of work functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * UnitOfWork interface implementing domain pattern implementation for unit of work operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteUnitOfWork implements IUnitOfWork {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface IUnitOfWork {
   /**
    * Begins a new transaction.

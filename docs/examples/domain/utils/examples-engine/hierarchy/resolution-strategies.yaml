@@ -1,0 +1,270 @@
+# resolution-strategies - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'resolution-strategies'
+title: 'MetadataResolutionStrategies - Strategy Implementation'
+description: 'Implementation of metadata resolution strategies for hierarchy processing'
+business-context: 'Provides flexible metadata inheritance and combination strategies'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  MetadataResolutionStrategies:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Static class implementing metadata resolution strategies'
+      business-context: 'Controls how metadata is combined across hierarchy levels'
+
+      formats:
+        jsdoc:
+          description: 'Metadata resolution strategy implementations'
+        cli:
+          description: |
+            ## MetadataResolutionStrategies
+
+            Resolution strategies:
+            - **Merge**: Combines content from all levels
+            - **Replace**: Higher level completely overrides lower
+            - **Append**: Adds content to existing metadata
+
+            Hierarchy flow:
+            Global → Package → Class → Method
+            (lowest)                    (highest priority)
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Strategy Pattern'
+        static: 'true'
+
+    # Methods
+    methods:
+      applyHierarchy:
+        description: 'Apply hierarchical resolution with different strategies'
+        business-context: 'Main entry point for resolving metadata hierarchy'
+
+        parameters:
+          - name: 'sources'
+            type: 'MetadataSource[]'
+            description: 'Ordered metadata sources (low to high priority)'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Final resolved metadata'
+
+        examples:
+          - id: 'apply-hierarchy'
+            code: |
+              const sources: MetadataSource[] = [
+                {
+                  level: MetadataLevel.GLOBAL,
+                  metadata: { author: 'Team', since: '1.0.0' },
+                  strategy: 'merge'
+                },
+                {
+                  level: MetadataLevel.PACKAGE,
+                  metadata: { complexity: 'intermediate' },
+                  strategy: 'merge'
+                },
+                {
+                  level: MetadataLevel.CLASS,
+                  metadata: { description: 'Base class' },
+                  strategy: 'merge'
+                },
+                {
+                  level: MetadataLevel.METHOD,
+                  metadata: { description: 'Specific method' },
+                  strategy: 'replace' // Overrides class description
+                }
+              ];
+
+              const resolved = MetadataResolutionStrategies.applyHierarchy(sources);
+              // Result:
+              // {
+              //   author: 'Team',              // From GLOBAL (merge)
+              //   since: '1.0.0',              // From GLOBAL (merge)
+              //   complexity: 'intermediate',  // From PACKAGE (merge)
+              //   description: 'Specific method' // From METHOD (replace)
+              // }
+
+        custom-tags:
+          static: 'true'
+          public: 'true'
+
+      mergeStrategy:
+        description: 'Merge strategy - combines content from lower levels'
+        business-context: 'Default strategy that preserves and combines metadata'
+
+        parameters:
+          - name: 'base'
+            type: 'ResolvedMetadata'
+            description: 'Base metadata to merge into'
+          - name: 'source'
+            type: 'MetadataSource'
+            description: 'Source to merge'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Merged metadata'
+
+        examples:
+          - id: 'merge-strategy'
+            code: |
+              // Merge combines all properties
+              const base = { author: 'Team', since: '1.0.0' };
+              const source = {
+                metadata: { description: 'Method desc', author: 'John' },
+                strategy: 'merge'
+              };
+
+              // Result: Both properties, source wins conflicts
+              // {
+              //   author: 'John',        // Source overrides
+              //   since: '1.0.0',       // Preserved from base
+              //   description: 'Method desc' // Added from source
+              // }
+
+        custom-tags:
+          private: 'true'
+          static: 'true'
+
+      replaceStrategy:
+        description: 'Replace strategy - completely overrides content from lower levels'
+        business-context: 'Used when higher level should completely override inheritance'
+
+        parameters:
+          - name: 'base'
+            type: 'ResolvedMetadata'
+            description: 'Base metadata (ignored)'
+          - name: 'source'
+            type: 'MetadataSource'
+            description: 'Source that replaces'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Replaced metadata'
+
+        examples:
+          - id: 'replace-strategy'
+            code: |
+              // Replace discards base completely
+              const base = {
+                author: 'Team',
+                since: '1.0.0',
+                description: 'Base description'
+              };
+              const source = {
+                metadata: { description: 'New description' },
+                strategy: 'replace'
+              };
+
+              // Result: Only source metadata
+              // {
+              //   description: 'New description'
+              // }
+              // Base properties are discarded!
+
+        custom-tags:
+          private: 'true'
+          static: 'true'
+
+      appendStrategy:
+        description: 'Append strategy - adds content to existing metadata'
+        business-context: 'Used for accumulating values like examples or warnings'
+
+        parameters:
+          - name: 'base'
+            type: 'ResolvedMetadata'
+            description: 'Base metadata'
+          - name: 'source'
+            type: 'MetadataSource'
+            description: 'Source to append'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Appended metadata'
+
+        examples:
+          - id: 'append-strategy'
+            code: |
+              // Append concatenates array/string values
+              const base = {
+                description: 'Base description',
+                examples: ['example1']
+              };
+              const source = {
+                metadata: {
+                  description: '\\nAdditional info',
+                  examples: ['example2', 'example3']
+                },
+                strategy: 'append'
+              };
+
+              // Result: Values concatenated
+              // {
+              //   description: 'Base description\\nAdditional info',
+              //   examples: ['example1', 'example2', 'example3']
+              // }
+
+        custom-tags:
+          private: 'true'
+          static: 'true'
+
+# === EXAMPLES ===
+examples:
+  - id: 'strategy-comparison'
+    description: 'Comparison of all resolution strategies'
+    code: |
+      // Starting with base metadata
+      const baseMetadata: ResolvedMetadata = {
+        author: 'Original Team',
+        since: '1.0.0',
+        description: 'Original description',
+        examples: ['original example']
+      };
+
+      // Source to apply
+      const newMetadata = {
+        author: 'New Team',
+        description: 'New description',
+        examples: ['new example'],
+        added: 'new property'
+      };
+
+      // === MERGE STRATEGY ===
+      // Combines, source wins conflicts
+      const merged = {
+        author: 'New Team',           // Overridden
+        since: '1.0.0',              // Preserved
+        description: 'New description', // Overridden
+        examples: ['new example'],     // Overridden
+        added: 'new property'          // Added
+      };
+
+      // === REPLACE STRATEGY ===
+      // Complete replacement
+      const replaced = {
+        author: 'New Team',
+        description: 'New description',
+        examples: ['new example'],
+        added: 'new property'
+        // 'since' is gone!
+      };
+
+      // === APPEND STRATEGY ===
+      // Concatenates values
+      const appended = {
+        author: 'New Team',           // Still overridden
+        since: '1.0.0',              // Preserved
+        description: 'Original description\\nNew description', // Concatenated
+        examples: ['original example', 'new example'],        // Combined
+        added: 'new property'          // Added
+      };

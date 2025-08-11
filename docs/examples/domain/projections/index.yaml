@@ -1,0 +1,191 @@
+# index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Projections Package Exports'
+description: 'Main export file for projections package'
+business-context: 'Provides unified access to all projection components'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  # Core Classes
+  - name: 'BaseProjection'
+    from: './projection-base'
+    description: 'Abstract base class for projections'
+
+  - name: 'ProjectionEngine'
+    from: './projection-engine'
+    description: 'Core projection processing engine'
+
+  - name: 'EnhancedProjectionEngine'
+    from: './projection-engine'
+    description: 'Engine with retry and error handling'
+
+  - name: 'ProjectionProcessor'
+    from: './projection-processor'
+    description: 'Multi-projection processor'
+
+  - name: 'ProjectionRegistry'
+    from: './projection-registry'
+    description: 'Projection management registry'
+
+  - name: 'GlobalProjectionRegistry'
+    from: './projection-registry'
+    description: 'Singleton global registry'
+
+  - name: 'ProjectionBuilder'
+    from: './projection.builder'
+    description: 'Fluent projection configuration builder'
+
+  - name: 'ProjectionRebuilder'
+    from: './projection-rebuilder'
+    description: 'Projection rebuild orchestrator'
+
+  # Error Classes
+  - name: 'ProjectionError'
+    from: './projection-errors'
+    description: 'Base projection error'
+
+  - name: 'ProjectionProcessingError'
+    from: './projection-errors'
+    description: 'Event processing error'
+
+  - name: 'ProjectionStateError'
+    from: './projection-errors'
+    description: 'State management error'
+
+  - name: 'ProjectionRebuildError'
+    from: './projection-errors'
+    description: 'Rebuild operation error'
+
+  - name: 'ProjectionCapabilityError'
+    from: './projection-errors'
+    description: 'Capability execution error'
+
+  - name: 'ProjectionNotFoundError'
+    from: './projection-errors'
+    description: 'Missing projection error'
+
+  # Domain Errors
+  - name: 'ProjectionDomainError'
+    from: './domain.errors'
+    description: 'Base domain error'
+
+  - name: 'InvalidProjectionStateError'
+    from: './domain.errors'
+    description: 'Invalid state error'
+
+  - name: 'ProjectionAlreadyExistsError'
+    from: './domain.errors'
+    description: 'Duplicate projection error'
+
+  # Error Strategies
+  - name: 'ExponentialBackoffStrategy'
+    from: './error-strategy'
+    description: 'Exponential backoff retry'
+
+  - name: 'LinearBackoffStrategy'
+    from: './error-strategy'
+    description: 'Linear backoff retry'
+
+  - name: 'FixedDelayStrategy'
+    from: './error-strategy'
+    description: 'Fixed delay retry'
+
+  - name: 'ImmediateRetryStrategy'
+    from: './error-strategy'
+    description: 'Immediate retry'
+
+  # Special Projections
+  - name: 'ErrorProjection'
+    from: './error-projection'
+    description: 'Error tracking projection'
+
+  # Interfaces
+  - name: 'IProjection'
+    from: './projection-interfaces'
+    description: 'Core projection interface'
+
+  - name: 'IProjectionStore'
+    from: './projection-interfaces'
+    description: 'State persistence interface'
+
+  - name: 'IProjectionEngine'
+    from: './projection-interfaces'
+    description: 'Engine interface'
+
+  - name: 'IProjectionLifecycleCapability'
+    from: './projection-interfaces'
+    description: 'Lifecycle hooks interface'
+
+  - name: 'ICheckpointProjectionCapability'
+    from: './projection-interfaces'
+    description: 'Checkpoint capability interface'
+
+  - name: 'ISnapshotProjectionCapability'
+    from: './projection-interfaces'
+    description: 'Snapshot capability interface'
+
+  - name: 'IProjectionErrorStrategy'
+    from: './projection-interfaces'
+    description: 'Error strategy interface'
+
+  - name: 'IDeadLetterStore'
+    from: './projection-interfaces'
+    description: 'Dead letter storage interface'
+
+  # Re-export Capabilities
+  - name: 'capabilities'
+    from: './capabilities'
+    description: 'All capability implementations'
+    export-type: 'namespace'
+
+# === USAGE EXAMPLES ===
+examples:
+  - id: 'basic-import'
+    description: 'Basic projection imports'
+    code: |
+      import {
+        BaseProjection,
+        ProjectionEngine,
+        ProjectionBuilder
+      } from '@vytches/ddd-projections';
+
+  - id: 'complete-setup'
+    description: 'Complete projection setup'
+    code: |
+      import {
+        ProjectionBuilder,
+        ProjectionRegistry,
+        ExponentialBackoffStrategy,
+        capabilities
+      } from '@vytches/ddd-projections';
+
+      const engine = ProjectionBuilder
+        .create(projection)
+        .withStore(store)
+        .withCheckpoints(new capabilities.CheckpointCapability(checkpointStore))
+        .withRetry(new ExponentialBackoffStrategy())
+        .build();
+
+      const registry = new ProjectionRegistry();
+      registry.register(projection);
+
+  - id: 'error-handling'
+    description: 'Error handling setup'
+    code: |
+      import {
+        ProjectionProcessingError,
+        ExponentialBackoffStrategy,
+        capabilities
+      } from '@vytches/ddd-projections';
+
+      const deadLetterCapability = new capabilities.DeadLetterCapability(
+        deadLetterStore,
+        { maxRetries: 3 }
+      );

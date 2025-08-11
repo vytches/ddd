@@ -1,0 +1,507 @@
+# result - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'result'
+title: 'Result - Railway-Oriented Programming Pattern'
+description: 'Monadic Result type for explicit error handling without exceptions'
+business-context: 'Provides type-safe error handling for domain operations and business logic'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  Result:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Result monad for handling success and failure states without throwing exceptions'
+      business-context: 'Enables railway-oriented programming for predictable error handling in domain logic'
+
+      formats:
+        jsdoc:
+          description: 'Generic Result type for type-safe error handling'
+        cli:
+          description: |
+            ## Result<TValue, TError>
+
+            Railway-oriented programming features:
+            - Type-safe success and failure states
+            - No exception throwing in business logic
+            - Composable error handling chains
+            - Functional transformation methods
+            - Pattern matching support
+            - Async operation support
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Result Monad'
+        generic-types: |
+          - TValue: Type of success value
+          - TError: Type of error (default: Error)
+
+    # Properties
+    properties:
+      isSuccess:
+        description: 'Check if the result is successful'
+        business-context: 'Determines if operation completed without errors'
+
+        returns:
+          type: 'boolean'
+          description: 'True if successful, false if failed'
+
+        examples:
+          - id: 'check-success'
+            code: |
+              const result = Result.ok(42);
+              if (result.isSuccess) {
+                console.log('Operation succeeded');
+              }
+
+      isFailure:
+        description: 'Check if the result is a failure'
+        business-context: 'Determines if operation encountered an error'
+
+        returns:
+          type: 'boolean'
+          description: 'True if failed, false if successful'
+
+        examples:
+          - id: 'check-failure'
+            code: |
+              const result = Result.fail(new Error('Failed'));
+              if (result.isFailure) {
+                console.log('Operation failed');
+              }
+
+      value:
+        description: 'Get the success value'
+        business-context: 'Retrieves the successful operation result'
+
+        returns:
+          type: 'TValue'
+          description: 'The success value'
+
+        throws:
+          - type: 'Error'
+            description: 'If the result is a failure'
+
+        examples:
+          - id: 'get-value'
+            code: |
+              const result = Result.ok(42);
+              if (result.isSuccess) {
+                const val = result.value; // 42
+              }
+
+      error:
+        description: 'Get the error value'
+        business-context: 'Retrieves the failure reason'
+
+        returns:
+          type: 'TError'
+          description: 'The error value'
+
+        throws:
+          - type: 'Error'
+            description: 'If the result is successful'
+
+        examples:
+          - id: 'get-error'
+            code: |
+              const result = Result.fail(new Error('Validation failed'));
+              if (result.isFailure) {
+                const err = result.error; // Error: Validation failed
+              }
+
+    # Methods
+    methods:
+      ok:
+        description: 'Create a successful result'
+        business-context: 'Wraps successful operation outcomes'
+
+        parameters:
+          - name: 'value'
+            type: 'TValue'
+            description: 'The success value'
+            optional: true
+
+        returns:
+          type: 'Result<TValue, TError>'
+          description: 'A successful Result instance'
+
+        examples:
+          - id: 'create-success'
+            code: |
+              // With value
+              const result = Result.ok(42);
+
+              // Without value (void operations)
+              const voidResult = Result.ok();
+
+              // With complex object
+              const userResult = Result.ok({ id: 1, name: 'John' });
+
+        custom-tags:
+          static: 'true'
+          factory: 'true'
+
+      fail:
+        description: 'Create a failure result'
+        business-context: 'Wraps operation failures and errors'
+
+        parameters:
+          - name: 'error'
+            type: 'TError'
+            description: 'The error value'
+
+        returns:
+          type: 'Result<TValue, TError>'
+          description: 'A failed Result instance'
+
+        examples:
+          - id: 'create-failure'
+            code: |
+              // With Error object
+              const result = Result.fail(new Error('Validation failed'));
+
+              // With custom error type
+              const customResult = Result.fail<User, string>('User not found');
+
+              // With domain error
+              const domainResult = Result.fail(new ValidationError('Invalid email'));
+
+        custom-tags:
+          static: 'true'
+          factory: 'true'
+
+      try:
+        description: 'Try to execute a function and wrap the result'
+        business-context: 'Safely executes operations that might throw exceptions'
+
+        parameters:
+          - name: 'fn'
+            type: '() => TValue'
+            description: 'Function to execute safely'
+
+        returns:
+          type: 'Result<TValue, Error>'
+          description: 'Result containing function result or caught error'
+
+        examples:
+          - id: 'try-function'
+            code: |
+              // Successful execution
+              const result = Result.try(() => JSON.parse('{"valid": true}'));
+              // result.isSuccess === true
+              // result.value === { valid: true }
+
+              // Failed execution
+              const failResult = Result.try(() => JSON.parse('invalid json'));
+              // failResult.isFailure === true
+              // failResult.error instanceof SyntaxError
+
+        custom-tags:
+          static: 'true'
+          exception-safe: 'true'
+
+      tryAsync:
+        description: 'Try to execute an async function and wrap the result'
+        business-context: 'Safely executes async operations that might throw or reject'
+
+        parameters:
+          - name: 'fn'
+            type: '() => Promise<TValue>'
+            description: 'Async function to execute safely'
+
+        returns:
+          type: 'Promise<Result<TValue, Error>>'
+          description: 'Promise of Result containing async result or error'
+
+        examples:
+          - id: 'try-async'
+            code: |
+              // Successful async operation
+              const result = await Result.tryAsync(async () => {
+                const response = await fetch('/api/user');
+                return response.json();
+              });
+
+              // Failed async operation
+              const failResult = await Result.tryAsync(async () => {
+                throw new Error('Network error');
+              });
+
+        custom-tags:
+          static: 'true'
+          async: 'true'
+          exception-safe: 'true'
+
+      map:
+        description: 'Transform the success value'
+        business-context: 'Chains operations on successful results'
+
+        parameters:
+          - name: 'fn'
+            type: '(value: TValue) => TNewValue'
+            description: 'Transformation function'
+
+        returns:
+          type: 'Result<TNewValue, TError>'
+          description: 'New Result with transformed value or original error'
+
+        examples:
+          - id: 'map-transform'
+            code: |
+              const result = Result.ok(42)
+                .map(x => x * 2)      // 84
+                .map(x => x.toString()) // "84"
+                .map(s => s.length);   // 2
+
+              // Mapping on failure does nothing
+              const failResult = Result.fail<number, Error>(new Error('Failed'))
+                .map(x => x * 2); // Still a failure
+
+        custom-tags:
+          functor: 'true'
+          chainable: 'true'
+
+      flatMap:
+        description: 'Transform success value with function returning Result'
+        business-context: 'Chains operations that might fail'
+
+        parameters:
+          - name: 'fn'
+            type: '(value: TValue) => Result<TNewValue, TError>'
+            description: 'Transformation function returning Result'
+
+        returns:
+          type: 'Result<TNewValue, TError>'
+          description: 'Flattened Result from transformation'
+
+        examples:
+          - id: 'flatmap-chain'
+            code: |
+              function divide(a: number, b: number): Result<number, string> {
+                if (b === 0) {
+                  return Result.fail('Division by zero');
+                }
+                return Result.ok(a / b);
+              }
+
+              const result = Result.ok(10)
+                .flatMap(x => divide(x, 2))  // Ok(5)
+                .flatMap(x => divide(x, 0)); // Fail('Division by zero')
+
+        custom-tags:
+          monad: 'true'
+          chainable: 'true'
+
+      match:
+        description: 'Apply function based on success or failure'
+        business-context: 'Pattern matching for Result values'
+
+        parameters:
+          - name: 'onSuccess'
+            type: '(value: TValue) => TResult'
+            description: 'Function for success case'
+          - name: 'onFailure'
+            type: '(error: TError) => TResult'
+            description: 'Function for failure case'
+
+        returns:
+          type: 'TResult'
+          description: 'Result of the matched function'
+
+        examples:
+          - id: 'pattern-match'
+            code: |
+              const message = result.match(
+                value => `Success: ${value}`,
+                error => `Error: ${error.message}`
+              );
+
+              // Use for rendering UI
+              const component = userResult.match(
+                user => <UserProfile user={user} />,
+                error => <ErrorMessage error={error} />
+              );
+
+        custom-tags:
+          pattern-matching: 'true'
+
+      tap:
+        description: 'Apply side effect if result is successful'
+        business-context: 'Performs actions without modifying the result'
+
+        parameters:
+          - name: 'fn'
+            type: '(value: TValue) => void'
+            description: 'Side effect function'
+
+        returns:
+          type: 'Result<TValue, TError>'
+          description: 'Original Result unchanged'
+
+        examples:
+          - id: 'tap-logging'
+            code: |
+              const result = Result.ok(42)
+                .tap(value => console.log('Value:', value))
+                .map(x => x * 2)
+                .tap(value => console.log('Doubled:', value));
+
+              // Tap on failure does nothing
+              Result.fail(new Error('Failed'))
+                .tap(value => console.log('Never called'));
+
+        custom-tags:
+          side-effect: 'true'
+          chainable: 'true'
+
+      tapError:
+        description: 'Apply side effect if result is a failure'
+        business-context: 'Performs error handling without modifying the result'
+
+        parameters:
+          - name: 'fn'
+            type: '(error: TError) => void'
+            description: 'Error handling function'
+
+        returns:
+          type: 'Result<TValue, TError>'
+          description: 'Original Result unchanged'
+
+        examples:
+          - id: 'tap-error'
+            code: |
+              const result = Result.fail(new Error('Failed'))
+                .tapError(error => console.error('Error occurred:', error))
+                .tapError(error => logToSentry(error));
+
+              // TapError on success does nothing
+              Result.ok(42)
+                .tapError(error => console.log('Never called'));
+
+        custom-tags:
+          side-effect: 'true'
+          chainable: 'true'
+
+      mapAsync:
+        description: 'Transform success value with async function'
+        business-context: 'Chains async operations on successful results'
+
+        parameters:
+          - name: 'fn'
+            type: '(value: TValue) => Promise<TNewValue>'
+            description: 'Async transformation function'
+
+        returns:
+          type: 'Promise<Result<TNewValue, TError>>'
+          description: 'Promise of Result with transformed value'
+
+        examples:
+          - id: 'map-async'
+            code: |
+              const result = await Result.ok(1)
+                .mapAsync(async id => {
+                  const response = await fetch(`/api/user/${id}`);
+                  return response.json();
+                });
+
+        custom-tags:
+          async: 'true'
+          chainable: 'true'
+
+      flatMapAsync:
+        description: 'Transform with async function returning Result'
+        business-context: 'Chains async operations that might fail'
+
+        parameters:
+          - name: 'fn'
+            type: '(value: TValue) => Promise<Result<TNewValue, TError>>'
+            description: 'Async transformation returning Result'
+
+        returns:
+          type: 'Promise<Result<TNewValue, TError>>'
+          description: 'Promise of flattened Result'
+
+        examples:
+          - id: 'flatmap-async'
+            code: |
+              async function fetchUser(id: number): Promise<Result<User, Error>> {
+                try {
+                  const response = await fetch(`/api/user/${id}`);
+                  if (!response.ok) {
+                    return Result.fail(new Error('User not found'));
+                  }
+                  const user = await response.json();
+                  return Result.ok(user);
+                } catch (error) {
+                  return Result.fail(error as Error);
+                }
+              }
+
+              const result = await Result.ok(1)
+                .flatMapAsync(id => fetchUser(id));
+
+        custom-tags:
+          async: 'true'
+          monad: 'true'
+
+# === EXAMPLES ===
+examples:
+  - id: 'domain-operation'
+    description: 'Using Result in domain operations'
+    code: |
+      class UserService {
+        createUser(data: CreateUserData): Result<User, ValidationError> {
+          // Validate input
+          if (!data.email.includes('@')) {
+            return Result.fail(new ValidationError('Invalid email'));
+          }
+          
+          if (data.age < 18) {
+            return Result.fail(new ValidationError('Must be 18 or older'));
+          }
+          
+          // Create user
+          const user = new User(data);
+          return Result.ok(user);
+        }
+        
+        async saveUser(user: User): Promise<Result<User, Error>> {
+          return Result.tryAsync(async () => {
+            await this.repository.save(user);
+            return user;
+          });
+        }
+      }
+
+  - id: 'result-chaining'
+    description: 'Chaining multiple operations'
+    code: |
+      // Complex business flow with Result chaining
+      function processOrder(orderId: string): Result<Invoice, OrderError> {
+        return Result.ok(orderId)
+          .flatMap(id => findOrder(id))
+          .flatMap(order => validateOrder(order))
+          .flatMap(order => calculatePricing(order))
+          .map(pricedOrder => createInvoice(pricedOrder))
+          .tap(invoice => sendNotification(invoice))
+          .tapError(error => logError(error));
+      }
+
+      // Usage
+      const result = processOrder('ORDER-123');
+
+      result.match(
+        invoice => console.log('Invoice created:', invoice.id),
+        error => console.error('Order processing failed:', error.message)
+      );

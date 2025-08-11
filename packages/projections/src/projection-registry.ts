@@ -2,32 +2,6 @@ import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 
 import type { IProjectionEngine } from './projection-interfaces';
 
-/**
- * @llm-summary ProjectionEngineRegistry class for projection engine registry operations
- * @llm-domain Architecture
- * @llm-complexity Simple
- *
- * @description
- * ProjectionEngineRegistry class implementing architectural component for projection engine registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new ProjectionEngineRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new ProjectionEngineRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class ProjectionEngineRegistry {
   private engines = new Map<string, IProjectionEngine<unknown>>();
 

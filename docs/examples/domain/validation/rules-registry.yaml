@@ -1,0 +1,483 @@
+# RulesRegistry - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'rules-registry'
+title: 'RulesRegistry - Domain-Specific Validation Rules Registry'
+description: 'Registry system for organizing and accessing domain-specific validation rules'
+business-context: 'Centralized registry for domain validation rules with core and custom rule providers'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  RuleFunction:
+    description: 'Function signature for validation rule that can be applied to BusinessRuleValidator'
+    business-context: 'Standard interface for all validation rules in the registry system'
+
+    signature:
+      parameters:
+        - name: 'validator'
+          type: 'BusinessRuleValidator<T>'
+          description: 'Validator instance to configure with the rule'
+      returns:
+        type: 'BusinessRuleValidator<T>'
+        description: 'Configured validator for fluent chaining'
+
+    examples:
+      - id: 'rule-function-example'
+        code: |
+          const requiredRule: RuleFunction<User> = (validator) => 
+            validator.addRule('name', user => !!user.name, 'Name is required');
+
+          // Usage
+          const validator = BusinessRuleValidator.create<User>();
+          requiredRule(validator);
+
+  IRulesProvider:
+    description: 'Interface for domain-specific rule providers'
+    business-context: 'Contract for creating domain-specific validation rule collections'
+
+    properties:
+      name:
+        description: 'Unique name identifier for the rules provider'
+        type: 'string'
+        business-context: 'Used for registry lookup and provider identification'
+        readonly: true
+
+    examples:
+      - id: 'rules-provider-implementation'
+        code: |
+          class OrderRulesProvider implements IRulesProvider {
+            readonly name = 'orders';
+            
+            required = <T>(property: keyof T, message = 'Field is required') =>
+              (validator: BusinessRuleValidator<T>) =>
+                validator.addRule(
+                  property as string,
+                  value => value[property] !== undefined,
+                  message
+                );
+          }
+
+  ICoreRules:
+    description: 'Interface defining standard validation rules available across all domains'
+    business-context: 'Contract for core validation rules that apply to any domain object'
+
+    methods:
+      required:
+        description: 'Creates required field validation rule'
+        business-context: 'Ensures domain object property has a value'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'Property to validate for required value'
+          - name: 'message'
+            type: 'string | undefined'
+            description: 'Optional custom error message'
+
+        returns:
+          type: 'RuleFunction<T>'
+          description: 'Rule function for required field validation'
+
+      minLength:
+        description: 'Creates minimum length validation rule for strings'
+        business-context: 'Validates string properties meet minimum length requirements'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'String property to validate'
+          - name: 'length'
+            type: 'number'
+            description: 'Minimum required length'
+          - name: 'message'
+            type: 'string | undefined'
+            description: 'Optional custom error message'
+
+        returns:
+          type: 'RuleFunction<T>'
+          description: 'Rule function for minimum length validation'
+
+      maxLength:
+        description: 'Creates maximum length validation rule for strings'
+        business-context: "Validates string properties don't exceed maximum length"
+
+      pattern:
+        description: 'Creates regex pattern validation rule'
+        business-context: 'Validates string properties match required format patterns'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'String property to validate'
+          - name: 'regex'
+            type: 'RegExp'
+            description: 'Regular expression pattern to match'
+          - name: 'message'
+            type: 'string | undefined'
+            description: 'Optional custom error message'
+
+      range:
+        description: 'Creates numeric range validation rule'
+        business-context: 'Validates numeric properties fall within business-defined ranges'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'Numeric property to validate'
+          - name: 'min'
+            type: 'number'
+            description: 'Minimum allowed value'
+          - name: 'max'
+            type: 'number'
+            description: 'Maximum allowed value'
+
+      email:
+        description: 'Creates email format validation rule'
+        business-context: 'Validates email properties have correct format'
+
+      satisfies:
+        description: 'Creates rule from specification for entire object'
+        business-context: 'Integrates specification pattern into rule-based validation'
+
+        parameters:
+          - name: 'specification'
+            type: 'ISpecification<T>'
+            description: 'Specification to use for validation'
+          - name: 'message'
+            type: 'string'
+            description: 'Error message when specification fails'
+
+      propertySatisfies:
+        description: 'Creates rule from specification for specific property'
+        business-context: 'Applies specification pattern to individual object properties'
+
+      when:
+        description: 'Creates conditional rule that applies only when condition is met'
+        business-context: 'Enables context-dependent business rules'
+
+        parameters:
+          - name: 'condition'
+            type: '(value: T) => boolean'
+            description: 'Condition that determines when to apply rules'
+          - name: 'thenRules'
+            type: '(validator: BusinessRuleValidator<T>) => void'
+            description: 'Rules to apply when condition is true'
+
+      whenSatisfies:
+        description: 'Creates conditional rule based on specification'
+        business-context: 'Applies rules when object satisfies given specification'
+
+      otherwise:
+        description: 'Creates alternative rules for when previous condition is false'
+        business-context: 'Provides alternative validation logic for different business scenarios'
+
+# === CLASSES ===
+classes:
+  CoreRules:
+    class-doc:
+      description: 'Default implementation of core validation rules'
+      business-context: 'Standard validation rules available across all domain contexts'
+
+      formats:
+        jsdoc:
+          description: 'Core validation rules implementation with standard business validations'
+        cli:
+          description: |
+            ## CoreRules
+
+            Default implementation providing standard validation rules that apply across all domains.
+            Includes common validations like required fields, string length, patterns, numeric ranges,
+            and integration with specifications and conditional logic.
+
+            **Available Rules:**
+            - `required` - Ensures field has value
+            - `minLength/maxLength` - String length validation
+            - `pattern` - Regex pattern matching
+            - `range` - Numeric range validation
+            - `email` - Email format validation
+            - `satisfies` - Specification integration
+            - `when/otherwise` - Conditional validation
+
+    properties:
+      name:
+        description: 'Provider name for registry identification'
+        type: 'string'
+        value: "'core'"
+        business-context: 'Identifies this as the core rules provider'
+        readonly: true
+
+    methods:
+      required:
+        description: 'Creates required field validation rule'
+        business-context: 'Standard required field validation for any domain object'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'Property that must have a value'
+          - name: 'message'
+            type: 'string'
+            description: "Error message (defaults to 'Field is required')"
+
+        returns:
+          type: 'RuleFunction<T>'
+          description: 'Rule function that validates property is not null/undefined'
+
+        examples:
+          - id: 'required-rule'
+            code: |
+              const rules = new CoreRules();
+
+              const validator = BusinessRuleValidator.create<User>()
+                .apply(rules.required('name', 'Name is required'))
+                .apply(rules.required('email', 'Email is required'));
+
+      minLength:
+        description: 'Creates minimum string length validation rule'
+        business-context: 'Validates string properties meet minimum business requirements'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'String property to validate'
+          - name: 'length'
+            type: 'number'
+            description: 'Minimum required length'
+          - name: 'message'
+            type: 'string | undefined'
+            description: 'Optional error message'
+
+        examples:
+          - id: 'min-length-rule'
+            code: |
+              const validator = BusinessRuleValidator.create<User>()
+                .apply(rules.minLength('name', 2, 'Name must be at least 2 characters'))
+                .apply(rules.minLength('password', 8, 'Password too short'));
+
+      email:
+        description: 'Creates email format validation rule'
+        business-context: 'Standard email format validation for user communications'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'Email property to validate'
+          - name: 'message'
+            type: 'string'
+            description: "Error message (defaults to 'Invalid email address')"
+
+        examples:
+          - id: 'email-rule'
+            code: |
+              const validator = BusinessRuleValidator.create<User>()
+                .apply(rules.email('email'))
+                .apply(rules.email('alternateEmail', 'Alternate email format invalid'));
+
+      range:
+        description: 'Creates numeric range validation rule'
+        business-context: 'Validates numeric properties fall within business constraints'
+
+        parameters:
+          - name: 'property'
+            type: 'keyof T'
+            description: 'Numeric property to validate'
+          - name: 'min'
+            type: 'number'
+            description: 'Minimum allowed value'
+          - name: 'max'
+            type: 'number'
+            description: 'Maximum allowed value'
+          - name: 'message'
+            type: 'string | undefined'
+            description: 'Optional error message'
+
+        examples:
+          - id: 'range-rule'
+            code: |
+              const validator = BusinessRuleValidator.create<User>()
+                .apply(rules.range('age', 18, 120, 'Age must be between 18-120'))
+                .apply(rules.range('salary', 0, 1000000, 'Invalid salary range'));
+
+      satisfies:
+        description: 'Creates rule from specification for entire object validation'
+        business-context: 'Integrates complex business logic via specification pattern'
+
+        parameters:
+          - name: 'specification'
+            type: 'ISpecification<T>'
+            description: 'Business rule specification'
+          - name: 'message'
+            type: 'string'
+            description: 'Error message when specification fails'
+
+        examples:
+          - id: 'satisfies-rule'
+            code: |
+              const eligibilitySpec = new UserEligibilitySpecification();
+
+              const validator = BusinessRuleValidator.create<User>()
+                .apply(rules.satisfies(eligibilitySpec, 'User not eligible for this service'));
+
+      when:
+        description: 'Creates conditional validation rule'
+        business-context: 'Applies business rules only when specific conditions are met'
+
+        parameters:
+          - name: 'condition'
+            type: '(value: T) => boolean'
+            description: 'Condition function determining when to apply rules'
+          - name: 'thenRules'
+            type: '(validator: BusinessRuleValidator<T>) => void'
+            description: 'Function that adds rules when condition is true'
+
+        examples:
+          - id: 'when-rule'
+            code: |
+              const validator = BusinessRuleValidator.create<User>()
+                .apply(rules.when(
+                  user => user.type === 'premium',
+                  v => v.apply(rules.range('creditLimit', 10000, 100000, 'Premium credit limit required'))
+                ))
+                .apply(rules.otherwise(
+                  v => v.apply(rules.range('creditLimit', 0, 5000, 'Standard credit limit exceeded'))
+                ));
+
+  RulesRegistry:
+    class-doc:
+      description: 'Central registry for managing domain-specific validation rule providers'
+      business-context: 'Centralized access point for all validation rules across different domains'
+
+      formats:
+        jsdoc:
+          description: 'Static registry for validation rule providers with core rules access'
+        cli:
+          description: |
+            ## RulesRegistry
+
+            Central registry system for managing and accessing validation rule providers.
+            Provides static access to core validation rules and allows registration of
+            domain-specific rule providers for organized validation management.
+
+            **Key Features:**
+            - Static registry for global access
+            - Core rules provider built-in
+            - Domain-specific rule provider registration
+            - Type-safe rule provider access
+            - Centralized validation rule management
+
+    methods:
+      register:
+        description: 'Registers domain-specific rule provider in the registry'
+        business-context: 'Adds custom domain validation rules to central registry'
+
+        parameters:
+          - name: 'provider'
+            type: 'IRulesProvider'
+            description: 'Rule provider to register with unique name'
+
+        custom-tags:
+          static: 'Static method for global registry access'
+          throws: 'Error if provider name already exists'
+
+        examples:
+          - id: 'register-provider'
+            code: |
+              class OrderRulesProvider implements IRulesProvider {
+                readonly name = 'orders';
+                
+                validOrderStatus = <T extends { status: string }>(message = 'Invalid order status') =>
+                  (validator: BusinessRuleValidator<T>) =>
+                    validator.addRule('status',
+                      order => ['pending', 'confirmed', 'shipped', 'delivered'].includes(order.status),
+                      message
+                    );
+              }
+
+              RulesRegistry.register(new OrderRulesProvider());
+
+      getProvider:
+        description: 'Retrieves registered rule provider by name'
+        business-context: 'Accesses domain-specific validation rules by provider name'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Name of the rule provider to retrieve'
+
+        returns:
+          type: 'T'
+          description: 'Rule provider instance with specified type'
+
+        custom-tags:
+          static: 'Static method for global registry access'
+          throws: 'Error if provider not found'
+
+        examples:
+          - id: 'get-provider'
+            code: |
+              const orderRules = RulesRegistry.getProvider<OrderRulesProvider>('orders');
+
+              const validator = BusinessRuleValidator.create<Order>()
+                .apply(orderRules.validOrderStatus('Order status is invalid'));
+
+      Rules:
+        description: 'Static getter providing access to core validation rules'
+        business-context: 'Direct access to standard validation rules without registration'
+
+        returns:
+          type: 'ICoreRules'
+          description: 'Core rules instance with standard validation methods'
+
+        custom-tags:
+          static: 'Static getter property'
+
+        examples:
+          - id: 'core-rules-access'
+            code: |
+              const validator = BusinessRuleValidator.create<User>()
+                .apply(RulesRegistry.Rules.required('name'))
+                .apply(RulesRegistry.Rules.email('email'))
+                .apply(RulesRegistry.Rules.range('age', 18, 120));
+
+      forDomain:
+        description: 'Convenience method to access domain-specific rule providers'
+        business-context: 'Type-safe access to domain validation rules by domain name'
+
+        parameters:
+          - name: 'domain'
+            type: 'string'
+            description: 'Domain name identifying the rule provider'
+
+        returns:
+          type: 'T'
+          description: 'Domain-specific rule provider with specified type'
+
+        custom-tags:
+          static: 'Static method for domain-based access'
+
+        examples:
+          - id: 'for-domain-access'
+            code: |
+              // Register multiple domain providers
+              RulesRegistry.register(new UserRulesProvider());
+              RulesRegistry.register(new OrderRulesProvider());
+              RulesRegistry.register(new PaymentRulesProvider());
+
+              // Access domain-specific rules
+              const userRules = RulesRegistry.forDomain<UserRulesProvider>('users');
+              const orderRules = RulesRegistry.forDomain<OrderRulesProvider>('orders');
+
+              const validator = BusinessRuleValidator.create<Order>()
+                .apply(orderRules.validOrderStatus())
+                .apply(RulesRegistry.Rules.required('customerId'));
+
+# === TYPES ===
+types:
+  RuleFunction:
+    description: 'Type alias for validation rule functions'
+    business-context: 'Standard function signature for all validation rules in the system'

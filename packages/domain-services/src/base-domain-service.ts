@@ -1,38 +1,12 @@
+import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
+import type { IUnitOfWork } from '@vytches/ddd-core';
 import type {
+  IAsyncDomainService,
   IDomainService,
   IEventBusAware,
   IUnitOfWorkAware,
-  IAsyncDomainService,
 } from './domain-service.interface';
-import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
-import type { IUnitOfWork } from '@vytches/ddd-core';
 
-/**
- * @llm-summary BaseDomainService class for base domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * BaseDomainService class implementing domain pattern implementation for base domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new IBaseDomainService();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new IBaseDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class IBaseDomainService implements IDomainService {
   /**
    * Creates a new instance of a domain service.
@@ -42,32 +16,6 @@ export abstract class IBaseDomainService implements IDomainService {
   constructor(public readonly serviceId: string) {}
 }
 
-/**
- * @llm-summary EventAwareDomainService class for event aware domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * EventAwareDomainService class implementing domain pattern implementation for event aware domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new EventAwareDomainService();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new EventAwareDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class EventAwareDomainService extends IBaseDomainService implements IEventBusAware {
   /**
    * Reference to the event bus for publishing domain events.
@@ -87,9 +35,7 @@ export abstract class EventAwareDomainService extends IBaseDomainService impleme
   }
 
   /**
-   * Sets the event bus instance for this service.
-   * Must be called before any attempt to publish events.
-   *
+   * Sets the event bus for publishing domain events
    * @param {IEventBus} eventBus - The event bus to use for publishing events
    */
   setEventBus(eventBus: IEventBus): void {
@@ -113,32 +59,6 @@ export abstract class EventAwareDomainService extends IBaseDomainService impleme
   }
 }
 
-/**
- * @llm-summary UnitOfWorkAwareDomainService class for unit of work aware domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * UnitOfWorkAwareDomainService class implementing domain pattern implementation for unit of work aware domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new UnitOfWorkAwareDomainService();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new UnitOfWorkAwareDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class UnitOfWorkAwareDomainService
   extends EventAwareDomainService
   implements IUnitOfWorkAware
@@ -161,9 +81,7 @@ export abstract class UnitOfWorkAwareDomainService
   }
 
   /**
-   * Sets the Unit of Work instance for this service.
-   * Must be called before any transactional operation.
-   *
+   * Sets the Unit of Work for transactional operations
    * @param {IUnitOfWork} unitOfWork - The Unit of Work to use
    */
   setUnitOfWork(unitOfWork: IUnitOfWork): void {
@@ -173,8 +91,7 @@ export abstract class UnitOfWorkAwareDomainService
   }
 
   /**
-   * Clears the Unit of Work reference.
-   * Call this when the service should no longer use the current Unit of Work.
+   * Clears the Unit of Work and event bus references
    */
   clearUnitOfWork(): void {
     this.unitOfWork = undefined;
@@ -226,32 +143,6 @@ export abstract class UnitOfWorkAwareDomainService
   }
 }
 
-/**
- * @llm-summary AsyncDomainService class for async domain service operations
- * @llm-domain Pattern
- * @llm-complexity Medium
- *
- * @description
- * AsyncDomainService class implementing domain pattern implementation for async domain service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new AsyncDomainService();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new AsyncDomainService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class AsyncDomainService extends IBaseDomainService implements IAsyncDomainService {
   /**
    * Creates a new asynchronous domain service.
@@ -263,9 +154,7 @@ export abstract class AsyncDomainService extends IBaseDomainService implements I
   }
 
   /**
-   * Initializes the service asynchronously.
-   * Override this method to implement custom initialization logic.
-   *
+   * Initializes the domain service
    * @returns {Promise<void>} A promise that resolves when initialization is complete
    */
   async initialize(): Promise<void> {
@@ -273,9 +162,7 @@ export abstract class AsyncDomainService extends IBaseDomainService implements I
   }
 
   /**
-   * Disposes of the service asynchronously.
-   * Override this method to implement custom disposal logic.
-   *
+   * Disposes of the domain service resources
    * @returns {Promise<void>} A promise that resolves when disposal is complete
    */
   async dispose(): Promise<void> {

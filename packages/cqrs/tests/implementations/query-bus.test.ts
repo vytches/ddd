@@ -541,7 +541,7 @@ describe('QueryBus', () => {
       const middlewareError = new Error('Middleware error');
 
       const errorMiddleware: ICQRSMiddleware = {
-        async handle(context: CQRSExecutionContext, next: () => Promise<unknown>) {
+        async handle(_context: CQRSExecutionContext, _next: () => Promise<unknown>) {
           throw middlewareError;
         },
       };

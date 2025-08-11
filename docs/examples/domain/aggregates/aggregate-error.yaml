@@ -1,0 +1,396 @@
+# Aggregate Errors - Enhanced Metadata System V2
+# Comprehensive error classes for aggregate-specific domain errors
+
+# === FILE METADATA ===
+file-name: 'aggregate-error'
+title: 'Aggregate Errors - Domain Error Hierarchy'
+description: 'Comprehensive error classes for aggregate-specific domain errors and validation failures'
+business-context: 'Essential error handling for aggregate operations, version conflicts, and capability management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+complexity: 'beginner'
+patterns:
+  - 'error-handling'
+  - 'domain-errors'
+  - 'static-factory-methods'
+  - 'error-codes'
+
+dependencies:
+  - '@vytches/ddd-domain-primitives'
+
+# === CLASSES ===
+classes:
+  AggregateError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Comprehensive error classes for aggregate-specific domain errors'
+      business-context: 'Provides structured error handling for aggregate operations, capability management, and state validation'
+
+      # Format-specific overrides
+      formats:
+        jsdoc:
+          description: 'Domain error class for aggregate-specific exceptions'
+        cli:
+          description: |
+            ## AggregateError Class
+
+            Specialized domain error class providing structured error handling for aggregate operations.
+
+            ### Key Features
+            - Static factory methods for common error scenarios
+            - Rich error context with structured data
+            - Integration with domain error codes
+            - Type-safe error creation and handling
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'IDomainError from @vytches/ddd-domain-primitives'
+        error-hierarchy: 'Specialized domain errors for aggregate operations'
+
+    # Static Methods
+    methods:
+      invalidArguments:
+        description: 'Creates error for invalid arguments provided to aggregate'
+        business-context: 'Input validation failures during aggregate construction or method calls'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Descriptive error message'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context and metadata'
+            optional: true
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error instance with InvalidParameter code'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.InvalidParameter'
+
+        examples:
+          - id: 'invalid-argument-error'
+            code: |
+              // Validate aggregate constructor parameters
+              if (!params.id) {
+                throw AggregateError.invalidArguments(
+                  'Aggregate ID is required',
+                  { context: 'AggregateRoot constructor' }
+                );
+              }
+
+      versionConflict:
+        description: 'Creates error for version conflicts in aggregate operations'
+        business-context: 'Optimistic concurrency control violations during aggregate updates'
+
+        parameters:
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type name of the aggregate'
+          - name: 'aggregateId'
+            type: 'string | number'
+            description: 'Identifier of the aggregate with conflict'
+          - name: 'currentVersion'
+            type: 'number'
+            description: 'Current version of the aggregate'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected version from the operation'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with version conflict details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.ValidationFailed'
+          concurrency: 'Used for optimistic concurrency control'
+
+        examples:
+          - id: 'version-conflict-error'
+            code: |
+              // Repository save operation detecting version conflict
+              if (aggregate.getVersion() !== expectedVersion) {
+                throw AggregateError.versionConflict(
+                  'OrderAggregate',
+                  'order-123',
+                  aggregate.getVersion(),
+                  expectedVersion
+                );
+              }
+
+      featureNotEnabled:
+        description: 'Creates error when required capability is not enabled on aggregate'
+        business-context: 'Feature availability validation for capability-dependent operations'
+
+        parameters:
+          - name: 'feature'
+            type: 'string'
+            description: 'Name of the required feature/capability'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error indicating missing capability'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.ValidationFailed'
+          capability-system: 'Used by capability validation utilities'
+
+        examples:
+          - id: 'feature-not-enabled-error'
+            code: |
+              // Capability validation in utility functions
+              if (!aggregate.hasCapability(SnapshotCapability)) {
+                throw AggregateError.featureNotEnabled('snapshot');
+              }
+
+      methodNotImplemented:
+        description: 'Creates error when required method is not implemented'
+        business-context: 'Abstract method validation and interface compliance checking'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Name of the missing method'
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type name of the aggregate class'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error indicating missing implementation'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.MissingValue'
+
+        examples:
+          - id: 'method-not-implemented-error'
+            code: |
+              // Abstract method validation
+              if (typeof this.handleDomainEvent !== 'function') {
+                throw AggregateError.methodNotImplemented(
+                  'handleDomainEvent',
+                  this.constructor.name
+                );
+              }
+
+      invalidSnapshot:
+        description: 'Creates error for invalid snapshot data or format'
+        business-context: 'Snapshot validation during restoration and deserialization'
+
+        parameters:
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type name of the aggregate'
+          - name: 'reason'
+            type: 'string'
+            description: 'Specific reason for snapshot invalidity'
+            optional: true
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with snapshot validation details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.InvalidFormat'
+          snapshot-capability: 'Used by snapshot restoration operations'
+
+      idMismatch:
+        description: 'Creates error for ID mismatch during snapshot restoration'
+        business-context: 'Data integrity validation when loading snapshots'
+
+        parameters:
+          - name: 'snapshotId'
+            type: 'string | number'
+            description: 'ID from the snapshot data'
+          - name: 'aggregateId'
+            type: 'string | number'
+            description: 'ID of the target aggregate'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with ID mismatch details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.ValidationFailed'
+          data-integrity: 'Ensures snapshot belongs to correct aggregate'
+
+      typeMismatch:
+        description: 'Creates error for type mismatch during snapshot restoration'
+        business-context: 'Type safety validation when loading snapshots across aggregate types'
+
+        parameters:
+          - name: 'snapshotType'
+            type: 'string'
+            description: 'Type from the snapshot data'
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type of the target aggregate'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with type mismatch details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.ValidationFailed'
+          type-safety: 'Prevents loading incompatible snapshots'
+
+      duplicateUpcaster:
+        description: 'Creates error for duplicate upcaster registration'
+        business-context: 'Prevents conflicts in event versioning configuration'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type for the upcaster'
+          - name: 'sourceVersion'
+            type: 'number'
+            description: 'Source version already registered'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with upcaster conflict details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.DuplicateEntry'
+          versioning-capability: 'Used by event versioning system'
+
+      missingUpcaster:
+        description: 'Creates error when required upcaster is not found'
+        business-context: 'Event versioning validation during event processing'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type requiring upcasting'
+          - name: 'fromVersion'
+            type: 'number'
+            description: 'Source version of the event'
+          - name: 'toVersion'
+            type: 'number'
+            description: 'Target version needed'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with missing upcaster details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.MissingValue'
+
+        examples:
+          - id: 'missing-upcaster-error'
+            code: |
+              // Event versioning system detecting missing upcaster
+              if (!this.hasUpcaster(eventType, fromVersion)) {
+                throw AggregateError.missingUpcaster(eventType, fromVersion, toVersion);
+              }
+
+      configurationError:
+        description: 'Creates error for aggregate configuration problems'
+        business-context: 'Configuration validation during aggregate initialization'
+
+        parameters:
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type name of the aggregate with configuration issue'
+          - name: 'message'
+            type: 'string'
+            description: 'Specific configuration error message'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with configuration details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.ValidationFailed'
+
+      cannotInterceptApplyMethod:
+        description: 'Creates error when apply method interception fails'
+        business-context: 'Internal method interception for event handling infrastructure'
+
+        parameters:
+          - name: 'aggregateId'
+            type: 'string'
+            description: 'Identifier of the aggregate with interception failure'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
+            optional: true
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error with interception failure details'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.InternalError'
+          infrastructure: 'Used by event handling infrastructure'
+
+      eventStoreNotConfigured:
+        description: 'Creates error when event store is not configured'
+        business-context: 'Event sourcing infrastructure validation'
+
+        parameters:
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
+            optional: true
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error indicating missing event store'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.MissingValue'
+          event-sourcing: 'Used by event sourcing capability'
+
+        examples:
+          - id: 'event-store-not-configured'
+            code: |
+              // Event sourcing capability checking for event store
+              if (!this.eventStore) {
+                throw AggregateError.eventStoreNotConfigured({
+                  capability: 'EventSourcingCapability',
+                  operation: 'loadFromEventStore'
+                });
+              }
+
+      aggregateDoesNotSupportReplay:
+        description: "Creates error when aggregate doesn't support event replay"
+        business-context: 'Event sourcing compatibility validation'
+
+        parameters:
+          - name: 'aggregateType'
+            type: 'string'
+            description: "Type name of the aggregate that doesn't support replay"
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context'
+            optional: true
+
+        returns:
+          type: 'AggregateError'
+          description: 'Configured error indicating replay not supported'
+
+        custom-tags:
+          error-code: 'DomainErrorCode.MethodNotSupported'
+          event-sourcing: 'Event replay capability validation'
+
+# === CUSTOM TAGS ===
+custom-tags:
+  error-handling: 'Comprehensive error handling for aggregate operations'
+  domain-errors: 'Specialized domain error types with rich context'
+  static-factory-methods: 'Clean error creation through static factory pattern'
+  error-codes: 'Integration with standardized domain error codes'
+  capability-validation: 'Error handling for capability system operations'
+  concurrency-control: 'Support for optimistic concurrency control errors'
+  data-integrity: 'Validation errors for data consistency and integrity'

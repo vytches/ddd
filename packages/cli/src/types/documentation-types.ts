@@ -1,30 +1,3 @@
-/**
- * @llm-summary Documentation parsing and generation types for CLI
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Types for parsing, processing and generating documentation from example files.
- * These types replace the old *Example naming pattern with more descriptive names.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const parsed: ParsedDocumentationSet = await parser.parseDocumentation(options);
- * ```
- *
- * @example
- * ```typescript
- * // Registry usage
- * const registry = new DocumentationRegistry();
- * await registry.loadAll();
- * const content = registry.findById('example-id');
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 // No need to import ComponentType from './index' since we define FrameworkComponentType
 
 /**
@@ -40,7 +13,7 @@ export type FrameworkComponentType =
   | 'middleware'
   | 'guard'
   | 'interceptor';
-import type { ExampleDefinition } from '@vytches/ddd-contracts';
+import type { ExampleDefinition } from './legacy-contracts';
 
 /**
  * Parsed documentation set containing base content and optional framework integration

@@ -1,0 +1,379 @@
+# yaml-metadata-engine - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'yaml-metadata-engine'
+title: 'YamlMetadataEngine - Core Metadata Engine'
+description: 'Core YAML metadata engine handling all metadata loading and resolution'
+business-context: 'Central engine for hierarchical metadata processing with performance optimization'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  MetadataConfig:
+    description: 'Configuration for metadata loading'
+    business-context: 'Specifies what metadata to load from hierarchy'
+
+    properties:
+      - name: 'packageName'
+        type: 'string'
+        description: 'Package name to load'
+
+      - name: 'className'
+        type: 'string'
+        description: 'Class name to load'
+
+      - name: 'methodName'
+        type: 'string'
+        description: 'Method name to load'
+        optional: true
+
+# === CLASSES ===
+classes:
+  YamlMetadataEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Core YAML metadata engine for hierarchical metadata loading and resolution'
+      business-context: 'Separates metadata loading from formatting, enabling clean architecture'
+
+      formats:
+        jsdoc:
+          description: 'Central metadata loading engine'
+        cli:
+          description: |
+            ## YamlMetadataEngine
+
+            Core engine features:
+            - Hierarchical metadata loading (4 levels)
+            - Multi-level caching system
+            - Batch method loading optimization
+            - Performance monitoring
+            - Clean separation from formatting
+            - Global/Package/Class/Method hierarchy
+            - Cache management
+
+      custom-tags:
+        since: '2.0.0'
+        pattern: 'Engine'
+        architecture: 'Clean Architecture'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates metadata engine with optional base directory'
+        business-context: 'Initializes engine with caching infrastructure'
+
+        parameters:
+          - name: 'baseDir'
+            type: 'string'
+            description: 'Base directory for metadata files'
+            optional: true
+
+        examples:
+          - id: 'create-engine'
+            code: |
+              const engine = new YamlMetadataEngine('/project/root');
+              // Engine ready with caching initialized
+
+      loadHierarchicalMetadata:
+        description: 'Load complete hierarchical metadata for a method'
+        business-context: 'Main entry point for metadata resolution through hierarchy'
+
+        parameters:
+          - name: 'config'
+            type: 'MetadataConfig'
+            description: 'Metadata configuration'
+
+        returns:
+          type: 'Promise<ResolvedMetadata | null>'
+          description: 'Resolved metadata or null'
+
+        examples:
+          - id: 'load-metadata'
+            code: |
+              const metadata = await engine.loadHierarchicalMetadata({
+                packageName: 'aggregates',
+                className: 'AggregateRoot',
+                methodName: 'commit'
+              });
+
+              // Loads and resolves:
+              // 1. Global settings
+              // 2. Package settings
+              // 3. Class metadata
+              // 4. Method metadata
+              // Returns merged result
+
+        custom-tags:
+          async: 'true'
+          public: 'true'
+          main: 'true'
+
+      loadAllMethodsMetadata:
+        description: 'Batch load metadata for all methods in a class (performance optimization)'
+        business-context: 'Optimizes loading when processing multiple methods from same class'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name'
+          - name: 'className'
+            type: 'string'
+            description: 'Class name'
+
+        returns:
+          type: 'Promise<Record<string, ResolvedMetadata | null>>'
+          description: 'Map of method names to metadata'
+
+        examples:
+          - id: 'batch-load'
+            code: |
+              const allMethods = await engine.loadAllMethodsMetadata(
+                'repositories',
+                'BaseRepository'
+              );
+
+              // Single file read for all methods!
+              // Returns:
+              // {
+              //   'save': { ... },
+              //   'findById': { ... },
+              //   'delete': { ... },
+              //   'update': { ... }
+              // }
+
+              // Performance benefit:
+              // - Traditional: N file reads for N methods
+              // - Batch: 1 file read for N methods
+
+        custom-tags:
+          async: 'true'
+          public: 'true'
+          optimization: 'batch'
+
+      getCacheStats:
+        description: 'Get cache statistics for performance monitoring'
+        business-context: 'Provides visibility into cache effectiveness'
+
+        returns:
+          type: 'object'
+          description: 'Cache performance statistics'
+
+        examples:
+          - id: 'cache-stats'
+            code: |
+              const stats = engine.getCacheStats();
+
+              console.log('Cache Performance:');
+              console.log(`Hit Rate: ${(stats.hitRate * 100).toFixed(1)}%`);
+              console.log(`Cache Size: ${stats.cacheSize} files`);
+              console.log(`Hits: ${stats.hits}`);
+              console.log(`Misses: ${stats.misses}`);
+              console.log(`File Reads: ${stats.reads}`);
+              console.log(`Parse Operations: ${stats.parses}`);
+
+        custom-tags:
+          public: 'true'
+          monitoring: 'true'
+
+      clearCache:
+        description: 'Clear cache for performance testing'
+        business-context: 'Resets cache for testing or memory management'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Specific file to clear, or all if omitted'
+            optional: true
+
+        examples:
+          - id: 'clear-cache'
+            code: |
+              // Clear specific file
+              engine.clearCache('/docs/examples/domain/aggregates/aggregate-root.yaml');
+
+              // Clear all caches
+              engine.clearCache();
+
+        custom-tags:
+          public: 'true'
+          management: 'true'
+
+      collectMetadataSources:
+        description: 'Collect all metadata sources in hierarchy'
+        business-context: 'Gathers metadata from all levels for resolution'
+
+        parameters:
+          - name: 'config'
+            type: 'MetadataConfig'
+            description: 'Configuration'
+
+        returns:
+          type: 'Promise<MetadataSource[]>'
+          description: 'Ordered sources'
+
+        custom-tags:
+          private: 'true'
+          async: 'true'
+
+      collectBaseMetadataSources:
+        description: 'Collect base metadata sources shared across methods'
+        business-context: 'Optimizes by collecting shared sources once'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package'
+          - name: 'className'
+            type: 'string'
+            description: 'Class'
+
+        returns:
+          type: 'Promise<MetadataSource[]>'
+          description: 'Base sources'
+
+        custom-tags:
+          private: 'true'
+          optimization: 'shared'
+
+      loadGlobalMetadata:
+        description: 'Load global metadata settings'
+        business-context: 'Loads organization-wide defaults'
+
+        returns:
+          type: 'Promise<MetadataParseResult | null>'
+          description: 'Global metadata'
+
+        custom-tags:
+          private: 'true'
+          level: 'global'
+
+      loadPackageMetadata:
+        description: 'Load package-level metadata'
+        business-context: 'Loads package-specific settings'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package'
+
+        returns:
+          type: 'Promise<MetadataParseResult | null>'
+          description: 'Package metadata'
+
+        custom-tags:
+          private: 'true'
+          level: 'package'
+
+      loadClassMetadata:
+        description: 'Load class-level metadata'
+        business-context: 'Loads class-specific documentation'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package'
+          - name: 'className'
+            type: 'string'
+            description: 'Class'
+
+        returns:
+          type: 'Promise<MetadataParseResult | null>'
+          description: 'Class metadata'
+
+        custom-tags:
+          private: 'true'
+          level: 'class'
+
+      loadMethodMetadata:
+        description: 'Load method-specific metadata'
+        business-context: 'Loads method documentation'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package'
+          - name: 'className'
+            type: 'string'
+            description: 'Class'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method'
+
+        returns:
+          type: 'Promise<MetadataParseResult | null>'
+          description: 'Method metadata'
+
+        custom-tags:
+          private: 'true'
+          level: 'method'
+
+      loadAllMethodsFromClass:
+        description: 'Load all methods from class file at once'
+        business-context: 'Batch optimization for multiple methods'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package'
+          - name: 'className'
+            type: 'string'
+            description: 'Class'
+
+        returns:
+          type: 'Promise<Map<string, MetadataParseResult>>'
+          description: 'All methods metadata'
+
+        custom-tags:
+          private: 'true'
+          optimization: 'batch'
+
+# === EXAMPLES ===
+examples:
+  - id: 'complete-workflow'
+    description: 'Complete metadata engine workflow'
+    code: |
+      const engine = new YamlMetadataEngine();
+
+      // === Single Method Loading ===
+      const singleMethod = await engine.loadHierarchicalMetadata({
+        packageName: 'cqrs',
+        className: 'CommandBus',
+        methodName: 'execute'
+      });
+
+      console.log('Method metadata:', singleMethod);
+
+      // === Batch Loading (Optimized) ===
+      const allMethods = await engine.loadAllMethodsMetadata(
+        'repositories',
+        'BaseRepository'
+      );
+
+      console.log(`Loaded ${Object.keys(allMethods).length} methods`);
+
+      // === Performance Analysis ===
+      const stats = engine.getCacheStats();
+
+      console.log('\nPerformance Report:');
+      console.log('===================');
+      console.log(`Cache Hit Rate: ${(stats.hitRate * 100).toFixed(1)}%`);
+      console.log(`Total Reads Saved: ${stats.hits}`);
+      console.log(`Actual File Reads: ${stats.reads}`);
+
+      const efficiency = (stats.hits / (stats.hits + stats.reads)) * 100;
+      console.log(`I/O Efficiency: ${efficiency.toFixed(1)}%`);
+
+      // === Cache Management ===
+      if (stats.cacheSize > 100) {
+        console.log('\nCache too large, clearing...');
+        engine.clearCache();
+      }

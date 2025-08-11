@@ -2,10 +2,10 @@
 // Export all core testing functionality
 
 export {
-  safeRun,
-  safeRunTest,
   expectError,
   expectSuccess,
+  safeRun,
+  safeRunTest,
   safeRunWithTimeout,
   type SafeRunResult,
 } from './safe-run';
@@ -14,15 +14,15 @@ export {
   TestClock,
   TimeScenarioBuilder,
   withTestClock,
-  type TimeAdvanceOptions,
   type TestClockState,
+  type TimeAdvanceOptions,
 } from './test-clock';
 
 export { TestClockSimple } from './test-clock-simple';
 
 export {
-  TestHarness,
   SimpleTestHarness,
+  TestHarness,
   TestResourceBuilder,
   type TestHarnessOptions,
   type TestHarnessState,
@@ -30,13 +30,13 @@ export {
 } from './test-harness';
 
 export {
-  TestDataBuilder,
-  EntityIdBuilder,
-  UserBuilder,
   DomainEventBuilder,
-  type TestDataBuilderOptions,
-  type SequenceOptions,
+  EntityIdBuilder,
+  TestDataBuilder,
+  UserBuilder,
   type RandomOptions,
-  type TestUser,
+  type SequenceOptions,
+  type TestDataBuilderOptions,
   type TestDomainEvent,
+  type TestUser,
 } from './test-data-builder';

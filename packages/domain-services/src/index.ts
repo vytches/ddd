@@ -1,15 +1,15 @@
 // Most commonly used - prioritized exports
 export {
-  IBaseDomainService,
-  EventAwareDomainService,
-  UnitOfWorkAwareDomainService,
   AsyncDomainService,
+  EventAwareDomainService,
+  IBaseDomainService,
+  UnitOfWorkAwareDomainService,
 } from './base-domain-service';
 
 export {
   DomainService,
-  getDomainServiceMetadata,
   getDIDomainServiceMetadata,
+  getDomainServiceMetadata,
   isDomainServicePendingDIRegistration,
 } from './domain-service.decorator';
 
@@ -17,27 +17,27 @@ export {
 
 // Types commonly used
 export type {
+  IAsyncDomainService,
   IDomainService,
   IEventBusAware,
   IUnitOfWorkAware,
-  IAsyncDomainService,
 } from './domain-service.interface';
 
+export type { DIServiceMetadata, EnhancedDomainServiceOptions } from './di-types';
 export type { DomainServiceOptions } from './domain-service.decorator';
-export type { EnhancedDomainServiceOptions, DIServiceMetadata } from './di-types';
 
 // IDomainServiceRegistry interface removed - use VytchesDDD DI system instead
 
 // Errors
 export {
+  ServiceCircularError,
   ServiceDuplicateError,
   ServiceNotFoundError,
-  ServiceCircularError,
 } from './service.errors';
 
 // For advanced usage - full exports
-export * from './domain-service.interface';
 export * from './base-domain-service';
 export * from './domain-service.decorator';
+export * from './domain-service.interface';
 // Legacy implementations removed - use VytchesDDD DI system instead
 export * from './service.errors';

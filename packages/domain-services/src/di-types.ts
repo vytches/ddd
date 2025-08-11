@@ -7,48 +7,12 @@
 
 import type { ServiceLifetime } from '@vytches/ddd-di';
 
-/**
- * @llm-summary Type definition for context resolution strategy
- * @llm-domain Pattern
- * @llm-usage Frequent
- *
- * @description
- * ContextResolutionStrategy type implementing domain pattern implementation for context resolution strategy operations.
- *
- * @example
- * ```typescript
- * // Usage example
- * const value: ContextResolutionStrategy = {} as ContextResolutionStrategy;
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export type ContextResolutionStrategy =
   | 'auto' // Auto-detect from call stack or class location
   | 'explicit' // Use explicitly provided context
   | 'global' // Always use global container
   | 'inherit'; // Inherit context from parent service
 
-/**
- * @llm-summary Contract for d i decorator options functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * DIDecoratorOptions interface implementing domain pattern implementation for d i decorator options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteDIDecoratorOptions implements DIDecoratorOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface DIDecoratorOptions {
   /**
    * Service lifetime in the DI container.
@@ -101,25 +65,6 @@ export interface DIDecoratorOptions {
   fallbackToGlobal?: boolean;
 }
 
-/**
- * @llm-summary Contract for enhanced domain service options functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * EnhancedDomainServiceOptions interface implementing domain pattern implementation for enhanced domain service options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteEnhancedDomainServiceOptions implements EnhancedDomainServiceOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface EnhancedDomainServiceOptions extends DIDecoratorOptions {
   /**
    * Unique identifier for the service.
@@ -167,25 +112,6 @@ export interface EnhancedDomainServiceOptions extends DIDecoratorOptions {
   };
 }
 
-/**
- * @llm-summary Contract for d i service metadata functionality
- * @llm-domain Pattern
- * @llm-contract Required
- *
- * @description
- * DIServiceMetadata interface implementing domain pattern implementation for d i service metadata operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteDIServiceMetadata implements DIServiceMetadata {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface DIServiceMetadata extends EnhancedDomainServiceOptions {
   /**
    * The domain service class/constructor.
@@ -211,32 +137,6 @@ export interface DIServiceMetadata extends EnhancedDomainServiceOptions {
   createdAt: Date;
 }
 
-/**
- * @llm-summary DIDomainServiceMetadataRegistry class for d i domain service metadata registry operations
- * @llm-domain Pattern
- * @llm-complexity Simple
- *
- * @description
- * DIDomainServiceMetadataRegistry class implementing domain pattern implementation for d i domain service metadata registry operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new DIDomainServiceMetadataRegistry();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new DIDomainServiceMetadataRegistry());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class DIDomainServiceMetadataRegistry {
   private static services = new Map<string, DIServiceMetadata>();
 

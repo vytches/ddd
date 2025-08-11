@@ -1,0 +1,87 @@
+# validation.error - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'validation.error'
+title: 'CqrsValidationError - CQRS Validation Error'
+description: 'Specialized error class for CQRS validation failures'
+business-context: 'Provides detailed validation error information for CQRS commands and queries'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  CqrsValidationError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Specialized error for CQRS validation failures with field-level error details'
+      business-context: 'Used when command or query validation fails, providing specific field information'
+
+      formats:
+        jsdoc:
+          description: 'CQRS validation error with field details'
+        cli:
+          description: |
+            ## CqrsValidationError
+
+            Extends BaseError to provide CQRS-specific validation errors:
+            - Field-level error tracking
+            - Validation context preservation
+            - Integration with CQRS middleware pipeline
+
+    # Properties
+    properties:
+      field:
+        description: 'Optional field name that caused the validation error'
+        type: 'string | undefined'
+        readonly: true
+        business-context: 'Identifies specific field that failed validation for targeted error handling'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates new CQRS validation error with optional field information'
+        business-context: 'Initializes validation error with descriptive message and field context'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Descriptive error message explaining validation failure'
+          - name: 'field'
+            type: 'string | undefined'
+            description: 'Optional field name that caused the validation error'
+            optional: true
+
+        examples:
+          - id: 'basic-validation-error'
+            code: |
+              const error = new CqrsValidationError(
+                "Email format is invalid",
+                "email"
+              );
+
+          - id: 'general-validation-error'
+            code: |
+              const error = new CqrsValidationError(
+                "Command validation failed"
+              );
+              // field is undefined for general validation errors
+
+          - id: 'multiple-field-validation'
+            code: |
+              const errors = [
+                new CqrsValidationError("Required field missing", "name"),
+                new CqrsValidationError("Invalid email format", "email"),
+                new CqrsValidationError("Age must be positive", "age")
+              ];
+
+        custom-tags:
+          validation-context: 'Preserves field information for client error handling'
+          middleware-integration: 'Used by CQRS validation middleware'

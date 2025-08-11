@@ -1,0 +1,249 @@
+# Event Dispatcher - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'event-dispatcher'
+title: 'Universal Event Dispatcher'
+description: 'Enhanced event dispatcher with middleware and processor support'
+business-context: 'Central event dispatching mechanism with pipeline processing for enterprise event-driven architecture'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  UniversalEventDispatcher:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enhanced event dispatcher with middleware pipeline and processor support'
+      business-context: 'Orchestrates event flow through middleware and processors before publishing to unified bus'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Universal event dispatcher with pipeline processing'
+        cli:
+          description: |
+            ## UniversalEventDispatcher
+            Enterprise event dispatcher featuring:
+            - Middleware pipeline for cross-cutting concerns
+            - Event processor registration
+            - Unified bus integration
+            - Aggregate event publishing
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'IEnhancedEventDispatcher'
+        pattern: 'Pipeline'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new universal event dispatcher'
+        business-context: 'Initializes dispatcher with optional unified bus instance'
+
+        parameters:
+          - name: 'unifiedBus'
+            type: 'UnifiedEventBus'
+            description: 'Optional unified event bus instance (creates new if not provided)'
+            optional: true
+
+        examples:
+          - id: 'basic'
+            code: |
+              const dispatcher = new UniversalEventDispatcher();
+              // Or with existing bus
+              const bus = new UnifiedEventBus();
+              const dispatcher = new UniversalEventDispatcher(bus);
+
+      use:
+        description: 'Add middleware to the event processing pipeline'
+        business-context: 'Enables cross-cutting concerns like logging, validation, and transformation'
+
+        parameters:
+          - name: 'middleware'
+            type: 'EventMiddleware'
+            description: 'Middleware function to add to pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Returns dispatcher instance for method chaining'
+
+        examples:
+          - id: 'middleware'
+            code: |
+              dispatcher
+                .use(loggingMiddleware)
+                .use(validationMiddleware)
+                .use(authorizationMiddleware);
+
+        custom-tags:
+          chainable: 'true'
+          pattern: 'Builder'
+
+      registerProcessor:
+        description: 'Register an event processor for specialized event handling'
+        business-context: 'Processors run after events are published but before aggregate commit'
+
+        parameters:
+          - name: 'processor'
+            type: 'IEventProcessor'
+            description: 'Event processor to register'
+
+        returns:
+          type: 'this'
+          description: 'Returns dispatcher instance for method chaining'
+
+        examples:
+          - id: 'processor'
+            code: |
+              dispatcher
+                .registerProcessor(auditProcessor)
+                .registerProcessor(integrationProcessor);
+
+        custom-tags:
+          chainable: 'true'
+
+      dispatchEventsForAggregate:
+        description: 'Dispatch all events from an aggregate and clear them'
+        business-context: 'This is the main method used by IBaseRepository.save()'
+
+        parameters:
+          - name: 'aggregate'
+            type: 'IAggregateWithEvents'
+            description: 'Aggregate containing pending events'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when all aggregate events are dispatched'
+
+        examples:
+          - id: 'aggregate'
+            code: |
+              const order = new OrderAggregate();
+              order.confirmOrder(); // Generates events
+              await dispatcher.dispatchEventsForAggregate(order);
+              // Events dispatched and aggregate cleared
+
+        custom-tags:
+          async: 'true'
+          repository-integration: 'true'
+
+      dispatchEvent:
+        description: 'Dispatch a single event through middleware pipeline'
+        business-context: 'Core method for single event dispatch with middleware and processor execution'
+
+        parameters:
+          - name: 'event'
+            type: 'IDomainEvent'
+            description: 'Domain event to dispatch'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when event is dispatched'
+
+        examples:
+          - id: 'single'
+            code: |
+              const event = new OrderCreatedEvent(orderData);
+              await dispatcher.dispatchEvent(event);
+
+        custom-tags:
+          async: 'true'
+
+      dispatchEvents:
+        description: 'Dispatch multiple events'
+        business-context: 'Sequential dispatch of multiple events through the pipeline'
+
+        parameters:
+          - name: 'events'
+            type: '...IDomainEvent[]'
+            description: 'Domain events to dispatch'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when all events are dispatched'
+
+        examples:
+          - id: 'multiple'
+            code: |
+              await dispatcher.dispatchEvents(
+                new OrderCreatedEvent(orderData),
+                new PaymentProcessedEvent(paymentData)
+              );
+
+        custom-tags:
+          async: 'true'
+          variadic: 'true'
+
+      getUnifiedEventBus:
+        description: 'Get direct access to UnifiedEventBus for advanced scenarios'
+        business-context: 'Provides access to underlying unified bus for direct operations'
+
+        returns:
+          type: 'UnifiedEventBus'
+          description: 'The unified event bus instance'
+
+        examples:
+          - id: 'access'
+            code: |
+              const bus = dispatcher.getUnifiedEventBus();
+              // Direct bus operations
+              bus.subscribe(OrderCreatedEvent, handler);
+
+        custom-tags:
+          accessor: 'true'
+
+      setUnifiedEventBus:
+        description: 'Replace the unified event bus (useful for testing)'
+        business-context: 'Allows swapping the bus instance for testing or reconfiguration'
+
+        parameters:
+          - name: 'bus'
+            type: 'UnifiedEventBus'
+            description: 'New unified event bus instance'
+
+        examples:
+          - id: 'testing'
+            code: |
+              const mockBus = new MockUnifiedEventBus();
+              dispatcher.setUnifiedEventBus(mockBus);
+              // Now using mock bus for testing
+
+        custom-tags:
+          testing: 'true'
+
+      buildPipeline:
+        description: 'Build the middleware pipeline for event processing'
+        business-context: 'Constructs composed middleware chain for event flow'
+
+        returns:
+          type: '(event: IDomainEvent) => Promise<void>'
+          description: 'Composed pipeline function'
+
+        custom-tags:
+          private: 'true'
+          pattern: 'Pipeline'
+
+      processEvent:
+        description: 'Process an event through all registered processors'
+        business-context: 'Executes all applicable processors for the given event'
+
+        parameters:
+          - name: 'event'
+            type: 'IDomainEvent'
+            description: 'Event to process'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when processing completes'
+
+        custom-tags:
+          private: 'true'
+          async: 'true'

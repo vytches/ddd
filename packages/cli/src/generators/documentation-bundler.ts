@@ -1,22 +1,3 @@
-/**
- * @llm-summary Documentation bundler for generating multi-package documentation
- * @llm-domain Infrastructure
- * @llm-complexity Medium
- *
- * @description
- * Documentation bundler that combines examples from multiple packages into
- * unified documentation bundles.
- *
- * @example
- * ```typescript
- * const bundler = new DocumentationBundler();
- * const bundle = await bundler.createBundle(['domain-services', 'di']);
- * ```
- *
- * @since 1.0.0
- * @public
- */
-
 import type { PackageExampleConfig, ExampleDefinition } from '../types/example-types';
 import { DocumentationGenerator } from './documentation-generator';
 import { PackageConfigLoader } from '../core/package-config-loader';

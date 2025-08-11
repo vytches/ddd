@@ -6,25 +6,6 @@ import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import { OutboxMessageFactory } from './outbox-message-factory';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
-/**
- * @llm-summary Contract for outbox service options functionality
- * @llm-domain Integration
- * @llm-contract Required
- *
- * @description
- * OutboxServiceOptions interface implementing integration layer component for outbox service options operations.
- *
- * @example
- * ```typescript
- * // Implementation example
- * class ConcreteOutboxServiceOptions implements OutboxServiceOptions {
- *   // Implementation
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export interface OutboxServiceOptions {
   /** Default priority for messages */
   defaultPriority?: MessagePriority;
@@ -38,32 +19,6 @@ export interface OutboxServiceOptions {
   enableLogging?: boolean;
 }
 
-/**
- * @llm-summary OutboxService class for outbox service operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * OutboxService class implementing integration layer component for outbox service operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new OutboxService();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new OutboxService());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class OutboxService {
   private readonly repository: IOutboxRepository;
   private readonly options: Required<OutboxServiceOptions>;

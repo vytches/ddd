@@ -28,8 +28,8 @@ export {
   PolicyTemporalBehavior,
   PolicyTemporalBehaviorBuilder,
   PolicyTemporalBehaviorFactory,
-  type TemporalPolicyConfig,
   type BusinessCalendar,
   type TemporalCondition,
   type TemporalInfo,
+  type TemporalPolicyConfig,
 } from './temporal-policy';

@@ -1,0 +1,17 @@
+# registry/index - Universal Enhanced Metadata System V2
+
+# === FOLDER METADATA ===
+folder-name: 'registry'
+title: 'Policy Registry'
+description: 'Central policy management'
+business-context: 'Provides centralized policy discovery and lifecycle'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'folder'
+
+# === EXPORTS ===
+exports:
+  classes:
+    - 'PolicyRegistry'

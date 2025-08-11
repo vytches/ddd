@@ -2,42 +2,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Result } from '@vytches/ddd-utils';
 
+import { ACLError } from './acl-errors';
 import type {
+  ACLContextInfo,
+  ACLMiddleware,
+  ExecuteOptions,
   IACLAdapter,
   IExternalAPI,
   IModelTranslator,
-  ACLContextInfo,
-  ExecuteOptions,
-  ACLMiddleware,
 } from './acl.interfaces';
-import { ACLError } from './acl-errors';
 
-/**
- * @llm-summary BaseACLAdapter class for base a c l adapter operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * BaseACLAdapter class implementing integration layer component for base a c l adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new BaseACLAdapter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new BaseACLAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any>
   implements IACLAdapter<TDomainModel, TExternalModel, TResult>
 {
@@ -173,32 +147,6 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
   }
 }
 
-/**
- * @llm-summary SimpleACLAdapter class for simple a c l adapter operations
- * @llm-domain Integration
- * @llm-complexity Medium
- *
- * @description
- * SimpleACLAdapter class implementing integration layer component for simple a c l adapter operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SimpleACLAdapter();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SimpleACLAdapter());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class SimpleACLAdapter<TDomain, TExternal, TResult = any> extends BaseACLAdapter<
   TDomain,
   TExternal,

@@ -1,49 +1,22 @@
 import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
-import type {
-  ISagaOrchestrator,
-  ISagaRepository,
-  ISagaDefinition,
-  ISaga,
-  ISagaExecutionContext,
-  ISagaProcessingResult,
-  ISagaOrchestratorConfig,
-  ISagaOrchestratorStatistics,
-} from '../interfaces';
-import { SagaStatus } from '../interfaces';
 import {
+  SagaConfigurationError,
   SagaDefinitionNotFoundError,
   SagaInstanceLimitExceededError,
-  SagaConfigurationError,
-  SagaOrchestrationError,
 } from '../errors';
+import type {
+  ISaga,
+  ISagaDefinition,
+  ISagaExecutionContext,
+  ISagaOrchestrator,
+  ISagaOrchestratorConfig,
+  ISagaOrchestratorStatistics,
+  ISagaProcessingResult,
+  ISagaRepository,
+} from '../interfaces';
+import { SagaStatus } from '../interfaces';
 
-/**
- * @llm-summary SagaOrchestrator class for saga orchestrator operations
- * @llm-domain Integration
- * @llm-complexity Expert
- *
- * @description
- * SagaOrchestrator class implementing integration layer component for saga orchestrator operations.
- *
- * @example
- * ```typescript
- * // Basic usage
- * const instance = new SagaOrchestrator();
- * ```
- *
- * @example
- * ```typescript
- * // With error handling
- * const [error, instance] = safeRun(() => new SagaOrchestrator());
- * if (error) {
- *   console.error('Creation failed:', error.message);
- * }
- * ```
- *
- * @since 1.0.0
- * @public
- */
 export class SagaOrchestrator implements ISagaOrchestrator {
   private readonly logger: ReturnType<typeof Logger.forContext>;
   private readonly sagaDefinitions: Map<string, ISagaDefinition> = new Map();
