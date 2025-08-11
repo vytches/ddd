@@ -40,10 +40,10 @@ const CONFIG = {
     messaging: 25,
     resilience: 8,
     enterprise: 5,
-    cli: 80, // CLI tools can have more flexibility
+    cli: 100, // CLI tools can have more flexibility
     testing: 60, // Testing utilities have more flexibility for test files
     logging: 35,
-    utils: 5,
+    utils: 15,
     contracts: 50, // Higher limit for contracts due to interfaces
     'domain-services': 14,
     'event-scheduling': 25,

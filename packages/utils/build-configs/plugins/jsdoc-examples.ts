@@ -4,7 +4,9 @@
  */
 
 import type { Plugin } from 'vite';
-import { JSDocAdapter } from '../../src/examples-engine/adapters/jsdoc-adapter';
+// NOTE: JSDocAdapter moved to @vytches/ddd-cli package
+// This plugin is now deprecated - use the CLI package directly for JSDoc processing
+// import { JSDocAdapter } from '@vytches/ddd-cli/src/examples-engine/adapters/jsdoc-adapter';
 
 export interface JSDocExamplesPluginOptions {
   /**

@@ -2,9 +2,9 @@
  * Integration tests for Examples Engine
  */
 
+import { safeRun } from '@vytches/ddd-utils';
 import { describe, expect, it } from 'vitest';
 import { ExampleEngine, FileScanner, TagExtractor } from '../../src/examples-engine';
-import { safeRun } from '../../src/saferun';
 
 describe('Examples Engine Integration', () => {
   describe('TagExtractor', () => {

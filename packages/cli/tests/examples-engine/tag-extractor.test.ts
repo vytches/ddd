@@ -2,9 +2,9 @@
  * Tests for TagExtractor functionality
  */
 
+import { safeRun } from '@vytches/ddd-utils';
 import { describe, expect, it } from 'vitest';
 import { TagExtractor } from '../../src/examples-engine/extractor/tag-extractor';
-import { safeRun } from '../../src/saferun';
 
 describe('TagExtractor', () => {
   let extractor: TagExtractor;

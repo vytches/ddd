@@ -1,7 +1,7 @@
 import path from 'path';
 import { ContentResolver } from './content-resolver';
-import { HierarchicalMetadataResolver } from '@vytches/ddd-utils';
-import type { ResolvedMetadata } from '@vytches/ddd-utils';
+import { HierarchicalMetadataResolver } from '../examples-engine/hierarchy/hierarchical-metadata-resolver';
+import type { ResolvedMetadata } from '../examples-engine/hierarchy/types';
 
 /**
  * Enhanced content resolver that integrates with Enhanced Metadata System V2

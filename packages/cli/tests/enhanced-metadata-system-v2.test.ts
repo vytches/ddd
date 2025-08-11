@@ -1,3 +1,4 @@
+import { safeRun } from '@vytches/ddd-utils';
 import { resolve } from 'path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -7,7 +8,6 @@ import {
   MultiLevelCache,
 } from '../src/examples-engine';
 import type { HierarchyConfig, ResolvedMetadata } from '../src/examples-engine/hierarchy/types';
-import { safeRun } from '../src/saferun';
 
 describe('Enhanced Metadata System V2', () => {
   let resolver: HierarchicalMetadataResolver;

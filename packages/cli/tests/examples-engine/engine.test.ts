@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import { safeRun } from '../../src/saferun';
 
+import { safeRun } from '@vytches/ddd-utils';
 import type { ExampleFile, ExtractedExample } from '../../src/examples-engine';
 import { ExampleEngine } from '../../src/examples-engine';
 
