@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/vytches/ddd/compare/@vytches/ddd-acl@0.4.0...@vytches/ddd-acl@0.5.0) (2025-08-11)
+
+### Features
+
+- **docs:** yaml files updated
+  ([abeb16b](https://github.com/vytches/ddd/commit/abeb16bdd4abb9b7991dd9a391bc90ebd4167fed))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.4.2](https://github.com/vytches/ddd/compare/@vytches/ddd-acl@0.4.0...@vytches/ddd-acl@0.4.2) (2025-08-07)
 
 **Note:** Version bump only for package @vytches/ddd-acl
