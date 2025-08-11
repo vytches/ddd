@@ -1,0 +1,398 @@
+# VytchesDDD Project Orchestration Workflows
+
+workflows:
+  # Feature Development Workflow
+  feature_development:
+    name: 'Feature Development'
+    description: 'Complete workflow for developing new features'
+    triggers:
+      - manual
+      - pull_request
+    phases:
+      - name: planning
+        agents:
+          - tech-lead
+          - ddd-patterns-expert
+        tasks:
+          - create_adr
+          - design_architecture
+          - define_patterns
+        outputs:
+          - adr_document
+          - design_specification
+
+      - name: implementation
+        agents:
+          - library-expert
+          - ddd-patterns-expert
+        tasks:
+          - write_code
+          - implement_patterns
+          - create_tests
+        outputs:
+          - source_code
+          - unit_tests
+
+      - name: quality_assurance
+        parallel: true
+        agents:
+          - testing-excellence
+          - security-audit
+          - performance-optimizer
+        tasks:
+          - run_tests
+          - check_coverage
+          - security_scan
+          - bundle_analysis
+        outputs:
+          - test_report
+          - coverage_report
+          - security_report
+          - performance_metrics
+
+      - name: documentation
+        agents:
+          - documentation-master
+          - yaml-metadata-specialist
+        tasks:
+          - generate_jsdoc
+          - create_yaml_metadata
+          - update_readme
+          - create_examples
+        outputs:
+          - api_documentation
+          - yaml_metadata_files
+          - usage_examples
+
+      - name: review
+        agents:
+          - tech-lead
+          - project-orchestrator
+        tasks:
+          - code_review
+          - approve_changes
+          - merge_request
+        outputs:
+          - approval_status
+          - merge_commit
+
+  # Package Creation Workflow
+  package_creation:
+    name: 'Package Creation'
+    description: 'Create a new package in the monorepo'
+    triggers:
+      - manual
+    phases:
+      - name: design
+        agents:
+          - tech-lead
+          - ddd-patterns-expert
+        tasks:
+          - define_package_scope
+          - select_patterns
+          - create_adr
+        outputs:
+          - package_specification
+          - architecture_decision
+
+      - name: scaffold
+        agents:
+          - library-expert
+        tasks:
+          - create_package_structure
+          - setup_configuration
+          - initialize_dependencies
+        outputs:
+          - package_skeleton
+          - config_files
+
+      - name: setup_quality
+        parallel: true
+        agents:
+          - testing-excellence
+          - documentation-master
+          - performance-optimizer
+        tasks:
+          - setup_test_framework
+          - create_initial_docs
+          - configure_bundling
+        outputs:
+          - test_configuration
+          - readme_template
+          - build_configuration
+
+  # Bug Fix Workflow
+  bug_fix:
+    name: 'Bug Fix'
+    description: 'Workflow for fixing reported bugs'
+    triggers:
+      - issue_created
+      - manual
+    phases:
+      - name: triage
+        agents:
+          - tech-lead
+          - library-expert
+        tasks:
+          - assess_severity
+          - identify_affected_packages
+          - assign_priority
+        outputs:
+          - bug_analysis
+          - impact_assessment
+
+      - name: investigation
+        agents:
+          - library-expert
+          - testing-excellence
+        tasks:
+          - reproduce_bug
+          - identify_root_cause
+          - create_failing_test
+        outputs:
+          - reproduction_steps
+          - root_cause_analysis
+          - regression_test
+
+      - name: fix
+        agents:
+          - library-expert
+        tasks:
+          - implement_fix
+          - update_tests
+        outputs:
+          - fix_implementation
+          - passing_tests
+
+      - name: validation
+        parallel: true
+        agents:
+          - testing-excellence
+          - security-audit
+          - performance-optimizer
+        tasks:
+          - run_regression_tests
+          - security_review
+          - performance_check
+        outputs:
+          - test_results
+          - security_clearance
+          - performance_impact
+
+  # Release Workflow
+  release:
+    name: 'Release Preparation'
+    description: 'Prepare and validate release locally (actual publish is manual)'
+    triggers:
+      - manual
+    phases:
+      - name: prepare
+        agents:
+          - tech-lead
+          - documentation-master
+        tasks:
+          - update_version
+          - generate_changelog
+          - update_documentation
+        outputs:
+          - version_bump
+          - changelog
+          - updated_docs
+
+      - name: validate
+        parallel: true
+        agents:
+          - testing-excellence
+          - security-audit
+          - performance-optimizer
+        tasks:
+          - full_test_suite
+          - security_audit
+          - bundle_size_check
+          - regression_check
+        outputs:
+          - test_report
+          - security_report
+          - performance_report
+
+      - name: prerelease
+        agents:
+          - tech-lead
+          - project-orchestrator
+        tasks:
+          - run_prerelease_check # pnpm prerelease
+          - verify_build_outputs
+          - validate_package_json
+          - dry_run_publish # npm publish --dry-run
+          - prepare_release_notes
+        outputs:
+          - prerelease_validation
+          - build_artifacts
+          - release_checklist
+          - draft_release_notes
+
+      - name: final_review
+        agents:
+          - tech-lead
+        tasks:
+          - review_all_changes
+          - create_release_branch
+          - prepare_pr_for_release
+          - generate_release_instructions
+        outputs:
+          - release_ready_status
+          - release_branch
+          - pr_link
+          - manual_release_steps
+
+  # Security Audit Workflow
+  security_audit:
+    name: 'Security Audit'
+    description: 'Comprehensive security audit'
+    triggers:
+      - schedule
+      - manual
+    phases:
+      - name: scan
+        agents:
+          - security-audit
+        tasks:
+          - dependency_scan
+          - code_scan
+          - secret_detection
+        outputs:
+          - vulnerability_report
+          - code_issues
+          - secrets_report
+
+      - name: assess
+        agents:
+          - security-audit
+          - tech-lead
+        tasks:
+          - risk_assessment
+          - prioritize_fixes
+        outputs:
+          - risk_matrix
+          - action_plan
+
+      - name: remediate
+        agents:
+          - library-expert
+          - security-audit
+        tasks:
+          - apply_patches
+          - update_dependencies
+          - fix_vulnerabilities
+        outputs:
+          - patched_code
+          - updated_dependencies
+
+  # Performance Optimization Workflow
+  performance_optimization:
+    name: 'Performance Optimization'
+    description: 'Optimize bundle size and runtime performance'
+    triggers:
+      - manual
+      - performance_regression
+    phases:
+      - name: analysis
+        agents:
+          - performance-optimizer
+        tasks:
+          - bundle_analysis
+          - runtime_profiling
+          - dependency_analysis
+        outputs:
+          - bundle_report
+          - performance_profile
+          - dependency_graph
+
+      - name: optimize
+        agents:
+          - performance-optimizer
+          - library-expert
+        tasks:
+          - tree_shaking
+          - code_splitting
+          - lazy_loading
+          - cache_optimization
+        outputs:
+          - optimized_bundles
+          - performance_improvements
+
+      - name: validate
+        agents:
+          - performance-optimizer
+          - testing-excellence
+        tasks:
+          - benchmark_tests
+          - regression_check
+        outputs:
+          - benchmark_results
+          - comparison_report
+
+# Agent Capabilities
+agents:
+  tech-lead:
+    capabilities:
+      - architecture_design
+      - code_review
+      - decision_making
+      - version_management
+
+  testing-excellence:
+    capabilities:
+      - test_execution
+      - coverage_analysis
+      - test_design
+      - quality_assurance
+
+  documentation-master:
+    capabilities:
+      - documentation_generation
+      - example_creation
+      - api_documentation
+      - changelog_management
+
+  yaml-metadata-specialist:
+    capabilities:
+      - yaml_metadata_generation
+      - hierarchical_structure_validation
+      - inheritance_chain_resolution
+      - format_specific_overrides
+
+  performance-optimizer:
+    capabilities:
+      - bundle_analysis
+      - performance_profiling
+      - optimization
+      - benchmarking
+
+  ddd-patterns-expert:
+    capabilities:
+      - pattern_selection
+      - domain_modeling
+      - aggregate_design
+      - event_design
+
+  security-audit:
+    capabilities:
+      - vulnerability_scanning
+      - security_review
+      - compliance_check
+      - risk_assessment
+
+  library-expert:
+    capabilities:
+      - code_implementation
+      - bug_fixing
+      - package_creation
+      - api_design
+
+  project-orchestrator:
+    capabilities:
+      - workflow_coordination
+      - task_distribution
+      - progress_monitoring
+      - quality_gates
