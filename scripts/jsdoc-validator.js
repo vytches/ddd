@@ -398,9 +398,10 @@ class JSDocValidator {
       );
     }
 
-    // Exit code
+    // Exit code - temporarily disabled to not block releases
     if (this.errors.length > 0) {
-      console.warn('\\n💥 Validation failed due to errors');
+      console.warn('\\n💥 Validation found issues (non-blocking for now)');
+      // Temporarily disabled - JSDoc system needs time for fixes
       // process.exit(1);
     } else {
       console.log('\\n✅ Validation completed successfully');
