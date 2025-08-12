@@ -133,66 +133,73 @@ classes:
           fluent-interface: 'Returns this for method chaining'
           pipeline-order: 'Middleware executes in registration order'
 
-      # Legacy Methods (Deprecated)
+      # Manual Registration Methods
       register:
-        description: 'Legacy handler registration method (deprecated)'
-        business-context: 'Superseded by @CommandHandler decorator and DI container'
+        description: 'Manually register a command handler'
+        business-context: 'Allows explicit handler registration without decorators or DI'
 
         parameters:
           - name: 'commandType'
             type: 'unknown'
-            description: 'Command type (unused in current implementation)'
+            description: 'Command class or string name'
           - name: 'handler'
             type: 'ICommandHandler<T, TResult>'
-            description: 'Handler instance (unused in current implementation)'
+            description: 'Handler instance to register'
 
         returns:
           type: 'void'
           description: 'No return value'
 
-        throws:
-          - type: 'CQRSConfigurationError'
-            description: 'Always thrown - method is deprecated'
-
         examples:
-          - id: 'deprecated-usage'
+          - id: 'manual-registration'
             code: |
-              // ❌ Deprecated - throws CQRSConfigurationError
-              // commandBus.register(CreateUserCommand, handler);
+              // Manual handler registration
+              const handler = new CreateUserHandler(userService);
+              commandBus.register(CreateUserCommand, handler);
 
-              // ✅ Use @CommandHandler decorator instead
-              @CommandHandler(CreateUserCommand)
-              class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
-                async execute(cmd: CreateUserCommand): Promise<void> {}
-              }
+              // Or using string name
+              commandBus.register('CreateUserCommand', handler);
+
+              // Execute the command
+              const command = new CreateUserCommand(userData);
+              await commandBus.execute(command);
 
         custom-tags:
-          deprecated: 'true'
-          replacement: 'Use @CommandHandler decorator'
+          manual-registration: 'Supports both decorator and manual approaches'
+          flexibility: 'Useful for dynamic handler registration'
 
       registerFactory:
-        description: 'Legacy factory registration method (deprecated)'
-        business-context: 'Superseded by @CommandHandler decorator and DI container'
+        description: 'Register a command handler using factory function'
+        business-context: 'Enables lazy initialization and dependency injection patterns'
 
         parameters:
           - name: 'commandType'
             type: 'unknown'
-            description: 'Command type (unused in current implementation)'
+            description: 'Command class or string name'
           - name: 'factory'
             type: '() => ICommandHandler<T, TResult>'
-            description: 'Handler factory (unused in current implementation)'
+            description: 'Factory function returning handler instance'
 
         returns:
           type: 'void'
           description: 'No return value'
 
-        throws:
-          - type: 'CQRSConfigurationError'
-            description: 'Always thrown - method is deprecated'
+        examples:
+          - id: 'factory-registration'
+            code: |
+              // Factory registration for lazy initialization
+              commandBus.registerFactory(
+                ProcessOrderCommand,
+                () => new ProcessOrderHandler(orderService, paymentService)
+              );
+
+              // Handler created only when command is executed
+              const command = new ProcessOrderCommand(orderData);
+              await commandBus.execute(command);
 
         custom-tags:
-          deprecated: 'true'
-          replacement: 'Use @CommandHandler decorator with DI container'
+          lazy-initialization: 'Handler created on first use'
+          dependency-injection: 'Factory can resolve dependencies dynamically'
 
       discoverHandlers:
         description: 'Legacy handler discovery method (deprecated)'

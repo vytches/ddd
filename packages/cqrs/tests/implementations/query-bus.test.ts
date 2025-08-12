@@ -83,42 +83,38 @@ describe('QueryBus', () => {
   });
 
   describe('register', () => {
-    it('should throw CQRSConfigurationError for manual registration', () => {
+    it('should allow manual handler registration', () => {
       const [registerError] = safeRun(() => {
         queryBus.register(TestQuery, mockHandler);
       });
-      expect(registerError).toBeInstanceOf(CQRSConfigurationError);
+      expect(registerError).toBeUndefined();
     });
 
-    it('should throw with deprecation message', () => {
-      const [messageError] = safeRun(() => {
-        queryBus.register(TestQuery, mockHandler);
+    it('should register handler for string query name', () => {
+      const [registerError] = safeRun(() => {
+        queryBus.register('TestQuery', mockHandler);
       });
-      expect(messageError?.message).toContain(
-        'Manual registration is deprecated. Use @QueryHandler decorator and DI container instead.'
-      );
+      expect(registerError).toBeUndefined();
     });
   });
 
   describe('registerFactory', () => {
-    it('should throw CQRSConfigurationError for manual factory registration', () => {
+    it('should allow factory registration', () => {
       const factory = () => mockHandler;
 
       const [factoryError] = safeRun(() => {
         queryBus.registerFactory(TestQuery, factory);
       });
-      expect(factoryError).toBeInstanceOf(CQRSConfigurationError);
+      expect(factoryError).toBeUndefined();
     });
 
-    it('should throw with deprecation message', () => {
+    it('should register factory for string query name', () => {
       const factory = () => mockHandler;
 
-      const [factoryMessageError] = safeRun(() => {
-        queryBus.registerFactory(TestQuery, factory);
+      const [factoryError] = safeRun(() => {
+        queryBus.registerFactory('TestQuery', factory);
       });
-      expect(factoryMessageError?.message).toContain(
-        'Manual factory registration is deprecated. Use @QueryHandler decorator and DI container instead.'
-      );
+      expect(factoryError).toBeUndefined();
     });
   });
 
@@ -228,16 +224,42 @@ describe('QueryBus', () => {
       expect(executeError).toBeInstanceOf(HandlerNotFoundError);
     });
 
-    it('should throw CQRSConfigurationError when no handler metadata exists', async () => {
+    it('should throw HandlerNotFoundError when no handler exists', async () => {
       const query = new TestQuery('test-id');
 
       vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
 
       const [executeError] = await safeRun(() => queryBus.execute(query));
-      expect(executeError).toBeInstanceOf(CQRSConfigurationError);
-      expect(executeError?.message).toContain(
-        'No handler registered for query TestQuery. Did you forget @QueryHandler decorator?'
-      );
+      expect(executeError).toBeInstanceOf(HandlerNotFoundError);
+      expect(executeError?.message).toContain('No query handler registered for: TestQuery');
+    });
+
+    it('should execute manually registered handler', async () => {
+      const query = new TestQuery('test-id');
+      const manualHandler = {
+        execute: vi.fn().mockResolvedValue('manual-result'),
+      };
+
+      queryBus.register(TestQuery, manualHandler);
+
+      const result = await queryBus.execute(query);
+
+      expect(manualHandler.execute).toHaveBeenCalledWith(query);
+      expect(result).toBe('manual-result');
+    });
+
+    it('should execute factory-registered handler', async () => {
+      const query = new TestQuery('test-id');
+      const factoryHandler = {
+        execute: vi.fn().mockResolvedValue('factory-result'),
+      };
+
+      queryBus.registerFactory(TestQuery, () => factoryHandler);
+
+      const result = await queryBus.execute(query);
+
+      expect(factoryHandler.execute).toHaveBeenCalledWith(query);
+      expect(result).toBe('factory-result');
     });
 
     it('should validate query when validatable', async () => {

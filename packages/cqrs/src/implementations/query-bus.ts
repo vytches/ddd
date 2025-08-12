@@ -10,28 +10,28 @@ import type { ICqrsValidatable } from '../validation';
 
 export class QueryBus extends IQueryBus {
   private middlewares: ICQRSMiddleware[] = [];
+  private handlers: Map<string, IQueryHandler<any, any> | (() => IQueryHandler<any, any>)> =
+    new Map();
 
   constructor(private container: IDependencyContainer) {
     super();
   }
 
-  register<T extends IQuery<R>, R>(_queryType: unknown, _handler: IQueryHandler<T, R>): void {
-    // Legacy method - deprecated in favor of DI container registration
-    throw new CQRSConfigurationError(
-      'Manual registration is deprecated. Use @QueryHandler decorator and DI container instead.',
-      'QueryBus'
-    );
+  register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
+    // Support manual registration for flexibility
+    const queryName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
+
+    this.handlers.set(queryName, handler);
   }
 
   registerFactory<T extends IQuery<R>, R>(
-    _queryType: unknown,
-    _factory: () => IQueryHandler<T, R>
+    queryType: unknown,
+    factory: () => IQueryHandler<T, R>
   ): void {
-    // Legacy method - deprecated in favor of DI container registration
-    throw new CQRSConfigurationError(
-      'Manual factory registration is deprecated. Use @QueryHandler decorator and DI container instead.',
-      'QueryBus'
-    );
+    // Support factory registration for lazy initialization
+    const queryName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
+
+    this.handlers.set(queryName, factory);
   }
 
   use(middleware: ICQRSMiddleware): this {
@@ -51,14 +51,28 @@ export class QueryBus extends IQueryBus {
   }
 
   async execute<T extends IQuery<R>, R>(query: T): Promise<R> {
-    // Direct resolution through DI container using metadata
-    const handlerToken = this.getHandlerToken(query.constructor);
-
+    const queryName = query.constructor.name;
     let handler: IQueryHandler<T, R>;
-    try {
-      handler = this.container.resolve<IQueryHandler<T, R>>(handlerToken);
-    } catch (_error) {
-      throw new HandlerNotFoundError(query.constructor.name, 'query');
+
+    // First, check manual registrations
+    const registeredHandler = this.handlers.get(queryName);
+    if (registeredHandler) {
+      // Check if it's a factory function or direct handler
+      if (typeof registeredHandler === 'function' && !('execute' in registeredHandler)) {
+        // It's a factory function
+        handler = (registeredHandler as () => IQueryHandler<T, R>)();
+      } else {
+        // It's a direct handler
+        handler = registeredHandler as IQueryHandler<T, R>;
+      }
+    } else {
+      // Fall back to DI container resolution
+      try {
+        const handlerToken = this.getHandlerToken(query.constructor);
+        handler = this.container.resolve<IQueryHandler<T, R>>(handlerToken);
+      } catch (_error) {
+        throw new HandlerNotFoundError(query.constructor.name, 'query');
+      }
     }
 
     // Optional validation

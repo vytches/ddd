@@ -1,4 +1,13 @@
-# ⚡ VytchesDDD Performance Optimizer Agent
+---
+name: performance-optimizer
+description:
+  Performance engineering specialist for bundle size and runtime optimization
+tools: Task, Bash, Read, Glob, Grep, LS, mcp__zen__analyze, mcp__zen__codereview
+model: sonnet
+color: lime
+---
+
+# VytchesDDD Performance Optimizer Agent
 
 ## Role
 
