@@ -6,8 +6,15 @@ import dts from 'vite-plugin-dts';
 
 // Modern build configuration system
 export {
-  createArchitectureConfig, createFoundationConfig, createInfrastructureConfig, createMetaPackageConfig, createPackageConfig, createPatternConfig, type BundleStrategy, type PackageConfigOptions,
-  type PackageType
+  createArchitectureConfig,
+  createFoundationConfig,
+  createInfrastructureConfig,
+  createMetaPackageConfig,
+  createPackageConfig,
+  createPatternConfig,
+  type BundleStrategy,
+  type PackageConfigOptions,
+  type PackageType,
 } from './build-configs';
 
 // Legacy configuration for utils package itself
