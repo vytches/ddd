@@ -3,6 +3,61 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/vytches/ddd/compare/@vytches/ddd-projections@0.4.0...@vytches/ddd-projections@0.7.0) (2025-08-12)
+
+- Release/2025 08 11 2 (#32)
+  ([c71ebd6](https://github.com/vytches/ddd/commit/c71ebd6b33ae0c211b8cbe74e57ce4e2a753c344)),
+  closes [#32](https://github.com/vytches/ddd/issues/32)
+
+### BREAKING CHANGES
+
+- None - maintains full API compatibility
+
+  Or if you prefer a shorter version:
+
+  fix(build): bundle types for meta-packages to fix package resolution
+
+  Add bundle-meta-types step to build pipeline to generate inline type
+  definitions instead of re-exports. Fixes "Cannot find module '@vytches/ddd'"
+  error in published packages on GitHub Packages registry.
+
+  - Modified build script to run bundle-meta-types after fix:dts
+  - Generates 292-line index.d.ts with all types bundled inline
+  - Fixes @vytches/ddd 0.6.0 package resolution issues
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.5.1
+* @vytches/ddd-aggregates@0.5.1
+* @vytches/ddd-cli@0.6.1
+* @vytches/ddd-contracts@0.7.1
+* @vytches/ddd-core@0.5.1
+* @vytches/ddd-cqrs@0.5.1
+* @vytches/ddd-di@0.5.1
+* @vytches/ddd-domain-primitives@0.5.1
+* @vytches/ddd-domain-services@0.5.1
+* @vytches/ddd@0.6.1
+* @vytches/ddd-event-scheduling@0.5.1
+* @vytches/ddd-event-store@0.5.1
+* @vytches/ddd-events@0.5.1
+* @vytches/ddd-logging@0.5.1
+* @vytches/ddd-messaging@0.5.1
+* @vytches/ddd-policies@0.6.1
+* @vytches/ddd-projections@0.5.1
+* @vytches/ddd-repositories@0.5.1
+* @vytches/ddd-resilience@0.5.1
+* @vytches/ddd-testing@0.5.1
+* @vytches/ddd-utils@0.5.1
+* @vytches/ddd-validation@0.6.1
+* @vytches/ddd-value-objects@0.5.1
+
+- fix: folder removed
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.6.0](https://github.com/vytches/ddd/compare/@vytches/ddd-projections@0.4.0...@vytches/ddd-projections@0.6.0) (2025-08-12)
 
 - Release/2025 08 11 2 (#32)
