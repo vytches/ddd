@@ -377,7 +377,7 @@ class ModernUserHandler implements IEventHandler<UserCreatedEvent> {
 ```typescript
 // Authentication middleware
 const authMiddleware: EventBusMiddleware = next => async event => {
-  const metadata = (event as IExtendedDomainEvent).metadata;
+  const metadata = (event as IDomainEvent).metadata;
   if (metadata?.userId) {
     await validateUserPermissions(metadata.userId);
   }
@@ -422,10 +422,10 @@ const eventBus = EventBusBuilder.create()
 ```typescript
 // Debug middleware for tracing event flow
 const debugMiddleware: EventBusMiddleware = next => async event => {
-  const eventId = (event as IExtendedDomainEvent).metadata?.eventId;
+  const eventId = (event as IDomainEvent).metadata?.eventId;
   console.group(`Event: ${event.eventType} (${eventId})`);
   console.log('Payload:', event.payload);
-  console.log('Metadata:', (event as IExtendedDomainEvent).metadata);
+  console.log('Metadata:', (event as IDomainEvent).metadata);
   console.time('Processing');
 
   try {

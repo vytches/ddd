@@ -106,7 +106,7 @@ interface IProjection<TReadModel> {
   createInitialState(): TReadModel | Promise<TReadModel>;
   apply(
     readModel: TReadModel,
-    event: IExtendedDomainEvent
+    event: IDomainEvent
   ): TReadModel | Promise<TReadModel>;
   handles(eventType: string): boolean;
 }
@@ -134,8 +134,8 @@ The engine that processes events:
 interface IProjectionEngine<TReadModel> {
   getProjectionName(): string;
   getEventTypes(): string[];
-  processEvent(event: IExtendedDomainEvent): Promise<void>;
-  isInterestedIn(event: IExtendedDomainEvent): boolean;
+  processEvent(event: IDomainEvent): Promise<void>;
+  isInterestedIn(event: IDomainEvent): boolean;
   getState(): Promise<TReadModel | null>;
   reset(): Promise<void>;
   addCapability<T extends Capability & IProjectionCapability>(
@@ -176,7 +176,7 @@ class UserStatsProjection extends BaseProjection<UserStatsReadModel> {
 
   apply(
     readModel: UserStatsReadModel,
-    event: IExtendedDomainEvent
+    event: IDomainEvent
   ): UserStatsReadModel {
     const newState = { ...readModel };
 
@@ -307,7 +307,7 @@ try {
 // Process multiple events
 async function processEventBatch(
   engine: ProjectionEngine<any>,
-  events: IExtendedDomainEvent[]
+  events: IDomainEvent[]
 ) {
   for (const event of events) {
     if (engine.isInterestedIn(event)) {
@@ -319,7 +319,7 @@ async function processEventBatch(
 // Process events from stream
 async function processEventStream(
   engine: ProjectionEngine<any>,
-  eventStream: AsyncIterable<IExtendedDomainEvent>
+  eventStream: AsyncIterable<IDomainEvent>
 ) {
   for await (const event of eventStream) {
     if (engine.isInterestedIn(event)) {
@@ -523,7 +523,7 @@ class DatabaseDeadLetterStore implements IDeadLetterStore {
     return await this.database.getDeadLettersByProjection(projectionName);
   }
 
-  async retry(deadLetterId: string): Promise<IExtendedDomainEvent> {
+  async retry(deadLetterId: string): Promise<IDomainEvent> {
     // Retry dead letter event
     const deadLetter = await this.database.getDeadLetter(deadLetterId);
     return deadLetter.event;
@@ -553,7 +553,7 @@ class LoggingCapability extends BaseProjectionCapability {
     super();
   }
 
-  async onBeforeApply(state: any, event: IExtendedDomainEvent): Promise<void> {
+  async onBeforeApply(state: any, event: IDomainEvent): Promise<void> {
     this.logger.info('Processing event', {
       projection: this.getProjectionName(),
       eventType: event.eventType,
@@ -561,7 +561,7 @@ class LoggingCapability extends BaseProjectionCapability {
     });
   }
 
-  async onAfterApply(state: any, event: IExtendedDomainEvent): Promise<void> {
+  async onAfterApply(state: any, event: IDomainEvent): Promise<void> {
     this.logger.info('Event processed successfully', {
       projection: this.getProjectionName(),
       eventType: event.eventType,
@@ -569,7 +569,7 @@ class LoggingCapability extends BaseProjectionCapability {
     });
   }
 
-  async onError(error: Error, event?: IExtendedDomainEvent): Promise<void> {
+  async onError(error: Error, event?: IDomainEvent): Promise<void> {
     this.logger.error('Event processing failed', {
       projection: this.getProjectionName(),
       error: error.message,
@@ -638,7 +638,7 @@ if (checkpointCapability) {
 // Recover projection from checkpoint
 async function recoverFromCheckpoint(
   engine: ProjectionEngine<any>,
-  eventStream: AsyncIterable<IExtendedDomainEvent>
+  eventStream: AsyncIterable<IDomainEvent>
 ) {
   const checkpointCapability = engine.getCapability(CheckpointCapability);
 
@@ -719,7 +719,7 @@ if (snapshotCapability) {
 // Recover projection from snapshot
 async function recoverFromSnapshot(
   engine: ProjectionEngine<any>,
-  eventStream: AsyncIterable<IExtendedDomainEvent>
+  eventStream: AsyncIterable<IDomainEvent>
 ) {
   const snapshotCapability = engine.getCapability(SnapshotProjectionCapability);
 
@@ -892,7 +892,7 @@ const enhancedEngine = new EnhancedProjectionEngine(
 class ErrorHandlingCapability extends BaseProjectionCapability {
   private errorCount = 0;
 
-  async onError(error: Error, event?: IExtendedDomainEvent): Promise<void> {
+  async onError(error: Error, event?: IDomainEvent): Promise<void> {
     this.errorCount++;
 
     // Log error
@@ -914,13 +914,13 @@ class ErrorHandlingCapability extends BaseProjectionCapability {
 
   private async sendToMonitoring(
     error: Error,
-    event?: IExtendedDomainEvent
+    event?: IDomainEvent
   ): Promise<void> {
     // Send error to monitoring system
   }
 
   private async sendToDeadLetter(
-    event: IExtendedDomainEvent | undefined,
+    event: IDomainEvent | undefined,
     error: Error
   ): Promise<void> {
     // Send event to dead letter queue
@@ -947,7 +947,7 @@ class GlobalProjectionErrorHandler {
   async handleError(
     projectionName: string,
     error: Error,
-    event?: IExtendedDomainEvent
+    event?: IDomainEvent
   ): Promise<void> {
     // Update error statistics
     const currentCount = this.errorStats.get(projectionName) || 0;
@@ -1011,7 +1011,7 @@ class UserCreatedEventHandler {
 
   async handle(event: UserCreatedEvent): Promise<void> {
     // Convert domain event to extended domain event
-    const extendedEvent: IExtendedDomainEvent = {
+    const extendedEvent: IDomainEvent = {
       eventType: 'UserCreated',
       aggregateId: event.aggregateId,
       payload: event.payload,
@@ -1088,7 +1088,7 @@ class UserRepository {
     // Update projections
     const events = user.getUncommittedEvents();
     for (const event of events) {
-      const extendedEvent: IExtendedDomainEvent = {
+      const extendedEvent: IDomainEvent = {
         eventType: event.eventType,
         aggregateId: event.aggregateId,
         payload: event.payload,
@@ -1135,7 +1135,7 @@ describe('UserStatsProjection', () => {
 
   describe('event handling', () => {
     it('should handle UserCreated event', async () => {
-      const event: IExtendedDomainEvent = {
+      const event: IDomainEvent = {
         eventType: 'UserCreated',
         aggregateId: 'user-123',
         payload: { name: 'John Doe', status: 'active' },
@@ -1160,7 +1160,7 @@ describe('UserStatsProjection', () => {
         version: 1,
       });
 
-      const activatedEvent: IExtendedDomainEvent = {
+      const activatedEvent: IDomainEvent = {
         eventType: 'UserActivated',
         aggregateId: 'user-123',
         payload: { userId: 'user-123' },

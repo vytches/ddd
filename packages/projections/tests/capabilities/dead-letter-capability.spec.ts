@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { DomainErrorCode } from '@vytches/ddd-core';
 import { DeadLetterCapability } from '../../src';
 import { ProjectionError } from '../../src/projection-errors';
@@ -22,7 +22,7 @@ class MockDeadLetterStore implements IDeadLetterStore {
     return this.deadLetters.filter(dl => dl.projectionName === projectionName);
   }
 
-  async retry(deadLetterId: string): Promise<IExtendedDomainEvent> {
+  async retry(deadLetterId: string): Promise<IDomainEvent> {
     const deadLetter = this.deadLetters.find(dl => dl.id === deadLetterId);
     if (!deadLetter) {
       throw new Error(`Dead letter ${deadLetterId} not found`);
@@ -69,7 +69,7 @@ describe('DeadLetterCapability', () => {
   let store: MockDeadLetterStore;
   let context: MockContext;
 
-  const createMockEvent = (): IExtendedDomainEvent => ({
+  const createMockEvent = (): IDomainEvent => ({
     eventType: 'TestEvent',
     payload: { data: 'test' },
     metadata: {

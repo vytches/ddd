@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { BaseProjection } from './projection-base';
 import type { ErrorProjectionState } from './projection-interfaces';
 
@@ -23,7 +23,7 @@ export class ErrorProjection extends BaseProjection<ErrorProjectionState> {
     };
   }
 
-  apply(state: ErrorProjectionState, event: IExtendedDomainEvent): ErrorProjectionState {
+  apply(state: ErrorProjectionState, event: IDomainEvent): ErrorProjectionState {
     return this.when(state, event, 'ProjectionErrorOccurred', (state, event) => {
       const { projectionName, eventType, error } = event.payload as {
         projectionName: string;

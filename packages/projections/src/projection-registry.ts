@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 
 import type { IProjectionEngine } from './projection-interfaces';
 
@@ -23,7 +23,7 @@ export class ProjectionEngineRegistry {
     return Array.from(this.engines.values());
   }
 
-  getInterestedEngines(event: IExtendedDomainEvent): IProjectionEngine<unknown>[] {
+  getInterestedEngines(event: IDomainEvent): IProjectionEngine<unknown>[] {
     return this.getAll().filter(engine => engine.isInterestedIn(event));
   }
 

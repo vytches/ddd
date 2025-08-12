@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type {
   ISagaActionResult,
   ISagaExecutionContext,
@@ -16,12 +16,12 @@ export interface SagaStepConfig {
   triggerEvents: string[];
   completionEvents: string[];
   execute: (
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     state: ISagaState,
     context: ISagaExecutionContext
   ) => Promise<ISagaActionResult>;
   compensate?: (state: ISagaState, context: ISagaExecutionContext) => Promise<ISagaActionResult>;
-  canExecute?: (event: IExtendedDomainEvent, state: ISagaState) => boolean;
+  canExecute?: (event: IDomainEvent, state: ISagaState) => boolean;
 }
 
 export class ConcreteSagaStep implements ISagaStep {
@@ -57,7 +57,7 @@ export class ConcreteSagaStep implements ISagaStep {
   }
 
   async execute(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     state: ISagaState,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
@@ -76,7 +76,7 @@ export class ConcreteSagaStep implements ISagaStep {
     return { success: true };
   }
 
-  canExecute(event: IExtendedDomainEvent, state: ISagaState): boolean {
+  canExecute(event: IDomainEvent, state: ISagaState): boolean {
     if (this.canExecuteImpl) {
       return this.canExecuteImpl(event, state);
     }

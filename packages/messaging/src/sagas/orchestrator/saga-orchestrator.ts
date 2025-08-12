@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import {
   SagaConfigurationError,
@@ -78,7 +78,7 @@ export class SagaOrchestrator implements ISagaOrchestrator {
    * @param context - Execution context
    * @returns Started saga instance
    */
-  async startSaga(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISaga> {
+  async startSaga(event: IDomainEvent, context: ISagaExecutionContext): Promise<ISaga> {
     this.logger.info('Starting new saga', {
       eventType: event.eventType,
       correlationId: context.correlationId,
@@ -172,7 +172,7 @@ export class SagaOrchestrator implements ISagaOrchestrator {
    * @returns Array of processing results
    */
   async processEvent(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaProcessingResult[]> {
     this.logger.debug('Processing event against sagas', {
@@ -617,7 +617,7 @@ export class SagaOrchestrator implements ISagaOrchestrator {
    * @param context - Execution context
    */
   private async findSagasForEvent(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISaga[]> {
     // This is a simplified approach - in a real implementation,
@@ -646,7 +646,7 @@ export class SagaOrchestrator implements ISagaOrchestrator {
    */
   private async processSagaEvent(
     saga: ISaga,
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaProcessingResult> {
     const startTime = Date.now();

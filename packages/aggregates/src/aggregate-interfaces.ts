@@ -1,5 +1,5 @@
 import type {
-  IExtendedDomainEvent,
+  IDomainEvent,
   IEventMetadata,
   IEventUpcaster,
   IAuditEvent,
@@ -46,7 +46,7 @@ export interface IAggregateRoot<TId = string> {
    * Returns uncommitted domain events
    * @returns Readonly array of uncommitted domain events
    */
-  getDomainEvents(): ReadonlyArray<IExtendedDomainEvent>;
+  getDomainEvents(): ReadonlyArray<IDomainEvent>;
 
   /**
    * Clears all uncommitted domain events and updates initial version
@@ -171,10 +171,7 @@ export interface IVersioningCapability extends IAggregateCapability {
   /**
    * Handles versioned event processing
    */
-  handleVersionedEvent(
-    event: IExtendedDomainEvent,
-    handlers: Map<string, IAggregateEventHandler>
-  ): void;
+  handleVersionedEvent(event: IDomainEvent, handlers: Map<string, IAggregateEventHandler>): void;
 }
 
 /**
@@ -195,7 +192,7 @@ export interface IEventSourcingCapability extends IAggregateCapability {
   /**
    * Replays events to rebuild aggregate state
    */
-  replayEvents(events: IExtendedDomainEvent[]): void;
+  replayEvents(events: IDomainEvent[]): void;
 }
 
 /**
@@ -282,8 +279,8 @@ export interface IAggregateEventHandler<T = unknown> {
  * Enables interception and modification of events before they are handled.
  */
 export type EventAggregateMiddleware<T = unknown> = (
-  event: IExtendedDomainEvent<T>,
-  next: (event: IExtendedDomainEvent<T>) => void
+  event: IDomainEvent<T>,
+  next: (event: IDomainEvent<T>) => void
 ) => void;
 
 /**
@@ -390,14 +387,14 @@ export interface IAggregateFactory<TId, TAggregate extends IAggregateRoot<TId>> 
   /**
    * Rebuilds aggregate from events
    */
-  fromEvents(id: EntityId<TId>, events: IExtendedDomainEvent[]): TAggregate;
+  fromEvents(id: EntityId<TId>, events: IDomainEvent[]): TAggregate;
 
   /**
    * Rebuilds aggregate from snapshot and subsequent events
    */
   fromSnapshot<TState, TMeta>(
     snapshot: IAggregateSnapshot<TState, TMeta>,
-    events: IExtendedDomainEvent[]
+    events: IDomainEvent[]
   ): TAggregate;
 }
 
@@ -418,7 +415,7 @@ export interface IAggregateValidator<TAggregate extends IAggregateRoot<unknown>>
   /**
    * Validates aggregate before applying event
    */
-  validateBeforeEvent(aggregate: TAggregate, event: IExtendedDomainEvent): ValidationResult;
+  validateBeforeEvent(aggregate: TAggregate, event: IDomainEvent): ValidationResult;
 }
 
 /**

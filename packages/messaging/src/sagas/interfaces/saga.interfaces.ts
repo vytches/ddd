@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 
 export interface ISagaState {
   /** Unique identifier for the saga instance */
@@ -93,10 +93,7 @@ export interface ISaga {
    * @param event - Domain event to process
    * @param context - Execution context
    */
-  handleEvent(
-    event: IExtendedDomainEvent,
-    context: ISagaExecutionContext
-  ): Promise<ISagaActionResult>;
+  handleEvent(event: IDomainEvent, context: ISagaExecutionContext): Promise<ISagaActionResult>;
 
   /**
    * Execute compensation for a specific step
@@ -109,7 +106,7 @@ export interface ISaga {
    * Check if saga can handle the given event
    * @param event - Domain event to check
    */
-  canHandle(event: IExtendedDomainEvent): boolean;
+  canHandle(event: IDomainEvent): boolean;
 
   /**
    * Get correlation data for event filtering
@@ -158,7 +155,7 @@ export interface ISagaActionResult {
   commands?: unknown[];
 
   /** Events to publish as result of this action */
-  events?: IExtendedDomainEvent[];
+  events?: IDomainEvent[];
 
   /** Whether this action should trigger saga completion */
   completesSaga?: boolean;
@@ -208,7 +205,7 @@ export interface ISagaStep {
    * @param context - Execution context
    */
   execute(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     state: ISagaState,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult>;
@@ -225,7 +222,7 @@ export interface ISagaStep {
    * @param event - Triggering event
    * @param state - Current saga state
    */
-  canExecute(event: IExtendedDomainEvent, state: ISagaState): boolean;
+  canExecute(event: IDomainEvent, state: ISagaState): boolean;
 }
 
 export interface ISagaDefinition {
@@ -255,13 +252,13 @@ export interface ISagaDefinition {
    * @param event - Starting event
    * @param context - Execution context
    */
-  createInstance(event: IExtendedDomainEvent, context: ISagaExecutionContext): Promise<ISaga>;
+  createInstance(event: IDomainEvent, context: ISagaExecutionContext): Promise<ISaga>;
 
   /**
    * Get correlation data from starting event
    * @param event - Starting event
    */
-  getCorrelationData(event: IExtendedDomainEvent): Record<string, unknown>;
+  getCorrelationData(event: IDomainEvent): Record<string, unknown>;
 
   /**
    * Validate saga configuration
@@ -276,11 +273,7 @@ export interface ISagaFactory {
    * @param event - Starting event
    * @param context - Execution context
    */
-  createSaga(
-    sagaType: string,
-    event: IExtendedDomainEvent,
-    context: ISagaExecutionContext
-  ): Promise<ISaga>;
+  createSaga(sagaType: string, event: IDomainEvent, context: ISagaExecutionContext): Promise<ISaga>;
 
   /**
    * Check if factory can create saga of specified type

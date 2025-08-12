@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { safeRun } from '@vytches/ddd-utils';
 import { SnapshotProjectionCapability } from '../../src';
 import type {
@@ -88,7 +88,7 @@ describe('SnapshotProjectionCapability', () => {
   let store: MockSnapshotStore;
   let context: MockContext;
 
-  const createMockEvent = (position = 100): IExtendedDomainEvent => ({
+  const createMockEvent = (position = 100): IDomainEvent => ({
     eventType: 'TestEvent',
     payload: { data: 'test' },
     metadata: {
@@ -203,7 +203,7 @@ describe('SnapshotProjectionCapability', () => {
     it('should handle events without position metadata', async () => {
       // Arrange
       const state = { id: 'test', version: 1 };
-      const eventWithoutPosition: IExtendedDomainEvent = {
+      const eventWithoutPosition: IDomainEvent = {
         eventType: 'TestEvent',
         payload: { data: 'test' },
         metadata: {

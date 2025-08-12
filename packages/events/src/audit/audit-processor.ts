@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IRepository, IActor } from '@vytches/ddd-core';
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 
 import type { IEventProcessor } from '../event-processor';
 import type { IAuditEvent, IAuditEventMetadata } from './audit-event.interface';
@@ -41,7 +41,7 @@ export class AuditEventProcessor implements IEventProcessor {
   /**
    * Process a domain event by creating an audit event if applicable
    */
-  async process(event: IExtendedDomainEvent): Promise<void> {
+  async process(event: IDomainEvent): Promise<void> {
     // Check if event should be audited
     if (!this.shouldAudit(event)) return;
 
@@ -53,7 +53,7 @@ export class AuditEventProcessor implements IEventProcessor {
   /**
    * Determine if an event should be audited based on configuration
    */
-  private shouldAudit(event: IExtendedDomainEvent): boolean {
+  private shouldAudit(event: IDomainEvent): boolean {
     if (this.options.auditAll) return true;
 
     if (this.options.auditEventTypes && this.options.auditEventTypes.length > 0) {
@@ -66,7 +66,7 @@ export class AuditEventProcessor implements IEventProcessor {
   /**
    * Create an audit event from a domain event
    */
-  private createAuditEvent(domainEvent: IExtendedDomainEvent): IAuditEvent {
+  private createAuditEvent(domainEvent: IDomainEvent): IAuditEvent {
     // Determine action type from event name
     let actionType = AuditActionType.OTHER;
     if (domainEvent.eventType.includes('Created')) actionType = AuditActionType.CREATE;

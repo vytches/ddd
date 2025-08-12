@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent, ISpecification } from '@vytches/ddd-contracts';
+import type { IDomainEvent, ISpecification } from '@vytches/ddd-contracts';
 
 /**
  * Interface for routing events to appropriate contexts based on business rules.
@@ -8,7 +8,7 @@ import type { IExtendedDomainEvent, ISpecification } from '@vytches/ddd-contract
  * @public
  */
 export interface IContextRouter {
-  determineTargetContexts(event: IExtendedDomainEvent): string[];
+  determineTargetContexts(event: IDomainEvent): string[];
 }
 
 // Implementacja z różnymi opcjami konfiguracji
@@ -97,7 +97,7 @@ export class ContextRouter implements IContextRouter {
 
   // Dodanie reguły korzystającej ze specyfikacji
   sendEventsMatchingSpecificationTo(
-    specification: ISpecification<IExtendedDomainEvent>,
+    specification: ISpecification<IDomainEvent>,
     ...contexts: string[]
   ): this {
     this.routingRules.push({
@@ -109,7 +109,7 @@ export class ContextRouter implements IContextRouter {
 
   // Dodanie reguły korzystającej z funkcji predykatu
   sendEventsMatchingPredicateTo(
-    predicate: (event: IExtendedDomainEvent) => boolean,
+    predicate: (event: IDomainEvent) => boolean,
     ...contexts: string[]
   ): this {
     this.routingRules.push({
@@ -120,7 +120,7 @@ export class ContextRouter implements IContextRouter {
   }
 
   // Główna funkcja - określenie kontekstów docelowych dla eventu
-  determineTargetContexts(event: IExtendedDomainEvent): string[] {
+  determineTargetContexts(event: IDomainEvent): string[] {
     const targetContexts = new Set<string>();
 
     for (const rule of this.routingRules) {
@@ -136,9 +136,7 @@ export class ContextRouter implements IContextRouter {
     return Array.from(targetContexts);
   }
 
-  private normalizeCondition(
-    condition: EventRoutingCondition
-  ): (event: IExtendedDomainEvent) => boolean {
+  private normalizeCondition(condition: EventRoutingCondition): (event: IDomainEvent) => boolean {
     // Jeśli to funkcja, użyj jej bezpośrednio
     if (typeof condition === 'function') {
       return condition;
@@ -158,10 +156,7 @@ export class ContextRouter implements IContextRouter {
     return () => true;
   }
 
-  private evaluateCondition(
-    condition: EventRoutingCondition,
-    event: IExtendedDomainEvent
-  ): boolean {
+  private evaluateCondition(condition: EventRoutingCondition, event: IDomainEvent): boolean {
     return this.normalizeCondition(condition)(event);
   }
 
@@ -175,8 +170,8 @@ export class ContextRouter implements IContextRouter {
 // Typy pomocnicze
 type EventRoutingCondition =
   | string // Typ eventu
-  | ((event: IExtendedDomainEvent) => boolean) // Funkcja predykatu
-  | ISpecification<IExtendedDomainEvent> // Specyfikacja
+  | ((event: IDomainEvent) => boolean) // Funkcja predykatu
+  | ISpecification<IDomainEvent> // Specyfikacja
   | boolean; // Stała wartość
 
 type ContextRouterConfig =

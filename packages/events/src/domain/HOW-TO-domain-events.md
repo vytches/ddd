@@ -51,10 +51,10 @@ interface IDomainEvent<P = any> {
 }
 ```
 
-**IExtendedDomainEvent**: Event with metadata
+**IDomainEvent**: Event with metadata
 
 ```typescript
-interface IExtendedDomainEvent<P = any> extends IDomainEvent<P> {
+interface IDomainEvent<P = any> extends IDomainEvent<P> {
   metadata?: IEventMetadata;
 }
 ```
@@ -81,7 +81,7 @@ interface IEventMetadata {
 Base implementation for typed domain events:
 
 ```typescript
-abstract class DomainEvent<T = any> implements IExtendedDomainEvent<T> {
+abstract class DomainEvent<T = any> implements IDomainEvent<T> {
   readonly eventId: string; // Auto-generated UUID
   readonly occurredOn: Date; // Auto-set timestamp
   readonly eventType: string; // Defaults to class name
@@ -104,7 +104,7 @@ function createDomainEvent<P = any>(
   eventType: string,
   payload: P,
   metadata?: Partial<IEventMetadata>
-): IExtendedDomainEvent<P>;
+): IDomainEvent<P>;
 ```
 
 ## Usage Patterns

@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '../events/domain-event-interfaces';
+import type { IDomainEvent } from '../events/domain-event-interfaces';
 
 export enum SchedulePriority {
   LOW = 0,
@@ -77,7 +77,7 @@ export interface IScheduleOptions {
   metadata?: Record<string, unknown>;
 }
 
-export interface IScheduledEvent extends IExtendedDomainEvent {
+export interface IScheduledEvent extends IDomainEvent {
   /**
    * When the event should be processed
    */

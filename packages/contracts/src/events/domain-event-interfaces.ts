@@ -42,9 +42,7 @@ export interface IDomainEvent<P = unknown> {
 
   /** Payload (data) of the event */
   payload?: P | undefined;
-}
 
-export interface IExtendedDomainEvent<P = unknown> extends IDomainEvent<P> {
   /** Event metadata */
   metadata?: IEventMetadata;
 }

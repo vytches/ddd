@@ -1,4 +1,4 @@
-import type { IEventMetadata, IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IEventMetadata, IDomainEvent } from '@vytches/ddd-contracts';
 import { LibUtils } from '@vytches/ddd-utils';
 
 /**
@@ -8,7 +8,7 @@ import { LibUtils } from '@vytches/ddd-utils';
  * @since 1.0.0
  * @public
  */
-export abstract class DomainEvent<T = unknown> implements IExtendedDomainEvent<T> {
+export abstract class DomainEvent<T = unknown> implements IDomainEvent<T> {
   /**
    * Unique identifier for the event
    */

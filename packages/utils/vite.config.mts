@@ -1,20 +1,20 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite';
-import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 
 // Modern build configuration system
 export {
-  createPackageConfig,
-  createFoundationConfig,
-  createMetaPackageConfig,
-  createPatternConfig,
   createArchitectureConfig,
+  createFoundationConfig,
   createInfrastructureConfig,
+  createMetaPackageConfig,
+  createPackageConfig,
+  createPatternConfig,
+  type BundleStrategy,
   type PackageConfigOptions,
   type PackageType,
-  type BundleStrategy,
 } from './build-configs';
 
 // Legacy configuration for utils package itself

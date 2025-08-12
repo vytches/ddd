@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type {
   ISaga,
@@ -83,7 +83,7 @@ export class PerformanceMonitoringMiddleware extends BaseSagaMiddleware {
       sagaId: context.sagaId,
       sagaType: context.sagaType,
       stepName: context.stepName,
-      eventType: (context.event as IExtendedDomainEvent)?.eventType,
+      eventType: (context.event as IDomainEvent)?.eventType,
     });
 
     await next();
@@ -426,7 +426,7 @@ export class SagaMiddlewarePipeline {
    */
   async execute(
     saga: ISaga,
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     executionContext: ISagaExecutionContext,
     stepName: string,
     operation: () => Promise<ISagaActionResult>

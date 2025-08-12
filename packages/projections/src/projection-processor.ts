@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IDomainEvent, IEventProcessor, IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent, IEventProcessor } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import { LibUtils } from '@vytches/ddd-utils';
 
@@ -38,7 +38,7 @@ export class ProjectionProcessor implements IEventProcessor {
 
   private async processWithErrorHandling(
     engine: IProjectionEngine<unknown>,
-    event: IExtendedDomainEvent
+    event: IDomainEvent
   ): Promise<void> {
     try {
       await engine.processEvent(event);
@@ -51,9 +51,9 @@ export class ProjectionProcessor implements IEventProcessor {
     }
   }
 
-  private ensureExtendedEvent(event: IDomainEvent): IExtendedDomainEvent {
+  private ensureExtendedEvent(event: IDomainEvent): IDomainEvent {
     if ('metadata' in event) {
-      return event as IExtendedDomainEvent;
+      return event as IDomainEvent;
     }
 
     return {
@@ -62,6 +62,6 @@ export class ProjectionProcessor implements IEventProcessor {
         eventId: LibUtils.getUUID(),
         timestamp: new Date(),
       },
-    } as IExtendedDomainEvent;
+    } as IDomainEvent;
   }
 }

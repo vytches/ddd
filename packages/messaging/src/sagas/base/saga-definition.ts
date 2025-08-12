@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type {
   ISaga,
@@ -36,10 +36,7 @@ export abstract class SagaDefinition implements ISagaDefinition {
    * @param event - Starting event
    * @param context - Execution context
    */
-  async createInstance(
-    event: IExtendedDomainEvent,
-    context: ISagaExecutionContext
-  ): Promise<ISaga> {
+  async createInstance(event: IDomainEvent, context: ISagaExecutionContext): Promise<ISaga> {
     this.logger.info('Creating new saga instance', {
       sagaType: this.sagaType,
       eventType: event.eventType,
@@ -110,7 +107,7 @@ export abstract class SagaDefinition implements ISagaDefinition {
    * Get correlation data from starting event
    * @param event - Starting event
    */
-  getCorrelationData(event: IExtendedDomainEvent): Record<string, unknown> {
+  getCorrelationData(event: IDomainEvent): Record<string, unknown> {
     // Default implementation - extracts common correlation properties
     const correlationData: Record<string, unknown> = {};
 
@@ -221,7 +218,7 @@ export abstract class SagaDefinition implements ISagaDefinition {
    */
   protected abstract createSagaInstance(
     initialState: ISagaState,
-    startingEvent: IExtendedDomainEvent,
+    startingEvent: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISaga>;
 
@@ -230,7 +227,7 @@ export abstract class SagaDefinition implements ISagaDefinition {
    * Can be overridden by concrete implementations
    * @param event - Starting event
    */
-  protected getInitialStep(event: IExtendedDomainEvent): string {
+  protected getInitialStep(event: IDomainEvent): string {
     // Find first step that can handle the starting event
     for (const step of this._steps) {
       if (step.triggerEvents.includes(event.eventType)) {
@@ -248,7 +245,7 @@ export abstract class SagaDefinition implements ISagaDefinition {
    * @param event - Starting event
    * @param context - Execution context
    */
-  protected generateSagaId(event: IExtendedDomainEvent, context: ISagaExecutionContext): string {
+  protected generateSagaId(event: IDomainEvent, context: ISagaExecutionContext): string {
     // Default implementation - use timestamp + random
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
@@ -260,7 +257,7 @@ export abstract class SagaDefinition implements ISagaDefinition {
    * Can be overridden by concrete implementations
    * @param event - Domain event
    */
-  protected extractCustomCorrelationData(event: IExtendedDomainEvent): Record<string, unknown> {
+  protected extractCustomCorrelationData(event: IDomainEvent): Record<string, unknown> {
     // Default implementation - return empty object
     return {};
   }
@@ -279,7 +276,7 @@ export abstract class SagaDefinition implements ISagaDefinition {
    * @param event - Domain event
    * @param propertyPath - Property path (e.g., 'payload.orderId')
    */
-  private extractEventProperty(event: IExtendedDomainEvent, propertyPath: string): unknown {
+  private extractEventProperty(event: IDomainEvent, propertyPath: string): unknown {
     try {
       const parts = propertyPath.split('.');
       let current: Record<string, unknown> = event as unknown as Record<string, unknown>;

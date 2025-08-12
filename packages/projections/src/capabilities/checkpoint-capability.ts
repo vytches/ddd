@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 
 import type { IProjectionCheckpointStore } from '../projection-interfaces';
 
@@ -21,7 +21,7 @@ export class CheckpointCapability<TReadModel> extends BaseIntervalCapability<
     super('checkpoint', interval);
   }
 
-  protected async handleInterval(state: TReadModel, event: IExtendedDomainEvent): Promise<void> {
+  protected async handleInterval(state: TReadModel, event: IDomainEvent): Promise<void> {
     this.ensureAttached();
 
     const position: number =

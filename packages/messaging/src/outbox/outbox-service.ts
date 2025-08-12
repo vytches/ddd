@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 
 import type { IOutboxMessage, OutboxMessageOptions } from './outbox-interfaces';
@@ -130,10 +130,7 @@ export class OutboxService {
   /**
    * Converts a domain event to an outbox message and saves it
    */
-  async saveDomainEvent(
-    event: IExtendedDomainEvent,
-    options?: OutboxMessageOptions
-  ): Promise<string> {
+  async saveDomainEvent(event: IDomainEvent, options?: OutboxMessageOptions): Promise<string> {
     const message = OutboxMessageFactory.createFromIntegrationEvent(
       {
         eventType: event.eventType,

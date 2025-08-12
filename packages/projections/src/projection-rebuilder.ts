@@ -1,6 +1,6 @@
 import type {
   IEventStore,
-  IExtendedDomainEvent,
+  IDomainEvent,
   IReplayConfig,
   IReplayFilter,
   IReplayResult,
@@ -79,7 +79,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
       }
 
       // Create event handler for projection
-      const handler = async (event: IExtendedDomainEvent) => {
+      const handler = async (event: IDomainEvent) => {
         try {
           await this.projectionEngine.processEvent(event);
         } catch (error) {
@@ -152,7 +152,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         throw new ProjectionError('Event store does not support event replay');
       }
 
-      const handler = async (event: IExtendedDomainEvent) => {
+      const handler = async (event: IDomainEvent) => {
         try {
           await this.projectionEngine.processEvent(event);
         } catch (error) {

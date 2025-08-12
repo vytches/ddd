@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IEventMetadata, IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IEventMetadata, IDomainEvent } from '@vytches/ddd-contracts';
 import type { IActor } from '@vytches/ddd-core';
 import type { IContextRouter } from './context-router';
 import type {
@@ -10,7 +10,7 @@ import type {
 import { createIntegrationEvent } from './integration-event.utils';
 
 export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
-  implements IDomainToIntegrationEventTransformer<IExtendedDomainEvent<D>, I>
+  implements IDomainToIntegrationEventTransformer<IDomainEvent<D>, I>
 {
   /**
    * Source bounded context
@@ -33,7 +33,7 @@ export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
   }
 
   public transformToMultipleTargets(
-    domainEvent: IExtendedDomainEvent<D>,
+    domainEvent: IDomainEvent<D>,
     additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): IIntegrationEvent<I>[] {
     if (!this.contextRouter) {
@@ -64,7 +64,7 @@ export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
    * @returns Transformed integration event
    */
   public transform(
-    domainEvent: IExtendedDomainEvent<D>,
+    domainEvent: IDomainEvent<D>,
     additionalMetadata?: Partial<IIntegrationEventMetadata>
   ): IIntegrationEvent<I> {
     // Transform payload to integration format
