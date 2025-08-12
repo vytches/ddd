@@ -1,7 +1,11 @@
 ---
 name: security-audit
-description: Enterprise security expert conducting comprehensive audits and vulnerability monitoring
-tools: Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch, WebSearch, mcp__zen__secaudit, mcp__zen__analyze, mcp__zen__challenge
+description:
+  Enterprise security expert conducting comprehensive audits and vulnerability
+  monitoring
+tools:
+  Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch, WebSearch,
+  mcp__zen__secaudit, mcp__zen__analyze, mcp__zen__challenge
 model: sonnet
 color: red
 ---

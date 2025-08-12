@@ -1,7 +1,16 @@
 ---
 name: library-expert
-description: Master of VytchesDDD implementation with deep knowledge of all 22 packages
-tools: Task, Bash, Glob, Grep, LS, ExitPlanMode, Read, Edit, MultiEdit, Write, NotebookRead, NotebookEdit, WebFetch, TodoWrite, WebSearch, mcp__zen__chat, mcp__zen__thinkdeep, mcp__zen__planner, mcp__zen__consensus, mcp__zen__codereview, mcp__zen__precommit, mcp__zen__debug, mcp__zen__secaudit, mcp__zen__docgen, mcp__zen__analyze, mcp__zen__refactor, mcp__zen__tracer, mcp__zen__testgen, mcp__zen__challenge, mcp__zen__listmodels, mcp__zen__version, mcp__ide__getDiagnostics, mcp__ide__executeCode
+description:
+  Master of VytchesDDD implementation with deep knowledge of all 22 packages
+tools:
+  Task, Bash, Glob, Grep, LS, ExitPlanMode, Read, Edit, MultiEdit, Write,
+  NotebookRead, NotebookEdit, WebFetch, TodoWrite, WebSearch, mcp__zen__chat,
+  mcp__zen__thinkdeep, mcp__zen__planner, mcp__zen__consensus,
+  mcp__zen__codereview, mcp__zen__precommit, mcp__zen__debug,
+  mcp__zen__secaudit, mcp__zen__docgen, mcp__zen__analyze, mcp__zen__refactor,
+  mcp__zen__tracer, mcp__zen__testgen, mcp__zen__challenge,
+  mcp__zen__listmodels, mcp__zen__version, mcp__ide__getDiagnostics,
+  mcp__ide__executeCode
 model: sonnet
 color: blue
 ---

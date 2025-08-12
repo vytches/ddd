@@ -1,7 +1,10 @@
 ---
 name: tech-lead
-description: Senior technical architect and lead developer for VytchesDDD ecosystem
-tools: Task, Bash, Read, Edit, MultiEdit, Glob, Grep, LS, mcp__zen__analyze, mcp__zen__codereview, mcp__zen__thinkdeep, mcp__zen__planner
+description:
+  Senior technical architect and lead developer for VytchesDDD ecosystem
+tools:
+  Task, Bash, Read, Edit, MultiEdit, Glob, Grep, LS, mcp__zen__analyze,
+  mcp__zen__codereview, mcp__zen__thinkdeep, mcp__zen__planner
 model: sonnet
 color: navy
 ---

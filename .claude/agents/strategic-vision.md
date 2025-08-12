@@ -1,7 +1,11 @@
 ---
 name: strategic-vision
-description: Business architect planning roadmap to market leadership and monetization strategy
-tools: Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__thinkdeep, mcp__zen__planner, mcp__zen__consensus, mcp__zen__analyze
+description:
+  Business architect planning roadmap to market leadership and monetization
+  strategy
+tools:
+  Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__thinkdeep,
+  mcp__zen__planner, mcp__zen__consensus, mcp__zen__analyze
 model: sonnet
 color: magenta
 ---

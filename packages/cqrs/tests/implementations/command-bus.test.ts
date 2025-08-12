@@ -83,42 +83,38 @@ describe('CommandBus', () => {
   });
 
   describe('register', () => {
-    it('should throw CQRSConfigurationError for manual registration', () => {
+    it('should allow manual handler registration', () => {
       const [registerError] = safeRun(() => {
         commandBus.register(TestCommand, mockHandler);
       });
-      expect(registerError).toBeInstanceOf(CQRSConfigurationError);
+      expect(registerError).toBeUndefined();
     });
 
-    it('should throw with deprecation message', () => {
-      const [messageError] = safeRun(() => {
-        commandBus.register(TestCommand, mockHandler);
+    it('should register handler for string command name', () => {
+      const [registerError] = safeRun(() => {
+        commandBus.register('TestCommand', mockHandler);
       });
-      expect(messageError?.message).toContain(
-        'Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.'
-      );
+      expect(registerError).toBeUndefined();
     });
   });
 
   describe('registerFactory', () => {
-    it('should throw CQRSConfigurationError for manual factory registration', () => {
+    it('should allow factory registration', () => {
       const factory = () => mockHandler;
 
       const [factoryError] = safeRun(() => {
         commandBus.registerFactory(TestCommand, factory);
       });
-      expect(factoryError).toBeInstanceOf(CQRSConfigurationError);
+      expect(factoryError).toBeUndefined();
     });
 
-    it('should throw with deprecation message', () => {
+    it('should register factory for string command name', () => {
       const factory = () => mockHandler;
 
-      const [factoryMessageError] = safeRun(() => {
-        commandBus.registerFactory(TestCommand, factory);
+      const [factoryError] = safeRun(() => {
+        commandBus.registerFactory('TestCommand', factory);
       });
-      expect(factoryMessageError?.message).toContain(
-        'Manual factory registration is deprecated. Use @CommandHandler decorator and DI container instead.'
-      );
+      expect(factoryError).toBeUndefined();
     });
   });
 
@@ -226,16 +222,42 @@ describe('CommandBus', () => {
       expect(executeError).toBeInstanceOf(HandlerNotFoundError);
     });
 
-    it('should throw CQRSConfigurationError when no handler metadata exists', async () => {
+    it('should throw HandlerNotFoundError when no handler exists', async () => {
       const command = new TestCommand('test-data');
 
       vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
 
       const [executeError] = await safeRun(() => commandBus.execute(command));
-      expect(executeError).toBeInstanceOf(CQRSConfigurationError);
-      expect(executeError?.message).toContain(
-        'No handler registered for command TestCommand. Did you forget @CommandHandler decorator?'
-      );
+      expect(executeError).toBeInstanceOf(HandlerNotFoundError);
+      expect(executeError?.message).toContain('No command handler registered for: TestCommand');
+    });
+
+    it('should execute manually registered handler', async () => {
+      const command = new TestCommand('test-data');
+      const manualHandler = {
+        execute: vi.fn().mockResolvedValue('manual-result'),
+      };
+
+      commandBus.register(TestCommand, manualHandler);
+
+      const result = await commandBus.execute(command);
+
+      expect(manualHandler.execute).toHaveBeenCalledWith(command);
+      expect(result).toBe('manual-result');
+    });
+
+    it('should execute factory-registered handler', async () => {
+      const command = new TestCommand('test-data');
+      const factoryHandler = {
+        execute: vi.fn().mockResolvedValue('factory-result'),
+      };
+
+      commandBus.registerFactory(TestCommand, () => factoryHandler);
+
+      const result = await commandBus.execute(command);
+
+      expect(factoryHandler.execute).toHaveBeenCalledWith(command);
+      expect(result).toBe('factory-result');
     });
 
     it('should validate command when validatable', async () => {

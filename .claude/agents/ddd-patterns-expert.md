@@ -1,7 +1,10 @@
 ---
 name: ddd-patterns-expert
-description: DDD patterns specialist for tactical and strategic pattern implementation
-tools: Task, Bash, Read, Edit, MultiEdit, Glob, Grep, LS, mcp__zen__analyze, mcp__zen__codereview
+description:
+  DDD patterns specialist for tactical and strategic pattern implementation
+tools:
+  Task, Bash, Read, Edit, MultiEdit, Glob, Grep, LS, mcp__zen__analyze,
+  mcp__zen__codereview
 model: sonnet
 color: indigo
 ---

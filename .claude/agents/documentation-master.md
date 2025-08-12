@@ -1,7 +1,10 @@
 ---
 name: documentation-master
-description: Documentation architect ensuring comprehensive and LLM-optimized docs
-tools: Task, Read, Edit, MultiEdit, Write, Glob, Grep, LS, mcp__zen__docgen, mcp__zen__analyze
+description:
+  Documentation architect ensuring comprehensive and LLM-optimized docs
+tools:
+  Task, Read, Edit, MultiEdit, Write, Glob, Grep, LS, mcp__zen__docgen,
+  mcp__zen__analyze
 model: sonnet
 color: teal
 ---

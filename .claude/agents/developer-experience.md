@@ -1,7 +1,11 @@
 ---
 name: developer-experience
-description: Specializes in developer UX with AI-first documentation and framework integration
-tools: Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, Write, WebFetch, WebSearch, mcp__zen__docgen, mcp__zen__analyze, mcp__zen__chat
+description:
+  Specializes in developer UX with AI-first documentation and framework
+  integration
+tools:
+  Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, Write, WebFetch, WebSearch,
+  mcp__zen__docgen, mcp__zen__analyze, mcp__zen__chat
 model: sonnet
 color: cyan
 ---

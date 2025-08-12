@@ -1,7 +1,9 @@
 ---
 name: architecture-guardian
 description: Guards VytchesDDD meta-package architecture and module boundaries
-tools: Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch, mcp__zen__analyze, mcp__zen__codereview, mcp__zen__challenge
+tools:
+  Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch,
+  mcp__zen__analyze, mcp__zen__codereview, mcp__zen__challenge
 model: sonnet
 color: orange
 ---

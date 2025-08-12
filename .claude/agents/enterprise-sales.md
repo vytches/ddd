@@ -1,7 +1,11 @@
 ---
 name: enterprise-sales
-description: Enterprise sales specialist targeting Fortune 500 with ROI and competitive analysis
-tools: Task, Bash, Read, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__analyze, mcp__zen__consensus
+description:
+  Enterprise sales specialist targeting Fortune 500 with ROI and competitive
+  analysis
+tools:
+  Task, Bash, Read, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__analyze,
+  mcp__zen__consensus
 model: sonnet
 color: purple
 ---

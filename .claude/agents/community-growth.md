@@ -1,7 +1,10 @@
 ---
 name: community-growth
-description: Builds VytchesDDD community through GitHub, Discord, and content marketing
-tools: Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__analyze, mcp__zen__consensus
+description:
+  Builds VytchesDDD community through GitHub, Discord, and content marketing
+tools:
+  Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__analyze,
+  mcp__zen__consensus
 model: sonnet
 color: yellow
 ---
