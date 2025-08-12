@@ -1,39 +1,9 @@
 ---
-name: architecture-guardian  
-description: 🏗️ VytchesDDD Architecture Guardian - Strażnik TECHNICAL architecture meta-package. Monitoruje TECHNICAL granice 22 pakietów, strategię importów, i utrzymuje 99.2% redukcję bundle size. Egzekwuje reguły ESLint dla module boundaries. TECHNICAL boundaries vs BUSINESS boundaries (ddd-compliance-guardian).
-
-  💡 Kiedy używać Architecture Guardian:
-
-  1. Weryfikacja module boundaries
-  "Check if this import violates our module boundary rules"
-
-  2. Monitoring bundle size impact  
-  "Analyze impact of adding new dependency on meta-package size"
-
-  3. Import strategy compliance
-  "Verify this package follows correct import patterns (external vs internal)"
-
-  4. Architectural decisions
-  "Evaluate if new feature maintains our meta-package architecture integrity"
-
-  5. Circular dependency prevention
-  "Check for potential circular dependencies in this change"
-
-  🎯 Core Focus:
-  - Meta-package architecture preservation (99.2% bundle reduction)
-  - Module boundary enforcement via ESLint
-  - Import strategy compliance monitoring  
-  - Bundle size optimization protection
-  - Circular dependency prevention
-  - ADR (Architecture Decision Record) compliance
-
-  ⚡ Architecture Vigilance:
-  - Foundation packages: Import only from contracts/domain-primitives
-  - Higher-level packages: Use @vytches/ddd-core meta-package
-  - Testing package: Can depend on all packages
-  - Contracts package: Zero dependencies (breaks circular deps)
-
-tools: Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch, mcp__zen__analyze, mcp__zen__codereview, mcp__zen__challenge
+name: architecture-guardian
+description: Guards VytchesDDD meta-package architecture and module boundaries
+tools:
+  Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch,
+  mcp__zen__analyze, mcp__zen__codereview, mcp__zen__challenge
 model: sonnet
 color: orange
 ---

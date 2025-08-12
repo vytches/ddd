@@ -159,68 +159,73 @@ classes:
           pipeline-order: 'Middleware executes in registration order'
           common-middleware: 'Logging, caching, performance monitoring'
 
-      # Legacy Methods (Deprecated)
+      # Manual Registration Methods
       register:
-        description: 'Legacy handler registration method (deprecated)'
-        business-context: 'Superseded by @QueryHandler decorator and DI container'
+        description: 'Manually register a query handler'
+        business-context: 'Allows explicit handler registration without decorators or DI'
 
         parameters:
           - name: 'queryType'
             type: 'unknown'
-            description: 'Query type (unused in current implementation)'
+            description: 'Query class or string name'
           - name: 'handler'
             type: 'IQueryHandler<T, R>'
-            description: 'Handler instance (unused in current implementation)'
+            description: 'Handler instance to register'
 
         returns:
           type: 'void'
           description: 'No return value'
 
-        throws:
-          - type: 'CQRSConfigurationError'
-            description: 'Always thrown - method is deprecated'
-
         examples:
-          - id: 'deprecated-usage'
+          - id: 'manual-registration'
             code: |
-              // ❌ Deprecated - throws CQRSConfigurationError
-              // queryBus.register(GetUserQuery, handler);
+              // Manual handler registration
+              const handler = new GetUserHandler(userRepository);
+              queryBus.register(GetUserQuery, handler);
 
-              // ✅ Use @QueryHandler decorator instead
-              @QueryHandler(GetUserQuery)
-              class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
-                async execute(query: GetUserQuery): Promise<User> {
-                  return await userRepository.findById(query.userId);
-                }
-              }
+              // Or using string name
+              queryBus.register('GetUserQuery', handler);
+
+              // Execute the query
+              const query = new GetUserQuery('user-123');
+              const user = await queryBus.execute(query);
 
         custom-tags:
-          deprecated: 'true'
-          replacement: 'Use @QueryHandler decorator'
+          manual-registration: 'Supports both decorator and manual approaches'
+          flexibility: 'Useful for dynamic handler registration'
 
       registerFactory:
-        description: 'Legacy factory registration method (deprecated)'
-        business-context: 'Superseded by @QueryHandler decorator and DI container'
+        description: 'Register a query handler using factory function'
+        business-context: 'Enables lazy initialization and dependency injection patterns'
 
         parameters:
           - name: 'queryType'
             type: 'unknown'
-            description: 'Query type (unused in current implementation)'
+            description: 'Query class or string name'
           - name: 'factory'
             type: '() => IQueryHandler<T, R>'
-            description: 'Handler factory (unused in current implementation)'
+            description: 'Factory function returning handler instance'
 
         returns:
           type: 'void'
           description: 'No return value'
 
-        throws:
-          - type: 'CQRSConfigurationError'
-            description: 'Always thrown - method is deprecated'
+        examples:
+          - id: 'factory-registration'
+            code: |
+              // Factory registration for lazy initialization
+              queryBus.registerFactory(
+                GetOrdersQuery,
+                () => new GetOrdersHandler(orderRepository, cacheService)
+              );
+
+              // Handler created only when query is executed
+              const query = new GetOrdersQuery({ status: 'pending' });
+              const orders = await queryBus.execute(query);
 
         custom-tags:
-          deprecated: 'true'
-          replacement: 'Use @QueryHandler decorator with DI container'
+          lazy-initialization: 'Handler created on first use'
+          dependency-injection: 'Factory can resolve dependencies dynamically'
 
       discoverHandlers:
         description: 'Legacy handler discovery method (deprecated)'

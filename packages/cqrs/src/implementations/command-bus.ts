@@ -11,31 +11,33 @@ import type { ICqrsValidatable } from '../validation';
 
 export class CommandBus extends ICommandBus {
   private middlewares: ICQRSMiddleware[] = [];
+  private handlers: Map<string, ICommandHandler<any, any> | (() => ICommandHandler<any, any>)> =
+    new Map();
 
   constructor(private container: IDependencyContainer) {
     super();
   }
 
   register<T extends ICommand, TResult = void>(
-    _commandType: unknown,
-    _handler: ICommandHandler<T, TResult>
+    commandType: unknown,
+    handler: ICommandHandler<T, TResult>
   ): void {
-    // Legacy method - deprecated in favor of DI container registration
-    throw new CQRSConfigurationError(
-      'Manual registration is deprecated. Use @CommandHandler decorator and DI container instead.',
-      'CommandBus'
-    );
+    // Support manual registration for flexibility
+    const commandName =
+      typeof commandType === 'string' ? commandType : (commandType as Function).name;
+
+    this.handlers.set(commandName, handler);
   }
 
   registerFactory<T extends ICommand, TResult = void>(
-    _commandType: unknown,
-    _factory: () => ICommandHandler<T, TResult>
+    commandType: unknown,
+    factory: () => ICommandHandler<T, TResult>
   ): void {
-    // Legacy method - deprecated in favor of DI container registration
-    throw new CQRSConfigurationError(
-      'Manual factory registration is deprecated. Use @CommandHandler decorator and DI container instead.',
-      'CommandBus'
-    );
+    // Support factory registration for lazy initialization
+    const commandName =
+      typeof commandType === 'string' ? commandType : (commandType as Function).name;
+
+    this.handlers.set(commandName, factory);
   }
 
   use(middleware: ICQRSMiddleware): this {
@@ -55,14 +57,28 @@ export class CommandBus extends ICommandBus {
   }
 
   async execute<T extends ICommand, TResult = void>(command: T): Promise<TResult> {
-    // Direct resolution through DI container using metadata
-    const handlerToken = this.getHandlerToken(command.constructor);
-
+    const commandName = command.constructor.name;
     let handler: ICommandHandler<T, TResult>;
-    try {
-      handler = this.container.resolve<ICommandHandler<T, TResult>>(handlerToken);
-    } catch (_error) {
-      throw new HandlerNotFoundError(command.constructor.name, 'command');
+
+    // First, check manual registrations
+    const registeredHandler = this.handlers.get(commandName);
+    if (registeredHandler) {
+      // Check if it's a factory function or direct handler
+      if (typeof registeredHandler === 'function' && !('execute' in registeredHandler)) {
+        // It's a factory function
+        handler = (registeredHandler as () => ICommandHandler<T, TResult>)();
+      } else {
+        // It's a direct handler
+        handler = registeredHandler as ICommandHandler<T, TResult>;
+      }
+    } else {
+      // Fall back to DI container resolution
+      try {
+        const handlerToken = this.getHandlerToken(command.constructor);
+        handler = this.container.resolve<ICommandHandler<T, TResult>>(handlerToken);
+      } catch (_error) {
+        throw new HandlerNotFoundError(command.constructor.name, 'command');
+      }
     }
 
     // Optional validation
@@ -79,10 +95,8 @@ export class CommandBus extends ICommandBus {
     // Get handler metadata from command class
     const handlerMetadata = Reflect.getMetadata('di:command-handler', commandClass);
     if (!handlerMetadata) {
-      throw new CQRSConfigurationError(
-        `No handler registered for command ${commandClass.name}. Did you forget @CommandHandler decorator?`,
-        'CommandBus'
-      );
+      // For manual registration, we don't have metadata, so throw to trigger fallback
+      throw new Error(`No metadata for ${commandClass.name}`);
     }
 
     return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
