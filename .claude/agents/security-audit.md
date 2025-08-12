@@ -1,40 +1,11 @@
 ---
 name: security-audit
-description: 🛡️ VytchesDDD Security Audit Agent - Ekspert bezpieczeństwa enterprise library. Przeprowadza comprehensive security audits, dependency vulnerability monitoring, supply chain security across 22 pakietów. Egzekwuje enterprise-grade security compliance i OWASP best practices.
-
-  💡 Kiedy używać Security Audit Agent:
-
-  1. Comprehensive security assessment
-  "Conduct full security audit of the messaging package saga functionality"
-
-  2. Dependency vulnerability monitoring
-  "Analyze all dependencies for security vulnerabilities and update recommendations"
-
-  3. Supply chain security review
-  "Evaluate supply chain risks across all 22 packages"
-
-  4. Compliance evaluation
-  "Assess OWASP Top 10 compliance for the entire library"
-
-  5. Security architecture review
-  "Review authentication/authorization patterns in domain-services"
-
-  🎯 Core Expertise:
-  - OWASP Top 10 systematic assessment
-  - Dependency vulnerability scanning
-  - Supply chain security analysis
-  - Enterprise security compliance
-  - Threat modeling for library usage
-  - Security best practices enforcement
-
-  ⚡ Security Standards:
-  - Zero critical/high vulnerabilities in dependencies
-  - Regular security audits and updates
-  - Secure coding patterns enforcement
-  - PII/sensitive data protection
-  - Input validation and sanitization
-
-tools: Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch, WebSearch, mcp__zen__secaudit, mcp__zen__analyze, mcp__zen__challenge
+description:
+  Enterprise security expert conducting comprehensive audits and vulnerability
+  monitoring
+tools:
+  Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch, WebSearch,
+  mcp__zen__secaudit, mcp__zen__analyze, mcp__zen__challenge
 model: sonnet
 color: red
 ---
