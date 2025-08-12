@@ -1,4 +1,4 @@
-import type { IAuditEvent, IEventStore, IEventUpcaster, IExtendedDomainEvent } from '../events';
+import type { IAuditEvent, IEventStore, IEventUpcaster, IDomainEvent } from '../events';
 import type { IAggregateCapability, IProjectionCapability } from './capability-base';
 
 export interface ISnapshotCapability<TState = unknown, TMeta = unknown>
@@ -45,7 +45,7 @@ export interface IVersioningCapability extends IAggregateCapability<'versioning'
    * Handles versioned event processing
    */
   handleVersionedEvent(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     handlers: Map<string, (payload: unknown, metadata?: unknown) => void>
   ): void;
 
@@ -163,14 +163,14 @@ export interface IDeadLetterCapability<TReadModel = unknown>
   /**
    * Send event to dead letter queue
    */
-  sendToDeadLetter(event: IExtendedDomainEvent, error: Error, projectionId: string): Promise<void>;
+  sendToDeadLetter(event: IDomainEvent, error: Error, projectionId: string): Promise<void>;
 
   /**
    * Get dead letter events
    */
   getDeadLetterEvents(projectionId: string): Promise<
     Array<{
-      event: IExtendedDomainEvent;
+      event: IDomainEvent;
       error: string;
       timestamp: Date;
     }>

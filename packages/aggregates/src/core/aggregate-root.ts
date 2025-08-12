@@ -6,7 +6,7 @@ import type {
 } from '../aggregate-interfaces';
 
 import type {
-  IExtendedDomainEvent,
+  IDomainEvent,
   IEventMetadata,
   Capability,
   CapabilityConstructor,
@@ -18,7 +18,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private readonly _id: EntityId<TId>;
   private _version = 0;
   private _initialVersion = 0;
-  private _domainEvents: IExtendedDomainEvent[] = [];
+  private _domainEvents: IDomainEvent[] = [];
   private _eventHandlers = new Map<string, IAggregateEventHandler>();
   private _capabilities = new CapabilityRegistry();
 
@@ -65,9 +65,9 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
 
   /**
    *
-   * @returns {ReadonlyArray<IExtendedDomainEvent>} Array of uncommitted domain events
+   * @returns {ReadonlyArray<IDomainEvent>} Array of uncommitted domain events
    */
-  getDomainEvents(): ReadonlyArray<IExtendedDomainEvent> {
+  getDomainEvents(): ReadonlyArray<IDomainEvent> {
     return [...this._domainEvents];
   }
 
@@ -95,19 +95,19 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
 
   /**
    * Apply domain event to aggregate and add to pending events
-   * @param {string | IExtendedDomainEvent<P>} eventTypeOrEvent - Event type string or complete event object
+   * @param {string | IDomainEvent<P>} eventTypeOrEvent - Event type string or complete event object
    * @param {P} payload - Event payload data
    * @param {Partial<IEventMetadata>} metadata - Optional event metadata
    */
   protected apply<P = unknown>(
-    eventTypeOrEvent: string | IExtendedDomainEvent<P>,
+    eventTypeOrEvent: string | IDomainEvent<P>,
     payload?: P,
     metadata?: Partial<IEventMetadata>
   ): void {
-    let event: IExtendedDomainEvent<P | undefined>;
+    let event: IDomainEvent<P | undefined>;
 
     if (typeof eventTypeOrEvent === 'string') {
-      event = createDomainEvent(eventTypeOrEvent, payload, metadata) as IExtendedDomainEvent<P>;
+      event = createDomainEvent(eventTypeOrEvent, payload, metadata) as IDomainEvent<P>;
     } else {
       event = eventTypeOrEvent;
       if (metadata) {
@@ -118,7 +118,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     this._version++;
 
     // Enrich with aggregate metadata
-    const enrichedEvent: IExtendedDomainEvent<P> = {
+    const enrichedEvent: IDomainEvent<P> = {
       ...event,
       metadata: {
         ...event.metadata,
@@ -132,7 +132,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     this.handleEvent(enrichedEvent);
   }
 
-  private handleEvent(event: IExtendedDomainEvent): void {
+  private handleEvent(event: IDomainEvent): void {
     // Check if we have versioning capability for upcasting
     const versioningCapability = this.getCapability(VersioningCapability);
     if (versioningCapability) {
@@ -148,9 +148,9 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
 
   /**
    * Reconstruct aggregate state from historical domain events
-   * @param {IExtendedDomainEvent[]} events - Array of events to replay for state reconstruction
+   * @param {IDomainEvent[]} events - Array of events to replay for state reconstruction
    */
-  protected loadFromHistory(events: IExtendedDomainEvent[]): void {
+  protected loadFromHistory(events: IDomainEvent[]): void {
     this._version = this._initialVersion;
     this._domainEvents = [];
 
@@ -239,7 +239,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   _internal_setState(state: {
     version: number;
     initialVersion: number;
-    domainEvents: IExtendedDomainEvent[];
+    domainEvents: IDomainEvent[];
   }): void {
     this._version = state.version;
     this._initialVersion = state.initialVersion;

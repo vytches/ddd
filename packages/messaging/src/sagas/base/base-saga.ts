@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type {
   ISaga,
@@ -58,7 +58,7 @@ export abstract class BaseSaga implements ISaga {
    * @param context - Execution context
    */
   async handleEvent(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
     this.logger.info('Handling event in saga', {
@@ -86,7 +86,7 @@ export abstract class BaseSaga implements ISaga {
    * @param context - Execution context
    */
   private async executeEventHandling(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
     try {
@@ -262,7 +262,7 @@ export abstract class BaseSaga implements ISaga {
    * Check if saga can handle the given event
    * @param event - Domain event to check
    */
-  canHandle(event: IExtendedDomainEvent): boolean {
+  canHandle(event: IDomainEvent): boolean {
     // Check if any step can handle this event
     for (const step of this.steps.values()) {
       if (
@@ -351,7 +351,7 @@ export abstract class BaseSaga implements ISaga {
    * Find appropriate step to handle the event
    * @param event - Domain event to process
    */
-  private findStepForEvent(event: IExtendedDomainEvent): ISagaStep | null {
+  private findStepForEvent(event: IDomainEvent): ISagaStep | null {
     // First try to find step by trigger events
     for (const step of this.steps.values()) {
       if (step.triggerEvents.includes(event.eventType)) {
@@ -377,7 +377,7 @@ export abstract class BaseSaga implements ISaga {
    */
   private async executeStep(
     step: ISagaStep,
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
     const startTime = Date.now();

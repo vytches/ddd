@@ -1331,7 +1331,7 @@ class ComponentGenerator {
       policy: ['Policy', 'PolicyBuilder'],
       command: ['ICommand', 'ICommandHandler'],
       query: ['IQuery', 'IQueryHandler'],
-      event: ['DomainEvent', 'IExtendedDomainEvent'],
+      event: ['DomainEvent', 'IDomainEvent'],
       repository: ['IRepository', 'IBaseRepository'],
       'domain-service': ['DomainService'],
     };

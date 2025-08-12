@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type { IProjection } from './projection-interfaces';
 
 export abstract class BaseProjection<TReadModel> implements IProjection<TReadModel> {
@@ -6,7 +6,7 @@ export abstract class BaseProjection<TReadModel> implements IProjection<TReadMod
   abstract readonly eventTypes: string[];
 
   abstract createInitialState(): TReadModel | Promise<TReadModel>;
-  abstract apply(readModel: TReadModel, event: IExtendedDomainEvent): TReadModel;
+  abstract apply(readModel: TReadModel, event: IDomainEvent): TReadModel;
 
   /**
    * Check if projection handles specific event type
@@ -18,9 +18,9 @@ export abstract class BaseProjection<TReadModel> implements IProjection<TReadMod
   /**
    * Helper for type-safe event handling
    */
-  protected when<TEvent extends IExtendedDomainEvent>(
+  protected when<TEvent extends IDomainEvent>(
     readModel: TReadModel,
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     eventType: string,
     handler: (state: TReadModel, event: TEvent) => TReadModel
   ): TReadModel {
@@ -33,9 +33,9 @@ export abstract class BaseProjection<TReadModel> implements IProjection<TReadMod
   /**
    * Helper for multiple event types
    */
-  protected whenAny<TEvent extends IExtendedDomainEvent>(
+  protected whenAny<TEvent extends IDomainEvent>(
     readModel: TReadModel,
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     eventTypes: string[],
     handler: (state: TReadModel, event: TEvent) => TReadModel
   ): TReadModel {
@@ -48,9 +48,9 @@ export abstract class BaseProjection<TReadModel> implements IProjection<TReadMod
   /**
    * Helper for conditional application
    */
-  protected applyIf<TEvent extends IExtendedDomainEvent>(
+  protected applyIf<TEvent extends IDomainEvent>(
     readModel: TReadModel,
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     condition: (event: TEvent) => boolean,
     handler: (state: TReadModel, event: TEvent) => TReadModel
   ): TReadModel {

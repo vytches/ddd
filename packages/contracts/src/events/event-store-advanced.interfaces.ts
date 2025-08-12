@@ -1,7 +1,7 @@
 import type { IAggregateSnapshot } from '../capabilities';
-import type { IExtendedDomainEvent } from './domain-event-interfaces';
+import type { IDomainEvent } from './domain-event-interfaces';
 
-export interface IStoredDomainEvent<P = unknown> extends IExtendedDomainEvent<P> {
+export interface IStoredDomainEvent<P = unknown> extends IDomainEvent<P> {
   /** Unique identifier for the event */
   eventId: string;
 

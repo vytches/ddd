@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IEventMetadata, IExtendedDomainEvent } from './domain-event-interfaces';
+import type { IEventMetadata, IDomainEvent } from './domain-event-interfaces';
 
 export interface IEventUpcaster<TInput = unknown, TOutput = unknown> {
   /**
@@ -25,19 +25,15 @@ export interface IEventStore {
   /**
    * Gets all events for an aggregate
    */
-  getEvents(aggregateId: unknown): Promise<IExtendedDomainEvent[]>;
+  getEvents(aggregateId: unknown): Promise<IDomainEvent[]>;
 
   /**
    * Saves events for an aggregate
    */
-  saveEvents(
-    aggregateId: unknown,
-    events: IExtendedDomainEvent[],
-    expectedVersion: number
-  ): Promise<void>;
+  saveEvents(aggregateId: unknown, events: IDomainEvent[], expectedVersion: number): Promise<void>;
 
   /**
    * Gets events after a specific version
    */
-  getEventsAfterVersion(aggregateId: unknown, version: number): Promise<IExtendedDomainEvent[]>;
+  getEventsAfterVersion(aggregateId: unknown, version: number): Promise<IDomainEvent[]>;
 }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
+import type { IDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
 import { Capability } from '@vytches/ddd-contracts';
 
 import { ProjectionError } from '../projection-errors';
@@ -39,7 +39,7 @@ export class CircuitBreakerCapability<TReadModel>
 
   // readonly name = 'circuit-breaker'; // Replaced by type property
 
-  async onBeforeApply(_state: TReadModel, _event: IExtendedDomainEvent): Promise<void> {
+  async onBeforeApply(_state: TReadModel, _event: IDomainEvent): Promise<void> {
     if (this.state === CircuitState.OPEN) {
       if (this.shouldAttemptReset()) {
         this.state = CircuitState.HALF_OPEN;
@@ -51,7 +51,7 @@ export class CircuitBreakerCapability<TReadModel>
     }
   }
 
-  async onAfterApply(_state: TReadModel, _event: IExtendedDomainEvent): Promise<void> {
+  async onAfterApply(_state: TReadModel, _event: IDomainEvent): Promise<void> {
     if (this.state === CircuitState.HALF_OPEN) {
       this.halfOpenAttempts++;
       if (this.halfOpenAttempts >= this.config.halfOpenMaxAttempts) {

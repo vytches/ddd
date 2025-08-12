@@ -403,7 +403,7 @@ class EntityIdFactory implements IEntityIdFactory {
 import { IDomainEvent, IEventMetadata } from '@vytches/ddd-contracts';
 
 // Extended domain event with additional metadata
-interface IExtendedDomainEvent extends IDomainEvent {
+interface IDomainEvent extends IDomainEvent {
   causationId?: string;
   correlationId?: string;
   userId?: string;

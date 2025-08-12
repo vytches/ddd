@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { SagaOrchestrator } from '../../../src/sagas/orchestrator';
 import type {
   ISagaRepository,
@@ -30,10 +30,7 @@ vi.mock('@vytches/ddd-logging', () => ({
 }));
 
 // Mock implementations
-const createMockEvent = (
-  eventType = 'TestEvent',
-  aggregateId = 'agg-123'
-): IExtendedDomainEvent => ({
+const createMockEvent = (eventType = 'TestEvent', aggregateId = 'agg-123'): IDomainEvent => ({
   eventType,
   payload: { test: true },
   metadata: {

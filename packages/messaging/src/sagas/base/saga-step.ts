@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type {
   ISagaActionResult,
@@ -30,7 +30,7 @@ export abstract class SagaStep implements ISagaStep {
    * @param context - Execution context
    */
   async execute(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     state: ISagaState,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
@@ -135,7 +135,7 @@ export abstract class SagaStep implements ISagaStep {
    * @param event - Triggering event
    * @param state - Current saga state
    */
-  canExecute(event: IExtendedDomainEvent, state: ISagaState): boolean {
+  canExecute(event: IDomainEvent, state: ISagaState): boolean {
     // Check if event type is supported
     if (
       !this.triggerEvents.includes(event.eventType) &&
@@ -156,7 +156,7 @@ export abstract class SagaStep implements ISagaStep {
    * @param context - Execution context
    */
   protected abstract executeImpl(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     state: ISagaState,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult>;
@@ -179,7 +179,7 @@ export abstract class SagaStep implements ISagaStep {
    * @param event - Triggering event
    * @param state - Current saga state
    */
-  protected canExecuteImpl(event: IExtendedDomainEvent, state: ISagaState): boolean {
+  protected canExecuteImpl(event: IDomainEvent, state: ISagaState): boolean {
     // Default implementation - always allow execution
     return true;
   }
@@ -189,7 +189,7 @@ export abstract class SagaStep implements ISagaStep {
    * @param event - Domain event
    * @param path - Property path (e.g., 'payload.orderId')
    */
-  protected getEventData<T = unknown>(event: IExtendedDomainEvent, path: string): T | undefined {
+  protected getEventData<T = unknown>(event: IDomainEvent, path: string): T | undefined {
     try {
       const parts = path.split('.');
       let current: Record<string, unknown> = event as unknown as Record<string, unknown>;
@@ -247,7 +247,7 @@ export abstract class SagaStep implements ISagaStep {
   protected createSuccessResult(
     options: {
       commands?: unknown[];
-      events?: IExtendedDomainEvent[];
+      events?: IDomainEvent[];
       completesSaga?: boolean;
       compensationData?: Record<string, unknown>;
       nextStep?: string;
@@ -281,7 +281,7 @@ export abstract class SagaStep implements ISagaStep {
    * @param event - Domain event
    * @param requiredPaths - Array of required property paths
    */
-  protected validateEventData(event: IExtendedDomainEvent, requiredPaths: string[]): string[] {
+  protected validateEventData(event: IDomainEvent, requiredPaths: string[]): string[] {
     const errors: string[] = [];
 
     for (const path of requiredPaths) {

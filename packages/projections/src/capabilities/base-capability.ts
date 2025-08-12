@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
+import type { IDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
 import { Capability } from '@vytches/ddd-contracts';
 
 import { ProjectionError } from '../projection-errors';
@@ -31,7 +31,7 @@ export abstract class BaseIntervalCapability<T extends string, TReadModel>
     this.context = undefined;
   }
 
-  async onAfterApply(state: TReadModel, event: IExtendedDomainEvent): Promise<void> {
+  async onAfterApply(state: TReadModel, event: IDomainEvent): Promise<void> {
     this.eventCounter++;
 
     if (this.eventCounter >= this.interval) {
@@ -40,7 +40,7 @@ export abstract class BaseIntervalCapability<T extends string, TReadModel>
     }
   }
 
-  protected abstract handleInterval(state: TReadModel, event: IExtendedDomainEvent): Promise<void>;
+  protected abstract handleInterval(state: TReadModel, event: IDomainEvent): Promise<void>;
 
   protected ensureAttached(): void {
     if (!this.context) {

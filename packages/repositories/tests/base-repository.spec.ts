@@ -1,13 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EntityId } from '@vytches/ddd-contracts';
-import type {
-  IDomainEvent,
-  IAggregateWithEvents,
-  IExtendedDomainEvent,
+import type { IAggregateWithEvents, IDomainEvent } from '@vytches/ddd-contracts';
+import {
+  EntityId,
+  IEnhancedEventDispatcher,
+  IEventPersistenceHandler,
 } from '@vytches/ddd-contracts';
-import { IEventPersistenceHandler, IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import type { IRepositoryAggregate } from '../src';
 import { IBaseRepository } from '../src';
 
@@ -92,7 +91,7 @@ class MockEventPersistenceHandler extends IEventPersistenceHandler {
 class TestAggregate implements IRepositoryAggregate {
   private _id: EntityId;
   private _version: number;
-  private _events: IExtendedDomainEvent[] = [];
+  private _events: IDomainEvent[] = [];
   private _name = '';
   private _items: string[] = [];
 
@@ -109,7 +108,7 @@ class TestAggregate implements IRepositoryAggregate {
     return this._version;
   }
 
-  getDomainEvents(): ReadonlyArray<IExtendedDomainEvent> {
+  getDomainEvents(): ReadonlyArray<IDomainEvent> {
     return [...this._events];
   }
 
@@ -144,7 +143,7 @@ class TestAggregate implements IRepositoryAggregate {
   }
 
   private addEvent(eventType: string, payload: any): void {
-    const event: IExtendedDomainEvent = {
+    const event: IDomainEvent = {
       eventType,
       payload,
       metadata: {

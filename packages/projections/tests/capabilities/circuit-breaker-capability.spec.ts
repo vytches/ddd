@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { safeRun } from '@vytches/ddd-utils';
 import { CircuitBreakerCapability } from '../../src';
 import { ProjectionError } from '../../src/projection-errors';
@@ -28,7 +28,7 @@ describe('CircuitBreakerCapability', () => {
   let context: MockContext;
   let config: ICircuitBreakerConfig;
 
-  const createMockEvent = (): IExtendedDomainEvent => ({
+  const createMockEvent = (): IDomainEvent => ({
     eventType: 'TestEvent',
     payload: { data: 'test' },
     metadata: {

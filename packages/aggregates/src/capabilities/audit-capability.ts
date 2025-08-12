@@ -1,5 +1,5 @@
 import { Capability } from '@vytches/ddd-contracts';
-import type { IAuditCapability, IAuditEvent, IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IAuditCapability, IAuditEvent, IDomainEvent } from '@vytches/ddd-contracts';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 export class AuditCapability extends Capability<'audit'> implements IAuditCapability {
@@ -109,9 +109,9 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * @param {IExtendedDomainEvent} event - Domain event to record in audit log
+   * @param {IDomainEvent} event - Domain event to record in audit log
    */
-  recordEvent(event: IExtendedDomainEvent): void {
+  recordEvent(event: IDomainEvent): void {
     const auditEvent: IAuditEvent = {
       eventId: event.metadata?.eventId || `audit-${Date.now()}-${Math.random()}`,
       eventType: event.eventType,

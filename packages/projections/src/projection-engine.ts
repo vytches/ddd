@@ -2,7 +2,7 @@ import type {
   Capability,
   CapabilityConstructor,
   IEventStore,
-  IExtendedDomainEvent,
+  IDomainEvent,
   IProjectionCapability,
   IReplayFilter,
   IReplayResult,
@@ -50,11 +50,11 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
     return this.projection.eventTypes;
   }
 
-  isInterestedIn(event: IExtendedDomainEvent): boolean {
+  isInterestedIn(event: IDomainEvent): boolean {
     return this.projection.handles(event.eventType);
   }
 
-  async processEvent(event: IExtendedDomainEvent): Promise<void> {
+  async processEvent(event: IDomainEvent): Promise<void> {
     if (!this.isInterestedIn(event)) return;
 
     try {
@@ -124,7 +124,7 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
     await this.store.save(this.projection.name, initialState);
   }
 
-  async rebuildFromEvents(events: AsyncIterable<IExtendedDomainEvent>): Promise<void> {
+  async rebuildFromEvents(events: AsyncIterable<IDomainEvent>): Promise<void> {
     await this.reset();
 
     for await (const event of events) {
@@ -259,7 +259,7 @@ export class EnhancedProjectionEngine<TReadModel> extends ProjectionEngine<TRead
 
   private readonly retryConfig: IProjectionRetryConfig;
 
-  override async processEvent(event: IExtendedDomainEvent): Promise<void> {
+  override async processEvent(event: IDomainEvent): Promise<void> {
     if (!this.isInterestedIn(event)) return;
 
     let attempt = 0;

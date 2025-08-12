@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { BaseSaga, ConcreteSagaStep } from '../../../src/sagas/base';
 import type { ISagaState, ISagaStep, ISagaExecutionContext } from '../../../src/sagas/interfaces';
 import { SagaStatus } from '../../../src/sagas/interfaces';
@@ -18,7 +18,7 @@ vi.mock('@vytches/ddd-logging', () => ({
 }));
 
 // Test event implementation
-class TestEvent implements IExtendedDomainEvent {
+class TestEvent implements IDomainEvent {
   constructor(
     public readonly eventId: string,
     public readonly eventType: string,

@@ -3,7 +3,7 @@
 import type {
   Capability,
   CapabilityConstructor,
-  IExtendedDomainEvent,
+  IDomainEvent,
   IProjectionCapability,
 } from '@vytches/ddd-contracts';
 import type { ProjectionError } from './projection-errors';
@@ -13,7 +13,7 @@ export interface IProjection<TReadModel> {
   readonly eventTypes: string[];
 
   createInitialState(): TReadModel | Promise<TReadModel>;
-  apply(readModel: TReadModel, event: IExtendedDomainEvent): TReadModel | Promise<TReadModel>;
+  apply(readModel: TReadModel, event: IDomainEvent): TReadModel | Promise<TReadModel>;
   handles(eventType: string): boolean;
 }
 
@@ -35,16 +35,16 @@ export interface ICapabilityContext<TReadModel> {
 }
 
 export interface IProjectionLifecycleCapability<TReadModel> {
-  onBeforeApply?(state: TReadModel, event: IExtendedDomainEvent): Promise<void> | void;
-  onAfterApply?(state: TReadModel, event: IExtendedDomainEvent): Promise<void> | void;
-  onError?(error: ProjectionError, event?: IExtendedDomainEvent): Promise<void> | void;
+  onBeforeApply?(state: TReadModel, event: IDomainEvent): Promise<void> | void;
+  onAfterApply?(state: TReadModel, event: IDomainEvent): Promise<void> | void;
+  onError?(error: ProjectionError, event?: IDomainEvent): Promise<void> | void;
 }
 
 export interface IProjectionEngine<TReadModel> {
   getProjectionName(): string;
   getEventTypes(): string[];
-  processEvent(event: IExtendedDomainEvent): Promise<void>;
-  isInterestedIn(event: IExtendedDomainEvent): boolean;
+  processEvent(event: IDomainEvent): Promise<void>;
+  isInterestedIn(event: IDomainEvent): boolean;
   getState(): Promise<TReadModel | null>;
   reset(): Promise<void>;
   addCapability<T extends Capability & IProjectionCapability>(capability: T): this;
@@ -153,14 +153,14 @@ export interface IProjectionErrorStrategy {
 export interface IDeadLetterStore {
   store(deadLetter: IDeadLetter): Promise<void>;
   getByProjection(projectionName: string): Promise<IDeadLetter[]>;
-  retry(deadLetterId: string): Promise<IExtendedDomainEvent>;
+  retry(deadLetterId: string): Promise<IDomainEvent>;
   delete(deadLetterId: string): Promise<void>;
 }
 
 export interface IDeadLetter {
   id: string;
   projectionName: string;
-  event: IExtendedDomainEvent;
+  event: IDomainEvent;
   error: Error;
   attemptCount: number;
   firstFailedAt: Date;

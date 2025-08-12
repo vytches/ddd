@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import {
   BaseSagaMiddleware,
   PerformanceMonitoringMiddleware,
@@ -30,7 +30,7 @@ vi.mock('@vytches/ddd-logging', () => ({
 }));
 
 // Mock implementations
-const createMockEvent = (eventType = 'TestEvent'): IExtendedDomainEvent => ({
+const createMockEvent = (eventType = 'TestEvent'): IDomainEvent => ({
   eventType,
   payload: { test: true },
   metadata: { eventId: 'evt-123', timestamp: new Date(), correlationId: 'corr-123' },

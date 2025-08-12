@@ -1,11 +1,11 @@
 import { LibUtils } from '@vytches/ddd-utils';
-import type { IEventMetadata, IExtendedDomainEvent } from './domain-event-interfaces';
+import type { IEventMetadata, IDomainEvent } from './domain-event-interfaces';
 
 export function createDomainEvent<P = unknown>(
   eventType: string,
   payload: P,
   metadata?: Partial<IEventMetadata>
-): IExtendedDomainEvent<P> {
+): IDomainEvent<P> {
   return {
     eventType,
     payload,

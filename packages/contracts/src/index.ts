@@ -23,7 +23,6 @@ export type {
   IEventStoreConfig,
   IEventStream,
   IEventUpcaster,
-  IExtendedDomainEvent,
   IGlobalEventStream,
   IReadAllOptions,
   IReadStreamOptions,

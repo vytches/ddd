@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
+import type { IDomainEvent, IProjectionCapability } from '@vytches/ddd-contracts';
 import { Capability } from '@vytches/ddd-contracts';
 import { LibUtils } from '@vytches/ddd-utils';
 
@@ -37,7 +37,7 @@ export class DeadLetterCapability<TReadModel>
     this.context = context;
   }
 
-  async onError(error: ProjectionError, event?: IExtendedDomainEvent): Promise<void> {
+  async onError(error: ProjectionError, event?: IDomainEvent): Promise<void> {
     if (!event || !this.context) return;
 
     const attemptCount = this.getAttemptCount(error);

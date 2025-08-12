@@ -137,14 +137,14 @@ interface ISaga {
   readonly state: ISagaState;
 
   handleEvent(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult>;
   compensate(
     stepName: string,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult>;
-  canHandle(event: IExtendedDomainEvent): boolean;
+  canHandle(event: IDomainEvent): boolean;
   getCorrelationData(): Record<string, unknown>;
 }
 
@@ -237,7 +237,7 @@ class OrderProcessingSaga extends BaseSaga {
 
   @SagaEventHandler('OrderCreated')
   async handleOrderCreated(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
     // Process order creation
@@ -255,7 +255,7 @@ class OrderProcessingSaga extends BaseSaga {
 
   @SagaEventHandler('PaymentProcessed')
   async handlePaymentProcessed(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
     // Process payment completion
@@ -285,7 +285,7 @@ class OrderProcessingSaga extends BaseSaga {
     }
   }
 
-  canHandle(event: IExtendedDomainEvent): boolean {
+  canHandle(event: IDomainEvent): boolean {
     return ['OrderCreated', 'PaymentProcessed', 'InventoryReserved'].includes(
       event.eventType
     );
@@ -618,7 +618,7 @@ import { BaseSagaMiddleware } from '@vytches/ddd-messaging';
 class AuditMiddleware extends BaseSagaMiddleware {
   async execute(
     saga: ISaga,
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext,
     next: () => Promise<ISagaActionResult>
   ): Promise<ISagaActionResult> {
@@ -669,7 +669,7 @@ import {
 
 class OrderProcessingSaga extends BaseSaga {
   async handleEvent(
-    event: IExtendedDomainEvent,
+    event: IDomainEvent,
     context: ISagaExecutionContext
   ): Promise<ISagaActionResult> {
     try {

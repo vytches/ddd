@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type {
   IDomainToIntegrationEventTransformer,
   IIntegrationEvent,
@@ -42,7 +42,7 @@ export class IntegrationEventTransformerRegistry {
    * @returns Integration event or undefined if no transformer found
    */
   public transform<D = unknown, I = unknown>(
-    domainEvent: IExtendedDomainEvent<D>
+    domainEvent: IDomainEvent<D>
   ): IIntegrationEvent<I> | undefined {
     const transformer = this.find(domainEvent.eventType);
 

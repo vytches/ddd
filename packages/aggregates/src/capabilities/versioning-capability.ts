@@ -1,9 +1,5 @@
 import { Capability } from '@vytches/ddd-contracts';
-import type {
-  IVersioningCapability,
-  IExtendedDomainEvent,
-  IEventUpcaster,
-} from '@vytches/ddd-contracts';
+import type { IVersioningCapability, IDomainEvent, IEventUpcaster } from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
 
 export class VersioningCapability
@@ -47,13 +43,10 @@ export class VersioningCapability
   }
 
   /**
-   * @param {IExtendedDomainEvent} event - Event to process with version handling
+   * @param {IDomainEvent} event - Event to process with version handling
    * @param {Map<string, IAggregateEventHandler>} handlers - Map of event handlers
    */
-  handleVersionedEvent(
-    event: IExtendedDomainEvent,
-    handlers: Map<string, IAggregateEventHandler>
-  ): void {
+  handleVersionedEvent(event: IDomainEvent, handlers: Map<string, IAggregateEventHandler>): void {
     const eventVersion = (event.metadata?.version as number) || 1;
     const currentVersion =
       (event.metadata as { targetVersion?: number })?.targetVersion || eventVersion;

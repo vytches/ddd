@@ -1,4 +1,4 @@
-import type { IExtendedDomainEvent } from '@vytches/ddd-contracts';
+import type { IDomainEvent } from '@vytches/ddd-contracts';
 
 import type { IProjectionSnapshotStore } from '../projection-interfaces';
 
@@ -22,7 +22,7 @@ export class SnapshotProjectionCapability<TReadModel> extends BaseIntervalCapabi
     super('snapshot', interval);
   }
 
-  protected async handleInterval(state: TReadModel, event: IExtendedDomainEvent): Promise<void> {
+  protected async handleInterval(state: TReadModel, event: IDomainEvent): Promise<void> {
     this.ensureAttached();
 
     this.version++;

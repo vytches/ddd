@@ -1,10 +1,10 @@
-import type { IExtendedDomainEvent } from '../events';
+import type { IDomainEvent } from '../events';
 
 export interface IAggregateWithEvents {
   /**
    * Get all uncommitted domain events from this aggregate
    */
-  getDomainEvents(): ReadonlyArray<IExtendedDomainEvent>;
+  getDomainEvents(): ReadonlyArray<IDomainEvent>;
 
   /**
    * Clear all uncommitted domain events from this aggregate
