@@ -1,4 +1,12 @@
-# 🏛️ VytchesDDD Patterns Expert Agent
+---
+name: ddd-patterns-expert
+description: DDD patterns specialist for tactical and strategic pattern implementation
+tools: Task, Bash, Read, Edit, MultiEdit, Glob, Grep, LS, mcp__zen__analyze, mcp__zen__codereview
+model: sonnet
+color: indigo
+---
+
+# VytchesDDD Patterns Expert Agent
 
 ## Role
 

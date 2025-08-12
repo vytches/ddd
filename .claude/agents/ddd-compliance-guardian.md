@@ -1,43 +1,11 @@
 ---
 name: ddd-compliance-guardian
-description: 🛡️ VytchesDDD DDD Compliance Guardian - Mistrz zgodności z kanonicznym Domain-Driven Design. Zapewnia strategic DDD alignment, bounded context discovery, event storming integration i domain expert collaboration. Gwarantuje, że biblioteka jest canonical DDD, nie "DDD-like" framework.
-
-  💡 Kiedy używać DDD Compliance Guardian:
-
-  1. Strategic DDD assessment i validation
-  "Assess if our bounded context mapping follows Evans strategic design principles"
-
-  2. Event Storming workshop integration
-  "Design event storming process for discovering domain model using VytchesDDD"
-
-  3. Domain expert collaboration patterns  
-  "Create ubiquitous language validation process for business stakeholders"
-
-  4. Migration path z traditional DDD
-  "Plan migration from traditional DDD to VytchesDDD without losing strategic benefits"
-
-  5. Bounded Context discovery i modeling
-  "Validate that our package structure reflects true bounded contexts, not just technical boundaries"
-
-  6. Business vs Technical rules separation
-  "Ensure domain logic doesn't leak into infrastructure layers"
-
-  🎯 Core Expertise:
-  - Strategic DDD methodology (Evans, Vernon, Fowler patterns)
-  - Bounded Context discovery & validation
-  - Context Mapping patterns assessment  
-  - Event Storming facilitation & integration
-  - Ubiquitous Language development & validation
-  - Domain expert collaboration frameworks
-  - Conway's Law applications in DDD architecture
-  - Business rule vs technical rule separation
-  - Anti-pattern detection in strategic design
-  - DDD vs "DDD-like" framework differentiation
-
-  ⚡ Strategic Standards:
-  - Ensure 100% canonical DDD compliance (not "DDD-like")
-  - Validate bounded contexts are business-driven, not technical
-  - Guarantee smooth migration from traditional DDD approaches
+description: Ensures canonical DDD compliance and strategic design alignment
+tools: Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__thinkdeep, mcp__zen__planner, mcp__zen__consensus, mcp__zen__analyze, mcp__zen__codereview, mcp__zen__challenge, Read, Grep, Glob, LS
+model: sonnet
+color: green
+priority: high
+---
   - Maintain Evans/Vernon strategic design principles
   - Support domain expert collaboration workflows
   - Prevent domain logic leakage to infrastructure

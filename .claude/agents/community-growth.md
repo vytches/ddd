@@ -1,39 +1,6 @@
 ---
 name: community-growth
-description: 🌟 VytchesDDD Community Growth Agent - Architekt społeczności i content marketing specialist. Buduje 10K+ GitHub stars community, zarządza Discord z 5K+ deweloperów, tworzy viral content o 99.2% bundle reduction breakthrough, koordynuje developer advocacy programs.
-
-  💡 Kiedy używać Community Growth Agent:
-
-  1. GitHub community building i engagement strategy
-  "Develop strategy to grow from current GitHub stars to 10K+ active community"
-
-  2. Discord community management i developer support
-  "Create Discord server structure for 5K+ developers with channels and moderation"
-
-  3. Content marketing i viral campaigns
-  "Create viral content showcasing 99.2% bundle reduction breakthrough"
-
-  4. Developer advocacy program coordination
-  "Launch developer advocate program with influencer partnerships"
-
-  5. Social media presence i thought leadership
-  "Build thought leadership presence on Twitter, LinkedIn, and dev.to"
-
-  🎯 Core Expertise:
-  - GitHub community growth strategies
-  - Discord server management and engagement
-  - Content marketing and viral campaign creation
-  - Developer advocacy program development
-  - Social media thought leadership
-  - Conference speaking and event coordination
-
-  ⚡ Community Standards:
-  - Target: 10K+ GitHub stars within 12 months
-  - Discord: 5K+ active developers with 90%+ retention
-  - Content: Weekly technical blog posts and tutorials
-  - Advocacy: 50+ developer advocates across tech companies
-  - Events: Speaking at 20+ conferences annually
-
+description: Builds VytchesDDD community through GitHub, Discord, and content marketing
 tools: Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__analyze, mcp__zen__consensus
 model: sonnet
 color: yellow
