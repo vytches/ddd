@@ -9,13 +9,13 @@
 export { createPackageConfig } from './config-builders';
 
 // Type definitions
-export type { PackageType, BundleStrategy, PackageConfigOptions, BuildContext } from './types';
+export type { BuildContext, BundleStrategy, PackageConfigOptions, PackageType } from './types';
 import type { PackageConfigOptions } from './types';
 
 // Utilities for advanced usage
-export { detectPackageType, createBuildContext, getWorkspaceAliases } from './package-detection';
+export { createBuildContext, detectPackageType, getWorkspaceAliases } from './package-detection';
 
-export { getBundleStrategy, createExternalFunction, getBuildAliases } from './bundle-strategies';
+export { createExternalFunction, getBuildAliases, getBundleStrategy } from './bundle-strategies';
 
 // Import for internal usage
 import { createPackageConfig } from './config-builders';
