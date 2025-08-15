@@ -1,22 +1,151 @@
 # VytchesDDD Seeder Framework
 
+A comprehensive test data generation framework for Domain-Driven Design
+applications, providing type-safe, business rule compliant, and high-performance
+data seeding capabilities.
+
 ## Overview
 
-A comprehensive domain data seeding framework with full DDD pattern support.
-Provides type-safe generation of aggregates, value objects, and test scenarios
-while respecting domain boundaries and business rules.
+The DDD Seeder Framework follows the Factory pattern over Builder pattern for
+better composability and implements a streaming-first architecture for
+performance with large datasets. It provides deep integration with all
+VytchesDDD packages while respecting domain boundaries and business rules.
 
-## Architecture
+## Core Components
 
-The framework uses the **Factory pattern** instead of Builder for better
-composability and DDD compliance:
+### DomainSeeder (Main Orchestrator)
 
-- **DomainSeeder** - Main orchestrator with fluent API
-- **AggregateFactory** - Factory for type-safe aggregate creation
-- **AggregateSeeder** - Aggregate seeder with business rule validation
-- **ValueObjectBuilder** - Builder for value objects with validation
-- **EntityIdGenerator** - ID generator with multiple strategies
-- **StreamingSeeder** - Efficient generation for large datasets
+The central entry point providing factory methods for different types of
+seeders:
+
+```typescript
+import { DomainSeeder } from '@vytches/ddd-testing/seeder';
+
+// Configure global settings
+DomainSeeder.configure({
+  enableEvents: true,
+  defaultBatchSize: 1000,
+  randomSeed: 'reproducible-seed',
+});
+
+// Simple aggregate seeding
+const userSeeder = DomainSeeder.forAggregate(UserAggregate)
+  .withDefaults({ status: 'active' })
+  .withSequence('email', n => `user${n}@example.com`);
+
+const user = await userSeeder.build();
+const users = await userSeeder.buildMany(100);
+```
+
+### AggregateFactory (Factory Pattern Implementation)
+
+Type-safe aggregate generation with template systems and business rule
+validation:
+
+```typescript
+import { AggregateFactory } from '@vytches/ddd-testing/seeder';
+
+const orderFactory = new AggregateFactory(OrderAggregate)
+  .withTemplate('basic-order', {
+    amount: 100,
+    currency: 'USD',
+    status: 'pending',
+  })
+  .withSequence('orderId', n => `ORDER-${n.toString().padStart(6, '0')}`)
+  .withRelationship('customerId', () => randomCustomerId())
+  .withValidation(order => order.amount > 0);
+
+// Generate single order
+const result = await orderFactory.create();
+if (result.isSuccess) {
+  const order = result.value;
+  // Use the generated order
+}
+
+// Generate multiple orders with overrides
+const orders = await orderFactory.createMany(50, {
+  status: 'confirmed',
+});
+```
+
+### ValueObjectBuilder (Business Rule Compliance)
+
+Specialized builder for value objects with constraint handling:
+
+```typescript
+import { ValueObjectBuilder } from '@vytches/ddd-testing/seeder';
+
+const emailBuilder = new ValueObjectBuilder(EmailVO)
+  .withConstraints({
+    pattern: /^[^@]+@[^@]+\.[^@]+$/,
+    forbiddenValues: ['admin@test.com'],
+  })
+  .withBusinessRules(['valid-email-format', 'no-disposable-emails'])
+  .withTemplate({
+    name: 'corporate-email',
+    generator: () => ({
+      value: faker.internet.email({ provider: 'company.com' }),
+    }),
+  });
+
+const email = await emailBuilder.build('corporate-email');
+const emails = await emailBuilder.buildMany(100);
+```
+
+### EntityIdGenerator (ID Generation Strategies)
+
+Comprehensive EntityId generation with multiple strategies:
+
+```typescript
+import { EntityIdGenerator } from '@vytches/ddd-testing/seeder';
+
+// UUID strategy
+const userId = EntityIdGenerator.uuid();
+
+// Sequential strategy
+const orderId = EntityIdGenerator.sequential('ORDER', 6); // ORDER-000001
+
+// Pattern-based strategy with context
+const invoiceId = EntityIdGenerator.pattern(
+  'INV-{{year}}-{{month}}-{{sequence}}',
+  'invoice'
+);
+
+// Domain-specific presets
+const customerId = EntityIdGenerator.customerPreset('premium');
+const productId = EntityIdGenerator.productPreset('electronics');
+```
+
+### StreamingSeeder (High-Performance Architecture)
+
+Memory-efficient streaming for large-scale data generation:
+
+```typescript
+import { StreamingSeeder } from '@vytches/ddd-testing/seeder';
+
+const streamingSeeder = new StreamingSeeder(UserAggregate)
+  .withBatchSize(1000)
+  .withBackpressure({ highWaterMark: 10000 })
+  .withMemoryManagement(500) // 500MB limit
+  .withProgressTracking(true);
+
+// Stream millions of aggregates efficiently
+for await (const userResult of streamingSeeder.stream(1_000_000)) {
+  if (userResult.isSuccess) {
+    // Process user (automatically batched and memory-managed)
+    await persistUser(userResult.value);
+  } else {
+    console.error('Failed to generate user:', userResult.error);
+  }
+}
+
+// Monitor progress
+streamingSeeder.on('progress', progress => {
+  console.log(
+    `Progress: ${progress.completed}/${progress.total} (${progress.rate}/s)`
+  );
+});
+```
 
 ## Basic Usage
 
@@ -393,6 +522,186 @@ describe('UserAggregate Seeding', () => {
 });
 ```
 
-This is just the beginning of the framework's capabilities. Refer to the
-documentation of individual classes for more detailed examples and advanced
-features.
+## Performance Features
+
+### Memory Management
+
+- **Backpressure handling**: Automatically pauses generation when memory usage
+  is high
+- **Garbage collection hints**: Triggers GC when memory limits are approached
+- **Streaming architecture**: Never loads all data into memory simultaneously
+- **Batch processing**: Configurable batch sizes for optimal performance
+
+### Monitoring and Metrics
+
+```typescript
+// Get comprehensive performance metrics
+const metrics = streamingSeeder.getMetrics();
+console.log({
+  totalItems: metrics.totalItems,
+  averageRate: metrics.averageRate,
+  peakRate: metrics.peakRate,
+  memoryStats: metrics.memoryStats,
+  errorStats: metrics.errorStats,
+  batchStats: metrics.batchStats,
+});
+
+// Listen to real-time events
+streamingSeeder.on('progress', progress => {
+  console.log(`${progress.completed}/${progress.total} completed`);
+  console.log(
+    `Rate: ${progress.rate}/s, ETA: ${progress.estimatedTimeRemaining}ms`
+  );
+  console.log(
+    `Memory: ${progress.memoryUsage}MB, Errors: ${progress.errorCount}`
+  );
+});
+
+streamingSeeder.on('backpressure', ({ memoryUsage, watermark }) => {
+  console.log(`Backpressure triggered: ${memoryUsage}MB > ${watermark}MB`);
+});
+```
+
+## Error Handling
+
+The framework uses the VytchesDDD Result pattern throughout:
+
+```typescript
+const result = await aggregateFactory.create();
+
+if (result.isSuccess) {
+  const aggregate = result.value;
+  // Success path
+} else {
+  const error = result.error;
+  console.error('Generation failed:', error.message);
+  // Handle error appropriately
+}
+
+// For streaming operations
+for await (const itemResult of streamingSeeder.stream(1000)) {
+  if (itemResult.isFailure) {
+    // Handle individual item failures
+    console.error('Item generation failed:', itemResult.error);
+    continue;
+  }
+
+  // Process successful item
+  await processItem(itemResult.value);
+}
+```
+
+## Architecture Principles
+
+### Factory Pattern Over Builder Pattern
+
+The framework uses the Factory pattern instead of Builder pattern for several
+reasons:
+
+1. **Better Composability**: Factories can be easily combined and reused
+2. **DDD Alignment**: Factories are a natural DDD pattern for complex object
+   creation
+3. **Performance**: Less method chaining overhead
+4. **Flexibility**: Easier to implement conditional logic and validation
+
+### Streaming-First Architecture
+
+All seeders are designed with streaming in mind:
+
+1. **Memory Efficiency**: Never load entire datasets into memory
+2. **Backpressure Support**: Automatic flow control to prevent resource
+   exhaustion
+3. **Scalability**: Handle millions of records without performance degradation
+4. **Interruptible**: Can be stopped and resumed gracefully
+
+### Business Rule Compliance
+
+Every aspect of data generation respects domain rules:
+
+1. **Validation Integration**: Built-in validation with retry mechanisms
+2. **Constraint Handling**: Sophisticated constraint satisfaction
+3. **Business Logic**: Templates can encode complex business scenarios
+4. **Domain Events**: Automatic event generation with realistic timelines
+
+## Migration from Other Tools
+
+### From Faker.js
+
+```typescript
+// Before (Faker.js)
+const user = {
+  id: faker.datatype.uuid(),
+  email: faker.internet.email(),
+  name: faker.person.fullName(),
+};
+
+// After (VytchesDDD Seeder)
+const userResult = await DomainSeeder.forAggregate(UserAggregate)
+  .withDefaults({ status: 'active' })
+  .build();
+
+const user = userResult.value; // Fully validated domain aggregate
+```
+
+### From Factory Boy (Python)
+
+```typescript
+// Similar to Factory Boy, but with TypeScript safety and DDD principles
+const userFactory = new AggregateFactory(UserAggregate)
+  .withSequence('email', n => `user${n}@example.com`)
+  .withLazyAttribute('hashedPassword', user => hashPassword(user.email))
+  .withTrait('premium', { subscriptionLevel: 'premium' });
+
+const premiumUser = await userFactory.create({ premium: true });
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Memory Exhaustion**
+
+   - Reduce batch size
+   - Enable memory management
+   - Use streaming instead of buildMany()
+
+2. **Slow Performance**
+
+   - Increase batch size (if memory allows)
+   - Disable unnecessary validation
+   - Use templates instead of complex generation logic
+
+3. **Validation Failures**
+
+   - Check business rule implementations
+   - Increase retry attempts
+   - Review constraint configurations
+
+4. **Circular Dependencies**
+   - Use the SeedableAggregate interface
+   - Avoid importing AggregateRoot directly in seeder code
+   - Leverage dependency injection patterns
+
+## Contributing
+
+When extending the seeder framework:
+
+1. Follow the Factory pattern for new seeder types
+2. Always use the Result pattern for error handling
+3. Implement streaming support for large-scale operations
+4. Add comprehensive tests with >95% coverage
+5. Document all public APIs with JSDoc
+6. Validate against business rules and domain constraints
+
+## Roadmap
+
+- **Phase 2**: Event sourcing integration and timeline management
+- **Phase 3**: AI-enhanced realistic data generation
+- **Phase 4**: Database provider implementations (PostgreSQL, MongoDB, etc.)
+- **Phase 5**: Visual scenario builder and template marketplace
+
+---
+
+**Note**: This is Phase 1 Week 1 implementation of VF-007 DDD Seeder Framework.
+More advanced features and specialized seeders will be added in subsequent
+phases.
