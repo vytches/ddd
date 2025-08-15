@@ -1,0 +1,125 @@
+{
+  "module_boundaries": {
+    "foundation_layer": {
+      "packages": [
+        "@vytches/ddd-contracts",
+        "@vytches/ddd-domain-primitives",
+        "@vytches/ddd-value-objects",
+        "@vytches/ddd-repositories",
+        "@vytches/ddd-aggregates"
+      ],
+      "allowed_imports": {
+        "@vytches/ddd-contracts": [],
+        "@vytches/ddd-domain-primitives": ["@vytches/ddd-contracts"],
+        "@vytches/ddd-value-objects": ["@vytches/ddd-contracts", "@vytches/ddd-domain-primitives"],
+        "@vytches/ddd-repositories": [
+          "@vytches/ddd-contracts",
+          "@vytches/ddd-domain-primitives",
+          "@vytches/ddd-value-objects"
+        ],
+        "@vytches/ddd-aggregates": [
+          "@vytches/ddd-contracts",
+          "@vytches/ddd-domain-primitives",
+          "@vytches/ddd-value-objects"
+        ]
+      },
+      "forbidden_imports": ["@vytches/ddd-testing", "@vytches/ddd-core"],
+      "enforcement": "BLOCK_BUILD"
+    },
+    "application_layer": {
+      "packages": [
+        "@vytches/ddd-events",
+        "@vytches/ddd-cqrs",
+        "@vytches/ddd-policies",
+        "@vytches/ddd-validation",
+        "@vytches/ddd-domain-services"
+      ],
+      "allowed_imports": ["@vytches/ddd-core", "@vytches/ddd-contracts"],
+      "forbidden_imports": ["@vytches/ddd-testing"],
+      "enforcement": "BLOCK_BUILD"
+    },
+    "infrastructure_layer": {
+      "packages": [
+        "@vytches/ddd-logging",
+        "@vytches/ddd-di",
+        "@vytches/ddd-messaging",
+        "@vytches/ddd-projections",
+        "@vytches/ddd-acl",
+        "@vytches/ddd-resilience",
+        "@vytches/ddd-event-store"
+      ],
+      "allowed_imports": ["@vytches/ddd-core", "any"],
+      "forbidden_imports": [],
+      "enforcement": "WARNING"
+    }
+  },
+  "circular_dependencies": {
+    "allowed": 0,
+    "current": 0,
+    "check_frequency": "every_build",
+    "enforcement": "BLOCK_BUILD",
+    "detection_tool": "madge"
+  },
+  "import_conventions": {
+    "external_consumers": {
+      "pattern": "import { X } from '@vytches/ddd-{package}'",
+      "enforcement": "DOCUMENTATION"
+    },
+    "internal_packages": {
+      "foundation": {
+        "pattern": "import { X } from '@vytches/ddd-contracts'",
+        "enforcement": "ESLINT"
+      },
+      "higher_level": {
+        "pattern": "import { X } from '@vytches/ddd-core'",
+        "enforcement": "ESLINT"
+      }
+    }
+  },
+  "api_stability": {
+    "breaking_changes": {
+      "allowed_in": ["major_version"],
+      "requires": ["ADR", "migration_guide", "deprecation_period"],
+      "enforcement": "MANUAL_REVIEW"
+    },
+    "deprecation_policy": {
+      "minimum_period": "6_months",
+      "warning_in_docs": true,
+      "console_warnings": true
+    }
+  },
+  "test_organization": {
+    "location": "tests/",
+    "forbidden_locations": ["src/"],
+    "naming": "*.test.ts",
+    "enforcement": "ESLINT"
+  },
+  "documentation_requirements": {
+    "public_api": {
+      "jsdoc": "required",
+      "examples": "required",
+      "yaml_metadata": "required"
+    },
+    "internal_api": {
+      "jsdoc": "recommended",
+      "examples": "optional",
+      "yaml_metadata": "optional"
+    }
+  },
+  "dependency_management": {
+    "runtime_dependencies": {
+      "foundation_packages": 0,
+      "application_packages": "minimal",
+      "infrastructure_packages": "as_needed"
+    },
+    "dev_dependencies": {
+      "shared_in_root": true,
+      "package_specific": "discouraged"
+    }
+  },
+  "quality_gates": {
+    "pre_commit": ["circular_dependency_check", "import_convention_check", "test_location_check"],
+    "pre_merge": ["module_boundary_check", "api_stability_check", "documentation_check"],
+    "release": ["all_checks", "deprecation_notices", "migration_guides"]
+  }
+}

@@ -46,6 +46,24 @@ enterprises:
 - Code review: Comprehensive PR review process
 - Quality gates: Automated quality checks and manual reviews
 
+🚨 PROJECT ORCHESTRATOR INTEGRATION
+
+**ALWAYS CHECK ORCHESTRATION STATE FIRST:**
+
+- Read `vytches-orchestration/package-health/dashboard.json` for package health
+  metrics
+- Check `vytches-orchestration/work-items/fixes/` for test-related tasks
+  (VB-XXX)
+- Report test coverage status to orchestrator-state files
+- Follow work item templates for bug fixes and testing improvements
+
+**Testing Orchestration Flow:**
+
+1. Check for assigned testing work items in `vytches-orchestration/work-items/`
+2. Verify current coverage from dashboard before starting
+3. Update work item status during testing progress
+4. Report final coverage and test results to orchestrator
+
 🔍 CORE RESPONSIBILITIES
 
 **1. Comprehensive Code Review & PR Approval (CRITICAL)**

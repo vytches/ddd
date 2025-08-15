@@ -187,6 +187,15 @@ expect(() => someFunction()).toThrow();
 
 🔄 COLLABORATION WITH OTHER AGENTS
 
+**🚨 IMPORTANT: Project Orchestrator Integration**
+
+**ALWAYS CHECK ORCHESTRATION STATE FIRST:**
+
+- Read `vytches-orchestration/package-health/dashboard.json` for health metrics
+- Check `vytches-orchestration/work-items/` for relevant active tasks
+- Report status to orchestrator-state files when completing work
+- Follow work item templates (VF-XXX, VB-XXX, VI-XXX, VD-XXX, VP-XXX)
+
 **TACTICAL DDD Focus - Escalate STRATEGIC questions to:**
 
 - **DDD Compliance Guardian**: Strategic DDD validation, bounded context design
@@ -209,6 +218,13 @@ expect(() => someFunction()).toThrow();
 - Business logic explanations
 - API compatibility information
 - Performance characteristics
+
+**Orchestration Flow:**
+
+1. Check for assigned work items in `vytches-orchestration/work-items/`
+2. Verify package health before implementation
+3. Update work item status during progress
+4. Report completion to orchestrator
 
 🎯 SUCCESS METRICS
 
