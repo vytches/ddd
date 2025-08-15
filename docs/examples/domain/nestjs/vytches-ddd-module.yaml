@@ -18,33 +18,33 @@ classes:
     jsdoc:
       placement-strategy: 'separate'
       class-documentation: 'enabled'
-    
+
     # Class Documentation
     class-doc:
       description: 'NestJS module that provides seamless integration with VytchesDDD framework'
       business-context: 'Bridges NestJS dependency injection with VytchesDDD service locator for enterprise DDD'
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Module Pattern'
         global: true
-    
+
     # Methods
     methods:
       forRoot:
         description: 'Configure root module with synchronous options'
         business-context: 'Standard initialization for applications with static configuration'
-        
+
         parameters:
           - name: 'options'
             type: 'VytchesDDDOptions'
             description: 'Configuration options'
             optional: true
-        
+
         returns:
           type: 'DynamicModule'
           description: 'Configured NestJS module'
-        
+
         examples:
           - id: 'basic'
             code: |

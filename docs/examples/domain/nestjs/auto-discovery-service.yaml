@@ -18,45 +18,45 @@ classes:
     jsdoc:
       placement-strategy: 'separate'
       class-documentation: 'enabled'
-    
+
     # Class Documentation
     class-doc:
       description: 'Automatically discovers and registers classes decorated with DDD patterns'
       business-context: 'Eliminates manual registration overhead in large enterprise applications'
-      
+
       formats:
         jsdoc:
           description: 'Service for automatic discovery of DDD decorators in NestJS modules'
         cli:
           description: |
             ## AutoDiscoveryService
-            
+
             Enterprise auto-discovery system that scans NestJS modules for DDD decorators
             and automatically registers them with the VytchesDDD container.
-            
+
             Discovered decorators:
             - @DomainService - Domain services with business logic
             - @CommandHandler - CQRS command handlers
             - @QueryHandler - CQRS query handlers
             - @EventHandler - Domain and integration event handlers
-            
+
             Benefits:
             - Zero configuration for standard patterns
             - Automatic bounded context organization
             - Reduced boilerplate code
             - Convention over configuration
-      
+
       custom-tags:
         since: '2.0.0'
         pattern: 'Service Discovery'
         decorator-aware: true
-    
+
     # Methods
     methods:
       constructor:
         description: 'Creates auto-discovery service with adapter and options'
         business-context: 'Initializes discovery with configurable patterns and exclusions'
-        
+
         parameters:
           - name: 'adapter'
             type: 'NestJSContainerAdapter'
@@ -66,7 +66,7 @@ classes:
             description: 'Discovery configuration options'
             optional: true
             default: '{}'
-        
+
         examples:
           - id: 'basic'
             code: |
@@ -77,19 +77,19 @@ classes:
                   exclude: ['**/*.spec.ts', '**/*.test.ts']
                 }
               );
-      
+
       discover:
         description: 'Performs complete discovery of all DDD decorators'
         business-context: 'Main entry point for automatic service registration during startup'
-        
+
         returns:
           type: 'Promise<DiscoveryResult>'
           description: 'Summary of discovered and registered components'
-        
+
         custom-tags:
           async: true
           lifecycle: 'Called during module initialization'
-        
+
         examples:
           - id: 'module-init'
             code: |
@@ -98,19 +98,19 @@ classes:
                 console.log(`Discovered ${result.services.length} services`);
                 console.log(`Discovered ${result.handlers.length} handlers`);
               }
-      
+
       discoverServices:
         description: 'Discovers classes decorated with @DomainService'
         business-context: 'Finds and registers domain services for business logic encapsulation'
-        
+
         returns:
           type: 'Promise<ServiceMetadata[]>'
           description: 'Array of discovered service metadata'
-        
+
         custom-tags:
           decorator: '@DomainService'
           internal: true
-        
+
         examples:
           - id: 'domain-services'
             code: |
@@ -122,19 +122,19 @@ classes:
               class UserService {
                 // Business logic
               }
-      
+
       discoverHandlers:
         description: 'Discovers CQRS command and query handlers'
         business-context: 'Registers handlers for command-query responsibility segregation'
-        
+
         returns:
           type: 'Promise<HandlerMetadata[]>'
           description: 'Array of discovered handler metadata'
-        
+
         custom-tags:
           decorators: '@CommandHandler, @QueryHandler'
           pattern: 'CQRS'
-        
+
         examples:
           - id: 'cqrs-handlers'
             code: |
@@ -145,30 +145,30 @@ classes:
                   // Handle command
                 }
               }
-              
+
               @QueryHandler(GetUserQuery)
               class GetUserHandler {
                 async execute(query: GetUserQuery) {
                   // Handle query
                 }
               }
-      
+
       registerService:
         description: 'Registers a discovered service with the container'
         business-context: 'Handles the actual registration of discovered services'
-        
+
         parameters:
           - name: 'metadata'
             type: 'ServiceMetadata'
             description: 'Service metadata from decorator'
-        
+
         returns:
           type: 'void'
           description: 'Service registered in container'
-        
+
         custom-tags:
           internal: true
-        
+
         examples:
           - id: 'registration'
             code: |
@@ -181,24 +181,24 @@ classes:
                   tags: ['domain', 'user']
                 }
               });
-      
+
       registerHandler:
         description: 'Registers a discovered handler with appropriate bus'
         business-context: 'Connects handlers to command/query buses for CQRS pattern'
-        
+
         parameters:
           - name: 'metadata'
             type: 'HandlerMetadata'
             description: 'Handler metadata from decorator'
-        
+
         returns:
           type: 'void'
           description: 'Handler registered with appropriate bus'
-        
+
         custom-tags:
           internal: true
           pattern: 'CQRS'
-        
+
         examples:
           - id: 'handler-registration'
             code: |
@@ -213,47 +213,47 @@ classes:
 interfaces:
   AutoDiscoveryOptions:
     description: 'Configuration options for auto-discovery'
-    
+
     properties:
       - name: 'enabled'
         type: 'boolean'
         description: 'Enable/disable auto-discovery'
         optional: true
         default: true
-      
+
       - name: 'patterns'
         type: 'string[]'
         description: 'Glob patterns for files to scan'
         optional: true
         default: "['**/*.service.ts', '**/*.handler.ts']"
-      
+
       - name: 'exclude'
         type: 'string[]'
         description: 'Patterns to exclude from scanning'
         optional: true
         default: "['**/*.spec.ts', '**/*.test.ts']"
-      
+
       - name: 'contexts'
         type: 'string[]'
         description: 'Bounded contexts to discover'
         optional: true
-  
+
   DiscoveryResult:
     description: 'Result of auto-discovery process'
-    
+
     properties:
       - name: 'services'
         type: 'ServiceMetadata[]'
         description: 'Discovered domain services'
-      
+
       - name: 'handlers'
         type: 'HandlerMetadata[]'
         description: 'Discovered CQRS handlers'
-      
+
       - name: 'eventHandlers'
         type: 'EventHandlerMetadata[]'
         description: 'Discovered event handlers'
-      
+
       - name: 'errors'
         type: 'DiscoveryError[]'
         description: 'Any errors during discovery'
