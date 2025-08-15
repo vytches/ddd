@@ -51,7 +51,7 @@ describe('NestJSContainerAdapter', () => {
       class TestService {}
 
       adapter.register('testService', TestService, {
-        lifetime: 'singleton',
+        lifetime: 'singleton' as any,
       });
 
       expect(adapter.isRegistered('testService')).toBe(true);
@@ -83,7 +83,7 @@ describe('NestJSContainerAdapter', () => {
       const factory = () => ({ value: 'test' });
 
       adapter.registerFactory('testFactory', factory, {
-        lifetime: 'singleton',
+        lifetime: 'singleton' as any,
         tags: ['factory'],
       });
 
@@ -146,7 +146,7 @@ describe('NestJSContainerAdapter', () => {
       };
 
       adapter.registerFactory('singletonService', factory, {
-        lifetime: 'singleton',
+        lifetime: 'singleton' as any,
       });
 
       const first = adapter.resolve('singletonService');
@@ -164,7 +164,7 @@ describe('NestJSContainerAdapter', () => {
       };
 
       adapter.registerFactory('transientService', factory, {
-        lifetime: 'transient',
+        lifetime: 'transient' as any,
       });
 
       const first = adapter.resolve('transientService');
@@ -281,7 +281,7 @@ describe('NestJSContainerAdapter', () => {
         'singleton',
         { value: 'singleton' },
         {
-          lifetime: 'singleton',
+          lifetime: 'singleton' as any,
         }
       );
 
