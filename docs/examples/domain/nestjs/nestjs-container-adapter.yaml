@@ -1,0 +1,87 @@
+# NestJSContainerAdapter - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'nestjs-container-adapter'
+title: 'NestJSContainerAdapter - Bridge Pattern Implementation'
+description: 'Adapter that bridges NestJS DI with VytchesDDD service locator'
+business-context: 'Enables dual container resolution preventing double instance issues'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  NestJSContainerAdapter:
+    # Class Documentation
+    class-doc:
+      description: 'Container adapter implementing Bridge Pattern for framework isolation'
+      business-context: 'Prevents double instance risk when integrating with NestJS'
+      
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Bridge Pattern'
+        extends: 'BaseContainerAdapter'
+    
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates adapter with optional ModuleRef'
+        business-context: 'Initializes bridge between containers'
+        
+        parameters:
+          - name: 'moduleRef'
+            type: 'ModuleRef'
+            description: 'NestJS module reference'
+            optional: true
+        
+        examples:
+          - id: 'basic'
+            code: |
+              const adapter = new NestJSContainerAdapter(moduleRef);
+      
+      resolve:
+        description: 'Resolves service from NestJS first, then VytchesDDD'
+        business-context: 'Dual resolution strategy prevents duplicate instances'
+        
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identifier'
+        
+        returns:
+          type: 'T'
+          description: 'Resolved service instance'
+        
+        examples:
+          - id: 'resolution'
+            code: |
+              // Tries NestJS container first
+              const service = adapter.resolve<UserService>('userService');
+              // Falls back to internal registry if not found
+      
+      register:
+        description: 'Registers service in internal container'
+        business-context: 'Maintains internal registry for VytchesDDD services'
+        
+        parameters:
+          - name: 'token'
+            type: 'ServiceToken<T>'
+            description: 'Service identifier'
+          - name: 'implementation'
+            type: 'Constructor<T>'
+            description: 'Service class'
+          - name: 'options'
+            type: 'ServiceRegistrationOptions'
+            description: 'Registration options'
+            optional: true
+        
+        examples:
+          - id: 'registration'
+            code: |
+              adapter.register('orderService', OrderService, {
+                lifetime: ServiceLifetime.Singleton,
+                context: 'OrderManagement',
+                tags: ['domain-service']
+              });

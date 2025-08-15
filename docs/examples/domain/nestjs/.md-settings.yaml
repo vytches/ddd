@@ -1,0 +1,34 @@
+# Package Settings - NestJS Adapter
+# Inherits from global-settings.yaml
+
+# === PACKAGE IDENTITY ===
+package-name: 'nestjs'
+display-name: 'NestJS Adapter'
+description: 'Enterprise framework integration for NestJS applications'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'framework-integration'
+complexity: 'intermediate'
+patterns:
+  - 'adapter-pattern'
+  - 'bridge-pattern'
+  - 'dependency-injection'
+  - 'auto-discovery'
+
+# === PACKAGE SPECIFIC ===
+framework: 'nestjs'
+category: 'integration'
+author: 'VytchesDDD Integration Team'
+since: '2.0.0'
+
+# === JSDOC CONFIGURATION ===
+jsdoc:
+  placement-strategy: 'separate'
+  class-documentation: 'enabled'
+  constructor-documentation: 'enabled'
+  emphasis: 'framework-integration'
