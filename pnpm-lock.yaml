@@ -684,21 +684,9 @@ importers:
 
   packages/nestjs:
     dependencies:
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches/ddd-cqrs':
-        specifier: workspace:*
-        version: link:../cqrs
       '@vytches/ddd-di':
         specifier: workspace:*
         version: link:../di
-      '@vytches/ddd-events':
-        specifier: workspace:*
-        version: link:../events
-      '@vytches/ddd-utils':
-        specifier: workspace:*
-        version: link:../utils
     devDependencies:
       '@nestjs/common':
         specifier: ^10.3.0
@@ -712,9 +700,21 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.19.1
+      '@vytches/ddd-core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches/ddd-cqrs':
+        specifier: workspace:*
+        version: link:../cqrs
+      '@vytches/ddd-events':
+        specifier: workspace:*
+        version: link:../events
       '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../utils
       reflect-metadata:
         specifier: ^0.2.1
         version: 0.2.2
@@ -727,9 +727,9 @@ importers:
       vite:
         specifier: ^5.0.10
         version: 5.4.19(@types/node@20.19.1)
-      vite-tsconfig-paths:
-        specifier: ^5.1.4
-        version: 5.1.4(typescript@5.8.3)(vite@5.4.19)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@5.4.19)
       vitest:
         specifier: ^1.1.0
         version: 1.6.1(@types/node@20.19.1)(@vitest/ui@3.2.4)
@@ -839,9 +839,33 @@ importers:
 
   packages/testing:
     dependencies:
+      '@anthropic-ai/sdk':
+        specifier: '>=0.24.0'
+        version: 0.60.0
+      '@faker-js/faker':
+        specifier: ^8.0.0
+        version: 8.4.1
+      '@vytches/ddd-aggregates':
+        specifier: workspace:*
+        version: link:../aggregates
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@vytches/ddd-core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches/ddd-events':
+        specifier: workspace:*
+        version: link:../events
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
+      '@vytches/ddd-value-objects':
+        specifier: workspace:*
+        version: link:../value-objects
+      openai:
+        specifier: '>=4.0.0'
+        version: 5.12.2
     devDependencies:
       typescript:
         specifier: ^5.0.0
@@ -940,6 +964,11 @@ packages:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
     dev: true
+
+  /@anthropic-ai/sdk@0.60.0:
+    resolution: {integrity: sha512-9zu/TXaUy8BZhXedDtt1wT3H4LOlpKDO1/ftiFpeR3N1PCr3KJFKkxxlQWWt1NNp08xSwUNJ3JNY8yhl8av6eQ==}
+    hasBin: true
+    dev: false
 
   /@babel/code-frame@7.27.1:
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -3003,6 +3032,11 @@ packages:
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
     dev: true
+
+  /@faker-js/faker@8.4.1:
+    resolution: {integrity: sha512-XQ3cU+Q8Uqmrbf2e0cIC/QN43sTBSC8KF12u29Mb47tWrt2hAgBXSgpZMj4Ao8Uk0iJcU99QsOCaIL8934obCg==}
+    engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0, npm: '>=6.14.13'}
+    dev: false
 
   /@golevelup/ts-vitest@0.5.2:
     resolution: {integrity: sha512-kxL12/4lBeYcdpfabvqWGgIagt8ycD6vUNlVyNUjGjxuqo8wPRB1Ohfnn4LNWQG8X8/xf74S2qYnOGqJ7IvWFA==}
@@ -9589,10 +9623,6 @@ packages:
       unicorn-magic: 0.3.0
     dev: true
 
-  /globrex@0.1.2:
-    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
-    dev: true
-
   /gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
     engines: {node: '>= 0.4'}
@@ -12623,6 +12653,19 @@ packages:
       is-wsl: 2.2.0
     dev: true
 
+  /openai@5.12.2:
+    resolution: {integrity: sha512-xqzHHQch5Tws5PcKR2xsZGX9xtch+JQFz5zb14dGqlshmmDAFBFEWmeIpf7wVqWV+w7Emj7jRgkNJakyKE0tYQ==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+    dev: false
+
   /optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -15047,19 +15090,6 @@ packages:
       yn: 3.1.1
     dev: true
 
-  /tsconfck@3.1.6(typescript@5.8.3):
-    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
-    engines: {node: ^18 || >=20}
-    hasBin: true
-    peerDependencies:
-      typescript: ^5.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      typescript: 5.8.3
-    dev: true
-
   /tsconfig-paths@3.15.0:
     resolution: {integrity: sha512-2Ac2RgzDe/cn48GvOe3M+o82pEFewD3UPbyoUHHdKasHwJKjds4fLXWf/Ux5kATBKN20oaFGu+jbElp1pos0mg==}
     dependencies:
@@ -15608,6 +15638,32 @@ packages:
       - yaml
     dev: true
 
+  /vite-plugin-dts@4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@5.4.19):
+    resolution: {integrity: sha512-d4sOM8M/8z7vRXHHq/ebbblfaxENjogAAekcfcDCCwAyvGqnPrc7f4NZbvItS+g4WTgerW0xDwSz5qz11JT3vg==}
+    peerDependencies:
+      typescript: '*'
+      vite: '*'
+    peerDependenciesMeta:
+      vite:
+        optional: true
+    dependencies:
+      '@microsoft/api-extractor': 7.52.8(@types/node@20.19.1)
+      '@rollup/pluginutils': 5.2.0(rollup@4.46.2)
+      '@volar/typescript': 2.4.14
+      '@vue/language-core': 2.2.0(typescript@5.8.3)
+      compare-versions: 6.1.1
+      debug: 4.4.1
+      kolorist: 1.8.0
+      local-pkg: 1.1.1
+      magic-string: 0.30.17
+      typescript: 5.8.3
+      vite: 5.4.19(@types/node@20.19.1)
+    transitivePeerDependencies:
+      - '@types/node'
+      - rollup
+      - supports-color
+    dev: true
+
   /vite-plugin-dts@4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@6.3.5):
     resolution: {integrity: sha512-d4sOM8M/8z7vRXHHq/ebbblfaxENjogAAekcfcDCCwAyvGqnPrc7f4NZbvItS+g4WTgerW0xDwSz5qz11JT3vg==}
     peerDependencies:
@@ -15658,23 +15714,6 @@ packages:
       - '@types/node'
       - rollup
       - supports-color
-    dev: true
-
-  /vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@5.4.19):
-    resolution: {integrity: sha512-cYj0LRuLV2c2sMqhqhGpaO3LretdtMn/BVX4cPLanIZuwwrkVl+lK84E/miEXkCHWXuq65rhNN4rXsBcOB3S4w==}
-    peerDependencies:
-      vite: '*'
-    peerDependenciesMeta:
-      vite:
-        optional: true
-    dependencies:
-      debug: 4.4.1
-      globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@5.8.3)
-      vite: 5.4.19(@types/node@20.19.1)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
     dev: true
 
   /vite@5.4.19(@types/node@20.19.1):

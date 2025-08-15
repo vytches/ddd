@@ -42,7 +42,25 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@vytches/ddd-utils": "workspace:*"
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-value-objects": "workspace:*",
+    "@vytches/ddd-aggregates": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@faker-js/faker": "^8.0.0"
+  },
+  "peerDependencies": {
+    "openai": ">=4.0.0",
+    "@anthropic-ai/sdk": ">=0.24.0"
+  },
+  "peerDependenciesMeta": {
+    "openai": {
+      "optional": true
+    },
+    "@anthropic-ai/sdk": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "typescript": "^5.0.0",

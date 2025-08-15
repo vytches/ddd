@@ -2,8 +2,6 @@
 
 // Phase 1: Foundation Layer - Core testing utilities
 export {
-  DomainEventBuilder,
-  EntityIdBuilder,
   expectError,
   expectSuccess,
   // Safe execution utilities
@@ -14,23 +12,18 @@ export {
   // Time control utilities
   TestClock,
   // Test data building utilities
-  TestDataBuilder,
   // Test harness utilities
   TestHarness,
   TestResourceBuilder,
   TimeScenarioBuilder,
-  UserBuilder,
   withTestClock,
-  type RandomOptions,
   type SafeRunResult,
-  type SequenceOptions,
   type TestClockState,
-  type TestDataBuilderOptions,
-  type TestDomainEvent,
   type TestHarnessOptions,
   type TestHarnessState,
   type TestResource,
-  type TestUser,
-  type TimeAdvanceOptions
+  type TimeAdvanceOptions,
 } from './core';
 
+// Phase 2: DDD Seeder Framework - Domain-aware test data generation
+export * from './seeder';

@@ -42,6 +42,21 @@
     "bundle_size": "45KB"
   },
   {
+    "id": "VF-007",
+    "type": "feature",
+    "priority_score": 90,
+    "package": "@vytches/ddd-testing",
+    "title": "DDD Seeder Framework Implementation",
+    "reason": "Critical for developer experience and enterprise adoption",
+    "business_impact": 9,
+    "technical_urgency": 6,
+    "estimated_hours": 80,
+    "status": "ready",
+    "branch": "feature/VF-007-ddd-seeder-framework",
+    "epic": "developer-experience-transformation",
+    "agents": ["library-expert", "testing-excellence", "developer-experience"]
+  },
+  {
     "id": "VP-001",
     "type": "performance",
     "priority_score": 75,

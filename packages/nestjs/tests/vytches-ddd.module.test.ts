@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { VytchesDDDModule } from '../src/vytches-ddd.module';
-import { NestJSContainerAdapter } from '../src/adapters/nestjs-container.adapter';
 import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 import { UnifiedEventBus } from '@vytches/ddd-events';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { NestJSContainerAdapter } from '../src/adapters/nestjs-container.adapter';
+import { VytchesDDDModule } from '../src/vytches-ddd.module';
 // VytchesDDD will be mocked
 import { VYTCHES_DDD_OPTIONS } from '../src/constants';
 

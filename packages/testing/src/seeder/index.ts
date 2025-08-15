@@ -1,30 +1,17 @@
 /**
- * @llm-summary DDD-native test data seeding framework
- * @llm-domain Infrastructure
- * @llm-complexity Advanced
+ * DDD-native test data seeding framework
  *
- * @description
- * Comprehensive DDD-native seeder framework that respects aggregate boundaries,
+ * Comprehensive seeding framework that respects aggregate boundaries,
  * generates real domain events, and provides factory-based test data generation.
- * 
- * This replaces the legacy TestDataBuilder with a modern, DDD-aware solution.
- *
- * @example
- * ```typescript
- * import { DomainSeeder, AggregateFactory } from '@vytches/ddd-testing/seeder';
- * 
- * const factory = new AggregateFactory(UserAggregate)
- *   .withDefaults({ status: 'active' })
- *   .withSequence('email', n => `user${n}@example.com`);
- * 
- * const users = await factory.createMany(10);
- * ```
- *
- * @since 1.1.0
- * @public
  */
 
-// TODO: Implement DDD-native seeder
-// See implementation guide: /docs/DDD_SEEDER_IMPLEMENTATION_GUIDE.md
-
-export const placeholder = 'DDD Seeder coming in v1.1.0';
+export * from './aggregate-factory.js';
+export * from './aggregate-seeder.js';
+export * from './ai-enhanced-seeder.js';
+export * from './domain-seeder.js';
+export * from './entity-id-generator.js';
+export * from './event-sourced-seeder.js';
+export * from './geographic-seeder.js';
+export * from './scenario-seeder.js';
+export * from './streaming-seeder.js';
+export * from './value-object-builder.js';

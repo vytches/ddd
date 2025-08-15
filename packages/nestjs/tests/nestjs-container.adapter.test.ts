@@ -1,7 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { ModuleRef } from '@nestjs/core';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NestJSContainerAdapter } from '../src/adapters/nestjs-container.adapter';
-// ServiceLifetime will be imported dynamically when needed
 import { safeRun } from '@vytches/ddd-utils';
 
 describe('NestJSContainerAdapter', () => {
