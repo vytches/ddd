@@ -27,13 +27,19 @@
     "id": "VF-001",
     "type": "feature",
     "priority_score": 85,
-    "package": "@vytches/ddd-di",
+    "package": "@vytches/ddd-nestjs",
     "title": "NestJS adapter implementation",
     "reason": "High market demand, 40% enterprise adoption potential",
     "business_impact": 8,
     "technical_urgency": 5,
     "estimated_hours": 16,
-    "status": "pending"
+    "status": "completed",
+    "completed_date": "2025-08-15",
+    "branch": "feature/VF-001-nestjs-adapter",
+    "commit": "7f7f847",
+    "actual_hours": 16,
+    "test_results": "44 passed, 1 skipped",
+    "bundle_size": "45KB"
   },
   {
     "id": "VP-001",
