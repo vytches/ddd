@@ -54,6 +54,7 @@
     "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-process-managers": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "rxjs": "^7.0.0"
@@ -74,6 +75,9 @@
     "@vytches/ddd-events": {
       "optional": true
     },
+    "@vytches/ddd-process-managers": {
+      "optional": true
+    },
     "@vytches/ddd-utils": {
       "optional": true
     }
@@ -86,6 +90,7 @@
     "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-process-managers": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
     "@vytches/ddd-testing": "workspace:*",
     "reflect-metadata": "^0.2.1",

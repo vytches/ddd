@@ -43,11 +43,8 @@
   },
   "dependencies": {
     "@vytches/ddd-utils": "workspace:*",
-    "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-value-objects": "workspace:*",
-    "@vytches/ddd-aggregates": "workspace:*",
-    "@vytches/ddd-events": "workspace:*",
     "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
     "@faker-js/faker": "^8.0.0"
   },
   "peerDependencies": {

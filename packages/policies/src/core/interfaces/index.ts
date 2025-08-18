@@ -5,8 +5,8 @@ export {
   type IPolicyConditionalBuilder,
   type IPolicyConditionalElse,
   type PolicyCondition,
-  type PolicyContext,
   type PolicyDefinition,
   type PolicyRequest,
 } from './business-policy.interface';
 export type { IPolicyRegistry, IUnifiedRegistry, PolicyQuery } from './policy-registry.interface';
+export type { PolicyContext } from '../shared';

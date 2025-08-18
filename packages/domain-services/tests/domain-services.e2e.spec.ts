@@ -7,15 +7,13 @@
  * wszystkich komponentów, bez mocków, symulując rzeczywisty przepływ biznesowy.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
-import type { IUnitOfWork } from '@vytches/ddd-core';
 import { AggregateRoot, EntityId } from '@vytches/ddd-core';
-import type { IAggregateRoot, IRepository } from '@vytches/ddd-core';
-import { LibUtils } from '@vytches/ddd-utils';
-import { safeRun } from '@vytches/ddd-utils';
 import { UnifiedEventBus } from '@vytches/ddd-events';
+import type { IRepository, IUnitOfWork } from '@vytches/ddd-repositories';
+import { LibUtils, safeRun } from '@vytches/ddd-utils';
 import {
   DomainService,
   EventAwareDomainService,
@@ -298,7 +296,7 @@ class Order extends AggregateRoot {
 }
 
 // Implementacja InMemoryRepository
-class InMemoryRepository<T extends IAggregateRoot<any>> implements IRepository<T> {
+class InMemoryRepository<T extends AggregateRoot> implements IRepository<T> {
   protected items: Map<string, T> = new Map();
 
   async findById(id: any): Promise<T | null> {
@@ -384,7 +382,7 @@ class InMemoryUnitOfWork implements IUnitOfWork {
     return this.eventBus;
   }
 
-  collectEvents(aggregate: IAggregateRoot<any>): void {
+  collectEvents(aggregate: AggregateRoot): void {
     const events = aggregate.getDomainEvents();
     this.pendingEvents.push(...events);
     aggregate.commit();
@@ -449,7 +447,7 @@ class ProductService extends UnitOfWorkAwareDomainService {
     return productRepo.findAll();
   }
 
-  private collectEvents(aggregate: IAggregateRoot<any>): void {
+  private collectEvents(aggregate: AggregateRoot): void {
     (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate);
   }
 }
@@ -478,7 +476,7 @@ class CustomerService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  private collectEvents(aggregate: IAggregateRoot<any>): void {
+  private collectEvents(aggregate: AggregateRoot): void {
     (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate);
   }
 }
@@ -592,7 +590,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  private collectEvents(aggregate: IAggregateRoot<any>): void {
+  private collectEvents(aggregate: AggregateRoot): void {
     (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate);
   }
 }

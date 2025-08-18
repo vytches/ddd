@@ -71,7 +71,6 @@ export type {
   CapabilityMap,
   CapabilityType,
   IAggregateCapability,
-  IAggregateSnapshot,
   IAuditCapability,
   ICheckpointCapability,
   ICircuitBreakerCapability,
@@ -102,5 +101,30 @@ export type {
 
 export { BackoffStrategy, JobStatus, SchedulePriority } from './scheduling';
 
-// Examples Types - removed, use new YAML system instead
-// Legacy examples system has been replaced with YAML-based metadata system
+// Testing
+export type {
+  ITestClock,
+  ITestHarness,
+  ISafeRunResult,
+  ITestDataBuilder,
+  ITestScenario,
+  ITestFixture,
+  TestClockOptions,
+  TestHarnessOptions,
+  TestScenarioOptions,
+} from './testing';
+
+// Repositories
+export type {
+  IRepositoryEntity,
+  IRepository,
+  IExtendedRepository,
+  IRepositoryProvider,
+  IUnitOfWork,
+  IQueryRepository,
+  IWriteRepository,
+  ICQRSRepository,
+} from './repositories';
+
+// Shared types (to avoid circular dependencies)
+export type { IAggregateSnapshot } from './shared';

@@ -345,12 +345,6 @@ importers:
       '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
-      '@vytches/ddd-logging':
-        specifier: workspace:*
-        version: link:../logging
-      '@vytches/ddd-repositories':
-        specifier: workspace:*
-        version: link:../repositories
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
@@ -451,6 +445,9 @@ importers:
       '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
+      '@vytches/ddd-repositories':
+        specifier: workspace:*
+        version: link:../repositories
       '@vytches/ddd-validation':
         specifier: workspace:*
         version: link:../validation
@@ -518,6 +515,9 @@ importers:
       '@vytches/ddd-policies':
         specifier: workspace:*
         version: link:../policies
+      '@vytches/ddd-process-managers':
+        specifier: workspace:*
+        version: link:../process-managers
       '@vytches/ddd-projections':
         specifier: workspace:*
         version: link:../projections
@@ -640,9 +640,6 @@ importers:
         specifier: workspace:*
         version: link:../contracts
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -708,6 +705,9 @@ importers:
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
+      '@vytches/ddd-process-managers':
+        specifier: workspace:*
+        version: link:../process-managers
       '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
@@ -744,6 +744,46 @@ importers:
       '@vytches/ddd-validation':
         specifier: workspace:*
         version: link:../validation
+    devDependencies:
+      '@vytches/ddd-testing':
+        specifier: workspace:*
+        version: link:../testing
+      typescript:
+        specifier: ^5.0.0
+        version: 5.8.3
+      vite:
+        specifier: ^6.0.0
+        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
+      vite-plugin-dts:
+        specifier: ^4.0.0
+        version: 4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@6.3.5)
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
+
+  packages/process-managers:
+    dependencies:
+      '@vytches/ddd-aggregates':
+        specifier: workspace:*
+        version: link:../aggregates
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@vytches/ddd-core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches/ddd-domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
+      '@vytches/ddd-events':
+        specifier: workspace:*
+        version: link:../events
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       '@vytches/ddd-testing':
         specifier: workspace:*
@@ -844,24 +884,15 @@ importers:
       '@faker-js/faker':
         specifier: ^8.0.0
         version: 8.4.1
-      '@vytches/ddd-aggregates':
-        specifier: workspace:*
-        version: link:../aggregates
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches/ddd-core':
+      '@vytches/ddd-domain-primitives':
         specifier: workspace:*
-        version: link:../core
-      '@vytches/ddd-events':
-        specifier: workspace:*
-        version: link:../events
+        version: link:../domain-primitives
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
-      '@vytches/ddd-value-objects':
-        specifier: workspace:*
-        version: link:../value-objects
       openai:
         specifier: '>=4.0.0'
         version: 5.12.2
@@ -906,9 +937,15 @@ importers:
 
   packages/validation:
     dependencies:
-      '@vytches/ddd-core':
+      '@vytches/ddd-contracts':
         specifier: workspace:*
-        version: link:../core
+        version: link:../contracts
+      '@vytches/ddd-domain-primitives':
+        specifier: workspace:*
+        version: link:../domain-primitives
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       '@vytches/ddd-testing':
         specifier: workspace:*

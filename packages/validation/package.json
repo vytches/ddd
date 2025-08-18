@@ -60,6 +60,8 @@
     "access": "restricted"
   },
   "dependencies": {
-    "@vytches/ddd-core": "workspace:*"
+    "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*"
   }
 }

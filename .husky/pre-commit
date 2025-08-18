@@ -6,6 +6,28 @@ echo "🚀 Running pre-commit hooks..."
 # Run lint-staged first
 pnpm lint-staged --verbose
 
+# Check for circular dependencies in critical packages
+echo "🔍 Checking for circular dependencies..."
+CRITICAL_PACKAGES="core repositories testing contracts events"
+CIRCULAR_FOUND=false
+
+for pkg in $CRITICAL_PACKAGES; do
+  if [ -f "packages/$pkg/src/index.ts" ]; then
+    if npx madge --circular "packages/$pkg/src/index.ts" 2>&1 | grep -q "Found.*circular"; then
+      echo "❌ Circular dependency detected in @vytches/ddd-$pkg!"
+      CIRCULAR_FOUND=true
+    fi
+  fi
+done
+
+if [ "$CIRCULAR_FOUND" = true ]; then
+  echo "❌ Circular dependencies found! Please fix before committing."
+  echo "Run 'pnpm deps:circular' for details."
+  exit 1
+fi
+
+echo "✅ No circular dependencies detected"
+
 # Run tests for affected packages
 echo "🧪 Running tests..."
 NX_DAEMON=false pnpm nx affected --target=test --uncommitted --parallel=3

@@ -1,5 +1,5 @@
 import { Result } from '@vytches/ddd-utils';
-import type { DomainSeederConfig } from './domain-seeder.js';
+import type { DomainSeederConfig } from './shared-seeder-types.js';
 
 export class AIEnhancedSeeder {
   constructor(

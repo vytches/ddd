@@ -73,6 +73,7 @@
     "@vytches/ddd-logging": "workspace:*",
     "@vytches/ddd-messaging": "workspace:*",
     "@vytches/ddd-policies": "workspace:*",
+    "@vytches/ddd-process-managers": "workspace:*",
     "@vytches/ddd-projections": "workspace:*",
     "@vytches/ddd-repositories": "workspace:*",
     "@vytches/ddd-resilience": "workspace:*",

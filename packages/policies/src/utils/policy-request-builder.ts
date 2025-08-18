@@ -1,4 +1,5 @@
-import type { PolicyContext, PolicyRequest } from '../core/interfaces/business-policy.interface';
+import type { PolicyRequest } from '../core/interfaces/business-policy.interface';
+import type { PolicyContext } from '../core/shared';
 import type { PolicyMetadata } from '../core/models/policy-metadata';
 import { PolicyContextBuilder } from './policy-context-builder';
 

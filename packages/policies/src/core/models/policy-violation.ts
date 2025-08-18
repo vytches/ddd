@@ -1,4 +1,4 @@
-import type { PolicyContext } from '../interfaces/business-policy.interface';
+import type { PolicyContext } from '../shared';
 export type PolicyViolationSeverity = 'ERROR' | 'WARNING' | 'INFO';
 
 export class PolicyViolation extends Error {

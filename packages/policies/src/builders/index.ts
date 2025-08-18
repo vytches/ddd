@@ -18,6 +18,7 @@ export {
   ConditionalPolicyElseStepBuilder,
   ConditionalPolicyThenStepBuilder,
 } from './conditional-policy-builder';
-export { PolicyBuilder, type PolicyBuildStep } from './policy-builder';
+export { PolicyBuilder } from './policy-builder';
+export { type PolicyBuildStep } from './policy-builder-types';
 export { PolicyGroup, PolicyGroupStepBuilder, type PolicyGroupStep } from './policy-group';
 export { PolicyStepBuilder } from './policy-step-builder';

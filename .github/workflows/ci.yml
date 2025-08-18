@@ -122,6 +122,37 @@ jobs:
       - name: Build affected projects
         run: pnpm nx affected --target=build --parallel=3
 
+      # Architecture validation - check for circular dependencies
+      - name: Check for circular dependencies
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Checking for circular dependencies between packages..."
+          npx madge --circular packages/core/src/index.ts packages/repositories/src/index.ts packages/testing/src/index.ts packages/contracts/src/index.ts packages/events/src/index.ts 2>&1 | tee circular-check.log
+          if grep -q "Found.*circular" circular-check.log; then
+            echo "❌ Circular dependencies detected!"
+            cat circular-check.log
+            exit 1
+          else
+            echo "✅ No circular dependencies between packages"
+          fi
+
+      - name: Validate module boundaries
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Validating module boundaries with dependency-cruiser..."
+          if [ -f ".dependency-cruiser.js" ]; then
+            npx dependency-cruiser packages/*/src --config .dependency-cruiser.js --output-type err-long 2>&1 | tee dep-check.log || true
+            if grep -q "error" dep-check.log; then
+              echo "❌ Module boundary violations detected!"
+              grep "error" dep-check.log | head -20
+              exit 1
+            else
+              echo "✅ Module boundaries are correctly enforced"
+            fi
+          else
+            echo "⚠️ Dependency cruiser configuration not found, skipping"
+          fi
+
       - name: Check if quality gates needed
         id: check_gates
         run: |
@@ -144,6 +175,25 @@ jobs:
         run: node scripts/quality-gates/quality-gates.js --ci --parallel
         env:
           NODE_ENV: ci
+
+      # Bundle size monitoring
+      - name: Check bundle sizes
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "📦 Checking bundle sizes..."
+          node scripts/quality-gates/bundle-size-monitor.js --ci 2>&1 | tee bundle-check.log
+
+          # Extract core package size for special validation
+          CORE_SIZE=$(grep "@vytches/ddd-core" bundle-check.log | grep -oE '[0-9]+\.[0-9]+KB' | grep -oE '[0-9]+\.[0-9]+' || echo "0")
+
+          # Ensure core package stays under 2KB (currently ~0.82KB)
+          if [ "$(echo "$CORE_SIZE > 2" | bc)" -eq 1 ]; then
+            echo "❌ Core package bundle size exceeded threshold: ${CORE_SIZE}KB > 2KB"
+            echo "This indicates potential circular dependency issues!"
+            exit 1
+          else
+            echo "✅ Core package bundle size is optimal: ${CORE_SIZE}KB"
+          fi
 
       # Coverage disabled - use separate workflow if needed
       # - name: Upload coverage to Codecov

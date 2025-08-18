@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IActor } from '@vytches/ddd-core';
+import type { IActor } from '@vytches/ddd-domain-primitives';
 
 export interface IIntegrationEventMetadata {
   /** Unique identifier for the event */
