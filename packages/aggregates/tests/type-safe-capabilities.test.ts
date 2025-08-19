@@ -1,5 +1,6 @@
 import { EntityId } from '@vytches/ddd-contracts';
 import { describe, expect, it } from 'vitest';
+import type { IAggregateConstructorParams } from '../src/aggregate-interfaces';
 import { AggregateRoot } from '../src/core/aggregate-root';
 import { aggregateBuilder } from '../src/core/aggregate-root.builder';
 
@@ -15,7 +16,7 @@ import {
 class TestAggregate extends AggregateRoot<string> {
   private value = '';
 
-  constructor(params: { id: EntityId<string>; version?: number }) {
+  constructor(params: IAggregateConstructorParams<string>) {
     super(params);
   }
 
@@ -51,7 +52,7 @@ describe('Type-Safe Capability System', () => {
   });
 
   it('should support type-safe capability access', () => {
-    const aggregate = new TestAggregate({ id: new EntityId('test-456', 'text') });
+    const aggregate = new TestAggregate({ id: EntityId.fromText('test-456') as any });
 
     // Add capabilities using new type-safe API
     aggregate.addCapability(new SnapshotCapability());
@@ -71,7 +72,10 @@ describe('Type-Safe Capability System', () => {
     aggregate.setValue('hello world');
 
     if (hasSnapshotCapability(aggregate)) {
-      const snapshotCap = aggregate.getCapability(SnapshotCapability)!;
+      const snapshotCap = aggregate.getCapability(SnapshotCapability);
+      if (!snapshotCap) {
+        throw new Error('Snapshot capability should exist');
+      }
       const snapshot = snapshotCap.createSnapshot(() => aggregate.serialize());
 
       expect(snapshot.aggregateId).toBe('test-789');
@@ -88,7 +92,10 @@ describe('Type-Safe Capability System', () => {
       .build(TestAggregate);
 
     if (hasVersioningCapability(aggregate)) {
-      const versioningCap = aggregate.getCapability(VersioningCapability)!;
+      const versioningCap = aggregate.getCapability(VersioningCapability);
+      if (!versioningCap) {
+        throw new Error('Versioning capability should exist');
+      }
 
       // Register an upcaster
       versioningCap.registerUpcaster('ValueChanged', 1, {
@@ -113,7 +120,10 @@ describe('Type-Safe Capability System', () => {
     aggregate.setValue('second value');
 
     if (hasAuditCapability(aggregate)) {
-      const auditCap = aggregate.getCapability(AuditCapability)!;
+      const auditCap = aggregate.getCapability(AuditCapability);
+      if (!auditCap) {
+        throw new Error('Audit capability should exist');
+      }
       const auditLog = auditCap.getAuditLog();
       const stats = auditCap.getAuditStatistics();
 
@@ -126,7 +136,7 @@ describe('Type-Safe Capability System', () => {
   });
 
   it('should work with direct capability class access', () => {
-    const aggregate = new TestAggregate({ id: new EntityId('test-compat', 'text') });
+    const aggregate = new TestAggregate({ id: EntityId.fromText('test-compat') as any });
 
     // Direct capability access
     aggregate.addCapability(new SnapshotCapability());
@@ -136,7 +146,7 @@ describe('Type-Safe Capability System', () => {
   });
 
   it('should return undefined for non-existent capabilities', () => {
-    const aggregate = new TestAggregate({ id: new EntityId('test-empty', 'text') });
+    const aggregate = new TestAggregate({ id: EntityId.fromText('test-empty') as any });
 
     const snapshotCap = aggregate.getCapability(SnapshotCapability);
     expect(snapshotCap).toBeUndefined();
@@ -145,7 +155,7 @@ describe('Type-Safe Capability System', () => {
   });
 
   it('should support capability removal', () => {
-    const aggregate = new TestAggregate({ id: new EntityId('test-remove', 'text') });
+    const aggregate = new TestAggregate({ id: EntityId.fromText('test-remove') as any });
 
     aggregate.addCapability(new SnapshotCapability());
     expect(hasSnapshotCapability(aggregate)).toBe(true);

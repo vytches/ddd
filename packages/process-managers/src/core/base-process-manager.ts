@@ -1,6 +1,8 @@
-import { AggregateRoot, EntityId } from '@vytches/ddd-core';
+import { EntityId } from '@vytches/ddd-contracts';
+import { AggregateRoot } from '@vytches/ddd-core';
 import { Logger } from '@vytches/ddd-logging';
-import { Result } from '@vytches/ddd-utils';
+import type { GuardEvaluationResult, IProcessGuard, ProcessGuardContext } from '../guards';
+import { GuardManager, GuardOperation } from '../guards';
 import type {
   IProcessManager,
   IProcessManagerContext,
@@ -9,25 +11,21 @@ import type {
   ProcessManagerResult,
 } from '../interfaces';
 import { ProcessManagerStatus } from '../interfaces';
+import type { IProcessInvariant, InvariantContext } from '../invariants';
+import { InvariantManager, InvariantTrigger } from '../invariants';
 import {
   ProcessManagerAuth,
   ProcessManagerSecurity,
   ProcessManagerSecurityError,
   type IProcessManagerSecurityContext,
 } from '../security';
-import { GuardOperation } from '../guards';
-import type { IProcessGuard, ProcessGuardContext, GuardEvaluationResult } from '../guards';
-import { GuardManager } from '../guards';
-import { InvariantTrigger } from '../invariants';
-import type { IProcessInvariant, InvariantContext, InvariantValidationResult } from '../invariants';
-import { InvariantManager } from '../invariants';
 
 /**
  * Abstract base class for all process managers.
  * Provides common functionality and enforces the process manager contract.
  */
 export abstract class BaseProcessManager<TState extends IProcessManagerState = IProcessManagerState>
-  extends AggregateRoot
+  extends AggregateRoot<string>
   implements IProcessManager<TState>
 {
   protected readonly logger = Logger.forContext(this.constructor.name);
@@ -140,7 +138,7 @@ export abstract class BaseProcessManager<TState extends IProcessManagerState = I
 
   // Getter for IProcessManager interface compliance - returns string ID value
   get id(): string {
-    return this.getId().getValue() as string;
+    return this.getId().toString();
   }
 
   get state(): TState {

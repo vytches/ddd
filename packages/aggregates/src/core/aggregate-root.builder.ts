@@ -1,14 +1,14 @@
-import type { IEventStore, Capability } from '@vytches/ddd-contracts';
+import type { Capability, IEventStore } from '@vytches/ddd-contracts';
 import { EntityId } from '@vytches/ddd-contracts';
 
+import type { IAggregateCapability, IAggregateConstructorParams } from '../aggregate-interfaces';
 import { AggregateRoot } from './aggregate-root';
-import type { IAggregateConstructorParams, IAggregateCapability } from '../aggregate-interfaces';
 
 // Import capability classes
+import { AuditCapability } from '../capabilities/audit-capability';
+import { EventSourcingCapability } from '../capabilities/event-sourcing-capability';
 import { SnapshotCapability } from '../capabilities/snapshot-capability';
 import { VersioningCapability } from '../capabilities/versioning-capability';
-import { EventSourcingCapability } from '../capabilities/event-sourcing-capability';
-import { AuditCapability } from '../capabilities/audit-capability';
 
 export class AggregateBuilder<TId = string> {
   private params: IAggregateConstructorParams<TId>;
@@ -32,7 +32,7 @@ export class AggregateBuilder<TId = string> {
     const constructorParams: IAggregateConstructorParams<TId> = {
       id: params.id instanceof EntityId ? params.id : new EntityId(params.id, 'text'),
       version: params.version || 0,
-    };
+    } as IAggregateConstructorParams<TId>;
     return new AggregateBuilder(constructorParams);
   }
 

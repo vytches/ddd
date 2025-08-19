@@ -30,6 +30,7 @@ module.exports = {
         'cqrs',
         'acl',
         'projections',
+        'aggregates',
         'messaging',
         'resilience',
         'testing',

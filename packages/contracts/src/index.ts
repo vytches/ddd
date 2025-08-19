@@ -51,6 +51,9 @@ export {
 } from './events';
 
 // Aggregates
+// Deprecated: Use EntityId instead of IAggregateId
+// export { areAggregateIdsEqual, isAggregateId } from './aggregates';
+// export type { IAggregateId } from './aggregates';
 export type { IAggregateWithEvents } from './aggregates';
 
 // Validation
@@ -103,12 +106,12 @@ export { BackoffStrategy, JobStatus, SchedulePriority } from './scheduling';
 
 // Testing
 export type {
-  ITestClock,
-  ITestHarness,
   ISafeRunResult,
+  ITestClock,
   ITestDataBuilder,
-  ITestScenario,
   ITestFixture,
+  ITestHarness,
+  ITestScenario,
   TestClockOptions,
   TestHarnessOptions,
   TestScenarioOptions,
@@ -116,14 +119,14 @@ export type {
 
 // Repositories
 export type {
-  IRepositoryEntity,
-  IRepository,
+  ICQRSRepository,
   IExtendedRepository,
+  IQueryRepository,
+  IRepository,
+  IRepositoryEntity,
   IRepositoryProvider,
   IUnitOfWork,
-  IQueryRepository,
   IWriteRepository,
-  ICQRSRepository,
 } from './repositories';
 
 // Shared types (to avoid circular dependencies)

@@ -1,5 +1,5 @@
-import { Capability } from '@vytches/ddd-contracts';
 import type { IEventSourcingCapability, IEventStore } from '@vytches/ddd-contracts';
+import { Capability } from '@vytches/ddd-contracts';
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
@@ -86,7 +86,7 @@ export class EventSourcingCapability
     }
 
     await this.eventStore.saveEvents(
-      this.aggregate.getId().getValue(),
+      this.aggregate.getId().toString(),
       [...events],
       this.aggregate.getInitialVersion()
     );
@@ -103,7 +103,7 @@ export class EventSourcingCapability
    * @returns {string} Stream name combining aggregate type and ID
    */
   getStreamName(): string {
-    return `${this.aggregate.constructor.name}-${this.aggregate.getId().getValue()}`;
+    return `${this.aggregate.constructor.name}-${this.aggregate.getId().toString()}`;
   }
 
   /**

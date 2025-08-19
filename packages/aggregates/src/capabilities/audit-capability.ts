@@ -115,7 +115,7 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     const auditEvent: IAuditEvent = {
       eventId: event.metadata?.eventId || `audit-${Date.now()}-${Math.random()}`,
       eventType: event.eventType,
-      aggregateId: this.aggregate.getId().getValue(),
+      aggregateId: this.aggregate.getId().toString(),
       aggregateType: this.aggregate.constructor.name,
       aggregateVersion: this.aggregate.getVersion(),
       timestamp: new Date(),

@@ -3,6 +3,8 @@ import type { PolicyMetadata } from '../models/policy-metadata';
 import type { PolicyViolation } from '../models/policy-violation';
 import type { PolicyContext } from '../shared';
 
+export type { PolicyContext } from '../shared';
+
 export interface IBusinessPolicy<T> {
   /**
    * Unique identifier for this policy
