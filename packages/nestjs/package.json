@@ -46,16 +46,14 @@
     "directory": "packages/nestjs"
   },
   "dependencies": {
-    "@vytches/ddd-di": "workspace:*"
+    "@vytches/ddd-di": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-cqrs": "workspace:*",
+    "@vytches/ddd-events": "workspace:*"
   },
   "peerDependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
-    "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-cqrs": "workspace:*",
-    "@vytches/ddd-events": "workspace:*",
-    "@vytches/ddd-process-managers": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "rxjs": "^7.0.0"
   },
@@ -65,21 +63,6 @@
     },
     "@nestjs/core": {
       "optional": false
-    },
-    "@vytches/ddd-core": {
-      "optional": true
-    },
-    "@vytches/ddd-cqrs": {
-      "optional": true
-    },
-    "@vytches/ddd-events": {
-      "optional": true
-    },
-    "@vytches/ddd-process-managers": {
-      "optional": true
-    },
-    "@vytches/ddd-utils": {
-      "optional": true
     }
   },
   "devDependencies": {
