@@ -1,10 +1,11 @@
 export { BaseError, type ErrorOptions } from './base.error';
 export {
-  IDomainError,
-  MissingValueError,
-  InvalidParameterError,
   DuplicateError,
+  IDomainError,
+  InvalidParameterError,
+  MissingValueError,
   NotFoundError,
   type DomainErrorOptions,
+  type ErrorCode,
 } from './domain.errors';
-export { DomainErrorCode, ApplicationErrorCode, FrameworkErrorCode } from './error.enum';
+export { ApplicationErrorCode, DomainErrorCode, FrameworkErrorCode } from './error.enum';

@@ -45,6 +45,12 @@
 - [ ] **Memory Profiling**: Optimize memory usage in high-throughput scenarios
 - [ ] **Edge Case Testing**: Stress testing with large datasets and concurrent
       operations
+- [ ] **DDD Seeder Framework**: Comprehensive test data generation with DDD
+      patterns - Start in @vytches/ddd-testing package for rapid iteration -
+      DDD-native factories respecting aggregate boundaries - Event-aware seeding
+      with domain event generation - Database provider abstraction (PostgreSQL,
+      MongoDB, MySQL, SQLite, InMemory) - Migration to standalone
+      @vytches/seeder package post-v1.0
 
 #### 1.2 Documentation Excellence
 

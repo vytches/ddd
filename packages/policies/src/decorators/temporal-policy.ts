@@ -4,9 +4,9 @@ import type {
   IPolicyComposer,
   IPolicyConditionalBuilder,
   PolicyCondition,
-  PolicyContext,
   PolicyRequest,
 } from '../core/interfaces/business-policy.interface';
+import type { PolicyContext } from '../core/shared';
 import { PolicyViolation } from '../core/models/policy-violation';
 
 export interface BusinessCalendar {

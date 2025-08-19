@@ -1,5 +1,5 @@
+import type { IAggregateSnapshot, ISnapshotCapability } from '@vytches/ddd-contracts';
 import { Capability } from '@vytches/ddd-contracts';
-import type { ISnapshotCapability, IAggregateSnapshot } from '@vytches/ddd-contracts';
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
@@ -38,14 +38,16 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
   ): IAggregateSnapshot<TState, TMeta> {
     const events = this.aggregate.getDomainEvents();
     const lastEvent = events.length > 0 ? events[events.length - 1] : null;
+    const lastEventId = lastEvent?.metadata?.eventId;
 
+    const aggregateId = this.aggregate.getId().toString();
     const snapshot: IAggregateSnapshot<TState, TMeta> = {
-      aggregateId: this.aggregate.getId().getValue(),
+      aggregateId,
       version: this.aggregate.getVersion(),
       aggregateType: this.aggregate.constructor.name,
       state: serializer(),
       timestamp: new Date(),
-      lastEventId: lastEvent?.metadata?.eventId,
+      ...(lastEventId !== undefined && { lastEventId }),
     };
 
     if (metadataCreator) {
@@ -70,11 +72,9 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
       throw AggregateError.invalidSnapshot(this.aggregate.constructor.name, 'Invalid snapshot');
     }
 
-    if (snapshot.aggregateId !== this.aggregate.getId().getValue()) {
-      throw AggregateError.idMismatch(
-        snapshot.aggregateId as string | number,
-        this.aggregate.getId().getValue() as string | number
-      );
+    const currentAggregateId = this.aggregate.getId().toString();
+    if (snapshot.aggregateId !== currentAggregateId) {
+      throw AggregateError.idMismatch(snapshot.aggregateId as string | number, currentAggregateId);
     }
 
     if (snapshot.aggregateType !== this.aggregate.constructor.name) {

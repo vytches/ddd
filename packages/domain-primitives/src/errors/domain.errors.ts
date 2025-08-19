@@ -4,9 +4,14 @@ import type { ErrorOptions } from './base.error';
 import { BaseError } from './base.error';
 import { DomainErrorCode } from './error.enum';
 
+/**
+ * Flexible error code type that accepts both enum values and string literals
+ */
+export type ErrorCode = DomainErrorCode | string;
+
 export type DomainErrorOptions = ErrorOptions & {
   domain?: string | object | undefined;
-  code?: DomainErrorCode;
+  code?: ErrorCode;
   data?: unknown;
   error?: Error | undefined;
 };
@@ -14,7 +19,7 @@ export type DomainErrorOptions = ErrorOptions & {
 export abstract class IDomainError extends BaseError implements DomainErrorOptions {
   domain?: string | object | undefined;
 
-  code: DomainErrorCode = DomainErrorCode.Default;
+  code: ErrorCode = DomainErrorCode.Default;
 
   data?: unknown;
 
@@ -30,13 +35,15 @@ export abstract class IDomainError extends BaseError implements DomainErrorOptio
     if (options instanceof Error) {
       this.error = options;
     } else if (LibUtils.isNotEmpty(options)) {
-      if ('code' in options) {
+      if ('code' in options || 'domain' in options || 'error' in options || 'data' in options) {
+        // Handle DomainErrorOptions
         this.domain = options?.domain;
+        // Accept both string and enum codes
         this.code = options?.code != null ? options?.code : DomainErrorCode.Default;
         this.data = options?.data ?? {};
-        this.error = options?.error ?? new Error('__Defautl error__');
+        this.error = options?.error ?? new Error('__Default error__');
       } else {
-        // Handle case where options is just data without code
+        // Handle case where options is just data without recognized fields
         this.data = options;
         this.code = DomainErrorCode.Default;
         this.error = new Error('__Default error__');

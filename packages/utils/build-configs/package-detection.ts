@@ -8,7 +8,10 @@ import type { PackageType, BuildContext } from './types';
 /**
  * Detect package type based on name and dependencies
  */
-export function detectPackageType(packageName: string, packageJson: any): PackageType {
+export function detectPackageType(
+  packageName: string,
+  _packageJson: Record<string, unknown>
+): PackageType {
   // Meta packages (enterprise bundle)
   if (packageName === 'enterprise' || packageName === 'ddd') {
     return 'meta';
@@ -34,7 +37,16 @@ export function detectPackageType(packageName: string, packageJson: any): Packag
   }
 
   // Architecture layer (event-driven)
-  if (['events', 'cqrs', 'projections', 'event-store', 'event-scheduling'].includes(packageName)) {
+  if (
+    [
+      'events',
+      'cqrs',
+      'projections',
+      'event-store',
+      'event-scheduling',
+      'process-managers',
+    ].includes(packageName)
+  ) {
     return 'architecture';
   }
 

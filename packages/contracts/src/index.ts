@@ -51,6 +51,9 @@ export {
 } from './events';
 
 // Aggregates
+// Deprecated: Use EntityId instead of IAggregateId
+// export { areAggregateIdsEqual, isAggregateId } from './aggregates';
+// export type { IAggregateId } from './aggregates';
 export type { IAggregateWithEvents } from './aggregates';
 
 // Validation
@@ -71,7 +74,6 @@ export type {
   CapabilityMap,
   CapabilityType,
   IAggregateCapability,
-  IAggregateSnapshot,
   IAuditCapability,
   ICheckpointCapability,
   ICircuitBreakerCapability,
@@ -102,5 +104,30 @@ export type {
 
 export { BackoffStrategy, JobStatus, SchedulePriority } from './scheduling';
 
-// Examples Types - removed, use new YAML system instead
-// Legacy examples system has been replaced with YAML-based metadata system
+// Testing
+export type {
+  ISafeRunResult,
+  ITestClock,
+  ITestDataBuilder,
+  ITestFixture,
+  ITestHarness,
+  ITestScenario,
+  TestClockOptions,
+  TestHarnessOptions,
+  TestScenarioOptions,
+} from './testing';
+
+// Repositories
+export type {
+  ICQRSRepository,
+  IExtendedRepository,
+  IQueryRepository,
+  IRepository,
+  IRepositoryEntity,
+  IRepositoryProvider,
+  IUnitOfWork,
+  IWriteRepository,
+} from './repositories';
+
+// Shared types (to avoid circular dependencies)
+export type { IAggregateSnapshot } from './shared';

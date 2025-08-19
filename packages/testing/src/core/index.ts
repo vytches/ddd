@@ -29,14 +29,5 @@ export {
   type TestResource,
 } from './test-harness';
 
-export {
-  DomainEventBuilder,
-  EntityIdBuilder,
-  TestDataBuilder,
-  UserBuilder,
-  type RandomOptions,
-  type SequenceOptions,
-  type TestDataBuilderOptions,
-  type TestDomainEvent,
-  type TestUser,
-} from './test-data-builder';
+// Test data builders removed - will be replaced by DDD-native seeder in v1.1.0
+// See: /docs/adr/0019-ddd-seeder-framework-architecture.md

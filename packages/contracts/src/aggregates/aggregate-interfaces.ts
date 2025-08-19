@@ -1,4 +1,4 @@
-import type { IDomainEvent } from '../events';
+import type { IDomainEvent } from '../events/domain-event-interfaces';
 
 export interface IAggregateWithEvents {
   /**

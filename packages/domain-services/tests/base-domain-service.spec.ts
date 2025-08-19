@@ -1,12 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
-import type { IUnitOfWork } from '@vytches/ddd-core';
+import type { IUnitOfWork } from '@vytches/ddd-repositories';
 import { safeRun } from '@vytches/ddd-utils';
 import {
   AsyncDomainService,
-  IBaseDomainService,
   EventAwareDomainService,
+  IBaseDomainService,
   UnitOfWorkAwareDomainService,
 } from '../src/base-domain-service';
 

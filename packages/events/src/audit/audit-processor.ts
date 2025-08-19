@@ -1,11 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { IRepository, IActor } from '@vytches/ddd-core';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
+import type { IActor } from '@vytches/ddd-domain-primitives';
 
 import type { IEventProcessor } from '../event-processor';
 import type { IAuditEvent, IAuditEventMetadata } from './audit-event.interface';
 import { AuditActionType, AuditStatus } from './audit-event.interface';
+
+/**
+ * Interface for audit event storage
+ * @since 1.0.0
+ * @public
+ */
+export interface IAuditStorage {
+  save(auditEvent: IAuditEvent): Promise<void>;
+}
 
 /**
  * Configuration options for audit event processor.
@@ -34,7 +43,7 @@ export interface AuditEventProcessorOptions {
  */
 export class AuditEventProcessor implements IEventProcessor {
   constructor(
-    private readonly auditRepository: IRepository<any>,
+    private readonly auditStorage: IAuditStorage,
     private readonly options: AuditEventProcessorOptions = {}
   ) {}
 
@@ -47,7 +56,7 @@ export class AuditEventProcessor implements IEventProcessor {
 
     // Create and publish audit event
     const auditEvent = this.createAuditEvent(event);
-    await this.auditRepository.save(auditEvent);
+    await this.auditStorage.save(auditEvent);
   }
 
   /**
@@ -117,6 +126,6 @@ export class AuditEventProcessor implements IEventProcessor {
       },
     };
 
-    await this.auditRepository.save(auditEvent);
+    await this.auditStorage.save(auditEvent);
   }
 }

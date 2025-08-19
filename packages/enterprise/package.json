@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Complete Domain-Driven Design framework for TypeScript",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -73,6 +73,7 @@
     "@vytches/ddd-logging": "workspace:*",
     "@vytches/ddd-messaging": "workspace:*",
     "@vytches/ddd-policies": "workspace:*",
+    "@vytches/ddd-process-managers": "workspace:*",
     "@vytches/ddd-projections": "workspace:*",
     "@vytches/ddd-repositories": "workspace:*",
     "@vytches/ddd-resilience": "workspace:*",

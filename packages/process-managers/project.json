@@ -1,0 +1,36 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches/ddd-process-managers",
+  "projectType": "library",
+  "sourceRoot": "packages/process-managers/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "vite build",
+        "cwd": "packages/process-managers"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run packages/process-managers/tests --reporter=verbose"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/process-managers/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/process-managers/tsconfig.json"
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:process-managers", "layer:architecture"]
+}

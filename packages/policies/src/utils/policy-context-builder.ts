@@ -1,4 +1,4 @@
-import type { PolicyContext } from '../core/interfaces/business-policy.interface';
+import type { PolicyContext } from '../core/shared';
 
 export class PolicyContextBuilder {
   private userId?: string;

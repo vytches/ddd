@@ -1,18 +1,18 @@
 import type {
-  IAggregateRoot,
   IAggregateCapability,
   IAggregateConstructorParams,
   IAggregateEventHandler,
+  IAggregateRoot,
 } from '../aggregate-interfaces';
 
 import type {
-  IDomainEvent,
-  IEventMetadata,
   Capability,
   CapabilityConstructor,
   EntityId,
+  IDomainEvent,
+  IEventMetadata,
 } from '@vytches/ddd-contracts';
-import { createDomainEvent, CapabilityRegistry } from '@vytches/ddd-contracts';
+import { CapabilityRegistry, createDomainEvent } from '@vytches/ddd-contracts';
 
 export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private readonly _id: EntityId<TId>;
@@ -117,12 +117,12 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
 
     this._version++;
 
-    // Enrich with aggregate metadata
+    // Enrich with aggregate metadata - use toString() which both EntityId and IAggregateId have
     const enrichedEvent: IDomainEvent<P> = {
       ...event,
       metadata: {
         ...event.metadata,
-        aggregateId: this._id.getValue(),
+        aggregateId: this._id.toString(),
         aggregateType: this.constructor.name,
         aggregateVersion: this._version,
       },
@@ -173,7 +173,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
    */
   addCapability<T extends Capability & IAggregateCapability>(capability: T): this {
     if ('attach' in capability && typeof capability.attach === 'function') {
-      capability.attach(this);
+      capability.attach(this as unknown as IAggregateRoot<unknown>);
     }
     this._capabilities.register(capability);
     return this;
