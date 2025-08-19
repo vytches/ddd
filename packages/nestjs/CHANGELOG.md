@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.1.1 (2025-08-19)
+
+### Bug Fixes
+
+- fixing nestjs package to remove issues with import
+  ([a9d66cc](https://github.com/vytches/ddd/commit/a9d66cc9d4f89052c4229df7f57d61af95a47c0d))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 1.1.0 (2025-08-19)
 
 ### Bug Fixes

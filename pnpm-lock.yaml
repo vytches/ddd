@@ -680,9 +680,18 @@ importers:
 
   packages/nestjs:
     dependencies:
+      '@vytches/ddd-core':
+        specifier: workspace:*
+        version: link:../core
+      '@vytches/ddd-cqrs':
+        specifier: workspace:*
+        version: link:../cqrs
       '@vytches/ddd-di':
         specifier: workspace:*
         version: link:../di
+      '@vytches/ddd-events':
+        specifier: workspace:*
+        version: link:../events
     devDependencies:
       '@nestjs/common':
         specifier: ^10.3.0
@@ -696,15 +705,6 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.19.1
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches/ddd-cqrs':
-        specifier: workspace:*
-        version: link:../cqrs
-      '@vytches/ddd-events':
-        specifier: workspace:*
-        version: link:../events
       '@vytches/ddd-process-managers':
         specifier: workspace:*
         version: link:../process-managers

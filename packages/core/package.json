@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-core",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Meta-package: Enterprise API stability for DDD building blocks",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.8.1 (2025-08-19)
+
+**Note:** Version bump only for package @vytches/ddd-process-managers
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 0.8.0 (2025-08-19)
 
 ### Bug Fixes
