@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-nestjs",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "NestJS adapter for VytchesDDD - Enterprise Domain-Driven Design framework integration",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -46,9 +46,9 @@
     "directory": "packages/nestjs"
   },
   "dependencies": {
-    "@vytches/ddd-di": "workspace:*",
     "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
+    "@vytches/ddd-di": "workspace:*",
     "@vytches/ddd-events": "workspace:*"
   },
   "peerDependencies": {

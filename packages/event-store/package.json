@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-event-store",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Enterprise-grade Event Store with Event Sourcing support",
   "type": "module",
   "main": "./dist/index.cjs",
