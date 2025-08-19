@@ -34,7 +34,16 @@ export function detectPackageType(packageName: string, packageJson: any): Packag
   }
 
   // Architecture layer (event-driven)
-  if (['events', 'cqrs', 'projections', 'event-store', 'event-scheduling'].includes(packageName)) {
+  if (
+    [
+      'events',
+      'cqrs',
+      'projections',
+      'event-store',
+      'event-scheduling',
+      'process-managers',
+    ].includes(packageName)
+  ) {
     return 'architecture';
   }
 
