@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-testing",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Test utilities and DDD-specific testing helpers",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -42,14 +42,14 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@vytches/ddd-utils": "workspace:*",
+    "@faker-js/faker": "^8.0.0",
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
-    "@faker-js/faker": "^8.0.0"
+    "@vytches/ddd-utils": "workspace:*"
   },
   "peerDependencies": {
-    "openai": ">=4.0.0",
-    "@anthropic-ai/sdk": ">=0.24.0"
+    "@anthropic-ai/sdk": ">=0.24.0",
+    "openai": ">=4.0.0"
   },
   "peerDependenciesMeta": {
     "openai": {
