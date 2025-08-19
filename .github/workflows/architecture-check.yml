@@ -137,7 +137,7 @@ jobs:
           node scripts/quality-gates/bundle-size-monitor.js 2>&1 | tee bundle-report.log
 
           # Critical size checks
-          CORE_SIZE=$(grep "@vytches/ddd-core" bundle-report.log | grep -oE '[0-9]+\.[0-9]+KB' | grep -oE '[0-9]+\.[0-9]+' || echo "999")
+          CORE_SIZE=$(grep "core:" bundle-report.log | grep -oE '[0-9]+(\.[0-9]+)?KB' | head -1 | grep -oE '[0-9]+(\.[0-9]+)?' || echo "999")
 
           echo "Core package size: ${CORE_SIZE}KB"
 
