@@ -164,7 +164,7 @@ jobs:
 
       - name: Upload dependency graph
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.verbose == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dependency-graph
           path: dependency-graph.svg
