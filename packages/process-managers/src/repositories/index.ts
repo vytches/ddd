@@ -3,8 +3,9 @@ export type {
   IProcessRepository,
   ProcessManagerId,
   CorrelationData,
-  ProcessSnapshot,
 } from '../interfaces/process-repository.interface';
+
+// Note: ProcessSnapshot class is exported from ../core/process-snapshot
 
 export { InMemoryProcessRepository } from './in-memory-process-repository';
 export type {
@@ -17,6 +18,6 @@ export type {
 export {
   ProcessRepositoryError,
   ConcurrencyError,
-  ValidationError,
+  ProcessValidationError,
   StorageError,
 } from './process-repository-errors';

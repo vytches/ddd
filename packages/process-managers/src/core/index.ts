@@ -2,7 +2,15 @@
 export { BaseProcessManager } from './base-process-manager';
 
 // Process Snapshot and Recovery
-export * from './process-snapshot';
+// Export everything except ProcessSnapshot class
+export type {
+  SnapshotMetadata,
+  ProcessSnapshotOptions,
+  SnapshotValidationResult,
+  SnapshotSummary,
+} from './process-snapshot';
+export { ProcessSnapshot as ProcessSnapshotImpl, ProcessSnapshotError } from './process-snapshot';
+
 export * from './process-recovery';
 
 // Transition History and Audit Trail

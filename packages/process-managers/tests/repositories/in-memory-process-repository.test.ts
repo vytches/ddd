@@ -4,7 +4,7 @@ import { InMemoryProcessRepository } from '../../src/repositories/in-memory-proc
 import {
   ProcessRepositoryError,
   ConcurrencyError,
-  ValidationError,
+  ProcessValidationError,
   StorageError,
 } from '../../src/repositories/process-repository-errors';
 import type {
@@ -169,7 +169,7 @@ describe('InMemoryProcessRepository', () => {
 
       const [validationError] = await safeRun(() => repository.save(invalidProcess));
 
-      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError).toBeInstanceOf(ProcessValidationError);
     });
   });
 
@@ -197,7 +197,7 @@ describe('InMemoryProcessRepository', () => {
     it('should validate process manager ID', async () => {
       const [validationError] = await safeRun(() => repository.load(''));
 
-      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError).toBeInstanceOf(ProcessValidationError);
       expect(validationError?.message).toContain('must be a non-empty string');
     });
 
@@ -282,7 +282,7 @@ describe('InMemoryProcessRepository', () => {
     it('should validate correlation data', async () => {
       const [validationError] = await safeRun(() => repository.findByCorrelation({}));
 
-      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError).toBeInstanceOf(ProcessValidationError);
       expect(validationError?.message).toContain('cannot be empty');
     });
   });
@@ -331,7 +331,7 @@ describe('InMemoryProcessRepository', () => {
 
       const [validationError] = await safeRun(() => repository.saveSnapshot(invalidSnapshot));
 
-      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError).toBeInstanceOf(ProcessValidationError);
       expect(validationError?.message).toContain('does not exist');
     });
 
@@ -344,7 +344,7 @@ describe('InMemoryProcessRepository', () => {
 
       const [validationError] = await safeRun(() => repository.saveSnapshot(invalidSnapshot));
 
-      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError).toBeInstanceOf(ProcessValidationError);
     });
   });
 
@@ -413,7 +413,7 @@ describe('InMemoryProcessRepository', () => {
     it('should validate process manager ID', async () => {
       const [validationError] = await safeRun(() => repository.delete(''));
 
-      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError).toBeInstanceOf(ProcessValidationError);
     });
   });
 
@@ -439,7 +439,7 @@ describe('InMemoryProcessRepository', () => {
     it('should validate process manager ID', async () => {
       const [validationError] = await safeRun(() => repository.exists(''));
 
-      expect(validationError).toBeInstanceOf(ValidationError);
+      expect(validationError).toBeInstanceOf(ProcessValidationError);
     });
   });
 
@@ -540,8 +540,8 @@ describe('InMemoryProcessRepository', () => {
     it('should provide detailed error information', async () => {
       const [error] = await safeRun(() => repository.save(null as any));
 
-      expect(error).toBeInstanceOf(ValidationError);
-      const validationError = error as ValidationError;
+      expect(error).toBeInstanceOf(ProcessValidationError);
+      const validationError = error as ProcessValidationError;
       expect(validationError.code).toBe('VALIDATION_ERROR');
       expect(validationError.field).toBe('process');
       expect(validationError.details).toBeDefined();

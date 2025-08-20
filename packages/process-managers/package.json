@@ -11,6 +11,41 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./dist/*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    },
+    "./dist/core/*": {
+      "types": "./dist/core/*.d.ts",
+      "import": "./dist/core/*.js",
+      "require": "./dist/core/*.cjs"
+    },
+    "./dist/core/process-snapshot": {
+      "types": "./dist/core/process-snapshot.d.ts",
+      "import": "./dist/core/process-snapshot.js",
+      "require": "./dist/core/process-snapshot.cjs"
+    },
+    "./dist/core/base-process-manager": {
+      "types": "./dist/core/base-process-manager.d.ts",
+      "import": "./dist/core/base-process-manager.js",
+      "require": "./dist/core/base-process-manager.cjs"
+    },
+    "./dist/core/process-recovery": {
+      "types": "./dist/core/process-recovery.d.ts",
+      "import": "./dist/core/process-recovery.js",
+      "require": "./dist/core/process-recovery.cjs"
+    },
+    "./dist/core/process-timeout-manager": {
+      "types": "./dist/core/process-timeout-manager.d.ts",
+      "import": "./dist/core/process-timeout-manager.js",
+      "require": "./dist/core/process-timeout-manager.cjs"
+    },
+    "./dist/core/transition-history": {
+      "types": "./dist/core/transition-history.d.ts",
+      "import": "./dist/core/transition-history.js",
+      "require": "./dist/core/transition-history.cjs"
     }
   },
   "sideEffects": false,

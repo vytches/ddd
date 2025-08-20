@@ -9,7 +9,7 @@ import type {
 import {
   ProcessRepositoryError,
   ConcurrencyError,
-  ValidationError,
+  ProcessValidationError,
   StorageError,
 } from './process-repository-errors';
 
@@ -332,7 +332,7 @@ export class InMemoryProcessRepository implements IProcessRepository {
 
       // Check if process manager exists
       if (!this.processStorage.has(processId)) {
-        throw new ValidationError(
+        throw new ProcessValidationError(
           `Cannot save snapshot: process manager '${processId}' does not exist`,
           'processManagerId',
           processId
@@ -542,15 +542,23 @@ export class InMemoryProcessRepository implements IProcessRepository {
    */
   private validateProcessManager(process: IProcessManager, operation: string): void {
     if (!process) {
-      throw new ValidationError(`Process manager is required for ${operation}`, 'process', process);
+      throw new ProcessValidationError(
+        `Process manager is required for ${operation}`,
+        'process',
+        process
+      );
     }
 
     if (!process.id || typeof process.id !== 'string' || process.id.trim().length === 0) {
-      throw new ValidationError('Process manager ID must be a non-empty string', 'id', process.id);
+      throw new ProcessValidationError(
+        'Process manager ID must be a non-empty string',
+        'id',
+        process.id
+      );
     }
 
     if (!process.type || typeof process.type !== 'string' || process.type.trim().length === 0) {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         'Process manager type must be a non-empty string',
         'type',
         process.type
@@ -558,11 +566,11 @@ export class InMemoryProcessRepository implements IProcessRepository {
     }
 
     if (!process.state) {
-      throw new ValidationError('Process manager state is required', 'state', process.state);
+      throw new ProcessValidationError('Process manager state is required', 'state', process.state);
     }
 
     if (typeof process.state.version !== 'number' || process.state.version < 0) {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         'Process state version must be a non-negative number',
         'state.version',
         process.state.version
@@ -575,7 +583,7 @@ export class InMemoryProcessRepository implements IProcessRepository {
    */
   private validateProcessManagerId(id: ProcessManagerId, operation: string): void {
     if (!id || typeof id !== 'string' || id.trim().length === 0) {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         `Process manager ID must be a non-empty string for ${operation}`,
         'id',
         id
@@ -588,7 +596,7 @@ export class InMemoryProcessRepository implements IProcessRepository {
    */
   private validateCorrelationData(correlation: CorrelationData, operation: string): void {
     if (!correlation || typeof correlation !== 'object') {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         `Correlation data must be an object for ${operation}`,
         'correlation',
         correlation
@@ -596,7 +604,7 @@ export class InMemoryProcessRepository implements IProcessRepository {
     }
 
     if (Object.keys(correlation).length === 0) {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         `Correlation data cannot be empty for ${operation}`,
         'correlation',
         correlation
@@ -609,11 +617,15 @@ export class InMemoryProcessRepository implements IProcessRepository {
    */
   private validateSnapshot(snapshot: ProcessSnapshot, operation: string): void {
     if (!snapshot) {
-      throw new ValidationError(`Snapshot is required for ${operation}`, 'snapshot', snapshot);
+      throw new ProcessValidationError(
+        `Snapshot is required for ${operation}`,
+        'snapshot',
+        snapshot
+      );
     }
 
     if (!snapshot.processManagerId || typeof snapshot.processManagerId !== 'string') {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         'Snapshot processManagerId must be a non-empty string',
         'processManagerId',
         snapshot.processManagerId
@@ -621,7 +633,7 @@ export class InMemoryProcessRepository implements IProcessRepository {
     }
 
     if (!snapshot.processManagerType || typeof snapshot.processManagerType !== 'string') {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         'Snapshot processManagerType must be a non-empty string',
         'processManagerType',
         snapshot.processManagerType
@@ -629,11 +641,11 @@ export class InMemoryProcessRepository implements IProcessRepository {
     }
 
     if (!snapshot.state) {
-      throw new ValidationError('Snapshot state is required', 'state', snapshot.state);
+      throw new ProcessValidationError('Snapshot state is required', 'state', snapshot.state);
     }
 
     if (!(snapshot.snapshotTimestamp instanceof Date)) {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         'Snapshot timestamp must be a Date',
         'snapshotTimestamp',
         snapshot.snapshotTimestamp
@@ -641,7 +653,7 @@ export class InMemoryProcessRepository implements IProcessRepository {
     }
 
     if (typeof snapshot.version !== 'number' || snapshot.version < 0) {
-      throw new ValidationError(
+      throw new ProcessValidationError(
         'Snapshot version must be a non-negative number',
         'version',
         snapshot.version
