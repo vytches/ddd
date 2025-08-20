@@ -5,7 +5,7 @@ import type {
   ProcessSnapshot as IProcessSnapshot,
 } from '../interfaces/process-repository.interface';
 import type { IProcessManagerState } from '../interfaces/process-manager-state.interface';
-import { ProcessSnapshot, ProcessSnapshotError } from './process-snapshot';
+import { ProcessSnapshot as ProcessSnapshotImpl, ProcessSnapshotError } from './process-snapshot';
 
 /**
  * Options for process recovery operations
@@ -54,7 +54,7 @@ export interface ProcessRecoveryResult {
   /**
    * The snapshot used for recovery
    */
-  snapshot?: ProcessSnapshot | IProcessSnapshot | undefined;
+  snapshot?: ProcessSnapshotImpl | IProcessSnapshot | undefined;
 
   /**
    * Any errors that occurred during recovery
@@ -126,12 +126,12 @@ export class ProcessRecovery {
       }
 
       // Convert to ProcessSnapshot class if it's just the interface
-      let snapshot: ProcessSnapshot;
-      if (snapshotData instanceof ProcessSnapshot) {
+      let snapshot: ProcessSnapshotImpl;
+      if (snapshotData instanceof ProcessSnapshotImpl) {
         snapshot = snapshotData;
       } else {
         // Create ProcessSnapshot instance from interface data
-        snapshot = new ProcessSnapshot(
+        snapshot = new ProcessSnapshotImpl(
           snapshotData.processManagerId,
           snapshotData.processManagerType,
           snapshotData.state,
@@ -307,7 +307,7 @@ export class ProcessRecovery {
   async createCheckpoint(
     processManager: IProcessManager,
     reason: 'scheduled' | 'manual' | 'transition' | 'recovery' | 'migration' = 'manual'
-  ): Promise<ProcessSnapshot> {
+  ): Promise<ProcessSnapshotImpl> {
     this.logger.info('Creating process checkpoint', {
       processManagerId: processManager.id,
       processManagerType: processManager.type,
@@ -316,7 +316,7 @@ export class ProcessRecovery {
     });
 
     try {
-      const snapshot = await ProcessSnapshot.fromProcessManager(processManager, {
+      const snapshot = await ProcessSnapshotImpl.fromProcessManager(processManager, {
         reason,
         enableCompression: true,
         tags: ['checkpoint'],
@@ -362,7 +362,7 @@ export class ProcessRecovery {
     fromVersion: string,
     toVersion: string,
     migrationFn: (state: IProcessManagerState) => IProcessManagerState
-  ): Promise<ProcessSnapshot> {
+  ): Promise<ProcessSnapshotImpl> {
     this.logger.info('Starting process state migration', {
       processManagerId: processManager.id,
       fromVersion,
@@ -384,7 +384,7 @@ export class ProcessRecovery {
       );
 
       // Create post-migration snapshot
-      const postSnapshot = await ProcessSnapshot.fromProcessManager(migratedProcess, {
+      const postSnapshot = await ProcessSnapshotImpl.fromProcessManager(migratedProcess, {
         reason: 'migration',
         tags: ['migration', `from-${fromVersion}`, `to-${toVersion}`],
         metadata: {

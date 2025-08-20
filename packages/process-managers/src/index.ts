@@ -15,17 +15,3 @@ export * from './guards';
 
 // Invariants system
 export * from './invariants';
-
-// Re-export commonly used types for convenience
-export { ProcessManagerStatus } from './interfaces';
-export type {
-  IProcessManager,
-  IProcessManagerContext,
-  IProcessManagerEvent,
-  IProcessManagerState,
-  ProcessManagerResult,
-  IProcessRepository,
-  ProcessManagerId,
-  CorrelationData,
-  ProcessSnapshot,
-} from './interfaces';

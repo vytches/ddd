@@ -51,7 +51,7 @@ export interface IProcessRepository {
    *
    * @param process - The process manager to save
    * @throws {ConcurrencyError} When version conflicts occur
-   * @throws {ValidationError} When process data is invalid
+   * @throws {ProcessValidationError} When process data is invalid
    * @throws {StorageError} When persistence operation fails
    */
   save(process: IProcessManager): Promise<void>;
@@ -61,7 +61,7 @@ export interface IProcessRepository {
    *
    * @param id - The unique identifier of the process manager
    * @returns The process manager if found, undefined otherwise
-   * @throws {ValidationError} When id is invalid
+   * @throws {ProcessValidationError} When id is invalid
    * @throws {StorageError} When retrieval operation fails
    */
   load(id: ProcessManagerId): Promise<IProcessManager | undefined>;
@@ -72,7 +72,7 @@ export interface IProcessRepository {
    *
    * @param correlation - Correlation criteria to match against
    * @returns Array of matching process managers (may be empty)
-   * @throws {ValidationError} When correlation data is invalid
+   * @throws {ProcessValidationError} When correlation data is invalid
    * @throws {StorageError} When query operation fails
    */
   findByCorrelation(correlation: CorrelationData): Promise<IProcessManager[]>;
@@ -82,7 +82,7 @@ export interface IProcessRepository {
    * Snapshots allow faster reconstruction of process state.
    *
    * @param snapshot - The snapshot to save
-   * @throws {ValidationError} When snapshot data is invalid
+   * @throws {ProcessValidationError} When snapshot data is invalid
    * @throws {StorageError} When persistence operation fails
    */
   saveSnapshot(snapshot: ProcessSnapshot): Promise<void>;
@@ -93,7 +93,7 @@ export interface IProcessRepository {
    *
    * @param processManagerId - The process manager identifier
    * @returns The most recent snapshot if available, undefined otherwise
-   * @throws {ValidationError} When id is invalid
+   * @throws {ProcessValidationError} When id is invalid
    * @throws {StorageError} When retrieval operation fails
    */
   loadSnapshot(processManagerId: ProcessManagerId): Promise<ProcessSnapshot | undefined>;
@@ -104,7 +104,7 @@ export interface IProcessRepository {
    *
    * @param id - The unique identifier of the process manager
    * @returns true if the process was deleted, false if it didn't exist
-   * @throws {ValidationError} When id is invalid
+   * @throws {ProcessValidationError} When id is invalid
    * @throws {StorageError} When deletion operation fails
    */
   delete(id: ProcessManagerId): Promise<boolean>;
@@ -115,7 +115,7 @@ export interface IProcessRepository {
    *
    * @param id - The unique identifier to check
    * @returns true if the process manager exists, false otherwise
-   * @throws {ValidationError} When id is invalid
+   * @throws {ProcessValidationError} When id is invalid
    * @throws {StorageError} When check operation fails
    */
   exists(id: ProcessManagerId): Promise<boolean>;

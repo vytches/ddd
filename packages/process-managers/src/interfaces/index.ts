@@ -23,8 +23,11 @@ export type {
   IProcessRepository,
   ProcessManagerId,
   CorrelationData,
-  ProcessSnapshot,
 } from './process-repository.interface';
+
+// Note: ProcessSnapshot class is exported from ./core/process-snapshot
+// This is the interface type only
+export type { ProcessSnapshot as IProcessSnapshot } from './process-repository.interface';
 
 // Process Timeout Interfaces
 export * from './process-timeout.interface';

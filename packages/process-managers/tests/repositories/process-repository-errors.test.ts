@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   ProcessRepositoryError,
   ConcurrencyError,
-  ValidationError,
+  ProcessValidationError,
   StorageError,
 } from '../../src/repositories/process-repository-errors';
 
@@ -76,12 +76,12 @@ describe('ConcurrencyError', () => {
   });
 });
 
-describe('ValidationError', () => {
+describe('ProcessValidationError', () => {
   it('should create a validation error with message only', () => {
-    const error = new ValidationError('Invalid input data');
+    const error = new ProcessValidationError('Invalid input data');
 
     expect(error).toBeInstanceOf(ProcessRepositoryError);
-    expect(error).toBeInstanceOf(ValidationError);
+    expect(error).toBeInstanceOf(ProcessValidationError);
     expect(error.message).toBe('Invalid input data');
     expect(error.code).toBe('VALIDATION_ERROR');
     expect(error.field).toBeUndefined();
@@ -90,7 +90,11 @@ describe('ValidationError', () => {
 
   it('should create a validation error with field and value information', () => {
     const invalidValue = { invalid: true };
-    const error = new ValidationError('Process ID must be a string', 'processId', invalidValue);
+    const error = new ProcessValidationError(
+      'Process ID must be a string',
+      'processId',
+      invalidValue
+    );
 
     expect(error.message).toBe('Process ID must be a string');
     expect(error.field).toBe('processId');
@@ -103,7 +107,7 @@ describe('ValidationError', () => {
 
   it('should include additional details when provided', () => {
     const additionalDetails = { validationRule: 'required', context: 'save' };
-    const error = new ValidationError('Field is required', 'name', null, additionalDetails);
+    const error = new ProcessValidationError('Field is required', 'name', null, additionalDetails);
 
     expect(error.details).toEqual({
       field: 'name',
@@ -113,8 +117,8 @@ describe('ValidationError', () => {
   });
 
   it('should have the correct error name', () => {
-    const error = new ValidationError('Test message');
-    expect(error.name).toBe('ValidationError');
+    const error = new ProcessValidationError('Test message');
+    expect(error.name).toBe('ProcessValidationError');
   });
 });
 
@@ -175,7 +179,7 @@ describe('Error Inheritance Chain', () => {
   it('should maintain proper inheritance chain for all error types', () => {
     const baseError = new ProcessRepositoryError('Base error');
     const concurrencyError = new ConcurrencyError('proc-1', 2, 1);
-    const validationError = new ValidationError('Validation failed');
+    const validationError = new ProcessValidationError('Validation failed');
     const storageError = new StorageError('save', 'Storage failed');
 
     // All should be instances of Error
@@ -192,23 +196,23 @@ describe('Error Inheritance Chain', () => {
 
     // Specific type checks
     expect(concurrencyError instanceof ConcurrencyError).toBe(true);
-    expect(validationError instanceof ValidationError).toBe(true);
+    expect(validationError instanceof ProcessValidationError).toBe(true);
     expect(storageError instanceof StorageError).toBe(true);
 
     // Cross-type checks should be false
-    expect(concurrencyError instanceof ValidationError).toBe(false);
+    expect(concurrencyError instanceof ProcessValidationError).toBe(false);
     expect(validationError instanceof StorageError).toBe(false);
     expect(storageError instanceof ConcurrencyError).toBe(false);
   });
 
   it('should have consistent error properties across all types', () => {
     const concurrencyError = new ConcurrencyError('proc-1', 2, 1);
-    const validationError = new ValidationError('Invalid');
+    const validationError = new ProcessValidationError('Invalid');
     const storageError = new StorageError('save', 'Failed');
 
     // All should have name property matching constructor name
     expect(concurrencyError.name).toBe('ConcurrencyError');
-    expect(validationError.name).toBe('ValidationError');
+    expect(validationError.name).toBe('ProcessValidationError');
     expect(storageError.name).toBe('StorageError');
 
     // All should have appropriate error codes

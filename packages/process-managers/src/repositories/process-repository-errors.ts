@@ -53,7 +53,7 @@ export class ConcurrencyError extends ProcessRepositoryError {
  * Error thrown when validation of repository inputs fails.
  * Indicates invalid data being passed to repository methods.
  */
-export class ValidationError extends ProcessRepositoryError {
+export class ProcessValidationError extends ProcessRepositoryError {
   public readonly field?: string | undefined;
   public readonly value?: unknown;
 

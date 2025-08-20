@@ -179,38 +179,9 @@ export type {
 
 export * from '@vytches/ddd-event-store';
 export * from '@vytches/ddd-projections';
-// Process Managers exports (ValidationError conflict - using validation package version)
-// Type exports
-export type {
-  IProcessManager,
-  IProcessManagerState,
-  IProcessManagerContext,
-  ProcessManagerResult,
-  IProcessRepository,
-  ProcessManagerId,
-  CorrelationData,
-  ProcessSnapshot, // Interface type
-} from '@vytches/ddd-process-managers';
-
-// Value exports
-export {
-  ProcessManagerStatus,
-  BaseProcessManager,
-  InMemoryProcessRepository,
-  ProcessRepositoryError,
-  ConcurrencyError,
-  StorageError,
-  // Note: ProcessSnapshot class is available through core, not re-exported here to avoid conflict
-  ProcessRecovery,
-  ProcessSnapshotError,
-  ProcessRecoveryError,
-  ProcessManagerSecurity,
-  ProcessManagerAuth,
-  ProcessManagerSecurityError,
-} from '@vytches/ddd-process-managers';
-
-// Export ProcessSnapshot class specifically from core
-export { ProcessSnapshot as ProcessSnapshotClass } from '@vytches/ddd-process-managers/dist/core/process-snapshot';
+// Process Managers exports
+// Everything from process-managers is re-exported, including core module with ProcessSnapshot class
+export * from '@vytches/ddd-process-managers';
 
 // ===== INTEGRATION LAYER =====
 export * from '@vytches/ddd-acl';
