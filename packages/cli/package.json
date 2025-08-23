@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-cli",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Code generation tools and CLI framework",
   "type": "module",
   "main": "./dist/index.cjs",

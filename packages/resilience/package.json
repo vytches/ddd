@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-resilience",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Circuit breakers and resilience patterns",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -62,7 +62,7 @@
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
-    "@vytches/ddd-logging": "workspace:*"
+    "@vytches/ddd-logging": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*"
   }
 }
