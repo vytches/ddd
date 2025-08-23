@@ -5,9 +5,37 @@ import type { ModuleMetadata, Type } from '@nestjs/common';
  */
 export interface VytchesDDDOptions {
   /**
-   * Enable auto-discovery of DDD decorators
+   * Simple feature selection (intermediate complexity)
+   * Example: { features: ['acl', 'cqrs', 'events'] }
+   */
+  features?: string[];
+
+  /**
+   * Legacy auto-discovery of DDD decorators (backward compatibility)
    */
   autoDiscovery?: boolean | AutoDiscoveryOptions;
+
+  /**
+   * Plugin-based discovery configuration (advanced)
+   */
+  discovery?: {
+    enabled: boolean;
+    plugins?: any[]; // IDiscoveryPlugin instances
+    parallel?: boolean;
+    timeout?: number;
+    debug?: boolean;
+  };
+
+  /**
+   * Bounded contexts configuration (enterprise)
+   */
+  contexts?: Record<
+    string,
+    {
+      modules: any[];
+      accessMatrix?: string[]; // List of contexts this context can access
+    }
+  >;
 
   /**
    * CQRS configuration
@@ -18,6 +46,26 @@ export interface VytchesDDDOptions {
    * Event system configuration
    */
   events?: EventOptions;
+
+  /**
+   * ACL configuration
+   */
+  acl?: ACLOptions;
+
+  /**
+   * Domain Services configuration
+   */
+  domainServices?: DomainServicesOptions;
+
+  /**
+   * Resilience configuration
+   */
+  resilience?: ResilienceOptions;
+
+  /**
+   * Policies configuration
+   */
+  policies?: PoliciesOptions;
 
   /**
    * Messaging configuration
@@ -74,16 +122,60 @@ export interface CQRSOptions {
    * Command bus configuration
    */
   commandBus?: {
+    /**
+     * Implementation to use
+     * 'simple' - Basic CommandBus
+     * 'enhanced' - EnhancedCommandBus with middleware support
+     * Type<ICommandBus> - Custom implementation class
+     * Factory function - For dynamic creation
+     */
+    implementation?: 'simple' | 'enhanced' | Type<any> | (() => any);
+
+    /**
+     * Custom provider token (for multiple bus instances)
+     */
+    token?: string | symbol;
+
+    /**
+     * Configuration options
+     */
     timeout?: number;
     retries?: number;
+
+    /**
+     * Bus-specific middleware (overrides global)
+     */
+    middleware?: MiddlewareConfig[];
   };
 
   /**
    * Query bus configuration
    */
   queryBus?: {
+    /**
+     * Implementation to use
+     * 'simple' - Basic QueryBus
+     * 'enhanced' - EnhancedQueryBus with caching
+     * Type<IQueryBus> - Custom implementation class
+     * Factory function - For dynamic creation
+     */
+    implementation?: 'simple' | 'enhanced' | Type<any> | (() => any);
+
+    /**
+     * Custom provider token (for multiple bus instances)
+     */
+    token?: string | symbol;
+
+    /**
+     * Configuration options
+     */
     timeout?: number;
     cache?: boolean;
+
+    /**
+     * Bus-specific middleware (overrides global)
+     */
+    middleware?: MiddlewareConfig[];
   };
 }
 
@@ -134,6 +226,131 @@ export interface EventOptions {
 }
 
 /**
+ * ACL configuration
+ */
+export interface ACLOptions {
+  /**
+   * ACL adapters to register
+   */
+  adapters?: Record<string, any>;
+
+  /**
+   * Default timeout for ACL operations
+   */
+  timeout?: number;
+
+  /**
+   * Enable circuit breaker for external services
+   */
+  circuitBreaker?: boolean;
+
+  /**
+   * Retry configuration
+   */
+  retry?: {
+    maxAttempts?: number;
+    baseDelay?: number;
+  };
+}
+
+/**
+ * Domain Services configuration
+ */
+export interface DomainServicesOptions {
+  /**
+   * Domain services to register
+   */
+  services?: Type<any>[];
+
+  /**
+   * Auto-discover domain services
+   */
+  autoDiscover?: boolean;
+
+  /**
+   * Service registration options
+   */
+  registration?: {
+    lifetime?: 'transient' | 'singleton' | 'scoped';
+    context?: string;
+  };
+}
+
+/**
+ * Resilience configuration
+ */
+export interface ResilienceOptions {
+  /**
+   * Circuit breaker configuration
+   */
+  circuitBreaker?: {
+    failureThreshold?: number;
+    resetTimeout?: number;
+    halfOpenRequests?: number;
+  };
+
+  /**
+   * Retry configuration
+   */
+  retry?: {
+    maxAttempts?: number;
+    baseDelay?: number;
+    maxDelay?: number;
+    backoff?: 'exponential' | 'linear';
+  };
+
+  /**
+   * Bulkhead configuration
+   */
+  bulkhead?: {
+    maxConcurrent?: number;
+    maxQueue?: number;
+  };
+
+  /**
+   * Timeout configuration
+   */
+  timeout?: {
+    default?: number;
+    perOperation?: Record<string, number>;
+  };
+}
+
+/**
+ * Policies configuration
+ */
+export interface PoliciesOptions {
+  /**
+   * Policy definitions to register
+   */
+  policies?: any[];
+
+  /**
+   * Policy registry configuration
+   */
+  registry?: {
+    strict?: boolean;
+    throwOnDuplicate?: boolean;
+  };
+
+  /**
+   * Enable policy caching
+   */
+  cache?: {
+    enabled?: boolean;
+    ttl?: number;
+  };
+
+  /**
+   * Policy execution options
+   */
+  execution?: {
+    timeout?: number;
+    parallel?: boolean;
+  };
+}
+
+/**
  * Messaging configuration
  */
 export interface MessagingOptions {
@@ -151,6 +368,24 @@ export interface MessagingOptions {
    * Enable saga orchestration
    */
   sagas?: boolean;
+
+  /**
+   * Saga orchestrator configuration
+   */
+  orchestrator?: {
+    maxConcurrentExecutions?: number;
+    enableMetrics?: boolean;
+    enableAutoRetry?: boolean;
+  };
+
+  /**
+   * Outbox pattern configuration
+   */
+  outbox?: {
+    enabled?: boolean;
+    pollInterval?: number;
+    batchSize?: number;
+  };
 }
 
 /**
@@ -171,6 +406,36 @@ export interface ContainerOptions {
    * Custom container factory
    */
   factory?: () => any;
+}
+
+/**
+ * Context-specific configuration options
+ */
+export interface VytchesDDDContextOptions {
+  /**
+   * Context name
+   */
+  name: string;
+
+  /**
+   * Create isolated container for this context
+   */
+  isolated?: boolean;
+
+  /**
+   * Override global settings for this context
+   */
+  overrides?: Partial<VytchesDDDOptions>;
+
+  /**
+   * Context-specific middleware
+   */
+  middleware?: MiddlewareConfig[];
+
+  /**
+   * Context-specific resilience settings
+   */
+  resilience?: 'standard' | 'critical' | 'relaxed';
 }
 
 /**
@@ -196,6 +461,11 @@ export interface VytchesDDDFeatureOptions {
    * Bounded context for this feature
    */
   context?: string;
+
+  /**
+   * Override settings for this feature
+   */
+  overrides?: Partial<VytchesDDDOptions>;
 }
 
 /**

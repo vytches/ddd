@@ -10,8 +10,10 @@ import type { ICqrsValidatable } from '../validation';
 
 export class QueryBus extends IQueryBus {
   private middlewares: ICQRSMiddleware[] = [];
-  private handlers: Map<string, IQueryHandler<any, any> | (() => IQueryHandler<any, any>)> =
-    new Map();
+  private handlers: Map<
+    string,
+    IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
+  > = new Map();
 
   constructor(private container: IDependencyContainer) {
     super();

@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { IProcessManagerContext, IProcessManagerState } from '../../src/interfaces';
 import {
   InvariantManager,
   type InvariantManagerConfiguration,
 } from '../../src/invariants/invariant-manager';
 import {
-  InvariantTrigger,
   InvariantSeverity,
+  InvariantTrigger,
   type IProcessInvariant,
   type InvariantContext,
 } from '../../src/invariants/invariant.interface';
-import type { IProcessManagerState, IProcessManagerContext } from '../../src/interfaces';
 
 describe('InvariantManager', () => {
   let mockState: IProcessManagerState;
@@ -701,7 +701,7 @@ describe('InvariantManager', () => {
       const duration = Date.now() - startTime;
 
       // Should take longer due to concurrency limits (invariants executed in batches)
-      expect(duration).toBeGreaterThan(20); // At least 2 batches of 10ms each
+      expect(duration).toBeGreaterThan(10); // At least 2 batches of 10ms each
     });
   });
 

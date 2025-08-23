@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, type Type } from '@nestjs/common';
 import type { ModuleRef } from '@nestjs/core';
 import type {
   Constructor,
   IDependencyContainer,
   ServiceDescriptor,
   ServiceFactory,
+  ServiceLifetime,
   ServiceRegistrationOptions,
   ServiceToken,
-  ServiceLifetime,
 } from '@vytches/ddd-di';
 import type { ExtendedServiceRegistrationOptions } from '../types/extended';
 
@@ -18,7 +18,7 @@ import type { ExtendedServiceRegistrationOptions } from '../types/extended';
 @Injectable()
 export class NestJSContainerAdapter implements IDependencyContainer {
   private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly instances = new Map<string, any>();
+  private readonly instances = new Map<string, object>();
   private moduleRef?: ModuleRef;
 
   constructor(moduleRef?: ModuleRef) {
@@ -57,7 +57,9 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     if (this.moduleRef) {
       try {
         // Try to get from NestJS DI
-        const nestInstance = this.moduleRef.get(token as any, { strict: false });
+        const nestInstance = this.moduleRef.get(token as string | symbol | Type<object>, {
+          strict: false,
+        });
         if (nestInstance) {
           return nestInstance as T;
         }
@@ -91,7 +93,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
 
     // Cache singleton instances
     if (descriptor.lifetime === 'singleton') {
-      this.instances.set(key, instance);
+      this.instances.set(key, instance as object);
     }
 
     return instance;
@@ -161,7 +163,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     };
 
     this.services.set(key, descriptor);
-    this.instances.set(key, instance);
+    this.instances.set(key, instance as object);
   }
 
   /**
@@ -178,7 +180,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     // Check NestJS container
     if (this.moduleRef) {
       try {
-        this.moduleRef.get(token as any, { strict: false });
+        this.moduleRef.get(token as string | symbol | Type<object>, { strict: false });
         return true;
       } catch {
         return false;
@@ -216,7 +218,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
       if (descriptor.lifetime === 'singleton') {
         scopedAdapter.services.set(key, descriptor);
         if (this.instances.has(key)) {
-          scopedAdapter.instances.set(key, this.instances.get(key));
+          scopedAdapter.instances.set(key, this.instances.get(key) as object);
         }
       }
     });
@@ -240,7 +242,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     const paramTypes = Reflect.getMetadata('design:paramtypes', constructor) || [];
 
     // Resolve dependencies
-    const dependencies = paramTypes.map((paramType: any) => {
+    const dependencies = paramTypes.map((paramType: Constructor<object>) => {
       try {
         return this.resolve(paramType);
       } catch {
@@ -257,9 +259,9 @@ export class NestJSContainerAdapter implements IDependencyContainer {
    * Register a service in NestJS DI system
    * This is a simplified version - full implementation would need access to NestJS internals
    */
-  private registerInNestJS(
-    _token: ServiceToken<any>,
-    _implementation: Constructor<any>,
+  private registerInNestJS<T>(
+    _token: ServiceToken<T>,
+    _implementation: Constructor<T>,
     _options?: ExtendedServiceRegistrationOptions
   ): void {
     // This would require deeper integration with NestJS

@@ -45,7 +45,13 @@ export abstract class ScheduledEvent<T = any> extends DomainEvent<T> implements 
    * Check if event is overdue
    */
   isOverdue(): boolean {
-    return this.getDelayMs() === 0 && this.scheduleAt.getTime() < Date.now();
+    const now = Date.now();
+    const scheduledTime = this.scheduleAt.getTime();
+    const timeDiff = now - scheduledTime;
+
+    // Consider events overdue only if they're significantly in the past (>=1 second)
+    // Immediate events (scheduled for now or very recently) are not considered overdue
+    return timeDiff >= 1000;
   }
 
   /**

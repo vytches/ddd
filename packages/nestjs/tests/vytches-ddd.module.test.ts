@@ -8,19 +8,25 @@ import { VytchesDDDModule } from '../src/vytches-ddd.module';
 // VytchesDDD will be mocked
 import { VYTCHES_DDD_OPTIONS } from '../src/constants';
 
-// Mock VytchesDDD
-const mockVytchesDDD = {
-  configure: vi.fn(),
-  resolve: vi.fn(),
-};
-
+// Vi.mock hoisting fix: Move mock object inside vi.mock factory
 vi.mock('@vytches/ddd-di', async () => {
   const actual = await vi.importActual('@vytches/ddd-di');
   return {
     ...actual,
-    VytchesDDD: mockVytchesDDD,
+    VytchesDDD: {
+      configure: vi.fn(),
+      resolve: vi.fn(),
+    },
+    DiscoveryRegistry: class MockDiscoveryRegistry {
+      registerPlugin = vi.fn();
+      discoverForContext = vi.fn();
+      registerPlugins = vi.fn();
+    },
   };
 });
+
+// Access the mocked VytchesDDD for test assertions
+const { VytchesDDD: mockVytchesDDD } = await import('@vytches/ddd-di');
 
 describe('VytchesDDDModule', () => {
   let module: TestingModule;
@@ -30,8 +36,6 @@ describe('VytchesDDDModule', () => {
       await module.close();
     }
     vi.clearAllMocks();
-    mockVytchesDDD.configure.mockClear();
-    mockVytchesDDD.resolve.mockClear();
   });
 
   describe('forRoot', () => {

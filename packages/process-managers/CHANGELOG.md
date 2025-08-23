@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.9.0 (2025-08-23)
+
+### Bug Fixes
+
+- **nestjs:** implement configuration methods and reduce any type usage
+  ([648c96f](https://github.com/vytches/ddd/commit/648c96f34e7f576e39a72d394317ba096038228c))
+
+### BREAKING CHANGES
+
+- **nestjs:** None - all changes maintain backward compatibility
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.8.2 (2025-08-20)
 
 ### Bug Fixes
