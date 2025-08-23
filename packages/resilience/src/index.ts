@@ -15,7 +15,10 @@ export {
   CompositeResilienceStrategy,
   ResiliencePolicyBuilder,
   RetryStrategy,
+  TimeoutStrategy,
 } from './patterns/resilience-strategy';
+
+export type { ResilienceStrategy } from './patterns/resilience-strategy';
 
 export {
   DefaultResilienceContext,

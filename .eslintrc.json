@@ -54,6 +54,23 @@
                 ]
               },
               {
+                "sourceTag": "scope:nestjs",
+                "onlyDependOnLibsWithTags": [
+                  "scope:di",
+                  "scope:utils",
+                  "scope:events",
+                  "scope:resilience",
+                  "scope:process-managers",
+                  "scope:cqrs",
+                  "scope:acl",
+                  "scope:core",
+                  "scope:policies",
+                  "scope:messaging",
+                  "scope:validation",
+                  "scope:contracts"
+                ]
+              },
+              {
                 "sourceTag": "scope:aggregates",
                 "onlyDependOnLibsWithTags": [
                   "scope:utils",
@@ -118,6 +135,7 @@
                   "scope:validation",
                   "scope:utils",
                   "scope:contracts",
+                  "scope:resilience",
                   "scope:di",
                   "scope:cqrs"
                 ]

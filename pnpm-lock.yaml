@@ -373,6 +373,9 @@ importers:
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
+      '@vytches/ddd-resilience':
+        specifier: workspace:*
+        version: link:../resilience
     devDependencies:
       '@vytches/ddd-testing':
         specifier: workspace:*
@@ -680,6 +683,9 @@ importers:
 
   packages/nestjs:
     dependencies:
+      '@vytches/ddd-acl':
+        specifier: workspace:*
+        version: link:../acl
       '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
@@ -692,6 +698,12 @@ importers:
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
+      '@vytches/ddd-resilience':
+        specifier: workspace:*
+        version: link:../resilience
     devDependencies:
       '@nestjs/common':
         specifier: ^10.3.0
@@ -859,6 +871,12 @@ importers:
       '@vytches/ddd-core':
         specifier: workspace:*
         version: link:../core
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../utils
     devDependencies:
       '@vytches/ddd-testing':
         specifier: workspace:*

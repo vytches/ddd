@@ -1,7 +1,7 @@
 import type { ModuleRef } from '@nestjs/core';
+import { safeRun } from '@vytches/ddd-utils';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NestJSContainerAdapter } from '../src/adapters/nestjs-container.adapter';
-import { safeRun } from '@vytches/ddd-utils';
 
 describe('NestJSContainerAdapter', () => {
   let adapter: NestJSContainerAdapter;

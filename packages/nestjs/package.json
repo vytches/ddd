@@ -46,10 +46,13 @@
     "directory": "packages/nestjs"
   },
   "dependencies": {
+    "@vytches/ddd-acl": "workspace:*",
     "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-di": "workspace:*",
-    "@vytches/ddd-events": "workspace:*"
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-logging": "workspace:*",
+    "@vytches/ddd-resilience": "workspace:*"
   },
   "peerDependencies": {
     "@nestjs/common": "^10.0.0",

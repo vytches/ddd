@@ -3,7 +3,7 @@ import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import 'reflect-metadata';
 
 import { ICommandBus } from '../abstracts';
-import { CQRSConfigurationError, HandlerNotFoundError } from '../errors';
+import { HandlerNotFoundError } from '../errors';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
@@ -11,8 +11,10 @@ import type { ICqrsValidatable } from '../validation';
 
 export class CommandBus extends ICommandBus {
   private middlewares: ICQRSMiddleware[] = [];
-  private handlers: Map<string, ICommandHandler<any, any> | (() => ICommandHandler<any, any>)> =
-    new Map();
+  private handlers: Map<
+    string,
+    ICommandHandler<ICommand, unknown> | (() => ICommandHandler<ICommand, unknown>)
+  > = new Map();
 
   constructor(private container: IDependencyContainer) {
     super();
