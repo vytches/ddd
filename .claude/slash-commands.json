@@ -1,0 +1,48 @@
+{
+  "project": "vytches-ddd",
+  "description": "VytchesDDD Library - Enterprise DDD Framework",
+  "version": "1.0.0",
+  "slash_commands": {
+    "/ddd-analyze-package": {
+      "description": "Analyze DDD patterns in a specific package",
+      "handler": ".claude/commands/analyze-package.sh"
+    },
+    "/ddd-validate": {
+      "description": "Validate package against DDD principles",
+      "handler": ".claude/commands/validate.sh"
+    },
+    "/ddd-index-library": {
+      "description": "Index library structure in knowledge graph",
+      "handler": ".claude/commands/index-library.sh"
+    },
+    "/ddd-metrics": {
+      "description": "Show library metrics and statistics",
+      "handler": ".claude/commands/metrics.sh"
+    },
+    "/ddd-dependencies": {
+      "description": "Analyze package dependencies",
+      "handler": ".claude/commands/dependencies.sh"
+    },
+    "/ddd-suggest-refactor": {
+      "description": "Suggest refactoring based on DDD principles",
+      "handler": ".claude/commands/suggest-refactor.sh"
+    }
+  },
+  "agents": [
+    {
+      "name": "Library Architect",
+      "role": "Maintains library architecture and DDD compliance",
+      "focus": ["architecture", "patterns", "boundaries"]
+    },
+    {
+      "name": "Package Validator",
+      "role": "Validates packages against DDD principles",
+      "focus": ["validation", "anti-patterns", "best-practices"]
+    }
+  ],
+  "integration": {
+    "knowledge_graph": "/home/node/personal/ddd",
+    "auto_index": true,
+    "validation_on_commit": true
+  }
+}
