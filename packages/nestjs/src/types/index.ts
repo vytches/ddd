@@ -1,4 +1,4 @@
-import type { ModuleMetadata, Type } from '@nestjs/common';
+import type { ModuleMetadata, Provider, Type } from '@nestjs/common';
 
 /**
  * Main configuration options for VytchesDDD NestJS integration
@@ -76,6 +76,17 @@ export interface VytchesDDDOptions {
    * Custom container configuration
    */
   container?: ContainerOptions;
+
+  /**
+   * Custom NestJS providers (pure NestJS style)
+   * These will be added to the module's providers array
+   * @example
+   * providers: [
+   *   { provide: IEventBus, useClass: CustomEventBus },
+   *   { provide: ICommandBus, useFactory: () => new CustomCommandBus() },
+   * ]
+   */
+  providers?: Provider[];
 }
 
 /**
@@ -137,6 +148,11 @@ export interface CQRSOptions {
     token?: string | symbol;
 
     /**
+     * Interface token for dependency injection (e.g., abstract class)
+     */
+    interfaceToken?: string | symbol | Type<any>;
+
+    /**
      * Configuration options
      */
     timeout?: number;
@@ -165,6 +181,11 @@ export interface CQRSOptions {
      * Custom provider token (for multiple bus instances)
      */
     token?: string | symbol;
+
+    /**
+     * Interface token for dependency injection (e.g., abstract class)
+     */
+    interfaceToken?: string | symbol | Type<any>;
 
     /**
      * Configuration options
@@ -217,6 +238,35 @@ export interface EventOptions {
   eventBus?: {
     type: 'unified' | 'domain' | 'integration';
     config?: Record<string, any>;
+    /**
+     * Interface token for dependency injection (e.g., abstract class)
+     */
+    interfaceToken?: string | symbol | Type<any>;
+  };
+
+  /**
+   * Event dispatcher configuration
+   */
+  dispatcher?: {
+    /**
+     * Enable/disable event dispatcher
+     */
+    enabled?: boolean;
+    /**
+     * Custom dispatcher implementation
+     * Type<IEventDispatcher> - Custom implementation class
+     * Factory function - For dynamic creation
+     * Instance - Pre-created instance
+     */
+    implementation?: Type<any> | (() => any) | any;
+    /**
+     * Custom provider token for dispatcher
+     */
+    token?: string | symbol | Type<any>;
+    /**
+     * Interface token for dependency injection (e.g., abstract class)
+     */
+    interfaceToken?: string | symbol | Type<any>;
   };
 
   /**
