@@ -1,1 +1,1 @@
-export { AutoDiscoveryService } from './auto-discovery.service';
+export { VytchesDiscoveryService } from './vytches-discovery.service';

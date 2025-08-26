@@ -4,6 +4,7 @@ import type {
   IDomainEvent,
   IEventProcessor,
   IAggregateWithEvents,
+  IEventBus,
 } from '@vytches/ddd-contracts';
 import { IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from './unified-event-bus';
@@ -12,15 +13,15 @@ import { Logger } from '@vytches/ddd-logging';
 export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
   private middlewares: EventMiddleware[] = [];
   private processors: IEventProcessor[] = [];
-  private unifiedBus: UnifiedEventBus;
+  private eventBus: IEventBus<IDomainEvent>;
 
   /**
    * Create a new universal event dispatcher
-   * @param unifiedBus Optional unified event bus instance (creates new if not provided)
+   * @param eventBus Optional event bus instance (creates new UnifiedEventBus if not provided)
    */
-  constructor(unifiedBus?: UnifiedEventBus) {
+  constructor(eventBus?: IEventBus<IDomainEvent>) {
     super();
-    this.unifiedBus = unifiedBus || new UnifiedEventBus();
+    this.eventBus = eventBus || new UnifiedEventBus();
   }
 
   /**
@@ -107,26 +108,42 @@ export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
   }
 
   /**
-   * Get direct access to UnifiedEventBus for advanced scenarios
+   * Get direct access to event bus for advanced scenarios
    */
-  getUnifiedEventBus(): UnifiedEventBus {
-    return this.unifiedBus;
+  getEventBus(): IEventBus<IDomainEvent> {
+    return this.eventBus;
   }
 
   /**
-   * Replace the unified event bus (useful for testing)
+   * Get direct access to UnifiedEventBus for advanced scenarios (backward compatibility)
+   * @deprecated Use getEventBus() instead
    */
-  setUnifiedEventBus(bus: UnifiedEventBus): void {
-    this.unifiedBus = bus;
+  getUnifiedEventBus(): IEventBus<IDomainEvent> {
+    return this.eventBus;
+  }
+
+  /**
+   * Replace the event bus (useful for testing)
+   */
+  setEventBus(bus: IEventBus<IDomainEvent>): void {
+    this.eventBus = bus;
+  }
+
+  /**
+   * Replace the unified event bus (backward compatibility)
+   * @deprecated Use setEventBus() instead
+   */
+  setUnifiedEventBus(bus: IEventBus<IDomainEvent>): void {
+    this.eventBus = bus;
   }
 
   /**
    * Build the middleware pipeline for event processing
    */
   private buildPipeline(): (event: IDomainEvent) => Promise<void> {
-    // Base function that publishes to UnifiedEventBus
+    // Base function that publishes to event bus
     let pipeline = async (event: IDomainEvent): Promise<void> => {
-      await this.unifiedBus.publish(event);
+      await this.eventBus.publish(event);
     };
 
     // Apply middleware in reverse order (last added, first executed)

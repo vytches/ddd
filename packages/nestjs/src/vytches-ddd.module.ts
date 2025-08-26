@@ -1,13 +1,10 @@
 import type { DynamicModule, OnModuleInit, Type } from '@nestjs/common';
-import { Global, Inject, Module } from '@nestjs/common';
+import { Global, Inject, Module, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
-// VytchesDDD will be lazy-loaded
-import { UnifiedEventBus } from '@vytches/ddd-events';
 import { NestJSContainerAdapter } from './adapters/nestjs-container.adapter';
 import { VYTCHES_DDD_OPTIONS } from './constants';
-import { AutoDiscoveryService } from './discovery/auto-discovery.service';
-import { EnhancedDiscoveryService } from './discovery/enhanced-discovery.service';
+import { VytchesDiscoveryService } from './discovery/vytches-discovery.service';
 import type {
   CQRSOptions,
   VytchesDDDAsyncOptions,
@@ -25,6 +22,8 @@ import type {
 @Module({})
 export class VytchesDDDModule implements OnModuleInit {
   private static adapter: NestJSContainerAdapter;
+  private static logger = new Logger('VytchesDDDModule');
+  private initTimeout?: NodeJS.Timeout;
 
   constructor(
     @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
@@ -32,9 +31,43 @@ export class VytchesDDDModule implements OnModuleInit {
   ) {}
 
   /**
-   * Initialize VytchesDDD on module init
+   * Initialize VytchesDDD on module init with timeout and proper error handling
    */
   async onModuleInit(): Promise<void> {
+    const startTime = Date.now();
+    const timeout = (this.options as any)?.initTimeout ?? 5000;
+
+    try {
+      // Run initialization with timeout
+      await Promise.race([
+        this.initializeModule(),
+        new Promise((_, reject) => {
+          this.initTimeout = setTimeout(
+            () => reject(new Error(`VytchesDDD initialization timeout after ${timeout}ms`)),
+            timeout
+          );
+        }),
+      ]);
+
+      VytchesDDDModule.logger.log(
+        `✓ VytchesDDD initialized successfully in ${Date.now() - startTime}ms`
+      );
+    } catch (error) {
+      // Always log errors - no silent failures
+      VytchesDDDModule.logger.error('Failed to initialize VytchesDDD:', error);
+      VytchesDDDModule.logger.warn('VytchesDDD is running with limited functionality');
+      // Don't throw - allow app to continue
+    } finally {
+      if (this.initTimeout) {
+        clearTimeout(this.initTimeout);
+      }
+    }
+  }
+
+  /**
+   * Internal initialization logic
+   */
+  private async initializeModule(): Promise<void> {
     // Set up the adapter with ModuleRef
     if (VytchesDDDModule.adapter) {
       VytchesDDDModule.adapter.setModuleRef(this.moduleRef);
@@ -42,44 +75,73 @@ export class VytchesDDDModule implements OnModuleInit {
       VytchesDDDModule.adapter = new NestJSContainerAdapter(this.moduleRef);
     }
 
-    // Configure VytchesDDD with our adapter (lazy-loaded)
-    const { VytchesDDD } = await import('@vytches/ddd-di');
-    await VytchesDDD.configure(VytchesDDDModule.adapter);
+    // Try to configure VytchesDDD but don't fail if it doesn't work
+    try {
+      const { VytchesDDD } = await import('@vytches/ddd-di');
+      await VytchesDDD.configure(VytchesDDDModule.adapter);
+      VytchesDDDModule.logger.debug('VytchesDDD DI configured successfully');
+    } catch (error) {
+      VytchesDDDModule.logger.warn('Could not configure VytchesDDD DI:', error);
+      // Continue without VytchesDDD - basic functionality still works
+    }
 
-    // Set up CQRS if configured (before discovery so buses are available)
+    // Set up CQRS if configured
     if (this.options.cqrs) {
-      await this.setupCQRS();
+      try {
+        await this.setupCQRS();
+      } catch (error) {
+        VytchesDDDModule.logger.error('Failed to setup CQRS:', error);
+      }
     }
 
-    // Set up Events if configured (before discovery so bus is available)
+    // Set up Events if configured
     if (this.options.events) {
-      await this.setupEvents();
+      try {
+        await this.setupEvents();
+      } catch (error) {
+        VytchesDDDModule.logger.error('Failed to setup Events:', error);
+      }
     }
 
-    // Check if this is zero-config mode (no options or empty options)
-    const isZeroConfig =
-      !this.options ||
-      Object.keys(this.options).length === 0 ||
-      (Object.keys(this.options).length === 1 && this.options.discovery?.enabled);
-
-    if (isZeroConfig) {
-      // Zero-config mode: use enhanced discovery
-      const enhancedDiscovery = new EnhancedDiscoveryService(
-        VytchesDDDModule.adapter,
-        this.moduleRef
-      );
-      await enhancedDiscovery.discoverAll();
-    } else if (this.options.discovery?.enabled) {
-      // Plugin-based discovery for advanced configuration
-      await this.setupPluginDiscovery();
-    } else if (this.options.autoDiscovery) {
-      // Legacy auto-discovery (backward compatibility)
-      const discoveryService = new AutoDiscoveryService(
-        VytchesDDDModule.adapter,
-        this.options.autoDiscovery === true ? {} : this.options.autoDiscovery
-      );
-      await discoveryService.discover();
+    // Discovery is DISABLED by default - only run if explicitly enabled
+    if (this.options?.discovery?.enabled === true) {
+      VytchesDDDModule.logger.log('Discovery explicitly enabled, starting...');
+      await this.runDiscovery();
+    } else if (this.options?.autoDiscovery === true) {
+      // Legacy auto-discovery
+      VytchesDDDModule.logger.log('Legacy auto-discovery enabled');
+      await this.runLegacyDiscovery();
     }
+  }
+
+  /**
+   * Run discovery with timeout
+   */
+  private async runDiscovery(): Promise<void> {
+    try {
+      const discoveryService = new VytchesDiscoveryService(
+        VytchesDDDModule.adapter,
+        this.moduleRef!
+      );
+
+      // Run with 3 second timeout
+      await Promise.race([
+        discoveryService.discoverAll(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Discovery timeout')), 3000)),
+      ]);
+
+      VytchesDDDModule.logger.log('Discovery completed successfully');
+    } catch (error) {
+      VytchesDDDModule.logger.error('Discovery failed:', error);
+      // Don't throw - continue without discovery
+    }
+  }
+
+  /**
+   * Run legacy discovery (same as regular discovery now)
+   */
+  private async runLegacyDiscovery(): Promise<void> {
+    await this.runDiscovery();
   }
 
   /**
@@ -193,15 +255,15 @@ export class VytchesDDDModule implements OnModuleInit {
   private static normalizeOptions(options?: VytchesDDDOptions | string[]): VytchesDDDOptions {
     // Handle undefined or null
     if (!options) {
-      // Zero-config: enable auto-discovery with all features
+      // Zero-config: DISABLE discovery by default to prevent hanging
       return {
         discovery: {
-          enabled: true,
+          enabled: false, // DISABLED by default!
           parallel: true,
           debug: false,
         },
         cqrs: {
-          autoRegisterHandlers: true,
+          autoRegisterHandlers: false, // DISABLED by default!
         },
         events: {
           eventBus: {
@@ -216,7 +278,7 @@ export class VytchesDDDModule implements OnModuleInit {
       return {
         features: options,
         discovery: {
-          enabled: true,
+          enabled: false, // Still disabled by default
           parallel: true,
         },
       };
@@ -226,12 +288,12 @@ export class VytchesDDDModule implements OnModuleInit {
     if (Object.keys(options).length === 0) {
       return {
         discovery: {
-          enabled: true,
+          enabled: false, // DISABLED by default!
           parallel: true,
           debug: false,
         },
         cqrs: {
-          autoRegisterHandlers: true,
+          autoRegisterHandlers: false, // DISABLED by default!
         },
         events: {
           eventBus: {
@@ -246,7 +308,7 @@ export class VytchesDDDModule implements OnModuleInit {
       return {
         ...options,
         discovery: {
-          enabled: true,
+          enabled: false, // Disabled by default
           parallel: true,
         },
       };
@@ -287,6 +349,14 @@ export class VytchesDDDModule implements OnModuleInit {
     // Normalize options for progressive complexity
     const normalizedOptions = this.normalizeOptions(options);
 
+    // Log configuration for debugging
+    this.logger.log('VytchesDDDModule configuration:', {
+      discovery: normalizedOptions.discovery?.enabled ? 'enabled' : 'disabled',
+      autoDiscovery: normalizedOptions.autoDiscovery ? 'enabled' : 'disabled',
+      cqrs: normalizedOptions.cqrs ? 'configured' : 'not configured',
+      events: normalizedOptions.events ? 'configured' : 'not configured',
+    });
+
     // Build providers based on features
     const providers = this.buildProviders(normalizedOptions);
 
@@ -299,10 +369,23 @@ export class VytchesDDDModule implements OnModuleInit {
 
     // Only export services that were actually provided
     if (enabledFeatures.includes('cqrs') || normalizedOptions.cqrs) {
-      exports.push(CommandBus, QueryBus);
+      exports.push(CommandBus, QueryBus, 'ICommandBus', 'IQueryBus');
     }
+
+    // Only export events if the package is actually available
     if (enabledFeatures.includes('events') || normalizedOptions.events) {
-      exports.push(UnifiedEventBus);
+      try {
+        const { UnifiedEventBus, UniversalEventDispatcher } = require('@vytches/ddd-events');
+        exports.push(UnifiedEventBus, 'IEventBus');
+
+        // Export dispatcher if enabled
+        if (normalizedOptions.events?.dispatcher?.enabled !== false) {
+          exports.push(UniversalEventDispatcher, 'IEventDispatcher');
+        }
+      } catch {
+        // Events package not available - don't export
+        this.logger.debug('Events package not available, skipping event exports');
+      }
     }
 
     return {
@@ -350,8 +433,13 @@ export class VytchesDDDModule implements OnModuleInit {
         provide: NestJSContainerAdapter,
         useValue: this.adapter,
       },
-      AutoDiscoveryService,
+      VytchesDiscoveryService,
     ];
+
+    // Add custom providers if provided (NestJS style)
+    if (options.providers && Array.isArray(options.providers)) {
+      providers.push(...options.providers);
+    }
 
     // Detect which packages are installed and add their providers
     const detectedFeatures = this.detectInstalledPackages();
@@ -364,10 +452,7 @@ export class VytchesDDDModule implements OnModuleInit {
 
     // Add Events providers if enabled
     if (enabledFeatures.includes('events') || options.events) {
-      providers.push({
-        provide: UnifiedEventBus,
-        useFactory: () => new UnifiedEventBus(),
-      });
+      providers.push(...this.buildEventProviders(options.events));
     }
 
     // Add ACL providers if enabled
@@ -493,7 +578,7 @@ export class VytchesDDDModule implements OnModuleInit {
       },
       // Provide interface token pointing to implementation
       {
-        provide: 'ICommandBus',
+        provide: commandBusConfig?.interfaceToken || 'ICommandBus',
         useExisting: commandBusToken,
       },
       // Also provide the concrete class if different from token
@@ -557,7 +642,7 @@ export class VytchesDDDModule implements OnModuleInit {
       },
       // Provide interface token pointing to implementation
       {
-        provide: 'IQueryBus',
+        provide: queryBusConfig?.interfaceToken || 'IQueryBus',
         useExisting: queryBusToken,
       },
       // Also provide the concrete class if different from token
@@ -570,6 +655,99 @@ export class VytchesDDDModule implements OnModuleInit {
           ]
         : [])
     );
+
+    return providers;
+  }
+
+  /**
+   * Build Event-specific providers with flexible implementation selection
+   */
+  private static buildEventProviders(eventsConfig?: any): any[] {
+    const providers: any[] = [];
+
+    try {
+      // Import event classes
+      const { UnifiedEventBus, UniversalEventDispatcher } = require('@vytches/ddd-events');
+
+      // Determine implementation and tokens
+      const eventBusImplementation = eventsConfig?.eventBus?.implementation;
+      const eventBusToken = eventsConfig?.eventBus?.token || UnifiedEventBus;
+      const eventBusInterfaceToken = eventsConfig?.eventBus?.interfaceToken || 'IEventBus';
+      const dispatcherImplementation = eventsConfig?.dispatcher?.implementation;
+      const dispatcherToken = eventsConfig?.dispatcher?.token || UniversalEventDispatcher;
+      const dispatcherInterfaceToken =
+        eventsConfig?.dispatcher?.interfaceToken || 'IEventDispatcher';
+
+      // Event Bus Provider
+      const actualEventBusClass = eventBusImplementation || UnifiedEventBus;
+
+      // Main provider
+      providers.push({
+        provide: eventBusToken,
+        useClass: actualEventBusClass,
+      });
+
+      // Interface token (only if different from main token)
+      if (eventBusInterfaceToken && eventBusInterfaceToken !== eventBusToken) {
+        providers.push({
+          provide: eventBusInterfaceToken,
+          useExisting: eventBusToken,
+        });
+      }
+
+      // Backward compatibility - always provide UnifiedEventBus token if it's not the main token
+      if (eventBusToken !== UnifiedEventBus) {
+        providers.push({
+          provide: UnifiedEventBus,
+          useExisting: eventBusToken,
+        });
+      }
+
+      // Event Dispatcher Provider (if needed)
+      if (eventsConfig?.dispatcher?.enabled !== false) {
+        // Main dispatcher provider
+        providers.push({
+          provide: dispatcherToken,
+          useFactory: (eventBus: any) => {
+            // If custom dispatcher implementation
+            if (dispatcherImplementation) {
+              if (typeof dispatcherImplementation === 'function') {
+                // Check if it's a class constructor or factory
+                if (dispatcherImplementation.prototype?.constructor) {
+                  return new (dispatcherImplementation as any)(eventBus);
+                } else {
+                  // Factory function
+                  return (dispatcherImplementation as any)(eventBus);
+                }
+              }
+              return dispatcherImplementation; // Instance
+            }
+            // Default dispatcher
+            return new UniversalEventDispatcher(eventBus);
+          },
+          inject: [eventBusToken], // Inject using the configured token
+        });
+
+        // Interface token (only if different from main token)
+        if (dispatcherInterfaceToken && dispatcherInterfaceToken !== dispatcherToken) {
+          providers.push({
+            provide: dispatcherInterfaceToken,
+            useExisting: dispatcherToken,
+          });
+        }
+
+        // Backward compatibility - always provide UniversalEventDispatcher token if it's not the main token
+        if (dispatcherToken !== UniversalEventDispatcher) {
+          providers.push({
+            provide: UniversalEventDispatcher,
+            useExisting: dispatcherToken,
+          });
+        }
+      }
+    } catch (error) {
+      // Events package not installed
+      this.logger.debug('Events package not available:', error);
+    }
 
     return providers;
   }
@@ -721,7 +899,7 @@ export class VytchesDDDModule implements OnModuleInit {
           provide: NestJSContainerAdapter,
           useValue: this.adapter,
         },
-        AutoDiscoveryService,
+        VytchesDiscoveryService,
         // Core services with async options
         {
           provide: CommandBus,
@@ -746,11 +924,24 @@ export class VytchesDDDModule implements OnModuleInit {
           inject: [NestJSContainerAdapter, VYTCHES_DDD_OPTIONS],
         },
         {
-          provide: UnifiedEventBus,
-          useFactory: () => new UnifiedEventBus(),
+          provide: 'UnifiedEventBus',
+          useFactory: async () => {
+            try {
+              const { UnifiedEventBus } = await import('@vytches/ddd-events');
+              return new UnifiedEventBus();
+            } catch {
+              return null;
+            }
+          },
         },
       ],
-      exports: [NestJSContainerAdapter, CommandBus, QueryBus, UnifiedEventBus, VYTCHES_DDD_OPTIONS],
+      exports: [
+        NestJSContainerAdapter,
+        CommandBus,
+        QueryBus,
+        'UnifiedEventBus',
+        VYTCHES_DDD_OPTIONS,
+      ],
     };
   }
 
@@ -866,11 +1057,24 @@ export class VytchesDDDModule implements OnModuleInit {
           inject: [NestJSContainerAdapter],
         },
         {
-          provide: UnifiedEventBus,
-          useValue: new UnifiedEventBus(),
+          provide: 'UnifiedEventBus',
+          useFactory: async () => {
+            try {
+              const { UnifiedEventBus } = await import('@vytches/ddd-events');
+              return new UnifiedEventBus();
+            } catch {
+              return null;
+            }
+          },
         },
       ],
-      exports: [NestJSContainerAdapter, CommandBus, QueryBus, UnifiedEventBus, VYTCHES_DDD_OPTIONS],
+      exports: [
+        NestJSContainerAdapter,
+        CommandBus,
+        QueryBus,
+        'UnifiedEventBus',
+        VYTCHES_DDD_OPTIONS,
+      ],
     };
   }
 
@@ -882,16 +1086,25 @@ export class VytchesDDDModule implements OnModuleInit {
       return;
     }
 
-    const commandBus = this.moduleRef.get(CommandBus, { strict: false });
-    const queryBus = this.moduleRef.get(QueryBus, { strict: false });
+    try {
+      const commandBus = this.moduleRef.get(CommandBus, { strict: false });
+      const queryBus = this.moduleRef.get(QueryBus, { strict: false });
 
-    // Register buses in VytchesDDD
-    VytchesDDDModule.adapter.registerInstance('commandBus', commandBus);
-    VytchesDDDModule.adapter.registerInstance('queryBus', queryBus);
+      // Register buses in VytchesDDD if available
+      if (commandBus) {
+        VytchesDDDModule.adapter.registerInstance('commandBus', commandBus);
+      }
+      if (queryBus) {
+        VytchesDDDModule.adapter.registerInstance('queryBus', queryBus);
+      }
 
-    // Auto-register handlers if configured
-    if (this.options.cqrs?.autoRegisterHandlers) {
-      // This will be handled by auto-discovery service
+      // Auto-register handlers if configured
+      if (this.options.cqrs?.autoRegisterHandlers) {
+        // This will be handled by auto-discovery service
+      }
+    } catch (error) {
+      VytchesDDDModule.logger.debug('Could not get CQRS buses:', error);
+      // Continue without CQRS buses
     }
   }
 
@@ -903,10 +1116,21 @@ export class VytchesDDDModule implements OnModuleInit {
       return;
     }
 
-    const eventBus = this.moduleRef.get(UnifiedEventBus, { strict: false });
+    try {
+      // Dynamic import to avoid lazy-loading issues
+      const { UnifiedEventBus } = await import('@vytches/ddd-events');
+      const eventBus = this.moduleRef.get(UnifiedEventBus, { strict: false });
 
-    // Register event bus in VytchesDDD
-    VytchesDDDModule.adapter.registerInstance('eventBus', eventBus);
+      if (eventBus) {
+        // Register event bus in VytchesDDD
+        VytchesDDDModule.adapter.registerInstance('eventBus', eventBus);
+      } else {
+        VytchesDDDModule.logger.debug('UnifiedEventBus not available in module context');
+      }
+    } catch (error) {
+      VytchesDDDModule.logger.debug('Could not get UnifiedEventBus:', error);
+      // Continue without event bus
+    }
   }
 
   /**
