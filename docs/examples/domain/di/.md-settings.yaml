@@ -1,0 +1,49 @@
+# Package Settings for DI - Enhanced Metadata System V2
+
+# === PACKAGE IDENTITY ===
+package-name: 'di'
+display-name: 'DDD Dependency Injection'
+description: 'Enterprise-grade dependency injection with auto-discovery and context isolation'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'infrastructure'
+complexity: 'advanced'
+patterns:
+  - 'service-locator'
+  - 'decorator-pattern'
+  - 'plugin-pattern'
+  - 'adapter-pattern'
+  - 'auto-discovery'
+
+# === BUSINESS CONTEXT ===
+business-context: 'Provides unified dependency injection following MediatR pattern with framework-agnostic design and bounded context support'
+
+# === PACKAGE-LEVEL FORMAT OVERRIDES ===
+formats:
+  jsdoc:
+    description: 'Dependency injection with auto-discovery and multiple framework adapters'
+    business-context: 'Enables loose coupling and testability across enterprise applications'
+  cli:
+    description: |
+      ## DI Package
+      Complete dependency injection solution with:
+      - Global service locator pattern
+      - Auto-discovery through decorators
+      - Framework adapters (NestJS, InversifyJS, TSyringe)
+      - Bounded context isolation
+      - Service lifetime management
+    business-context: |
+      Essential for building maintainable enterprise applications with proper separation of concerns and testability
+
+# === CUSTOM TAGS ===
+custom-tags:
+  author: 'VytchesDDD Team'
+  since: '1.0.0'
+  maturity: 'stable'
+  enterprise: 'true'
+  mediatR-compatible: 'true'

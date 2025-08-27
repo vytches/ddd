@@ -1,0 +1,119 @@
+# Index - Domain Primitives Package Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Domain Primitives Package Public API'
+description: 'Main export file for domain primitives and foundational patterns'
+business-context: 'Provides unified access to all domain primitive functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for domain primitives including errors and actors'
+  business-context: 'Simplifies imports by providing single entry point for foundational DDD patterns'
+  
+  formats:
+    jsdoc:
+      description: 'Domain primitives package exports and re-exports'
+    cli:
+      description: |
+        ## Domain Primitives Package Exports
+        
+        Complete foundational system including:
+        - Comprehensive error handling system
+        - Actor pattern for domain operations
+        - Base classes and interfaces
+        - Error code categorization
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'foundation'
+    pattern: 'facade-pattern'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  # Error System Exports
+  ApplicationErrorCode:
+    description: 'Application-level error code enumeration'
+    business-context: 'Categorizes application infrastructure and flow errors'
+    source: './errors'
+    
+  BaseError:
+    description: 'Foundation error class with structured metadata'
+    business-context: 'Base class for all domain errors with consistent patterns'
+    source: './errors'
+    
+  DomainErrorCode:
+    description: 'Domain-specific error code enumeration'
+    business-context: 'Categorizes business rule and domain logic errors'
+    source: './errors'
+    
+  DuplicateError:
+    description: 'Error for duplicate entity or value detection'
+    business-context: 'Enforces unique constraints and duplicate prevention'
+    source: './errors'
+    
+  FrameworkErrorCode:
+    description: 'Framework-level error code enumeration'
+    business-context: 'Categorizes framework infrastructure and setup errors'
+    source: './errors'
+    
+  IDomainError:
+    description: 'Core domain error interface contract'
+    business-context: 'Standard interface for all domain-specific error implementations'
+    source: './errors'
+    
+  InvalidParameterError:
+    description: 'Error for invalid domain operation parameters'
+    business-context: 'Validates input parameters and provides clear feedback'
+    source: './errors'
+    
+  MissingValueError:
+    description: 'Error for absent or null required values'
+    business-context: 'Enforces required field validation in domain operations'
+    source: './errors'
+    
+  NotFoundError:
+    description: 'Error for missing entities or resources'
+    business-context: 'Handles entity lookup failures and resource availability'
+    source: './errors'
+    
+  DomainErrorOptions:
+    description: 'Domain-specific error configuration options'
+    business-context: 'Extends base error options with domain metadata'
+    source: './errors'
+    type: 'type'
+    
+  ErrorCode:
+    description: 'Union type of all available error codes'
+    business-context: 'Provides type-safe error code usage across domains'
+    source: './errors'
+    type: 'type'
+    
+  ErrorOptions:
+    description: 'Base error configuration options interface'
+    business-context: 'Provides flexible error configuration with context'
+    source: './errors'
+    type: 'type'
+    
+  # Actor System Exports
+  ActorError:
+    description: 'Actor-specific domain error class'
+    business-context: 'Handles validation and operational failures in actor patterns'
+    source: './actor'
+    
+  DefaultActorType:
+    description: 'Default actor type constant for system operations'
+    business-context: 'Standard actor identity for automated domain processes'
+    source: './actor'
+    
+  IActor:
+    description: 'Core actor interface for domain operations'
+    business-context: 'Actor pattern contract with user context and identity'
+    source: './actor'
+    type: 'type'

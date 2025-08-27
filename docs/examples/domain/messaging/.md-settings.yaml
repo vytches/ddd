@@ -1,0 +1,50 @@
+# Package Settings for Messaging - Enhanced Metadata System V2
+
+# === PACKAGE IDENTITY ===
+package-name: 'messaging'
+display-name: 'DDD Messaging'
+description: 'Enterprise messaging patterns including outbox, sagas, and reliable message delivery'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'integration'
+complexity: 'advanced'
+patterns:
+  - 'outbox-pattern'
+  - 'saga-pattern'
+  - 'message-broker'
+  - 'retry-pattern'
+  - 'compensation-pattern'
+
+# === BUSINESS CONTEXT ===
+business-context: 'Implements enterprise messaging patterns for reliable distributed communication and long-running business processes'
+
+# === PACKAGE-LEVEL FORMAT OVERRIDES ===
+formats:
+  jsdoc:
+    description: 'Messaging patterns with outbox, sagas, and guaranteed delivery'
+    business-context: 'Ensures reliable message delivery in distributed systems'
+  cli:
+    description: |
+      ## Messaging Package
+      Complete messaging infrastructure with:
+      - Outbox pattern for transactional messaging
+      - Saga orchestration for long-running processes
+      - Priority message processing
+      - Delayed and scheduled messages
+      - Retry mechanisms with exponential backoff
+      - Compensation and rollback support
+    business-context: |
+      Critical for building resilient distributed systems with eventual consistency and reliable inter-service communication
+
+# === CUSTOM TAGS ===
+custom-tags:
+  author: 'VytchesDDD Team'
+  since: '1.0.0'
+  maturity: 'stable'
+  enterprise: 'true'
+  distributed: 'true'

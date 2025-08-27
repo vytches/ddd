@@ -1,0 +1,38 @@
+# Testing Interfaces - Test Harness Contracts
+
+# === FILE METADATA ===
+file-name: 'testing.interfaces'
+title: 'Testing Harness Interfaces'
+description: 'Core testing interfaces and contracts for test utilities'
+business-context: 'Foundation for implementing test harnesses and testing utilities'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Comprehensive testing harness interfaces'
+  business-context: 'Contracts for implementing test harnesses, data builders, and testing utilities'
+  
+  formats:
+    jsdoc:
+      description: 'Testing harness contracts and utilities'
+    cli:
+      description: |
+        ## Testing Harness Interfaces
+        
+        Testing system supporting:
+        - Test harness implementation
+        - Test data builders
+        - Test fixtures
+        - Test scenarios
+        - Test clock utilities
+        - Safe run result handling
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'testing-harness'
+    usage: 'testing'

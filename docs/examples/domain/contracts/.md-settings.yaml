@@ -1,0 +1,43 @@
+# Contracts Package Settings - Enhanced Metadata System V2
+
+# === PACKAGE IDENTITY ===
+package-name: 'contracts'
+display-name: 'DDD Contracts'
+description: 'Foundation interfaces and contracts for domain-driven design'
+business-context: 'Core contracts providing the foundation for all DDD patterns and implementations across the library'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'foundation'
+complexity: 'intermediate'
+maturity: 'stable'
+framework-agnostic: true
+
+patterns:
+  - 'interface-contracts'
+  - 'event-sourcing'
+  - 'repository-pattern'
+  - 'specification-pattern'
+  - 'capability-pattern'
+  - 'aggregate-pattern'
+
+# === JSDOC CONFIGURATION ===
+jsdoc:
+  placement-strategy: 'separate'
+  class-documentation: 'enabled'
+  constructor-documentation: 'enabled'
+  method-documentation: 'enabled'
+  interface-documentation: 'enabled'
+
+# === PACKAGE-LEVEL CUSTOM TAGS ===
+custom-tags:
+  since: '1.0.0'
+  stability: 'stable'
+  category: 'contracts'
+  enterprise: true
+  foundation: true
+  circular-dependency-breaker: true

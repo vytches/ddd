@@ -1,0 +1,119 @@
+# Utils Index - NestJS Utility Functions
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'NestJS Integration Utility Functions'
+description: 'Helper functions for VytchesDDD-NestJS integration'
+business-context: 'Utilities for bridging VytchesDDD services with NestJS dependency injection'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FUNCTIONS ===
+functions:
+  createProvider:
+    description: 'Create a NestJS provider from a VytchesDDD service'
+    business-context: 'Bridges VytchesDDD service locator pattern with NestJS DI system'
+    
+    parameters:
+      - name: 'serviceId'
+        type: 'string'
+        description: 'The service identifier in VytchesDDD container'
+        
+    returns:
+      type: 'Provider'
+      description: 'NestJS provider configuration object'
+      
+    examples:
+      - id: 'basic'
+        code: |
+          const userServiceProvider = createProvider('userService');
+          // Returns: { provide: 'userService', useFactory: () => Promise<UserService> }
+          
+  createProviders:
+    description: 'Create multiple NestJS providers from VytchesDDD service IDs'
+    business-context: 'Batch creation of providers for efficient module configuration'
+    
+    parameters:
+      - name: 'serviceIds'
+        type: 'string[]'
+        description: 'Array of service identifiers to convert to providers'
+        
+    returns:
+      type: 'Provider[]'
+      description: 'Array of NestJS provider configuration objects'
+      
+    examples:
+      - id: 'batch'
+        code: |
+          const providers = createProviders(['userService', 'orderService', 'paymentService']);
+          // Returns array of provider configurations
+          
+  isConstructor:
+    description: 'Helper to check if a value is a class constructor'
+    business-context: 'Type guard for distinguishing constructors from other values in DI registration'
+    
+    parameters:
+      - name: 'value'
+        type: 'any'
+        description: 'Value to check for constructor signature'
+        
+    returns:
+      type: 'boolean'
+      description: 'True if value is a constructor function'
+      
+    examples:
+      - id: 'type-check'
+        code: |
+          if (isConstructor(UserService)) {
+            // Register as class provider
+          }
+          
+  getMetadata:
+    description: 'Helper to retrieve metadata from a class or object'
+    business-context: 'Accesses decorator metadata for discovery and configuration'
+    
+    parameters:
+      - name: 'key'
+        type: 'string | symbol'
+        description: 'Metadata key to retrieve'
+      - name: 'target'
+        type: 'any'
+        description: 'Target class or object to get metadata from'
+        
+    returns:
+      type: 'any'
+      description: 'The metadata value if found, undefined otherwise'
+      
+    examples:
+      - id: 'read-metadata'
+        code: |
+          const serviceId = getMetadata('vytches:service-id', UserService);
+          // Retrieves the service ID from decorator metadata
+          
+  setMetadata:
+    description: 'Helper to attach metadata to a class or object'
+    business-context: 'Stores configuration and discovery metadata on classes'
+    
+    parameters:
+      - name: 'key'
+        type: 'string | symbol'
+        description: 'Metadata key to set'
+      - name: 'value'
+        type: 'any'
+        description: 'Metadata value to store'
+      - name: 'target'
+        type: 'any'
+        description: 'Target class or object to attach metadata to'
+        
+    returns:
+      type: 'void'
+      description: 'Does not return a value'
+      
+    examples:
+      - id: 'store-metadata'
+        code: |
+          setMetadata('vytches:bounded-context', 'UserManagement', UserService);
+          // Attaches bounded context metadata to the service class

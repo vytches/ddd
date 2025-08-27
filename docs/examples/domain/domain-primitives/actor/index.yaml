@@ -1,0 +1,53 @@
+# Actor Index - Domain Actor Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Domain Actor Package Exports'
+description: 'Actor pattern exports for domain-driven design'
+business-context: 'Provides unified access to actor pattern functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for domain actor patterns and interfaces'
+  business-context: 'Simplifies imports for actor pattern implementation in DDD contexts'
+  
+  formats:
+    jsdoc:
+      description: 'Actor pattern exports and interfaces'
+    cli:
+      description: |
+        ## Domain Actor Exports
+        
+        Actor pattern functionality including:
+        - Actor interfaces and contracts
+        - Actor error handling
+        - Default actor type definitions
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'actor-pattern'
+    pattern: 'facade-pattern'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  ActorError:
+    description: 'Error class for actor-specific exceptions in domain operations'
+    business-context: 'Handles validation and operational failures in actor pattern implementations'
+    source: './actor.error'
+    
+  DefaultActorType:
+    description: 'Default actor type constant for system-generated operations'
+    business-context: 'Provides standard actor identity for automated domain processes'
+    source: './actor.interface'
+    
+  IActor:
+    description: 'Core actor interface defining identity and behavior contracts'
+    business-context: 'Establishes actor pattern contract for domain operations with user context'
+    source: './actor.interface'
+    type: 'type'

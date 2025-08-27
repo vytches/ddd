@@ -1,0 +1,41 @@
+# Adapters Index - NestJS Container Adapter Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'NestJS Adapters Package Exports'
+description: 'NestJS container adapter exports'
+business-context: 'Provides unified access to NestJS container adaptation functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for NestJS container adapters'
+  business-context: 'Simplifies imports for NestJS dependency injection integration'
+  
+  formats:
+    jsdoc:
+      description: 'NestJS container adapter exports'
+    cli:
+      description: |
+        ## NestJS Adapters Exports
+        
+        Container adaptation functionality including:
+        - NestJS container adapter implementation
+        - Dependency injection bridge patterns
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'adapter-pattern'
+    framework: 'nestjs'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  NestJSContainerAdapter:
+    description: 'Adapter implementation for integrating VytchesDDD with NestJS DI container'
+    business-context: 'Bridges VytchesDDD service locator pattern with NestJS dependency injection system'
+    source: './nestjs-container.adapter'

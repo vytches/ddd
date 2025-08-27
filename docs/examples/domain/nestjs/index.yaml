@@ -1,0 +1,73 @@
+# Index - NestJS Package Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'NestJS Package Public API'
+description: 'Main export file for NestJS integration with VytchesDDD'
+business-context: 'Provides unified access to all NestJS adapter functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for NestJS framework integration with VytchesDDD'
+  business-context: 'Simplifies imports by providing single entry point for NestJS-specific functionality'
+  
+  formats:
+    jsdoc:
+      description: 'NestJS adapter package exports and integrations'
+    cli:
+      description: |
+        ## NestJS Package Exports
+        
+        Complete NestJS integration including:
+        - VytchesDDD module configuration
+        - Container adapter for dependency injection
+        - Type definitions and utilities
+        - Discovery services and configuration
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'framework-integration'
+    pattern: 'adapter-pattern'
+    framework: 'nestjs'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  VytchesDDDModule:
+    description: 'Main NestJS module for VytchesDDD integration'
+    business-context: 'Configures and initializes VytchesDDD services within NestJS application'
+    source: './vytches-ddd.module'
+    
+  NestJSContainerAdapter:
+    description: 'Container adapter implementing dependency injection bridge pattern'
+    business-context: 'Enables VytchesDDD service locator to work with NestJS dependency injection'
+    source: './adapters/nestjs-container.adapter'
+    
+  types:
+    description: 'Type definitions for NestJS integration'
+    business-context: 'Provides TypeScript interfaces and types for framework integration'
+    source: './types'
+    type: 'namespace'
+    
+  configuration:
+    description: 'Configuration interfaces and options for VytchesDDD module'
+    business-context: 'Module configuration contracts and setup options'
+    source: './configuration'
+    type: 'namespace'
+    
+  discovery:
+    description: 'Auto-discovery services for handlers and domain services'
+    business-context: 'Automatic registration and discovery of VytchesDDD components'
+    source: './discovery'
+    type: 'namespace'
+    
+  utils:
+    description: 'Utility functions for NestJS integration'
+    business-context: 'Helper functions for framework integration and configuration'
+    source: './utils'
+    type: 'namespace'

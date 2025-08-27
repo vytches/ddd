@@ -1,0 +1,41 @@
+# Validation Package Settings - Enhanced Metadata System V2
+
+# === PACKAGE IDENTITY ===
+package-name: 'validation'
+display-name: 'DDD Validation'
+description: 'Advanced validation system with specifications, business rules, and external library adapters'
+business-context: 'Comprehensive validation framework supporting specification pattern, business rule validation, and adapter pattern for enterprise domain validation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'validation'
+complexity: 'intermediate'
+maturity: 'stable'
+framework-agnostic: true
+
+patterns:
+  - 'specification-pattern'
+  - 'business-rules'
+  - 'adapter-pattern'
+  - 'composite-pattern'
+  - 'facade-pattern'
+
+# === JSDOC CONFIGURATION ===
+jsdoc:
+  placement-strategy: 'separate'
+  class-documentation: 'enabled'
+  constructor-documentation: 'enabled'
+  method-documentation: 'enabled'
+
+# === PACKAGE-LEVEL CUSTOM TAGS ===
+custom-tags:
+  since: '1.0.0'
+  stability: 'stable'
+  category: 'validation'
+  enterprise: true
+  async-support: true
+  extensible: true

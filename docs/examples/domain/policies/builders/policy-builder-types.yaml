@@ -1,0 +1,121 @@
+# PolicyBuilderTypes - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'policy-builder-types'
+title: 'Policy Builder Types - Builder Pattern Types'
+description: 'Type definitions for the policy builder pattern'
+business-context: 'Defines the structure for building complex business policies with various validation strategies'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  PolicyBuildStep:
+    description: 'Represents a single step in the policy building process'
+    business-context: 'Enables fluent API for constructing complex policies with multiple validation rules'
+    
+    formats:
+      jsdoc:
+        description: 'Policy build step with specification, predicate, or rules'
+      cli:
+        description: |
+          ## PolicyBuildStep<T>
+          Flexible policy building step supporting various validation strategies including specifications, predicates, and business rules
+
+    generics:
+      - name: 'T'
+        description: 'The entity type being validated by the policy'
+
+    properties:
+      - name: 'type'
+        type: "'specification' | 'async-specification' | 'predicate' | 'async-predicate' | 'rules' | 'group-or' | 'conditional'"
+        description: 'Type of validation step'
+        business-context: 'Determines the validation strategy to apply for this policy step'
+        required: true
+        
+      - name: 'specification'
+        type: 'ISpecification<T>'
+        description: 'Synchronous specification for validation'
+        business-context: 'Applies specification pattern for complex business rules'
+        optional: true
+        
+      - name: 'asyncSpecification'
+        type: 'IAsyncSpecification<T>'
+        description: 'Asynchronous specification for validation'
+        business-context: 'Enables validation requiring external service calls or database queries'
+        optional: true
+        
+      - name: 'predicate'
+        type: '(entity: T, context?: unknown) => boolean'
+        description: 'Simple predicate function for validation'
+        business-context: 'Provides lightweight validation for simple business rules'
+        optional: true
+        
+      - name: 'asyncPredicate'
+        type: '(entity: T, context?: unknown) => Promise<boolean>'
+        description: 'Asynchronous predicate function'
+        business-context: 'Allows async validation logic without full specification overhead'
+        optional: true
+        
+      - name: 'rulesBuilder'
+        type: '(entity: T) => boolean'
+        description: 'Function to build complex validation rules'
+        business-context: 'Enables dynamic rule construction based on entity state'
+        optional: true
+        
+      - name: 'groups'
+        type: 'IPolicyGroup<T>[]'
+        description: 'Policy groups for OR logic'
+        business-context: 'Supports alternative validation paths where any group can satisfy the requirement'
+        optional: true
+        
+      - name: 'isRequired'
+        type: 'boolean'
+        description: 'Whether this validation must pass'
+        business-context: 'Distinguishes between mandatory and optional validation rules'
+        required: true
+        
+      - name: 'errorCode'
+        type: 'string'
+        description: 'Error code when validation fails'
+        business-context: 'Provides machine-readable error identification for automation'
+        required: true
+        
+      - name: 'errorMessage'
+        type: 'string'
+        description: 'Human-readable error message'
+        business-context: 'Delivers clear feedback to users and developers about validation failures'
+        required: true
+        
+      - name: 'severity'
+        type: 'PolicyViolationSeverity'
+        description: 'Severity level of the violation'
+        business-context: 'Enables prioritization of policy violations (ERROR, WARNING, INFO)'
+        required: true
+        
+      - name: 'field'
+        type: 'string'
+        description: 'Optional field name for field-level validation'
+        business-context: 'Associates violations with specific entity properties for targeted feedback'
+        optional: true
+        
+      - name: 'details'
+        type: 'Record<string, unknown>'
+        description: 'Additional details about the validation'
+        business-context: 'Provides context-specific information for debugging and audit trails'
+        optional: true
+        
+      - name: 'logicOperator'
+        type: "'AND' | 'OR'"
+        description: 'Logic operator for combining conditions'
+        business-context: 'Determines how multiple validation conditions are combined'
+        optional: true
+
+    custom-tags:
+      since: '2.0.0'
+      stability: 'stable'
+      category: 'builder-pattern'
+      pattern: 'builder'

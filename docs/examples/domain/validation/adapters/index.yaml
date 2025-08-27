@@ -1,0 +1,47 @@
+# Adapters Index - Validation Adapter Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Validation Adapters Package Exports'
+description: 'External validation library adapter exports'
+business-context: 'Provides unified access to validation adapter functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for validation library adapters'
+  business-context: 'Simplifies imports for integrating external validation libraries'
+  
+  formats:
+    jsdoc:
+      description: 'Validation adapter exports and utilities'
+    cli:
+      description: |
+        ## Validation Adapters Exports
+        
+        Adapter pattern functionality including:
+        - Base adapter implementations
+        - Adapter utility functions
+        - External library integration patterns
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'adapter-pattern'
+    pattern: 'facade-pattern'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  BaseValidationAdapter:
+    description: 'Abstract base class for external validation library adapters'
+    business-context: 'Provides consistent interface for integrating third-party validation libraries'
+    source: './base-adapter'
+    
+  AdapterUtils:
+    description: 'Utility functions for validation adapter implementations'
+    business-context: 'Helper functions for error mapping, format conversion, and adapter configuration'
+    source: './base-adapter'

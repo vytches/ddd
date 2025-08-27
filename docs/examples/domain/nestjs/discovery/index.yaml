@@ -1,0 +1,42 @@
+# Discovery Index - NestJS Auto-Discovery Service Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'NestJS Discovery Package Exports'
+description: 'Auto-discovery service exports for VytchesDDD components'
+business-context: 'Provides unified access to auto-discovery functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for VytchesDDD component auto-discovery services'
+  business-context: 'Simplifies imports for automatic handler and service registration'
+  
+  formats:
+    jsdoc:
+      description: 'Auto-discovery service exports and utilities'
+    cli:
+      description: |
+        ## NestJS Discovery Exports
+        
+        Auto-discovery functionality including:
+        - Component discovery services
+        - Handler registration utilities
+        - Automatic service scanning
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'auto-discovery'
+    framework: 'nestjs'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  VytchesDiscoveryService:
+    description: 'Service for automatic discovery and registration of VytchesDDD components'
+    business-context: 'Scans application for handlers and services, automatically registering them with appropriate containers'
+    source: './vytches-discovery.service'

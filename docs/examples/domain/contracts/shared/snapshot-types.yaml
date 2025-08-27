@@ -1,0 +1,37 @@
+# Snapshot Types - Aggregate Snapshot Contracts
+
+# === FILE METADATA ===
+file-name: 'snapshot-types'
+title: 'Aggregate Snapshot Type Definitions'
+description: 'Type definitions and interfaces for aggregate snapshots'
+business-context: 'Foundation for implementing snapshot functionality in event-sourced aggregates'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Snapshot-related type definitions for performance optimization'
+  business-context: 'Contracts for aggregate snapshots that optimize event replay performance'
+  
+  formats:
+    jsdoc:
+      description: 'Snapshot type definitions for aggregate state capture'
+    cli:
+      description: |
+        ## Snapshot Types
+        
+        Aggregate snapshot system supporting:
+        - State capture at specific versions
+        - Metadata preservation
+        - Snapshot frequency configuration
+        - Performance optimization
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'snapshots'
+    pattern: 'event-sourcing'
+    performance: 'optimization'

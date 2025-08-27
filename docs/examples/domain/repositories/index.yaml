@@ -1,0 +1,78 @@
+# Index - Repository Package Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Repository Package Public API'
+description: 'Main export file for repository patterns and interfaces'
+business-context: 'Provides unified access to all repository functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for repository patterns and domain contracts'
+  business-context: 'Simplifies imports by providing single entry point for all repository functionality'
+  
+  formats:
+    jsdoc:
+      description: 'Repository package exports and re-exports'
+    cli:
+      description: |
+        ## Repository Package Exports
+        
+        Central export file providing access to:
+        - Base repository implementations and interfaces
+        - Unit of Work pattern contracts
+        - Repository error handling
+        - Extended repository functionality
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'exports'
+    pattern: 'facade-pattern'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  IBaseRepository:
+    description: 'Base repository interface for aggregate persistence'
+    business-context: 'Core contract for domain aggregate storage and retrieval'
+    source: './base-repository'
+    
+  VersionError:
+    description: 'Error thrown when version conflicts occur during persistence'
+    business-context: 'Optimistic concurrency control error handling'
+    source: './base-repository'
+    
+  IRepositoryAggregate:
+    description: 'Type definition for aggregates compatible with repository pattern'
+    business-context: 'Ensures aggregate meets repository contract requirements'
+    source: './base-repository'
+    type: 'type'
+    
+  IRepository:
+    description: 'Generic repository interface contract'
+    business-context: 'Foundation interface for all repository implementations'
+    source: './base-repository.interface'
+    type: 'type'
+    
+  IRepositoryProvider:
+    description: 'Repository provider interface for dependency injection'
+    business-context: 'Enables repository factory patterns and DI integration'
+    source: './base-repository.interface'
+    type: 'type'
+    
+  IExtendedRepository:
+    description: 'Extended repository interface with additional capabilities'
+    business-context: 'Advanced repository operations beyond basic CRUD'
+    source: './base-repository.interface'
+    type: 'type'
+    
+  IUnitOfWork:
+    description: 'Unit of Work pattern interface for transactional operations'
+    business-context: 'Manages aggregate consistency across multiple repository operations'
+    source: './unit-of-work.interface'
+    type: 'type'

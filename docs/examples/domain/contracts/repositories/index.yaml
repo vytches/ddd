@@ -1,0 +1,43 @@
+# Repositories Index - Repository Pattern Contracts Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Repository Contracts Package Exports'
+description: 'Repository pattern contracts and interfaces exports'
+business-context: 'Provides unified access to repository pattern contracts'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for repository pattern contracts'
+  business-context: 'Foundation for data persistence and aggregate storage patterns'
+  
+  formats:
+    jsdoc:
+      description: 'Repository pattern contracts and interfaces'
+    cli:
+      description: |
+        ## Repository Contracts Exports
+        
+        Repository pattern contracts including:
+        - Base repository interfaces
+        - CQRS repository patterns
+        - Unit of Work pattern
+        - Query and Write repository separation
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'repository-pattern'
+    
+# === EXPORTS DOCUMENTATION ===
+exports:
+  repository-interfaces:
+    description: 'All repository pattern interfaces and contracts'
+    business-context: 'Complete set of repository contracts for data persistence'
+    source: './repository.interfaces'
+    type: 'namespace'

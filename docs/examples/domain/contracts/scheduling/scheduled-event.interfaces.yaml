@@ -1,0 +1,37 @@
+# Scheduled Event Interfaces - Event Scheduling Contracts
+
+# === FILE METADATA ===
+file-name: 'scheduled-event.interfaces'
+title: 'Scheduled Event Interfaces'
+description: 'Contracts for scheduled event definitions and management'
+business-context: 'Foundation for implementing scheduled and delayed event execution'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Interfaces for scheduled event definitions'
+  business-context: 'Contracts for events that execute on schedules, with delays, or recurring patterns'
+  
+  formats:
+    jsdoc:
+      description: 'Scheduled event contracts for time-based event execution'
+    cli:
+      description: |
+        ## Scheduled Event Interfaces
+        
+        Scheduled event system supporting:
+        - One-time scheduled events
+        - Recurring event patterns
+        - Delayed event execution
+        - Priority-based scheduling
+        - Job status tracking
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'event-scheduling'
+    pattern: 'scheduled-events'

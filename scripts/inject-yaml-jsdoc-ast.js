@@ -19,6 +19,7 @@ class ASTJSDocInjector {
     this.classMetadata = new Map();
     this.debug = process.env.JSDOC_DEBUG === 'true';
     this.dryRun = false;
+    this.forceMode = false;
   }
 
   async loadYamlFile(filePath) {
@@ -64,8 +65,17 @@ class ASTJSDocInjector {
 
     // FIXED: Preserve directory structure when handling subdirectories
     let yamlFilePath;
-    if (fileName) {
-      // Extract relative path from packages/[package]/dist/ to preserve subdirectory structure
+    
+    // Check if className contains a path separator (for subdirectory files)
+    const hasPath = className.includes('/');
+    // Check if className looks like an actual class name (starts with uppercase)
+    const isClassName = !hasPath && /^[A-Z]/.test(className);
+    
+    if (hasPath) {
+      // For subdirectory paths like 'utils/index', use directly
+      yamlFilePath = className + '.yaml';
+    } else if (fileName && !isClassName) {
+      // For file-based lookups (interfaces, functions), use file path structure
       const packageDistPath = `packages/${packageName}/dist/`;
       const fileRelativePath = fileName.includes(packageDistPath)
         ? fileName.substring(fileName.indexOf(packageDistPath) + packageDistPath.length)
@@ -76,7 +86,7 @@ class ASTJSDocInjector {
         .replace(/\.d\.ts$/, '.yaml')
         .replace('.interface', '.interface');
     } else {
-      // Fallback to kebab-case filename (e.g., AggregateRoot -> aggregate-root.yaml)
+      // For class names, use kebab-case conversion (e.g., AggregateRoot -> aggregate-root.yaml)
       yamlFilePath =
         className
           .replace(/([A-Z])/g, (match, letter, index) =>
@@ -102,6 +112,7 @@ class ASTJSDocInjector {
       this.classMetadata.set(key, classMeta);
       if (this.debug) {
         console.log(`✅ Class metadata loaded for ${className} from ${yamlFilePath}`);
+        console.log(`  📋 Loaded keys: ${Object.keys(classMeta).slice(0, 10).join(', ')}`);
       }
     }
   }
@@ -187,8 +198,27 @@ class ASTJSDocInjector {
     }
 
     // 3. Apply file/class metadata
+    // Try both file-based and class-based keys
     const fileKey = `${packageName}-${fileBaseName.toLowerCase()}`;
-    const fileMeta = this.classMetadata.get(fileKey);
+    const classKey = interfaceOrClassName ? `${packageName}-${interfaceOrClassName.toLowerCase()}` : null;
+    
+    // Debug for class-level resolution
+    if (!methodName && interfaceOrClassName === 'AggregateRoot') {
+      console.log(`      🔍 CLASS HIERARCHICAL DEBUG:`);
+      console.log(`        FileKey: ${fileKey}`);
+      console.log(`        ClassKey: ${classKey}`);
+      console.log(`        Available keys: ${Array.from(this.classMetadata.keys()).join(', ')}`);
+    }
+    
+    // Debug for commit
+    if (methodName === 'commit' && interfaceOrClassName === 'AggregateRoot') {
+      console.log(`      🔍 COMMIT DEBUG - FileKey: ${fileKey}`);
+      console.log(`      🔍 COMMIT DEBUG - ClassKey: ${classKey}`);
+      console.log(`      🔍 COMMIT DEBUG - Available keys: ${Array.from(this.classMetadata.keys()).join(', ')}`);
+    }
+    
+    // Try class-specific key first, then file-based key
+    const fileMeta = (classKey && this.classMetadata.get(classKey)) || this.classMetadata.get(fileKey);
     if (fileMeta) {
       const fileStrategy = fileMeta.hierarchy?.strategy || 'merge';
 
@@ -198,34 +228,187 @@ class ASTJSDocInjector {
         fileMeta.interfaces?.[interfaceOrClassName] ||
         fileMeta;
 
+      // Debug for class-level resolution
+      if (!methodName && interfaceOrClassName === 'AggregateRoot') {
+        console.log(`      🔍 CLASS HIERARCHICAL DEBUG - ElementMeta:`);
+        console.log(`        FileMeta has classes? ${!!fileMeta.classes}`);
+        console.log(`        FileMeta.classes keys: ${Object.keys(fileMeta.classes || {}).join(', ')}`);
+        console.log(`        ElementMeta type: ${typeof elementMeta}`);
+        console.log(`        ElementMeta keys: ${Object.keys(elementMeta).join(', ')}`);
+        console.log(`        ElementMeta has class-doc? ${!!elementMeta['class-doc']}`);
+        if (elementMeta['class-doc']) {
+          console.log(`        Class-doc description: ${elementMeta['class-doc'].description}`);
+          console.log(`        Class-doc has formats? ${!!elementMeta['class-doc'].formats}`);
+        }
+      }
+
+      // Debug for class-level resolution
+      if (!methodName && interfaceOrClassName === 'AggregateRoot') {
+        console.log(`        ElementMeta === FileMeta? ${elementMeta === fileMeta}`);
+        console.log(`        Will merge elementMeta? ${elementMeta && elementMeta !== fileMeta}`);
+      }
+
       if (elementMeta && elementMeta !== fileMeta) {
         const elementStrategy =
           elementMeta.hierarchy?.strategy || elementMeta.strategy || fileStrategy;
         resolved = this.mergeMetadata(resolved, elementMeta, elementStrategy);
+        
+        // CRITICAL FIX: Handle class-doc formats specially
+        // Class-doc formats need to be elevated to top-level formats for proper override priority
+        if (elementMeta['class-doc']?.formats) {
+          if (!resolved.formats) resolved.formats = {};
+          
+          // Merge class-doc formats with higher priority than existing formats
+          for (const formatKey in elementMeta['class-doc'].formats) {
+            if (!resolved.formats[formatKey]) resolved.formats[formatKey] = {};
+            
+            // Class-level formats should override package-level formats
+            resolved.formats[formatKey] = {
+              ...resolved.formats[formatKey],
+              ...elementMeta['class-doc'].formats[formatKey]
+            };
+          }
+        }
+        
+        // CRITICAL FIX 2: Also handle class-doc custom-tags
+        // Custom tags from class-doc should be merged into resolved custom-tags
+        if (elementMeta['class-doc']?.['custom-tags']) {
+          if (!resolved['custom-tags']) resolved['custom-tags'] = {};
+          
+          // Handle direct custom tags (not format-specific)
+          const classTags = elementMeta['class-doc']['custom-tags'];
+          for (const tagKey in classTags) {
+            // Skip formats sub-object as it's handled separately
+            if (tagKey !== 'formats' && typeof classTags[tagKey] === 'string') {
+              resolved['custom-tags'][tagKey] = classTags[tagKey];
+            }
+          }
+          
+          // Handle format-specific custom tags if they exist
+          if (classTags.formats?.jsdoc) {
+            // Merge jsdoc-specific custom tags
+            Object.assign(resolved['custom-tags'], classTags.formats.jsdoc);
+          }
+        }
+        
+        if (!methodName && interfaceOrClassName === 'AggregateRoot') {
+          console.log(`        Merged elementMeta with strategy: ${elementStrategy}`);
+          console.log(`        ElementMeta has class-doc formats? ${!!elementMeta['class-doc']?.formats}`);
+          if (elementMeta['class-doc']?.formats?.jsdoc) {
+            console.log(`        ElementMeta class-doc.formats.jsdoc.description: ${elementMeta['class-doc'].formats.jsdoc.description}`);
+          }
+          console.log(`        Resolved after elementMeta merge has formats? ${!!resolved.formats}`);
+          if (resolved.formats && resolved.formats.jsdoc) {
+            console.log(`        Resolved.formats.jsdoc.description: ${resolved.formats.jsdoc.description}`);
+          }
+          console.log(`        🔧 FIXED: Applied class-doc formats with higher priority`);
+          console.log(`        Resolved has custom-tags? ${!!resolved['custom-tags']}`);
+          if (resolved['custom-tags']) {
+            console.log(`        Custom tags: ${JSON.stringify(resolved['custom-tags'], null, 2)}`);
+          }
+        }
       }
 
       // 4. Apply method metadata if specified
-      if (methodName && elementMeta?.methods?.[methodName]) {
-        const methodMeta = elementMeta.methods[methodName];
-        const methodStrategy = methodMeta.hierarchy?.strategy || methodMeta.strategy || 'merge';
-        resolved = this.mergeMetadata(resolved, methodMeta, methodStrategy);
-      }
-    }
-
-    // 5. Apply format-specific overrides
-    const formatSpecific = {};
-    for (const key in resolved) {
-      // Check for format-specific keys like 'description.jsdoc'
-      if (key.includes('.')) {
-        const [baseKey, formatKey] = key.split('.');
-        if (formatKey === format) {
-          formatSpecific[baseKey] = resolved[key];
+      if (methodName) {
+        // Debug: check what methods are available
+        if (methodName === 'commit' && interfaceOrClassName === 'AggregateRoot') {
+          console.log(`      🔍 COMMIT DEBUG - Looking for method metadata`);
+          console.log(`        ElementMeta type: ${typeof elementMeta}`);
+          console.log(`        Has methods? ${!!elementMeta?.methods}`);
+          console.log(`        Method keys: ${Object.keys(elementMeta?.methods || {}).join(', ')}`);
+          console.log(`        Has commit? ${!!elementMeta?.methods?.commit}`);
+        }
+        
+        if (elementMeta?.methods?.[methodName]) {
+          const methodMeta = elementMeta.methods[methodName];
+          const methodStrategy = methodMeta.hierarchy?.strategy || methodMeta.strategy || 'merge';
+          
+          // DEBUG: Check what we're merging for commit
+          if (methodName === 'commit') {
+            console.log(`      🔍 COMMIT DEBUG - Class/Interface: ${interfaceOrClassName}`);
+          }
+          if (methodName === 'commit' && interfaceOrClassName === 'AggregateRoot') {
+            console.log(`      🔍 COMMIT DEBUG - Before merge:`);
+            console.log(`        Description: ${resolved.description?.substring(0, 60)}...`);
+            console.log(`        Business-context: ${resolved['business-context']?.substring(0, 60)}...`);
+            console.log(`      🔍 COMMIT DEBUG - Method metadata:`);
+            console.log(`        Description: ${methodMeta.description}`);
+            console.log(`        Business-context: ${methodMeta['business-context']}`);
+            console.log(`        Strategy: ${methodStrategy}`);
+          }
+          
+          resolved = this.mergeMetadata(resolved, methodMeta, methodStrategy);
+          
+          if (methodName === 'commit' && interfaceOrClassName === 'AggregateRoot') {
+            console.log(`      🔍 COMMIT DEBUG - After merge:`);
+            console.log(`        Description: ${resolved.description}`);
+            console.log(`        Business-context: ${resolved['business-context']}`);
+          }
+        } else if (methodName) {
+          if (methodName === 'commit') {
+            console.log(`      ⚠️ COMMIT DEBUG - No method metadata found for ${interfaceOrClassName}!`);
+            console.log(`      📋 ElementMeta keys: ${Object.keys(elementMeta || {}).join(', ')}`);
+            console.log(`      📋 Available methods: ${Object.keys(elementMeta?.methods || {}).join(', ')}`);
+          }
         }
       }
     }
 
-    // Override with format-specific values
-    Object.assign(resolved, formatSpecific);
+    // 5. Apply format-specific overrides in hierarchical order
+    // For classes, prioritize class-level formats over package/global formats
+    if (!methodName) {
+      // Collect format overrides from all levels in reverse hierarchy (most specific first)
+      const formatOverrides = {};
+      
+      // Start with global format overrides (lowest priority)
+      if (this.globalMetadata?.formats?.[format]) {
+        for (const key in this.globalMetadata.formats[format]) {
+          formatOverrides[key] = this.globalMetadata.formats[format][key];
+        }
+      }
+      
+      // Apply package format overrides (medium priority)
+      const packageMeta = this.packageMetadata.get(packageName);
+      if (packageMeta?.formats?.[format]) {
+        for (const key in packageMeta.formats[format]) {
+          formatOverrides[key] = packageMeta.formats[format][key];
+        }
+      }
+      
+      // Apply file/class format overrides (highest priority)
+      if (resolved.formats && resolved.formats[format]) {
+        for (const key in resolved.formats[format]) {
+          formatOverrides[key] = resolved.formats[format][key];
+        }
+      }
+      
+      // Debug for class-level format overrides
+      if (!methodName && interfaceOrClassName === 'AggregateRoot') {
+        console.log(`      🔍 CLASS FORMAT DEBUG (NEW):`);
+        console.log(`        Description before format override: ${resolved.description}`);
+        console.log(`        Format override keys: ${Object.keys(formatOverrides).join(', ')}`);
+        console.log(`        Format override description: ${formatOverrides.description}`);
+      }
+
+      // Apply format overrides (class-level has priority)
+      for (const key in formatOverrides) {
+        resolved[key] = formatOverrides[key];
+      }
+
+      // Debug for class-level format overrides
+      if (!methodName && interfaceOrClassName === 'AggregateRoot') {
+        console.log(`        Description after format override: ${resolved.description}`);
+      }
+    } else {
+      // For methods, only apply method-level format overrides if they exist
+      // Check if the method has format-specific overrides in the resolved metadata
+      if (resolved.formats && resolved.formats[format]) {
+        // These would be method-level format overrides that were merged earlier
+        // We can remove them from the resolved object
+        delete resolved.formats;
+      }
+    }
 
     // Clean up format-specific keys from result
     for (const key in resolved) {
@@ -248,6 +431,15 @@ class ASTJSDocInjector {
     interfaceOrClassName = null,
     methodName = null
   ) {
+    // Debug for commit method
+    if (methodName === 'commit' && interfaceOrClassName === 'AggregateRoot') {
+      console.log(`      🔍 COMMIT DEBUG in generateJSDoc:`);
+      console.log(`        packageName: ${packageName}`);
+      console.log(`        fileBaseName: ${fileBaseName}`);
+      console.log(`        interfaceOrClassName: ${interfaceOrClassName}`);
+      console.log(`        methodName: ${methodName}`);
+    }
+    
     // If we have hierarchy info, resolve it
     if (packageName && fileBaseName) {
       metadata = this.resolveHierarchicalMetadata(
@@ -257,6 +449,12 @@ class ASTJSDocInjector {
         methodName,
         'jsdoc'
       );
+      
+      if (methodName === 'commit' && interfaceOrClassName === 'AggregateRoot') {
+        console.log(`      🔍 COMMIT DEBUG - After resolution:`);
+        console.log(`        Description: ${metadata.description}`);
+        console.log(`        Business-context: ${metadata['business-context']}`);
+      }
     }
 
     const lines = [];
@@ -341,8 +539,16 @@ class ASTJSDocInjector {
 
         // Load metadata for this interface
         const fileBaseName = path.basename(filePath, '.d.ts');
-        await this.loadClassMetadata(packageName, fileBaseName, filePath);
-        const key = `${packageName}-${fileBaseName.toLowerCase()}`;
+        
+        // For subdirectory files, include the subdirectory in the key to avoid collisions
+        const relativePath = path.relative(path.join('packages', packageName, 'dist'), filePath);
+        const dirName = path.dirname(relativePath);
+        const metadataKey = dirName && dirName !== '.' 
+          ? `${dirName}/${fileBaseName}`.replace(/\\/g, '/')
+          : fileBaseName;
+        
+        await this.loadClassMetadata(packageName, metadataKey, filePath);
+        const key = `${packageName}-${metadataKey.toLowerCase()}`;
         const metadata = this.classMetadata.get(key);
 
         if (this.debug) {
@@ -367,7 +573,7 @@ class ASTJSDocInjector {
               content.substring(comment.pos, comment.end).includes('/**')
             );
 
-          if (!hasJSDoc) {
+          if (!hasJSDoc || this.forceMode) {
             const interfaceJSDoc = this.generateJSDoc(
               interfaceMetadata,
               '',
@@ -395,16 +601,15 @@ class ASTJSDocInjector {
               if (ts.isMethodSignature(member) || ts.isPropertySignature(member)) {
                 const memberName = member.name?.getText(sourceFile);
                 if (memberName && interfaceMetadata.methods[memberName]) {
-                  const methodMetadata = interfaceMetadata.methods[memberName];
-
                   // Get the indent for the member
                   const memberStart = member.getStart(sourceFile);
                   const lineStart = content.lastIndexOf('\n', memberStart - 1) + 1;
                   const memberIndent = content.substring(lineStart, memberStart).match(/^\s*/)[0];
 
-                  // Generate JSDoc with the same indent as the member
+                  // Generate JSDoc with hierarchical resolution
+                  // Pass empty object to force hierarchical resolution
                   const methodJSDoc = this.generateJSDoc(
-                    methodMetadata,
+                    {}, // Empty object forces hierarchical resolution
                     memberIndent,
                     packageName,
                     fileBaseName,
@@ -453,14 +658,15 @@ class ASTJSDocInjector {
 
           // Load metadata for this class
           const fileBaseName = path.basename(filePath, '.d.ts');
-          await this.loadClassMetadata(packageName, fileBaseName, filePath);
+          await this.loadClassMetadata(packageName, className, filePath);
+          // FIXED: Use file-based key that was actually loaded, not class-based key
           const key = `${packageName}-${fileBaseName.toLowerCase()}`;
           const metadata = this.classMetadata.get(key);
 
           if (metadata?.classes?.[className]) {
             const classMetadata = metadata.classes[className];
 
-            // Add JSDoc for class itself if it doesn't already have one
+            // Add/Replace JSDoc for class itself
             if (classMetadata['class-doc']) {
               const leadingComments = ts.getLeadingCommentRanges(content, node.pos);
               const hasJSDoc =
@@ -469,27 +675,53 @@ class ASTJSDocInjector {
                   content.substring(comment.pos, comment.end).includes('/**')
                 );
 
-              if (!hasJSDoc) {
-                const classJSDoc = this.generateJSDoc(
-                  classMetadata['class-doc'],
-                  '',
-                  packageName,
-                  fileBaseName,
-                  className
-                );
-                // Find the actual start of the class declaration
-                const classStart = node.getStart(sourceFile);
-                // Find the start of the line containing the class
-                const lineStart = content.lastIndexOf('\n', classStart - 1) + 1;
-                const indent = content.substring(lineStart, classStart).match(/^\s*/)[0];
+              // Debug for AggregateRoot class
+              if (className === 'AggregateRoot') {
+                console.log(`      🔍 CLASS DEBUG - ${className}:`);
+                console.log(`        Has existing JSDoc: ${hasJSDoc}`);
+                console.log(`        Class-doc metadata: ${JSON.stringify(classMetadata['class-doc'], null, 2)}`);
+              }
 
-                // Insert JSDoc at the beginning of the line
+              // Always generate JSDoc - replace if exists, add if not
+              // Use empty object to force hierarchical resolution for classes too
+              const classJSDoc = this.generateJSDoc(
+                {}, // Empty object forces hierarchical resolution
+                '',
+                packageName,
+                fileBaseName,
+                className
+                // No methodName for class-level JSDoc
+              );
+              
+              // Debug for AggregateRoot class
+              if (className === 'AggregateRoot') {
+                console.log(`      🔍 CLASS DEBUG - Generated JSDoc:`);
+                console.log(classJSDoc.split('\n').slice(0, 5).join('\n'));
+              }
+              
+              if (hasJSDoc && leadingComments && leadingComments.length > 0) {
+                // Replace existing JSDoc
+                const commentStart = leadingComments[0].pos;
+                const commentLineStart = content.lastIndexOf('\n', commentStart - 1) + 1;
+                
+                modifications.push({
+                  start: commentLineStart,
+                  end: leadingComments[leadingComments.length - 1].end,
+                  text: classJSDoc,
+                });
+              } else {
+                // Add new JSDoc
+                const classStart = node.getStart(sourceFile);
+                const lineStart = content.lastIndexOf('\n', classStart - 1) + 1;
+                
                 modifications.push({
                   start: lineStart,
                   end: lineStart,
                   text: classJSDoc + '\n',
                 });
               }
+              
+              console.log(`    ✅ Enhanced JSDoc for ${className} class`);
             }
 
             // Process class methods
@@ -501,26 +733,39 @@ class ASTJSDocInjector {
                     : member.name?.getText(sourceFile);
 
                   if (memberName && classMetadata.methods[memberName]) {
-                    const methodMetadata = classMetadata.methods[memberName];
-
                     // Get the indent for the member
                     const memberStart = member.getStart(sourceFile);
                     const lineStart = content.lastIndexOf('\n', memberStart - 1) + 1;
                     const memberIndent = content.substring(lineStart, memberStart).match(/^\s*/)[0];
 
-                    // Generate JSDoc with the same indent as the member
+                    // Generate JSDoc with hierarchical resolution
+                    // Pass empty object to force hierarchical resolution
                     const methodJSDoc = this.generateJSDoc(
-                      methodMetadata,
+                      {}, // Empty object forces hierarchical resolution
                       memberIndent,
                       packageName,
                       fileBaseName,
                       className,
                       memberName
                     );
+                    
+                    // Debug for commit method
+                    if (memberName === 'commit' && className === 'AggregateRoot') {
+                      console.log(`      🔍 COMMIT DEBUG - Generated JSDoc:`);
+                      console.log(methodJSDoc.split('\n').slice(0, 5).join('\n'));
+                    }
 
                     // Find position to insert JSDoc
                     const leadingComments = ts.getLeadingCommentRanges(content, member.pos);
                     if (leadingComments && leadingComments.length > 0) {
+                      // Debug: check what's already there for commit method
+                      if (memberName === 'commit' && className === 'AggregateRoot') {
+                        const existingJSDoc = content.substring(leadingComments[0].pos, leadingComments[leadingComments.length - 1].end);
+                        console.log(`      🔍 COMMIT DEBUG - Existing JSDoc:`);
+                        console.log(existingJSDoc.split('\n').slice(0, 5).join('\n'));
+                        console.log(`      🔍 COMMIT DEBUG - Are they the same?`, existingJSDoc.trim() === methodJSDoc.trim());
+                      }
+                      
                       // Replace existing JSDoc with properly indented one
                       // We need to preserve any whitespace before the comment
                       const commentStart = leadingComments[0].pos;
@@ -560,14 +805,23 @@ class ASTJSDocInjector {
 
           // Load metadata for this file
           const fileBaseName = path.basename(filePath, '.d.ts');
-          await this.loadClassMetadata(packageName, fileBaseName, filePath);
-          const key = `${packageName}-${fileBaseName.toLowerCase()}`;
+          
+          // For subdirectory files, include the subdirectory in the key to avoid collisions
+          const relativePath = path.relative(path.join('packages', packageName, 'dist'), filePath);
+          const dirName = path.dirname(relativePath);
+          const metadataKey = dirName && dirName !== '.' 
+            ? `${dirName}/${fileBaseName}`.replace(/\\/g, '/')
+            : fileBaseName;
+          
+          await this.loadClassMetadata(packageName, metadataKey, filePath);
+          const key = `${packageName}-${metadataKey.toLowerCase()}`;
           const metadata = this.classMetadata.get(key);
 
           if (this.debug) {
             console.log(`    📋 Metadata key: ${key}`);
             console.log(`    📋 Has metadata: ${!!metadata}`);
             if (metadata) {
+              console.log(`    📋 Metadata keys: ${Object.keys(metadata).join(', ')}`);
               console.log(`    📋 Has functions: ${!!metadata.functions}`);
               console.log(
                 `    📋 Function names: ${metadata.functions ? Object.keys(metadata.functions).join(', ') : 'none'}`
@@ -586,7 +840,7 @@ class ASTJSDocInjector {
                 content.substring(comment.pos, comment.end).includes('/**')
               );
 
-            if (!hasJSDoc) {
+            if (!hasJSDoc || this.forceMode) {
               // Pass function metadata directly, not resolved metadata
               const functionJSDoc = this.generateJSDoc(
                 functionMetadata,
@@ -664,12 +918,28 @@ class ASTJSDocInjector {
       if (processedContent !== content) {
         if (this.dryRun) {
           console.log(`🔍 Dry run - would write to: ${file}`);
+          // Debug: Show what would be different
+          if (baseName === 'aggregate-root' && packageName === 'aggregates') {
+            const commitIndex = processedContent.indexOf('commit():');
+            if (commitIndex > -1) {
+              console.log('  DEBUG: New commit JSDoc would be:');
+              console.log(processedContent.substring(commitIndex - 200, commitIndex + 50));
+            }
+          }
         } else {
           await fs.writeFile(file, processedContent);
           console.log(`✅ File updated with JSDoc`);
         }
       } else {
         console.log(`ℹ️  No changes needed`);
+        // Debug for aggregate-root
+        if (baseName === 'aggregate-root' && packageName === 'aggregates') {
+          console.log('  DEBUG: Content unchanged, checking commit JSDoc:');
+          const commitIndex = content.indexOf('commit():');
+          if (commitIndex > -1) {
+            console.log(content.substring(commitIndex - 200, commitIndex + 50));
+          }
+        }
       }
     }
   }
@@ -679,6 +949,7 @@ class ASTJSDocInjector {
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
+  const forceMode = args.includes('--force');
 
   let packageName = args.find(arg => arg.startsWith('--package='))?.split('=')[1];
 
@@ -705,6 +976,7 @@ async function main() {
 
   const injector = new ASTJSDocInjector(process.cwd());
   injector.dryRun = dryRun;
+  injector.forceMode = forceMode;
 
   try {
     await injector.loadHierarchicalMetadata();

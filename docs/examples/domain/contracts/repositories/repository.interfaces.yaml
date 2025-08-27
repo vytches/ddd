@@ -1,0 +1,39 @@
+# Repository Interfaces - Repository Pattern Contracts
+
+# === FILE METADATA ===
+file-name: 'repository.interfaces'
+title: 'Repository Pattern Interfaces'
+description: 'Complete repository pattern contracts for data persistence'
+business-context: 'Foundation for implementing repository pattern with CQRS support'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Comprehensive repository pattern interfaces'
+  business-context: 'Contracts for implementing data persistence with repository pattern, supporting CQRS and unit of work'
+  
+  formats:
+    jsdoc:
+      description: 'Repository pattern contracts for aggregate persistence'
+    cli:
+      description: |
+        ## Repository Pattern Interfaces
+        
+        Complete repository system including:
+        - Base repository interface
+        - CQRS repository separation
+        - Query and Write repositories
+        - Extended repository features
+        - Unit of Work pattern
+        - Repository provider pattern
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'repository-pattern'
+    pattern: 'repository'
+    supports-cqrs: true

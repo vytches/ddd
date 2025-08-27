@@ -1,0 +1,97 @@
+# Constants - NestJS Integration Constants
+
+# === FILE METADATA ===
+file-name: 'constants'
+title: 'NestJS Integration Constants'
+description: 'Constants for VytchesDDD NestJS adapter integration'
+business-context: 'Provides standardized tokens and patterns for framework integration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Constants and metadata keys for NestJS adapter functionality'
+  business-context: 'Centralizes configuration tokens, metadata keys, and discovery patterns for consistent framework integration'
+  
+  formats:
+    jsdoc:
+      description: 'Constants for dependency injection and decorator metadata'
+    cli:
+      description: |
+        ## NestJS Integration Constants
+        
+        Essential constants including:
+        - Dependency injection tokens
+        - Decorator metadata keys
+        - Auto-discovery patterns
+        - Configuration defaults
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'constants'
+    framework: 'nestjs'
+    
+# === CONSTANTS DOCUMENTATION ===
+constants:
+  VYTCHES_DDD_OPTIONS:
+    description: 'Unique symbol for VytchesDDD module options injection token'
+    business-context: 'Used by NestJS dependency injection to provide module configuration options'
+    type: 'unique symbol'
+    usage: 'dependency-injection'
+    
+  VYTCHES_DDD_ADAPTER:
+    description: 'Unique symbol for VytchesDDD container adapter injection token'
+    business-context: 'Used by NestJS DI to provide container adapter instance for service locator pattern'
+    type: 'unique symbol'
+    usage: 'dependency-injection'
+    
+  DOMAIN_SERVICE_METADATA:
+    description: 'Metadata key for domain service decorator identification'
+    business-context: 'Marks classes as domain services for auto-discovery and registration'
+    type: 'string'
+    value: 'vytches:domain-service'
+    usage: 'decorator-metadata'
+    
+  COMMAND_HANDLER_METADATA:
+    description: 'Metadata key for command handler decorator identification'
+    business-context: 'Marks classes as command handlers for CQRS auto-discovery'
+    type: 'string'
+    value: 'vytches:command-handler'
+    usage: 'decorator-metadata'
+    
+  QUERY_HANDLER_METADATA:
+    description: 'Metadata key for query handler decorator identification'
+    business-context: 'Marks classes as query handlers for CQRS auto-discovery'
+    type: 'string'
+    value: 'vytches:query-handler'
+    usage: 'decorator-metadata'
+    
+  EVENT_HANDLER_METADATA:
+    description: 'Metadata key for event handler decorator identification'
+    business-context: 'Marks classes as event handlers for event-driven architecture'
+    type: 'string'
+    value: 'vytches:event-handler'
+    usage: 'decorator-metadata'
+    
+  SAGA_METADATA:
+    description: 'Metadata key for saga decorator identification'
+    business-context: 'Marks classes as sagas for long-running business process orchestration'
+    type: 'string'
+    value: 'vytches:saga'
+    usage: 'decorator-metadata'
+    
+  DEFAULT_DISCOVERY_PATTERNS:
+    description: 'Default file patterns for auto-discovery of VytchesDDD components'
+    business-context: 'Specifies which file patterns to scan for handlers and services during startup'
+    type: 'string[]'
+    usage: 'auto-discovery'
+    
+  DEFAULT_EXCLUDE_PATTERNS:
+    description: 'Default exclusion patterns for auto-discovery process'
+    business-context: 'Specifies which file patterns to exclude from auto-discovery scanning'
+    type: 'string[]'
+    usage: 'auto-discovery'
