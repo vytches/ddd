@@ -12,7 +12,7 @@ export interface HandlerInfo {
   handlerType: Constructor;
 
   /** DI metadata from decorator */
-  metadata: any;
+  metadata: unknown;
 }
 
 export interface IHandlerDiscoveryPlugin {
@@ -26,7 +26,7 @@ export interface IHandlerDiscoveryPlugin {
    * @param assemblies - Optional assemblies to scan
    * @returns Array of discovered handlers
    */
-  discoverHandlers(assemblies?: any[]): Promise<HandlerInfo[]> | HandlerInfo[];
+  discoverHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]> | HandlerInfo[];
 
   /**
    * Check if the plugin is available (dependencies installed)
@@ -47,7 +47,7 @@ export interface IHandlerDiscoveryRegistry {
    * @param assemblies - Optional assemblies to scan
    * @returns Array of all discovered handlers
    */
-  discoverAllHandlers(assemblies?: any[]): Promise<HandlerInfo[]>;
+  discoverAllHandlers(assemblies?: unknown[]): Promise<HandlerInfo[]>;
 
   /**
    * Get all registered plugins

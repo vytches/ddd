@@ -20,7 +20,7 @@ export interface VytchesDDDOptions {
    */
   discovery?: {
     enabled: boolean;
-    plugins?: any[]; // IDiscoveryPlugin instances
+    plugins?: unknown[]; // IDiscoveryPlugin instances - using unknown for flexibility
     parallel?: boolean;
     timeout?: number;
     debug?: boolean;
@@ -32,7 +32,7 @@ export interface VytchesDDDOptions {
   contexts?: Record<
     string,
     {
-      modules: any[];
+      modules: Type<unknown>[];
       accessMatrix?: string[]; // List of contexts this context can access
     }
   >;
@@ -140,7 +140,7 @@ export interface CQRSOptions {
      * Type<ICommandBus> - Custom implementation class
      * Factory function - For dynamic creation
      */
-    implementation?: 'simple' | 'enhanced' | Type<any> | (() => any);
+    implementation?: 'simple' | 'enhanced' | Type<unknown> | (() => unknown);
 
     /**
      * Custom provider token (for multiple bus instances)
@@ -150,7 +150,7 @@ export interface CQRSOptions {
     /**
      * Interface token for dependency injection (e.g., abstract class)
      */
-    interfaceToken?: string | symbol | Type<any>;
+    interfaceToken?: string | symbol | Type<unknown>;
 
     /**
      * Configuration options
@@ -175,7 +175,7 @@ export interface CQRSOptions {
      * Type<IQueryBus> - Custom implementation class
      * Factory function - For dynamic creation
      */
-    implementation?: 'simple' | 'enhanced' | Type<any> | (() => any);
+    implementation?: 'simple' | 'enhanced' | Type<unknown> | (() => unknown);
 
     /**
      * Custom provider token (for multiple bus instances)
@@ -185,7 +185,7 @@ export interface CQRSOptions {
     /**
      * Interface token for dependency injection (e.g., abstract class)
      */
-    interfaceToken?: string | symbol | Type<any>;
+    interfaceToken?: string | symbol | Type<unknown>;
 
     /**
      * Configuration options
@@ -207,12 +207,12 @@ export interface MiddlewareConfig {
   /**
    * Middleware class
    */
-  class: Type<any>;
+  class: Type<unknown>;
 
   /**
    * Middleware options
    */
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 
   /**
    * Apply only to specific contexts
@@ -229,7 +229,7 @@ export interface EventOptions {
    */
   eventStore?: {
     type: 'memory' | 'postgresql' | 'mongodb';
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
   };
 
   /**
@@ -237,11 +237,11 @@ export interface EventOptions {
    */
   eventBus?: {
     type: 'unified' | 'domain' | 'integration';
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
     /**
      * Interface token for dependency injection (e.g., abstract class)
      */
-    interfaceToken?: string | symbol | Type<any>;
+    interfaceToken?: string | symbol | Type<unknown>;
   };
 
   /**
@@ -258,15 +258,15 @@ export interface EventOptions {
      * Factory function - For dynamic creation
      * Instance - Pre-created instance
      */
-    implementation?: Type<any> | (() => any) | any;
+    implementation?: Type<unknown> | (() => unknown) | unknown;
     /**
      * Custom provider token for dispatcher
      */
-    token?: string | symbol | Type<any>;
+    token?: string | symbol | Type<unknown>;
     /**
      * Interface token for dependency injection (e.g., abstract class)
      */
-    interfaceToken?: string | symbol | Type<any>;
+    interfaceToken?: string | symbol | Type<unknown>;
   };
 
   /**
@@ -282,7 +282,7 @@ export interface ACLOptions {
   /**
    * ACL adapters to register
    */
-  adapters?: Record<string, any>;
+  adapters?: Record<string, unknown>;
 
   /**
    * Default timeout for ACL operations
@@ -310,7 +310,7 @@ export interface DomainServicesOptions {
   /**
    * Domain services to register
    */
-  services?: Type<any>[];
+  services?: Type<unknown>[];
 
   /**
    * Auto-discover domain services
@@ -373,7 +373,7 @@ export interface PoliciesOptions {
   /**
    * Policy definitions to register
    */
-  policies?: any[];
+  policies?: unknown[];
 
   /**
    * Policy registry configuration
@@ -412,7 +412,7 @@ export interface MessagingOptions {
   /**
    * Provider configuration
    */
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 
   /**
    * Enable saga orchestration
@@ -455,7 +455,7 @@ export interface ContainerOptions {
   /**
    * Custom container factory
    */
-  factory?: () => any;
+  factory?: () => unknown;
 }
 
 /**
@@ -495,17 +495,17 @@ export interface VytchesDDDFeatureOptions {
   /**
    * Services to register
    */
-  services?: string[] | Type<any>[];
+  services?: string[] | Type<unknown>[];
 
   /**
    * Command/Query handlers to register
    */
-  handlers?: Type<any>[];
+  handlers?: Type<unknown>[];
 
   /**
    * Event handlers to register
    */
-  eventHandlers?: Type<any>[];
+  eventHandlers?: Type<unknown>[];
 
   /**
    * Bounded context for this feature
@@ -525,7 +525,7 @@ export interface VytchesDDDTestOptions {
   /**
    * Mock services
    */
-  mocks?: Record<string, any>;
+  mocks?: Record<string, unknown>;
 
   /**
    * Override configuration
@@ -545,12 +545,12 @@ export interface VytchesDDDAsyncOptions extends Pick<ModuleMetadata, 'imports'> 
   /**
    * Injection token for options
    */
-  inject?: any[];
+  inject?: unknown[];
 
   /**
    * Factory function to create options
    */
-  useFactory?: (...args: any[]) => Promise<VytchesDDDOptions> | VytchesDDDOptions;
+  useFactory?: (...args: unknown[]) => Promise<VytchesDDDOptions> | VytchesDDDOptions;
 
   /**
    * Use existing options provider

@@ -1,4 +1,6 @@
 // Core CLI interfaces
+import type { WorkflowContext } from './workflows/types';
+
 export interface CLIConfig {
   debug: boolean;
   outputDir: string;
@@ -26,7 +28,7 @@ export interface CommandOption {
   choices?: string[];
 }
 
-export type CommandAction = (args: string[], options: Record<string, any>) => Promise<void>;
+export type CommandAction = (args: string[], options: Record<string, unknown>) => Promise<void>;
 
 // Project structures
 
@@ -45,18 +47,18 @@ export type FrameworkType = 'nestjs' | 'express' | 'fastify' | 'standalone';
 export interface Template {
   name: string;
   path: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   conditions?: TemplateCondition[];
 }
 
 export interface TemplateCondition {
   variable: string;
   operator: 'equals' | 'not-equals' | 'contains' | 'exists';
-  value: any;
+  value: unknown;
 }
 
 export interface TemplateContext {
-  [key: string]: any;
+  [key: string]: unknown;
   // Standard context variables (optional for flexibility)
   name?: string;
   className?: string;
@@ -107,7 +109,7 @@ export interface WorkflowStep {
   type: WorkflowStepType;
   prompt?: PromptConfig;
   action?: WorkflowAction;
-  next?: string | ((context: any) => string);
+  next?: string | ((context: WorkflowContext) => string);
 }
 
 export type WorkflowStepType = 'prompt' | 'action' | 'decision' | 'completion';
@@ -115,18 +117,18 @@ export type WorkflowStepType = 'prompt' | 'action' | 'decision' | 'completion';
 export interface PromptConfig {
   type: 'input' | 'select' | 'multiselect' | 'confirm' | 'password';
   message: string;
-  choices?: string[] | ChoiceOption[] | ((context: any) => string[] | ChoiceOption[]);
-  default?: any;
-  validate?: (input: any) => boolean | string;
+  choices?: string[] | ChoiceOption[] | ((context: WorkflowContext) => string[] | ChoiceOption[]);
+  default?: unknown;
+  validate?: (input: unknown) => boolean | string;
 }
 
 export interface ChoiceOption {
   name: string;
-  value: any;
+  value: unknown;
   description?: string;
 }
 
-export type WorkflowAction = (context: any) => Promise<void>;
+export type WorkflowAction = (context: WorkflowContext) => Promise<void>;
 
 // WorkflowContext moved to workflows/types.ts
 

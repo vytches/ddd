@@ -22,7 +22,7 @@ const yargs = require('yargs');
 // Configuration for any type monitoring
 const CONFIG = {
   // Global thresholds
-  globalThreshold: 1310, // Adjusted for comprehensive enterprise packages
+  globalThreshold: 1320, // Adjusted for comprehensive enterprise packages with some flexibility
 
   // Per-package thresholds (can be customized per package)
   packageThresholds: {

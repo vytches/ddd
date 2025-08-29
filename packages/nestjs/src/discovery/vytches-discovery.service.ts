@@ -3,12 +3,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { ModuleRef } from '@nestjs/core';
 import type { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 import type { UnifiedEventBus } from '@vytches/ddd-events';
+import type { ServiceLifetime } from '@vytches/ddd-di';
 import type { NestJSContainerAdapter } from '../adapters/nestjs-container.adapter';
 import { DOMAIN_SERVICE_METADATA, EVENT_HANDLER_METADATA } from '../constants';
 
 // Import domain service metadata helpers
-let getDIDomainServiceMetadata: any;
-let getDomainServiceMetadata: any;
+type MetadataGetter = (target: Function) => unknown;
+let getDIDomainServiceMetadata: MetadataGetter | undefined;
+let getDomainServiceMetadata: MetadataGetter | undefined;
 try {
   const domainServiceModule = require('@vytches/ddd-domain-services');
   getDIDomainServiceMetadata = domainServiceModule.getDIDomainServiceMetadata;
@@ -21,10 +23,10 @@ try {
 type DiscoveredInstance = object;
 interface ServiceMetadata {
   serviceId?: string;
-  lifetime?: any;
+  lifetime?: ServiceLifetime;
   context?: string;
   tags?: string[];
-  resilience?: any;
+  resilience?: unknown;
   timeout?: number;
   commandType?: Function;
   queryType?: Function;
@@ -145,7 +147,7 @@ export class VytchesDiscoveryService {
     let discovered = false;
 
     // Check for @DomainService - use exported functions for proper metadata access
-    let domainServiceMetadata: any = null;
+    let domainServiceMetadata: unknown = null;
     if (getDIDomainServiceMetadata) {
       domainServiceMetadata = getDIDomainServiceMetadata(target);
     }
@@ -205,7 +207,7 @@ export class VytchesDiscoveryService {
     }
 
     // Check for @Saga - use correct metadata key
-    let sagaMetadata: any = null;
+    let sagaMetadata: unknown = null;
     try {
       const { SAGA_METADATA_KEY } = await import('@vytches/ddd-messaging');
       sagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target);
@@ -248,6 +250,7 @@ export class VytchesDiscoveryService {
         this.logger.debug(`Registered domain service: ${serviceId} (NestJS managed)`);
       } else {
         // Pure VytchesDDD service - register the class
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.adapter.register(serviceId, target as any, {
           lifetime: metadata.lifetime,
           context: metadata.context,
@@ -288,10 +291,12 @@ export class VytchesDiscoveryService {
   private async registerCommandHandler(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: any
+    metadata: unknown
   ): Promise<void> {
     // Extract command type from DI metadata structure
-    const commandType = metadata.messageType || metadata.commandType;
+    const metadataObj = metadata as { messageType?: Function; commandType?: Function };
+    const commandType = metadataObj.messageType || metadataObj.commandType;
+    if (!commandType) return;
     const handlerId = `${commandType.name}Handler`;
 
     try {
@@ -306,7 +311,9 @@ export class VytchesDiscoveryService {
         );
       } else {
         // Pure VytchesDDD handler - we manage the lifecycle
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.adapter.register(handlerId, target as any, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           lifetime: 'singleton' as any, // Command handlers typically singleton
           tags: ['command-handler', 'auto-discovered'],
         });

@@ -3,6 +3,7 @@ import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { ModuleRef } from '@nestjs/core';
 // Mock decorators for testing - avoid lazy-loaded imports
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const CommandHandler = (commandType: any) => (target: any) => {
   Reflect.defineMetadata(
     'di:handler-metadata',
@@ -12,6 +13,7 @@ const CommandHandler = (commandType: any) => (target: any) => {
   return target;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const QueryHandler = (queryType: any) => (target: any) => {
   Reflect.defineMetadata(
     'di:handler-metadata',
@@ -21,16 +23,19 @@ const QueryHandler = (queryType: any) => (target: any) => {
   return target;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const EventHandler = (eventType: any) => (target: any) => {
   Reflect.defineMetadata('di:event-handler', { eventType }, target as object);
   return target;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DomainService = (serviceId: string) => (target: any) => {
   Reflect.defineMetadata('di:domain-service', { serviceId }, target as object);
   return target;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Saga = (sagaType: string) => (target: any) => {
   Reflect.defineMetadata('saga:metadata', { saga: { sagaType } }, target as object);
   return target;
@@ -102,11 +107,11 @@ class TestDomainService {
 @Injectable()
 @Saga('TestProcessingSaga')
 class TestSaga {
-  async handleEvent(_event: any, _context: ISagaExecutionContext): Promise<ISagaActionResult> {
+  async handleEvent(_event: unknown, _context: ISagaExecutionContext): Promise<ISagaActionResult> {
     return { success: true };
   }
 
-  canHandle(_event: any): boolean {
+  canHandle(_event: unknown): boolean {
     return true;
   }
 
@@ -142,14 +147,16 @@ describe('VytchesDDDBulkProvider', () => {
     describe('forHandlers', () => {
       it('should create basic NestJS providers for handlers', () => {
         const handlers = [TestCommandHandler, TestQueryHandler, TestEventHandler];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const providers = VytchesDDDBulkProvider.forHandlers(handlers as any);
 
         expect(providers).toHaveLength(3);
 
         // Check each provider
         providers.forEach((provider, index) => {
-          expect((provider as any).provide).toBe(handlers[index]);
-          expect((provider as any).useClass).toBe(handlers[index]);
+          const classProvider = provider as { provide: unknown; useClass: unknown };
+          expect(classProvider.provide).toBe(handlers[index]);
+          expect(classProvider.useClass).toBe(handlers[index]);
         });
       });
 
@@ -165,8 +172,9 @@ describe('VytchesDDDBulkProvider', () => {
         const providers = VytchesDDDBulkProvider.forDomainServices(services);
 
         expect(providers).toHaveLength(1);
-        expect((providers[0] as any).provide).toBe(TestDomainService);
-        expect((providers[0] as any).useClass).toBe(TestDomainService);
+        const classProvider = providers[0] as { provide: unknown; useClass: unknown };
+        expect(classProvider.provide).toBe(TestDomainService);
+        expect(classProvider.useClass).toBe(TestDomainService);
       });
 
       it('should handle empty services array', () => {
@@ -190,12 +198,19 @@ describe('VytchesDDDBulkProvider', () => {
         expect(providers.length).toBeGreaterThan(4);
 
         // Verify specific provider types are included
-        const handlerProviders = providers.filter(
-          p => (p as any).provide === TestCommandHandler || (p as any).provide === TestQueryHandler
-        );
+        const handlerProviders = providers.filter(p => {
+          const classProvider = p as { provide: unknown };
+          return (
+            classProvider.provide === TestCommandHandler ||
+            classProvider.provide === TestQueryHandler
+          );
+        });
         expect(handlerProviders).toHaveLength(2);
 
-        const serviceProviders = providers.filter(p => (p as any).provide === TestDomainService);
+        const serviceProviders = providers.filter(p => {
+          const classProvider = p as { provide: unknown };
+          return classProvider.provide === TestDomainService;
+        });
         expect(serviceProviders).toHaveLength(1);
       });
 
@@ -234,9 +249,14 @@ describe('VytchesDDDBulkProvider', () => {
 
         const provider = VytchesDDDBulkProvider.createBulkRegistrar(config);
 
-        expect((provider as any).provide).toMatch(/BULK_REGISTRAR_/);
-        expect((provider as any).useFactory).toBeDefined();
-        expect((provider as any).inject).toEqual([ModuleRef]);
+        const factoryProvider = provider as {
+          provide: string;
+          useFactory: unknown;
+          inject: unknown[];
+        };
+        expect(factoryProvider.provide).toMatch(/BULK_REGISTRAR_/);
+        expect(factoryProvider.useFactory).toBeDefined();
+        expect(factoryProvider.inject).toEqual([ModuleRef]);
       });
     });
   });
@@ -254,6 +274,7 @@ describe('VytchesDDDBulkProvider', () => {
       });
 
       it('should reject non-function values', () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const invalidClasses = [TestCommandHandler, 'not-a-class' as any];
 
         const [error] = safeRun(() => {
@@ -268,9 +289,11 @@ describe('VytchesDDDBulkProvider', () => {
         const functionWithoutPrototype = () => {
           return;
         };
-        delete (functionWithoutPrototype as any).prototype;
+        const funcWithoutProto = functionWithoutPrototype as { prototype?: unknown };
+        delete funcWithoutProto.prototype;
 
         const [error] = safeRun(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           VytchesDDDBulkProvider.validateClasses([functionWithoutPrototype as any]);
         });
 
@@ -283,7 +306,7 @@ describe('VytchesDDDBulkProvider', () => {
       it('should validate proper ModuleRef instance', () => {
         const mockModuleRef = {
           get: vi.fn(),
-        } as any;
+        } as unknown as ModuleRef;
 
         const [_result, error] = safeRun(() => {
           VytchesDDDBulkProvider.validateModuleRef(mockModuleRef);
@@ -294,7 +317,7 @@ describe('VytchesDDDBulkProvider', () => {
 
       it('should reject null or undefined ModuleRef', () => {
         const [error] = safeRun(() => {
-          VytchesDDDBulkProvider.validateModuleRef(null as any);
+          VytchesDDDBulkProvider.validateModuleRef(null as unknown as ModuleRef);
         });
 
         expect(error).toBeInstanceOf(Error);
@@ -302,7 +325,7 @@ describe('VytchesDDDBulkProvider', () => {
       });
 
       it('should reject ModuleRef without get method', () => {
-        const invalidModuleRef = {} as any;
+        const invalidModuleRef = {} as unknown as ModuleRef;
 
         const [error] = safeRun(() => {
           VytchesDDDBulkProvider.validateModuleRef(invalidModuleRef);
@@ -351,7 +374,7 @@ describe('BulkRegistrar', () => {
       const config: BulkRegistrationConfig = { handlers: [TestCommandHandler] };
 
       const [error] = safeRun(() => {
-        new BulkRegistrar(null as any, config);
+        new BulkRegistrar(null as unknown as ModuleRef, config);
       });
 
       expect(error).toBeInstanceOf(Error);
@@ -360,6 +383,7 @@ describe('BulkRegistrar', () => {
 
     it('should validate handler classes on construction', () => {
       const config: BulkRegistrationConfig = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         handlers: ['not-a-class' as any],
       };
 
@@ -505,7 +529,7 @@ describe('BulkRegistrar', () => {
         get: vi.fn().mockImplementation(() => {
           throw new Error('Mock registration error');
         }),
-      } as any;
+      } as unknown as ModuleRef;
 
       const config: BulkRegistrationConfig = {
         handlers: [TestCommandHandler],
