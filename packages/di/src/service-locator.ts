@@ -328,7 +328,8 @@ export class ServiceLocator implements IServiceLocator {
     if (!this.globalContainer) return;
 
     const { handlerType, messageType, metadata } = handler;
-    const options = metadata.options || metadata; // Support both formats
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const options = (metadata as any)?.options || metadata || {}; // Support both formats
 
     try {
       // Determine target container (context-specific or global)
@@ -398,8 +399,8 @@ export class ServiceLocator implements IServiceLocator {
       }
 
       // Update metadata to mark as registered (but keep registration-pending for re-discovery)
-      metadata.registeredWithDI = true;
-      Reflect.defineMetadata(`di:${handler.type}-handler`, metadata, handlerType);
+      const updatedMetadata = { ...(metadata as object), registeredWithDI: true };
+      Reflect.defineMetadata(`di:${handler.type}-handler`, updatedMetadata, handlerType);
       // Don't delete 'di:registration-pending' - keep it for future discoveries
     } catch (error) {
       console.warn(`Failed to register ${handler.type} handler:`, error);

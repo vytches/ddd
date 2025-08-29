@@ -42,13 +42,13 @@ export interface ValueObjectConstraints {
   pattern?: RegExp;
 
   /** Allowed values (enum-like constraints) */
-  allowedValues?: any[];
+  allowedValues?: unknown[];
 
   /** Forbidden values */
-  forbiddenValues?: any[];
+  forbiddenValues?: unknown[];
 
   /** Custom constraint validator */
-  customValidator?: (value: any) => boolean;
+  customValidator?: (value: unknown) => boolean;
 
   /** Geographic constraints */
   geographic?: {
@@ -67,7 +67,7 @@ export interface ValueObjectConstraints {
   };
 
   /** Additional arbitrary constraints */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -298,7 +298,7 @@ export class ValueObjectBuilder<T> {
    * const customEmail = await emailBuilder.build(undefined, { domain: 'company.com' });
    * ```
    */
-  async build(templateName?: string, overrides?: Partial<any>): Promise<Result<T, Error>> {
+  async build(templateName?: string, overrides?: Partial<T>): Promise<Result<T, Error>> {
     try {
       let attempts = 0;
       const maxAttempts = this.config.maxRetryAttempts!;
@@ -364,7 +364,7 @@ export class ValueObjectBuilder<T> {
   async buildMany(
     count: number,
     templateName?: string,
-    overrideGenerator?: (index: number) => Partial<any>
+    overrideGenerator?: (index: number) => Partial<T>
   ): Promise<Result<T[], Error>> {
     try {
       const valueObjects: T[] = [];
@@ -436,7 +436,7 @@ export class ValueObjectBuilder<T> {
    */
   private async generateValueObjectData(
     templateName?: string,
-    overrides?: Partial<any>
+    overrides?: Partial<T>
   ): Promise<any> {
     let data: any;
 

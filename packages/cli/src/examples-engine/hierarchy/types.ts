@@ -28,7 +28,7 @@ export interface ResolvedMetadata {
   tags?: string[];
   warnings?: string[];
   // Format-specific fields
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface HierarchyConfig {

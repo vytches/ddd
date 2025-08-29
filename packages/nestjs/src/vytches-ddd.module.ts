@@ -1,7 +1,16 @@
 import type { DynamicModule, OnModuleInit, Type } from '@nestjs/common';
 import { Global, Inject, Module, Logger } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
+// Lazy load CQRS to avoid module boundary issues
+let CommandBus: any;
+let QueryBus: any;
+try {
+  const cqrs = require('@vytches/ddd-cqrs');
+  CommandBus = cqrs.CommandBus;
+  QueryBus = cqrs.QueryBus;
+} catch {
+  // CQRS package not available
+}
 import { NestJSContainerAdapter } from './adapters/nestjs-container.adapter';
 import { VYTCHES_DDD_OPTIONS } from './constants';
 import { VytchesDiscoveryService } from './discovery/vytches-discovery.service';

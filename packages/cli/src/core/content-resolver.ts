@@ -892,9 +892,9 @@ Cache expensive calculations and external service calls.
 
 \`\`\`typescript
 class OptimizedDomainService extends BaseDomainService {
-  private cache = new Map<string, any>();
+  private cache = new Map<string, unknown>();
 
-  async expensiveOperation(input: string): Promise<Result<any, Error>> {
+  async expensiveOperation(input: string): Promise<Result<unknown, Error>> {
     const cacheKey = \`operation_\${input}\`;
 
     if (this.cache.has(cacheKey)) {
@@ -1006,7 +1006,7 @@ import { ${this.getMainExport(packageName)} } from '@vytches/ddd-${packageName}'
 import { Result } from '@vytches/ddd-utils';
 
 export class Example${this.getMainExport(packageName)} extends ${this.getMainExport(packageName)} {
-  async execute(input: any): Promise<Result<any, Error>> {
+  async execute(input: unknown): Promise<Result<unknown, Error>> {
     try {
       // Implementation logic here
       return Result.success({ message: 'Success' });

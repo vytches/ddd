@@ -3,23 +3,30 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { ModuleRef } from '@nestjs/core';
 import type { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
 import type { UnifiedEventBus } from '@vytches/ddd-events';
+import type { ServiceLifetime } from '@vytches/ddd-di';
 import type { NestJSContainerAdapter } from '../adapters/nestjs-container.adapter';
-import {
-  COMMAND_HANDLER_METADATA,
-  DOMAIN_SERVICE_METADATA,
-  EVENT_HANDLER_METADATA,
-  QUERY_HANDLER_METADATA,
-  SAGA_METADATA,
-} from '../constants';
+import { DOMAIN_SERVICE_METADATA, EVENT_HANDLER_METADATA } from '../constants';
+
+// Import domain service metadata helpers
+type MetadataGetter = (target: Function) => unknown;
+let getDIDomainServiceMetadata: MetadataGetter | undefined;
+let getDomainServiceMetadata: MetadataGetter | undefined;
+try {
+  const domainServiceModule = require('@vytches/ddd-domain-services');
+  getDIDomainServiceMetadata = domainServiceModule.getDIDomainServiceMetadata;
+  getDomainServiceMetadata = domainServiceModule.getDomainServiceMetadata;
+} catch {
+  // Domain services package not available
+}
 
 // Type for discovered instances and metadata
 type DiscoveredInstance = object;
 interface ServiceMetadata {
   serviceId?: string;
-  lifetime?: any;
+  lifetime?: ServiceLifetime;
   context?: string;
   tags?: string[];
-  resilience?: any;
+  resilience?: unknown;
   timeout?: number;
   commandType?: Function;
   queryType?: Function;
@@ -139,37 +146,78 @@ export class VytchesDiscoveryService {
   private async processTarget(target: Function, instance: DiscoveredInstance): Promise<boolean> {
     let discovered = false;
 
-    // Check for @DomainService
-    const domainServiceMetadata = Reflect.getMetadata(DOMAIN_SERVICE_METADATA, target);
+    // Check for @DomainService - use exported functions for proper metadata access
+    let domainServiceMetadata: unknown = null;
+    if (getDIDomainServiceMetadata) {
+      domainServiceMetadata = getDIDomainServiceMetadata(target);
+    }
+    if (!domainServiceMetadata && getDomainServiceMetadata) {
+      domainServiceMetadata = getDomainServiceMetadata(target);
+    }
+    // Final fallback to direct metadata check
+    if (!domainServiceMetadata) {
+      domainServiceMetadata = Reflect.getMetadata(DOMAIN_SERVICE_METADATA, target);
+    }
+
     if (domainServiceMetadata) {
+      this.logger.debug(`Found @DomainService metadata on ${target.name}:`, domainServiceMetadata);
       await this.registerDomainService(target, instance, domainServiceMetadata);
       discovered = true;
     }
 
-    // Check for @CommandHandler
-    const commandHandlerMetadata = Reflect.getMetadata(COMMAND_HANDLER_METADATA, target);
-    if (commandHandlerMetadata) {
+    // Check for @CommandHandler - use correct DI metadata key
+    const commandHandlerMetadata = Reflect.getMetadata('di:handler-metadata', target);
+    if (commandHandlerMetadata && commandHandlerMetadata.type === 'command') {
+      this.logger.debug(
+        `Found @CommandHandler metadata on ${target.name}:`,
+        commandHandlerMetadata
+      );
       await this.registerCommandHandler(target, instance, commandHandlerMetadata);
       discovered = true;
     }
 
-    // Check for @QueryHandler
-    const queryHandlerMetadata = Reflect.getMetadata(QUERY_HANDLER_METADATA, target);
-    if (queryHandlerMetadata) {
+    // Check for @QueryHandler - use correct DI metadata key
+    const queryHandlerMetadata = Reflect.getMetadata('di:handler-metadata', target);
+    if (queryHandlerMetadata && queryHandlerMetadata.type === 'query') {
+      this.logger.debug(`Found @QueryHandler metadata on ${target.name}:`, queryHandlerMetadata);
       await this.registerQueryHandler(target, instance, queryHandlerMetadata);
       discovered = true;
     }
 
-    // Check for @EventHandler
-    const eventHandlerMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, target);
-    if (eventHandlerMetadata) {
-      await this.registerEventHandler(target, instance, eventHandlerMetadata);
+    // Check for @EventHandler - use correct DI metadata key
+    const eventHandlerDIMetadata = Reflect.getMetadata('di:event-handler', target);
+    if (eventHandlerDIMetadata) {
+      this.logger.debug(
+        `Found @EventHandler DI metadata on ${target.name}:`,
+        eventHandlerDIMetadata
+      );
+      await this.registerEventHandler(target, instance, eventHandlerDIMetadata);
       discovered = true;
+    } else {
+      // Fallback to legacy metadata for compatibility
+      const eventHandlerLegacyMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, target);
+      if (eventHandlerLegacyMetadata) {
+        this.logger.debug(
+          `Found @EventHandler legacy metadata on ${target.name}:`,
+          eventHandlerLegacyMetadata
+        );
+        await this.registerEventHandler(target, instance, eventHandlerLegacyMetadata);
+        discovered = true;
+      }
     }
 
-    // Check for @Saga
-    const sagaMetadata = Reflect.getMetadata(SAGA_METADATA, target);
+    // Check for @Saga - use correct metadata key
+    let sagaMetadata: unknown = null;
+    try {
+      const { SAGA_METADATA_KEY } = await import('@vytches/ddd-messaging');
+      sagaMetadata = Reflect.getMetadata(SAGA_METADATA_KEY, target);
+    } catch {
+      // Fallback to symbol-based access if import fails
+      sagaMetadata = Reflect.getMetadata(Symbol.for('saga:metadata'), target);
+    }
+
     if (sagaMetadata) {
+      this.logger.debug(`Found @Saga metadata on ${target.name}:`, sagaMetadata);
       await this.registerSaga(target, instance, sagaMetadata);
       discovered = true;
     }
@@ -202,6 +250,7 @@ export class VytchesDiscoveryService {
         this.logger.debug(`Registered domain service: ${serviceId} (NestJS managed)`);
       } else {
         // Pure VytchesDDD service - register the class
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.adapter.register(serviceId, target as any, {
           lifetime: metadata.lifetime,
           context: metadata.context,
@@ -242,43 +291,59 @@ export class VytchesDiscoveryService {
   private async registerCommandHandler(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: ServiceMetadata
+    metadata: unknown
   ): Promise<void> {
-    const handlerId = `${(metadata.commandType as Function).name}Handler`;
+    // Extract command type from DI metadata structure
+    const metadataObj = metadata as { messageType?: Function; commandType?: Function };
+    const commandType = metadataObj.messageType || metadataObj.commandType;
+    if (!commandType) return;
+    const handlerId = `${commandType.name}Handler`;
 
     try {
       // Check if @Injectable is also present - prioritize NestJS DI
-      const hasInjectable = Reflect.getMetadata('injectable', target);
+      const hasInjectable = Reflect.getMetadata('__injectable__', target);
 
       if (hasInjectable) {
         // NestJS manages the instance lifecycle - we just register it for VytchesDDD features
         this.adapter.registerInstance(handlerId, instance);
-        this.logger.debug(`Command handler ${target.name} (NestJS managed)`);
+        this.logger.debug(
+          `✅ Command handler ${target.name} (NestJS managed) for ${commandType.name}`
+        );
       } else {
         // Pure VytchesDDD handler - we manage the lifecycle
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.adapter.register(handlerId, target as any, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           lifetime: 'singleton' as any, // Command handlers typically singleton
           tags: ['command-handler', 'auto-discovered'],
         });
-        this.logger.debug(`Command handler ${target.name} (VytchesDDD managed)`);
+        this.logger.debug(
+          `✅ Command handler ${target.name} (VytchesDDD managed) for ${commandType.name}`
+        );
       }
 
       // Get command bus and register the handler
       try {
         const commandBus = this.adapter.resolve<CommandBus>('commandBus');
         if (commandBus && 'register' in commandBus) {
-          commandBus.register(metadata.commandType as Function, instance as any);
-          this.logger.debug(`Registered command handler: ${handlerId}`);
+          // Use the actual instance for handler registration
+          commandBus.register(commandType, instance as any);
+          this.logger.debug(
+            `✅ Registered command handler with bus: ${handlerId} → ${commandType.name}`
+          );
+        } else {
+          this.logger.warn(`CommandBus not found - handler ${handlerId} registration deferred`);
         }
-      } catch (_error) {
+      } catch (busError) {
         this.logger.debug(
-          `CommandBus not available yet, handler ${handlerId} will be registered later`
+          `CommandBus not available yet, handler ${handlerId} will be registered later:`,
+          busError
         );
       }
 
       this.discoveredHandlers.set(handlerId, instance);
     } catch (error) {
-      this.logger.error(`Failed to register command handler ${handlerId}:`, error);
+      this.logger.error(`❌ Failed to register command handler ${handlerId}:`, error);
       // Don't throw - continue with other handlers
     }
   }
@@ -289,43 +354,53 @@ export class VytchesDiscoveryService {
   private async registerQueryHandler(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: ServiceMetadata
+    metadata: any
   ): Promise<void> {
-    const handlerId = `${(metadata.queryType as Function).name}Handler`;
+    // Extract query type from DI metadata structure
+    const queryType = metadata.messageType || metadata.queryType;
+    const handlerId = `${queryType.name}Handler`;
 
     try {
       // Check if @Injectable is also present - prioritize NestJS DI
-      const hasInjectable = Reflect.getMetadata('injectable', target);
+      const hasInjectable = Reflect.getMetadata('__injectable__', target);
 
       if (hasInjectable) {
         // NestJS manages the instance lifecycle - we just register it for VytchesDDD features
         this.adapter.registerInstance(handlerId, instance);
-        this.logger.debug(`Query handler ${target.name} (NestJS managed)`);
+        this.logger.debug(`✅ Query handler ${target.name} (NestJS managed) for ${queryType.name}`);
       } else {
         // Pure VytchesDDD handler - we manage the lifecycle
         this.adapter.register(handlerId, target as any, {
           lifetime: 'singleton' as any, // Query handlers typically singleton
           tags: ['query-handler', 'auto-discovered'],
         });
-        this.logger.debug(`Query handler ${target.name} (VytchesDDD managed)`);
+        this.logger.debug(
+          `✅ Query handler ${target.name} (VytchesDDD managed) for ${queryType.name}`
+        );
       }
 
       // Get query bus and register the handler
       try {
         const queryBus = this.adapter.resolve<QueryBus>('queryBus');
         if (queryBus && 'register' in queryBus) {
-          queryBus.register(metadata.queryType as Function, instance as any);
-          this.logger.debug(`Registered query handler: ${handlerId}`);
+          // Use the actual instance for handler registration
+          queryBus.register(queryType, instance as any);
+          this.logger.debug(
+            `✅ Registered query handler with bus: ${handlerId} → ${queryType.name}`
+          );
+        } else {
+          this.logger.warn(`QueryBus not found - handler ${handlerId} registration deferred`);
         }
-      } catch (_error) {
+      } catch (busError) {
         this.logger.debug(
-          `QueryBus not available yet, handler ${handlerId} will be registered later`
+          `QueryBus not available yet, handler ${handlerId} will be registered later:`,
+          busError
         );
       }
 
       this.discoveredHandlers.set(handlerId, instance);
     } catch (error) {
-      this.logger.error(`Failed to register query handler ${handlerId}:`, error);
+      this.logger.error(`❌ Failed to register query handler ${handlerId}:`, error);
       // Don't throw - continue with other handlers
     }
   }
@@ -336,37 +411,44 @@ export class VytchesDiscoveryService {
   private async registerEventHandler(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: ServiceMetadata
+    metadata: any
   ): Promise<void> {
     const handlerId = `${target.name}EventHandler`;
 
     try {
       // Check if @Injectable is also present - prioritize NestJS DI
-      const hasInjectable = Reflect.getMetadata('injectable', target);
+      const hasInjectable = Reflect.getMetadata('__injectable__', target);
 
       if (hasInjectable) {
         // NestJS manages the instance lifecycle - we just register it for VytchesDDD features
         this.adapter.registerInstance(handlerId, instance);
-        this.logger.debug(`Event handler ${target.name} (NestJS managed)`);
+        this.logger.debug(`✅ Event handler ${target.name} (NestJS managed)`);
       } else {
         // Pure VytchesDDD handler - we manage the lifecycle
         this.adapter.register(handlerId, target as any, {
           lifetime: 'transient' as any, // Event handlers typically don't need singleton
           tags: ['event-handler', 'auto-discovered'],
         });
-        this.logger.debug(`Event handler ${target.name} (VytchesDDD managed)`);
+        this.logger.debug(`✅ Event handler ${target.name} (VytchesDDD managed)`);
       }
 
       // Get event bus and subscribe the handler
       try {
         const eventBus = this.adapter.resolve<UnifiedEventBus>('eventBus');
         if (eventBus && 'subscribe' in eventBus) {
-          // Handle both eventType (from decorator) and eventTypes (legacy)
-          const eventTypes =
-            metadata.eventTypes ||
-            ((metadata.eventType ? [metadata.eventType] : []) as Array<string | Function>);
+          // Extract event type from metadata structure
+          // Handle both DI metadata and legacy metadata formats
+          let eventType: string | Function | undefined;
 
-          if (eventTypes.length === 0) {
+          if (metadata.eventType) {
+            // DI metadata format
+            eventType = metadata.eventType;
+          } else if (metadata.eventTypes && metadata.eventTypes.length > 0) {
+            // Legacy metadata format
+            eventType = metadata.eventTypes[0];
+          }
+
+          if (!eventType) {
             this.logger.warn(
               `No event types found for ${target.name}. ` +
                 `Make sure @EventHandler decorator is properly applied.`
@@ -374,38 +456,39 @@ export class VytchesDiscoveryService {
             return;
           }
 
-          eventTypes.forEach((eventType: string | Function) => {
-            if (instance && 'handle' in instance) {
-              // Support both constructor types and string event names
-              const eventName = typeof eventType === 'function' ? eventType.name : eventType;
+          if (instance && 'handle' in instance) {
+            // Support both constructor types and string event names
+            const eventName = typeof eventType === 'function' ? eventType.name : eventType;
 
-              eventBus.subscribe(eventName, async (event: DiscoveredInstance) => {
-                try {
-                  await (instance as any).handle(event);
-                } catch (error) {
-                  this.logger.error(
-                    `Error in event handler ${target.name} for ${eventName}:`,
-                    error
-                  );
-                  // Don't throw - other handlers should still execute
-                }
-              });
+            eventBus.subscribe(eventName, async (event: DiscoveredInstance) => {
+              try {
+                await (instance as any).handle(event);
+              } catch (error) {
+                this.logger.error(
+                  `❌ Error in event handler ${target.name} for ${eventName}:`,
+                  error
+                );
+                // Don't throw - other handlers should still execute
+              }
+            });
 
-              this.logger.debug(`✅ Registered event handler ${target.name} for: ${eventName}`);
-            } else {
-              this.logger.warn(`Handler ${target.name} does not have a 'handle' method`);
-            }
-          });
+            this.logger.debug(`✅ Registered event handler ${target.name} for: ${eventName}`);
+          } else {
+            this.logger.warn(`❌ Handler ${target.name} does not have a 'handle' method`);
+          }
+        } else {
+          this.logger.warn(`EventBus not found - handler ${handlerId} registration deferred`);
         }
-      } catch (_error) {
+      } catch (busError) {
         this.logger.debug(
-          `EventBus not available yet, handler ${handlerId} will be registered later`
+          `EventBus not available yet, handler ${handlerId} will be registered later:`,
+          busError
         );
       }
 
       this.discoveredHandlers.set(handlerId, instance);
     } catch (error) {
-      this.logger.error(`Failed to register event handler ${handlerId}:`, error);
+      this.logger.error(`❌ Failed to register event handler ${handlerId}:`, error);
       // Don't throw - continue with other handlers
     }
   }
@@ -416,19 +499,47 @@ export class VytchesDiscoveryService {
   private async registerSaga(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: ServiceMetadata
+    metadata: any
   ): Promise<void> {
-    const sagaId = metadata.sagaId || target.name;
+    // Extract saga ID from metadata structure
+    const sagaConfig = metadata.saga || metadata;
+    const sagaId = sagaConfig.sagaType || sagaConfig.sagaId || target.name;
 
     try {
-      // Register saga instance in VytchesDDD
-      this.adapter.registerInstance(sagaId, instance);
+      // Check if @Injectable is also present - prioritize NestJS DI
+      const hasInjectable = Reflect.getMetadata('__injectable__', target);
 
-      this.logger.debug(`Registered saga: ${sagaId}`);
+      if (hasInjectable) {
+        // NestJS manages the instance lifecycle - register for VytchesDDD features
+        this.adapter.registerInstance(sagaId, instance);
+        this.logger.debug(`✅ Saga ${target.name} (NestJS managed) - ${sagaId}`);
+      } else {
+        // Pure VytchesDDD saga - we manage the lifecycle
+        this.adapter.register(sagaId, target as any, {
+          lifetime: sagaConfig.lifetime || 'transient',
+          tags: ['saga', 'auto-discovered'],
+          context: sagaConfig.context,
+        });
+        this.logger.debug(`✅ Saga ${target.name} (VytchesDDD managed) - ${sagaId}`);
+      }
+
+      // TODO: Register saga with saga orchestrator if available
+      try {
+        const sagaOrchestrator = this.adapter.resolve<any>('sagaOrchestrator');
+        if (sagaOrchestrator && 'registerSaga' in sagaOrchestrator) {
+          sagaOrchestrator.registerSaga(sagaId, instance);
+          this.logger.debug(`✅ Registered saga with orchestrator: ${sagaId}`);
+        }
+      } catch (orchestratorError) {
+        this.logger.debug(
+          `SagaOrchestrator not available yet, saga ${sagaId} will be registered later:`,
+          orchestratorError
+        );
+      }
 
       this.discoveredServices.set(sagaId, instance);
     } catch (error) {
-      this.logger.error(`Failed to register saga ${sagaId}:`, error);
+      this.logger.error(`❌ Failed to register saga ${sagaId}:`, error);
       // Don't throw - continue with other services
     }
   }
