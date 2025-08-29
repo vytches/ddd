@@ -1,0 +1,289 @@
+# VersionedACLRegistry - Multi-Version ACL Management
+
+# === FILE METADATA ===
+file-name: 'versioned-acl-registry'
+title: 'VersionedACLRegistry - API Version Management'
+description: 'Registry and adapter supporting multiple API versions'
+business-context: |
+  Manages multiple versions of external APIs and adapters, enabling
+  gradual migration between API versions while maintaining backward
+  compatibility and supporting blue-green deployments.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  VersionedACLRegistry:
+    class-doc:
+      description: 'Registry managing multiple adapter versions'
+      business-context: |
+        Supports versioned external API integrations, enabling smooth
+        transitions between API versions with fallback strategies and
+        gradual migration capabilities.
+
+      formats:
+        jsdoc:
+          description: 'Multi-version ACL adapter registry'
+        cli:
+          description: |
+            ## VersionedACLRegistry
+            Version management providing:
+            - Multiple API version support
+            - Fallback version strategies
+            - Migration path planning
+            - Compatibility checking
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseACLRegistry'
+        pattern: 'Versioning'
+
+    methods:
+      registerVersion:
+        description: 'Registers adapter for specific API version'
+        business-context: 'Associates adapter with API version'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter identifier'
+          - name: 'version'
+            type: 'string'
+            description: 'API version (semver format)'
+          - name: 'adapter'
+            type: 'IACLAdapter'
+            description: 'Version-specific adapter'
+
+        returns:
+          type: 'void'
+
+        examples:
+          - id: 'version-registration'
+            code: |
+              const registry = new VersionedACLRegistry();
+              
+              // Register different versions
+              registry.registerVersion('payments', '1.0.0', paymentsV1Adapter);
+              registry.registerVersion('payments', '2.0.0', paymentsV2Adapter);
+              registry.registerVersion('payments', '2.1.0', paymentsV2_1Adapter);
+
+      resolveVersion:
+        description: 'Resolves adapter for specific version'
+        business-context: 'Finds exact version match'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+          - name: 'version'
+            type: 'string'
+            description: 'Required version'
+
+        returns:
+          type: 'IACLAdapter | undefined'
+          description: 'Version-specific adapter'
+
+      resolveCompatible:
+        description: 'Resolves adapter with version compatibility'
+        business-context: 'Finds compatible version with fallback'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+          - name: 'versionRange'
+            type: 'string'
+            description: 'Version range (semver format)'
+
+        returns:
+          type: 'IACLAdapter | undefined'
+          description: 'Compatible adapter'
+
+        examples:
+          - id: 'compatible-resolution'
+            code: |
+              // Find any 2.x version
+              const adapter = registry.resolveCompatible('payments', '^2.0.0');
+              
+              // Prefer specific version with fallback
+              const specificAdapter = registry.resolveCompatible('payments', '~2.1.0');
+
+      getVersions:
+        description: 'Returns all registered versions for adapter'
+        business-context: 'Discovers available versions'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of available versions'
+
+      setDefaultVersion:
+        description: 'Sets default version for adapter'
+        business-context: 'Configures fallback version'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+          - name: 'version'
+            type: 'string'
+            description: 'Default version'
+
+        returns:
+          type: 'void'
+
+      deprecateVersion:
+        description: 'Marks version as deprecated'
+        business-context: 'Plans migration away from old versions'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+          - name: 'version'
+            type: 'string'
+            description: 'Version to deprecate'
+          - name: 'migrationPath'
+            type: 'string'
+            description: 'Recommended migration version'
+            optional: true
+
+        returns:
+          type: 'void'
+
+  VersionedACLAdapter:
+    class-doc:
+      description: 'Adapter supporting multiple external API versions'
+      business-context: |
+        Handles multiple versions of the same external API, routing
+        requests to appropriate version-specific implementations while
+        maintaining a unified domain interface.
+
+      formats:
+        jsdoc:
+          description: 'Multi-version ACL adapter implementation'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseACLAdapter'
+
+    methods:
+      constructor:
+        description: 'Initializes versioned adapter'
+        business-context: 'Sets up multi-version support'
+
+        parameters:
+          - name: 'contextInfo'
+            type: 'ACLContextInfo'
+            description: 'Context information'
+          - name: 'versionedAPIs'
+            type: 'Map<string, IExternalAPI>'
+            description: 'Version-specific API clients'
+          - name: 'translator'
+            type: 'IModelTranslator'
+            description: 'Model translator'
+
+        examples:
+          - id: 'versioned-setup'
+            code: |
+              const versionedAdapter = new VersionedACLAdapter(
+                { contextName: 'Payments', externalSystem: 'StripeAPI' },
+                new Map([
+                  ['2020-08-27', stripeAPI_2020],
+                  ['2022-11-15', stripeAPI_2022],
+                  ['2023-10-16', stripeAPI_2023]
+                ]),
+                new StripeTranslator()
+              );
+
+      executeWithVersion:
+        description: 'Executes operation with specific API version'
+        business-context: 'Routes to version-specific implementation'
+
+        parameters:
+          - name: 'version'
+            type: 'string'
+            description: 'API version to use'
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name'
+          - name: 'domainModel'
+            type: 'TDomainModel'
+            description: 'Domain model'
+          - name: 'options'
+            type: 'ExecuteOptions'
+            description: 'Execution options'
+            optional: true
+
+        returns:
+          type: 'Promise<Result<TResult, ACLError>>'
+          description: 'Version-specific result'
+
+      getSupportedVersions:
+        description: 'Returns supported API versions'
+        business-context: 'Lists available versions'
+
+        returns:
+          type: 'string[]'
+          description: 'Supported version list'
+
+      migrateToVersion:
+        description: 'Migrates operations to newer version'
+        business-context: 'Facilitates version migration'
+
+        parameters:
+          - name: 'targetVersion'
+            type: 'string'
+            description: 'Target API version'
+          - name: 'migrationStrategy'
+            type: 'MigrationStrategy'
+            description: 'Migration approach'
+            optional: true
+
+        returns:
+          type: 'Promise<MigrationResult>'
+          description: 'Migration outcome'
+
+# === USAGE PATTERNS ===
+patterns:
+  - name: 'Blue-Green Version Migration'
+    description: 'Safe version migration strategy'
+    example: |
+      // Start with old version
+      registry.registerVersion('api', '1.0', oldAdapter);
+      registry.setDefaultVersion('api', '1.0');
+      
+      // Deploy new version alongside
+      registry.registerVersion('api', '2.0', newAdapter);
+      
+      // Gradually migrate traffic
+      const adapter = registry.resolveCompatible('api', 
+        Math.random() > 0.1 ? '^2.0' : '^1.0'
+      );
+      
+      // Eventually deprecate old version
+      registry.deprecateVersion('api', '1.0', '2.0');
+
+  - name: 'Fallback Strategy'
+    description: 'Graceful degradation between versions'
+    example: |
+      class FallbackVersionedAdapter extends VersionedACLAdapter {
+        async execute(operation: string, model: any): Promise<Result<any, ACLError>> {
+          // Try latest version first
+          let result = await this.executeWithVersion('2.1', operation, model);
+          
+          if (result.isFailure() && this.isVersionCompatibilityError(result.error)) {
+            // Fallback to stable version
+            result = await this.executeWithVersion('2.0', operation, model);
+          }
+          
+          return result;
+        }
+      }

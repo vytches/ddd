@@ -1,0 +1,43 @@
+# Package Settings for ACL - Anti-Corruption Layer
+# Provides boundary protection between domain and external systems
+
+# === PACKAGE IDENTITY ===
+package-name: 'acl'
+display-name: 'DDD Anti-Corruption Layer'
+description: 'Boundary protection and translation for external system integration'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'integration-patterns'
+complexity: 'intermediate'
+patterns:
+  - 'anti-corruption-layer'
+  - 'adapter-pattern'
+  - 'translator-pattern'
+  - 'registry-pattern'
+
+# === BUSINESS CONTEXT ===
+business-context: |
+  Anti-Corruption Layer (ACL) provides essential boundary protection between
+  your domain model and external systems. It prevents external concepts from
+  contaminating your domain while enabling seamless integration with third-party
+  services, legacy systems, and external APIs.
+
+# === KEY CAPABILITIES ===
+capabilities:
+  - 'External system translation'
+  - 'Domain model protection'
+  - 'Versioned API handling'
+  - 'Context-aware routing'
+  - 'Middleware pipeline'
+  - 'Type-safe operations'
+
+# === DEPENDENCIES ===
+dependencies:
+  - '@vytches/ddd-core'
+  - '@vytches/ddd-utils'
+  - '@vytches/ddd-logging'

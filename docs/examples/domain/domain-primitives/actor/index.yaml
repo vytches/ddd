@@ -1,53 +1,48 @@
-# Actor Index - Domain Actor Exports
+# Actor Module Index - Universal Enhanced Metadata System V2
 
 # === FILE METADATA ===
 file-name: 'index'
-title: 'Domain Actor Package Exports'
-description: 'Actor pattern exports for domain-driven design'
-business-context: 'Provides unified access to actor pattern functionality'
+title: 'Actor Module Exports'
+description: 'Central export point for actor-related functionality'
+business-context: 'Provides actor pattern components for tracking operation initiators'
 
 # === HIERARCHY ===
 hierarchy:
   strategy: 'merge'
   scope: 'file'
 
-# === FILE-LEVEL METADATA ===
+# === FILE-DOC ===
 file-doc:
-  description: 'Central export hub for domain actor patterns and interfaces'
-  business-context: 'Simplifies imports for actor pattern implementation in DDD contexts'
+  description: 'Actor module export hub'
+  business-context: 'Centralizes actor pattern exports for audit and authorization'
   
   formats:
     jsdoc:
-      description: 'Actor pattern exports and interfaces'
+      description: 'Actor module exports'
     cli:
       description: |
-        ## Domain Actor Exports
-        
-        Actor pattern functionality including:
-        - Actor interfaces and contracts
-        - Actor error handling
-        - Default actor type definitions
+        ## Actor Module
+        Components for tracking who performs actions in the domain
 
   custom-tags:
     since: '1.0.0'
-    stability: 'stable'
-    category: 'actor-pattern'
-    pattern: 'facade-pattern'
-    
-# === EXPORTS DOCUMENTATION ===
+    module: 'actor'
+    category: 'foundation'
+
+# === EXPORTS ===
 exports:
-  ActorError:
-    description: 'Error class for actor-specific exceptions in domain operations'
-    business-context: 'Handles validation and operational failures in actor pattern implementations'
-    source: './actor.error'
+  - name: 'ActorError'
+    from: './actor.error'
+    description: 'Error class for actor-related issues'
+    business-context: 'Handles actor validation and processing errors'
     
-  DefaultActorType:
-    description: 'Default actor type constant for system-generated operations'
-    business-context: 'Provides standard actor identity for automated domain processes'
-    source: './actor.interface'
+  - name: 'DefaultActorType'
+    from: './actor.interface'
+    description: 'Standard actor type enumeration'
+    business-context: 'Categorizes actors for authorization'
     
-  IActor:
-    description: 'Core actor interface defining identity and behavior contracts'
-    business-context: 'Establishes actor pattern contract for domain operations with user context'
-    source: './actor.interface'
-    type: 'type'
+  - name: 'IActor'
+    from: './actor.interface'
+    description: 'Actor identification interface'
+    business-context: 'Defines actor structure for audit trails'
+    type: 'interface'

@@ -66,7 +66,7 @@ interfaces:
         type: 'string[]'
         description: 'File patterns to scan for decorated classes'
         optional: true
-        default: "['**/*.service.ts', '**/*.handler.ts']"
+        default: '["**\/*.service.ts", "**\/*.handler.ts"]'
         
       - name: 'contexts'
         type: 'string[]'

@@ -1,0 +1,340 @@
+# ResilienceObservability - Metrics and Monitoring
+
+# === FILE METADATA ===
+file-name: 'observability/index'
+title: 'ResilienceObservability - Metrics and Monitoring'  
+description: 'Observability components for resilience patterns monitoring'
+business-context: |
+  Provides comprehensive observability for resilience patterns including
+  metrics collection, event tracking, and multiple export formats for
+  monitoring and alerting integration.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  MetricValue:
+    description: 'Union type for metric values'
+    business-context: 'Flexible value type supporting different metric data types'
+
+  MetricType:
+    description: 'Enumeration of supported metric types'
+    business-context: 'Defines categories of metrics for proper aggregation and display'
+
+  BulkheadMetrics:
+    description: 'Metrics data for bulkhead pattern'
+    business-context: 'Tracks resource utilization and queue status'
+
+  CircuitBreakerMetrics:
+    description: 'Metrics data for circuit breaker pattern'
+    business-context: 'Monitors circuit state and failure rates'
+
+  HistogramBucket:
+    description: 'Histogram bucket for latency distribution'
+    business-context: 'Enables percentile calculations for response times'
+
+  HistogramMetric:
+    description: 'Histogram metric with buckets and statistics'
+    business-context: 'Provides detailed latency distribution analysis'
+
+  Metric:
+    description: 'Base metric interface for all metric types'
+    business-context: 'Common structure for all observability metrics'
+
+  MetricCollector:
+    description: 'Interface for collecting pattern-specific metrics'
+    business-context: 'Enables custom metrics collection for resilience patterns'
+
+  MetricExporter:
+    description: 'Interface for exporting metrics to external systems'
+    business-context: 'Allows integration with monitoring platforms'
+
+  MetricLabels:
+    description: 'Key-value labels for metric categorization'
+    business-context: 'Enables metric filtering and grouping'
+
+  MetricRegistry:
+    description: 'Registry for managing metric collectors'
+    business-context: 'Central registry for all resilience metrics'
+
+  MetricType:
+    description: 'Enumeration of supported metric types'
+    business-context: 'Defines available metric collection types'
+
+  MetricValue:
+    description: 'Numeric value for metrics with timestamp'
+    business-context: 'Time-series data point for metrics'
+
+  ObservabilityEvent:
+    description: 'Event data for resilience pattern operations'
+    business-context: 'Captures operational events for audit and debugging'
+
+  ObservabilityEventBus:
+    description: 'Event bus for observability events'
+    business-context: 'Distributes events to multiple listeners'
+
+  ObservabilityEventListener:
+    description: 'Listener interface for observability events'
+    business-context: 'Enables custom event processing'
+
+  ResilienceMetrics:
+    description: 'Combined metrics for all resilience patterns'
+    business-context: 'Aggregated view of system resilience health'
+
+  RetryMetrics:
+    description: 'Metrics data for retry pattern'
+    business-context: 'Tracks retry attempts and success rates'
+
+  TimeoutMetrics:
+    description: 'Metrics data for timeout pattern'
+    business-context: 'Monitors timeout occurrences and durations'
+
+  TimerMetric:
+    description: 'Timer metric for operation duration tracking'
+    business-context: 'Measures execution times and latency'
+
+# === CLASSES ===
+classes:
+  BulkheadMetricCollector:
+    class-doc:
+      description: 'Collects metrics for bulkhead pattern'
+      business-context: |
+        Tracks resource utilization, queue status, and rejection rates
+        for bulkhead pattern instances. Provides insights into resource
+        contention and capacity planning.
+
+      formats:
+        jsdoc:
+          description: 'Bulkhead metrics collector for resource monitoring'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricCollector'
+
+  CircuitBreakerMetricCollector:
+    class-doc:
+      description: 'Collects metrics for circuit breaker pattern'
+      business-context: |
+        Tracks circuit state changes, failure rates, and recovery attempts
+        for circuit breaker instances. Essential for monitoring system
+        stability and failure patterns.
+
+      formats:
+        jsdoc:
+          description: 'Circuit breaker metrics collector for failure monitoring'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricCollector'
+
+  RetryMetricCollector:
+    class-doc:
+      description: 'Collects metrics for retry pattern'
+      business-context: |
+        Tracks retry attempts, success rates after retries, and backoff
+        effectiveness. Helps optimize retry configurations and identify
+        problematic dependencies.
+
+      formats:
+        jsdoc:
+          description: 'Retry metrics collector for attempt tracking'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricCollector'
+
+  TimeoutMetricCollector:
+    class-doc:
+      description: 'Collects metrics for timeout pattern'
+      business-context: |
+        Tracks timeout occurrences, operation durations, and timeout
+        effectiveness. Helps optimize timeout values and identify
+        performance bottlenecks.
+
+      formats:
+        jsdoc:
+          description: 'Timeout metrics collector for duration monitoring'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricCollector'
+
+  DefaultMetricRegistry:
+    class-doc:
+      description: 'Default implementation of metric registry'
+      business-context: |
+        Central registry for managing all metric collectors. Provides
+        unified access to metrics from all resilience patterns and
+        enables batch metric collection.
+
+      formats:
+        jsdoc:
+          description: 'Default metric registry implementation'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricRegistry'
+
+  DefaultObservabilityEventBus:
+    class-doc:
+      description: 'Default implementation of observability event bus'
+      business-context: |
+        Distributes observability events to registered listeners.
+        Enables real-time monitoring, alerting, and custom event
+        processing for resilience patterns.
+
+      formats:
+        jsdoc:
+          description: 'Default observability event bus implementation'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'ObservabilityEventBus'
+
+  GlobalMetricRegistry:
+    class-doc:
+      description: 'Global singleton metric registry'
+      business-context: |
+        Provides application-wide access to metrics registry.
+        Simplifies metric collection across multiple modules
+        and enables centralized metrics management.
+
+      formats:
+        jsdoc:
+          description: 'Global singleton metric registry'
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Singleton'
+
+  GlobalObservabilityEventBus:
+    class-doc:
+      description: 'Global singleton observability event bus'
+      business-context: |
+        Provides application-wide event distribution for observability.
+        Enables centralized event management and cross-module
+        event communication.
+
+      formats:
+        jsdoc:
+          description: 'Global singleton observability event bus'
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Singleton'
+
+  ObservabilityEventFactory:
+    class-doc:
+      description: 'Factory for creating standardized observability events'
+      business-context: |
+        Creates consistently formatted observability events for
+        different resilience patterns. Ensures event standardization
+        across the observability system.
+
+      formats:
+        jsdoc:
+          description: 'Factory for standardized observability events'
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Factory'
+
+  CompositeMetricExporter:
+    class-doc:
+      description: 'Exports metrics to multiple destinations'
+      business-context: |
+        Combines multiple metric exporters to send metrics to different
+        monitoring systems simultaneously. Enables hybrid monitoring
+        strategies and backup metric storage.
+
+      formats:
+        jsdoc:
+          description: 'Composite metric exporter for multiple destinations'
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Composite'
+        implements: 'MetricExporter'
+
+  CsvMetricExporter:
+    class-doc:
+      description: 'Exports metrics to CSV format'
+      business-context: |
+        Exports metrics in CSV format for analysis in spreadsheet
+        applications or data analysis tools. Useful for historical
+        analysis and reporting.
+
+      formats:
+        jsdoc:
+          description: 'CSV metric exporter for spreadsheet analysis'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricExporter'
+
+  JsonMetricExporter:
+    class-doc:
+      description: 'Exports metrics to JSON format'
+      business-context: |
+        Exports metrics in JSON format for programmatic consumption
+        or storage in document databases. Preserves full metric
+        structure and metadata.
+
+      formats:
+        jsdoc:
+          description: 'JSON metric exporter for structured data'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricExporter'
+
+  MetricExporterFactory:
+    class-doc:
+      description: 'Factory for creating metric exporters'
+      business-context: |
+        Creates appropriate metric exporters based on configuration.
+        Simplifies exporter instantiation and supports dynamic
+        exporter selection.
+
+      formats:
+        jsdoc:
+          description: 'Factory for metric exporter creation'
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Factory'
+
+  PrometheusMetricExporter:
+    class-doc:
+      description: 'Exports metrics to Prometheus format'
+      business-context: |
+        Exports metrics in Prometheus format for integration with
+        Prometheus monitoring stack. Enables advanced querying,
+        alerting, and visualization with Grafana.
+
+      formats:
+        jsdoc:
+          description: 'Prometheus metric exporter for monitoring'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricExporter'
+
+  TextMetricExporter:
+    class-doc:
+      description: 'Exports metrics to plain text format'
+      business-context: |
+        Exports metrics as human-readable text for logging,
+        debugging, or simple monitoring scenarios. Useful for
+        development and troubleshooting.
+
+      formats:
+        jsdoc:
+          description: 'Text metric exporter for human-readable output'
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'MetricExporter'

@@ -1,0 +1,348 @@
+# EventReplayFactory - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'event-replay-factory'
+title: 'EventReplayFactory - Event Replay Factory Pattern'
+description: 'Factory for creating different types of event replay instances with capability-based configuration'
+business-context: 'Provides flexible creation of event replay instances based on requirements and capabilities'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  EventReplayFactory:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Factory class for creating various types of event replay instances with different capabilities'
+      business-context: 'Centralizes replay instance creation with capability-based configuration for different use cases'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Factory for creating event replay instances with different capabilities'
+        cli:
+          description: |
+            ## EventReplayFactory
+            
+            Factory pattern implementation for event replay creation.
+            Supports basic replay, advanced replay with session control, and custom replay strategies.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Factory Pattern, Abstract Factory Pattern'
+        implements: 'IEventReplayFactory'
+        use-case: 'Flexible replay instance creation, capability-based configuration'
+
+    # Properties
+    properties:
+      - name: 'eventStore'
+        type: 'IAdvancedEventStore'
+        description: 'Advanced event store for replay operations'
+        private: true
+        readonly: true
+        business-context: 'Event source for all replay instances created by this factory'
+
+      - name: 'logger'
+        type: 'ILogger'
+        description: 'Structured logger for factory operations'
+        private: true
+        readonly: true
+        business-context: 'Tracks replay instance creation and factory operations'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new event replay factory with the specified event store'
+        business-context: 'Initializes the factory with event store dependency and structured logging'
+
+        parameters:
+          - name: 'eventStore'
+            type: 'IAdvancedEventStore'
+            description: 'Advanced event store instance for replay operations'
+
+        examples:
+          - id: 'basic-factory'
+            code: |
+              const eventStore = new InMemoryEventStore();
+              const replayFactory = new EventReplayFactory(eventStore);
+
+          - id: 'production-factory'
+            code: |
+              const postgresEventStore = new PostgreSQLEventStore(config);
+              await postgresEventStore.connect();
+              const replayFactory = new EventReplayFactory(postgresEventStore);
+
+      createBasicReplay:
+        description: 'Creates a basic event replay instance for simple replay operations'
+        business-context: 'Basic replay for simple event processing without advanced features like session control'
+
+        returns:
+          type: 'IEventReplay'
+          description: 'Basic event replay instance with core functionality'
+
+        examples:
+          - id: 'basic-replay'
+            code: |
+              const basicReplay = replayFactory.createBasicReplay();
+              
+              const result = await basicReplay.replayFromStream(
+                'order-stream',
+                async (event) => {
+                  console.log(`Processing: ${event.eventType}`);
+                }
+              );
+
+          - id: 'simple-projection'
+            code: |
+              // Simple projection rebuild
+              const replay = replayFactory.createBasicReplay();
+              const result = await replay.replayAll(async (event) => {
+                await projectionService.updateProjection(event);
+              });
+
+        custom-tags:
+          basic: 'Simple replay functionality'
+          lightweight: 'Minimal overhead for basic scenarios'
+
+      createAdvancedReplay:
+        description: 'Creates an advanced event replay instance with session control and monitoring capabilities'
+        business-context: 'Advanced replay for complex scenarios requiring pause, resume, cancel, and progress monitoring'
+
+        returns:
+          type: 'IAdvancedEventReplay'
+          description: 'Advanced event replay instance with full session control capabilities'
+
+        examples:
+          - id: 'advanced-replay'
+            code: |
+              const advancedReplay = replayFactory.createAdvancedReplay();
+              
+              const session = await advancedReplay.startReplaySession(
+                eventHandler,
+                { eventTypes: ['OrderCreated'] }
+              );
+              
+              // Monitor progress
+              session.onProgress((progress) => {
+                console.log(`Progress: ${progress.percentComplete}%`);
+              });
+
+          - id: 'production-migration'
+            code: |
+              // Production data migration with control
+              const replay = replayFactory.createAdvancedReplay();
+              const session = await replay.startReplaySession(migrationHandler);
+              
+              // Pause during peak hours
+              if (isPeakHours()) {
+                await session.pause();
+                await waitForOffPeakHours();
+                await session.resume();
+              }
+
+        custom-tags:
+          advanced: 'Full-featured replay with session control'
+          production: 'Production-grade replay capabilities'
+          monitoring: 'Built-in progress monitoring and control'
+
+      createCustomReplay:
+        description: 'Creates a custom event replay instance using the provided strategy class'
+        business-context: 'Extensibility point for creating specialized replay implementations with custom behavior'
+
+        parameters:
+          - name: 'strategy'
+            type: 'new (eventStore: IAdvancedEventStore) => T'
+            description: 'Constructor for the custom replay strategy class'
+
+        returns:
+          type: 'T'
+          description: 'Custom replay instance of the specified type'
+
+        examples:
+          - id: 'custom-strategy'
+            code: |
+              class CustomEventReplay extends EventReplayEngine {
+                async replayWithCustomLogic(handler: ReplayEventHandler) {
+                  // Custom replay implementation
+                  return super.replayAll(async (event) => {
+                    await this.customPreProcessing(event);
+                    await handler(event);
+                    await this.customPostProcessing(event);
+                  });
+                }
+              }
+              
+              const customReplay = replayFactory.createCustomReplay(CustomEventReplay);
+
+          - id: 'specialized-processor'
+            code: |
+              // Specialized replay for analytics
+              class AnalyticsEventReplay extends EventReplayEngine {
+                async replayForAnalytics(analyticsHandler: (event: IStoredEvent) => Promise<void>) {
+                  return this.replayAll(analyticsHandler, {
+                    eventTypes: ['OrderCreated', 'PaymentProcessed']
+                  });
+                }
+              }
+              
+              const analyticsReplay = replayFactory.createCustomReplay(AnalyticsEventReplay);
+
+        custom-tags:
+          extensibility: 'Custom replay strategy support'
+          strategy-pattern: 'Strategy pattern implementation'
+
+      createReplayWithCapabilities:
+        description: 'Creates an event replay instance based on required capabilities'
+        business-context: 'Capability-driven replay creation for flexible configuration based on specific needs'
+
+        parameters:
+          - name: 'capabilities'
+            type: 'object'
+            description: 'Configuration object specifying required capabilities'
+            properties:
+              - name: 'enableSessionControl'
+                type: 'boolean'
+                description: 'Whether session control (pause/resume/cancel) is required'
+                optional: true
+              - name: 'enableProgressReporting'
+                type: 'boolean'
+                description: 'Whether progress reporting is required'
+                optional: true
+              - name: 'enableErrorRecovery'
+                type: 'boolean'
+                description: 'Whether error recovery capabilities are required'
+                optional: true
+              - name: 'enableParallelProcessing'
+                type: 'boolean'
+                description: 'Whether parallel processing support is required'
+                optional: true
+
+        returns:
+          type: 'IEventReplay | IAdvancedEventReplay'
+          description: 'Event replay instance matching the specified capabilities'
+
+        examples:
+          - id: 'capability-based-creation'
+            code: |
+              // Create replay based on requirements
+              const replay = replayFactory.createReplayWithCapabilities({
+                enableSessionControl: true,
+                enableProgressReporting: true,
+                enableErrorRecovery: false
+              });
+              
+              // Type will be IAdvancedEventReplay due to session control requirement
+
+          - id: 'simple-requirements'
+            code: |
+              // Simple requirements get basic replay
+              const simpleReplay = replayFactory.createReplayWithCapabilities({
+                enableProgressReporting: true,
+                enableErrorRecovery: true
+              });
+              
+              // Type will be IEventReplay (basic)
+
+        custom-tags:
+          capability-driven: 'Creates replay based on required capabilities'
+          flexible: 'Adapts to different usage scenarios'
+          configuration: 'Declarative capability configuration'
+
+# === FUNCTIONS ===
+functions:
+  createEventReplayFactory:
+    description: 'Factory function to create an EventReplayFactory instance'
+    business-context: 'Convenience function for creating replay factories without using the new keyword'
+
+    parameters:
+      - name: 'eventStore'
+        type: 'IAdvancedEventStore'
+        description: 'Advanced event store instance for the factory'
+
+    returns:
+      type: 'IEventReplayFactory'
+      description: 'New EventReplayFactory instance'
+
+    examples:
+      - id: 'functional-creation'
+        code: |
+          const eventStore = new InMemoryEventStore();
+          const factory = createEventReplayFactory(eventStore);
+          const replay = factory.createBasicReplay();
+
+    custom-tags:
+      factory-function: 'Functional factory creation'
+      convenience: 'Alternative to constructor usage'
+
+  createEventReplay:
+    description: 'Convenience function to directly create a basic event replay instance'
+    business-context: 'Quick creation of basic replay instances without explicit factory usage'
+
+    parameters:
+      - name: 'eventStore'
+        type: 'IAdvancedEventStore'
+        description: 'Advanced event store instance for replay operations'
+
+    returns:
+      type: 'IEventReplay'
+      description: 'Basic event replay instance'
+
+    examples:
+      - id: 'direct-basic-creation'
+        code: |
+          const eventStore = new InMemoryEventStore();
+          const replay = createEventReplay(eventStore);
+          
+          const result = await replay.replayFromStream('stream-123', eventHandler);
+
+    custom-tags:
+      convenience: 'Direct basic replay creation'
+      shortcut: 'Bypasses explicit factory usage'
+
+  createAdvancedEventReplay:
+    description: 'Convenience function to directly create an advanced event replay instance'
+    business-context: 'Quick creation of advanced replay instances with session control capabilities'
+
+    parameters:
+      - name: 'eventStore'
+        type: 'IAdvancedEventStore'
+        description: 'Advanced event store instance for replay operations'
+
+    returns:
+      type: 'IAdvancedEventReplay'
+      description: 'Advanced event replay instance with session control'
+
+    examples:
+      - id: 'direct-advanced-creation'
+        code: |
+          const eventStore = new PostgreSQLEventStore(config);
+          const advancedReplay = createAdvancedEventReplay(eventStore);
+          
+          const session = await advancedReplay.startReplaySession(
+            eventHandler,
+            { fromTimestamp: startDate }
+          );
+
+      - id: 'production-usage'
+        code: |
+          // Production scenario with advanced features
+          const replay = createAdvancedEventReplay(eventStore);
+          
+          const estimatedDuration = await replay.estimateReplayDuration({
+            eventTypes: ['OrderCreated', 'OrderUpdated']
+          });
+          
+          console.log(`Estimated duration: ${estimatedDuration / 1000} seconds`);
+
+    custom-tags:
+      convenience: 'Direct advanced replay creation'
+      production: 'Production-ready advanced replay'
+      shortcut: 'Bypasses explicit factory usage'

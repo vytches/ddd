@@ -1,0 +1,292 @@
+# Bulkhead - Resource Isolation Implementation
+
+# === FILE METADATA ===
+file-name: 'patterns/bulkhead'
+title: 'Bulkhead - Resource Isolation Implementation'
+description: 'Resource isolation to prevent cascading resource exhaustion'
+business-context: |
+  Implements the Bulkhead pattern to isolate critical resources and prevent
+  resource exhaustion from affecting the entire system. Provides concurrency
+  limits and queue management to ensure system stability under load.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  BulkheadConfig:
+    interface-doc:
+      description: 'Configuration for bulkhead pattern'
+      business-context: |
+        Defines resource limits and queuing behavior for bulkhead isolation,
+        controlling concurrent executions and queue capacity.
+      
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Configuration'
+    
+    properties:
+      - name: 'maxConcurrency'
+        type: 'number'
+        description: 'Maximum concurrent executions allowed'
+      
+      - name: 'queueCapacity'
+        type: 'number'
+        description: 'Maximum queue size for pending executions'
+      
+      - name: 'timeout'
+        type: 'number'
+        description: 'Timeout for queued operations in milliseconds'
+        optional: true
+      
+      - name: 'name'
+        type: 'string'
+        description: 'Bulkhead name for identification'
+        optional: true
+  
+  BulkheadMetrics:
+    interface-doc:
+      description: 'Performance metrics for bulkhead'
+      business-context: |
+        Provides operational metrics for monitoring bulkhead effectiveness,
+        resource utilization, and rejection patterns.
+      
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Monitoring'
+    
+    properties:
+      - name: 'activeTasks'
+        type: 'number'
+        description: 'Currently executing tasks'
+      
+      - name: 'queuedTasks'
+        type: 'number'
+        description: 'Tasks waiting in queue'
+      
+      - name: 'totalCompleted'
+        type: 'number'
+        description: 'Total tasks completed successfully'
+      
+      - name: 'totalRejected'
+        type: 'number'
+        description: 'Total tasks rejected due to capacity'
+      
+      - name: 'avgExecutionTime'
+        type: 'number'
+        description: 'Average task execution time in milliseconds'
+
+# === CLASSES ===
+classes:
+  Bulkhead:
+    class-doc:
+      description: 'Resource isolation with concurrency limits and queue management'
+      business-context: |
+        Protects system resources by limiting concurrent operations and managing
+        queue capacity. Prevents resource starvation and ensures system
+        responsiveness even when operations are consuming resources heavily.
+
+      formats:
+        jsdoc:
+          description: 'Bulkhead pattern for resource isolation and concurrency control'
+        cli:
+          description: |
+            ## Bulkhead
+            Enterprise resource isolation providing:
+            - Concurrency limits per operation type
+            - Queue management with overflow handling
+            - Resource pool isolation
+            - Metrics collection
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Bulkhead Pattern'
+
+    methods:
+      constructor:
+        description: 'Initializes bulkhead with resource configuration'
+        business-context: 'Sets up resource limits and concurrency controls for isolation'
+
+        parameters:
+          - name: 'config'
+            type: 'BulkheadConfig'
+            description: 'Bulkhead configuration with resource limits'
+
+        examples:
+          - id: 'basic-bulkhead'
+            code: |
+              const bulkhead = new Bulkhead({
+                maxConcurrency: 10,       // Max 10 concurrent operations
+                queueCapacity: 50,        // Queue up to 50 pending
+                timeout: 30000,           // 30 second timeout
+                name: 'api-bulkhead'      // Optional bulkhead name
+              });
+
+          - id: 'database-bulkhead'
+            code: |
+              const dbBulkhead = new Bulkhead({
+                maxConcurrency: 5,        // Limit DB connections
+                queueCapacity: 20,        // Queue database operations
+                timeout: 15000            // 15 second DB timeout
+              });
+
+      execute:
+        description: 'Executes operation within resource limits'
+        business-context: 'Protects system resources by enforcing concurrency limits'
+
+        parameters:
+          - name: 'operation'
+            type: '(context: ResilienceContext) => Promise<T>'
+            description: 'Async operation to execute'
+          - name: 'context'
+            type: 'ResilienceContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<T>'
+          description: 'Operation result'
+
+        examples:
+          - id: 'resource-protected-operation'
+            code: |
+              const context = { correlationId: 'db-query-123' };
+              const result = await bulkhead.execute(async (ctx) => {
+                return await heavyDatabaseQuery(complexQuery);
+              }, context);
+              
+              console.log('Query completed:', result);
+
+          - id: 'api-protection'
+            code: |
+              const apiResult = await bulkhead.execute(async (ctx) => {
+                return await externalAPI.fetchData();
+              }, {
+                correlationId: 'api-fetch',
+                timeout: 10000
+              });
+
+      getName:
+        description: 'Returns bulkhead name'
+        business-context: 'Provides identification for logging and metrics'
+
+        returns:
+          type: 'string'
+          description: 'Bulkhead name'
+
+        examples:
+          - id: 'name-identification'
+            code: |
+              const bulkheadName = bulkhead.getName();
+              console.log(`Bulkhead: ${bulkheadName}`);
+
+      getMetrics:
+        description: 'Returns bulkhead performance metrics'
+        business-context: 'Provides operational insights for capacity planning'
+
+        returns:
+          type: 'BulkheadMetrics'
+          description: 'Throughput, rejection rates, and timing statistics'
+
+        examples:
+          - id: 'bulkhead-metrics'
+            code: |
+              const metrics = bulkhead.getMetrics();
+              console.log({
+                totalOperations: metrics.totalOperations,
+                completedOperations: metrics.completedOperations,
+                rejectedOperations: metrics.rejectedOperations,
+                averageWaitTime: metrics.averageWaitTime,
+                averageExecutionTime: metrics.averageExecutionTime
+              });
+
+  BulkheadRejectedException:
+    class-doc:
+      description: 'Error thrown when bulkhead rejects operation'
+      business-context: |
+        Specific error type thrown when operations are rejected due to
+        bulkhead capacity limits being reached. Indicates resource 
+        contention and enables proper backpressure handling.
+
+      formats:
+        jsdoc:
+          description: 'Bulkhead capacity exceeded error'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'Error'
+
+    methods:
+      constructor:
+        description: 'Creates bulkhead rejection error'
+        business-context: 'Used when bulkhead rejects operations due to capacity'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+
+        examples:
+          - id: 'rejection-error'
+            code: |
+              throw new BulkheadRejectedException('Bulkhead capacity exceeded');
+
+# === USAGE PATTERNS ===
+patterns:
+  - name: 'Database Connection Pool'
+    description: 'Isolating database operations to prevent connection exhaustion'
+    example: |
+      class DatabaseService {
+        private dbBulkhead = new Bulkhead({
+          maxConcurrency: 8,          // DB connection limit
+          queueCapacity: 25,
+          timeout: 10000,
+          name: 'database-pool'
+        });
+        
+        async executeQuery(sql: string): Promise<any> {
+          try {
+            const result = await this.dbBulkhead.execute(async (ctx) => {
+              return await this.database.query(sql);
+            }, { correlationId: `query-${Date.now()}` });
+            
+            return result;
+          } catch (error) {
+            if (error.message.includes('Bulkhead capacity exceeded')) {
+              // Handle resource exhaustion
+              throw new Error('Database overloaded, please try later');
+            }
+            throw error;
+          }
+        }
+      }
+
+  - name: 'API Rate Limiting'
+    description: 'Protecting external API quota with bulkhead isolation'
+    example: |
+      const apiBulkhead = new Bulkhead({
+        maxConcurrency: 5,            // API rate limit
+        queueCapacity: 15,
+        timeout: 8000,
+        name: 'external-api'
+      });
+      
+      // Protect API calls
+      await apiBulkhead.execute(async (ctx) => {
+        return await externalAPI.fetchUserData(userId);
+      }, { correlationId: 'api-call' });
+
+  - name: 'File Processing Isolation'
+    description: 'Isolating file processing operations'
+    example: |
+      const fileBulkhead = new Bulkhead({
+        maxConcurrency: 3,            // Limit file processing
+        queueCapacity: 10,
+        timeout: 60000,               // 1 minute for file ops
+        name: 'file-processor'
+      });
+      
+      await fileBulkhead.execute(async (ctx) => {
+        return await processLargeFile(filePath);
+      }, { correlationId: `file-${filename}` });

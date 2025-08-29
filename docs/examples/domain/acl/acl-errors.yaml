@@ -1,0 +1,206 @@
+# ACL Errors - Error Classes for Anti-Corruption Layer
+
+# === FILE METADATA ===
+file-name: 'acl-errors'
+title: 'ACL Error Classes'
+description: 'Comprehensive error hierarchy for ACL operations'
+business-context: |
+  Provides structured error handling for Anti-Corruption Layer operations,
+  enabling proper error propagation and handling across domain boundaries
+  with clear distinction between different failure scenarios.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ACLError:
+    class-doc:
+      description: 'Base error class for all ACL-related failures'
+      business-context: |
+        Root error class providing common structure and metadata for
+        all ACL failures, including context information, operation details,
+        and error categorization for proper handling strategies.
+
+      formats:
+        jsdoc:
+          description: 'Base ACL error with context and operation details'
+        cli:
+          description: |
+            ## ACLError
+            Foundation error class for ACL failures with:
+            - Context information
+            - Operation details
+            - Error categorization
+            - Stack trace preservation
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'Error'
+        category: 'Error Handling'
+
+    methods:
+      constructor:
+        description: 'Creates ACL error with message and optional details'
+        business-context: 'Captures failure context for debugging and recovery'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the failure'
+          - name: 'details'
+            type: 'object'
+            description: 'Optional additional error context'
+            optional: true
+
+        examples:
+          - id: 'basic-error'
+            code: |
+              throw new ACLError(
+                'Translation failed',
+                { 
+                  operation: 'create',
+                  context: 'Orders',
+                  externalSystem: 'ERP'
+                }
+              );
+
+  AdapterNotFoundError:
+    class-doc:
+      description: 'Error thrown when requested adapter is not registered'
+      business-context: |
+        Indicates that the requested ACL adapter has not been registered
+        in the registry, typically due to missing configuration or
+        initialization issues.
+
+      formats:
+        jsdoc:
+          description: 'Adapter not found in registry error'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ACLError'
+
+    methods:
+      constructor:
+        description: 'Creates error for missing adapter'
+        business-context: 'Identifies which adapter is missing for troubleshooting'
+
+        parameters:
+          - name: 'adapterKey'
+            type: 'string'
+            description: 'Key of the missing adapter'
+          - name: 'availableAdapters'
+            type: 'string[]'
+            description: 'List of registered adapter keys'
+            optional: true
+
+        examples:
+          - id: 'adapter-not-found'
+            code: |
+              throw new AdapterNotFoundError(
+                'payment-service',
+                ['order-service', 'inventory-service']
+              );
+
+  TranslationError:
+    class-doc:
+      description: 'Error during model translation between domain and external'
+      business-context: |
+        Represents failures in the translation process between domain models
+        and external representations, often due to incompatible data structures,
+        missing required fields, or validation failures.
+
+      formats:
+        jsdoc:
+          description: 'Model translation failure error'
+        cli:
+          description: |
+            ## TranslationError
+            Translation failure with details about:
+            - Source model type
+            - Target model type
+            - Specific field failures
+            - Validation errors
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ACLError'
+        pattern: 'Translator Pattern'
+
+    methods:
+      constructor:
+        description: 'Creates translation error with context'
+        business-context: 'Captures translation failure details for debugging'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Description of translation failure'
+          - name: 'sourceModel'
+            type: 'string'
+            description: 'Source model type name'
+          - name: 'targetModel'
+            type: 'string'
+            description: 'Target model type name'
+          - name: 'failedFields'
+            type: 'string[]'
+            description: 'Fields that failed translation'
+            optional: true
+
+        examples:
+          - id: 'translation-failure'
+            code: |
+              throw new TranslationError(
+                'Incompatible date format',
+                'OrderAggregate',
+                'LegacyOrderDTO',
+                ['createdDate', 'shippingDate']
+              );
+
+# === ERROR HANDLING PATTERNS ===
+patterns:
+  - name: 'Error Recovery'
+    description: 'Strategies for recovering from ACL errors'
+    example: |
+      try {
+        const result = await adapter.execute('create', model);
+      } catch (error) {
+        if (error instanceof TranslationError) {
+          // Apply fallback translation strategy
+          return await fallbackTranslator.translate(model);
+        } else if (error instanceof AdapterNotFoundError) {
+          // Use default adapter
+          return await defaultAdapter.execute('create', model);
+        }
+        throw error;
+      }
+
+  - name: 'Error Enrichment'
+    description: 'Adding context to errors for better debugging'
+    example: |
+      class EnrichedACLError extends ACLError {
+        constructor(message: string, context: ACLContext) {
+          super(message, {
+            timestamp: new Date(),
+            correlationId: context.correlationId,
+            userId: context.userId,
+            boundedContext: context.boundedContext
+          });
+        }
+      }
+
+  - name: 'Error Categorization'
+    description: 'Categorizing errors for proper handling'
+    example: |
+      function categorizeError(error: ACLError): ErrorCategory {
+        if (error instanceof TranslationError) {
+          return ErrorCategory.DATA_MAPPING;
+        }
+        if (error instanceof AdapterNotFoundError) {
+          return ErrorCategory.CONFIGURATION;
+        }
+        return ErrorCategory.UNKNOWN;
+      }

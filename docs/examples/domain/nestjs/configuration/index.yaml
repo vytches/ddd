@@ -1,0 +1,38 @@
+# NestJS Configuration Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'NestJS Configuration Module'
+description: 'Configuration utilities and providers for VytchesDDD NestJS integration'
+business-context: 'Provides configuration management for DDD patterns in NestJS applications'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-DOC ===
+file-doc:
+  description: 'Configuration module exports'
+  business-context: 'Manages VytchesDDD configuration within NestJS context'
+  
+  formats:
+    jsdoc:
+      description: 'Configuration exports for VytchesDDD NestJS integration'
+    cli:
+      description: |
+        ## Configuration Module
+        Configuration management for VytchesDDD in NestJS applications
+
+  custom-tags:
+    since: '1.0.0'
+    module: 'configuration'
+
+# === EXPORTS ===
+exports:
+  - name: 'ConfigurationProvider'
+    from: './configuration.provider'
+    description: 'Provider for VytchesDDD configuration'
+  - name: 'ConfigurationService'
+    from: './configuration.service'
+    description: 'Service for accessing configuration values'

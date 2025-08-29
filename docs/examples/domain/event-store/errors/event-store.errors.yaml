@@ -1,0 +1,318 @@
+# Event Store Errors - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'event-store.errors'
+title: 'Event Store Error Classes'
+description: 'Domain-specific error classes for event store operations'
+business-context: 'Provides structured error handling for event sourcing, concurrency conflicts, and stream management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === ENUMS ===
+enums:
+  EventStoreErrorCode:
+    description: 'Error codes for event store operations'
+    business-context: 'Standardized error codes for debugging and monitoring event store issues'
+    
+    formats:
+      jsdoc:
+        description: 'Event store error code enumeration'
+      cli:
+        description: |
+          ## EventStoreErrorCode
+          Standard error codes for event store operations
+
+    values:
+      - name: 'Default'
+        value: '"ES_ERROR"'
+        description: 'Generic event store error'
+      - name: 'ConcurrencyConflict'
+        value: '"ES_CONCURRENCY_CONFLICT"'
+        description: 'Optimistic concurrency conflict detected'
+      - name: 'StreamNotFound'
+        value: '"ES_STREAM_NOT_FOUND"'
+        description: 'Requested stream does not exist'
+      - name: 'StreamDeleted'
+        value: '"ES_STREAM_DELETED"'
+        description: 'Stream has been deleted'
+      - name: 'InvalidStreamVersion'
+        value: '"ES_INVALID_STREAM_VERSION"'
+        description: 'Invalid stream version specified'
+
+# === TYPES ===
+types:
+  EventStoreErrorOptions:
+    description: 'Options for creating event store errors'
+    business-context: 'Provides structured error context for debugging and monitoring'
+    
+    properties:
+      - name: 'code'
+        type: 'EventStoreErrorCode'
+        optional: true
+        description: 'Specific error code'
+      - name: 'streamId'
+        type: 'string'
+        optional: true
+        description: 'Affected stream identifier'
+      - name: 'expectedVersion'
+        type: 'number'
+        optional: true
+        description: 'Expected stream version for concurrency control'
+      - name: 'actualVersion'
+        type: 'number'
+        optional: true
+        description: 'Actual stream version found'
+
+# === CLASSES ===
+classes:
+  EventStoreError:
+    class-doc:
+      description: 'Abstract base class for all event store errors'
+      business-context: 'Foundation for structured error handling in event sourcing'
+      
+      formats:
+        jsdoc:
+          description: 'Base class for event store errors with structured context'
+        cli:
+          description: |
+            ## EventStoreError
+            Abstract base class providing structured error handling for event store operations
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: 'true'
+        extends: 'IDomainError'
+
+    methods:
+      constructor:
+        description: 'Creates a new event store error with message and options'
+        business-context: 'Initializes error with contextual information for debugging'
+        
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the issue'
+          - name: 'options'
+            type: 'EventStoreErrorOptions'
+            optional: true
+            description: 'Additional error context and metadata'
+
+  EventStoreConcurrencyError:
+    class-doc:
+      description: 'Error thrown when optimistic concurrency conflict is detected'
+      business-context: 'Prevents data corruption by detecting concurrent modifications to event streams'
+      
+      formats:
+        jsdoc:
+          description: 'Concurrency conflict error with version information'
+        cli:
+          description: |
+            ## EventStoreConcurrencyError
+            Thrown when stream version doesn't match expected version during append operations
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+
+    methods:
+      constructor:
+        description: 'Creates concurrency error with version details'
+        business-context: 'Captures version mismatch information for conflict resolution'
+        
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream that experienced the conflict'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Version expected by the operation'
+          - name: 'actualVersion'
+            type: 'number'
+            description: 'Actual version found in the store'
+
+      withDetails:
+        description: 'Factory method to create error with additional details'
+        business-context: 'Provides structured way to create detailed error instances'
+        
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected version'
+          - name: 'actualVersion'
+            type: 'number'
+            description: 'Actual version'
+          - name: 'additionalData'
+            type: 'unknown'
+            optional: true
+            description: 'Additional context data'
+        
+        returns:
+          type: 'EventStoreConcurrencyError'
+          description: 'New error instance with details'
+
+  StreamNotFoundError:
+    class-doc:
+      description: 'Error thrown when requested stream does not exist'
+      business-context: 'Indicates attempt to read or modify non-existent event stream'
+      
+      formats:
+        jsdoc:
+          description: 'Stream not found error'
+        cli:
+          description: |
+            ## StreamNotFoundError
+            Thrown when attempting to access a stream that doesn't exist
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+
+    methods:
+      constructor:
+        description: 'Creates stream not found error'
+        business-context: 'Captures missing stream information'
+        
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Identifier of the missing stream'
+
+      withStreamId:
+        description: 'Factory method for creating error with stream ID'
+        business-context: 'Structured creation of stream not found errors'
+        
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier'
+          - name: 'additionalData'
+            type: 'unknown'
+            optional: true
+            description: 'Additional context'
+        
+        returns:
+          type: 'StreamNotFoundError'
+          description: 'New error instance'
+
+  StreamDeletedError:
+    class-doc:
+      description: 'Error thrown when accessing a deleted stream'
+      business-context: 'Prevents operations on streams marked as deleted'
+      
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+
+    methods:
+      constructor:
+        description: 'Creates stream deleted error'
+        
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Identifier of deleted stream'
+
+  EventSerializationError:
+    class-doc:
+      description: 'Error during event serialization'
+      business-context: 'Indicates failure to serialize domain events for storage'
+      
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+
+    methods:
+      constructor:
+        description: 'Creates serialization error'
+        
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+          - name: 'eventType'
+            type: 'string'
+            optional: true
+            description: 'Type of event that failed'
+          - name: 'originalError'
+            type: 'Error'
+            optional: true
+            description: 'Original error cause'
+
+  EventDeserializationError:
+    class-doc:
+      description: 'Error during event deserialization'
+      business-context: 'Indicates failure to reconstruct domain events from storage'
+      
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+
+    methods:
+      constructor:
+        description: 'Creates deserialization error'
+        
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+          - name: 'dataLength'
+            type: 'number'
+            optional: true
+            description: 'Length of data that failed'
+          - name: 'originalError'
+            type: 'Error'
+            optional: true
+            description: 'Original error cause'
+
+  EventStoreConnectionError:
+    class-doc:
+      description: 'Connection error to event store'
+      business-context: 'Indicates connectivity issues with event store backend'
+      
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+
+    methods:
+      constructor:
+        description: 'Creates connection error'
+        
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+          - name: 'originalError'
+            type: 'Error'
+            optional: true
+            description: 'Original connection error'
+
+  InvalidStreamVersionError:
+    class-doc:
+      description: 'Invalid stream version specified'
+      business-context: 'Prevents operations with invalid version numbers'
+      
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+
+    methods:
+      constructor:
+        description: 'Creates invalid version error'
+        
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier'
+          - name: 'version'
+            type: 'number'
+            description: 'Invalid version number'
+          - name: 'message'
+            type: 'string'
+            optional: true
+            description: 'Custom error message'

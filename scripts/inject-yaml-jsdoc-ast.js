@@ -595,58 +595,107 @@ class ASTJSDocInjector {
             });
           }
 
-          // Process interface methods
-          if (interfaceMetadata.methods) {
-            node.members.forEach(member => {
-              if (ts.isMethodSignature(member) || ts.isPropertySignature(member)) {
-                const memberName = member.name?.getText(sourceFile);
-                if (memberName && interfaceMetadata.methods[memberName]) {
-                  // Get the indent for the member
-                  const memberStart = member.getStart(sourceFile);
-                  const lineStart = content.lastIndexOf('\n', memberStart - 1) + 1;
-                  const memberIndent = content.substring(lineStart, memberStart).match(/^\s*/)[0];
-
-                  // Generate JSDoc with hierarchical resolution
-                  // Pass empty object to force hierarchical resolution
-                  const methodJSDoc = this.generateJSDoc(
-                    {}, // Empty object forces hierarchical resolution
-                    memberIndent,
-                    packageName,
-                    fileBaseName,
-                    interfaceName,
-                    memberName
-                  );
-
-                  // Find the position to insert JSDoc
-                  const leadingComments = ts.getLeadingCommentRanges(content, member.pos);
-                  if (leadingComments && leadingComments.length > 0) {
-                    // Replace existing JSDoc with properly indented one
-                    // We need to preserve any whitespace before the comment
-                    const commentStart = leadingComments[0].pos;
-                    const commentLineStart = content.lastIndexOf('\n', commentStart - 1) + 1;
-                    const commentIndent = content
-                      .substring(commentLineStart, commentStart)
-                      .match(/^\s*/)[0];
-
-                    modifications.push({
-                      start: commentLineStart,
-                      end: leadingComments[leadingComments.length - 1].end,
-                      text: methodJSDoc,
-                    });
-                  } else {
-                    // Add new JSDoc before the member on a new line
-                    modifications.push({
-                      start: lineStart,
-                      end: lineStart,
-                      text: methodJSDoc + '\n',
-                    });
-                  }
-
-                  console.log(`    ✅ Enhanced JSDoc for ${interfaceName}.${memberName}`);
-                }
+          // Convert properties array to object format if needed
+          let propertiesAsObject = {};
+          if (interfaceMetadata.properties && Array.isArray(interfaceMetadata.properties)) {
+            interfaceMetadata.properties.forEach(prop => {
+              if (prop.name) {
+                propertiesAsObject[prop.name] = {
+                  description: prop.description || `${prop.name} property`,
+                  type: prop.type,
+                  required: prop.required,
+                  default: prop.default,
+                  'business-context': prop['business-context']
+                };
               }
             });
+          } else if (interfaceMetadata.properties && typeof interfaceMetadata.properties === 'object') {
+            propertiesAsObject = interfaceMetadata.properties;
           }
+
+          // Process interface members (both methods and properties)
+          node.members.forEach(member => {
+            const memberName = member.name?.getText(sourceFile);
+            if (!memberName) return;
+
+            let memberMetadata = null;
+            let isProperty = false;
+
+            // Check if it's a property signature
+            if (ts.isPropertySignature(member) && propertiesAsObject[memberName]) {
+              memberMetadata = propertiesAsObject[memberName];
+              isProperty = true;
+            }
+            // Check if it's a method signature
+            else if (ts.isMethodSignature(member) && interfaceMetadata.methods && interfaceMetadata.methods[memberName]) {
+              memberMetadata = interfaceMetadata.methods[memberName];
+            }
+
+            if (memberMetadata) {
+              // Get the indent for the member
+              const memberStart = member.getStart(sourceFile);
+              const lineStart = content.lastIndexOf('\n', memberStart - 1) + 1;
+              const memberIndent = content.substring(lineStart, memberStart).match(/^\s*/)[0];
+
+              // Generate JSDoc
+              let jsdocText;
+              if (isProperty) {
+                // Generate simpler JSDoc for properties
+                const lines = [`${memberIndent}/**`];
+                if (memberMetadata.description) {
+                  lines.push(`${memberIndent} * ${memberMetadata.description}`);
+                }
+                if (memberMetadata['business-context']) {
+                  lines.push(`${memberIndent} * @businessContext ${memberMetadata['business-context']}`);
+                }
+                if (memberMetadata.type) {
+                  lines.push(`${memberIndent} * @type {${memberMetadata.type}}`);
+                }
+                if (memberMetadata.default !== undefined) {
+                  lines.push(`${memberIndent} * @default ${memberMetadata.default}`);
+                }
+                if (memberMetadata.required) {
+                  lines.push(`${memberIndent} * @required`);
+                }
+                lines.push(`${memberIndent} */`);
+                jsdocText = lines.join('\n');
+              } else {
+                // Use existing method for methods
+                jsdocText = this.generateJSDoc(
+                  {}, // Empty object forces hierarchical resolution
+                  memberIndent,
+                  packageName,
+                  fileBaseName,
+                  interfaceName,
+                  memberName
+                );
+              }
+
+              // Find the position to insert JSDoc
+              const leadingComments = ts.getLeadingCommentRanges(content, member.pos);
+              if (leadingComments && leadingComments.length > 0) {
+                // Replace existing JSDoc
+                const commentStart = leadingComments[0].pos;
+                const commentLineStart = content.lastIndexOf('\n', commentStart - 1) + 1;
+
+                modifications.push({
+                  start: commentLineStart,
+                  end: leadingComments[leadingComments.length - 1].end,
+                  text: jsdocText,
+                });
+              } else {
+                // Add new JSDoc before the member
+                modifications.push({
+                  start: lineStart,
+                  end: lineStart,
+                  text: jsdocText + '\n',
+                });
+              }
+
+              const memberType = isProperty ? 'property' : 'method';
+              console.log(`    ✅ Enhanced JSDoc for ${interfaceName}.${memberName} (${memberType})`);
+            }
+          });
         }
       }
 
@@ -659,9 +708,15 @@ class ASTJSDocInjector {
           // Load metadata for this class
           const fileBaseName = path.basename(filePath, '.d.ts');
           await this.loadClassMetadata(packageName, className, filePath);
-          // FIXED: Use file-based key that was actually loaded, not class-based key
-          const key = `${packageName}-${fileBaseName.toLowerCase()}`;
-          const metadata = this.classMetadata.get(key);
+          // Try both class-based and file-based keys since metadata could be stored under either
+          const classKey = `${packageName}-${className.toLowerCase()}`;
+          const fileKey = `${packageName}-${fileBaseName.toLowerCase()}`;
+          const metadata = this.classMetadata.get(classKey) || this.classMetadata.get(fileKey);
+          
+          if (this.debug) {
+            console.log(`    📋 Trying keys: classKey=${classKey}, fileKey=${fileKey}`);
+            console.log(`    📋 Found metadata: ${!!metadata}`);
+          }
 
           if (metadata?.classes?.[className]) {
             const classMetadata = metadata.classes[className];

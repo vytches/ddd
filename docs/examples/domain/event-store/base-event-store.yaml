@@ -1,0 +1,343 @@
+# BaseEventStore - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base-event-store'
+title: 'BaseEventStore - Abstract Event Store Implementation'
+description: 'Abstract base class for event store implementations with advanced features and replay capabilities'
+business-context: 'Foundation for building event stores that support event sourcing, CQRS, snapshots, and event replay scenarios'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseEventStore:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class providing common functionality for advanced event store implementations'
+      business-context: 'Foundation for event stores supporting event sourcing, snapshots, and event replay with configurable behavior'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Abstract event store with advanced features and replay capabilities'
+        cli:
+          description: |
+            ## BaseEventStore
+            
+            Abstract foundation for event store implementations.
+            Provides common functionality for event sourcing, snapshots, and event replay.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Abstract Base Class, Template Method Pattern'
+        implements: 'IAdvancedEventStore'
+        abstract: 'Must be extended by concrete implementations'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new event store with configuration and initializes logging'
+        business-context: 'Sets up event store with normalized configuration and context-aware logging'
+
+        parameters:
+          - name: 'config'
+            type: 'IEventStoreConfig'
+            description: 'Optional event store configuration'
+            optional: true
+            default: '{}'
+
+        examples:
+          - id: 'basic'
+            code: |
+              class MyEventStore extends BaseEventStore {
+                constructor(config?: IEventStoreConfig) {
+                  super({
+                    snapshotFrequency: 100,
+                    maxConcurrency: 10,
+                    enableSnapshots: true,
+                    ...config
+                  });
+                }
+              }
+
+          - id: 'production-config'
+            code: |
+              const productionStore = new MyEventStore({
+                snapshotFrequency: 50,
+                maxConcurrency: 20,
+                enableSnapshots: true,
+                enableGlobalStream: true
+              });
+
+      appendToStream:
+        description: 'Appends events to a stream with optional optimistic concurrency control (abstract method)'
+        business-context: 'Core event storage operation that must be implemented by concrete event stores'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the event stream (typically aggregate ID)'
+          - name: 'events'
+            type: 'IStoredDomainEvent[]'
+            description: 'Array of domain events to append to the stream'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected version of the stream for optimistic concurrency control'
+            optional: true
+
+        returns:
+          type: 'Promise<IAppendResult>'
+          description: 'Promise resolving to append operation results with version information'
+
+        throws:
+          - type: 'EventStoreConcurrencyError'
+            description: 'When expected version does not match actual stream version'
+
+        examples:
+          - id: 'basic-append'
+            code: |
+              const events: IStoredDomainEvent[] = [
+                { eventType: 'OrderCreated', eventData: orderData, eventId: uuid() },
+                { eventType: 'PaymentProcessed', eventData: paymentData, eventId: uuid() }
+              ];
+              
+              const result = await eventStore.appendToStream('order-123', events);
+              console.log(`New version: ${result.newVersion}`);
+
+          - id: 'optimistic-concurrency'
+            code: |
+              try {
+                const result = await eventStore.appendToStream('order-123', events, 5);
+              } catch (error) {
+                if (error instanceof EventStoreConcurrencyError) {
+                  console.error('Stream was modified by another process');
+                }
+              }
+
+        custom-tags:
+          abstract: 'Must be implemented by concrete stores'
+          core-operation: 'Primary event storage method'
+          concurrency: 'Supports optimistic concurrency control'
+
+      readStream:
+        description: 'Reads events from a specific stream with optional filtering and pagination (abstract method)'
+        business-context: 'Retrieves event history for aggregate reconstruction and event replay scenarios'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the event stream to read'
+          - name: 'options'
+            type: 'IReadStreamOptions'
+            description: 'Optional reading configuration including version range and direction'
+            optional: true
+
+        returns:
+          type: 'Promise<IEventStream<T>>'
+          description: 'Promise resolving to stream of events with metadata'
+
+        examples:
+          - id: 'read-full-stream'
+            code: |
+              const stream = await eventStore.readStream('order-123');
+              console.log(`Stream has ${stream.events.length} events`);
+              console.log(`Current version: ${stream.version}`);
+
+          - id: 'read-from-version'
+            code: |
+              const recentEvents = await eventStore.readStream('order-123', {
+                fromVersion: 10,
+                maxCount: 20,
+                direction: 'forward'
+              });
+
+        custom-tags:
+          abstract: 'Must be implemented by concrete stores'
+          query-operation: 'Event retrieval method'
+          pagination: 'Supports pagination and filtering'
+
+      readAll:
+        description: 'Reads events from all streams in chronological order (abstract method)'
+        business-context: 'Enables global event processing, projections, and cross-aggregate analysis'
+
+        parameters:
+          - name: 'options'
+            type: 'IReadAllOptions'
+            description: 'Optional configuration for global reading including position and filtering'
+            optional: true
+
+        returns:
+          type: 'Promise<IGlobalEventStream<T>>'
+          description: 'Promise resolving to global stream of all events'
+
+        examples:
+          - id: 'read-all-events'
+            code: |
+              const globalStream = await eventStore.readAll();
+              console.log(`Total events: ${globalStream.events.length}`);
+
+          - id: 'filtered-global-read'
+            code: |
+              const orderEvents = await eventStore.readAll({
+                eventTypes: ['OrderCreated', 'OrderProcessed'],
+                maxCount: 50
+              });
+
+        custom-tags:
+          abstract: 'Must be implemented by concrete stores'
+          global-operation: 'Cross-stream event reading'
+          projections: 'Used for building projections'
+
+      getStreamMetadata:
+        description: 'Retrieves metadata information for a specific stream (abstract method)'
+        business-context: 'Provides stream information for monitoring, debugging, and management operations'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the stream'
+
+        returns:
+          type: 'Promise<IStreamMetadata | null>'
+          description: 'Promise resolving to stream metadata or null if stream does not exist'
+
+        examples:
+          - id: 'get-metadata'
+            code: |
+              const metadata = await eventStore.getStreamMetadata('order-123');
+              if (metadata) {
+                console.log(`Stream version: ${metadata.version}`);
+                console.log(`Event count: ${metadata.eventCount}`);
+              }
+
+        custom-tags:
+          abstract: 'Must be implemented by concrete stores'
+          metadata-operation: 'Stream information retrieval'
+
+      createSnapshot:
+        description: 'Creates a snapshot of aggregate state for performance optimization'
+        business-context: 'Reduces aggregate reconstruction time by storing periodic state snapshots'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier for the aggregate'
+          - name: 'snapshot'
+            type: 'IAggregateSnapshot'
+            description: 'Snapshot data including aggregate state and version'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when snapshot is stored'
+
+        examples:
+          - id: 'create-snapshot'
+            code: |
+              const snapshot: IAggregateSnapshot = {
+                aggregateId: 'order-123',
+                aggregateType: 'Order',
+                version: 15,
+                data: aggregateState,
+                createdAt: new Date()
+              };
+              
+              await eventStore.createSnapshot('order-123', snapshot);
+
+        custom-tags:
+          performance: 'Performance optimization feature'
+          snapshots: 'Snapshot management'
+
+      getLatestSnapshot:
+        description: 'Retrieves the most recent snapshot for an aggregate'
+        business-context: 'Enables fast aggregate reconstruction by loading from latest snapshot plus recent events'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier for the aggregate'
+
+        returns:
+          type: 'Promise<IAggregateSnapshot | null>'
+          description: 'Promise resolving to latest snapshot or null if none exists'
+
+        examples:
+          - id: 'load-with-snapshot'
+            code: |
+              const snapshot = await eventStore.getLatestSnapshot(streamId);
+              if (snapshot) {
+                const eventsSinceSnapshot = await eventStore.readStream(streamId, {
+                  fromVersion: snapshot.version + 1
+                });
+                return applyEventsToSnapshot(snapshot, eventsSinceSnapshot.events);
+              }
+
+        custom-tags:
+          performance: 'Fast aggregate reconstruction'
+          snapshots: 'Snapshot retrieval'
+
+      createEventReplay:
+        description: 'Creates a basic event replay instance for stream processing'
+        business-context: 'Enables event replay for projections, analytics, and event processing scenarios'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream to replay events from'
+          - name: 'fromVersion'
+            type: 'number'
+            description: 'Version to start replay from'
+            optional: true
+
+        returns:
+          type: 'Promise<IEventReplay>'
+          description: 'Promise resolving to event replay instance'
+
+        examples:
+          - id: 'basic-replay'
+            code: |
+              const replay = await eventStore.createEventReplay('order-123');
+              for await (const event of replay) {
+                await processEvent(event);
+              }
+
+        custom-tags:
+          replay: 'Event replay functionality'
+          streaming: 'Stream processing'
+
+      createAdvancedEventReplay:
+        description: 'Creates an advanced event replay with filtering and processing options'
+        business-context: 'Advanced event replay for complex scenarios with filtering, batching, and error handling'
+
+        parameters:
+          - name: 'options'
+            type: 'IEventReplayOptions'
+            description: 'Advanced replay configuration including filters and processing options'
+
+        returns:
+          type: 'Promise<IAdvancedEventReplay>'
+          description: 'Promise resolving to advanced event replay instance'
+
+        examples:
+          - id: 'filtered-replay'
+            code: |
+              const advancedReplay = await eventStore.createAdvancedEventReplay({
+                streamIds: ['order-123', 'order-456'],
+                eventTypes: ['OrderCreated', 'OrderUpdated'],
+                batchSize: 100,
+                maxConcurrency: 5
+              });
+              
+              await advancedReplay.start();
+
+        custom-tags:
+          advanced: 'Advanced replay features'
+          projections: 'Projection rebuilding'
+          batch-processing: 'Supports batch processing'

@@ -1,0 +1,241 @@
+# DomainService Decorator - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'domain-service.decorator'
+title: 'DomainService Decorator - Service Registration'
+description: 'Decorator for registering domain services with dependency injection and metadata functions'
+business-context: 'Enables automatic service discovery and registration in DI container with enhanced capabilities'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  DomainServiceOptions:
+    # Interface Documentation
+    interface-doc:
+      description: 'Configuration options for basic domain service registration'
+      business-context: 'Defines the configuration structure for domain service metadata and capabilities'
+
+      custom-tags:
+        since: '1.0.0'
+        configuration: 'Service configuration options'
+
+    # Properties
+    properties:
+      - name: 'serviceId'
+        type: 'string'
+        description: 'Unique identifier for the service used for registration and lookup'
+        business-context: 'Primary key for service registration in DI container'
+
+      - name: 'dependencies'
+        type: 'string[]'
+        description: 'Service dependencies by ID that will be injected when creating the service instance'
+        optional: true
+        business-context: 'Declares service dependencies for proper initialization order'
+
+      - name: 'transactional'
+        type: 'boolean'
+        description: 'Whether this service requires transactional consistency through Unit of Work'
+        optional: true
+        default: false
+        business-context: 'Enables automatic Unit of Work configuration for transactional operations'
+
+      - name: 'async'
+        type: 'boolean'
+        description: 'Whether this service has an asynchronous lifecycle requiring initialize() call'
+        optional: true
+        default: false
+        business-context: 'Enables async lifecycle management for services with external dependencies'
+
+      - name: 'publishesEvents'
+        type: 'boolean'
+        description: 'Whether this service publishes domain events and needs event bus configuration'
+        optional: true
+        default: false
+        business-context: 'Enables automatic event bus injection for event-driven services'
+
+      - name: 'caching'
+        type: 'object'
+        description: 'Configuration for result caching to optimize service operation performance'
+        optional: true
+        business-context: 'Enables result caching for expensive operations'
+        properties:
+          - name: 'enabled'
+            type: 'boolean'
+            description: 'Whether caching is enabled for this service'
+          - name: 'ttl'
+            type: 'number'
+            description: 'Time-to-live in seconds for cached results'
+            optional: true
+
+# === FUNCTIONS ===
+functions:
+  DomainService:
+    description: 'Decorator factory function that marks classes as domain services for DI registration'
+    business-context: 'Simplifies service registration and enables auto-discovery in enterprise applications'
+    
+    parameters:
+      - name: 'options'
+        type: 'string | DomainServiceOptions | EnhancedDomainServiceOptions'
+        description: 'Service configuration - can be service ID string or full options object'
+    
+    returns:
+      type: 'ClassDecorator'
+      description: 'Class decorator function for applying metadata and DI registration'
+    
+    examples:
+      - id: 'basic-string'
+        code: |
+          @DomainService('paymentService')
+          class PaymentService extends IBaseDomainService {
+            async processPayment(order: Order): Promise<Result<Payment, Error>> {
+              // Business logic for payment processing
+              return Result.success(processedPayment);
+            }
+          }
+
+      - id: 'basic-options'
+        code: |
+          @DomainService({
+            serviceId: 'orderService',
+            dependencies: ['paymentService', 'inventoryService'],
+            transactional: true,
+            publishesEvents: true
+          })
+          class OrderService extends UnitOfWorkAwareDomainService {
+            async processOrder(order: Order): Promise<Result<void, Error>> {
+              return this.executeInTransaction(async () => {
+                // Complex transactional business logic
+                this.publishEvent(new OrderProcessedEvent(order.id));
+              });
+            }
+          }
+
+      - id: 'enhanced-di'
+        code: |
+          @DomainService({
+            serviceId: 'inventoryService',
+            lifetime: ServiceLifetime.Singleton,
+            context: 'InventoryManagement',
+            dependencies: ['stockRepository', 'auditService'],
+            tags: ['inventory', 'core-service'],
+            async: true,
+            caching: { enabled: true, ttl: 300 }
+          })
+          class InventoryService extends AsyncDomainService {
+            async initialize(): Promise<void> {
+              await this.loadInventoryCache();
+            }
+          }
+
+      - id: 'external-api'
+        code: |
+          @DomainService({
+            serviceId: 'shippingService',
+            dependencies: ['configService'],
+            async: true,
+            publishesEvents: true,
+            caching: { enabled: true, ttl: 60 }
+          })
+          class ShippingService extends EventAwareDomainService {
+            async calculateRates(shipment: Shipment): Promise<ShippingRates> {
+              // External API integration with caching
+            }
+          }
+    
+    custom-tags:
+      since: '1.0.0'
+      decorator: 'Class decorator factory'
+      di-integration: 'Integrates with @vytches/ddd-di package'
+      auto-discovery: 'Enables automatic service discovery'
+
+  getDomainServiceMetadata:
+    description: 'Retrieves legacy domain service metadata from a decorated class'
+    business-context: 'Provides access to basic service metadata for backward compatibility and inspection'
+    
+    parameters:
+      - name: 'target'
+        type: 'unknown'
+        description: 'The class/constructor to retrieve metadata from'
+    
+    returns:
+      type: 'DomainServiceOptions | undefined'
+      description: 'Service metadata if found, undefined otherwise'
+    
+    examples:
+      - id: 'basic'
+        code: |
+          @DomainService('testService')
+          class TestService extends IBaseDomainService {}
+          
+          const metadata = getDomainServiceMetadata(TestService);
+          console.log(metadata?.serviceId); // 'testService'
+    
+    custom-tags:
+      since: '1.0.0'
+      metadata: 'Metadata retrieval utility'
+      reflection: 'Uses reflect-metadata'
+
+  getDIDomainServiceMetadata:
+    description: 'Retrieves enhanced DI metadata from a decorated domain service class'
+    business-context: 'Provides access to enhanced DI metadata for auto-discovery and container registration'
+    
+    parameters:
+      - name: 'target'
+        type: 'unknown'
+        description: 'The class/constructor to retrieve DI metadata from'
+    
+    returns:
+      type: 'DIServiceMetadata | undefined'
+      description: 'Enhanced DI metadata if found, undefined otherwise'
+    
+    examples:
+      - id: 'basic'
+        code: |
+          @DomainService({
+            serviceId: 'testService',
+            lifetime: ServiceLifetime.Singleton,
+            context: 'TestContext'
+          })
+          class TestService extends IBaseDomainService {}
+          
+          const diMetadata = getDIDomainServiceMetadata(TestService);
+          console.log(diMetadata?.lifetime); // ServiceLifetime.Singleton
+          console.log(diMetadata?.context);  // 'TestContext'
+    
+    custom-tags:
+      since: '1.0.0'
+      metadata: 'DI metadata retrieval utility'
+      enhanced: 'Returns enhanced DI metadata'
+
+  isDomainServicePendingDIRegistration:
+    description: 'Checks if a domain service class is pending DI container registration'
+    business-context: 'Used by auto-discovery systems to identify services that need to be registered in DI container'
+    
+    parameters:
+      - name: 'target'
+        type: 'unknown'
+        description: 'The class/constructor to check registration status'
+    
+    returns:
+      type: 'boolean'
+      description: 'True if service is pending registration, false otherwise'
+    
+    examples:
+      - id: 'basic'
+        code: |
+          @DomainService('testService')
+          class TestService extends IBaseDomainService {}
+          
+          const isPending = isDomainServicePendingDIRegistration(TestService);
+          console.log(isPending); // true (before DI registration)
+          
+          // After VytchesDDD.configure() is called, this would return false
+    
+    custom-tags:
+      since: '1.0.0'
+      utility: 'Registration status utility'
+      auto-discovery: 'Used by auto-discovery systems'

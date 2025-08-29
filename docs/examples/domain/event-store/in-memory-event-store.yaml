@@ -1,0 +1,581 @@
+# InMemoryEventStore - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'in-memory-event-store'
+title: 'InMemoryEventStore - In-Memory Event Store Implementation'
+description: 'Production-ready in-memory event store with full ACID compliance and snapshot support'
+business-context: 'Memory-based event store for development, testing, and small-scale applications requiring event sourcing'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  InMemoryEventStore:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'In-memory event store implementation providing full event sourcing capabilities with persistence simulation'
+      business-context: 'Complete event store for applications requiring event sourcing without external database dependencies'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'In-memory event store with full ACID compliance and snapshot support'
+        cli:
+          description: |
+            ## InMemoryEventStore
+            
+            Production-ready in-memory event store implementation.
+            Provides full event sourcing capabilities with ACID compliance, snapshots, and global event ordering.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Event Sourcing, Repository Pattern'
+        extends: 'BaseEventStore'
+        implements: 'IEventStoreAdapter'
+        use-case: 'Development, testing, embedded applications'
+
+    # Properties
+    properties:
+      - name: 'streams'
+        type: 'Map<string, InMemoryStream>'
+        description: 'In-memory storage for event streams organized by stream ID'
+        private: true
+        business-context: 'Core storage mechanism providing O(1) stream access by ID'
+
+      - name: 'globalEvents'
+        type: 'IStoredEvent[]'
+        description: 'Global ordered list of all events across all streams'
+        private: true
+        business-context: 'Enables global event reading and cross-stream projections'
+
+      - name: 'globalPosition'
+        type: 'bigint'
+        description: 'Global position counter for event ordering'
+        private: true
+        business-context: 'Ensures total ordering of events across all streams'
+
+      - name: 'connected'
+        type: 'boolean'
+        description: 'Connection status flag for adapter compliance'
+        private: true
+        business-context: 'Simulates database connection state for testing scenarios'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new in-memory event store with optional configuration'
+        business-context: 'Initializes the event store with memory-based storage and logging'
+
+        parameters:
+          - name: 'config'
+            type: 'IEventStoreConfig'
+            description: 'Optional event store configuration'
+            optional: true
+            default: '{}'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const eventStore = new InMemoryEventStore({
+                enableSnapshots: true,
+                snapshotFrequency: 100,
+                enableOptimisticConcurrency: true
+              });
+
+          - id: 'development'
+            code: |
+              // Development configuration with logging
+              const devEventStore = new InMemoryEventStore({
+                enableSnapshots: false, // Disable for faster testing
+                enableOptimisticConcurrency: true,
+                enableChecksums: false
+              });
+
+      appendToStream:
+        description: 'Appends events to a stream with ACID compliance and optimistic concurrency control'
+        business-context: 'Core event storage operation ensuring data consistency and preventing lost updates'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the event stream (typically aggregate ID)'
+          - name: 'events'
+            type: 'IStoredDomainEvent[]'
+            description: 'Array of domain events to append to the stream'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected current version for optimistic concurrency control'
+            optional: true
+
+        returns:
+          type: 'Promise<IAppendResult>'
+          description: 'Promise resolving to append operation results with version and position information'
+
+        throws:
+          - type: 'Error'
+            description: 'When event store is not connected'
+          - type: 'EventStoreConcurrencyError'
+            description: 'When expected version does not match actual stream version'
+          - type: 'StreamDeletedError'
+            description: 'When attempting to append to a deleted stream'
+
+        examples:
+          - id: 'basic-append'
+            code: |
+              const events: IStoredDomainEvent[] = [
+                {
+                  eventId: 'event-123',
+                  eventType: 'OrderCreated',
+                  eventData: { orderId: 'order-123', amount: 100 },
+                  metadata: { userId: 'user-456' },
+                  timestamp: new Date()
+                }
+              ];
+              
+              const result = await eventStore.appendToStream('order-123', events);
+              console.log(`Events appended from version ${result.fromVersion} to ${result.toVersion}`);
+
+          - id: 'concurrency-control'
+            code: |
+              try {
+                const result = await eventStore.appendToStream('order-123', events, 5);
+                console.log(`Concurrency check passed, new version: ${result.toVersion}`);
+              } catch (error) {
+                if (error instanceof EventStoreConcurrencyError) {
+                  console.error('Stream was modified by another process');
+                }
+              }
+
+        custom-tags:
+          acid-compliance: 'Full ACID transaction semantics'
+          concurrency: 'Optimistic concurrency control with version checking'
+          auto-snapshot: 'Automatic snapshot creation when frequency threshold reached'
+
+      readStream:
+        description: 'Reads events from a specific stream with filtering and pagination support'
+        business-context: 'Retrieves event history for aggregate reconstruction and event replay scenarios'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the event stream to read'
+          - name: 'options'
+            type: 'IReadStreamOptions'
+            description: 'Optional reading configuration including version range and direction'
+            optional: true
+            default: '{}'
+
+        returns:
+          type: 'Promise<IEventStream<T>>'
+          description: 'Promise resolving to stream of events with pagination metadata'
+
+        throws:
+          - type: 'Error'
+            description: 'When event store is not connected'
+          - type: 'StreamNotFoundError'
+            description: 'When stream does not exist or has been deleted'
+
+        examples:
+          - id: 'read-full-stream'
+            code: |
+              const stream = await eventStore.readStream('order-123');
+              console.log(`Stream contains ${stream.events.length} events`);
+              console.log(`Last version: ${stream.lastVersion}`);
+
+          - id: 'paginated-reading'
+            code: |
+              const recentEvents = await eventStore.readStream('order-123', {
+                fromVersion: 10,
+                maxCount: 20,
+                direction: 'forward'
+              });
+              
+              console.log(`Read ${recentEvents.events.length} events from version 10`);
+              console.log(`End of stream: ${recentEvents.isEndOfStream}`);
+
+        custom-tags:
+          pagination: 'Built-in pagination with forward/backward direction support'
+          filtering: 'Version-based filtering capabilities'
+
+      readAll:
+        description: 'Reads events from all streams in global chronological order with advanced filtering'
+        business-context: 'Enables global event processing, projections, and cross-aggregate analysis'
+
+        parameters:
+          - name: 'options'
+            type: 'IReadAllOptions'
+            description: 'Optional configuration for global reading including position, filtering, and pagination'
+            optional: true
+            default: '{}'
+
+        returns:
+          type: 'Promise<IGlobalEventStream<T>>'
+          description: 'Promise resolving to global stream of all events with position tracking'
+
+        throws:
+          - type: 'Error'
+            description: 'When event store is not connected'
+
+        examples:
+          - id: 'read-all-events'
+            code: |
+              const globalStream = await eventStore.readAll();
+              console.log(`Total events in store: ${globalStream.events.length}`);
+
+          - id: 'filtered-global-read'
+            code: |
+              const orderEvents = await eventStore.readAll({
+                filterByEventType: ['OrderCreated', 'OrderProcessed'],
+                filterByStreamPrefix: 'order-',
+                maxCount: 100,
+                direction: 'forward'
+              });
+              
+              console.log(`Found ${orderEvents.events.length} order events`);
+
+        custom-tags:
+          global-stream: 'Cross-stream event processing capabilities'
+          filtering: 'Advanced filtering by event type and stream prefix'
+          projections: 'Essential for building read model projections'
+
+      getStreamMetadata:
+        description: 'Retrieves comprehensive metadata information for a specific stream'
+        business-context: 'Provides stream information for monitoring, debugging, and management operations'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the stream'
+
+        returns:
+          type: 'Promise<IStreamMetadata | null>'
+          description: 'Promise resolving to stream metadata or null if stream does not exist'
+
+        examples:
+          - id: 'get-metadata'
+            code: |
+              const metadata = await eventStore.getStreamMetadata('order-123');
+              if (metadata) {
+                console.log(`Stream version: ${metadata.version}`);
+                console.log(`Event count: ${metadata.eventCount}`);
+                console.log(`Created: ${metadata.created}`);
+                console.log(`Deleted: ${metadata.deleted}`);
+              }
+
+        custom-tags:
+          metadata: 'Comprehensive stream information'
+          monitoring: 'Essential for stream health monitoring'
+
+      setStreamMetadata:
+        description: 'Updates metadata for a stream, creating the stream if it does not exist'
+        business-context: 'Enables stream management operations like marking deletion or updating custom metadata'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the stream'
+          - name: 'metadata'
+            type: 'Partial<IStreamMetadata>'
+            description: 'Partial metadata to merge with existing metadata'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when metadata is updated'
+
+        examples:
+          - id: 'update-metadata'
+            code: |
+              await eventStore.setStreamMetadata('order-123', {
+                maxAge: 86400000, // 24 hours in milliseconds
+                maxCount: 1000,
+                deleted: false
+              });
+
+        custom-tags:
+          management: 'Stream management functionality'
+          auto-creation: 'Creates stream if it does not exist'
+
+      deleteStream:
+        description: 'Marks a stream as deleted with optional optimistic concurrency control'
+        business-context: 'Logical deletion of streams for data lifecycle management while preserving events'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the stream to delete'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected current version for optimistic concurrency control'
+            optional: true
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when stream is marked as deleted'
+
+        throws:
+          - type: 'EventStoreConcurrencyError'
+            description: 'When expected version does not match actual version'
+          - type: 'StreamNotFoundError'
+            description: 'When stream does not exist'
+
+        examples:
+          - id: 'delete-stream'
+            code: |
+              await eventStore.deleteStream('order-123');
+              console.log('Stream marked as deleted');
+
+          - id: 'delete-with-concurrency'
+            code: |
+              try {
+                await eventStore.deleteStream('order-123', 15);
+              } catch (error) {
+                if (error instanceof EventStoreConcurrencyError) {
+                  console.error('Stream was modified before deletion');
+                }
+              }
+
+        custom-tags:
+          logical-deletion: 'Marks as deleted without removing events'
+          concurrency: 'Supports optimistic concurrency control'
+
+      getSnapshot:
+        description: 'Retrieves the snapshot for a stream if one exists'
+        business-context: 'Enables fast aggregate reconstruction by loading state snapshots'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier for the aggregate'
+
+        returns:
+          type: 'Promise<IAggregateSnapshot<T> | null>'
+          description: 'Promise resolving to snapshot or null if none exists'
+
+        examples:
+          - id: 'load-snapshot'
+            code: |
+              const snapshot = await eventStore.getSnapshot<OrderState>('order-123');
+              if (snapshot) {
+                console.log(`Snapshot at version ${snapshot.version}`);
+                console.log(`Snapshot data:`, snapshot.data);
+              } else {
+                console.log('No snapshot available, will replay from beginning');
+              }
+
+        custom-tags:
+          performance: 'Fast aggregate reconstruction'
+          snapshots: 'Snapshot retrieval functionality'
+
+      saveSnapshot:
+        description: 'Saves a snapshot for a stream to optimize future aggregate loading'
+        business-context: 'Stores aggregate state snapshots to reduce reconstruction time'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier for the aggregate'
+          - name: 'snapshot'
+            type: 'IAggregateSnapshot<T>'
+            description: 'Snapshot data including aggregate state and version'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when snapshot is stored'
+
+        throws:
+          - type: 'StreamNotFoundError'
+            description: 'When stream does not exist'
+
+        examples:
+          - id: 'save-snapshot'
+            code: |
+              const snapshot: IAggregateSnapshot<OrderState> = {
+                streamId: 'order-123',
+                version: 15,
+                data: currentOrderState,
+                timestamp: new Date(),
+                metadata: { snapshotType: 'automatic' }
+              };
+              
+              await eventStore.saveSnapshot('order-123', snapshot);
+
+        custom-tags:
+          performance: 'Performance optimization'
+          snapshots: 'Snapshot storage functionality'
+
+      connect:
+        description: 'Establishes connection to the event store (simulated for in-memory implementation)'
+        business-context: 'Adapter interface compliance for consistent behavior across event store implementations'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when connection is established'
+
+        examples:
+          - id: 'connect-store'
+            code: |
+              await eventStore.connect();
+              console.log('Event store connected');
+
+        custom-tags:
+          adapter: 'IEventStoreAdapter interface compliance'
+          simulation: 'Simulated connection for consistency'
+
+      disconnect:
+        description: 'Disconnects from the event store and marks it as unavailable'
+        business-context: 'Graceful shutdown and resource cleanup for adapter interface compliance'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when disconnection is complete'
+
+        examples:
+          - id: 'disconnect-store'
+            code: |
+              await eventStore.disconnect();
+              console.log('Event store disconnected');
+
+        custom-tags:
+          adapter: 'IEventStoreAdapter interface compliance'
+          cleanup: 'Resource cleanup functionality'
+
+      isConnected:
+        description: 'Checks the current connection status of the event store'
+        business-context: 'Health monitoring and connection state validation for applications'
+
+        returns:
+          type: 'boolean'
+          description: 'True if connected, false if disconnected'
+
+        examples:
+          - id: 'check-connection'
+            code: |
+              if (eventStore.isConnected()) {
+                console.log('Event store is ready for operations');
+              } else {
+                console.warn('Event store is not connected');
+                await eventStore.connect();
+              }
+
+        custom-tags:
+          health-check: 'Connection health monitoring'
+          adapter: 'IEventStoreAdapter interface compliance'
+
+      clear:
+        description: 'Clears all data from the event store including streams and global events'
+        business-context: 'Testing utility and data reset functionality for development environments'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when all data is cleared'
+
+        examples:
+          - id: 'clear-data'
+            code: |
+              // Clear all data for testing
+              await eventStore.clear();
+              console.log('All event data cleared');
+
+          - id: 'test-setup'
+            code: |
+              // Common test setup pattern
+              beforeEach(async () => {
+                await eventStore.clear();
+                await eventStore.connect();
+              });
+
+        custom-tags:
+          testing: 'Test utility functionality'
+          data-management: 'Complete data reset capability'
+
+      # Private methods (documented for completeness)
+      createStream:
+        description: 'Creates a new in-memory stream with initialized metadata'
+        business-context: 'Internal stream creation with proper initialization'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Unique identifier for the new stream'
+
+        returns:
+          type: 'InMemoryStream'
+          description: 'New stream object with empty events array and initial metadata'
+
+        custom-tags:
+          private: 'Internal implementation method'
+          initialization: 'Stream initialization logic'
+
+      shouldSnapshot:
+        description: 'Determines if a stream should trigger automatic snapshot creation'
+        business-context: 'Automatic snapshot optimization based on event count frequency'
+
+        parameters:
+          - name: 'stream'
+            type: 'InMemoryStream'
+            description: 'The stream to evaluate for snapshot creation'
+
+        returns:
+          type: 'boolean'
+          description: 'True if snapshot should be created, false otherwise'
+
+        custom-tags:
+          private: 'Internal implementation method'
+          optimization: 'Performance optimization logic'
+          snapshots: 'Automatic snapshot triggering'
+
+      createAutoSnapshot:
+        description: 'Triggers automatic snapshot creation for a stream'
+        business-context: 'Placeholder for automatic snapshot creation logic'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier requiring snapshot'
+          - name: 'stream'
+            type: 'InMemoryStream'
+            description: 'Stream object for snapshot context'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when auto-snapshot logic completes'
+
+        custom-tags:
+          private: 'Internal implementation method'
+          snapshots: 'Automatic snapshot creation'
+          placeholder: 'Implementation placeholder for aggregate-specific logic'
+
+# === FILE-LEVEL ELEMENTS ===
+interfaces:
+  InMemoryStream:
+    description: 'Internal data structure representing an event stream in memory'
+    business-context: 'Encapsulates stream events, metadata, and optional snapshot in single object'
+    
+    properties:
+      - name: 'events'
+        type: 'IStoredEvent[]'
+        description: 'Ordered array of stored events in the stream'
+        business-context: 'Maintains event ordering and provides O(1) append operations'
+      
+      - name: 'metadata'
+        type: 'IStreamMetadata'
+        description: 'Stream metadata including version, timestamps, and status'
+        business-context: 'Tracks stream state for concurrency control and management'
+      
+      - name: 'snapshot'
+        type: 'IAggregateSnapshot'
+        description: 'Optional aggregate snapshot for performance optimization'
+        optional: true
+        business-context: 'Cached aggregate state to avoid full event replay'
+
+    custom-tags:
+      internal: 'Internal data structure'
+      performance: 'Optimized for memory usage and access patterns'

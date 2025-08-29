@@ -1,0 +1,772 @@
+# Event Store Errors - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'event-store.errors'
+title: 'Event Store Errors - Comprehensive Error Hierarchy'
+description: 'Complete error hierarchy for event store operations with domain-specific error handling'
+business-context: 'Enterprise-grade error handling for event store operations, providing detailed error information for debugging and monitoring'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === ENUMS ===
+enums:
+  EventStoreErrorCode:
+    description: 'Enumeration of specific error codes for event store operations'
+    business-context: 'Standardized error codes enabling precise error handling and monitoring in production systems'
+    
+    values:
+      - name: 'Default'
+        value: "'ES_ERROR'"
+        description: 'Generic event store error'
+        business-context: 'Catch-all error code for unspecified event store issues'
+      
+      - name: 'ConcurrencyConflict'
+        value: "'ES_CONCURRENCY_CONFLICT'"
+        description: 'Optimistic concurrency control violation'
+        business-context: 'Occurs when multiple processes attempt to modify the same stream simultaneously'
+      
+      - name: 'StreamNotFound'
+        value: "'ES_STREAM_NOT_FOUND'"
+        description: 'Requested stream does not exist'
+        business-context: 'Stream lookup failure, typically indicates data consistency issues'
+      
+      - name: 'StreamDeleted'
+        value: "'ES_STREAM_DELETED'"
+        description: 'Stream has been marked as deleted'
+        business-context: 'Attempt to access logically deleted stream, part of soft deletion strategy'
+      
+      - name: 'InvalidStreamVersion'
+        value: "'ES_INVALID_STREAM_VERSION'"
+        description: 'Stream version is invalid or out of range'
+        business-context: 'Version validation failure, indicates data integrity issues'
+      
+      - name: 'SerializationError'
+        value: "'ES_SERIALIZATION_ERROR'"
+        description: 'Event serialization failed'
+        business-context: 'Event data cannot be converted to storage format, data compatibility issue'
+      
+      - name: 'DeserializationError'
+        value: "'ES_DESERIALIZATION_ERROR'"
+        description: 'Event deserialization failed'
+        business-context: 'Stored event data cannot be converted back to object format, version compatibility issue'
+      
+      - name: 'ConnectionError'
+        value: "'ES_CONNECTION_ERROR'"
+        description: 'Event store connection failure'
+        business-context: 'Infrastructure connectivity issues with underlying storage system'
+      
+      - name: 'InvalidConfiguration'
+        value: "'ES_INVALID_CONFIGURATION'"
+        description: 'Event store configuration is invalid'
+        business-context: 'Configuration validation failure, prevents event store initialization'
+      
+      - name: 'SnapshotError'
+        value: "'ES_SNAPSHOT_ERROR'"
+        description: 'Snapshot operation failed'
+        business-context: 'Snapshot creation or retrieval failure, affects performance optimization'
+      
+      - name: 'StorageError'
+        value: "'ES_STORAGE_ERROR'"
+        description: 'Underlying storage system error'
+        business-context: 'Infrastructure-level storage failures, requires system-level intervention'
+
+    custom-tags:
+      standardization: 'Standardized error codes across all event store implementations'
+      monitoring: 'Essential for error monitoring and alerting systems'
+
+# === TYPES ===
+types:
+  EventStoreErrorOptions:
+    description: 'Configuration options for event store error instances'
+    business-context: 'Comprehensive error context for debugging and error analysis'
+    
+    extends: 'DomainErrorOptions'
+    
+    properties:
+      - name: 'code'
+        type: 'EventStoreErrorCode'
+        description: 'Specific event store error code'
+        optional: true
+      
+      - name: 'streamId'
+        type: 'string'
+        description: 'Identifier of the stream associated with the error'
+        optional: true
+      
+      - name: 'expectedVersion'
+        type: 'number'
+        description: 'Expected version for concurrency control errors'
+        optional: true
+      
+      - name: 'actualVersion'
+        type: 'number'
+        description: 'Actual version found during concurrency control'
+        optional: true
+      
+      - name: 'position'
+        type: 'bigint'
+        description: 'Global position in event store where error occurred'
+        optional: true
+      
+      - name: 'eventType'
+        type: 'string'
+        description: 'Type of event associated with the error'
+        optional: true
+      
+      - name: 'data'
+        type: 'unknown'
+        description: 'Additional error-specific data'
+        optional: true
+      
+      - name: 'error'
+        type: 'Error'
+        description: 'Original underlying error that caused this event store error'
+        optional: true
+
+    custom-tags:
+      context: 'Rich error context for debugging'
+      diagnostics: 'Comprehensive diagnostic information'
+
+# === CLASSES ===
+classes:
+  EventStoreError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for all event store-specific errors with comprehensive diagnostic information'
+      business-context: 'Foundation for event store error hierarchy providing structured error information for debugging and monitoring'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Abstract base class for event store errors with diagnostic context'
+        cli:
+          description: |
+            ## EventStoreError
+            
+            Base class for all event store errors.
+            Provides structured error information including stream context, versions, and positions.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Template Method Pattern, Error Hierarchy'
+        extends: 'IDomainError'
+        abstract: 'Must be extended by specific error types'
+
+    # Properties
+    properties:
+      - name: 'streamId'
+        type: 'string'
+        description: 'Identifier of the stream where the error occurred'
+        optional: true
+        business-context: 'Stream context for error diagnosis and debugging'
+
+      - name: 'expectedVersion'
+        type: 'number'
+        description: 'Expected version for concurrency-related errors'
+        optional: true
+        business-context: 'Concurrency control context for conflict resolution'
+
+      - name: 'actualVersion'
+        type: 'number'
+        description: 'Actual version found during the operation'
+        optional: true
+        business-context: 'Current state information for conflict analysis'
+
+      - name: 'position'
+        type: 'bigint'
+        description: 'Global position in the event store'
+        optional: true
+        business-context: 'Global context for error location in event timeline'
+
+      - name: 'eventType'
+        type: 'string'
+        description: 'Type of event being processed when error occurred'
+        optional: true
+        business-context: 'Event context for type-specific error analysis'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new event store error with comprehensive diagnostic information'
+        business-context: 'Initializes error with structured information for effective debugging and monitoring'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Human-readable error message'
+          - name: 'options'
+            type: 'EventStoreErrorOptions'
+            description: 'Optional error configuration with diagnostic context'
+            optional: true
+            default: '{}'
+
+        examples:
+          - id: 'basic-error'
+            code: |
+              // Custom error extending EventStoreError
+              class CustomEventStoreError extends EventStoreError {
+                constructor(message: string, streamId: string) {
+                  super(message, {
+                    streamId,
+                    code: EventStoreErrorCode.Default,
+                    data: { customInfo: 'additional context' }
+                  });
+                }
+              }
+
+        custom-tags:
+          diagnostics: 'Rich diagnostic information capture'
+          inheritance: 'Base for specific error types'
+
+  EventStoreConcurrencyError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when optimistic concurrency control detects conflicting modifications to the same stream'
+      business-context: 'Critical for maintaining data consistency in concurrent environments by detecting simultaneous modifications'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Optimistic concurrency control violation error'
+        cli:
+          description: |
+            ## EventStoreConcurrencyError
+            
+            Concurrency conflict detection error.
+            Thrown when expected stream version differs from actual version during updates.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Optimistic Concurrency Control'
+        extends: 'EventStoreError'
+        critical: 'Data consistency protection'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a concurrency conflict error with version information'
+        business-context: 'Documents concurrency violations with precise version information for conflict resolution'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Identifier of the stream with concurrency conflict'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Version expected by the operation'
+          - name: 'actualVersion'
+            type: 'number'
+            description: 'Actual current version of the stream'
+
+        examples:
+          - id: 'concurrency-error'
+            code: |
+              // Thrown during optimistic concurrency control
+              throw new EventStoreConcurrencyError(
+                'order-123',
+                5,  // Expected version
+                7   // Actual version (modified by another process)
+              );
+
+          - id: 'error-handling'
+            code: |
+              try {
+                await eventStore.appendToStream('order-123', events, expectedVersion);
+              } catch (error) {
+                if (error instanceof EventStoreConcurrencyError) {
+                  console.log(`Concurrency conflict: expected ${error.expectedVersion}, actual ${error.actualVersion}`);
+                  // Implement retry logic or conflict resolution
+                }
+              }
+
+        custom-tags:
+          concurrency: 'Optimistic concurrency control enforcement'
+          data-integrity: 'Prevents lost updates in concurrent scenarios'
+
+      withDetails:
+        description: 'Factory method to create concurrency error with additional diagnostic data'
+        business-context: 'Enhanced error creation with custom diagnostic information for complex scenarios'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected version'
+          - name: 'actualVersion'
+            type: 'number'
+            description: 'Actual version'
+          - name: 'additionalData'
+            type: 'unknown'
+            description: 'Additional diagnostic data'
+            optional: true
+
+        returns:
+          type: 'EventStoreConcurrencyError'
+          description: 'Concurrency error instance with additional data'
+
+        examples:
+          - id: 'detailed-error'
+            code: |
+              const concurrencyError = EventStoreConcurrencyError.withDetails(
+                'order-123',
+                5,
+                7,
+                {
+                  operation: 'appendEvents',
+                  timestamp: new Date(),
+                  userId: 'user-456'
+                }
+              );
+
+        custom-tags:
+          factory: 'Factory method with additional data'
+          static: 'Static factory method'
+
+  StreamNotFoundError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when attempting to access a stream that does not exist in the event store'
+      business-context: 'Stream lookup failure indicating potential data consistency issues or incorrect stream identifiers'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+        use-case: 'Stream existence validation'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a stream not found error for the specified stream identifier'
+        business-context: 'Documents stream lookup failures for debugging and data integrity monitoring'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Identifier of the stream that was not found'
+
+        examples:
+          - id: 'stream-not-found'
+            code: |
+              if (!streamExists(streamId)) {
+                throw new StreamNotFoundError(streamId);
+              }
+
+        custom-tags:
+          validation: 'Stream existence validation'
+
+      withStreamId:
+        description: 'Factory method to create stream not found error with additional data'
+        business-context: 'Enhanced error creation with diagnostic context for debugging'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier'
+          - name: 'additionalData'
+            type: 'unknown'
+            description: 'Additional diagnostic data'
+            optional: true
+
+        returns:
+          type: 'StreamNotFoundError'
+          description: 'Stream not found error with additional context'
+
+        custom-tags:
+          factory: 'Factory method with context'
+          static: 'Static factory method'
+
+  StreamDeletedError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when attempting to access a stream that has been logically deleted'
+      business-context: 'Prevents access to deleted streams while preserving event data for audit and recovery purposes'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+        soft-deletion: 'Logical deletion enforcement'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a stream deleted error for the specified stream'
+        business-context: 'Enforces logical deletion policy while maintaining data integrity'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Identifier of the deleted stream'
+
+        examples:
+          - id: 'deleted-stream'
+            code: |
+              if (stream.metadata.deleted) {
+                throw new StreamDeletedError(streamId);
+              }
+
+        custom-tags:
+          soft-deletion: 'Logical deletion enforcement'
+
+  EventSerializationError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when event data cannot be serialized for storage'
+      business-context: 'Data compatibility and format validation ensuring events can be properly stored and retrieved'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+        data-integrity: 'Serialization validation'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a serialization error with event context and underlying error information'
+        business-context: 'Captures serialization failures with full diagnostic context for debugging data format issues'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the serialization failure'
+          - name: 'eventType'
+            type: 'string'
+            description: 'Type of event that failed serialization'
+            optional: true
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Underlying error that caused serialization failure'
+            optional: true
+
+        examples:
+          - id: 'serialization-error'
+            code: |
+              try {
+                const serialized = JSON.stringify(eventData);
+              } catch (error) {
+                throw new EventSerializationError(
+                  'Failed to serialize order event',
+                  'OrderCreated',
+                  error as Error
+                );
+              }
+
+        custom-tags:
+          serialization: 'Event data serialization failure'
+
+      withEvent:
+        description: 'Factory method to create serialization error with event details'
+        business-context: 'Standardized error creation for serialization failures with comprehensive context'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Type of event'
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Original serialization error'
+          - name: 'additionalData'
+            type: 'unknown'
+            description: 'Additional diagnostic data'
+            optional: true
+
+        returns:
+          type: 'EventSerializationError'
+          description: 'Serialization error with event context'
+
+        examples:
+          - id: 'factory-usage'
+            code: |
+              const serializationError = EventSerializationError.withEvent(
+                'PaymentProcessed',
+                originalError,
+                { eventSize: eventData.length, timestamp: new Date() }
+              );
+
+        custom-tags:
+          factory: 'Factory method for event context'
+          static: 'Static factory method'
+
+  EventDeserializationError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when stored event data cannot be deserialized back to object format'
+      business-context: 'Version compatibility and data integrity validation ensuring stored events can be properly reconstructed'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+        data-integrity: 'Deserialization validation'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a deserialization error with data context and underlying error information'
+        business-context: 'Documents deserialization failures with diagnostic information for data compatibility analysis'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the deserialization failure'
+          - name: 'dataLength'
+            type: 'number'
+            description: 'Length of data that failed deserialization'
+            optional: true
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Underlying error that caused deserialization failure'
+            optional: true
+
+        examples:
+          - id: 'deserialization-error'
+            code: |
+              try {
+                const eventData = JSON.parse(storedData);
+              } catch (error) {
+                throw new EventDeserializationError(
+                  'Failed to deserialize stored event',
+                  storedData.length,
+                  error as Error
+                );
+              }
+
+        custom-tags:
+          deserialization: 'Event data deserialization failure'
+
+      withData:
+        description: 'Factory method to create deserialization error with data context'
+        business-context: 'Standardized error creation for deserialization failures with diagnostic context'
+
+        parameters:
+          - name: 'dataLength'
+            type: 'number'
+            description: 'Length of failed data'
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Original deserialization error'
+          - name: 'additionalData'
+            type: 'unknown'
+            description: 'Additional diagnostic data'
+            optional: true
+
+        returns:
+          type: 'EventDeserializationError'
+          description: 'Deserialization error with data context'
+
+        custom-tags:
+          factory: 'Factory method for data context'
+          static: 'Static factory method'
+
+  EventStoreConnectionError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when connection to the underlying event store fails'
+      business-context: 'Infrastructure connectivity issues requiring system-level intervention and monitoring'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+        infrastructure: 'Connection management'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a connection error with diagnostic information'
+        business-context: 'Documents infrastructure failures for system monitoring and alerting'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the connection failure'
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Underlying connection error'
+            optional: true
+
+        examples:
+          - id: 'connection-error'
+            code: |
+              try {
+                await database.connect();
+              } catch (error) {
+                throw new EventStoreConnectionError(
+                  'Failed to connect to PostgreSQL event store',
+                  error as Error
+                );
+              }
+
+        custom-tags:
+          infrastructure: 'Infrastructure connectivity failure'
+
+      withError:
+        description: 'Factory method to create connection error with underlying error context'
+        business-context: 'Standardized error creation for connection failures with full diagnostic context'
+
+        parameters:
+          - name: 'originalError'
+            type: 'Error'
+            description: 'Original connection error'
+          - name: 'additionalData'
+            type: 'unknown'
+            description: 'Additional diagnostic data'
+            optional: true
+
+        returns:
+          type: 'EventStoreConnectionError'
+          description: 'Connection error with diagnostic context'
+
+        custom-tags:
+          factory: 'Factory method for connection context'
+          static: 'Static factory method'
+
+  InvalidStreamVersionError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when a stream version is invalid or out of acceptable range'
+      business-context: 'Version validation ensuring data integrity and preventing invalid state transitions'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EventStoreError'
+        validation: 'Version validation'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates an invalid version error with stream and version context'
+        business-context: 'Documents version validation failures for data integrity monitoring'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Identifier of the stream with invalid version'
+          - name: 'version'
+            type: 'number'
+            description: 'Invalid version number'
+          - name: 'message'
+            type: 'string'
+            description: 'Optional custom error message'
+            optional: true
+
+        examples:
+          - id: 'invalid-version'
+            code: |
+              if (version < 0) {
+                throw new InvalidStreamVersionError(
+                  streamId,
+                  version,
+                  'Version cannot be negative'
+                );
+              }
+
+        custom-tags:
+          validation: 'Stream version validation'
+
+      withVersion:
+        description: 'Factory method to create invalid version error with additional context'
+        business-context: 'Enhanced error creation with diagnostic information for version validation failures'
+
+        parameters:
+          - name: 'streamId'
+            type: 'string'
+            description: 'Stream identifier'
+          - name: 'version'
+            type: 'number'
+            description: 'Invalid version'
+          - name: 'additionalData'
+            type: 'unknown'
+            description: 'Additional diagnostic data'
+            optional: true
+
+        returns:
+          type: 'InvalidStreamVersionError'
+          description: 'Invalid version error with additional context'
+
+        custom-tags:
+          factory: 'Factory method for version context'
+          static: 'Static factory method'
+
+# === FUNCTIONS ===
+functions:
+  createOptions:
+    description: 'Helper function to create event store error options with undefined values omitted'
+    business-context: 'TypeScript exactOptionalPropertyTypes compliance ensuring clean error option objects'
+
+    parameters:
+      - name: 'options'
+        type: 'object'
+        description: 'Raw options object with potentially undefined values'
+        properties:
+          - name: 'eventType'
+            type: 'string | undefined'
+            description: 'Event type if available'
+            optional: true
+          - name: 'error'
+            type: 'Error | undefined'  
+            description: 'Original error if available'
+            optional: true
+          - name: 'data'
+            type: 'unknown'
+            description: 'Additional data'
+            optional: true
+
+    returns:
+      type: 'EventStoreErrorOptions'
+      description: 'Clean options object with undefined values omitted'
+
+    examples:
+      - id: 'clean-options'
+        code: |
+          const cleanOptions = createOptions({
+            eventType: 'OrderCreated',
+            error: originalError,
+            data: { customInfo: 'value' }
+          });
+
+    custom-tags:
+      utility: 'TypeScript compliance helper'
+      private: 'Internal implementation function'

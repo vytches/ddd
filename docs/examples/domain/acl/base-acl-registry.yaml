@@ -1,0 +1,151 @@
+# BaseACLRegistry - Foundation for ACL Registry Implementations
+
+# === FILE METADATA ===
+file-name: 'base-acl-registry'
+title: 'BaseACLRegistry - Registry Foundation'
+description: 'Abstract base class for ACL registry implementations'
+business-context: |
+  Provides the foundational infrastructure for managing ACL adapters
+  with support for metadata, lifecycle management, and discovery patterns
+  essential for enterprise integration architectures.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseACLRegistry:
+    class-doc:
+      description: 'Abstract base for ACL registry implementations'
+      business-context: |
+        Foundation for building specialized registry implementations that
+        manage ACL adapters with specific capabilities like versioning,
+        context isolation, or dynamic discovery.
+
+      formats:
+        jsdoc:
+          description: 'Base registry class for ACL adapter management'
+        cli:
+          description: |
+            ## BaseACLRegistry
+            Registry foundation providing:
+            - Adapter registration with metadata
+            - Lifecycle management hooks
+            - Discovery and query capabilities
+            - Event-driven notifications
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry Pattern'
+        abstract: 'true'
+
+    methods:
+      constructor:
+        description: 'Initializes base registry with core capabilities'
+        business-context: 'Sets up foundational registry infrastructure'
+
+        parameters:
+          - name: 'options'
+            type: 'RegistryOptions'
+            description: 'Registry configuration'
+            optional: true
+
+      registerAdapter:
+        description: 'Registers adapter with metadata'
+        business-context: 'Adds adapter to registry with rich metadata'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Unique adapter identifier'
+          - name: 'adapter'
+            type: 'IACLAdapter'
+            description: 'Adapter instance'
+          - name: 'metadata'
+            type: 'ACLRegistrationMetadata'
+            description: 'Registration metadata'
+
+        returns:
+          type: 'void'
+
+      validateAdapter:
+        description: 'Validates adapter before registration'
+        business-context: 'Ensures adapter meets registry requirements'
+        visibility: 'protected'
+        abstract: true
+
+        parameters:
+          - name: 'adapter'
+            type: 'IACLAdapter'
+            description: 'Adapter to validate'
+
+        returns:
+          type: 'boolean'
+          description: 'Validation result'
+
+      onAdapterRegistered:
+        description: 'Hook called after adapter registration'
+        business-context: 'Enables post-registration processing'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+          - name: 'adapter'
+            type: 'IACLAdapter'
+            description: 'Registered adapter'
+
+        returns:
+          type: 'void'
+
+      onAdapterUnregistered:
+        description: 'Hook called after adapter removal'
+        business-context: 'Enables cleanup after adapter removal'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+
+        returns:
+          type: 'void'
+
+# === TYPES ===
+types:
+  ACLRegistrationMetadata:
+    description: 'Metadata for adapter registration'
+    business-context: 'Rich metadata for adapter discovery and management'
+
+    properties:
+      - name: 'registeredAt'
+        type: 'Date'
+        description: 'Registration timestamp'
+      - name: 'context'
+        type: 'string'
+        description: 'Bounded context name'
+        optional: true
+      - name: 'version'
+        type: 'string'
+        description: 'Adapter version'
+        optional: true
+      - name: 'tags'
+        type: 'string[]'
+        description: 'Searchable tags'
+        optional: true
+      - name: 'description'
+        type: 'string'
+        description: 'Human-readable description'
+        optional: true
+      - name: 'capabilities'
+        type: 'string[]'
+        description: 'Supported capabilities'
+        optional: true
+      - name: 'dependencies'
+        type: 'string[]'
+        description: 'Required dependencies'
+        optional: true

@@ -1,0 +1,233 @@
+# BaseACLMiddleware - Middleware Pipeline for ACL Operations
+
+# === FILE METADATA ===
+file-name: 'acl-middleware'
+title: 'BaseACLMiddleware - Cross-cutting Concerns'
+description: 'Base class for ACL middleware pipeline components'
+business-context: |
+  Enables implementation of cross-cutting concerns in ACL operations
+  through a middleware pipeline pattern, supporting logging, caching,
+  retry logic, authentication, and other enterprise requirements.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseACLMiddleware:
+    class-doc:
+      description: 'Abstract base for ACL middleware implementations'
+      business-context: |
+        Foundation for building middleware components that intercept and
+        enhance ACL operations with additional functionality like logging,
+        metrics, caching, and error handling without modifying core logic.
+
+      formats:
+        jsdoc:
+          description: 'Base middleware class for ACL operation pipeline'
+        cli:
+          description: |
+            ## BaseACLMiddleware
+            Middleware foundation providing:
+            - Request/response interception
+            - Pre/post processing hooks
+            - Error handling and recovery
+            - Context propagation
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Middleware Pattern'
+        implements: 'ACLMiddleware'
+
+    methods:
+      process:
+        description: 'Processes request through middleware chain'
+        business-context: 'Intercepts and enhances ACL operations'
+        abstract: true
+
+        parameters:
+          - name: 'context'
+            type: 'MiddlewareContext'
+            description: 'Request context with operation details'
+          - name: 'next'
+            type: 'NextFunction'
+            description: 'Next middleware in pipeline'
+
+        returns:
+          type: 'Promise<Result<any, ACLError>>'
+          description: 'Processed result or error'
+
+        examples:
+          - id: 'middleware-implementation'
+            code: |
+              class LoggingMiddleware extends BaseACLMiddleware {
+                async process(
+                  context: MiddlewareContext,
+                  next: NextFunction
+                ): Promise<Result<any, ACLError>> {
+                  const startTime = Date.now();
+                  console.log(`[ACL] Starting ${context.operation}`);
+                  
+                  try {
+                    const result = await next(context);
+                    const duration = Date.now() - startTime;
+                    console.log(`[ACL] Completed in ${duration}ms`);
+                    return result;
+                  } catch (error) {
+                    console.error(`[ACL] Failed:`, error);
+                    throw error;
+                  }
+                }
+              }
+
+      preProcess:
+        description: 'Hook for pre-processing logic'
+        business-context: 'Executes before main operation'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'context'
+            type: 'MiddlewareContext'
+            description: 'Request context'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when pre-processing done'
+
+      postProcess:
+        description: 'Hook for post-processing logic'
+        business-context: 'Executes after main operation'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'context'
+            type: 'MiddlewareContext'
+            description: 'Request context'
+          - name: 'result'
+            type: 'Result<any, ACLError>'
+            description: 'Operation result'
+
+        returns:
+          type: 'Promise<Result<any, ACLError>>'
+          description: 'Potentially modified result'
+
+      onError:
+        description: 'Error handling hook'
+        business-context: 'Handles and potentially recovers from errors'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'context'
+            type: 'MiddlewareContext'
+            description: 'Request context'
+          - name: 'error'
+            type: 'ACLError'
+            description: 'Error that occurred'
+
+        returns:
+          type: 'Promise<Result<any, ACLError>>'
+          description: 'Recovery result or rethrown error'
+
+# === MIDDLEWARE EXAMPLES ===
+examples:
+  - name: 'CachingMiddleware'
+    description: 'Caches ACL operation results'
+    code: |
+      class CachingMiddleware extends BaseACLMiddleware {
+        private cache = new Map<string, any>();
+        
+        async process(
+          context: MiddlewareContext,
+          next: NextFunction
+        ): Promise<Result<any, ACLError>> {
+          const cacheKey = this.getCacheKey(context);
+          
+          // Check cache for GET operations
+          if (context.operation === 'fetch') {
+            const cached = this.cache.get(cacheKey);
+            if (cached) {
+              return Result.success(cached);
+            }
+          }
+          
+          // Execute and cache result
+          const result = await next(context);
+          if (result.isSuccess() && context.operation === 'fetch') {
+            this.cache.set(cacheKey, result.value);
+          }
+          
+          return result;
+        }
+        
+        private getCacheKey(context: MiddlewareContext): string {
+          return `${context.operation}:${context.identifier}`;
+        }
+      }
+
+  - name: 'RetryMiddleware'
+    description: 'Retries failed operations with backoff'
+    code: |
+      class RetryMiddleware extends BaseACLMiddleware {
+        constructor(
+          private maxRetries: number = 3,
+          private baseDelay: number = 1000
+        ) {
+          super();
+        }
+        
+        async process(
+          context: MiddlewareContext,
+          next: NextFunction
+        ): Promise<Result<any, ACLError>> {
+          let lastError: ACLError;
+          
+          for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+            try {
+              const result = await next(context);
+              if (result.isSuccess()) {
+                return result;
+              }
+              lastError = result.error;
+            } catch (error) {
+              lastError = error as ACLError;
+            }
+            
+            if (attempt < this.maxRetries) {
+              await this.delay(this.baseDelay * Math.pow(2, attempt));
+            }
+          }
+          
+          return Result.failure(lastError!);
+        }
+        
+        private delay(ms: number): Promise<void> {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
+      }
+
+  - name: 'AuthenticationMiddleware'
+    description: 'Adds authentication to external API calls'
+    code: |
+      class AuthenticationMiddleware extends BaseACLMiddleware {
+        constructor(
+          private tokenProvider: ITokenProvider
+        ) {
+          super();
+        }
+        
+        async process(
+          context: MiddlewareContext,
+          next: NextFunction
+        ): Promise<Result<any, ACLError>> {
+          // Add auth token to context
+          const token = await this.tokenProvider.getToken();
+          context.headers = {
+            ...context.headers,
+            'Authorization': `Bearer ${token}`
+          };
+          
+          return next(context);
+        }
+      }

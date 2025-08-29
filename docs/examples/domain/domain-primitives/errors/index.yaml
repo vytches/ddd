@@ -1,101 +1,85 @@
-# Errors Index - Domain Error Exports
+# Domain Primitives Errors Index - Universal Enhanced Metadata System V2
 
 # === FILE METADATA ===
 file-name: 'index'
-title: 'Domain Error Package Exports'
-description: 'Comprehensive domain error system exports'
-business-context: 'Provides unified access to all domain error handling functionality'
+title: 'Domain Primitives Errors Module'
+description: 'Central export point for all error classes and types'
+business-context: 'Provides structured error handling foundation for Domain-Driven Design patterns'
 
 # === HIERARCHY ===
 hierarchy:
   strategy: 'merge'
   scope: 'file'
 
-# === FILE-LEVEL METADATA ===
+# === FILE-DOC ===
 file-doc:
-  description: 'Central export hub for domain error handling system'
-  business-context: 'Simplifies imports for comprehensive error handling in domain-driven applications'
+  description: 'Error module exports for domain primitives'
+  business-context: 'Foundation for error handling across all DDD packages'
   
   formats:
     jsdoc:
-      description: 'Domain error system exports and interfaces'
+      description: 'Domain primitives error exports'
     cli:
       description: |
-        ## Domain Error System Exports
-        
-        Complete error handling system including:
-        - Base error classes and interfaces
-        - Domain-specific error types
-        - Error code enumerations
-        - Error option interfaces
+        ## Domain Primitives Errors Module
+        Central export point for all error handling components
 
   custom-tags:
     since: '1.0.0'
-    stability: 'stable'
-    category: 'error-handling'
-    pattern: 'facade-pattern'
-    
-# === EXPORTS DOCUMENTATION ===
+    module: 'errors'
+    category: 'foundation'
+
+# === EXPORTS ===
 exports:
-  BaseError:
-    description: 'Foundation error class with structured metadata and error codes'
-    business-context: 'Base class for all domain errors with consistent error handling patterns'
-    source: './base.error'
+  - name: 'BaseError'
+    from: './base.error'
+    description: 'Base error class for all domain errors'
+    business-context: 'Foundation for structured error handling'
     
-  ErrorOptions:
-    description: 'Configuration options interface for error construction'
-    business-context: 'Provides flexible error configuration with context and metadata'
-    source: './base.error'
+  - name: 'ErrorOptions'
+    from: './base.error'
+    description: 'Options for creating base errors'
     type: 'type'
     
-  DuplicateError:
-    description: 'Error thrown when duplicate entities or values are detected'
-    business-context: 'Handles business rule violations for unique constraints and duplicate prevention'
-    source: './domain.errors'
+  - name: 'IDomainError'
+    from: './domain.errors'
+    description: 'Abstract base class for domain-specific errors'
+    business-context: 'Provides domain context for error handling'
     
-  IDomainError:
-    description: 'Core domain error interface extending base error functionality'
-    business-context: 'Standard contract for all domain-specific error implementations'
-    source: './domain.errors'
+  - name: 'MissingValueError'
+    from: './domain.errors'
+    description: 'Error for missing required values'
     
-  InvalidParameterError:
-    description: 'Error for invalid input parameters in domain operations'
-    business-context: 'Validates domain operation inputs and provides clear feedback'
-    source: './domain.errors'
+  - name: 'InvalidParameterError'
+    from: './domain.errors'
+    description: 'Error for invalid parameter values'
     
-  MissingValueError:
-    description: 'Error thrown when required values are absent or null'
-    business-context: 'Enforces required field validation in domain operations'
-    source: './domain.errors'
+  - name: 'DuplicateError'
+    from: './domain.errors'
+    description: 'Error for duplicate entries'
     
-  NotFoundError:
-    description: 'Error for missing entities or resources in domain operations'
-    business-context: 'Handles entity lookup failures and resource availability issues'
-    source: './domain.errors'
+  - name: 'NotFoundError'
+    from: './domain.errors'
+    description: 'Error for resources not found'
     
-  DomainErrorOptions:
-    description: 'Configuration options specific to domain error construction'
-    business-context: 'Extends base error options with domain-specific metadata'
-    source: './domain.errors'
+  - name: 'DomainErrorOptions'
+    from: './domain.errors'
+    description: 'Options for creating domain errors'
     type: 'type'
     
-  ErrorCode:
-    description: 'Union type of all available error codes across error categories'
-    business-context: 'Provides type-safe error code usage across the domain'
-    source: './domain.errors'
+  - name: 'ErrorCode'
+    from: './domain.errors'
+    description: 'Error code type definition'
     type: 'type'
     
-  ApplicationErrorCode:
-    description: 'Enumeration of application-level error codes'
-    business-context: 'Categorizes errors related to application infrastructure and flow'
-    source: './error.enum'
+  - name: 'ApplicationErrorCode'
+    from: './error.enum'
+    description: 'Application-level error codes'
     
-  DomainErrorCode:
-    description: 'Enumeration of domain-specific error codes'
-    business-context: 'Categorizes errors related to business rules and domain logic'
-    source: './error.enum'
+  - name: 'DomainErrorCode'
+    from: './error.enum'
+    description: 'Domain-level error codes'
     
-  FrameworkErrorCode:
-    description: 'Enumeration of framework-level error codes'
-    business-context: 'Categorizes errors related to framework infrastructure and setup'
-    source: './error.enum'
+  - name: 'FrameworkErrorCode'
+    from: './error.enum'
+    description: 'Framework-level error codes'

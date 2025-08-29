@@ -1,0 +1,44 @@
+# Package Settings for Resilience - Enterprise Resilience Patterns
+# Provides comprehensive resilience patterns for fault-tolerant applications
+
+# === PACKAGE IDENTITY ===
+package-name: 'resilience'
+display-name: 'DDD Resilience Patterns'
+description: 'Enterprise resilience patterns: circuit breaker, retry, bulkhead, timeout'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'system-resilience'
+complexity: 'intermediate'
+patterns:
+  - 'circuit-breaker'
+  - 'retry-pattern'
+  - 'bulkhead-pattern'
+  - 'timeout-strategy'
+  - 'composite-strategy'
+
+# === BUSINESS CONTEXT ===
+business-context: |
+  Resilience patterns protect applications from cascading failures and system
+  outages. These battle-tested patterns (circuit breaker, retry, bulkhead, timeout)
+  provide fault tolerance for external integrations, database operations, and
+  microservice communications in enterprise environments.
+
+# === KEY CAPABILITIES ===
+capabilities:
+  - 'Circuit breaker protection'
+  - 'Intelligent retry strategies'
+  - 'Resource isolation (bulkhead)'
+  - 'Operation timeouts'
+  - 'Strategy composition'
+  - 'Metrics and observability'
+
+# === DEPENDENCIES ===
+dependencies:
+  - '@vytches/ddd-core'
+  - '@vytches/ddd-utils'
+  - '@vytches/ddd-logging'

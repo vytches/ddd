@@ -1,41 +1,36 @@
-# Adapters Index - NestJS Container Adapter Exports
+# NestJS Adapters Index - Universal Enhanced Metadata System V2
 
 # === FILE METADATA ===
 file-name: 'index'
-title: 'NestJS Adapters Package Exports'
-description: 'NestJS container adapter exports'
-business-context: 'Provides unified access to NestJS container adaptation functionality'
+title: 'NestJS Adapters Module'
+description: 'Container adapters for NestJS dependency injection'
+business-context: 'Bridges VytchesDDD container with NestJS DI system'
 
 # === HIERARCHY ===
 hierarchy:
   strategy: 'merge'
   scope: 'file'
 
-# === FILE-LEVEL METADATA ===
+# === FILE-DOC ===
 file-doc:
-  description: 'Central export hub for NestJS container adapters'
-  business-context: 'Simplifies imports for NestJS dependency injection integration'
+  description: 'NestJS container adapter exports'
+  business-context: 'Enables seamless integration between VytchesDDD and NestJS dependency injection'
   
   formats:
     jsdoc:
-      description: 'NestJS container adapter exports'
+      description: 'NestJS adapter exports'
     cli:
       description: |
-        ## NestJS Adapters Exports
-        
-        Container adaptation functionality including:
-        - NestJS container adapter implementation
-        - Dependency injection bridge patterns
+        ## NestJS Adapters Module
+        Container adapters for integrating VytchesDDD with NestJS
 
   custom-tags:
     since: '1.0.0'
-    stability: 'stable'
-    category: 'adapter-pattern'
-    framework: 'nestjs'
-    
-# === EXPORTS DOCUMENTATION ===
+    module: 'adapters'
+
+# === EXPORTS ===
 exports:
-  NestJSContainerAdapter:
-    description: 'Adapter implementation for integrating VytchesDDD with NestJS DI container'
-    business-context: 'Bridges VytchesDDD service locator pattern with NestJS dependency injection system'
-    source: './nestjs-container.adapter'
+  - name: 'NestJSContainerAdapter'
+    from: './nestjs-container.adapter'
+    description: 'Adapter for NestJS ModuleRef container'
+    business-context: 'Allows VytchesDDD to resolve services from NestJS DI container'

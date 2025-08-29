@@ -1,0 +1,261 @@
+# BaseACLAdapter - Foundation for Anti-Corruption Layer Adapters
+
+# === FILE METADATA ===
+file-name: 'base-acl-adapter'
+title: 'BaseACLAdapter - Core ACL Implementation'
+description: 'Abstract base class for all Anti-Corruption Layer adapter implementations'
+business-context: |
+  Provides the foundational implementation for protecting your domain model
+  from external system contamination. Handles translation, middleware pipeline,
+  and operation execution with proper error handling and timeout support.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseACLAdapter:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class providing core ACL adapter functionality'
+      business-context: |
+        Foundation for building adapters that protect domain boundaries
+        from external system concepts while enabling seamless integration.
+        Implements middleware pipeline, operation registration, and translation.
+
+      formats:
+        jsdoc:
+          description: 'Abstract base for ACL adapters with middleware support'
+        cli:
+          description: |
+            ## BaseACLAdapter
+            Core Anti-Corruption Layer adapter providing:
+            - Model translation between domain and external
+            - Middleware pipeline for cross-cutting concerns
+            - Operation registration and validation
+            - Timeout and error handling
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Anti-Corruption Layer'
+        category: 'Integration'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Initializes ACL adapter with context, translator, and external API'
+        business-context: 'Sets up the adapter with all necessary dependencies for domain protection'
+
+        parameters:
+          - name: 'contextInfo'
+            type: 'ACLContextInfo'
+            description: 'Context information including bounded context and system names'
+          - name: 'translator'
+            type: 'IModelTranslator<TDomainModel, TExternalModel>'
+            description: 'Bidirectional model translator'
+          - name: 'externalAPI'
+            type: 'IExternalAPI<TExternalModel, TResult>'
+            description: 'External system API client'
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const adapter = new CustomACLAdapter(
+                { contextName: 'Orders', externalSystem: 'LegacyERP' },
+                new OrderTranslator(),
+                new ERPAPIClient()
+              );
+
+      use:
+        description: 'Adds middleware to the processing pipeline'
+        business-context: 'Enables cross-cutting concerns like logging, caching, and retry logic'
+
+        parameters:
+          - name: 'middleware'
+            type: 'ACLMiddleware'
+            description: 'Middleware to add to the pipeline'
+
+        returns:
+          type: 'this'
+          description: 'Adapter instance for method chaining'
+
+        examples:
+          - id: 'middleware-chain'
+            code: |
+              adapter
+                .use(new LoggingMiddleware())
+                .use(new CachingMiddleware())
+                .use(new RetryMiddleware());
+
+      execute:
+        description: 'Executes an operation through the ACL with translation'
+        business-context: 'Main entry point for domain operations that need external system integration'
+
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name to execute'
+          - name: 'domainModel'
+            type: 'TDomainModel'
+            description: 'Domain model to translate and send'
+          - name: 'options'
+            type: 'ExecuteOptions'
+            description: 'Optional execution configuration'
+
+        returns:
+          type: 'Promise<Result<TResult, ACLError>>'
+          description: 'Result containing response or error'
+
+        custom-tags:
+          async: 'true'
+          error-handling: 'Returns Result pattern with ACLError'
+
+        examples:
+          - id: 'execute-operation'
+            code: |
+              const result = await adapter.execute(
+                'create',
+                orderAggregate,
+                { timeout: 5000, retry: true }
+              );
+              
+              if (result.isSuccess()) {
+                console.log('Order created:', result.value);
+              }
+
+      fetch:
+        description: 'Fetches and translates external data to domain model'
+        business-context: 'Retrieves external data and converts it to clean domain model'
+
+        parameters:
+          - name: 'identifier'
+            type: 'string'
+            description: 'External resource identifier'
+
+        returns:
+          type: 'Promise<Result<TDomainModel, ACLError>>'
+          description: 'Domain model or error'
+
+        examples:
+          - id: 'fetch-example'
+            code: |
+              const result = await adapter.fetch('ORDER-123');
+              if (result.isSuccess()) {
+                const order = result.value; // Clean domain model
+              }
+
+      supportsOperation:
+        description: 'Checks if adapter supports specific operation'
+        business-context: 'Validates operation availability before execution'
+
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if operation is supported'
+
+      getContextInfo:
+        description: 'Returns adapter context information'
+        business-context: 'Provides metadata about bounded context and external system'
+
+        returns:
+          type: 'ACLContextInfo'
+          description: 'Context metadata'
+
+      registerOperation:
+        description: 'Registers a supported operation'
+        business-context: 'Declares operations this adapter can handle'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name to register'
+
+      registerSupportedOperations:
+        description: 'Abstract method to register all supported operations'
+        business-context: 'Implemented by concrete adapters to declare their capabilities'
+        visibility: 'protected'
+        abstract: true
+
+  SimpleACLAdapter:
+    class-doc:
+      description: 'Basic ACL adapter implementation for straightforward integrations'
+      business-context: |
+        Provides a simple, ready-to-use ACL adapter for common integration
+        scenarios without complex requirements. Ideal for CRUD operations
+        and basic external system interactions.
+
+      formats:
+        jsdoc:
+          description: 'Simple ACL adapter for basic integration needs'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseACLAdapter'
+
+    methods:
+      constructor:
+        description: 'Creates simple adapter with predefined operations'
+        business-context: 'Quick setup for standard integration patterns'
+
+        parameters:
+          - name: 'contextInfo'
+            type: 'ACLContextInfo'
+            description: 'Context information'
+          - name: 'translator'
+            type: 'IModelTranslator<TDomain, TExternal>'
+            description: 'Model translator'
+          - name: 'externalAPI'
+            type: 'IExternalAPI<TExternal, TResult>'
+            description: 'External API client'
+          - name: 'operations'
+            type: 'string[]'
+            description: 'List of supported operations'
+
+      create:
+        description: 'Factory method for creating simple ACL adapters'
+        business-context: 'Convenient creation with automatic context setup'
+        static: true
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Bounded context name'
+          - name: 'externalSystemName'
+            type: 'string'
+            description: 'External system name'
+          - name: 'translator'
+            type: 'IModelTranslator<TDomain, TExternal>'
+            description: 'Model translator'
+          - name: 'externalAPI'
+            type: 'IExternalAPI<TExternal, TResult>'
+            description: 'External API'
+          - name: 'operations'
+            type: 'string[]'
+            description: 'Supported operations'
+
+        returns:
+          type: 'SimpleACLAdapter<TDomain, TExternal, TResult>'
+          description: 'Configured adapter instance'
+
+        examples:
+          - id: 'factory-creation'
+            code: |
+              const adapter = SimpleACLAdapter.create(
+                'Payments',
+                'StripeAPI',
+                new PaymentTranslator(),
+                new StripeClient(),
+                ['charge', 'refund', 'getStatus']
+              );

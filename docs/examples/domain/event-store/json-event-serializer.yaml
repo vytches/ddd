@@ -1,0 +1,224 @@
+# JsonEventSerializer - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'json-event-serializer'
+title: 'JsonEventSerializer - JSON Event Serialization'
+description: 'JSON-based event serializer with automatic date restoration and error handling'
+business-context: 'Production-ready event serialization for JSON storage formats with comprehensive error handling'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  JsonEventSerializer:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'JSON-based event serializer providing reliable serialization and deserialization with automatic type restoration'
+      business-context: 'Standard serialization strategy for event stores using JSON storage formats with production-grade error handling'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'JSON event serializer with date restoration and error handling'
+        cli:
+          description: |
+            ## JsonEventSerializer
+            
+            Production-ready JSON event serialization.
+            Handles automatic date restoration and provides comprehensive error handling for reliable event storage.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Strategy Pattern, Error Handling'
+        implements: 'IEventSerializer'
+        use-case: 'JSON storage, database persistence, file storage'
+
+    # Properties
+    properties:
+      - name: 'logger'
+        type: 'ILogger'
+        description: 'Structured logger for serialization operations'
+        private: true
+        readonly: true
+        business-context: 'Comprehensive logging for debugging serialization issues and monitoring performance'
+
+      - name: 'pretty'
+        type: 'boolean'
+        description: 'Whether to format JSON output with indentation for human readability'
+        private: true
+        readonly: true
+        business-context: 'Development and debugging aid for readable JSON output'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new JSON event serializer with optional pretty-printing configuration'
+        business-context: 'Initializes serializer with logging and formatting options for development or production use'
+
+        parameters:
+          - name: 'pretty'
+            type: 'boolean'
+            description: 'Whether to enable pretty-printing with indentation'
+            optional: true
+            default: 'false'
+
+        examples:
+          - id: 'production'
+            code: |
+              // Production configuration - compact JSON
+              const serializer = new JsonEventSerializer();
+
+          - id: 'development'
+            code: |
+              // Development configuration - pretty-printed JSON
+              const devSerializer = new JsonEventSerializer(true);
+
+      serialize:
+        description: 'Serializes a domain event to a JSON string with comprehensive error handling'
+        business-context: 'Converts domain events to JSON format for storage while maintaining data integrity'
+
+        parameters:
+          - name: 'event'
+            type: 'IStoredDomainEvent'
+            description: 'Domain event to serialize to JSON format'
+
+        returns:
+          type: 'string'
+          description: 'JSON string representation of the event'
+
+        throws:
+          - type: 'EventSerializationError'
+            description: 'When JSON serialization fails due to invalid data or circular references'
+
+        examples:
+          - id: 'basic-serialization'
+            code: |
+              const event: IStoredDomainEvent = {
+                eventId: 'event-123',
+                eventType: 'OrderCreated',
+                aggregateId: 'order-456',
+                eventData: { amount: 100, currency: 'USD' },
+                metadata: { userId: 'user-789' },
+                timestamp: new Date()
+              };
+              
+              const json = serializer.serialize(event);
+              console.log('Serialized event:', json);
+
+          - id: 'error-handling'
+            code: |
+              try {
+                const json = serializer.serialize(eventWithCircularRef);
+              } catch (error) {
+                if (error instanceof EventSerializationError) {
+                  console.error('Serialization failed:', error.message);
+                  console.error('Event type:', error.eventType);
+                }
+              }
+
+        custom-tags:
+          serialization: 'JSON serialization with error handling'
+          data-integrity: 'Maintains event data integrity during conversion'
+          logging: 'Comprehensive error logging for debugging'
+
+      deserialize:
+        description: 'Deserializes a JSON string back to a domain event with automatic date restoration'
+        business-context: 'Reconstructs domain events from stored JSON with proper type restoration for Date objects'
+
+        parameters:
+          - name: 'data'
+            type: 'string'
+            description: 'JSON string to deserialize into a domain event'
+
+        returns:
+          type: 'IStoredDomainEvent<T>'
+          description: 'Reconstructed domain event with proper type restoration'
+
+        throws:
+          - type: 'EventDeserializationError'
+            description: 'When JSON parsing fails or data format is invalid'
+
+        examples:
+          - id: 'basic-deserialization'
+            code: |
+              const jsonString = '{"eventId":"event-123","eventType":"OrderCreated",...}';
+              const event = serializer.deserialize<OrderCreatedData>(jsonString);
+              
+              console.log('Event type:', event.eventType);
+              console.log('Timestamp restored:', event.timestamp instanceof Date);
+
+          - id: 'generic-deserialization'
+            code: |
+              // Deserialize without specific type
+              const event = serializer.deserialize(storedJson);
+              
+              // Date objects are automatically restored
+              console.log('Timestamp type:', typeof event.timestamp); // 'object' (Date)
+
+          - id: 'error-handling'
+            code: |
+              try {
+                const event = serializer.deserialize(malformedJson);
+              } catch (error) {
+                if (error instanceof EventDeserializationError) {
+                  console.error('Deserialization failed for', error.dataLength, 'bytes');
+                  console.error('Original error:', error.originalError?.message);
+                }
+              }
+
+        custom-tags:
+          deserialization: 'JSON parsing with type restoration'
+          date-restoration: 'Automatic Date object restoration'
+          type-safety: 'Generic type support for event data'
+
+      getContentType:
+        description: 'Returns the MIME content type for JSON serialization'
+        business-context: 'Standard content type identifier for HTTP headers and storage metadata'
+
+        returns:
+          type: 'string'
+          description: 'MIME type string for JSON content'
+
+        examples:
+          - id: 'content-type'
+            code: |
+              const contentType = serializer.getContentType();
+              console.log('Content type:', contentType); // 'application/json'
+
+          - id: 'http-headers'
+            code: |
+              // Use in HTTP response headers
+              const headers = {
+                'Content-Type': serializer.getContentType(),
+                'Content-Length': serializedEvent.length.toString()
+              };
+
+        custom-tags:
+          mime-type: 'Standard MIME type for JSON content'
+          http-integration: 'HTTP header compatibility'
+
+# === FEATURES ===
+features:
+  - name: 'Automatic Date Restoration'
+    description: 'Automatically converts ISO date strings back to Date objects during deserialization'
+    business-context: 'Maintains JavaScript Date object semantics for event timestamps and metadata'
+  
+  - name: 'Pretty Printing Support'
+    description: 'Optional human-readable JSON formatting for development and debugging'
+    business-context: 'Development aid for debugging and manual inspection of serialized events'
+  
+  - name: 'Comprehensive Error Handling'
+    description: 'Specialized error types with detailed context for debugging serialization issues'
+    business-context: 'Production-grade error handling with structured logging for monitoring and troubleshooting'
+  
+  - name: 'Structured Logging'
+    description: 'Detailed logging of serialization operations with contextual information'
+    business-context: 'Monitoring and debugging support for production event serialization operations'

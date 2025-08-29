@@ -1,0 +1,251 @@
+# ACLRegistry - Global Registry for ACL Adapters
+
+# === FILE METADATA ===
+file-name: 'acl-registry'
+title: 'ACLRegistry - Adapter Management System'
+description: 'Global registry for managing and discovering ACL adapters'
+business-context: |
+  Provides centralized management of ACL adapters across the application,
+  enabling dynamic adapter registration, discovery, and lifecycle management
+  for multiple external system integrations.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ACLRegistry:
+    class-doc:
+      description: 'Singleton registry for ACL adapter management'
+      business-context: |
+        Central hub for registering and resolving ACL adapters, supporting
+        dynamic adapter discovery, lazy loading, and context-based routing
+        for enterprise integration scenarios.
+
+      formats:
+        jsdoc:
+          description: 'Global ACL adapter registry with discovery support'
+        cli:
+          description: |
+            ## ACLRegistry
+            Centralized adapter management providing:
+            - Adapter registration and discovery
+            - Context-based adapter resolution
+            - Lazy loading and caching
+            - Import/export capabilities
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry Pattern'
+        singleton: 'true'
+
+    methods:
+      getInstance:
+        description: 'Returns singleton registry instance'
+        business-context: 'Ensures single point of adapter management'
+        static: true
+
+        returns:
+          type: 'ACLRegistry'
+          description: 'Singleton registry instance'
+
+        examples:
+          - id: 'get-instance'
+            code: |
+              const registry = ACLRegistry.getInstance();
+              registry.register('payments', paymentAdapter);
+
+      register:
+        description: 'Registers an ACL adapter with the registry'
+        business-context: 'Makes adapter available for application use'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Unique adapter identifier'
+          - name: 'adapter'
+            type: 'IACLAdapter'
+            description: 'Adapter instance to register'
+          - name: 'options'
+            type: 'RegistrationOptions'
+            description: 'Registration configuration'
+            optional: true
+
+        returns:
+          type: 'void'
+
+        examples:
+          - id: 'register-adapter'
+            code: |
+              registry.register(
+                'order-service',
+                orderAdapter,
+                { 
+                  context: 'Orders',
+                  version: '2.0',
+                  lazy: true 
+                }
+              );
+
+      resolve:
+        description: 'Retrieves registered adapter by key'
+        business-context: 'Locates appropriate adapter for integration needs'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter identifier'
+
+        returns:
+          type: 'IACLAdapter | undefined'
+          description: 'Adapter instance or undefined'
+
+        examples:
+          - id: 'resolve-adapter'
+            code: |
+              const adapter = registry.resolve<OrderAdapter>('order-service');
+              if (adapter) {
+                await adapter.execute('sync', orderData);
+              }
+
+      resolveOrThrow:
+        description: 'Retrieves adapter or throws if not found'
+        business-context: 'Ensures adapter availability for critical operations'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter identifier'
+
+        returns:
+          type: 'IACLAdapter'
+          description: 'Adapter instance'
+
+        throws:
+          - type: 'AdapterNotFoundError'
+            description: 'When adapter is not registered'
+
+      findByContext:
+        description: 'Finds all adapters for a bounded context'
+        business-context: 'Discovers adapters within specific domain boundary'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Bounded context name'
+
+        returns:
+          type: 'IACLAdapter[]'
+          description: 'Array of matching adapters'
+
+        examples:
+          - id: 'find-by-context'
+            code: |
+              const orderAdapters = registry.findByContext('Orders');
+              // Returns all adapters registered for Orders context
+
+      unregister:
+        description: 'Removes adapter from registry'
+        business-context: 'Cleans up unused adapters and frees resources'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter identifier to remove'
+
+        returns:
+          type: 'boolean'
+          description: 'True if adapter was removed'
+
+      clear:
+        description: 'Removes all registered adapters'
+        business-context: 'Resets registry for testing or shutdown'
+
+        returns:
+          type: 'void'
+
+      getAll:
+        description: 'Returns all registered adapters'
+        business-context: 'Provides registry introspection capabilities'
+
+        returns:
+          type: 'Map<string, IACLAdapter>'
+          description: 'Map of all adapters'
+
+      import:
+        description: 'Imports adapters from configuration'
+        business-context: 'Bulk adapter registration from external config'
+
+        parameters:
+          - name: 'config'
+            type: 'ImportOptions'
+            description: 'Import configuration'
+
+        returns:
+          type: 'Promise<void>'
+
+        examples:
+          - id: 'import-config'
+            code: |
+              await registry.import({
+                adapters: [
+                  { key: 'payments', module: './adapters/payment' },
+                  { key: 'shipping', module: './adapters/shipping' }
+                ],
+                lazy: true,
+                validate: true
+              });
+
+      export:
+        description: 'Exports current registry configuration'
+        business-context: 'Serializes registry state for persistence'
+
+        returns:
+          type: 'RegistrySnapshot'
+          description: 'Registry configuration snapshot'
+
+# === TYPES ===
+types:
+  ImportOptions:
+    description: 'Configuration for bulk adapter import'
+    business-context: 'Enables configuration-driven adapter setup'
+
+    properties:
+      - name: 'adapters'
+        type: 'AdapterConfig[]'
+        description: 'Array of adapter configurations'
+      - name: 'lazy'
+        type: 'boolean'
+        description: 'Enable lazy loading'
+        optional: true
+      - name: 'validate'
+        type: 'boolean'
+        description: 'Validate adapters on import'
+        optional: true
+      - name: 'override'
+        type: 'boolean'
+        description: 'Override existing adapters'
+        optional: true
+
+  RegistrationOptions:
+    description: 'Options for adapter registration'
+
+    properties:
+      - name: 'context'
+        type: 'string'
+        description: 'Bounded context name'
+        optional: true
+      - name: 'version'
+        type: 'string'
+        description: 'Adapter version'
+        optional: true
+      - name: 'lazy'
+        type: 'boolean'
+        description: 'Enable lazy initialization'
+        optional: true
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Additional metadata'
+        optional: true

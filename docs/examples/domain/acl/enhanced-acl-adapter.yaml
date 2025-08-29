@@ -1,0 +1,264 @@
+# EnhancedACLAdapter - Advanced ACL Adapter with Enterprise Features
+
+# === FILE METADATA ===
+file-name: 'enhanced-acl-adapter'
+title: 'EnhancedACLAdapter - Enterprise ACL Implementation'
+description: 'Advanced ACL adapter with caching, batching, and metrics'
+business-context: |
+  Extends basic ACL functionality with enterprise-grade features including
+  caching strategies, batch operations, health monitoring, and performance
+  metrics for high-volume external system integrations.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  EnhancedACLAdapter:
+    class-doc:
+      description: 'Enterprise-grade ACL adapter with advanced capabilities'
+      business-context: |
+        Production-ready ACL adapter supporting high-volume operations with
+        built-in caching, batch processing, circuit breaker patterns, and
+        comprehensive metrics for monitoring integration health.
+
+      formats:
+        jsdoc:
+          description: 'Advanced ACL adapter with caching and metrics'
+        cli:
+          description: |
+            ## EnhancedACLAdapter
+            Enterprise adapter features:
+            - Multi-level caching strategies
+            - Batch operation support
+            - Health check monitoring
+            - Performance metrics collection
+            - Circuit breaker protection
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseACLAdapter'
+        implements: 'IEnhancedACLAdapter'
+
+    methods:
+      constructor:
+        description: 'Initializes enhanced adapter with advanced options'
+        business-context: 'Configures enterprise features for production use'
+
+        parameters:
+          - name: 'contextInfo'
+            type: 'ACLContextInfo'
+            description: 'Context information'
+          - name: 'translator'
+            type: 'IModelTranslator<TDomainModel, TExternalModel>'
+            description: 'Model translator'
+          - name: 'externalAPI'
+            type: 'IExternalAPI<TExternalModel, TResult>'
+            description: 'External API client'
+          - name: 'options'
+            type: 'EnhancedAdapterOptions'
+            description: 'Enhanced configuration options'
+            optional: true
+
+        examples:
+          - id: 'enhanced-setup'
+            code: |
+              const adapter = new EnhancedACLAdapter(
+                { contextName: 'Orders', externalSystem: 'SAP' },
+                new OrderTranslator(),
+                new SAPClient(),
+                {
+                  cache: {
+                    ttl: 300000, // 5 minutes
+                    maxSize: 1000
+                  },
+                  batch: {
+                    maxSize: 100,
+                    flushInterval: 5000
+                  },
+                  metrics: {
+                    enabled: true,
+                    interval: 60000
+                  }
+                }
+              );
+
+      executeBatch:
+        description: 'Executes multiple operations in a single batch'
+        business-context: 'Optimizes performance for bulk operations'
+
+        parameters:
+          - name: 'operations'
+            type: 'BatchOperation<TDomainModel>[]'
+            description: 'Array of operations to execute'
+          - name: 'options'
+            type: 'BatchOptions'
+            description: 'Batch execution options'
+            optional: true
+
+        returns:
+          type: 'Promise<Result<BatchResult<TResult>[], ACLError>>'
+          description: 'Array of results maintaining order'
+
+        examples:
+          - id: 'batch-execution'
+            code: |
+              const operations = [
+                { operation: 'create', model: order1 },
+                { operation: 'update', model: order2 },
+                { operation: 'create', model: order3 }
+              ];
+              
+              const results = await adapter.executeBatch(operations, {
+                parallel: true,
+                continueOnError: true
+              });
+              
+              results.value.forEach((result, index) => {
+                if (result.success) {
+                  console.log(`Operation ${index} succeeded`);
+                } else {
+                  console.error(`Operation ${index} failed:`, result.error);
+                }
+              });
+
+      invalidateCache:
+        description: 'Invalidates cached data'
+        business-context: 'Ensures data freshness after external changes'
+
+        parameters:
+          - name: 'identifier'
+            type: 'string'
+            description: 'Specific cache key to invalidate'
+            optional: true
+
+        returns:
+          type: 'void'
+
+        examples:
+          - id: 'cache-invalidation'
+            code: |
+              // Invalidate specific entry
+              adapter.invalidateCache('ORDER-123');
+              
+              // Clear entire cache
+              adapter.invalidateCache();
+
+      healthCheck:
+        description: 'Performs health check on external system'
+        business-context: 'Monitors integration availability and performance'
+
+        returns:
+          type: 'Promise<HealthStatus>'
+          description: 'Health status with diagnostics'
+
+        examples:
+          - id: 'health-monitoring'
+            code: |
+              const health = await adapter.healthCheck();
+              
+              if (health.status === 'unhealthy') {
+                console.error('External system unavailable:', health.details);
+                // Trigger fallback mechanism
+              } else {
+                console.log('Latency:', health.latency, 'ms');
+              }
+
+      getMetrics:
+        description: 'Returns adapter performance metrics'
+        business-context: 'Provides insights for monitoring and optimization'
+
+        returns:
+          type: 'AdapterMetrics'
+          description: 'Performance and usage metrics'
+
+        examples:
+          - id: 'metrics-collection'
+            code: |
+              const metrics = adapter.getMetrics();
+              
+              console.log('Total operations:', metrics.totalOperations);
+              console.log('Success rate:', metrics.successRate);
+              console.log('Average latency:', metrics.averageLatency, 'ms');
+              console.log('Cache hit rate:', metrics.cacheHitRate);
+
+      enableCircuitBreaker:
+        description: 'Activates circuit breaker protection'
+        business-context: 'Prevents cascading failures in integrations'
+
+        parameters:
+          - name: 'config'
+            type: 'CircuitBreakerConfig'
+            description: 'Circuit breaker configuration'
+
+        returns:
+          type: 'void'
+
+        examples:
+          - id: 'circuit-breaker'
+            code: |
+              adapter.enableCircuitBreaker({
+                failureThreshold: 5,
+                resetTimeout: 60000,
+                halfOpenRequests: 3
+              });
+
+# === TYPES ===
+types:
+  EnhancedAdapterOptions:
+    description: 'Configuration for enhanced adapter features'
+
+    properties:
+      - name: 'cache'
+        type: 'CacheOptions'
+        description: 'Caching configuration'
+        optional: true
+      - name: 'batch'
+        type: 'BatchConfig'
+        description: 'Batch processing settings'
+        optional: true
+      - name: 'metrics'
+        type: 'MetricsConfig'
+        description: 'Metrics collection settings'
+        optional: true
+      - name: 'circuitBreaker'
+        type: 'CircuitBreakerConfig'
+        description: 'Circuit breaker configuration'
+        optional: true
+
+  HealthStatus:
+    description: 'Health check result'
+
+    properties:
+      - name: 'status'
+        type: "'healthy' | 'degraded' | 'unhealthy'"
+        description: 'Overall health status'
+      - name: 'latency'
+        type: 'number'
+        description: 'Response time in milliseconds'
+      - name: 'details'
+        type: 'Record<string, any>'
+        description: 'Additional diagnostic information'
+        optional: true
+
+  AdapterMetrics:
+    description: 'Performance metrics for monitoring'
+
+    properties:
+      - name: 'totalOperations'
+        type: 'number'
+        description: 'Total operations executed'
+      - name: 'successRate'
+        type: 'number'
+        description: 'Percentage of successful operations'
+      - name: 'averageLatency'
+        type: 'number'
+        description: 'Average operation latency'
+      - name: 'cacheHitRate'
+        type: 'number'
+        description: 'Cache effectiveness percentage'
+      - name: 'errorRate'
+        type: 'number'
+        description: 'Percentage of failed operations'

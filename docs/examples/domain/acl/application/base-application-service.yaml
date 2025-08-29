@@ -1,0 +1,273 @@
+# BaseApplicationService - Application Layer with ACL Integration
+
+# === FILE METADATA ===
+file-name: 'application/base-application-service'
+title: 'BaseApplicationService - ACL-Integrated Application Layer'
+description: 'Base class for application services using ACL patterns'
+business-context: |
+  Provides foundation for application services that orchestrate domain
+  operations with external system integrations through ACL adapters,
+  ensuring clean separation between application and infrastructure concerns.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseApplicationService:
+    class-doc:
+      description: 'Abstract base for ACL-integrated application services'
+      business-context: |
+        Foundation for building application services that coordinate
+        domain logic with external integrations through Anti-Corruption
+        Layer patterns, maintaining clean architecture boundaries.
+
+      formats:
+        jsdoc:
+          description: 'Base application service with ACL integration'
+        cli:
+          description: |
+            ## BaseApplicationService
+            Application layer foundation providing:
+            - Domain operation orchestration
+            - ACL adapter integration
+            - Transaction boundary management
+            - Error handling and recovery
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Application Service'
+        implements: 'IApplicationService'
+
+    methods:
+      constructor:
+        description: 'Initializes application service with ACL capabilities'
+        business-context: 'Sets up service with domain and integration dependencies'
+
+        parameters:
+          - name: 'aclRegistry'
+            type: 'ACLRegistry'
+            description: 'Registry for ACL adapter resolution'
+          - name: 'logger'
+            type: 'ILogger'
+            description: 'Structured logger instance'
+            optional: true
+
+        examples:
+          - id: 'service-setup'
+            code: |
+              class OrderApplicationService extends BaseApplicationService {
+                constructor(
+                  aclRegistry: ACLRegistry,
+                  private orderRepository: IOrderRepository,
+                  logger?: ILogger
+                ) {
+                  super(aclRegistry, logger);
+                }
+              }
+
+      executeWithACL:
+        description: 'Executes operation with ACL integration'
+        business-context: 'Coordinates domain operations with external systems'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'adapterKey'
+            type: 'string'
+            description: 'ACL adapter identifier'
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation to execute'
+          - name: 'domainModel'
+            type: 'TDomainModel'
+            description: 'Domain model'
+          - name: 'options'
+            type: 'ExecuteOptions'
+            description: 'Execution options'
+            optional: true
+
+        returns:
+          type: 'Promise<Result<TResult, ApplicationError>>'
+          description: 'Operation result or application error'
+
+        examples:
+          - id: 'acl-integration'
+            code: |
+              class OrderApplicationService extends BaseApplicationService {
+                async processOrder(command: ProcessOrderCommand): Promise<Result<Order, ApplicationError>> {
+                  try {
+                    // 1. Domain validation
+                    const order = Order.fromCommand(command);
+                    
+                    // 2. Save to repository
+                    await this.orderRepository.save(order);
+                    
+                    // 3. External system integration via ACL
+                    const syncResult = await this.executeWithACL(
+                      'erp-system',
+                      'sync',
+                      order,
+                      { timeout: 10000, retry: true }
+                    );
+                    
+                    if (syncResult.isFailure()) {
+                      // Handle external system failure
+                      return Result.failure(new ApplicationError(
+                        'External sync failed',
+                        'ERP_SYNC_ERROR'
+                      ));
+                    }
+                    
+                    return Result.success(order);
+                  } catch (error) {
+                    return this.handleError(error);
+                  }
+                }
+              }
+
+      resolveAdapter:
+        description: 'Resolves ACL adapter by key'
+        business-context: 'Gets adapter for external system integration'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Adapter key'
+
+        returns:
+          type: 'IACLAdapter'
+          description: 'ACL adapter instance'
+
+        throws:
+          - type: 'ApplicationError'
+            description: 'When adapter is not found'
+
+      handleError:
+        description: 'Handles and transforms errors for application layer'
+        business-context: 'Provides consistent error handling across services'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'error'
+            type: 'Error'
+            description: 'Original error'
+
+        returns:
+          type: 'Result<never, ApplicationError>'
+          description: 'Transformed application error'
+
+      withTransaction:
+        description: 'Executes operation within transaction boundary'
+        business-context: 'Ensures data consistency across operations'
+        visibility: 'protected'
+
+        parameters:
+          - name: 'operation'
+            type: '() => Promise<T>'
+            description: 'Operation to execute'
+
+        returns:
+          type: 'Promise<Result<T, ApplicationError>>'
+          description: 'Transaction result'
+
+# === INTERFACES ===
+interfaces:
+  IApplicationService:
+    description: 'Contract for application service implementations'
+    business-context: 'Defines standard application service interface'
+
+    methods:
+      - name: 'execute'
+        description: 'Executes application service operation'
+        parameters:
+          - name: 'command'
+            type: 'TCommand'
+            description: 'Command to execute'
+        returns: 'Promise<Result<TResult, ApplicationError>>'
+
+# === TYPES ===
+types:
+  ApplicationError:
+    description: 'Application layer error'
+    business-context: 'Represents application-level failures'
+
+    extends: 'Error'
+
+    properties:
+      - name: 'code'
+        type: 'string'
+        description: 'Error code for categorization'
+      - name: 'context'
+        type: 'Record<string, any>'
+        description: 'Additional error context'
+        optional: true
+      - name: 'cause'
+        type: 'Error'
+        description: 'Underlying cause'
+        optional: true
+
+# === PATTERNS ===
+patterns:
+  - name: 'Orchestration Pattern'
+    description: 'Coordinating domain and external operations'
+    example: |
+      class PaymentApplicationService extends BaseApplicationService {
+        async processPayment(command: ProcessPaymentCommand): Promise<Result<Payment, ApplicationError>> {
+          return this.withTransaction(async () => {
+            // 1. Domain validation
+            const payment = Payment.create(command.paymentData);
+            
+            // 2. Store domain event
+            await this.paymentRepository.save(payment);
+            
+            // 3. External payment processing
+            const result = await this.executeWithACL(
+              'payment-gateway',
+              'charge',
+              payment
+            );
+            
+            // 4. Update payment status based on result
+            if (result.isSuccess()) {
+              payment.markAsProcessed(result.value.transactionId);
+            } else {
+              payment.markAsFailed(result.error.message);
+            }
+            
+            await this.paymentRepository.save(payment);
+            return payment;
+          });
+        }
+      }
+
+  - name: 'Compensation Pattern'
+    description: 'Handling failures with compensation'
+    example: |
+      async createOrderWithInventory(command: CreateOrderCommand): Promise<Result<Order, ApplicationError>> {
+        const order = Order.create(command);
+        
+        try {
+          // 1. Reserve inventory
+          const reservationResult = await this.executeWithACL(
+            'inventory',
+            'reserve',
+            order.getItems()
+          );
+          
+          if (reservationResult.isFailure()) {
+            return Result.failure(new ApplicationError('Inventory reservation failed'));
+          }
+          
+          // 2. Save order
+          await this.orderRepository.save(order);
+          
+          return Result.success(order);
+        } catch (error) {
+          // Compensate: release inventory reservation
+          await this.executeWithACL('inventory', 'release', order.getItems());
+          throw error;
+        }
+      }

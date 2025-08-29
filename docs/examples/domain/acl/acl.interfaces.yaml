@@ -1,0 +1,233 @@
+# ACL Interfaces - Core Contracts for Anti-Corruption Layer
+
+# === FILE METADATA ===
+file-name: 'acl.interfaces'
+title: 'ACL Interface Definitions'
+description: 'Core interfaces defining contracts for ACL components'
+business-context: |
+  Establishes the contractual boundaries for Anti-Corruption Layer components,
+  ensuring consistent implementation across adapters, translators, and external
+  API integrations while maintaining domain model isolation.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  IACLAdapter:
+    description: 'Core contract for ACL adapter implementations'
+    business-context: |
+      Defines the essential operations every ACL adapter must support,
+      ensuring consistent behavior across different external system integrations
+      while protecting domain boundaries.
+
+    properties:
+      - name: 'contextInfo'
+        type: 'ACLContextInfo'
+        description: 'Context metadata for the adapter'
+        readonly: true
+
+    methods:
+      - name: 'execute'
+        description: 'Executes operation with domain model translation'
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation to perform'
+          - name: 'domainModel'
+            type: 'TDomainModel'
+            description: 'Domain model input'
+          - name: 'options'
+            type: 'ExecuteOptions'
+            description: 'Execution options'
+            optional: true
+        returns: 'Promise<Result<TResult, ACLError>>'
+
+      - name: 'fetch'
+        description: 'Retrieves and translates external data'
+        parameters:
+          - name: 'identifier'
+            type: 'string'
+            description: 'Resource identifier'
+        returns: 'Promise<Result<TDomainModel, ACLError>>'
+
+      - name: 'supportsOperation'
+        description: 'Checks operation support'
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name'
+        returns: 'boolean'
+
+      - name: 'getContextInfo'
+        description: 'Returns adapter context information'
+        returns: 'ACLContextInfo'
+
+  IEnhancedACLAdapter:
+    description: 'Extended ACL adapter with advanced capabilities'
+    business-context: |
+      Extends basic ACL functionality with caching, bulk operations,
+      health checks, and metrics for enterprise-grade integrations.
+
+    extends: 'IACLAdapter'
+
+    methods:
+      - name: 'executeBatch'
+        description: 'Executes multiple operations in batch'
+        parameters:
+          - name: 'operations'
+            type: 'BatchOperation[]'
+            description: 'Array of operations to execute'
+        returns: 'Promise<Result<TResult[], ACLError>>'
+
+      - name: 'invalidateCache'
+        description: 'Clears cached data for identifier'
+        parameters:
+          - name: 'identifier'
+            type: 'string'
+            description: 'Cache key to invalidate'
+            optional: true
+        returns: 'void'
+
+      - name: 'healthCheck'
+        description: 'Verifies external system connectivity'
+        returns: 'Promise<HealthStatus>'
+
+      - name: 'getMetrics'
+        description: 'Returns adapter performance metrics'
+        returns: 'AdapterMetrics'
+
+  IModelTranslator:
+    description: 'Bidirectional model translation contract'
+    business-context: |
+      Defines how domain models are translated to/from external representations,
+      ensuring clean separation between internal domain concepts and external
+      system data structures.
+
+    methods:
+      - name: 'toDomain'
+        description: 'Translates external model to domain model'
+        parameters:
+          - name: 'external'
+            type: 'TExternalModel'
+            description: 'External representation'
+        returns: 'Result<TDomainModel, TranslationError>'
+
+      - name: 'toExternal'
+        description: 'Translates domain model to external format'
+        parameters:
+          - name: 'domain'
+            type: 'TDomainModel'
+            description: 'Domain model'
+        returns: 'Result<TExternalModel, TranslationError>'
+
+      - name: 'canTranslate'
+        description: 'Validates if translation is possible'
+        parameters:
+          - name: 'model'
+            type: 'any'
+            description: 'Model to validate'
+          - name: 'direction'
+            type: "'toDomain' | 'toExternal'"
+            description: 'Translation direction'
+        returns: 'boolean'
+
+  IExternalAPI:
+    description: 'Contract for external system API clients'
+    business-context: |
+      Abstracts external system communication details, providing a clean
+      interface for ACL adapters to interact with third-party services,
+      legacy systems, or external APIs.
+
+    methods:
+      - name: 'call'
+        description: 'Makes API call to external system'
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'API operation name'
+          - name: 'payload'
+            type: 'TExternalModel'
+            description: 'Request payload'
+          - name: 'config'
+            type: 'APIConfig'
+            description: 'API configuration'
+            optional: true
+        returns: 'Promise<TResult>'
+
+      - name: 'get'
+        description: 'Retrieves data from external system'
+        parameters:
+          - name: 'identifier'
+            type: 'string'
+            description: 'Resource identifier'
+        returns: 'Promise<TExternalModel>'
+
+      - name: 'isAvailable'
+        description: 'Checks if external API is accessible'
+        returns: 'Promise<boolean>'
+
+  ACLMiddleware:
+    description: 'Middleware interface for ACL pipeline'
+    business-context: |
+      Enables cross-cutting concerns in ACL operations through a
+      middleware pipeline pattern, supporting logging, caching,
+      retry logic, and other enterprise requirements.
+
+    methods:
+      - name: 'process'
+        description: 'Processes request through middleware'
+        parameters:
+          - name: 'context'
+            type: 'MiddlewareContext'
+            description: 'Request context'
+          - name: 'next'
+            type: 'NextFunction'
+            description: 'Next middleware in chain'
+        returns: 'Promise<Result<any, ACLError>>'
+
+# === TYPES ===
+types:
+  ACLContextInfo:
+    description: 'Context metadata for ACL operations'
+    business-context: 'Provides bounded context and system identification'
+    
+    properties:
+      - name: 'contextName'
+        type: 'string'
+        description: 'Bounded context name'
+      - name: 'externalSystem'
+        type: 'string'
+        description: 'External system identifier'
+      - name: 'version'
+        type: 'string'
+        description: 'API version'
+        optional: true
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Additional context metadata'
+        optional: true
+
+  ExecuteOptions:
+    description: 'Configuration for operation execution'
+    business-context: 'Controls execution behavior including timeouts and retries'
+
+    properties:
+      - name: 'timeout'
+        type: 'number'
+        description: 'Operation timeout in milliseconds'
+        optional: true
+      - name: 'retry'
+        type: 'boolean | RetryConfig'
+        description: 'Retry configuration'
+        optional: true
+      - name: 'cache'
+        type: 'boolean | CacheConfig'
+        description: 'Caching configuration'
+        optional: true
+      - name: 'correlationId'
+        type: 'string'
+        description: 'Request correlation ID'
+        optional: true

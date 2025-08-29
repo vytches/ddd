@@ -1,0 +1,381 @@
+# InMemorySchedulerAdapter - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'in-memory-scheduler-adapter'
+title: 'InMemorySchedulerAdapter - Memory-Based Event Scheduler'
+description: 'In-memory implementation of event scheduler for development and testing scenarios'
+business-context: 'Provides lightweight event scheduling without external dependencies for testing and development'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  InMemorySchedulerAdapter:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'In-memory implementation of event scheduler using JavaScript timers for lightweight scheduling'
+      business-context: 'Ideal for development, testing, and scenarios where persistence is not required'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'In-memory event scheduler with JavaScript timer-based execution'
+        cli:
+          description: |
+            ## InMemorySchedulerAdapter
+            
+            Memory-based event scheduler implementation.
+            Uses JavaScript timers for event scheduling without external dependencies.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Adapter Pattern'
+        extends: 'BaseSchedulerAdapter'
+        use-case: 'Development, testing, non-persistent scheduling'
+
+    # Properties
+    properties:
+      - name: 'jobs'
+        type: 'Map<string, IScheduledJob>'
+        description: 'In-memory storage for scheduled jobs'
+        private: true
+        business-context: 'Stores job metadata and state for active scheduled jobs'
+
+      - name: 'timers'
+        type: 'Map<string, NodeJS.Timeout>'
+        description: 'Active JavaScript timers for scheduled job execution'
+        private: true
+        business-context: 'Manages timer references for cancellation and cleanup'
+
+      - name: 'processing'
+        type: 'Set<string>'
+        description: 'Set of job IDs currently being processed'
+        private: true
+        business-context: 'Prevents duplicate processing of the same job'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new in-memory scheduler adapter with optional configuration'
+        business-context: 'Initializes the scheduler with in-memory storage and timer management'
+
+        parameters:
+          - name: 'config'
+            type: 'ISchedulerConfig'
+            description: 'Optional scheduler configuration'
+            optional: true
+
+        examples:
+          - id: 'basic'
+            code: |
+              const scheduler = new InMemorySchedulerAdapter({
+                concurrency: 5,
+                defaultTimeout: 30000,
+                defaultMaxRetries: 3
+              });
+
+          - id: 'development'
+            code: |
+              // Development setup with lifecycle hooks
+              const devScheduler = new InMemorySchedulerAdapter({
+                concurrency: 1, // Single-threaded for debugging
+                lifecycle: {
+                  onStart: async () => console.log('Dev scheduler started'),
+                  onBeforeProcess: async (job) => console.log(`Processing: ${job.event.type}`),
+                  onError: async (job, error) => console.error(`Job failed: ${job.id}`, error)
+                }
+              });
+
+      schedule:
+        description: 'Schedules an event for future execution using JavaScript timers'
+        business-context: 'Creates in-memory job and sets up timer for execution at specified time'
+
+        parameters:
+          - name: 'event'
+            type: 'IScheduledEvent'
+            description: 'The event to schedule for execution'
+          - name: 'options'
+            type: 'IScheduleOptions'
+            description: 'Optional scheduling configuration'
+            optional: true
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to the unique job ID'
+
+        examples:
+          - id: 'basic-scheduling'
+            code: |
+              const scheduler = new InMemorySchedulerAdapter();
+              await scheduler.start();
+              
+              // Schedule event for 1 hour from now
+              const futureTime = new Date(Date.now() + 60 * 60 * 1000);
+              const event = new OrderReminderEvent('order-123', futureTime);
+              
+              const jobId = await scheduler.schedule(event);
+              console.log(`Scheduled job: ${jobId}`);
+
+          - id: 'immediate-execution'
+            code: |
+              // Schedule event for immediate execution
+              const now = new Date();
+              const event = new ProcessOrderEvent('order-456', now);
+              
+              const jobId = await scheduler.schedule(event, {
+                maxRetries: 5,
+                priority: 'high'
+              });
+
+        custom-tags:
+          timer-based: 'Uses JavaScript setTimeout for scheduling'
+          memory-only: 'Does not persist across restarts'
+
+      cancel:
+        description: 'Cancels a scheduled job and clears its timer'
+        business-context: 'Removes job from memory and cancels associated timer to prevent execution'
+
+        parameters:
+          - name: 'jobId'
+            type: 'string'
+            description: 'The unique ID of the job to cancel'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when job is cancelled'
+
+        examples:
+          - id: 'cancel-job'
+            code: |
+              const jobId = await scheduler.schedule(event);
+              
+              // Cancel the job before it executes
+              await scheduler.cancel(jobId);
+              console.log(`Job ${jobId} has been cancelled`);
+
+        custom-tags:
+          cleanup: 'Clears timers and removes from memory'
+
+      reschedule:
+        description: 'Reschedules an existing job for a new execution time'
+        business-context: 'Updates job timing and resets timer for new execution schedule'
+
+        parameters:
+          - name: 'jobId'
+            type: 'string'
+            description: 'The unique ID of the job to reschedule'
+          - name: 'newTime'
+            type: 'Date'
+            description: 'The new execution time for the job'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when job is rescheduled'
+
+        examples:
+          - id: 'reschedule-job'
+            code: |
+              const jobId = await scheduler.schedule(event);
+              
+              // Reschedule for 2 hours later
+              const newTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
+              await scheduler.reschedule(jobId, newTime);
+
+        throws:
+          - type: 'Error'
+            description: 'When job ID is not found'
+
+        custom-tags:
+          timer-management: 'Clears old timer and creates new one'
+
+      getJob:
+        description: 'Retrieves a scheduled job by its unique ID'
+        business-context: 'Provides job lookup for monitoring and management purposes'
+
+        parameters:
+          - name: 'jobId'
+            type: 'string'
+            description: 'The unique ID of the job to retrieve'
+
+        returns:
+          type: 'Promise<IScheduledJob | undefined>'
+          description: 'Promise resolving to job details or undefined if not found'
+
+        examples:
+          - id: 'get-job'
+            code: |
+              const jobId = await scheduler.schedule(event);
+              const job = await scheduler.getJob(jobId);
+              
+              if (job) {
+                console.log(`Job status: ${job.status}`);
+                console.log(`Scheduled for: ${job.scheduledAt}`);
+                console.log(`Attempts: ${job.attempts}`);
+              }
+
+        custom-tags:
+          lookup: 'Memory-based job lookup'
+
+      listJobs:
+        description: 'Lists scheduled jobs matching optional filter criteria'
+        business-context: 'Enables job monitoring and management with flexible filtering and pagination'
+
+        parameters:
+          - name: 'filter'
+            type: 'IJobFilter'
+            description: 'Optional filter criteria for job selection'
+            optional: true
+
+        returns:
+          type: 'Promise<IJobQueryResult>'
+          description: 'Promise resolving to filtered and paginated job results'
+
+        examples:
+          - id: 'list-pending-jobs'
+            code: |
+              // Get all pending jobs
+              const pendingJobs = await scheduler.listJobs({
+                status: JobStatus.PENDING
+              });
+              console.log(`Found ${pendingJobs.count} pending jobs`);
+
+          - id: 'list-with-pagination'
+            code: |
+              // Get jobs with pagination
+              const results = await scheduler.listJobs({
+                status: [JobStatus.PENDING, JobStatus.RUNNING],
+                limit: 10,
+                offset: 0,
+                sortBy: 'scheduledAt',
+                sortDirection: 'asc'
+              });
+              
+              results.jobs.forEach(job => {
+                console.log(`${job.id}: ${job.event.type} at ${job.scheduledAt}`);
+              });
+
+          - id: 'filter-by-time-range'
+            code: |
+              // Get jobs scheduled in next hour
+              const nextHour = new Date(Date.now() + 60 * 60 * 1000);
+              const upcomingJobs = await scheduler.listJobs({
+                scheduledAfter: new Date(),
+                scheduledBefore: nextHour,
+                eventType: 'OrderReminderEvent'
+              });
+
+        custom-tags:
+          filtering: 'Supports complex job filtering'
+          pagination: 'Built-in pagination support'
+
+      # Private/Protected methods would be documented here if they were in the public API
+      scheduleTimer:
+        description: 'Creates and manages JavaScript timer for job execution'
+        business-context: 'Internal method that sets up setTimeout for delayed job execution'
+
+        parameters:
+          - name: 'job'
+            type: 'IScheduledJob'
+            description: 'The job to schedule for timer-based execution'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'internal-usage'
+            code: |
+              // Internal usage during job scheduling
+              private scheduleTimer(job: IScheduledJob): void {
+                const delay = job.scheduledAt.getTime() - Date.now();
+                const timer = setTimeout(() => this.executeJob(job), Math.max(0, delay));
+                this.timers.set(job.id, timer);
+              }
+
+        custom-tags:
+          private: 'Internal implementation method'
+          timer-management: 'Creates and tracks timers'
+
+      clearTimer:
+        description: 'Clears and removes a timer for a specific job'
+        business-context: 'Internal cleanup method for timer management'
+
+        parameters:
+          - name: 'jobId'
+            type: 'string'
+            description: 'The job ID whose timer should be cleared'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          private: 'Internal implementation method'
+          cleanup: 'Timer cleanup functionality'
+
+      executeJob:
+        description: 'Executes a scheduled job at its designated time'
+        business-context: 'Internal method that processes jobs when their timers fire'
+
+        parameters:
+          - name: 'job'
+            type: 'IScheduledJob'
+            description: 'The job to execute'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when job execution completes'
+
+        custom-tags:
+          private: 'Internal implementation method'
+          execution: 'Core job execution logic'
+
+      doStart:
+        description: 'Implementation of scheduler startup logic'
+        business-context: 'Starts all pending jobs and their associated timers'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when startup completes'
+
+        custom-tags:
+          protected: 'Protected template method implementation'
+          lifecycle: 'Startup implementation'
+
+      doStop:
+        description: 'Implementation of scheduler shutdown logic'
+        business-context: 'Clears all active timers and stops job processing'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when shutdown completes'
+
+        custom-tags:
+          protected: 'Protected template method implementation'
+          lifecycle: 'Shutdown implementation'
+          cleanup: 'Clears all timers and resets state'
+
+      doProcessJob:
+        description: 'Template method implementation for job processing'
+        business-context: 'Processes individual jobs with proper state management'
+
+        parameters:
+          - name: 'job'
+            type: 'IScheduledJob'
+            description: 'The job to process'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when job processing completes'
+
+        custom-tags:
+          protected: 'Protected template method implementation'
+          processing: 'Core job processing logic'

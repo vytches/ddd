@@ -1,42 +1,39 @@
-# Discovery Index - NestJS Auto-Discovery Service Exports
+# NestJS Discovery Index - Universal Enhanced Metadata System V2
 
 # === FILE METADATA ===
 file-name: 'index'
-title: 'NestJS Discovery Package Exports'
-description: 'Auto-discovery service exports for VytchesDDD components'
-business-context: 'Provides unified access to auto-discovery functionality'
+title: 'NestJS Discovery Module'
+description: 'Service discovery and metadata scanning for VytchesDDD decorators'
+business-context: 'Enables automatic discovery of DDD components in NestJS applications'
 
 # === HIERARCHY ===
 hierarchy:
   strategy: 'merge'
   scope: 'file'
 
-# === FILE-LEVEL METADATA ===
+# === FILE-DOC ===
 file-doc:
-  description: 'Central export hub for VytchesDDD component auto-discovery services'
-  business-context: 'Simplifies imports for automatic handler and service registration'
+  description: 'Discovery module exports for automatic component registration'
+  business-context: 'Provides automatic discovery and registration of domain services, handlers, and aggregates'
   
   formats:
     jsdoc:
-      description: 'Auto-discovery service exports and utilities'
+      description: 'Discovery service exports'
     cli:
       description: |
-        ## NestJS Discovery Exports
-        
-        Auto-discovery functionality including:
-        - Component discovery services
-        - Handler registration utilities
-        - Automatic service scanning
+        ## Discovery Module
+        Automatic discovery and registration of DDD components in NestJS
 
   custom-tags:
     since: '1.0.0'
-    stability: 'stable'
-    category: 'auto-discovery'
-    framework: 'nestjs'
-    
-# === EXPORTS DOCUMENTATION ===
+    module: 'discovery'
+
+# === EXPORTS ===
 exports:
-  VytchesDiscoveryService:
-    description: 'Service for automatic discovery and registration of VytchesDDD components'
-    business-context: 'Scans application for handlers and services, automatically registering them with appropriate containers'
-    source: './vytches-discovery.service'
+  - name: 'VytchesDiscoveryService'
+    from: './vytches-discovery.service'
+    description: 'Service for discovering VytchesDDD decorated components'
+    business-context: 'Scans application modules for DDD decorators and registers components'
+  - name: 'DiscoveryPlugin'
+    from: './discovery-plugin.interface'
+    description: 'Plugin interface for custom discovery strategies'
