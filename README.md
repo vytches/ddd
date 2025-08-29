@@ -206,6 +206,59 @@ npm install @vytches/ddd
 npm install @vytches/ddd-core
 ```
 
+### NestJS Integration (NEW - Simplified!)
+
+```typescript
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { VytchesDDDModule } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus, IEventBus } from '@vytches/ddd-cqrs';
+import { EnhancedCommandBus, EnhancedQueryBus } from '@vytches/ddd-cqrs';
+import { UnifiedEventBus } from '@vytches/ddd-events';
+
+@Module({
+  imports: [
+    VytchesDDDModule.register({
+      providers: [
+        // Define your bus implementations
+        { provide: ICommandBus, useClass: EnhancedCommandBus },
+        { provide: IQueryBus, useClass: EnhancedQueryBus },
+        { provide: IEventBus, useClass: UnifiedEventBus },
+      ],
+      isGlobal: true, // Available everywhere
+    }),
+  ],
+})
+export class AppModule {}
+
+// order.module.ts - Domain Module
+@Module({
+  providers: [
+    // Just list your handlers - they're auto-registered!
+    CreateOrderHandler,
+    GetOrderHandler,
+    OrderProcessManager,
+    OrderService,
+  ],
+})
+export class OrderModule {
+  // No onModuleInit needed - auto-registration handles everything!
+}
+
+// order.service.ts - Use abstract tokens directly
+@Injectable()
+export class OrderService {
+  constructor(
+    @Inject(ICommandBus) private commandBus: ICommandBus,
+    @Inject(IQueryBus) private queryBus: IQueryBus
+  ) {}
+
+  async createOrder(data: CreateOrderData) {
+    return this.commandBus.execute(new CreateOrderCommand(data));
+  }
+}
+```
+
 ### Basic Example: E-Commerce Order Domain
 
 ```typescript

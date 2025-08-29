@@ -47,20 +47,29 @@ npm install @nestjs/common @nestjs/core reflect-metadata rxjs
 
 ## Quick Start
 
-### 1. Basic Setup
+### 1. Setup with `register()` Method
 
 ```typescript
 // app.module.ts
 import { Module } from '@nestjs/common';
 import { VytchesDDDModule } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus, IEventBus } from '@vytches/ddd-cqrs';
+import { EnhancedCommandBus, EnhancedQueryBus } from '@vytches/ddd-cqrs';
+import { UnifiedEventBus } from '@vytches/ddd-events';
 
 @Module({
   imports: [
-    VytchesDDDModule.forRoot({
-      autoDiscovery: true,
-      cqrs: {
-        autoRegisterHandlers: true,
-      },
+    VytchesDDDModule.register({
+      providers: [
+        // Define your bus implementations
+        { provide: ICommandBus, useClass: EnhancedCommandBus },
+        { provide: IQueryBus, useClass: EnhancedQueryBus },
+        { provide: IEventBus, useClass: UnifiedEventBus },
+      ],
+      autoRegisterHandlers: true, // Default: true
+      autoRegisterProcessManagers: true, // Default: true
+      autoRegisterSagas: true, // Default: true
+      isGlobal: true, // Make available everywhere
     }),
   ],
 })
@@ -111,127 +120,120 @@ export class UserController {
 }
 ```
 
-## Configuration
+## Configuration with `register()` Method
 
-### forRoot() Configuration
-
-```typescript
-VytchesDDDModule.forRoot({
-  // Auto-discovery configuration
-  autoDiscovery: {
-    enabled: true,
-    patterns: ['**/*.service.ts', '**/*.handler.ts'],
-    contexts: ['UserManagement', 'OrderProcessing'],
-    exclude: ['**/*.spec.ts', '**/*.test.ts'],
-  },
-
-  // CQRS configuration
-  cqrs: {
-    autoRegisterHandlers: true,
-    middleware: [
-      {
-        class: LoggingMiddleware,
-        options: { logLevel: 'debug' },
-      },
-      {
-        class: ValidationMiddleware,
-        contexts: ['UserManagement'],
-      },
-    ],
-    commandBus: {
-      timeout: 30000,
-      retries: 3,
-    },
-    queryBus: {
-      timeout: 15000,
-      cache: true,
-    },
-  },
-
-  // Event system configuration
-  events: {
-    eventStore: {
-      type: 'memory', // 'memory' | 'postgresql' | 'mongodb'
-      config: {},
-    },
-    eventBus: {
-      type: 'unified',
-      config: {},
-    },
-    replay: false,
-  },
-
-  // Messaging configuration
-  messaging: {
-    provider: 'memory', // 'redis' | 'rabbitmq' | 'kafka' | 'memory'
-    config: {},
-    sagas: true,
-  },
-
-  // Container configuration
-  container: {
-    strict: true,
-    debug: false,
-  },
-});
-```
-
-### forRootAsync() Configuration
-
-For dynamic configuration with dependency injection:
+### Basic Setup (Most Common)
 
 ```typescript
-// config.service.ts
-import { Injectable } from '@nestjs/common';
-import {
-  VytchesDDDOptionsFactory,
-  VytchesDDDOptions,
-} from '@vytches/ddd-nestjs';
-
-@Injectable()
-export class VytchesDDDConfigService implements VytchesDDDOptionsFactory {
-  createVytchesDDDOptions(): VytchesDDDOptions {
-    return {
-      autoDiscovery: process.env.NODE_ENV !== 'production',
-      cqrs: {
-        autoRegisterHandlers: true,
-        commandBus: {
-          timeout: parseInt(process.env.COMMAND_TIMEOUT || '30000'),
-        },
-      },
-    };
-  }
-}
-
 // app.module.ts
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    VytchesDDDModule.forRootAsync({
-      imports: [ConfigModule],
-      useClass: VytchesDDDConfigService,
+    VytchesDDDModule.register({
+      providers: [
+        { provide: ICommandBus, useClass: EnhancedCommandBus },
+        { provide: IQueryBus, useClass: EnhancedQueryBus },
+        { provide: IEventBus, useClass: UnifiedEventBus },
+      ],
+      isGlobal: true, // Available everywhere
     }),
+  ],
+})
+export class AppModule {}
+
+// Additional infrastructure in AppModule
+@Module({
+  imports: [
+    VytchesDDDModule.register({
+      /* ... */
+    }),
+  ],
+  providers: [
+    // Optional: Add EventStore, Saga, etc. as needed
+    { provide: IEventStore, useClass: PostgresEventStore },
+    { provide: ISagaOrchestrator, useClass: SagaOrchestrator },
   ],
 })
 export class AppModule {}
 ```
 
-### forFeature() for Module Organization
+### Using in Domain Modules
 
 ```typescript
-// user.module.ts
+// order.module.ts
 @Module({
-  imports: [
-    VytchesDDDModule.forFeature({
-      services: [UserService, UserValidationService],
-      handlers: [CreateUserHandler, GetUserHandler],
-      eventHandlers: [UserCreatedHandler],
-      context: 'UserManagement',
-    }),
+  providers: [
+    // Just list your handlers - they're auto-registered!
+    CreateOrderHandler,
+    UpdateOrderHandler,
+    GetOrderHandler,
+
+    // Process Managers
+    OrderProcessManager,
+
+    // Sagas
+    OrderCompensationSaga,
+
+    // Regular services
+    OrderService,
+    OrderRepository,
   ],
-  controllers: [UserController],
 })
-export class UserModule {}
+export class OrderModule {
+  // No onModuleInit needed - auto-registration handles everything!
+}
+```
+
+### Service Usage with Abstract Tokens
+
+```typescript
+@Injectable()
+export class OrderService {
+  constructor(
+    // Use abstract tokens directly!
+    @Inject(ICommandBus) private commandBus: ICommandBus,
+    @Inject(IQueryBus) private queryBus: IQueryBus,
+    @Inject(IEventBus) private eventBus: IEventBus
+  ) {}
+
+  async createOrder(data: CreateOrderData) {
+    return this.commandBus.execute(new CreateOrderCommand(data));
+  }
+}
+```
+
+### Custom Module Wrapper
+
+```typescript
+// shared/ddd.module.ts
+@Global()
+@Module({})
+export class DDDModule {
+  static forRoot(): DynamicModule {
+    return {
+      module: DDDModule,
+      imports: [
+        VytchesDDDModule.register({
+          providers: [
+            { provide: ICommandBus, useClass: EnhancedCommandBus },
+            { provide: IQueryBus, useClass: EnhancedQueryBus },
+            { provide: IEventBus, useClass: UnifiedEventBus },
+          ],
+          autoRegisterHandlers: true,
+          autoRegisterProcessManagers: true,
+          autoRegisterSagas: true,
+          isGlobal: true,
+        }),
+      ],
+      exports: [VytchesDDDModule],
+    };
+  }
+}
+
+// Then in AppModule
+@Module({
+  imports: [DDDModule.forRoot()],
+})
+export class AppModule {}
 ```
 
 ## Integration Patterns
@@ -504,24 +506,15 @@ export class UserController {
 
 #### Static Methods
 
-- **`forRoot(options?: VytchesDDDOptions): DynamicModule`**
+- **`register(options: RegisterOptions): DynamicModule`**
 
-  - Configure the module for the root application
-  - Sets up global VytchesDDD integration
-
-- **`forRootAsync(options: VytchesDDDAsyncOptions): DynamicModule`**
-
-  - Configure the module asynchronously with dependency injection
-  - Supports factory functions and configuration services
-
-- **`forFeature(options: VytchesDDDFeatureOptions): DynamicModule`**
-
-  - Configure feature-specific services and handlers
-  - Used in feature modules for organization
+  - Configure the module with explicit provider configuration
+  - Supports auto-registration of handlers, process managers, and sagas
+  - Makes the module globally available with `isGlobal: true`
 
 - **`forTest(options?: VytchesDDDTestOptions): DynamicModule`**
   - Configure the module for testing
-  - Disables auto-discovery and allows mocking
+  - Allows mocking and debugging
 
 ### NestJSContainerAdapter
 
@@ -549,32 +542,21 @@ export class UserController {
 ### Configuration Interfaces
 
 ```typescript
-interface VytchesDDDOptions {
-  autoDiscovery?: boolean | AutoDiscoveryOptions;
-  cqrs?: CQRSOptions;
-  events?: EventOptions;
-  messaging?: MessagingOptions;
-  container?: ContainerOptions;
+interface RegisterOptions {
+  providers: any[]; // Array of provider configurations
+  autoRegisterHandlers?: boolean; // Auto-register @CommandHandler/@QueryHandler (default: true)
+  autoRegisterProcessManagers?: boolean; // Auto-register @ProcessManager (default: true)
+  autoRegisterSagas?: boolean; // Auto-register @Saga (default: true)
+  autoRegisterProjections?: boolean; // Auto-register projections (default: false)
+  isGlobal?: boolean; // Make module globally available
 }
 
-interface AutoDiscoveryOptions {
-  enabled: boolean;
-  patterns?: string[];
-  contexts?: string[];
-  exclude?: string[];
-}
-
-interface CQRSOptions {
-  autoRegisterHandlers?: boolean;
-  middleware?: MiddlewareConfig[];
-  commandBus?: {
-    timeout?: number;
-    retries?: number;
-  };
-  queryBus?: {
-    timeout?: number;
-    cache?: boolean;
-  };
+// Provider configuration follows NestJS standard pattern
+interface ProviderConfig {
+  provide: any; // Token (can be abstract class, string, symbol)
+  useClass?: any; // Implementation class
+  useValue?: any; // Direct value
+  useFactory?: Function; // Factory function
 }
 ```
 
@@ -607,12 +589,18 @@ export class UserController {
 ```typescript
 // user-management.module.ts
 @Module({
-  imports: [
-    VytchesDDDModule.forFeature({
-      services: [UserService, UserValidationService],
-      handlers: [CreateUserHandler, GetUserHandler],
-      context: 'UserManagement',
-    }),
+  providers: [
+    // Domain services
+    UserService,
+    UserValidationService,
+
+    // Handlers
+    CreateUserHandler,
+    GetUserHandler,
+    UpdateUserHandler,
+
+    // Event handlers
+    UserCreatedEventHandler,
   ],
 })
 export class UserManagementModule {}
@@ -688,25 +676,33 @@ constructor() {
 constructor(private service: MyService) {}
 ```
 
-#### 3. Auto-Discovery Not Working
+#### 3. Handlers Not Being Registered
 
-**Problem**: Services not being discovered automatically
+**Problem**: Handlers not being registered automatically
 
 **Solutions**:
 
-- Check file patterns in configuration
-- Ensure decorators are applied correctly
-- Verify auto-discovery is enabled
-- Check exclude patterns
+- Ensure handlers are added to module providers
+- Check that auto-registration flags are enabled
+- Verify decorators are applied correctly
 
 ```typescript
-VytchesDDDModule.forRoot({
-  autoDiscovery: {
-    enabled: true,
-    patterns: ['**/*.service.ts', '**/*.handler.ts'], // ✅ Correct patterns
-    exclude: ['**/*.spec.ts'], // ✅ Exclude test files
-  },
-});
+@Module({
+  providers: [
+    // ✅ Add handlers to providers
+    CreateOrderHandler,
+    GetOrderHandler,
+  ],
+  imports: [
+    VytchesDDDModule.register({
+      providers: [
+        /* bus providers */
+      ],
+      autoRegisterHandlers: true, // ✅ Enable auto-registration
+    }),
+  ],
+})
+export class OrderModule {}
 ```
 
 #### 4. Circular Dependencies
@@ -729,11 +725,17 @@ export class UserService {
 Enable debug mode for troubleshooting:
 
 ```typescript
-VytchesDDDModule.forRoot({
-  container: {
-    debug: true, // ✅ Enable debug logging
-  },
-});
+// Use forTest() for debugging
+import { VytchesDDDModule } from '@vytches/ddd-nestjs';
+
+@Module({
+  imports: [
+    VytchesDDDModule.forTest({
+      debug: true, // ✅ Enable debug logging
+    }),
+  ],
+})
+export class TestModule {}
 ```
 
 ## Performance Considerations
@@ -754,38 +756,31 @@ export class UserService {}
 export class UserSessionService {}
 ```
 
-### 2. CQRS Caching
+### 2. Handler Registration
 
-Enable query caching for better performance:
+Auto-registration improves performance by reducing boilerplate:
 
 ```typescript
-VytchesDDDModule.forRoot({
-  cqrs: {
-    queryBus: {
-      cache: true, // ✅ Enable query caching
-      timeout: 15000,
-    },
-  },
+VytchesDDDModule.register({
+  providers: [
+    /* ... */
+  ],
+  autoRegisterHandlers: true, // ✅ Automatic handler registration
+  autoRegisterProcessManagers: true, // ✅ Automatic process manager registration
+  autoRegisterSagas: true, // ✅ Automatic saga registration
 });
 ```
 
-### 3. Auto-Discovery Optimization
+### 3. Global Module Configuration
 
-Optimize auto-discovery patterns:
+Make the module globally available to avoid reimporting:
 
 ```typescript
-VytchesDDDModule.forRoot({
-  autoDiscovery: {
-    patterns: [
-      'src/**/*.service.ts', // ✅ Specific patterns
-      'src/**/*.handler.ts',
-    ],
-    exclude: [
-      '**/*.spec.ts',
-      '**/*.test.ts',
-      'node_modules/**', // ✅ Exclude unnecessary files
-    ],
-  },
+VytchesDDDModule.register({
+  providers: [
+    /* ... */
+  ],
+  isGlobal: true, // ✅ Available everywhere without reimporting
 });
 ```
 
