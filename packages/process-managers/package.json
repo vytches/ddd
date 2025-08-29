@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-process-managers",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Process managers for orchestrating complex business workflows",
   "type": "module",
   "main": "./dist/index.cjs",
