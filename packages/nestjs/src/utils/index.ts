@@ -40,3 +40,6 @@ export function getMetadata(key: string | symbol, target: any): any {
 export function setMetadata(key: string | symbol, value: any, target: any): void {
   Reflect.defineMetadata(key, value, target);
 }
+
+// Export bulk provider utilities
+export * from './bulk-provider.helper';

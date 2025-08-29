@@ -11,11 +11,13 @@
 ## Business Impact
 
 **Revenue Risk**: HIGH - Blocking enterprise NestJS adoption
+
 - Affects 40% of potential enterprise customers using NestJS
 - Core advertised feature (auto-discovery) not working
 - User experience degradation forcing manual workarounds
 
 **Strategic Alignment**: CRITICAL
+
 - NestJS is primary enterprise framework target
 - Auto-discovery is key differentiator vs competitors
 - Integration reliability affects library credibility
@@ -24,7 +26,8 @@
 
 ### Root Cause Analysis
 
-The VytchesDDDModule.forRoot() auto-discovery system fails to properly register CQRS handlers that use the dual decorator pattern:
+The VytchesDDDModule.forRoot() auto-discovery system fails to properly register
+CQRS handlers that use the dual decorator pattern:
 
 ```typescript
 // FAILING PATTERN - Not discovered
@@ -47,20 +50,27 @@ VytchesDDDModule.forRoot({
 
 ### Discovery Service Gaps
 
-1. **Metadata Extraction**: Discovery service doesn't properly extract CQRS metadata from dual decorators
-2. **Registration Sync**: Handler registration doesn't sync between NestJS DI container and VytchesDDD service locator
-3. **Inheritance Handling**: BaseCommandHandler inheritance pattern not properly detected
+1. **Metadata Extraction**: Discovery service doesn't properly extract CQRS
+   metadata from dual decorators
+2. **Registration Sync**: Handler registration doesn't sync between NestJS DI
+   container and VytchesDDD service locator
+3. **Inheritance Handling**: BaseCommandHandler inheritance pattern not properly
+   detected
 
 ### Files Requiring Modification
 
 **Primary Files**:
-- `packages/nestjs/src/discovery/vytches-discovery.service.ts` - Main discovery service
-- `packages/nestjs/src/discovery/cqrs-handler-discovery.service.ts` - CQRS handler discovery
+
+- `packages/nestjs/src/discovery/vytches-discovery.service.ts` - Main discovery
+  service
+- `packages/nestjs/src/discovery/cqrs-handler-discovery.service.ts` - CQRS
+  handler discovery
 - `packages/nestjs/src/vytches-ddd.module.ts` - Module configuration
 - `packages/nestjs/src/providers/command-bus.provider.ts` - Command bus provider
 - `packages/nestjs/src/providers/query-bus.provider.ts` - Query bus provider
 
 **Test Files**:
+
 - `packages/nestjs/tests/discovery/cqrs-handler-discovery.service.test.ts`
 - `packages/nestjs/tests/integration/auto-discovery.test.ts`
 
@@ -69,11 +79,13 @@ VytchesDDDModule.forRoot({
 ### Acceptance Criteria
 
 1. **Dual Decorator Support**
+
    - [ ] Handlers with @Injectable() + @CommandHandler() are discovered
-   - [ ] Handlers with @Injectable() + @QueryHandler() are discovered  
+   - [ ] Handlers with @Injectable() + @QueryHandler() are discovered
    - [ ] Handler registration works with BaseCommandHandler inheritance
 
 2. **Auto-Discovery Integration**
+
    - [ ] VytchesDDDModule.forRoot({ autoDiscovery: { enabled: true } }) works
    - [ ] Handlers are registered in both NestJS and VytchesDDD containers
    - [ ] No manual registration required for standard patterns
@@ -86,6 +98,7 @@ VytchesDDDModule.forRoot({
 ### Technical Requirements
 
 1. **Discovery Service Enhancement**
+
    ```typescript
    // Must detect this pattern:
    @Injectable()
@@ -94,10 +107,11 @@ VytchesDDDModule.forRoot({
    ```
 
 2. **Container Synchronization**
+
    ```typescript
    // Both containers must have the handler:
-   nestjsContainer.get(SomeHandler) // Works
-   VytchesDDD.resolve<SomeHandler>('someHandler') // Works
+   nestjsContainer.get(SomeHandler); // Works
+   VytchesDDD.resolve<SomeHandler>('someHandler'); // Works
    ```
 
 3. **Metadata Processing**
@@ -110,6 +124,7 @@ VytchesDDDModule.forRoot({
 ### Phase 1: Discovery Service Fix (2 hours)
 
 1. **Enhance Handler Detection in vytches-discovery.service.ts**
+
    - Fix metadata extraction for dual decorators
    - Add proper CQRS metadata constants check
    - Support BaseCommandHandler inheritance pattern
@@ -122,6 +137,7 @@ VytchesDDDModule.forRoot({
 ### Phase 2: Container Integration (2 hours)
 
 1. **Sync Registration**
+
    - Register handlers in VytchesDDD container
    - Maintain NestJS DI registration
    - Create bridge between containers
@@ -134,6 +150,7 @@ VytchesDDDModule.forRoot({
 ### Phase 3: Validation & Testing (2 hours)
 
 1. **Error Handling**
+
    - Clear error messages for discovery failures
    - Validation for handler patterns
    - Debug logging for discovery process
@@ -146,6 +163,7 @@ VytchesDDDModule.forRoot({
 ## Temporary Workarounds (Currently Available)
 
 ### Option 1: Manual Registration with forFeature()
+
 ```typescript
 @Module({
   imports: [
@@ -160,9 +178,13 @@ export class AppModule {}
 ```
 
 ### Option 2: Direct CommandBus Registration
+
 ```typescript
 @Injectable()
-export class RegisterUserHandler extends BaseCommandHandler<RegisterUserCommand, void> {
+export class RegisterUserHandler extends BaseCommandHandler<
+  RegisterUserCommand,
+  void
+> {
   // Implementation without @CommandHandler decorator
 }
 
@@ -186,16 +208,18 @@ export class UserModule {}
 ## Verification Steps
 
 1. **Manual Verification**
+
    ```bash
    # Test dual decorator handler registration
    cd packages/nestjs
    pnpm test -- --grep "dual decorator"
-   
+
    # Test auto-discovery integration
    pnpm test -- --grep "auto-discovery"
    ```
 
 2. **Integration Test**
+
    ```typescript
    // Verify this works:
    @Injectable()
@@ -203,12 +227,12 @@ export class UserModule {}
    class TestHandler extends BaseCommandHandler<TestCommand, void> {
      async execute(command: TestCommand): Promise<void> {}
    }
-   
+
    // In module:
-   VytchesDDDModule.forRoot({ autoDiscovery: { enabled: true } })
-   
+   VytchesDDDModule.forRoot({ autoDiscovery: { enabled: true } });
+
    // Should work:
-   await commandBus.execute(new TestCommand())
+   await commandBus.execute(new TestCommand());
    ```
 
 ## Progress Tracking
@@ -242,9 +266,13 @@ export class UserModule {}
 
 ## Notes
 
-This is a critical blocker for NestJS enterprise adoption. The fix should be straightforward but requires careful testing to ensure both manual and auto-discovery patterns work correctly.
+This is a critical blocker for NestJS enterprise adoption. The fix should be
+straightforward but requires careful testing to ensure both manual and
+auto-discovery patterns work correctly.
 
-The discovery service already has partial implementation (lines 149-161 in vytches-discovery.service.ts) but needs enhancement for proper dual decorator support.
+The discovery service already has partial implementation (lines 149-161 in
+vytches-discovery.service.ts) but needs enhancement for proper dual decorator
+support.
 
 ## Lessons Learned
 
