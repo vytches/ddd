@@ -1,16 +1,6 @@
 import type { DynamicModule, OnModuleInit, Type } from '@nestjs/common';
-import { Global, Inject, Module, Logger } from '@nestjs/common';
+import { Global, Inject, Logger, Module } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-// Lazy load CQRS to avoid module boundary issues
-let CommandBus: any;
-let QueryBus: any;
-try {
-  const cqrs = require('@vytches/ddd-cqrs');
-  CommandBus = cqrs.CommandBus;
-  QueryBus = cqrs.QueryBus;
-} catch {
-  // CQRS package not available
-}
 import { NestJSContainerAdapter } from './adapters/nestjs-container.adapter';
 import { VYTCHES_DDD_OPTIONS } from './constants';
 import { VytchesDiscoveryService } from './discovery/vytches-discovery.service';
@@ -22,6 +12,16 @@ import type {
   VytchesDDDOptions,
   VytchesDDDTestOptions,
 } from './types';
+// Lazy load CQRS to avoid module boundary issues
+let CommandBus: any;
+let QueryBus: any;
+try {
+  const cqrs = require('@vytches/ddd-cqrs');
+  CommandBus = cqrs.CommandBus;
+  QueryBus = cqrs.QueryBus;
+} catch {
+  // CQRS package not available
+}
 
 /**
  * Main VytchesDDD NestJS Module
@@ -57,6 +57,26 @@ export class VytchesDDDModule implements OnModuleInit {
           );
         }),
       ]);
+
+      // Auto-register handlers if enabled (default: true)
+      if ((this.options as any)?.autoRegisterHandlers !== false) {
+        await this.autoRegisterHandlers();
+      }
+
+      // Auto-register process managers if enabled (default: true)
+      if ((this.options as any)?.autoRegisterProcessManagers !== false) {
+        await this.autoRegisterProcessManagers();
+      }
+
+      // Auto-register sagas if enabled (default: true)
+      if ((this.options as any)?.autoRegisterSagas !== false) {
+        await this.autoRegisterSagas();
+      }
+
+      // Auto-register projections if enabled (default: false)
+      if ((this.options as any)?.autoRegisterProjections === true) {
+        await this.autoRegisterProjections();
+      }
 
       VytchesDDDModule.logger.log(
         `✓ VytchesDDD initialized successfully in ${Date.now() - startTime}ms`
@@ -328,7 +348,96 @@ export class VytchesDDDModule implements OnModuleInit {
   }
 
   /**
+   * Modern register method - NestJS style configuration
+   *
+   * @example Minimal setup (80% use cases)
+   * ```typescript
+   * VytchesDDDModule.register({
+   *   providers: [
+   *     { provide: ICommandBus, useClass: EnhancedCommandBus },
+   *     { provide: IQueryBus, useClass: EnhancedQueryBus },
+   *     { provide: IEventBus, useClass: UnifiedEventBus },
+   *   ],
+   *   isGlobal: true,
+   * })
+   * ```
+   *
+   * @example With additional infrastructure
+   * ```typescript
+   * VytchesDDDModule.register({
+   *   providers: [
+   *     // Buses
+   *     { provide: ICommandBus, useClass: EnhancedCommandBus },
+   *     { provide: IQueryBus, useClass: EnhancedQueryBus },
+   *     { provide: IEventBus, useClass: UnifiedEventBus },
+   *   ],
+   *   autoRegisterHandlers: true,        // Default: true
+   *   autoRegisterProcessManagers: true, // Default: true
+   *   autoRegisterSagas: true,           // Default: true
+   *   isGlobal: true,
+   * })
+   * ```
+   */
+  static register(options: {
+    providers: any[];
+    autoRegisterHandlers?: boolean;
+    autoRegisterProcessManagers?: boolean;
+    autoRegisterSagas?: boolean;
+    autoRegisterProjections?: boolean;
+    isGlobal?: boolean;
+  }): DynamicModule {
+    // Create adapter instance
+    this.adapter = new NestJSContainerAdapter();
+
+    // Default auto-registration to true for better DX
+    const config = {
+      autoRegisterHandlers: options.autoRegisterHandlers ?? true,
+      autoRegisterProcessManagers: options.autoRegisterProcessManagers ?? true,
+      autoRegisterSagas: options.autoRegisterSagas ?? true,
+      autoRegisterProjections: options.autoRegisterProjections ?? false,
+      isGlobal: options.isGlobal ?? false,
+    };
+
+    // Build providers list
+    const providers = [
+      {
+        provide: VYTCHES_DDD_OPTIONS,
+        useValue: config,
+      },
+      {
+        provide: NestJSContainerAdapter,
+        useValue: this.adapter,
+      },
+      VytchesDiscoveryService,
+      // User-provided providers
+      ...options.providers,
+    ];
+
+    // Extract tokens from providers for exports
+    const exports: any[] = [NestJSContainerAdapter, VYTCHES_DDD_OPTIONS, VytchesDiscoveryService];
+
+    // Add all provided tokens to exports
+    options.providers.forEach(provider => {
+      if (provider.provide) {
+        exports.push(provider.provide);
+      } else if (typeof provider === 'function') {
+        exports.push(provider);
+      }
+    });
+
+    const module = {
+      module: VytchesDDDModule,
+      providers,
+      exports,
+      global: config.isGlobal,
+    };
+
+    return module;
+  }
+
+  /**
    * Configure module for root with progressive complexity
+   * @deprecated Use register() instead for better type safety and clarity
    *
    * @example Zero-config (simplest)
    * ```typescript
@@ -1139,6 +1248,130 @@ export class VytchesDDDModule implements OnModuleInit {
     } catch (error) {
       VytchesDDDModule.logger.debug('Could not get UnifiedEventBus:', error);
       // Continue without event bus
+    }
+  }
+
+  /**
+   * Auto-register command and query handlers
+   */
+  private async autoRegisterHandlers(): Promise<void> {
+    try {
+      const discoveryService = this.moduleRef.get(VytchesDiscoveryService, { strict: false });
+      if (!discoveryService) return;
+
+      // Get all providers from NestJS DI
+      const providers = discoveryService.getAllProviders();
+
+      // Get buses if available
+      const commandBus = this.moduleRef.get('ICommandBus', { strict: false });
+      const queryBus = this.moduleRef.get('IQueryBus', { strict: false });
+
+      for (const provider of providers) {
+        if (!provider || typeof provider !== 'object') continue;
+
+        // Check for command handler metadata
+        const commandMetadata = Reflect.getMetadata('handler:command', provider.constructor);
+        if (commandMetadata && commandBus) {
+          commandBus.register(commandMetadata, provider);
+          VytchesDDDModule.logger.debug(`Registered command handler for ${commandMetadata.name}`);
+        }
+
+        // Check for query handler metadata
+        const queryMetadata = Reflect.getMetadata('handler:query', provider.constructor);
+        if (queryMetadata && queryBus) {
+          queryBus.register(queryMetadata, provider);
+          VytchesDDDModule.logger.debug(`Registered query handler for ${queryMetadata.name}`);
+        }
+      }
+    } catch (error) {
+      VytchesDDDModule.logger.warn('Could not auto-register handlers:', error);
+    }
+  }
+
+  /**
+   * Auto-register process managers
+   */
+  private async autoRegisterProcessManagers(): Promise<void> {
+    try {
+      const discoveryService = this.moduleRef.get(VytchesDiscoveryService, { strict: false });
+      if (!discoveryService) return;
+
+      const orchestrator = this.moduleRef.get('IProcessManagerOrchestrator', { strict: false });
+      if (!orchestrator) return;
+
+      const providers = discoveryService.getAllProviders();
+
+      for (const provider of providers) {
+        if (!provider || typeof provider !== 'object') continue;
+
+        const metadata = Reflect.getMetadata('process-manager', provider.constructor);
+        if (metadata) {
+          orchestrator.register(provider);
+          VytchesDDDModule.logger.debug(
+            `Registered process manager: ${metadata.name || provider.constructor.name}`
+          );
+        }
+      }
+    } catch (error) {
+      VytchesDDDModule.logger.warn('Could not auto-register process managers:', error);
+    }
+  }
+
+  /**
+   * Auto-register sagas
+   */
+  private async autoRegisterSagas(): Promise<void> {
+    try {
+      const discoveryService = this.moduleRef.get(VytchesDiscoveryService, { strict: false });
+      if (!discoveryService) return;
+
+      const orchestrator = this.moduleRef.get('ISagaOrchestrator', { strict: false });
+      if (!orchestrator) return;
+
+      const providers = discoveryService.getAllProviders();
+
+      for (const provider of providers) {
+        if (!provider || typeof provider !== 'object') continue;
+
+        const metadata = Reflect.getMetadata('saga', provider.constructor);
+        if (metadata) {
+          orchestrator.registerSaga(provider);
+          VytchesDDDModule.logger.debug(
+            `Registered saga: ${metadata.name || provider.constructor.name}`
+          );
+        }
+      }
+    } catch (error) {
+      VytchesDDDModule.logger.warn('Could not auto-register sagas:', error);
+    }
+  }
+
+  /**
+   * Auto-register projections
+   */
+  private async autoRegisterProjections(): Promise<void> {
+    try {
+      const discoveryService = this.moduleRef.get(VytchesDiscoveryService, { strict: false });
+      if (!discoveryService) return;
+
+      const engine = this.moduleRef.get('IProjectionEngine', { strict: false });
+      if (!engine) return;
+
+      const providers = discoveryService.getAllProviders();
+
+      for (const provider of providers) {
+        if (!provider || typeof provider !== 'object') continue;
+
+        const metadata = Reflect.getMetadata('projection', provider.constructor);
+        if (metadata) {
+          engine.registerProjection(provider);
+          VytchesDDDModule.logger.debug(
+            `Registered projection: ${metadata.name || provider.constructor.name}`
+          );
+        }
+      }
+    } catch (error) {
+      VytchesDDDModule.logger.warn('Could not auto-register projections:', error);
     }
   }
 

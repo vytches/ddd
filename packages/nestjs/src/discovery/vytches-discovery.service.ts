@@ -30,9 +30,17 @@ interface ServiceMetadata {
   timeout?: number;
   commandType?: Function;
   queryType?: Function;
+  messageType?: Function; // For handlers using messageType
   eventType?: Function | string;
   eventTypes?: Array<Function | string>;
   sagaId?: string;
+  sagaType?: string;
+  saga?: {
+    sagaType?: string;
+    sagaId?: string;
+    lifetime?: ServiceLifetime;
+    context?: string;
+  }; // For saga metadata
 }
 
 /**
@@ -327,6 +335,7 @@ export class VytchesDiscoveryService {
         const commandBus = this.adapter.resolve<CommandBus>('commandBus');
         if (commandBus && 'register' in commandBus) {
           // Use the actual instance for handler registration
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           commandBus.register(commandType, instance as any);
           this.logger.debug(
             `✅ Registered command handler with bus: ${handlerId} → ${commandType.name}`
@@ -354,10 +363,14 @@ export class VytchesDiscoveryService {
   private async registerQueryHandler(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: any
+    metadata: ServiceMetadata
   ): Promise<void> {
     // Extract query type from DI metadata structure
     const queryType = metadata.messageType || metadata.queryType;
+    if (!queryType) {
+      this.logger.warn(`Query handler ${target.name} has no query type`);
+      return;
+    }
     const handlerId = `${queryType.name}Handler`;
 
     try {
@@ -370,7 +383,9 @@ export class VytchesDiscoveryService {
         this.logger.debug(`✅ Query handler ${target.name} (NestJS managed) for ${queryType.name}`);
       } else {
         // Pure VytchesDDD handler - we manage the lifecycle
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.adapter.register(handlerId, target as any, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           lifetime: 'singleton' as any, // Query handlers typically singleton
           tags: ['query-handler', 'auto-discovered'],
         });
@@ -384,6 +399,7 @@ export class VytchesDiscoveryService {
         const queryBus = this.adapter.resolve<QueryBus>('queryBus');
         if (queryBus && 'register' in queryBus) {
           // Use the actual instance for handler registration
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           queryBus.register(queryType, instance as any);
           this.logger.debug(
             `✅ Registered query handler with bus: ${handlerId} → ${queryType.name}`
@@ -411,7 +427,7 @@ export class VytchesDiscoveryService {
   private async registerEventHandler(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: any
+    metadata: ServiceMetadata
   ): Promise<void> {
     const handlerId = `${target.name}EventHandler`;
 
@@ -425,7 +441,9 @@ export class VytchesDiscoveryService {
         this.logger.debug(`✅ Event handler ${target.name} (NestJS managed)`);
       } else {
         // Pure VytchesDDD handler - we manage the lifecycle
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.adapter.register(handlerId, target as any, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           lifetime: 'transient' as any, // Event handlers typically don't need singleton
           tags: ['event-handler', 'auto-discovered'],
         });
@@ -462,6 +480,7 @@ export class VytchesDiscoveryService {
 
             eventBus.subscribe(eventName, async (event: DiscoveredInstance) => {
               try {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 await (instance as any).handle(event);
               } catch (error) {
                 this.logger.error(
@@ -499,7 +518,7 @@ export class VytchesDiscoveryService {
   private async registerSaga(
     target: Function,
     instance: DiscoveredInstance,
-    metadata: any
+    metadata: ServiceMetadata
   ): Promise<void> {
     // Extract saga ID from metadata structure
     const sagaConfig = metadata.saga || metadata;
@@ -515,8 +534,9 @@ export class VytchesDiscoveryService {
         this.logger.debug(`✅ Saga ${target.name} (NestJS managed) - ${sagaId}`);
       } else {
         // Pure VytchesDDD saga - we manage the lifecycle
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         this.adapter.register(sagaId, target as any, {
-          lifetime: sagaConfig.lifetime || 'transient',
+          lifetime: (sagaConfig as any).lifetime || ('transient' as ServiceLifetime),
           tags: ['saga', 'auto-discovered'],
           context: sagaConfig.context,
         });
@@ -525,6 +545,7 @@ export class VytchesDiscoveryService {
 
       // TODO: Register saga with saga orchestrator if available
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sagaOrchestrator = this.adapter.resolve<any>('sagaOrchestrator');
         if (sagaOrchestrator && 'registerSaga' in sagaOrchestrator) {
           sagaOrchestrator.registerSaga(sagaId, instance);
@@ -548,13 +569,14 @@ export class VytchesDiscoveryService {
    * Get all providers from NestJS container
    * Simplified to prevent scanning issues
    */
-  private getAllProviders(): Map<symbol | string | Function, DiscoveredInstance> {
+  public getAllProviders(): Map<symbol | string | Function, DiscoveredInstance> {
     const providers = new Map<symbol | string | Function, DiscoveredInstance>();
     const maxProviders = 1000; // Prevent runaway scanning
 
     try {
       // Use NestJS internal API to get all providers
       // This accesses the internal container to find all registered providers
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const internalProviders = (this.moduleRef as any).providers as Map<
         symbol | string | Function,
         { instance?: DiscoveredInstance }

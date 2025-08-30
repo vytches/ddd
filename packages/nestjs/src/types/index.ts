@@ -225,6 +225,11 @@ export interface MiddlewareConfig {
  */
 export interface EventOptions {
   /**
+   * Auto-register event handlers (Enhanced Module feature)
+   */
+  autoRegisterHandlers?: boolean;
+
+  /**
    * Event store configuration
    */
   eventStore?: {

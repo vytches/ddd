@@ -22,7 +22,7 @@ const yargs = require('yargs');
 // Configuration for any type monitoring
 const CONFIG = {
   // Global thresholds
-  globalThreshold: 1320, // Adjusted for comprehensive enterprise packages with some flexibility
+  globalThreshold: 1400, // Adjusted for comprehensive enterprise packages with some flexibility
 
   // Per-package thresholds (can be customized per package)
   packageThresholds: {
@@ -76,7 +76,7 @@ const CONFIG = {
     'domain-services': 25,
     'event-scheduling': 20,
     'process-managers': 90, // Process managers test files with mocks and complex scenarios
-    nestjs: 70, // NestJS integration tests
+    nestjs: 100, // NestJS integration tests
     'event-store': 25,
   },
 

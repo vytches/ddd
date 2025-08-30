@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-nestjs",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "description": "NestJS adapter for VytchesDDD - Enterprise Domain-Driven Design framework integration",
   "type": "module",
   "main": "./dist/index.cjs",
