@@ -476,7 +476,10 @@ export class EnhancedCommandBus extends ICommandBus {
     if (!handlerMetadata) {
       throw new Error(`No metadata for ${commandClass.name}`);
     }
-    return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
+    // Use handlerType (class constructor) for DI resolution, fallback to serviceId/name
+    return (
+      handlerMetadata.handlerType || handlerMetadata.serviceId || handlerMetadata.handlerType?.name
+    );
   }
 
   /**

@@ -536,7 +536,10 @@ export class EnhancedQueryBus extends IQueryBus {
     if (!handlerMetadata) {
       throw new Error(`No metadata for ${queryClass.name}`);
     }
-    return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
+    // Use handlerType (class constructor) for DI resolution, fallback to serviceId/name
+    return (
+      handlerMetadata.handlerType || handlerMetadata.serviceId || handlerMetadata.handlerType?.name
+    );
   }
 
   /**

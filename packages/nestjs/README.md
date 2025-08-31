@@ -1,31 +1,28 @@
 # @vytches/ddd-nestjs
 
-NestJS adapter for VytchesDDD - Enterprise Domain-Driven Design framework
-integration.
+Simple, clean NestJS integration for VytchesDDD - Enterprise Domain-Driven
+Design framework.
 
 [![npm version](https://badge.fury.io/js/@vytches%2Fddd-nestjs.svg)](https://www.npmjs.com/package/@vytches/ddd-nestjs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Overview
 
-The `@vytches/ddd-nestjs` package provides seamless integration between NestJS
-and VytchesDDD, enabling you to leverage Domain-Driven Design patterns in your
-NestJS applications with enterprise-grade features.
+The `@vytches/ddd-nestjs` package provides simple, clean integration between
+NestJS and VytchesDDD, following proven @nestjs/cqrs patterns for maximum
+familiarity and reliability.
 
 ### Key Features
 
-- **Bridge Pattern Integration**: Seamless connection between NestJS DI and
-  VytchesDDD service locator
-- **Auto-Discovery**: Automatic detection and registration of DDD decorators
-  (`@DomainService`, `@CommandHandler`, `@QueryHandler`)
-- **CQRS Integration**: Built-in Command and Query bus configuration with
-  middleware support
-- **Event System**: Unified event bus integration for domain and integration
-  events
-- **Testing Support**: Dedicated testing module with mocking capabilities
-- **Zero Configuration**: Works out of the box with sensible defaults
-- **Enterprise Ready**: Production-grade features with observability and
-  resilience patterns
+- **Simple & Clean**: ~250 lines of code following @nestjs/cqrs patterns
+- **Auto-Discovery**: Automatic handler registration using NestJS
+  DiscoveryService
+- **Custom Provider Tokens**: Support for interface tokens (IEventBus =>
+  UnifiedEventBus)
+- **CQRS Integration**: Command, Query, and Event bus support
+- **No Temporal Coupling**: Synchronous discovery during module initialization
+- **Testing Support**: Built-in forTesting() method with pre-configured buses
+- **Production Ready**: Battle-tested patterns from @nestjs/cqrs
 
 ## Installation
 
