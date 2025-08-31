@@ -93,7 +93,7 @@ classes:
                   return await externalAPI.call('create', external);
                 }
               );
-              
+
               if (result.isSuccess()) {
                 // result.value is typed as OrderResponse
                 console.log('Order ID:', result.value.orderId);
@@ -116,7 +116,7 @@ classes:
           - id: 'validation'
             code: |
               const validation = createOrderOp.validate(orderData);
-              
+
               if (!validation.isValid) {
                 console.error('Invalid input:', validation.errors);
                 return;

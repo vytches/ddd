@@ -76,16 +76,16 @@ functions:
   DomainService:
     description: 'Decorator factory function that marks classes as domain services for DI registration'
     business-context: 'Simplifies service registration and enables auto-discovery in enterprise applications'
-    
+
     parameters:
       - name: 'options'
         type: 'string | DomainServiceOptions | EnhancedDomainServiceOptions'
         description: 'Service configuration - can be service ID string or full options object'
-    
+
     returns:
       type: 'ClassDecorator'
       description: 'Class decorator function for applying metadata and DI registration'
-    
+
     examples:
       - id: 'basic-string'
         code: |
@@ -145,7 +145,7 @@ functions:
               // External API integration with caching
             }
           }
-    
+
     custom-tags:
       since: '1.0.0'
       decorator: 'Class decorator factory'
@@ -155,25 +155,25 @@ functions:
   getDomainServiceMetadata:
     description: 'Retrieves legacy domain service metadata from a decorated class'
     business-context: 'Provides access to basic service metadata for backward compatibility and inspection'
-    
+
     parameters:
       - name: 'target'
         type: 'unknown'
         description: 'The class/constructor to retrieve metadata from'
-    
+
     returns:
       type: 'DomainServiceOptions | undefined'
       description: 'Service metadata if found, undefined otherwise'
-    
+
     examples:
       - id: 'basic'
         code: |
           @DomainService('testService')
           class TestService extends IBaseDomainService {}
-          
+
           const metadata = getDomainServiceMetadata(TestService);
           console.log(metadata?.serviceId); // 'testService'
-    
+
     custom-tags:
       since: '1.0.0'
       metadata: 'Metadata retrieval utility'
@@ -182,16 +182,16 @@ functions:
   getDIDomainServiceMetadata:
     description: 'Retrieves enhanced DI metadata from a decorated domain service class'
     business-context: 'Provides access to enhanced DI metadata for auto-discovery and container registration'
-    
+
     parameters:
       - name: 'target'
         type: 'unknown'
         description: 'The class/constructor to retrieve DI metadata from'
-    
+
     returns:
       type: 'DIServiceMetadata | undefined'
       description: 'Enhanced DI metadata if found, undefined otherwise'
-    
+
     examples:
       - id: 'basic'
         code: |
@@ -201,11 +201,11 @@ functions:
             context: 'TestContext'
           })
           class TestService extends IBaseDomainService {}
-          
+
           const diMetadata = getDIDomainServiceMetadata(TestService);
           console.log(diMetadata?.lifetime); // ServiceLifetime.Singleton
           console.log(diMetadata?.context);  // 'TestContext'
-    
+
     custom-tags:
       since: '1.0.0'
       metadata: 'DI metadata retrieval utility'
@@ -214,27 +214,27 @@ functions:
   isDomainServicePendingDIRegistration:
     description: 'Checks if a domain service class is pending DI container registration'
     business-context: 'Used by auto-discovery systems to identify services that need to be registered in DI container'
-    
+
     parameters:
       - name: 'target'
         type: 'unknown'
         description: 'The class/constructor to check registration status'
-    
+
     returns:
       type: 'boolean'
       description: 'True if service is pending registration, false otherwise'
-    
+
     examples:
       - id: 'basic'
         code: |
           @DomainService('testService')
           class TestService extends IBaseDomainService {}
-          
+
           const isPending = isDomainServicePendingDIRegistration(TestService);
           console.log(isPending); // true (before DI registration)
-          
+
           // After VytchesDDD.configure() is called, this would return false
-    
+
     custom-tags:
       since: '1.0.0'
       utility: 'Registration status utility'

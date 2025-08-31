@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## EventReplayFactory
-            
+
             Factory pattern implementation for event replay creation.
             Supports basic replay, advanced replay with session control, and custom replay strategies.
 
@@ -92,7 +92,7 @@ classes:
           - id: 'basic-replay'
             code: |
               const basicReplay = replayFactory.createBasicReplay();
-              
+
               const result = await basicReplay.replayFromStream(
                 'order-stream',
                 async (event) => {
@@ -124,12 +124,12 @@ classes:
           - id: 'advanced-replay'
             code: |
               const advancedReplay = replayFactory.createAdvancedReplay();
-              
+
               const session = await advancedReplay.startReplaySession(
                 eventHandler,
                 { eventTypes: ['OrderCreated'] }
               );
-              
+
               // Monitor progress
               session.onProgress((progress) => {
                 console.log(`Progress: ${progress.percentComplete}%`);
@@ -140,7 +140,7 @@ classes:
               // Production data migration with control
               const replay = replayFactory.createAdvancedReplay();
               const session = await replay.startReplaySession(migrationHandler);
-              
+
               // Pause during peak hours
               if (isPeakHours()) {
                 await session.pause();
@@ -179,7 +179,7 @@ classes:
                   });
                 }
               }
-              
+
               const customReplay = replayFactory.createCustomReplay(CustomEventReplay);
 
           - id: 'specialized-processor'
@@ -192,7 +192,7 @@ classes:
                   });
                 }
               }
-              
+
               const analyticsReplay = replayFactory.createCustomReplay(AnalyticsEventReplay);
 
         custom-tags:
@@ -238,7 +238,7 @@ classes:
                 enableProgressReporting: true,
                 enableErrorRecovery: false
               });
-              
+
               // Type will be IAdvancedEventReplay due to session control requirement
 
           - id: 'simple-requirements'
@@ -248,7 +248,7 @@ classes:
                 enableProgressReporting: true,
                 enableErrorRecovery: true
               });
-              
+
               // Type will be IEventReplay (basic)
 
         custom-tags:
@@ -300,7 +300,7 @@ functions:
         code: |
           const eventStore = new InMemoryEventStore();
           const replay = createEventReplay(eventStore);
-          
+
           const result = await replay.replayFromStream('stream-123', eventHandler);
 
     custom-tags:
@@ -325,7 +325,7 @@ functions:
         code: |
           const eventStore = new PostgreSQLEventStore(config);
           const advancedReplay = createAdvancedEventReplay(eventStore);
-          
+
           const session = await advancedReplay.startReplaySession(
             eventHandler,
             { fromTimestamp: startDate }
@@ -335,11 +335,11 @@ functions:
         code: |
           // Production scenario with advanced features
           const replay = createAdvancedEventReplay(eventStore);
-          
+
           const estimatedDuration = await replay.estimateReplayDuration({
             eventTypes: ['OrderCreated', 'OrderUpdated']
           });
-          
+
           console.log(`Estimated duration: ${estimatedDuration / 1000} seconds`);
 
     custom-tags:

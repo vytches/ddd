@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for repository pattern contracts'
   business-context: 'Foundation for data persistence and aggregate storage patterns'
-  
+
   formats:
     jsdoc:
       description: 'Repository pattern contracts and interfaces'
     cli:
       description: |
         ## Repository Contracts Exports
-        
+
         Repository pattern contracts including:
         - Base repository interfaces
         - CQRS repository patterns
@@ -33,7 +33,7 @@ file-doc:
     since: '1.0.0'
     stability: 'stable'
     category: 'repository-pattern'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   repository-interfaces:

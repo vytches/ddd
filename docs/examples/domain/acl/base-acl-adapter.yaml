@@ -125,7 +125,7 @@ classes:
                 orderAggregate,
                 { timeout: 5000, retry: true }
               );
-              
+
               if (result.isSuccess()) {
                 console.log('Order created:', result.value);
               }

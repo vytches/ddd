@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## EventReplayEngine
-            
+
             Comprehensive event replay system for enterprise applications.
             Provides advanced filtering, batch processing, session control, and progress monitoring.
 
@@ -120,7 +120,7 @@ classes:
                   await processEvent(event);
                 }
               );
-              
+
               console.log(`Replayed ${result.eventsReplayed} events in ${result.duration}ms`);
 
           - id: 'filtered-stream-replay'
@@ -278,7 +278,7 @@ classes:
               const eventStream = replayEngine.getEventsAsIterable({
                 aggregateTypes: ['Order', 'Payment']
               });
-              
+
               for await (const event of eventStream) {
                 await analytics.processEvent(event);
               }
@@ -314,7 +314,7 @@ classes:
                 eventTypes: ['OrderCreated', 'OrderUpdated'],
                 fromTimestamp: lastMonth
               });
-              
+
               console.log(`Order events this month: ${orderEvents}`);
 
         custom-tags:
@@ -346,7 +346,7 @@ classes:
                 { eventTypes: ['OrderCreated'] },
                 { batchSize: 100, batchDelay: 50 }
               );
-              
+
               console.log(`Estimated duration: ${estimatedDuration / 1000} seconds`);
 
           - id: 'capacity-planning'
@@ -357,7 +357,7 @@ classes:
                 { batchSize: 200, batchDelay: 0 },
                 { batchSize: 100, batchDelay: 50 }
               ];
-              
+
               for (const config of scenarios) {
                 const duration = await replayEngine.estimateReplayDuration(filter, config);
                 console.log(`Config ${JSON.stringify(config)}: ${duration}ms`);
@@ -396,26 +396,26 @@ classes:
                 { eventTypes: ['OrderCreated'] },
                 { batchSize: 100, reportProgress: true }
               );
-              
+
               // Monitor progress
               session.onProgress((progress) => {
                 console.log(`Progress: ${progress.percentComplete}%`);
               });
-              
+
               // Pause after 50% completion
               if (session.progress.percentComplete > 50) {
                 await session.pause();
                 await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
                 await session.resume();
               }
-              
+
               // Wait for completion
               const result = await session.waitForCompletion();
 
           - id: 'error-handling-session'
             code: |
               const session = await replayEngine.startReplaySession(eventHandler);
-              
+
               // Handle errors during replay
               session.onError(async (error, event) => {
                 console.error(`Error processing event ${event.eventId}:`, error);
@@ -549,7 +549,7 @@ classes:
         cli:
           description: |
             ## ReplaySession
-            
+
             Advanced replay session with full lifecycle control.
             Supports pause, resume, cancel operations with progress monitoring.
 
@@ -695,7 +695,7 @@ classes:
             code: |
               const session = await replayEngine.startReplaySession(handler);
               const result = await session.waitForCompletion();
-              
+
               console.log(`Replay completed: ${result.eventsReplayed} events processed`);
 
         custom-tags:
@@ -725,7 +725,7 @@ classes:
                   console.log('Replay nearly complete');
                 }
               });
-              
+
               // Later: unsubscribe();
 
         custom-tags:
@@ -769,7 +769,7 @@ constants:
   DEFAULT_REPLAY_CONFIG:
     description: 'Default configuration values for event replay operations'
     business-context: 'Standard configuration providing balanced performance and reliability'
-    
+
     value:
       batchSize: 100
       batchDelay: 0
@@ -779,7 +779,7 @@ constants:
       eventTimeout: 30000
       reportProgress: true
       progressInterval: 1000
-    
+
     custom-tags:
       configuration: 'Default replay settings'
       performance: 'Balanced performance configuration'

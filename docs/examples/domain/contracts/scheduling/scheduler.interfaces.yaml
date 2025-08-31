@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Scheduler engine interfaces for job orchestration'
   business-context: 'Contracts for implementing scheduling engines that manage job execution, retries, and lifecycle'
-  
+
   formats:
     jsdoc:
       description: 'Scheduler contracts for job orchestration and management'
     cli:
       description: |
         ## Scheduler Engine Interfaces
-        
+
         Scheduling engine supporting:
         - Job lifecycle management
         - Retry strategies with backoff

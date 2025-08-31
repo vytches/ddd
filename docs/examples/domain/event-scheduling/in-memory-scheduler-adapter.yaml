@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## InMemorySchedulerAdapter
-            
+
             Memory-based event scheduler implementation.
             Uses JavaScript timers for event scheduling without external dependencies.
 
@@ -116,11 +116,11 @@ classes:
             code: |
               const scheduler = new InMemorySchedulerAdapter();
               await scheduler.start();
-              
+
               // Schedule event for 1 hour from now
               const futureTime = new Date(Date.now() + 60 * 60 * 1000);
               const event = new OrderReminderEvent('order-123', futureTime);
-              
+
               const jobId = await scheduler.schedule(event);
               console.log(`Scheduled job: ${jobId}`);
 
@@ -129,7 +129,7 @@ classes:
               // Schedule event for immediate execution
               const now = new Date();
               const event = new ProcessOrderEvent('order-456', now);
-              
+
               const jobId = await scheduler.schedule(event, {
                 maxRetries: 5,
                 priority: 'high'
@@ -156,7 +156,7 @@ classes:
           - id: 'cancel-job'
             code: |
               const jobId = await scheduler.schedule(event);
-              
+
               // Cancel the job before it executes
               await scheduler.cancel(jobId);
               console.log(`Job ${jobId} has been cancelled`);
@@ -184,7 +184,7 @@ classes:
           - id: 'reschedule-job'
             code: |
               const jobId = await scheduler.schedule(event);
-              
+
               // Reschedule for 2 hours later
               const newTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
               await scheduler.reschedule(jobId, newTime);
@@ -214,7 +214,7 @@ classes:
             code: |
               const jobId = await scheduler.schedule(event);
               const job = await scheduler.getJob(jobId);
-              
+
               if (job) {
                 console.log(`Job status: ${job.status}`);
                 console.log(`Scheduled for: ${job.scheduledAt}`);
@@ -257,7 +257,7 @@ classes:
                 sortBy: 'scheduledAt',
                 sortDirection: 'asc'
               });
-              
+
               results.jobs.forEach(job => {
                 console.log(`${job.id}: ${job.event.type} at ${job.scheduledAt}`);
               });

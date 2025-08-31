@@ -2,7 +2,7 @@
 
 # === FILE METADATA ===
 file-name: 'decorators/resilience-decorators'
-title: 'ResilienceDecorators - Method Decorators Implementation'  
+title: 'ResilienceDecorators - Method Decorators Implementation'
 description: 'Method decorators for applying resilience patterns'
 business-context: |
   Provides TypeScript decorators for applying resilience patterns to class methods.
@@ -137,22 +137,22 @@ constants:
     description: 'Circuit breaker decorator factory'
     business-context: 'Factory function for creating circuit breaker method decorators'
     type: '(config: CircuitBreakerDecoratorConfig) => MethodDecorator'
-    
+
   Retry:
     description: 'Retry decorator factory'
     business-context: 'Factory function for creating retry method decorators'
     type: '(config: RetryDecoratorConfig) => MethodDecorator'
-    
+
   Bulkhead:
     description: 'Bulkhead decorator factory'
     business-context: 'Factory function for creating bulkhead method decorators'
     type: '(config: BulkheadDecoratorConfig) => MethodDecorator'
-    
+
   Resilience:
     description: 'Composite resilience decorator factory'
     business-context: 'Factory function for creating composite resilience method decorators'
     type: '(config: CompositeResilienceConfig) => MethodDecorator'
-    
+
   Timeout:
     description: 'Timeout decorator factory'
     business-context: 'Factory function for creating timeout method decorators'

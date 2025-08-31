@@ -23,84 +23,84 @@ interfaces:
       business-context: |
         Defines retry behavior including attempt limits, delays, backoff
         strategies, and conditions for retryable failures.
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Configuration'
-    
+
     properties:
       - name: 'maxAttempts'
         type: 'number'
         description: 'Maximum number of retry attempts'
-      
+
       - name: 'baseDelay'
         type: 'number'
         description: 'Base delay in milliseconds between retries'
-      
+
       - name: 'maxDelay'
         type: 'number'
         description: 'Maximum delay between retries'
         optional: true
-      
+
       - name: 'backoffMultiplier'
         type: 'number'
         description: 'Multiplier for exponential backoff'
         optional: true
-      
+
       - name: 'jitter'
         type: 'boolean'
         description: 'Add random jitter to delays'
         optional: true
-      
+
       - name: 'retryableErrors'
         type: 'Array<ErrorConstructor | string>'
         description: 'Error types to retry'
         optional: true
-  
+
   RetryMetrics:
     interface-doc:
       description: 'Performance metrics for retry operations'
       business-context: |
         Provides insights into retry behavior including attempt counts,
         delays, and failure patterns for monitoring and optimization.
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Monitoring'
-    
+
     properties:
       - name: 'attempt'
         type: 'number'
         description: 'Current attempt number'
-      
+
       - name: 'totalAttempts'
         type: 'number'
         description: 'Total attempts made'
-      
+
       - name: 'totalDelay'
         type: 'number'
         description: 'Cumulative delay across all retries'
-      
+
       - name: 'lastError'
         type: 'Error | null'
         description: 'Most recent error encountered'
-  
+
   RetryPolicyConfig:
     interface-doc:
       description: 'Internal retry policy configuration'
       business-context: |
         Extended configuration including internal state tracking
         for retry policy execution.
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Configuration'
-    
+
     properties:
       - name: 'attempts'
         type: 'number'
         description: 'Current attempt counter'
-      
+
       - name: 'lastError'
         type: 'Error | undefined'
         description: 'Last encountered error'
@@ -189,7 +189,7 @@ classes:
               const result = await retryPolicy.execute(async (ctx) => {
                 return await externalAPI.fetchData(userId);
               }, context);
-              
+
               console.log('Data retrieved:', result);
 
           - id: 'database-retry'
@@ -331,7 +331,7 @@ patterns:
         maxDelayMs: 16000,
         jitter: true
       });
-      
+
       await messageRetry.execute(async (ctx) => {
         return await messageQueue.publish(topic, message);
       }, { correlationId: 'msg-publish' });

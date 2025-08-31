@@ -16,7 +16,7 @@ enums:
   EventStoreErrorCode:
     description: 'Error codes for event store operations'
     business-context: 'Standardized error codes for debugging and monitoring event store issues'
-    
+
     formats:
       jsdoc:
         description: 'Event store error code enumeration'
@@ -47,7 +47,7 @@ types:
   EventStoreErrorOptions:
     description: 'Options for creating event store errors'
     business-context: 'Provides structured error context for debugging and monitoring'
-    
+
     properties:
       - name: 'code'
         type: 'EventStoreErrorCode'
@@ -72,7 +72,7 @@ classes:
     class-doc:
       description: 'Abstract base class for all event store errors'
       business-context: 'Foundation for structured error handling in event sourcing'
-      
+
       formats:
         jsdoc:
           description: 'Base class for event store errors with structured context'
@@ -90,7 +90,7 @@ classes:
       constructor:
         description: 'Creates a new event store error with message and options'
         business-context: 'Initializes error with contextual information for debugging'
-        
+
         parameters:
           - name: 'message'
             type: 'string'
@@ -104,7 +104,7 @@ classes:
     class-doc:
       description: 'Error thrown when optimistic concurrency conflict is detected'
       business-context: 'Prevents data corruption by detecting concurrent modifications to event streams'
-      
+
       formats:
         jsdoc:
           description: 'Concurrency conflict error with version information'
@@ -121,7 +121,7 @@ classes:
       constructor:
         description: 'Creates concurrency error with version details'
         business-context: 'Captures version mismatch information for conflict resolution'
-        
+
         parameters:
           - name: 'streamId'
             type: 'string'
@@ -136,7 +136,7 @@ classes:
       withDetails:
         description: 'Factory method to create error with additional details'
         business-context: 'Provides structured way to create detailed error instances'
-        
+
         parameters:
           - name: 'streamId'
             type: 'string'
@@ -151,7 +151,7 @@ classes:
             type: 'unknown'
             optional: true
             description: 'Additional context data'
-        
+
         returns:
           type: 'EventStoreConcurrencyError'
           description: 'New error instance with details'
@@ -160,7 +160,7 @@ classes:
     class-doc:
       description: 'Error thrown when requested stream does not exist'
       business-context: 'Indicates attempt to read or modify non-existent event stream'
-      
+
       formats:
         jsdoc:
           description: 'Stream not found error'
@@ -177,7 +177,7 @@ classes:
       constructor:
         description: 'Creates stream not found error'
         business-context: 'Captures missing stream information'
-        
+
         parameters:
           - name: 'streamId'
             type: 'string'
@@ -186,7 +186,7 @@ classes:
       withStreamId:
         description: 'Factory method for creating error with stream ID'
         business-context: 'Structured creation of stream not found errors'
-        
+
         parameters:
           - name: 'streamId'
             type: 'string'
@@ -195,7 +195,7 @@ classes:
             type: 'unknown'
             optional: true
             description: 'Additional context'
-        
+
         returns:
           type: 'StreamNotFoundError'
           description: 'New error instance'
@@ -204,7 +204,7 @@ classes:
     class-doc:
       description: 'Error thrown when accessing a deleted stream'
       business-context: 'Prevents operations on streams marked as deleted'
-      
+
       custom-tags:
         since: '1.0.0'
         extends: 'EventStoreError'
@@ -212,7 +212,7 @@ classes:
     methods:
       constructor:
         description: 'Creates stream deleted error'
-        
+
         parameters:
           - name: 'streamId'
             type: 'string'
@@ -222,7 +222,7 @@ classes:
     class-doc:
       description: 'Error during event serialization'
       business-context: 'Indicates failure to serialize domain events for storage'
-      
+
       custom-tags:
         since: '1.0.0'
         extends: 'EventStoreError'
@@ -230,7 +230,7 @@ classes:
     methods:
       constructor:
         description: 'Creates serialization error'
-        
+
         parameters:
           - name: 'message'
             type: 'string'
@@ -248,7 +248,7 @@ classes:
     class-doc:
       description: 'Error during event deserialization'
       business-context: 'Indicates failure to reconstruct domain events from storage'
-      
+
       custom-tags:
         since: '1.0.0'
         extends: 'EventStoreError'
@@ -256,7 +256,7 @@ classes:
     methods:
       constructor:
         description: 'Creates deserialization error'
-        
+
         parameters:
           - name: 'message'
             type: 'string'
@@ -274,7 +274,7 @@ classes:
     class-doc:
       description: 'Connection error to event store'
       business-context: 'Indicates connectivity issues with event store backend'
-      
+
       custom-tags:
         since: '1.0.0'
         extends: 'EventStoreError'
@@ -282,7 +282,7 @@ classes:
     methods:
       constructor:
         description: 'Creates connection error'
-        
+
         parameters:
           - name: 'message'
             type: 'string'
@@ -296,7 +296,7 @@ classes:
     class-doc:
       description: 'Invalid stream version specified'
       business-context: 'Prevents operations with invalid version numbers'
-      
+
       custom-tags:
         since: '1.0.0'
         extends: 'EventStoreError'
@@ -304,7 +304,7 @@ classes:
     methods:
       constructor:
         description: 'Creates invalid version error'
-        
+
         parameters:
           - name: 'streamId'
             type: 'string'

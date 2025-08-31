@@ -17,19 +17,19 @@ classes:
     class-doc:
       description: 'Extension class that adds advanced capabilities to BusinessRuleValidator'
       business-context: 'Provides specification integration and additional validation methods for complex business scenarios'
-      
+
       formats:
         jsdoc:
           description: 'Extension for BusinessRuleValidator with specification support'
         cli:
           description: |
             ## BusinessRuleValidatorExtension<T>
-            
+
             Advanced extension class that enhances BusinessRuleValidator with:
             - Specification pattern integration
             - Composite validation capabilities
             - Enhanced error handling and reporting
-            
+
       custom-tags:
         since: '1.0.0'
         generic: 'T - Type being validated'
@@ -40,12 +40,12 @@ classes:
       constructor:
         description: 'Creates extension wrapper around existing BusinessRuleValidator instance'
         business-context: 'Initializes extension with base validator for enhanced functionality'
-        
+
         parameters:
           - name: 'validator'
             type: 'BusinessRuleValidator<T>'
             description: 'Base validator instance to extend with additional capabilities'
-            
+
         examples:
           - id: 'basic-extension'
             code: |
@@ -55,17 +55,17 @@ classes:
       toSpecification:
         description: 'Converts the validator to a reusable specification'
         business-context: 'Enables validator reuse as specification in other validation contexts'
-        
+
         parameters:
           - name: '_errorMessage'
             type: 'string'
             description: 'Optional custom error message for specification failures'
             optional: true
-            
+
         returns:
           type: 'ISpecification<T>'
           description: 'Specification that encapsulates validator logic'
-          
+
         examples:
           - id: 'validator-to-spec'
             code: |
@@ -75,7 +75,7 @@ classes:
       validateWithSpecifications:
         description: 'Validates object using base validator plus additional specifications'
         business-context: 'Combines business rule validation with specification-based validation for comprehensive validation'
-        
+
         parameters:
           - name: 'value'
             type: 'T'
@@ -84,11 +84,11 @@ classes:
             type: 'ISpecification<T>[]'
             description: 'Additional specifications to validate against'
             rest: true
-            
+
         returns:
           type: 'Result<T, ValidationErrors>'
           description: 'Result containing validated object or validation errors'
-          
+
         examples:
           - id: 'composite-validation'
             code: |
@@ -106,18 +106,18 @@ module-augmentation:
   BusinessRuleValidator:
     description: 'Module augmentation adding extension methods to BusinessRuleValidator'
     business-context: 'Extends base validator interface with extension capabilities'
-    
+
     methods:
       toSpecification:
         description: 'Converts validator to specification (augmented method)'
         business-context: 'Added via module augmentation for direct access from base validator'
-        
+
         parameters:
           - name: 'errorMessage'
             type: 'string'
             description: 'Optional error message for specification failures'
             optional: true
-            
+
         returns:
           type: 'ISpecification<T>'
           description: 'Specification encapsulating validator logic'
@@ -125,7 +125,7 @@ module-augmentation:
       validateWithSpecifications:
         description: 'Validates with additional specifications (augmented method)'
         business-context: 'Added via module augmentation for enhanced validation capabilities'
-        
+
         parameters:
           - name: 'value'
             type: 'T'
@@ -134,7 +134,7 @@ module-augmentation:
             type: 'ISpecification<T>[]'
             description: 'Additional specifications'
             rest: true
-            
+
         returns:
           type: 'Result<T, ValidationErrors>'
           description: 'Validation result'
@@ -142,12 +142,12 @@ module-augmentation:
       apply:
         description: 'Applies transformation function to validator (augmented method)'
         business-context: 'Enables functional composition of validator transformations'
-        
+
         parameters:
           - name: 'rule'
             type: '(validator: BusinessRuleValidator<T>) => BusinessRuleValidator<T>'
             description: 'Transformation function to apply to validator'
-            
+
         returns:
           type: 'BusinessRuleValidator<T>'
           description: 'Transformed validator instance'

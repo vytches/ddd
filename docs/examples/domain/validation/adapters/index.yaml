@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for validation library adapters'
   business-context: 'Simplifies imports for integrating external validation libraries'
-  
+
   formats:
     jsdoc:
       description: 'Validation adapter exports and utilities'
     cli:
       description: |
         ## Validation Adapters Exports
-        
+
         Adapter pattern functionality including:
         - Base adapter implementations
         - Adapter utility functions
@@ -33,14 +33,14 @@ file-doc:
     stability: 'stable'
     category: 'adapter-pattern'
     pattern: 'facade-pattern'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   BaseValidationAdapter:
     description: 'Abstract base class for external validation library adapters'
     business-context: 'Provides consistent interface for integrating third-party validation libraries'
     source: './base-adapter'
-    
+
   AdapterUtils:
     description: 'Utility functions for validation adapter implementations'
     business-context: 'Helper functions for error mapping, format conversion, and adapter configuration'

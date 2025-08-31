@@ -64,7 +64,7 @@ classes:
           - id: 'version-registration'
             code: |
               const registry = new VersionedACLRegistry();
-              
+
               // Register different versions
               registry.registerVersion('payments', '1.0.0', paymentsV1Adapter);
               registry.registerVersion('payments', '2.0.0', paymentsV2Adapter);
@@ -107,7 +107,7 @@ classes:
             code: |
               // Find any 2.x version
               const adapter = registry.resolveCompatible('payments', '^2.0.0');
-              
+
               // Prefer specific version with fallback
               const specificAdapter = registry.resolveCompatible('payments', '~2.1.0');
 
@@ -259,15 +259,15 @@ patterns:
       // Start with old version
       registry.registerVersion('api', '1.0', oldAdapter);
       registry.setDefaultVersion('api', '1.0');
-      
+
       // Deploy new version alongside
       registry.registerVersion('api', '2.0', newAdapter);
-      
+
       // Gradually migrate traffic
       const adapter = registry.resolveCompatible('api', 
         Math.random() > 0.1 ? '^2.0' : '^1.0'
       );
-      
+
       // Eventually deprecate old version
       registry.deprecateVersion('api', '1.0', '2.0');
 

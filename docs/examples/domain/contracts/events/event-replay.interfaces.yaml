@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Comprehensive interfaces for event replay functionality'
   business-context: 'Enables event sourcing patterns with replay capabilities for state reconstruction'
-  
+
   formats:
     jsdoc:
       description: 'Event replay system contracts'
     cli:
       description: |
         ## Event Replay Interfaces
-        
+
         Event replay system supporting:
         - Event stream replay
         - Filtered replay operations

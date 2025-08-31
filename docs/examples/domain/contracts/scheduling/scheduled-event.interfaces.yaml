@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Interfaces for scheduled event definitions'
   business-context: 'Contracts for events that execute on schedules, with delays, or recurring patterns'
-  
+
   formats:
     jsdoc:
       description: 'Scheduled event contracts for time-based event execution'
     cli:
       description: |
         ## Scheduled Event Interfaces
-        
+
         Scheduled event system supporting:
         - One-time scheduled events
         - Recurring event patterns

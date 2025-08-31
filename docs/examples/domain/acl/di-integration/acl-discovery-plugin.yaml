@@ -81,7 +81,7 @@ classes:
                 './src/adapters',
                 './src/integrations'
               ]);
-              
+
               console.log(`Found ${adapters.length} ACL adapters`);
 
       register:
@@ -105,7 +105,7 @@ classes:
               // Auto-register with VytchesDDD container
               const container = VytchesDDD.getContainer();
               await aclPlugin.register(container, adapters);
-              
+
               // Adapters are now available via DI
               const paymentAdapter = container.resolve<PaymentACLAdapter>('payment-adapter');
 
@@ -145,7 +145,7 @@ classes:
               // 1. Class extends BaseACLAdapter
               // 2. Implements IACLAdapter interface  
               // 3. Has @ACLAdapter decorator
-              
+
               @ACLAdapter('payment-service')
               class PaymentACLAdapter extends BaseACLAdapter {
                 // Automatically discovered and registered
@@ -232,16 +232,16 @@ patterns:
       // In application bootstrap
       import { VytchesDDD } from '@vytches/ddd-di';
       import { ACLDiscoveryPlugin } from '@vytches/ddd-acl';
-      
+
       const container = VytchesDDD.getContainer();
       const aclPlugin = new ACLDiscoveryPlugin({
         scanPaths: ['./src/adapters'],
         autoRegister: true
       });
-      
+
       // Register plugin with DI system
       VytchesDDD.addPlugin(aclPlugin);
-      
+
       // All ACL adapters are now available via DI
       const orderService = container.resolve<OrderService>('orderService');
 
@@ -250,9 +250,9 @@ patterns:
     example: |
       @ACLAdapter('inventory-adapter', { context: 'Inventory' })
       class InventoryACLAdapter extends BaseACLAdapter { }
-      
+
       @ACLAdapter('shipping-adapter', { context: 'Shipping' })  
       class ShippingACLAdapter extends BaseACLAdapter { }
-      
+
       // Plugin can filter by context
       const inventoryAdapters = await plugin.discoverByContext('Inventory');

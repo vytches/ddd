@@ -15,7 +15,7 @@ hierarchy:
 file-doc:
   description: 'Event store module providing event sourcing infrastructure'
   business-context: 'Complete event sourcing solution with storage, replay, and serialization capabilities'
-  
+
   formats:
     jsdoc:
       description: 'Event store module exports for event sourcing'
@@ -39,120 +39,120 @@ exports:
     from: './base-event-store'
     description: 'Abstract base class for event store implementations'
     business-context: 'Foundation for building custom event stores'
-    
+
   - name: 'InMemoryEventStore'
     from: './in-memory-event-store'
     description: 'In-memory implementation for testing and development'
     business-context: 'Fast event store for non-production environments'
-    
+
   - name: 'EventReplayEngine'
     from: './event-replay-engine'
     description: 'Engine for replaying events and rebuilding projections'
     business-context: 'Enables projection rebuilding and event processing'
-    
+
   - name: 'EventReplayFactory'
     from: './event-replay-factory'
     description: 'Factory for creating event replay instances'
     business-context: 'Simplified creation of replay configurations'
-    
+
   - name: 'createEventReplay'
     from: './event-replay-factory'
     description: 'Creates basic event replay instance'
     business-context: 'Quick setup for simple replay scenarios'
-    
+
   - name: 'createAdvancedEventReplay'
     from: './event-replay-factory'
     description: 'Creates advanced replay with filtering and batching'
     business-context: 'Complex replay scenarios with performance optimization'
-    
+
   - name: 'createEventReplayFactory'
     from: './event-replay-factory'
     description: 'Creates factory for replay instances'
     business-context: 'Reusable replay configuration'
-    
+
   - name: 'JsonEventSerializer'
     from: './serializers/json-event-serializer'
     description: 'JSON serialization strategy for events'
     business-context: 'Default serialization for event persistence'
-    
+
   # Error exports
   - name: 'EventStoreError'
     from: './errors'
     description: 'Base error class for event store operations'
-    
+
   - name: 'EventStoreErrorCode'
     from: './errors'
     description: 'Error code enumeration'
-    
+
   - name: 'EventStoreConcurrencyError'
     from: './errors'
     description: 'Optimistic concurrency conflict error'
-    
+
   - name: 'StreamNotFoundError'
     from: './errors'
     description: 'Stream does not exist error'
-    
+
   - name: 'StreamDeletedError'
     from: './errors'
     description: 'Stream has been deleted error'
-    
+
   - name: 'EventSerializationError'
     from: './errors'
     description: 'Event serialization failure'
-    
+
   - name: 'EventDeserializationError'
     from: './errors'
     description: 'Event deserialization failure'
-    
+
   - name: 'EventStoreConnectionError'
     from: './errors'
     description: 'Connection to event store failed'
-    
+
   - name: 'InvalidStreamVersionError'
     from: './errors'
     description: 'Invalid stream version specified'
-    
+
   # Type exports
   - name: 'EventStoreErrorOptions'
     from: './errors'
     description: 'Options for creating event store errors'
     type: 'type'
-    
+
   - name: 'IEventStore'
     from: '@vytches/ddd-contracts'
     description: 'Basic event store interface'
     type: 'interface'
-    
+
   - name: 'IAdvancedEventStore'
     from: '@vytches/ddd-contracts'
     description: 'Advanced event store with replay capabilities'
     type: 'interface'
-    
+
   - name: 'IEventStoreConfig'
     from: '@vytches/ddd-contracts'
     description: 'Event store configuration options'
     type: 'interface'
-    
+
   - name: 'IEventStream'
     from: '@vytches/ddd-contracts'
     description: 'Event stream with metadata'
     type: 'interface'
-    
+
   - name: 'IGlobalEventStream'
     from: '@vytches/ddd-contracts'
     description: 'Global event stream across all aggregates'
     type: 'interface'
-    
+
   - name: 'IAppendResult'
     from: '@vytches/ddd-contracts'
     description: 'Result of append operation'
     type: 'interface'
-    
+
   - name: 'IStoredEvent'
     from: '@vytches/ddd-contracts'
     description: 'Stored event with metadata'
     type: 'interface'
-    
+
   - name: 'IStoredDomainEvent'
     from: '@vytches/ddd-contracts'
     description: 'Domain event for storage'

@@ -15,7 +15,7 @@ hierarchy:
 file-doc:
   description: 'NestJS container adapter exports'
   business-context: 'Enables seamless integration between VytchesDDD and NestJS dependency injection'
-  
+
   formats:
     jsdoc:
       description: 'NestJS adapter exports'

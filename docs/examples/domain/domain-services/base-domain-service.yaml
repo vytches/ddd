@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## IBaseDomainService
-            
+
             Foundation abstract class for domain services in DDD architecture.
             Provides service identity and basic patterns for domain service implementation.
 
@@ -79,7 +79,7 @@ classes:
         cli:
           description: |
             ## EventAwareDomainService
-            
+
             Domain service extension that provides event publishing capabilities.
             Automatically manages event bus integration for domain event publishing.
 
@@ -178,7 +178,7 @@ classes:
         cli:
           description: |
             ## UnitOfWorkAwareDomainService
-            
+
             Advanced domain service with transactional capabilities.
             Provides Unit of Work pattern integration for coordinating repository operations.
 
@@ -331,7 +331,7 @@ classes:
         cli:
           description: |
             ## AsyncDomainService
-            
+
             Domain service with asynchronous lifecycle management.
             Provides hooks for async initialization and cleanup operations.
 

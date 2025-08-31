@@ -22,58 +22,58 @@ interfaces:
       business-context: |
         Defines resource limits and queuing behavior for bulkhead isolation,
         controlling concurrent executions and queue capacity.
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Configuration'
-    
+
     properties:
       - name: 'maxConcurrency'
         type: 'number'
         description: 'Maximum concurrent executions allowed'
-      
+
       - name: 'queueCapacity'
         type: 'number'
         description: 'Maximum queue size for pending executions'
-      
+
       - name: 'timeout'
         type: 'number'
         description: 'Timeout for queued operations in milliseconds'
         optional: true
-      
+
       - name: 'name'
         type: 'string'
         description: 'Bulkhead name for identification'
         optional: true
-  
+
   BulkheadMetrics:
     interface-doc:
       description: 'Performance metrics for bulkhead'
       business-context: |
         Provides operational metrics for monitoring bulkhead effectiveness,
         resource utilization, and rejection patterns.
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Monitoring'
-    
+
     properties:
       - name: 'activeTasks'
         type: 'number'
         description: 'Currently executing tasks'
-      
+
       - name: 'queuedTasks'
         type: 'number'
         description: 'Tasks waiting in queue'
-      
+
       - name: 'totalCompleted'
         type: 'number'
         description: 'Total tasks completed successfully'
-      
+
       - name: 'totalRejected'
         type: 'number'
         description: 'Total tasks rejected due to capacity'
-      
+
       - name: 'avgExecutionTime'
         type: 'number'
         description: 'Average task execution time in milliseconds'
@@ -155,7 +155,7 @@ classes:
               const result = await bulkhead.execute(async (ctx) => {
                 return await heavyDatabaseQuery(complexQuery);
               }, context);
-              
+
               console.log('Query completed:', result);
 
           - id: 'api-protection'
@@ -271,7 +271,7 @@ patterns:
         timeout: 8000,
         name: 'external-api'
       });
-      
+
       // Protect API calls
       await apiBulkhead.execute(async (ctx) => {
         return await externalAPI.fetchUserData(userId);
@@ -286,7 +286,7 @@ patterns:
         timeout: 60000,               // 1 minute for file ops
         name: 'file-processor'
       });
-      
+
       await fileBulkhead.execute(async (ctx) => {
         return await processLargeFile(filePath);
       }, { correlationId: `file-${filename}` });

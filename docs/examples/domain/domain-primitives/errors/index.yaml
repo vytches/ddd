@@ -15,7 +15,7 @@ hierarchy:
 file-doc:
   description: 'Error module exports for domain primitives'
   business-context: 'Foundation for error handling across all DDD packages'
-  
+
   formats:
     jsdoc:
       description: 'Domain primitives error exports'
@@ -35,51 +35,51 @@ exports:
     from: './base.error'
     description: 'Base error class for all domain errors'
     business-context: 'Foundation for structured error handling'
-    
+
   - name: 'ErrorOptions'
     from: './base.error'
     description: 'Options for creating base errors'
     type: 'type'
-    
+
   - name: 'IDomainError'
     from: './domain.errors'
     description: 'Abstract base class for domain-specific errors'
     business-context: 'Provides domain context for error handling'
-    
+
   - name: 'MissingValueError'
     from: './domain.errors'
     description: 'Error for missing required values'
-    
+
   - name: 'InvalidParameterError'
     from: './domain.errors'
     description: 'Error for invalid parameter values'
-    
+
   - name: 'DuplicateError'
     from: './domain.errors'
     description: 'Error for duplicate entries'
-    
+
   - name: 'NotFoundError'
     from: './domain.errors'
     description: 'Error for resources not found'
-    
+
   - name: 'DomainErrorOptions'
     from: './domain.errors'
     description: 'Options for creating domain errors'
     type: 'type'
-    
+
   - name: 'ErrorCode'
     from: './domain.errors'
     description: 'Error code type definition'
     type: 'type'
-    
+
   - name: 'ApplicationErrorCode'
     from: './error.enum'
     description: 'Application-level error codes'
-    
+
   - name: 'DomainErrorCode'
     from: './error.enum'
     description: 'Domain-level error codes'
-    
+
   - name: 'FrameworkErrorCode'
     from: './error.enum'
     description: 'Framework-level error codes'

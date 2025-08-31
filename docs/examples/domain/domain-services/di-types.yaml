@@ -16,7 +16,7 @@ types:
   ContextResolutionStrategy:
     description: 'Strategy for resolving bounded context during service resolution'
     business-context: 'Defines how DI container determines which bounded context to use for service resolution'
-    
+
     type: 'union'
     values:
       - name: 'auto'
@@ -119,7 +119,7 @@ interfaces:
         cli:
           description: |
             ## EnhancedDomainServiceOptions
-            
+
             Complete configuration interface for domain services.
             Combines DI integration with domain service-specific capabilities.
 
@@ -128,7 +128,7 @@ interfaces:
         extends: 'DIDecoratorOptions'
         enhanced: 'Full-featured domain service configuration'
 
-    # Properties  
+    # Properties
     properties:
       - name: 'serviceId'
         type: 'string'
@@ -181,7 +181,7 @@ interfaces:
         cli:
           description: |
             ## DIServiceMetadata
-            
+
             Complete metadata structure for DI-integrated domain services.
             Used internally by the DI system for service management and auto-discovery.
 
@@ -234,7 +234,7 @@ classes:
         cli:
           description: |
             ## DIDomainServiceMetadataRegistry
-            
+
             Central registry for domain service metadata management.
             Supports auto-discovery and DI container integration.
 
@@ -314,7 +314,7 @@ classes:
             code: |
               const allServices = DIDomainServiceMetadataRegistry.getAllServices();
               console.log(`Found ${allServices.length} registered services`);
-              
+
               // Bulk container registration
               allServices.forEach(service => {
                 if (service.autoRegister) {
@@ -343,7 +343,7 @@ classes:
           - id: 'basic'
             code: |
               const paymentServices = DIDomainServiceMetadataRegistry.getServicesByContext('PaymentManagement');
-              
+
               // Setup context-specific container
               const paymentContainer = new ContextContainer('PaymentManagement');
               paymentServices.forEach(service => paymentContainer.register(service));
@@ -370,7 +370,7 @@ classes:
             code: |
               // Get all services with 'cacheable' tag
               const cacheableServices = DIDomainServiceMetadataRegistry.getServicesByTag('cacheable');
-              
+
               // Apply caching decorator to all cacheable services
               cacheableServices.forEach(service => {
                 container.addDecorator(service.serviceId, new CachingDecorator());

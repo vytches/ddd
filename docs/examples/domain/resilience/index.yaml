@@ -145,7 +145,7 @@ patterns:
         failureThreshold: 5,
         resetTimeout: 60000
       });
-      
+
       const result = await circuitBreaker.execute(async () => {
         return await externalAPI.getData();
       });

@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## ServiceDuplicateError
-            
+
             Error for duplicate service registration scenarios.
             Thrown when attempting to register a service with an existing ID.
 
@@ -91,7 +91,7 @@ classes:
         cli:
           description: |
             ## ServiceNotFoundError
-            
+
             Error for missing service resolution scenarios.
             Thrown when attempting to resolve a service that doesn't exist in the registry.
 
@@ -162,7 +162,7 @@ classes:
         cli:
           description: |
             ## ServiceCircularError
-            
+
             Error for circular dependency scenarios in service resolution.
             Thrown when circular dependencies are detected during DI container operations.
 

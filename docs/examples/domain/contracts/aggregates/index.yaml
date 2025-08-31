@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for aggregate contracts and interfaces'
   business-context: 'Simplifies imports for aggregate-related contracts'
-  
+
   formats:
     jsdoc:
       description: 'Aggregate contracts exports'
     cli:
       description: |
         ## Aggregate Contracts Exports
-        
+
         Aggregate interfaces including:
         - Aggregates with event support
         - Core aggregate contracts
@@ -31,7 +31,7 @@ file-doc:
     since: '1.0.0'
     stability: 'stable'
     category: 'aggregates'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   IAggregateWithEvents:

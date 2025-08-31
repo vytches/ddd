@@ -17,20 +17,20 @@ classes:
     class-doc:
       description: 'Unified VytchesDDD discovery service for automatic component registration'
       business-context: 'Provides zero-configuration setup by scanning NestJS providers for VytchesDDD decorators and automatically registering them'
-      
+
       formats:
         jsdoc:
           description: 'Auto-discovery service for VytchesDDD components in NestJS'
         cli:
           description: |
             ## VytchesDiscoveryService
-            
+
             Unified discovery service that provides:
             - Zero-configuration setup for VytchesDDD components
             - Automatic scanning of NestJS providers
             - Registration of domain services, handlers, and sagas
             - Timeout protection for discovery process
-            
+
       custom-tags:
         since: '1.0.0'
         stability: 'stable'
@@ -42,7 +42,7 @@ classes:
       constructor:
         description: 'Initializes discovery service with NestJS adapter and module reference'
         business-context: 'Sets up discovery service with necessary dependencies for component scanning and registration'
-        
+
         parameters:
           - name: 'adapter'
             type: 'NestJSContainerAdapter'
@@ -50,7 +50,7 @@ classes:
           - name: 'moduleRef'
             type: 'ModuleRef'
             description: 'NestJS module reference for provider access'
-            
+
         examples:
           - id: 'basic-setup'
             code: |
@@ -60,17 +60,17 @@ classes:
       discoverAll:
         description: 'Performs zero-config discovery with timeout protection'
         business-context: 'Scans all NestJS providers for VytchesDDD decorators and registers them automatically'
-        
+
         parameters:
           - name: 'timeout'
             type: 'number'
             description: 'Optional timeout in milliseconds for discovery process'
             optional: true
-            
+
         returns:
           type: 'Promise<void>'
           description: 'Completes when all components have been discovered and registered'
-          
+
         examples:
           - id: 'auto-discovery'
             code: |
@@ -81,11 +81,11 @@ classes:
       getSummary:
         description: 'Returns summary of discovered components'
         business-context: 'Provides overview of registered services and handlers for monitoring and debugging'
-        
+
         returns:
           type: '{ services: number; handlers: number; total: number }'
           description: 'Summary object containing counts of discovered components'
-          
+
         examples:
           - id: 'discovery-summary'
             code: |
@@ -96,7 +96,7 @@ classes:
         description: 'Internal method performing the actual discovery process'
         business-context: 'Core discovery logic that scans providers and processes decorated classes'
         visibility: 'private'
-        
+
         returns:
           type: 'Promise<void>'
           description: 'Completes when discovery process finishes'
@@ -105,7 +105,7 @@ classes:
         description: 'Processes a target class for VytchesDDD decorators'
         business-context: 'Analyzes individual classes to identify and register decorated components'
         visibility: 'private'
-        
+
         parameters:
           - name: 'target'
             type: 'any'
@@ -115,7 +115,7 @@ classes:
         description: 'Registers a domain service in VytchesDDD container'
         business-context: 'Adds discovered domain services to the VytchesDDD service locator'
         visibility: 'private'
-        
+
         parameters:
           - name: 'target'
             type: 'any'
@@ -128,7 +128,7 @@ classes:
         description: 'Wraps NestJS instance with VytchesDDD capabilities'
         business-context: 'Enhances NestJS instances with VytchesDDD features while preventing proxy issues'
         visibility: 'private'
-        
+
         parameters:
           - name: 'instance'
             type: 'any'
@@ -138,7 +138,7 @@ classes:
         description: 'Registers a command handler in CQRS system'
         business-context: 'Adds discovered command handlers to the command bus'
         visibility: 'private'
-        
+
         parameters:
           - name: 'target'
             type: 'any'
@@ -148,7 +148,7 @@ classes:
         description: 'Registers a query handler in CQRS system'
         business-context: 'Adds discovered query handlers to the query bus'
         visibility: 'private'
-        
+
         parameters:
           - name: 'target'
             type: 'any'
@@ -158,7 +158,7 @@ classes:
         description: 'Registers an event handler in event system'
         business-context: 'Adds discovered event handlers to the event bus'
         visibility: 'private'
-        
+
         parameters:
           - name: 'target'
             type: 'any'
@@ -168,7 +168,7 @@ classes:
         description: 'Registers a saga in messaging system'
         business-context: 'Adds discovered sagas to the saga orchestrator'
         visibility: 'private'
-        
+
         parameters:
           - name: 'target'
             type: 'any'
@@ -178,7 +178,7 @@ classes:
         description: 'Gets all providers from NestJS container'
         business-context: 'Retrieves all available providers for scanning, simplified to prevent scanning issues'
         visibility: 'private'
-        
+
         returns:
           type: 'any[]'
           description: 'Array of all providers in the NestJS container'

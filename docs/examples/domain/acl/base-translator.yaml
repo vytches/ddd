@@ -132,7 +132,7 @@ classes:
           - id: 'validation'
             code: |
               const translator = new OrderTranslator();
-              
+
               // Check before translation
               if (translator.canTranslate(legacyData, 'toDomain')) {
                 const result = translator.toDomain(legacyData);

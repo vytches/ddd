@@ -110,12 +110,12 @@ classes:
                 { operation: 'update', model: order2 },
                 { operation: 'create', model: order3 }
               ];
-              
+
               const results = await adapter.executeBatch(operations, {
                 parallel: true,
                 continueOnError: true
               });
-              
+
               results.value.forEach((result, index) => {
                 if (result.success) {
                   console.log(`Operation ${index} succeeded`);
@@ -142,7 +142,7 @@ classes:
             code: |
               // Invalidate specific entry
               adapter.invalidateCache('ORDER-123');
-              
+
               // Clear entire cache
               adapter.invalidateCache();
 
@@ -158,7 +158,7 @@ classes:
           - id: 'health-monitoring'
             code: |
               const health = await adapter.healthCheck();
-              
+
               if (health.status === 'unhealthy') {
                 console.error('External system unavailable:', health.details);
                 // Trigger fallback mechanism
@@ -178,7 +178,7 @@ classes:
           - id: 'metrics-collection'
             code: |
               const metrics = adapter.getMetrics();
-              
+
               console.log('Total operations:', metrics.totalOperations);
               console.log('Success rate:', metrics.successRate);
               console.log('Average latency:', metrics.averageLatency, 'ms');

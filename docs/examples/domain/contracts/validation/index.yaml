@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for validation contracts and specifications'
   business-context: 'Foundation for business rule validation and specification pattern'
-  
+
   formats:
     jsdoc:
       description: 'Validation contracts and specification interfaces'
     cli:
       description: |
         ## Validation Contracts Exports
-        
+
         Validation system including:
         - Specification pattern interfaces
         - Validator contracts
@@ -33,7 +33,7 @@ file-doc:
     stability: 'stable'
     category: 'validation'
     pattern: 'specification-pattern'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   specification-interfaces:
@@ -41,7 +41,7 @@ exports:
     business-context: 'Contracts for implementing specification pattern validation'
     source: './specification.interfaces'
     type: 'namespace'
-    
+
   validator-interfaces:
     description: 'Validator contracts for validation implementations'
     business-context: 'Interfaces for creating validators and validation rules'

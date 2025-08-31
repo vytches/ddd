@@ -2,7 +2,7 @@
 
 /**
  * JSDoc Coverage Monitor - Track changes and detect outdated documentation
- * 
+ *
  * Features:
  * - Generate current coverage reports
  * - Compare with previous reports
@@ -22,12 +22,12 @@ class JSDocCoverageMonitor {
     this.historyDir = path.join(__dirname, '..', '.jsdoc-coverage-history');
     this.currentReportPath = path.join(this.historyDir, 'current.json');
     this.previousReportPath = path.join(this.historyDir, 'previous.json');
-    
+
     // Ensure history directory exists
     if (!fs.existsSync(this.historyDir)) {
       fs.mkdirSync(this.historyDir, { recursive: true });
     }
-    
+
     this.currentReport = {
       timestamp: new Date().toISOString(),
       packages: {},
@@ -40,9 +40,9 @@ class JSDocCoverageMonitor {
           improved: [],
           regressed: [],
           unchanged: [],
-          new: []
-        }
-      }
+          new: [],
+        },
+      },
     };
   }
 
@@ -54,38 +54,38 @@ class JSDocCoverageMonitor {
       showDetails = true,
       saveCurrent = true,
       compareWithPrevious = true,
-      checkOutdated = true
+      checkOutdated = true,
     } = options;
-    
+
     console.log('\n📊 JSDOC COVERAGE MONITOR');
     console.log('='.repeat(80));
     console.log(`🕐 Timestamp: ${this.currentReport.timestamp}`);
     console.log('='.repeat(80));
-    
+
     // Load previous report if exists
     const previousReport = this.loadPreviousReport();
-    
+
     // Analyze all packages
     await this.analyzeAllPackages();
-    
+
     // Check for outdated documentation
     if (checkOutdated) {
       await this.checkOutdatedDocumentation();
     }
-    
+
     // Compare with previous if exists
     if (compareWithPrevious && previousReport) {
       this.compareReports(previousReport);
     }
-    
+
     // Generate report
     this.generateReport(showDetails);
-    
+
     // Save current report
     if (saveCurrent) {
       this.saveCurrentReport();
     }
-    
+
     return this.currentReport;
   }
 
@@ -94,18 +94,24 @@ class JSDocCoverageMonitor {
    */
   async analyzeAllPackages() {
     const packagesPath = path.join(__dirname, '..', 'packages');
-    const packages = fs.readdirSync(packagesPath)
+    const packages = fs
+      .readdirSync(packagesPath)
       .filter(dir => fs.statSync(path.join(packagesPath, dir)).isDirectory());
-    
+
     for (const packageName of packages) {
       await this.analyzePackage(path.join(packagesPath, packageName));
     }
-    
+
     // Calculate summary
     this.currentReport.summary.totalPackages = Object.keys(this.currentReport.packages).length;
-    this.currentReport.summary.coverage = this.currentReport.summary.totalElements > 0
-      ? Math.round((this.currentReport.summary.documentedElements / this.currentReport.summary.totalElements) * 1000) / 10
-      : 0;
+    this.currentReport.summary.coverage =
+      this.currentReport.summary.totalElements > 0
+        ? Math.round(
+            (this.currentReport.summary.documentedElements /
+              this.currentReport.summary.totalElements) *
+              1000
+          ) / 10
+        : 0;
   }
 
   /**
@@ -114,11 +120,11 @@ class JSDocCoverageMonitor {
   async analyzePackage(packagePath) {
     const packageName = path.basename(packagePath);
     const distPath = path.join(packagePath, 'dist');
-    
+
     if (!fs.existsSync(distPath)) {
       return;
     }
-    
+
     const files = glob.sync(`${distPath}/**/*.d.ts`);
     const packageReport = {
       name: packageName,
@@ -129,34 +135,35 @@ class JSDocCoverageMonitor {
       yamlFiles: 0,
       hasYamlSettings: false,
       fileHashes: {},
-      outdatedFiles: []
+      outdatedFiles: [],
     };
-    
+
     // Check for YAML files
     const yamlPath = path.join(__dirname, '..', 'docs', 'examples', 'domain', packageName);
     if (fs.existsSync(yamlPath)) {
       packageReport.yamlFiles = glob.sync(`${yamlPath}/**/*.yaml`).length;
       packageReport.hasYamlSettings = fs.existsSync(path.join(yamlPath, '.md-settings.yaml'));
     }
-    
+
     // Analyze each .d.ts file
     for (const file of files) {
       const fileReport = await this.analyzeFile(file);
       const relativePath = path.relative(distPath, file);
-      
+
       packageReport.files[relativePath] = fileReport;
       packageReport.totalElements += fileReport.totalElements;
       packageReport.documentedElements += fileReport.documentedElements;
-      
+
       // Calculate file hash for change detection
       const fileContent = fs.readFileSync(file, 'utf8');
       packageReport.fileHashes[relativePath] = this.calculateHash(fileContent);
     }
-    
-    packageReport.coverage = packageReport.totalElements > 0
-      ? Math.round((packageReport.documentedElements / packageReport.totalElements) * 1000) / 10
-      : 0;
-    
+
+    packageReport.coverage =
+      packageReport.totalElements > 0
+        ? Math.round((packageReport.documentedElements / packageReport.totalElements) * 1000) / 10
+        : 0;
+
     this.currentReport.packages[packageName] = packageReport;
     this.currentReport.summary.totalElements += packageReport.totalElements;
     this.currentReport.summary.documentedElements += packageReport.documentedElements;
@@ -167,47 +174,43 @@ class JSDocCoverageMonitor {
    */
   async analyzeFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
-    const sourceFile = ts.createSourceFile(
-      filePath,
-      content,
-      ts.ScriptTarget.Latest,
-      true
-    );
-    
+    const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
+
     const report = {
       totalElements: 0,
       documentedElements: 0,
       coverage: 0,
       elements: [],
-      lastModified: fs.statSync(filePath).mtime
+      lastModified: fs.statSync(filePath).mtime,
     };
-    
-    const visit = (node) => {
+
+    const visit = node => {
       if (this.shouldHaveJSDoc(node)) {
         const element = {
           type: this.getNodeKindName(node.kind),
           name: this.getNodeName(node),
           hasJSDoc: this.hasJSDoc(node),
-          line: sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1
+          line: sourceFile.getLineAndCharacterOfPosition(node.getStart()).line + 1,
         };
-        
+
         report.elements.push(element);
         report.totalElements++;
-        
+
         if (element.hasJSDoc) {
           report.documentedElements++;
         }
       }
-      
+
       ts.forEachChild(node, visit);
     };
-    
+
     visit(sourceFile);
-    
-    report.coverage = report.totalElements > 0
-      ? Math.round((report.documentedElements / report.totalElements) * 1000) / 10
-      : 0;
-    
+
+    report.coverage =
+      report.totalElements > 0
+        ? Math.round((report.documentedElements / report.totalElements) * 1000) / 10
+        : 0;
+
     return report;
   }
 
@@ -216,25 +219,25 @@ class JSDocCoverageMonitor {
    */
   async checkOutdatedDocumentation() {
     console.log('\n🔍 Checking for outdated documentation...');
-    
+
     for (const [packageName, packageReport] of Object.entries(this.currentReport.packages)) {
       // Check YAML vs TypeScript timestamps
       const yamlPath = path.join(__dirname, '..', 'docs', 'examples', 'domain', packageName);
-      
+
       for (const [filePath, fileReport] of Object.entries(packageReport.files)) {
         const tsFile = path.join(__dirname, '..', 'packages', packageName, 'dist', filePath);
         const yamlFile = path.join(yamlPath, filePath.replace('.d.ts', '.yaml'));
-        
+
         if (fs.existsSync(yamlFile)) {
           const tsStats = fs.statSync(tsFile);
           const yamlStats = fs.statSync(yamlFile);
-          
+
           if (tsStats.mtime > yamlStats.mtime) {
             packageReport.outdatedFiles.push({
               file: filePath,
               tsModified: tsStats.mtime,
               yamlModified: yamlStats.mtime,
-              daysBehind: Math.round((tsStats.mtime - yamlStats.mtime) / (1000 * 60 * 60 * 24))
+              daysBehind: Math.round((tsStats.mtime - yamlStats.mtime) / (1000 * 60 * 60 * 24)),
             });
           }
         }
@@ -247,36 +250,36 @@ class JSDocCoverageMonitor {
    */
   compareReports(previousReport) {
     console.log('\n📈 Comparing with previous report...');
-    
+
     for (const [packageName, currentPackage] of Object.entries(this.currentReport.packages)) {
       const previousPackage = previousReport.packages[packageName];
-      
+
       if (!previousPackage) {
         this.currentReport.summary.trends.new.push({
           package: packageName,
-          coverage: currentPackage.coverage
+          coverage: currentPackage.coverage,
         });
       } else {
         const diff = currentPackage.coverage - previousPackage.coverage;
-        
+
         if (diff > 0.1) {
           this.currentReport.summary.trends.improved.push({
             package: packageName,
             previousCoverage: previousPackage.coverage,
             currentCoverage: currentPackage.coverage,
-            improvement: diff
+            improvement: diff,
           });
         } else if (diff < -0.1) {
           this.currentReport.summary.trends.regressed.push({
             package: packageName,
             previousCoverage: previousPackage.coverage,
             currentCoverage: currentPackage.coverage,
-            regression: Math.abs(diff)
+            regression: Math.abs(diff),
           });
         } else {
           this.currentReport.summary.trends.unchanged.push(packageName);
         }
-        
+
         // Check for file changes
         currentPackage.filesChanged = [];
         for (const [filePath, hash] of Object.entries(currentPackage.fileHashes)) {
@@ -296,7 +299,7 @@ class JSDocCoverageMonitor {
     console.log('='.repeat(80));
     console.log('📊 COVERAGE REPORT');
     console.log('='.repeat(80));
-    
+
     // Overall summary
     console.log('\n📈 OVERALL METRICS');
     console.log('-'.repeat(40));
@@ -304,30 +307,31 @@ class JSDocCoverageMonitor {
     console.log(`Total Elements: ${this.currentReport.summary.totalElements}`);
     console.log(`Documented: ${this.currentReport.summary.documentedElements}`);
     console.log(`Overall Coverage: ${this.currentReport.summary.coverage}%`);
-    
+
     // Package rankings
     console.log('\n🏆 PACKAGE COVERAGE RANKING');
     console.log('-'.repeat(40));
-    
-    const sortedPackages = Object.values(this.currentReport.packages)
-      .sort((a, b) => b.coverage - a.coverage);
-    
+
+    const sortedPackages = Object.values(this.currentReport.packages).sort(
+      (a, b) => b.coverage - a.coverage
+    );
+
     sortedPackages.forEach((pkg, index) => {
       const status = pkg.coverage >= 80 ? '🟢' : pkg.coverage >= 50 ? '🟡' : '🔴';
       const yamlStatus = pkg.yamlFiles > 0 ? '✅' : '❌';
       const rank = String(index + 1).padStart(2, ' ');
-      
+
       console.log(
         `${rank}. ${status} ${pkg.name.padEnd(25)} ${pkg.coverage.toFixed(1).padStart(5)}% ` +
-        `(${pkg.documentedElements}/${pkg.totalElements}) ` +
-        `YAML:${yamlStatus}(${pkg.yamlFiles})`
+          `(${pkg.documentedElements}/${pkg.totalElements}) ` +
+          `YAML:${yamlStatus}(${pkg.yamlFiles})`
       );
-      
+
       // Show files changed
       if (pkg.filesChanged && pkg.filesChanged.length > 0) {
         console.log(`    📝 Files changed: ${pkg.filesChanged.length}`);
       }
-      
+
       // Show outdated files
       if (pkg.outdatedFiles && pkg.outdatedFiles.length > 0) {
         console.log(`    ⚠️ Outdated YAML: ${pkg.outdatedFiles.length} files`);
@@ -338,61 +342,71 @@ class JSDocCoverageMonitor {
         }
       }
     });
-    
+
     // Coverage trends
-    if (this.currentReport.summary.trends.improved.length > 0 ||
-        this.currentReport.summary.trends.regressed.length > 0) {
+    if (
+      this.currentReport.summary.trends.improved.length > 0 ||
+      this.currentReport.summary.trends.regressed.length > 0
+    ) {
       console.log('\n📊 COVERAGE TRENDS');
       console.log('-'.repeat(40));
-      
+
       if (this.currentReport.summary.trends.improved.length > 0) {
         console.log('✅ Improved:');
         this.currentReport.summary.trends.improved.forEach(item => {
-          console.log(`   ${item.package}: ${item.previousCoverage}% → ${item.currentCoverage}% (+${item.improvement.toFixed(1)}%)`);
+          console.log(
+            `   ${item.package}: ${item.previousCoverage}% → ${item.currentCoverage}% (+${item.improvement.toFixed(1)}%)`
+          );
         });
       }
-      
+
       if (this.currentReport.summary.trends.regressed.length > 0) {
         console.log('⚠️ Regressed:');
         this.currentReport.summary.trends.regressed.forEach(item => {
-          console.log(`   ${item.package}: ${item.previousCoverage}% → ${item.currentCoverage}% (-${item.regression.toFixed(1)}%)`);
+          console.log(
+            `   ${item.package}: ${item.previousCoverage}% → ${item.currentCoverage}% (-${item.regression.toFixed(1)}%)`
+          );
         });
       }
     }
-    
+
     // Coverage by status
     console.log('\n📋 COVERAGE BREAKDOWN');
     console.log('-'.repeat(40));
-    
+
     const complete = sortedPackages.filter(p => p.coverage >= 80);
     const partial = sortedPackages.filter(p => p.coverage >= 50 && p.coverage < 80);
     const incomplete = sortedPackages.filter(p => p.coverage < 50);
-    
+
     console.log(`🟢 Complete (≥80%): ${complete.length} packages`);
     if (showDetails && complete.length > 0) {
       console.log(`   ${complete.map(p => p.name).join(', ')}`);
     }
-    
+
     console.log(`🟡 Partial (50-79%): ${partial.length} packages`);
     if (showDetails && partial.length > 0) {
       console.log(`   ${partial.map(p => p.name).join(', ')}`);
     }
-    
+
     console.log(`🔴 Incomplete (<50%): ${incomplete.length} packages`);
     if (showDetails && incomplete.length > 0) {
       console.log(`   ${incomplete.map(p => p.name).join(', ')}`);
     }
-    
+
     // YAML coverage
     console.log('\n📝 YAML DOCUMENTATION STATUS');
     console.log('-'.repeat(40));
-    
+
     const withYaml = sortedPackages.filter(p => p.yamlFiles > 0);
     const withSettings = sortedPackages.filter(p => p.hasYamlSettings);
-    
-    console.log(`Packages with YAML: ${withYaml.length}/${this.currentReport.summary.totalPackages}`);
-    console.log(`Packages with .md-settings: ${withSettings.length}/${this.currentReport.summary.totalPackages}`);
-    
+
+    console.log(
+      `Packages with YAML: ${withYaml.length}/${this.currentReport.summary.totalPackages}`
+    );
+    console.log(
+      `Packages with .md-settings: ${withSettings.length}/${this.currentReport.summary.totalPackages}`
+    );
+
     const missingYaml = sortedPackages.filter(p => p.yamlFiles === 0 && p.totalElements > 0);
     if (missingYaml.length > 0) {
       console.log(`\n⚠️ Packages missing YAML documentation:`);
@@ -400,14 +414,16 @@ class JSDocCoverageMonitor {
         console.log(`   - ${p.name} (${p.totalElements} elements)`);
       });
     }
-    
+
     // Outdated documentation summary
-    const packagesWithOutdated = sortedPackages.filter(p => p.outdatedFiles && p.outdatedFiles.length > 0);
+    const packagesWithOutdated = sortedPackages.filter(
+      p => p.outdatedFiles && p.outdatedFiles.length > 0
+    );
     if (packagesWithOutdated.length > 0) {
       console.log('\n⚠️ OUTDATED DOCUMENTATION');
       console.log('-'.repeat(40));
       console.log(`${packagesWithOutdated.length} packages have outdated YAML files:`);
-      
+
       packagesWithOutdated.forEach(pkg => {
         const totalOutdated = pkg.outdatedFiles.length;
         const avgDays = Math.round(
@@ -447,15 +463,15 @@ class JSDocCoverageMonitor {
     if (fs.existsSync(this.currentReportPath)) {
       fs.copyFileSync(this.currentReportPath, this.previousReportPath);
     }
-    
+
     // Save new current
     fs.writeFileSync(this.currentReportPath, JSON.stringify(this.currentReport, null, 2));
-    
+
     // Also save timestamped version
     const timestamp = this.currentReport.timestamp.replace(/[:.]/g, '-').slice(0, -5);
     const timestampPath = path.join(this.historyDir, `report-${timestamp}.json`);
     fs.writeFileSync(timestampPath, JSON.stringify(this.currentReport, null, 2));
-    
+
     console.log(`\n💾 Report saved to:`);
     console.log(`   Current: ${this.currentReportPath}`);
     console.log(`   Archive: ${timestampPath}`);
@@ -468,7 +484,7 @@ class JSDocCoverageMonitor {
     if (!this.isExported(node)) {
       return false;
     }
-    
+
     const relevantKinds = [
       ts.SyntaxKind.ClassDeclaration,
       ts.SyntaxKind.InterfaceDeclaration,
@@ -481,9 +497,9 @@ class JSDocCoverageMonitor {
       ts.SyntaxKind.PropertySignature,
       ts.SyntaxKind.GetAccessor,
       ts.SyntaxKind.SetAccessor,
-      ts.SyntaxKind.TypeAliasDeclaration
+      ts.SyntaxKind.TypeAliasDeclaration,
     ];
-    
+
     return relevantKinds.includes(node.kind);
   }
 
@@ -494,9 +510,8 @@ class JSDocCoverageMonitor {
 
   isExported(node) {
     if (!node.modifiers) return false;
-    return node.modifiers.some(m => 
-      m.kind === ts.SyntaxKind.ExportKeyword ||
-      m.kind === ts.SyntaxKind.DeclareKeyword
+    return node.modifiers.some(
+      m => m.kind === ts.SyntaxKind.ExportKeyword || m.kind === ts.SyntaxKind.DeclareKeyword
     );
   }
 
@@ -523,7 +538,7 @@ class JSDocCoverageMonitor {
       [ts.SyntaxKind.PropertySignature]: 'property',
       [ts.SyntaxKind.GetAccessor]: 'getter',
       [ts.SyntaxKind.SetAccessor]: 'setter',
-      [ts.SyntaxKind.TypeAliasDeclaration]: 'type'
+      [ts.SyntaxKind.TypeAliasDeclaration]: 'type',
     };
     return kindMap[kind] || 'unknown';
   }
@@ -536,9 +551,9 @@ async function main() {
     showDetails: !args.includes('--summary'),
     saveCurrent: !args.includes('--no-save'),
     compareWithPrevious: !args.includes('--no-compare'),
-    checkOutdated: !args.includes('--no-outdated')
+    checkOutdated: !args.includes('--no-outdated'),
   };
-  
+
   // Handle specific commands
   if (args.includes('--help')) {
     console.log(`
@@ -560,7 +575,7 @@ Examples:
 `);
     process.exit(0);
   }
-  
+
   const monitor = new JSDocCoverageMonitor();
   await monitor.analyze(options);
 }

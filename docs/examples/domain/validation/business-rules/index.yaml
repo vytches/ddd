@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for business rule validation system'
   business-context: 'Simplifies imports for domain-specific business rule validation'
-  
+
   formats:
     jsdoc:
       description: 'Business rule validation exports and extensions'
     cli:
       description: |
         ## Business Rule Validation Exports
-        
+
         Complete business rule validation system including:
         - Core business rule validators
         - Validator extensions and utilities
@@ -33,14 +33,14 @@ file-doc:
     stability: 'stable'
     category: 'business-rules'
     pattern: 'facade-pattern'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   BusinessRuleValidator:
     description: 'Core business rule validator with fluent API'
     business-context: 'Provides domain-specific validation with business rule composition'
     source: './business-rule-validator'
-    
+
   BusinessRuleValidatorExtension:
     description: 'Extension class providing additional validation capabilities'
     business-context: 'Extends base validator with specification integration and advanced features'

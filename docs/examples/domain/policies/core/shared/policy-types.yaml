@@ -16,7 +16,7 @@ interfaces:
   PolicyContext:
     description: 'Context information for policy evaluation'
     business-context: 'Captures all contextual information needed for policy decisions including user identity, environment, and metadata'
-    
+
     formats:
       jsdoc:
         description: 'Context for policy evaluation with audit trail'
@@ -32,42 +32,42 @@ interfaces:
         business-context: 'Essential for authorization and audit trail'
         readonly: true
         required: true
-        
+
       - name: 'tenantId'
         type: 'string'
         description: 'Optional tenant ID for multi-tenant applications'
         business-context: 'Enables tenant isolation in SaaS applications'
         readonly: true
         optional: true
-        
+
       - name: 'sessionId'
         type: 'string'
         description: 'Optional session ID for request correlation'
         business-context: 'Links policy evaluations to specific user sessions for debugging'
         readonly: true
         optional: true
-        
+
       - name: 'timestamp'
         type: 'Date'
         description: 'Timestamp when evaluation was requested'
         business-context: 'Provides temporal context for time-based policies and audit logs'
         readonly: true
         required: true
-        
+
       - name: 'environment'
         type: 'string'
         description: 'Environment where evaluation is happening (dev, staging, prod)'
         business-context: 'Allows different policy rules per environment'
         readonly: true
         required: true
-        
+
       - name: 'features'
         type: 'Record<string, boolean>'
         description: 'Feature flags or toggles affecting policy behavior'
         business-context: 'Enables gradual rollout and A/B testing of policy changes'
         readonly: true
         required: true
-        
+
       - name: 'metadata'
         type: 'Record<string, unknown>'
         description: 'Additional metadata for extensibility'

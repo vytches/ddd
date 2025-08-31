@@ -2,7 +2,7 @@
 
 /**
  * Comprehensive JSDoc Coverage Report and Verification System
- * 
+ *
  * This script:
  * 1. Verifies JSDoc coverage for all .d.ts files
  * 2. Generates detailed reports before and after injection
@@ -23,8 +23,8 @@ class ComprehensiveJSDocReporter {
         totalElements: 0,
         documentedElements: 0,
         coverage: 0,
-        byType: {}
-      }
+        byType: {},
+      },
     };
   }
 
@@ -50,7 +50,7 @@ class ComprehensiveJSDocReporter {
       documentedElements: 0,
       coverage: 0,
       byType: {},
-      missingByType: {}
+      missingByType: {},
     };
 
     files.forEach(file => {
@@ -58,12 +58,12 @@ class ComprehensiveJSDocReporter {
       packageResult.files[path.relative(distPath, file)] = fileResult;
       packageResult.totalElements += fileResult.totalElements;
       packageResult.documentedElements += fileResult.documentedElements;
-      
+
       // Aggregate by type
       Object.entries(fileResult.byType).forEach(([type, count]) => {
         packageResult.byType[type] = (packageResult.byType[type] || 0) + count;
       });
-      
+
       // Track missing by type
       fileResult.missingItems.forEach(item => {
         const type = this.getElementType(item);
@@ -72,14 +72,15 @@ class ComprehensiveJSDocReporter {
         }
         packageResult.missingByType[type].push({
           file: path.relative(distPath, file),
-          ...item
+          ...item,
         });
       });
     });
 
-    packageResult.coverage = packageResult.totalElements > 0 
-      ? Math.round((packageResult.documentedElements / packageResult.totalElements) * 1000) / 10 
-      : 0;
+    packageResult.coverage =
+      packageResult.totalElements > 0
+        ? Math.round((packageResult.documentedElements / packageResult.totalElements) * 1000) / 10
+        : 0;
 
     this.results.packages[packageName] = packageResult;
     this.results.summary.totalElements += packageResult.totalElements;
@@ -93,22 +94,17 @@ class ComprehensiveJSDocReporter {
    */
   analyzeFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
-    const sourceFile = ts.createSourceFile(
-      filePath,
-      content,
-      ts.ScriptTarget.Latest,
-      true
-    );
+    const sourceFile = ts.createSourceFile(filePath, content, ts.ScriptTarget.Latest, true);
 
     const result = {
       totalElements: 0,
       documentedElements: 0,
       coverage: 0,
       byType: {},
-      missingItems: []
+      missingItems: [],
     };
 
-    const visit = (node) => {
+    const visit = node => {
       if (this.shouldHaveJSDoc(node)) {
         const elementType = this.getNodeKindName(node.kind);
         result.totalElements++;
@@ -122,19 +118,20 @@ class ComprehensiveJSDocReporter {
           result.missingItems.push({
             type: elementType,
             name: name,
-            line: line
+            line: line,
           });
         }
       }
-      
+
       ts.forEachChild(node, visit);
     };
 
     visit(sourceFile);
 
-    result.coverage = result.totalElements > 0 
-      ? Math.round((result.documentedElements / result.totalElements) * 1000) / 10 
-      : 0;
+    result.coverage =
+      result.totalElements > 0
+        ? Math.round((result.documentedElements / result.totalElements) * 1000) / 10
+        : 0;
 
     return result;
   }
@@ -160,7 +157,7 @@ class ComprehensiveJSDocReporter {
       ts.SyntaxKind.PropertySignature,
       ts.SyntaxKind.GetAccessor,
       ts.SyntaxKind.SetAccessor,
-      ts.SyntaxKind.TypeAliasDeclaration
+      ts.SyntaxKind.TypeAliasDeclaration,
     ];
 
     return relevantKinds.includes(node.kind);
@@ -171,18 +168,18 @@ class ComprehensiveJSDocReporter {
    */
   hasJSDoc(node) {
     // Try multiple methods to detect JSDoc
-    
+
     // Method 1: getJSDocCommentsAndTags
     const jsDocNodes = ts.getJSDocCommentsAndTags(node);
     if (jsDocNodes && jsDocNodes.length > 0) {
       return true;
     }
-    
+
     // Method 2: Check node.jsDoc directly
     if (node.jsDoc && node.jsDoc.length > 0) {
       return true;
     }
-    
+
     // Method 3: Check leading comment ranges
     const sourceFile = node.getSourceFile();
     if (sourceFile) {
@@ -194,7 +191,7 @@ class ComprehensiveJSDocReporter {
         });
       }
     }
-    
+
     return false;
   }
 
@@ -203,9 +200,8 @@ class ComprehensiveJSDocReporter {
    */
   isExported(node) {
     if (!node.modifiers) return false;
-    return node.modifiers.some(m => 
-      m.kind === ts.SyntaxKind.ExportKeyword ||
-      m.kind === ts.SyntaxKind.DeclareKeyword
+    return node.modifiers.some(
+      m => m.kind === ts.SyntaxKind.ExportKeyword || m.kind === ts.SyntaxKind.DeclareKeyword
     );
   }
 
@@ -245,7 +241,7 @@ class ComprehensiveJSDocReporter {
       [ts.SyntaxKind.PropertySignature]: 'property',
       [ts.SyntaxKind.GetAccessor]: 'getter',
       [ts.SyntaxKind.SetAccessor]: 'setter',
-      [ts.SyntaxKind.TypeAliasDeclaration]: 'type'
+      [ts.SyntaxKind.TypeAliasDeclaration]: 'type',
     };
     return kindMap[kind] || 'unknown';
   }
@@ -258,18 +254,21 @@ class ComprehensiveJSDocReporter {
     console.log('='.repeat(80));
     console.log('📊 COMPREHENSIVE JSDOC COVERAGE REPORT');
     console.log('='.repeat(80));
-    
+
     // Overall summary
-    this.results.summary.coverage = this.results.summary.totalElements > 0
-      ? Math.round((this.results.summary.documentedElements / this.results.summary.totalElements) * 1000) / 10
-      : 0;
-    
+    this.results.summary.coverage =
+      this.results.summary.totalElements > 0
+        ? Math.round(
+            (this.results.summary.documentedElements / this.results.summary.totalElements) * 1000
+          ) / 10
+        : 0;
+
     console.log('\n📈 OVERALL SUMMARY');
     console.log('-'.repeat(40));
     console.log(`Total Elements: ${this.results.summary.totalElements}`);
     console.log(`Documented: ${this.results.summary.documentedElements}`);
     console.log(`Coverage: ${this.results.summary.coverage}%`);
-    
+
     // Coverage by type
     const typeStats = {};
     Object.values(this.results.packages).forEach(pkg => {
@@ -286,16 +285,17 @@ class ComprehensiveJSDocReporter {
         typeStats[type].total += count;
       });
     });
-    
+
     console.log('\n📊 COVERAGE BY TYPE');
     console.log('-'.repeat(40));
     Object.entries(typeStats).forEach(([type, stats]) => {
-      const coverage = stats.total > 0 
-        ? Math.round(((stats.total - stats.missing) / stats.total) * 100)
-        : 0;
-      console.log(`${type.padEnd(15)} ${coverage}% (${stats.total - stats.missing}/${stats.total})`);
+      const coverage =
+        stats.total > 0 ? Math.round(((stats.total - stats.missing) / stats.total) * 100) : 0;
+      console.log(
+        `${type.padEnd(15)} ${coverage}% (${stats.total - stats.missing}/${stats.total})`
+      );
     });
-    
+
     // Package details
     console.log('\n📦 PACKAGE DETAILS');
     console.log('-'.repeat(40));
@@ -303,14 +303,16 @@ class ComprehensiveJSDocReporter {
       .sort((a, b) => b.coverage - a.coverage)
       .forEach(pkg => {
         const status = pkg.coverage >= 80 ? '🟢' : pkg.coverage >= 50 ? '🟡' : '🔴';
-        console.log(`${status} ${pkg.name.padEnd(30)} ${pkg.coverage}% (${pkg.documentedElements}/${pkg.totalElements})`);
+        console.log(
+          `${status} ${pkg.name.padEnd(30)} ${pkg.coverage}% (${pkg.documentedElements}/${pkg.totalElements})`
+        );
       });
-    
+
     // Critical missing items (interface properties)
     console.log('\n⚠️ CRITICAL ISSUES');
     console.log('-'.repeat(40));
     console.log('Interface properties are not receiving JSDoc from YAML injection!');
-    
+
     let propertyCount = 0;
     Object.values(this.results.packages).forEach(pkg => {
       if (pkg.missingByType.property) {
@@ -318,7 +320,7 @@ class ComprehensiveJSDocReporter {
       }
     });
     console.log(`Total missing interface properties: ${propertyCount}`);
-    
+
     // Top missing items by package
     console.log('\n🎯 TOP MISSING ITEMS BY PACKAGE');
     console.log('-'.repeat(40));
@@ -342,7 +344,7 @@ class ComprehensiveJSDocReporter {
             console.log(`  - ${count} missing ${type}s`);
           });
       });
-    
+
     return this.results;
   }
 
@@ -362,10 +364,10 @@ class ComprehensiveJSDocReporter {
         missingByTypeCount: Object.entries(pkg.missingByType || {}).reduce((acc, [type, items]) => {
           acc[type] = items.length;
           return acc;
-        }, {})
-      }))
+        }, {}),
+      })),
     };
-    
+
     fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
     console.log(`\n💾 Report saved to: ${outputPath}`);
   }
@@ -375,19 +377,20 @@ class ComprehensiveJSDocReporter {
 function main() {
   const reporter = new ComprehensiveJSDocReporter();
   const packagesPath = path.join(__dirname, '..', 'packages');
-  
+
   // Get all packages
-  const packages = fs.readdirSync(packagesPath)
+  const packages = fs
+    .readdirSync(packagesPath)
     .filter(dir => fs.statSync(path.join(packagesPath, dir)).isDirectory());
-  
+
   // Analyze each package
   packages.forEach(packageName => {
     reporter.analyzePackage(path.join(packagesPath, packageName));
   });
-  
+
   // Generate report
   reporter.generateReport();
-  
+
   // Save report
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
   const reportPath = path.join(__dirname, '..', `jsdoc-coverage-report-${timestamp}.json`);

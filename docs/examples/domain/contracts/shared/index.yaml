@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for shared types and interfaces'
   business-context: 'Common contracts used across multiple domains'
-  
+
   formats:
     jsdoc:
       description: 'Shared types and interfaces'
     cli:
       description: |
         ## Shared Contracts Exports
-        
+
         Shared types including:
         - Snapshot types and interfaces
         - Common type definitions
@@ -31,7 +31,7 @@ file-doc:
     since: '1.0.0'
     stability: 'stable'
     category: 'shared-types'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   snapshot-types:

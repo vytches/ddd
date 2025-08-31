@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Storage interfaces for scheduled job persistence'
   business-context: 'Contracts for implementing persistent storage of scheduled jobs with query capabilities'
-  
+
   formats:
     jsdoc:
       description: 'Scheduling store contracts for job persistence'
     cli:
       description: |
         ## Scheduling Store Interfaces
-        
+
         Job storage system supporting:
         - Job persistence and retrieval
         - Query operations

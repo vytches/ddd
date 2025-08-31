@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Extended type definitions enhancing base VytchesDDD types for NestJS integration'
   business-context: 'Extends core type definitions with NestJS-specific options and capabilities'
-  
+
   formats:
     jsdoc:
       description: 'Extended type definitions for NestJS integration'
     cli:
       description: |
         ## Extended NestJS Types
-        
+
         Enhanced type definitions including:
         - Extended service registration options
         - NestJS-specific configuration interfaces
@@ -33,15 +33,15 @@ file-doc:
     stability: 'stable'
     category: 'type-definitions'
     framework: 'nestjs'
-    
+
 # === INTERFACES ===
 interfaces:
   ExtendedServiceRegistrationOptions:
     description: 'Extended service registration options for NestJS adapter integration'
     business-context: 'Provides additional configuration options beyond base service registration for NestJS-specific scenarios'
-    
+
     extends: 'BaseOptions (ServiceRegistrationOptions from @vytches/ddd-di)'
-    
+
     formats:
       jsdoc:
         description: 'Enhanced registration options with NestJS-specific features'
@@ -51,21 +51,21 @@ interfaces:
           - Additional metadata support
           - NestJS DI integration control
           - Framework-specific configuration options
-    
+
     properties:
       metadata:
         description: 'Additional metadata for the service registration'
         business-context: 'Allows attaching custom metadata for advanced service configuration and framework integration'
         type: 'Record<string, any>'
         optional: true
-        
+
       registerInNestJS:
         description: 'Flag controlling whether to register the service in NestJS dependency injection container'
         business-context: 'Enables selective registration allowing services to exist only in VytchesDDD or also in NestJS DI'
         type: 'boolean'
         optional: true
         default: true
-        
+
     custom-tags:
       extends: 'ServiceRegistrationOptions'
       usage: 'service-registration'

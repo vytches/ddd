@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## JsonEventSerializer
-            
+
             Production-ready JSON event serialization.
             Handles automatic date restoration and provides comprehensive error handling for reliable event storage.
 
@@ -109,7 +109,7 @@ classes:
                 metadata: { userId: 'user-789' },
                 timestamp: new Date()
               };
-              
+
               const json = serializer.serialize(event);
               console.log('Serialized event:', json);
 
@@ -151,7 +151,7 @@ classes:
             code: |
               const jsonString = '{"eventId":"event-123","eventType":"OrderCreated",...}';
               const event = serializer.deserialize<OrderCreatedData>(jsonString);
-              
+
               console.log('Event type:', event.eventType);
               console.log('Timestamp restored:', event.timestamp instanceof Date);
 
@@ -159,7 +159,7 @@ classes:
             code: |
               // Deserialize without specific type
               const event = serializer.deserialize(storedJson);
-              
+
               // Date objects are automatically restored
               console.log('Timestamp type:', typeof event.timestamp); // 'object' (Date)
 
@@ -210,15 +210,15 @@ features:
   - name: 'Automatic Date Restoration'
     description: 'Automatically converts ISO date strings back to Date objects during deserialization'
     business-context: 'Maintains JavaScript Date object semantics for event timestamps and metadata'
-  
+
   - name: 'Pretty Printing Support'
     description: 'Optional human-readable JSON formatting for development and debugging'
     business-context: 'Development aid for debugging and manual inspection of serialized events'
-  
+
   - name: 'Comprehensive Error Handling'
     description: 'Specialized error types with detailed context for debugging serialization issues'
     business-context: 'Production-grade error handling with structured logging for monitoring and troubleshooting'
-  
+
   - name: 'Structured Logging'
     description: 'Detailed logging of serialization operations with contextual information'
     business-context: 'Monitoring and debugging support for production event serialization operations'

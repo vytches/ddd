@@ -31,7 +31,7 @@ classes:
       constructor:
         description: 'Initializes base metric collector'
         business-context: 'Sets up common metric collection infrastructure'
-        
+
         parameters:
           - name: 'name'
             type: 'string'
@@ -44,7 +44,7 @@ classes:
       collectGauge:
         description: 'Collects gauge metric'
         business-context: 'Records current value metrics'
-        
+
         parameters:
           - name: 'name'
             type: 'string'
@@ -60,7 +60,7 @@ classes:
       collectCounter:
         description: 'Collects counter metric'
         business-context: 'Records cumulative count metrics'
-        
+
         parameters:
           - name: 'name'
             type: 'string'
@@ -76,7 +76,7 @@ classes:
       collectHistogram:
         description: 'Collects histogram metric'
         business-context: 'Records distribution metrics'
-        
+
         parameters:
           - name: 'name'
             type: 'string'
@@ -92,7 +92,7 @@ classes:
       collectTimer:
         description: 'Collects timer metric'
         business-context: 'Records duration metrics'
-        
+
         parameters:
           - name: 'name'
             type: 'string'
@@ -108,7 +108,7 @@ classes:
       getMetrics:
         description: 'Gets all collected metrics'
         business-context: 'Retrieves metrics for export'
-        
+
         returns:
           type: 'Metric[]'
           description: 'Collected metrics'
@@ -132,7 +132,7 @@ classes:
       constructor:
         description: 'Creates circuit breaker metric collector'
         business-context: 'Initializes circuit breaker specific metrics'
-        
+
         parameters:
           - name: 'circuitName'
             type: 'string'
@@ -141,7 +141,7 @@ classes:
       collectStateChange:
         description: 'Records state transition'
         business-context: 'Tracks circuit state changes for monitoring'
-        
+
         parameters:
           - name: 'fromState'
             type: 'CircuitBreakerState'
@@ -153,7 +153,7 @@ classes:
       collectFailure:
         description: 'Records operation failure'
         business-context: 'Tracks failures for threshold monitoring'
-        
+
         parameters:
           - name: 'error'
             type: 'Error'
@@ -166,7 +166,7 @@ classes:
       collectSuccess:
         description: 'Records operation success'
         business-context: 'Tracks successes for recovery monitoring'
-        
+
         parameters:
           - name: 'duration'
             type: 'number'
@@ -175,7 +175,7 @@ classes:
       getCircuitBreakerMetrics:
         description: 'Gets circuit breaker specific metrics'
         business-context: 'Provides circuit breaker health metrics'
-        
+
         returns:
           type: 'CircuitBreakerMetrics'
           description: 'Circuit breaker metrics'
@@ -195,7 +195,7 @@ classes:
       constructor:
         description: 'Creates retry metric collector'
         business-context: 'Initializes retry pattern metrics'
-        
+
         parameters:
           - name: 'operationName'
             type: 'string'
@@ -204,7 +204,7 @@ classes:
       collectAttempt:
         description: 'Records retry attempt'
         business-context: 'Tracks individual retry attempts'
-        
+
         parameters:
           - name: 'attemptNumber'
             type: 'number'
@@ -222,7 +222,7 @@ classes:
       collectExhaustion:
         description: 'Records retry exhaustion'
         business-context: 'Tracks when all retries are exhausted'
-        
+
         parameters:
           - name: 'totalAttempts'
             type: 'number'
@@ -234,7 +234,7 @@ classes:
       getRetryMetrics:
         description: 'Gets retry specific metrics'
         business-context: 'Provides retry pattern health metrics'
-        
+
         returns:
           type: 'RetryMetrics'
           description: 'Retry metrics'
@@ -254,7 +254,7 @@ classes:
       constructor:
         description: 'Creates bulkhead metric collector'
         business-context: 'Initializes bulkhead pattern metrics'
-        
+
         parameters:
           - name: 'bulkheadName'
             type: 'string'
@@ -269,7 +269,7 @@ classes:
       collectExecution:
         description: 'Records operation execution'
         business-context: 'Tracks bulkhead resource usage'
-        
+
         parameters:
           - name: 'duration'
             type: 'number'
@@ -282,7 +282,7 @@ classes:
       collectRejection:
         description: 'Records operation rejection'
         business-context: 'Tracks resource exhaustion'
-        
+
         parameters:
           - name: 'reason'
             type: "'QUEUE_FULL' | 'MAX_CONCURRENCY'"
@@ -291,7 +291,7 @@ classes:
       collectQueueOperation:
         description: 'Records queue operation'
         business-context: 'Tracks queue dynamics'
-        
+
         parameters:
           - name: 'operation'
             type: "'ENQUEUE' | 'DEQUEUE'"
@@ -303,7 +303,7 @@ classes:
       getBulkheadMetrics:
         description: 'Gets bulkhead specific metrics'
         business-context: 'Provides bulkhead health metrics'
-        
+
         returns:
           type: 'BulkheadMetrics'
           description: 'Bulkhead metrics'
@@ -323,7 +323,7 @@ classes:
       constructor:
         description: 'Creates timeout metric collector'
         business-context: 'Initializes timeout pattern metrics'
-        
+
         parameters:
           - name: 'operationName'
             type: 'string'
@@ -335,7 +335,7 @@ classes:
       collectTimeout:
         description: 'Records timeout occurrence'
         business-context: 'Tracks timeout events'
-        
+
         parameters:
           - name: 'duration'
             type: 'number'
@@ -344,7 +344,7 @@ classes:
       collectCompletion:
         description: 'Records successful completion'
         business-context: 'Tracks operations completing within timeout'
-        
+
         parameters:
           - name: 'duration'
             type: 'number'
@@ -353,7 +353,7 @@ classes:
       collectCancellation:
         description: 'Records operation cancellation'
         business-context: 'Tracks manual cancellations'
-        
+
         parameters:
           - name: 'duration'
             type: 'number'
@@ -362,7 +362,7 @@ classes:
       getTimeoutMetrics:
         description: 'Gets timeout specific metrics'
         business-context: 'Provides timeout pattern health metrics'
-        
+
         returns:
           type: 'TimeoutMetrics'
           description: 'Timeout metrics'

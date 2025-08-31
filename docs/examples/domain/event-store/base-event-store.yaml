@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## BaseEventStore
-            
+
             Abstract foundation for event store implementations.
             Provides common functionality for event sourcing, snapshots, and event replay.
 
@@ -108,7 +108,7 @@ classes:
                 { eventType: 'OrderCreated', eventData: orderData, eventId: uuid() },
                 { eventType: 'PaymentProcessed', eventData: paymentData, eventId: uuid() }
               ];
-              
+
               const result = await eventStore.appendToStream('order-123', events);
               console.log(`New version: ${result.newVersion}`);
 
@@ -248,7 +248,7 @@ classes:
                 data: aggregateState,
                 createdAt: new Date()
               };
-              
+
               await eventStore.createSnapshot('order-123', snapshot);
 
         custom-tags:
@@ -334,7 +334,7 @@ classes:
                 batchSize: 100,
                 maxConcurrency: 5
               });
-              
+
               await advancedReplay.start();
 
         custom-tags:

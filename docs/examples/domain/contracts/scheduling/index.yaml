@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for event scheduling contracts'
   business-context: 'Foundation for scheduled events and recurring job patterns'
-  
+
   formats:
     jsdoc:
       description: 'Scheduling system contracts and interfaces'
     cli:
       description: |
         ## Scheduling Contracts Exports
-        
+
         Event scheduling contracts including:
         - Scheduled event interfaces
         - Scheduler contracts
@@ -33,7 +33,7 @@ file-doc:
     since: '1.0.0'
     stability: 'stable'
     category: 'scheduling'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   scheduled-event-interfaces:
@@ -41,13 +41,13 @@ exports:
     business-context: 'Contracts for events that execute on schedules or delays'
     source: './scheduled-event.interfaces'
     type: 'namespace'
-    
+
   scheduler-interfaces:
     description: 'Core scheduler contracts for job management'
     business-context: 'Interfaces for scheduling engines and job orchestration'
     source: './scheduler.interfaces'
     type: 'namespace'
-    
+
   scheduling-store-interfaces:
     description: 'Storage contracts for scheduled jobs and events'
     business-context: 'Interfaces for persisting and retrieving scheduled tasks'

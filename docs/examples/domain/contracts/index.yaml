@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for all DDD contracts and foundational interfaces'
   business-context: 'Single entry point for accessing domain contracts, ensuring consistent API across the library'
-  
+
   formats:
     jsdoc:
       description: 'Contracts package exports - foundation for DDD implementation'
     cli:
       description: |
         ## Contracts Package Exports
-        
+
         Complete contract system including:
         - Event system interfaces and utilities
         - Aggregate interfaces and capabilities
@@ -37,7 +37,7 @@ file-doc:
     stability: 'stable'
     category: 'contracts'
     pattern: 'facade-pattern'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   # Event System Exports
@@ -52,21 +52,21 @@ exports:
       - 'Event replay mechanisms'
       - 'Event persistence handlers'
       - 'Domain event utilities'
-    
+
   # Aggregate Exports
   aggregates:
     description: 'Aggregate-related interfaces and contracts'
     business-context: 'Core contracts for aggregate roots and domain entities'
     source: './aggregates'
     type: 'namespace'
-    
+
   # Validation Exports
   validation:
     description: 'Validation system contracts and specifications'
     business-context: 'Interfaces for business rule validation and specifications'
     source: './validation'
     type: 'namespace'
-    
+
   # Capabilities Exports
   capabilities:
     description: 'Capability system for extensible aggregates'
@@ -78,7 +78,7 @@ exports:
       - 'CapabilityRegistry'
       - 'createCapabilityRegistry'
       - 'Various capability interfaces'
-    
+
   # Domain Exports
   domain:
     description: 'Core domain primitives including EntityId'
@@ -86,7 +86,7 @@ exports:
     source: './domain'
     type: 'namespace'
     highlight: 'EntityId - Base implementation for all entity identifiers'
-    
+
   # Scheduling Exports
   scheduling:
     description: 'Event scheduling and job management contracts'
@@ -97,21 +97,21 @@ exports:
       - 'BackoffStrategy enum'
       - 'JobStatus enum'
       - 'SchedulePriority enum'
-    
+
   # Testing Exports
   testing:
     description: 'Testing utility contracts and interfaces'
     business-context: 'Foundation for test harnesses and test data builders'
     source: './testing'
     type: 'namespace'
-    
+
   # Repository Exports
   repositories:
     description: 'Repository pattern contracts and unit of work'
     business-context: 'Interfaces for data persistence and aggregate storage'
     source: './repositories'
     type: 'namespace'
-    
+
   # Shared Exports
   shared:
     description: 'Shared types and interfaces across domains'

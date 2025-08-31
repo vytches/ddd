@@ -15,7 +15,7 @@ hierarchy:
 file-doc:
   description: 'Discovery module exports for automatic component registration'
   business-context: 'Provides automatic discovery and registration of domain services, handlers, and aggregates'
-  
+
   formats:
     jsdoc:
       description: 'Discovery service exports'

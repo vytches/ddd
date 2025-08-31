@@ -48,17 +48,17 @@ exports:
       description: 'Domain service with asynchronous lifecycle management'
       source-file: 'base-domain-service'
       business-context: 'For services requiring async initialization/cleanup'
-      
+
     EventAwareDomainService:
       description: 'Domain service with event publishing capabilities'
       source-file: 'base-domain-service'
       business-context: 'For services that need to publish domain events'
-      
+
     IBaseDomainService:
       description: 'Abstract base class for domain service implementation'
       source-file: 'base-domain-service'
       business-context: 'Foundation class for all domain services'
-      
+
     UnitOfWorkAwareDomainService:
       description: 'Domain service with transactional capabilities'
       source-file: 'base-domain-service'
@@ -69,17 +69,17 @@ exports:
       description: 'Decorator for registering domain services with DI'
       source-file: 'domain-service.decorator'
       business-context: 'Enables automatic service discovery and registration'
-      
+
     getDIDomainServiceMetadata:
       description: 'Retrieves enhanced DI metadata from decorated classes'
       source-file: 'domain-service.decorator'
       business-context: 'For accessing DI metadata programmatically'
-      
+
     getDomainServiceMetadata:
       description: 'Retrieves basic service metadata from decorated classes'
       source-file: 'domain-service.decorator'
       business-context: 'For backward compatibility and metadata inspection'
-      
+
     isDomainServicePendingDIRegistration:
       description: 'Checks if service is pending DI registration'
       source-file: 'domain-service.decorator'
@@ -90,17 +90,17 @@ exports:
       description: 'Interface for services with async lifecycle'
       source-file: 'domain-service.interface'
       business-context: 'Contract for async service initialization/cleanup'
-      
+
     IDomainService:
       description: 'Base interface for all domain services'
       source-file: 'domain-service.interface'
       business-context: 'Fundamental domain service contract'
-      
+
     IEventBusAware:
       description: 'Interface for event-publishing services'
       source-file: 'domain-service.interface'
       business-context: 'Contract for services that publish events'
-      
+
     IUnitOfWorkAware:
       description: 'Interface for transactional services'
       source-file: 'domain-service.interface'
@@ -111,7 +111,7 @@ exports:
       description: 'Complete DI metadata structure for services'
       source-file: 'di-types'
       business-context: 'Internal metadata for DI system integration'
-      
+
     EnhancedDomainServiceOptions:
       description: 'Enhanced service configuration with DI capabilities'
       source-file: 'di-types'
@@ -127,12 +127,12 @@ exports:
       description: 'Error for circular dependency detection'
       source-file: 'service.errors'
       business-context: 'Prevents infinite loops in service resolution'
-      
+
     ServiceDuplicateError:
       description: 'Error for duplicate service registration'
       source-file: 'service.errors'
       business-context: 'Prevents service ID conflicts'
-      
+
     ServiceNotFoundError:
       description: 'Error for missing service resolution'
       source-file: 'service.errors'

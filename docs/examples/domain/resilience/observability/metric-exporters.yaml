@@ -31,7 +31,7 @@ classes:
       constructor:
         description: 'Creates JSON metric exporter'
         business-context: 'Initializes JSON formatting options'
-        
+
         parameters:
           - name: 'options'
             type: 'JsonExporterOptions'
@@ -41,12 +41,12 @@ classes:
       export:
         description: 'Exports metrics as JSON'
         business-context: 'Formats metrics for JSON consumers'
-        
+
         parameters:
           - name: 'metrics'
             type: 'Metric[]'
             description: 'Metrics to export'
-            
+
         returns:
           type: 'string'
           description: 'JSON formatted metrics'
@@ -54,7 +54,7 @@ classes:
       getFormat:
         description: 'Returns export format name'
         business-context: 'Identifies exporter type'
-        
+
         returns:
           type: 'string'
           description: 'Format name "json"'
@@ -74,7 +74,7 @@ classes:
       constructor:
         description: 'Creates Prometheus metric exporter'
         business-context: 'Initializes Prometheus formatting'
-        
+
         parameters:
           - name: 'options'
             type: 'PrometheusExporterOptions'
@@ -84,12 +84,12 @@ classes:
       export:
         description: 'Exports metrics in Prometheus format'
         business-context: 'Formats metrics for Prometheus scraping'
-        
+
         parameters:
           - name: 'metrics'
             type: 'Metric[]'
             description: 'Metrics to export'
-            
+
         returns:
           type: 'string'
           description: 'Prometheus formatted metrics'
@@ -97,7 +97,7 @@ classes:
       getFormat:
         description: 'Returns export format name'
         business-context: 'Identifies exporter type'
-        
+
         returns:
           type: 'string'
           description: 'Format name "prometheus"'
@@ -105,12 +105,12 @@ classes:
       formatGauge:
         description: 'Formats gauge metric'
         business-context: 'Converts gauge to Prometheus format'
-        
+
         parameters:
           - name: 'metric'
             type: 'Metric'
             description: 'Gauge metric'
-            
+
         returns:
           type: 'string'
           description: 'Prometheus gauge format'
@@ -118,12 +118,12 @@ classes:
       formatCounter:
         description: 'Formats counter metric'
         business-context: 'Converts counter to Prometheus format'
-        
+
         parameters:
           - name: 'metric'
             type: 'Metric'
             description: 'Counter metric'
-            
+
         returns:
           type: 'string'
           description: 'Prometheus counter format'
@@ -131,12 +131,12 @@ classes:
       formatHistogram:
         description: 'Formats histogram metric'
         business-context: 'Converts histogram to Prometheus format'
-        
+
         parameters:
           - name: 'metric'
             type: 'Metric'
             description: 'Histogram metric'
-            
+
         returns:
           type: 'string'
           description: 'Prometheus histogram format'
@@ -156,7 +156,7 @@ classes:
       constructor:
         description: 'Creates CSV metric exporter'
         business-context: 'Initializes CSV formatting options'
-        
+
         parameters:
           - name: 'options'
             type: 'CsvExporterOptions'
@@ -166,12 +166,12 @@ classes:
       export:
         description: 'Exports metrics as CSV'
         business-context: 'Formats metrics for spreadsheet analysis'
-        
+
         parameters:
           - name: 'metrics'
             type: 'Metric[]'
             description: 'Metrics to export'
-            
+
         returns:
           type: 'string'
           description: 'CSV formatted metrics'
@@ -179,7 +179,7 @@ classes:
       getFormat:
         description: 'Returns export format name'
         business-context: 'Identifies exporter type'
-        
+
         returns:
           type: 'string'
           description: 'Format name "csv"'
@@ -187,7 +187,7 @@ classes:
       formatHeader:
         description: 'Formats CSV header row'
         business-context: 'Creates column headers'
-        
+
         returns:
           type: 'string'
           description: 'CSV header'
@@ -195,12 +195,12 @@ classes:
       formatRow:
         description: 'Formats metric as CSV row'
         business-context: 'Converts metric to CSV row'
-        
+
         parameters:
           - name: 'metric'
             type: 'Metric'
             description: 'Metric to format'
-            
+
         returns:
           type: 'string'
           description: 'CSV row'
@@ -220,7 +220,7 @@ classes:
       constructor:
         description: 'Creates text metric exporter'
         business-context: 'Initializes text formatting options'
-        
+
         parameters:
           - name: 'options'
             type: 'TextExporterOptions'
@@ -230,12 +230,12 @@ classes:
       export:
         description: 'Exports metrics as text'
         business-context: 'Formats metrics for human reading'
-        
+
         parameters:
           - name: 'metrics'
             type: 'Metric[]'
             description: 'Metrics to export'
-            
+
         returns:
           type: 'string'
           description: 'Text formatted metrics'
@@ -243,7 +243,7 @@ classes:
       getFormat:
         description: 'Returns export format name'
         business-context: 'Identifies exporter type'
-        
+
         returns:
           type: 'string'
           description: 'Format name "text"'
@@ -264,7 +264,7 @@ classes:
       constructor:
         description: 'Creates composite exporter'
         business-context: 'Combines multiple export formats'
-        
+
         parameters:
           - name: 'exporters'
             type: 'MetricExporter[]'
@@ -273,7 +273,7 @@ classes:
       addExporter:
         description: 'Adds an exporter'
         business-context: 'Extends export capabilities'
-        
+
         parameters:
           - name: 'exporter'
             type: 'MetricExporter'
@@ -282,7 +282,7 @@ classes:
       removeExporter:
         description: 'Removes an exporter'
         business-context: 'Reduces export formats'
-        
+
         parameters:
           - name: 'format'
             type: 'string'
@@ -291,12 +291,12 @@ classes:
       export:
         description: 'Exports in all formats'
         business-context: 'Applies all configured exporters'
-        
+
         parameters:
           - name: 'metrics'
             type: 'Metric[]'
             description: 'Metrics to export'
-            
+
         returns:
           type: 'Record<string, string>'
           description: 'Format-keyed results'
@@ -304,7 +304,7 @@ classes:
       getFormat:
         description: 'Returns all format names'
         business-context: 'Lists all export formats'
-        
+
         returns:
           type: 'string'
           description: 'Comma-separated formats'
@@ -324,7 +324,7 @@ classes:
       createExporter:
         description: 'Creates exporter by format'
         business-context: 'Instantiates appropriate exporter'
-        
+
         parameters:
           - name: 'format'
             type: "'json' | 'prometheus' | 'csv' | 'text'"
@@ -333,7 +333,7 @@ classes:
             type: 'unknown'
             description: 'Format-specific options'
             optional: true
-            
+
         returns:
           type: 'MetricExporter'
           description: 'Created exporter'
@@ -341,7 +341,7 @@ classes:
       createCompositeExporter:
         description: 'Creates composite exporter'
         business-context: 'Creates multi-format exporter'
-        
+
         parameters:
           - name: 'formats'
             type: 'string[]'
@@ -350,7 +350,7 @@ classes:
             type: 'Record<string, unknown>'
             description: 'Format options'
             optional: true
-            
+
         returns:
           type: 'CompositeMetricExporter'
           description: 'Composite exporter'
@@ -358,7 +358,7 @@ classes:
       getSupportedFormats:
         description: 'Gets supported formats'
         business-context: 'Lists available export formats'
-        
+
         returns:
           type: 'string[]'
           description: 'Supported format names'

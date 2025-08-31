@@ -31,7 +31,7 @@ interfaces:
         cli:
           description: |
             ## IDomainService
-            
+
             Base interface for all domain services in DDD architecture.
             Provides service identification for dependency injection and debugging.
 
@@ -48,7 +48,7 @@ interfaces:
         readonly: true
         optional: true
         business-context: 'Unique identifier for service registration and DI container lookup'
-        
+
         custom-tags:
           optional: 'Service ID is optional but recommended'
           readonly: 'Cannot be modified after creation'
@@ -71,7 +71,7 @@ interfaces:
         cli:
           description: |
             ## IAsyncDomainService
-            
+
             Interface for domain services with asynchronous lifecycle.
             Extends IDomainService with async initialization and cleanup capabilities.
 
@@ -148,7 +148,7 @@ interfaces:
         cli:
           description: |
             ## IUnitOfWorkAware
-            
+
             Interface for services that support Unit of Work pattern.
             Enables transactional coordination across multiple repository operations.
 
@@ -224,7 +224,7 @@ interfaces:
         cli:
           description: |
             ## IEventBusAware
-            
+
             Interface for services that support event publishing.
             Enables domain services to participate in event-driven architecture.
 
@@ -283,7 +283,7 @@ interfaces:
         cli:
           description: |
             ## ITransactionalDomainService
-            
+
             Composite interface combining IDomainService and IUnitOfWorkAware.
             Convenience interface for services requiring both identity and transactional capabilities.
 

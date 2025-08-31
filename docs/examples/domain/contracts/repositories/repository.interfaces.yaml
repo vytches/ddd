@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Comprehensive repository pattern interfaces'
   business-context: 'Contracts for implementing data persistence with repository pattern, supporting CQRS and unit of work'
-  
+
   formats:
     jsdoc:
       description: 'Repository pattern contracts for aggregate persistence'
     cli:
       description: |
         ## Repository Pattern Interfaces
-        
+
         Complete repository system including:
         - Base repository interface
         - CQRS repository separation

@@ -2,7 +2,7 @@
 
 # === FILE METADATA ===
 file-name: 'core/resilience-context'
-title: 'ResilienceContext - Core Context Implementation'  
+title: 'ResilienceContext - Core Context Implementation'
 description: 'Resilience context and error handling for operation tracking'
 business-context: |
   Provides correlation tracking and metadata for resilience operations.
@@ -74,29 +74,29 @@ classes:
       custom-tags:
         since: '1.0.0'
         implements: 'ResilienceContext'
-    
+
     properties:
       - name: 'correlationId'
         type: 'string'
         description: 'Unique correlation identifier for request tracking'
         readonly: true
-      
+
       - name: 'startTime'
         type: 'Date'
         description: 'Timestamp when operation started'
         readonly: true
-      
+
       - name: 'attempt'
         type: 'number'
         description: 'Current retry attempt number'
         readonly: true
-      
+
       - name: 'signal'
         type: 'AbortSignal'
         description: 'Abort signal for cancellation handling'
         readonly: true
         getter: true
-      
+
       - name: 'metadata'
         type: 'ReadonlyMap<string, unknown>'
         description: 'Additional context metadata'

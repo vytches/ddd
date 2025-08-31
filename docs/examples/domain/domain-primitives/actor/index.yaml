@@ -15,7 +15,7 @@ hierarchy:
 file-doc:
   description: 'Actor module export hub'
   business-context: 'Centralizes actor pattern exports for audit and authorization'
-  
+
   formats:
     jsdoc:
       description: 'Actor module exports'
@@ -35,12 +35,12 @@ exports:
     from: './actor.error'
     description: 'Error class for actor-related issues'
     business-context: 'Handles actor validation and processing errors'
-    
+
   - name: 'DefaultActorType'
     from: './actor.interface'
     description: 'Standard actor type enumeration'
     business-context: 'Categorizes actors for authorization'
-    
+
   - name: 'IActor'
     from: './actor.interface'
     description: 'Actor identification interface'

@@ -11,7 +11,7 @@ function analyzePackage(packageName) {
     classes: { documented: 0, undocumented: [] },
     functions: { documented: 0, undocumented: [] },
     types: { documented: 0, undocumented: [] },
-    enums: { documented: 0, undocumented: [] }
+    enums: { documented: 0, undocumented: [] },
   };
 
   function analyzeFile(filePath) {
@@ -40,7 +40,7 @@ function analyzePackage(packageName) {
       const name = node.name?.text || 'anonymous';
       const hasDoc = hasJsDoc(node);
       const fileName = path.basename(filePath);
-      
+
       if (ts.isInterfaceDeclaration(node)) {
         if (hasDoc) stats.interfaces.documented++;
         else stats.interfaces.undocumented.push({ name, file: fileName });
@@ -57,7 +57,7 @@ function analyzePackage(packageName) {
         if (hasDoc) stats.enums.documented++;
         else stats.enums.undocumented.push({ name, file: fileName });
       }
-      
+
       ts.forEachChild(node, visit);
     }
 
@@ -72,7 +72,11 @@ function analyzePackage(packageName) {
       const stat = fs.statSync(fullPath);
       if (stat.isDirectory()) {
         processDirectory(fullPath);
-      } else if (file.endsWith('.d.ts') && !file.endsWith('.spec.d.ts') && !file.endsWith('.test.d.ts')) {
+      } else if (
+        file.endsWith('.d.ts') &&
+        !file.endsWith('.spec.d.ts') &&
+        !file.endsWith('.test.d.ts')
+      ) {
         analyzeFile(fullPath);
       }
     });
@@ -86,7 +90,7 @@ const stats = analyzePackage('aggregates');
 if (stats) {
   console.log('📦 Aggregates Package Analysis:');
   console.log('================================');
-  
+
   Object.entries(stats).forEach(([type, data]) => {
     const total = data.documented + data.undocumented.length;
     const percentage = total > 0 ? Math.round((data.documented / total) * 100) : 0;
@@ -99,10 +103,15 @@ if (stats) {
       });
     }
   });
-  
+
   // Summary
   console.log('\n📊 SUMMARY:');
-  const totalElements = Object.values(stats).reduce((acc, s) => acc + s.documented + s.undocumented.length, 0);
+  const totalElements = Object.values(stats).reduce(
+    (acc, s) => acc + s.documented + s.undocumented.length,
+    0
+  );
   const totalDocumented = Object.values(stats).reduce((acc, s) => acc + s.documented, 0);
-  console.log(`Total coverage: ${totalDocumented}/${totalElements} (${Math.round((totalDocumented/totalElements) * 100)}%)`);
+  console.log(
+    `Total coverage: ${totalDocumented}/${totalElements} (${Math.round((totalDocumented / totalElements) * 100)}%)`
+  );
 }

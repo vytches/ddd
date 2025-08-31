@@ -33,10 +33,10 @@ types:
         code: |
           // Using enum value
           const errorCode: ErrorCode = DomainErrorCode.ValidationFailed;
-          
+
           // Using custom string
           const customCode: ErrorCode = 'CUSTOM_BUSINESS_ERROR';
-          
+
           // In error creation
           const error = new IDomainError('Something failed', {
             code: DomainErrorCode.NotFound

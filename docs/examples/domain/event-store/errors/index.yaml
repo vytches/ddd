@@ -15,7 +15,7 @@ hierarchy:
 file-doc:
   description: 'Event store errors module exports'
   business-context: 'Provides centralized access to all event store error handling utilities'
-  
+
   formats:
     jsdoc:
       description: 'Event store error exports'

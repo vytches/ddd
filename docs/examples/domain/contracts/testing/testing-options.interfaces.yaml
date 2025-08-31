@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Testing configuration option interfaces'
   business-context: 'Contracts for configuring test environments, behaviors, and utilities'
-  
+
   formats:
     jsdoc:
       description: 'Testing configuration contracts'
     cli:
       description: |
         ## Testing Options Interfaces
-        
+
         Test configuration supporting:
         - Test harness options
         - Test clock configuration

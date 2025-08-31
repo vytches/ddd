@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Snapshot-related type definitions for performance optimization'
   business-context: 'Contracts for aggregate snapshots that optimize event replay performance'
-  
+
   formats:
     jsdoc:
       description: 'Snapshot type definitions for aggregate state capture'
     cli:
       description: |
         ## Snapshot Types
-        
+
         Aggregate snapshot system supporting:
         - State capture at specific versions
         - Metadata preservation

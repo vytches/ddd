@@ -17,19 +17,19 @@ classes:
     class-doc:
       description: 'Abstract class defining the contract for event persistence handling'
       business-context: 'Foundation for implementing event stores with version control and persistence guarantees'
-      
+
       formats:
         jsdoc:
           description: 'Abstract base class for event persistence implementations'
         cli:
           description: |
             ## IEventPersistenceHandler
-            
+
             Event persistence contract providing:
             - Event storage operations
             - Version management
             - Aggregate version tracking
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'abstract-class'
@@ -41,22 +41,22 @@ classes:
         description: 'Persists a domain event and returns the new version number'
         business-context: 'Core operation for storing events with optimistic concurrency control'
         abstract: true
-        
+
         parameters:
           - name: 'event'
             type: 'IDomainEvent'
             description: 'Domain event to persist to storage'
-            
+
         returns:
           type: 'Promise<number>'
           description: 'New version number after successfully persisting the event'
-          
+
         examples:
           - id: 'persist-event'
             code: |
               const newVersion = await persistenceHandler.handleEvent(orderCreatedEvent);
               console.log(`Event stored, new version: ${newVersion}`);
-              
+
         custom-tags:
           async: true
           throws: 'May throw on persistence failures or version conflicts'
@@ -65,16 +65,16 @@ classes:
         description: 'Retrieves the current version of an aggregate'
         business-context: 'Version tracking for optimistic concurrency control and event ordering'
         abstract: true
-        
+
         parameters:
           - name: 'aggregateId'
             type: 'unknown'
             description: 'Identifier of the aggregate to get version for'
-            
+
         returns:
           type: 'Promise<number | undefined>'
           description: 'Current version number or undefined if aggregate not found'
-          
+
         examples:
           - id: 'get-version'
             code: |
@@ -82,7 +82,7 @@ classes:
               if (version === undefined) {
                 console.log('Aggregate not found');
               }
-              
+
         custom-tags:
           async: true
           nullable: 'Returns undefined for non-existent aggregates'

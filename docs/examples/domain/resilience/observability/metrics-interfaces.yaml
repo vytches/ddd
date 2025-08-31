@@ -19,11 +19,11 @@ types:
   MetricType:
     description: 'Types of metrics supported'
     business-context: 'Different metric types for various monitoring scenarios'
-    
+
   MetricValue:
     description: 'Union type for metric values'
     business-context: 'Flexible value type supporting different metric data types'
-    
+
   MetricLabels:
     description: 'Key-value labels for metric tagging'
     business-context: 'Enables metric filtering and grouping in monitoring systems'
@@ -33,7 +33,7 @@ interfaces:
   Metric:
     description: 'Base metric interface'
     business-context: 'Standard structure for all metric types'
-    
+
     properties:
       - name: 'name'
         type: 'string'
@@ -55,7 +55,7 @@ interfaces:
   HistogramBucket:
     description: 'Histogram bucket definition'
     business-context: 'Defines ranges for histogram metrics'
-    
+
     properties:
       - name: 'upperBound'
         type: 'number'
@@ -67,7 +67,7 @@ interfaces:
   HistogramMetric:
     description: 'Histogram metric for distributions'
     business-context: 'Tracks value distributions for latency and size metrics'
-    
+
     properties:
       - name: 'buckets'
         type: 'HistogramBucket[]'
@@ -82,7 +82,7 @@ interfaces:
   TimerMetric:
     description: 'Timer metric for durations'
     business-context: 'Tracks execution times and latencies'
-    
+
     properties:
       - name: 'min'
         type: 'number'
@@ -100,7 +100,7 @@ interfaces:
   MetricCollector:
     description: 'Interface for collecting metrics'
     business-context: 'Standardized metric collection across resilience patterns'
-    
+
     methods:
       - name: 'collectGauge'
         description: 'Collects gauge metric'
@@ -116,7 +116,7 @@ interfaces:
   MetricRegistry:
     description: 'Registry for metric management'
     business-context: 'Central registry for all application metrics'
-    
+
     methods:
       - name: 'register'
         description: 'Registers new metric'
@@ -138,7 +138,7 @@ interfaces:
   MetricExporter:
     description: 'Interface for exporting metrics'
     business-context: 'Exports metrics to monitoring systems'
-    
+
     methods:
       - name: 'export'
         description: 'Exports metrics in specific format'
@@ -148,7 +148,7 @@ interfaces:
   ObservabilityEvent:
     description: 'Event for observability'
     business-context: 'Structured events for monitoring and alerting'
-    
+
     properties:
       - name: 'type'
         type: 'string'
@@ -170,7 +170,7 @@ interfaces:
   ObservabilityEventListener:
     description: 'Listener for observability events'
     business-context: 'Handles observability events for monitoring'
-    
+
     methods:
       - name: 'onEvent'
         description: 'Handles observability event'
@@ -178,7 +178,7 @@ interfaces:
   ObservabilityEventBus:
     description: 'Event bus for observability'
     business-context: 'Distributes events to monitoring systems'
-    
+
     methods:
       - name: 'emit'
         description: 'Emits observability event'
@@ -200,7 +200,7 @@ interfaces:
   ResilienceMetrics:
     description: 'Base resilience metrics'
     business-context: 'Common metrics for all resilience patterns'
-    
+
     properties:
       - name: 'pattern'
         type: 'string'
@@ -225,7 +225,7 @@ interfaces:
   CircuitBreakerMetrics:
     description: 'Circuit breaker specific metrics'
     business-context: 'Metrics for circuit breaker monitoring'
-    
+
     properties:
       - name: 'state'
         type: 'CircuitBreakerState'
@@ -241,7 +241,7 @@ interfaces:
   RetryMetrics:
     description: 'Retry pattern metrics'
     business-context: 'Metrics for retry pattern monitoring'
-    
+
     properties:
       - name: 'totalRetries'
         type: 'number'
@@ -253,7 +253,7 @@ interfaces:
   BulkheadMetrics:
     description: 'Bulkhead pattern metrics'
     business-context: 'Metrics for bulkhead monitoring'
-    
+
     properties:
       - name: 'activeOperations'
         type: 'number'
@@ -271,7 +271,7 @@ interfaces:
   TimeoutMetrics:
     description: 'Timeout pattern metrics'
     business-context: 'Metrics for timeout monitoring'
-    
+
     properties:
       - name: 'timedOutOperations'
         type: 'number'

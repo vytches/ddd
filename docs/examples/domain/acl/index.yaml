@@ -33,110 +33,110 @@ exports:
     type: 'class'
     category: 'errors'
     description: 'Base error for application layer failures'
-  
+
   - name: 'BaseApplicationService'
     type: 'class'
     category: 'application'
     description: 'Foundation for application services using ACL'
-  
+
   - name: 'IApplicationService'
     type: 'interface'
     category: 'contracts'
     description: 'Contract for application service implementation'
-  
+
   # Errors
   - name: 'ACLError'
     type: 'class'
     category: 'errors'
     description: 'Base error class for all ACL-related failures'
-  
+
   - name: 'AdapterNotFoundError'
     type: 'class'
     category: 'errors'
     description: 'Error thrown when requested adapter is not registered'
-  
+
   - name: 'TranslationError'
     type: 'class'
     category: 'errors'
     description: 'Error during model translation between domain and external'
-  
+
   # Core Components
   - name: 'BaseACLAdapter'
     type: 'class'
     category: 'core'
     description: 'Abstract base for all ACL adapter implementations'
-  
+
   - name: 'SimpleACLAdapter'
     type: 'class'
     category: 'core'
     description: 'Basic ACL adapter for straightforward integrations'
-  
+
   - name: 'EnhancedACLAdapter'
     type: 'class'
     category: 'advanced'
     description: 'Advanced adapter with caching and retry capabilities'
-  
+
   # Middleware
   - name: 'BaseACLMiddleware'
     type: 'class'
     category: 'middleware'
     description: 'Base class for ACL middleware pipeline'
-  
+
   # Registry
   - name: 'ACLRegistry'
     type: 'class'
     category: 'registry'
     description: 'Global registry for ACL adapter management'
-  
+
   - name: 'BaseACLRegistry'
     type: 'class'
     category: 'registry'
     description: 'Base implementation for ACL registry patterns'
-  
+
   - name: 'ContextACLRegistry'
     type: 'class'
     category: 'registry'
     description: 'Context-aware registry for bounded context isolation'
-  
+
   - name: 'VersionedACLRegistry'
     type: 'class'
     category: 'registry'
     description: 'Registry supporting multiple API versions'
-  
+
   # Translators
   - name: 'BaseModelTranslator'
     type: 'class'
     category: 'translators'
     description: 'Base class for domain-external model translation'
-  
+
   # Operations
   - name: 'TypedOperation'
     type: 'class'
     category: 'operations'
     description: 'Type-safe operation definitions for ACL adapters'
-  
+
   # Versioning
   - name: 'VersionedACLAdapter'
     type: 'class'
     category: 'versioning'
     description: 'Adapter supporting multiple external API versions'
-  
+
   # Interfaces
   - name: 'IACLAdapter'
     type: 'interface'
     category: 'contracts'
     description: 'Core contract for ACL adapter implementations'
-  
+
   - name: 'IEnhancedACLAdapter'
     type: 'interface'
     category: 'contracts'
     description: 'Extended contract with advanced capabilities'
-  
+
   - name: 'IExternalAPI'
     type: 'interface'
     category: 'contracts'
     description: 'Contract for external API integration'
-  
+
   - name: 'IModelTranslator'
     type: 'interface'
     category: 'contracts'

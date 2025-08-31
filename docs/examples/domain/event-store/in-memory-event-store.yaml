@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## InMemoryEventStore
-            
+
             Production-ready in-memory event store implementation.
             Provides full event sourcing capabilities with ACID compliance, snapshots, and global event ordering.
 
@@ -139,7 +139,7 @@ classes:
                   timestamp: new Date()
                 }
               ];
-              
+
               const result = await eventStore.appendToStream('order-123', events);
               console.log(`Events appended from version ${result.fromVersion} to ${result.toVersion}`);
 
@@ -197,7 +197,7 @@ classes:
                 maxCount: 20,
                 direction: 'forward'
               });
-              
+
               console.log(`Read ${recentEvents.events.length} events from version 10`);
               console.log(`End of stream: ${recentEvents.isEndOfStream}`);
 
@@ -238,7 +238,7 @@ classes:
                 maxCount: 100,
                 direction: 'forward'
               });
-              
+
               console.log(`Found ${orderEvents.events.length} order events`);
 
         custom-tags:
@@ -404,7 +404,7 @@ classes:
                 timestamp: new Date(),
                 metadata: { snapshotType: 'automatic' }
               };
-              
+
               await eventStore.saveSnapshot('order-123', snapshot);
 
         custom-tags:
@@ -558,18 +558,18 @@ interfaces:
   InMemoryStream:
     description: 'Internal data structure representing an event stream in memory'
     business-context: 'Encapsulates stream events, metadata, and optional snapshot in single object'
-    
+
     properties:
       - name: 'events'
         type: 'IStoredEvent[]'
         description: 'Ordered array of stored events in the stream'
         business-context: 'Maintains event ordering and provides O(1) append operations'
-      
+
       - name: 'metadata'
         type: 'IStreamMetadata'
         description: 'Stream metadata including version, timestamps, and status'
         business-context: 'Tracks stream state for concurrency control and management'
-      
+
       - name: 'snapshot'
         type: 'IAggregateSnapshot'
         description: 'Optional aggregate snapshot for performance optimization'

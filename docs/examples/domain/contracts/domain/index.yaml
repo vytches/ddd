@@ -15,14 +15,14 @@ hierarchy:
 file-doc:
   description: 'Central export hub for core domain contracts including EntityId'
   business-context: 'Foundation for domain entity identification and value objects'
-  
+
   formats:
     jsdoc:
       description: 'Core domain contracts and EntityId implementation'
     cli:
       description: |
         ## Domain Contracts Exports
-        
+
         Core domain primitives including:
         - EntityId interfaces and types
         - EntityId base implementation
@@ -32,7 +32,7 @@ file-doc:
     since: '1.0.0'
     stability: 'stable'
     category: 'domain-primitives'
-    
+
 # === EXPORTS DOCUMENTATION ===
 exports:
   IdType:
@@ -40,25 +40,25 @@ exports:
     business-context: 'Defines valid ID type options (uuid, integer, bigint, custom)'
     source: './entity-id.interfaces'
     type: 'type'
-    
+
   IEntityId:
     description: 'Core interface for entity identification'
     business-context: 'Contract that all entity IDs must implement'
     source: './entity-id.interfaces'
     type: 'type'
-    
+
   IEntityIdConstructorParams:
     description: 'Constructor parameters for EntityId instances'
     business-context: 'Configuration options for creating entity IDs'
     source: './entity-id.interfaces'
     type: 'type'
-    
+
   IEntityIdFactory:
     description: 'Factory interface for creating EntityId instances'
     business-context: 'Contract for EntityId factory methods'
     source: './entity-id.interfaces'
     type: 'type'
-    
+
   EntityId:
     description: 'Base implementation of entity identification'
     business-context: 'Foundation class providing entity ID functionality with factory methods'

@@ -16,32 +16,32 @@ interfaces:
   IAggregateId:
     description: 'Minimal interface that any aggregate ID must implement'
     business-context: 'Allows flexible ID types while ensuring basic functionality for domain aggregates'
-    
+
     formats:
       jsdoc:
         description: 'Base interface for all aggregate identifiers'
       cli:
         description: |
           ## IAggregateId Interface
-          
+
           Flexible aggregate identification supporting:
           - Custom ID implementations
           - Serialization requirements
           - Optional equality comparison
-    
+
     properties:
       toString:
         description: 'Convert the ID to a string representation'
         business-context: 'Required for serialization, logging, and storage operations'
         type: '() => string'
         required: true
-        
+
       equals:
         description: 'Compare this ID with another for equality'
         business-context: 'Enables custom equality logic; defaults to string comparison if not provided'
         type: '(other: IAggregateId) => boolean'
         optional: true
-        
+
     custom-tags:
       since: '1.0.0'
       pattern: 'value-object'
@@ -52,23 +52,23 @@ functions:
   isAggregateId:
     description: 'Type guard to check if a value implements IAggregateId'
     business-context: 'Runtime validation for aggregate ID compatibility'
-    
+
     parameters:
       - name: 'value'
         type: 'unknown'
         description: 'Value to check for IAggregateId implementation'
-        
+
     returns:
       type: 'value is IAggregateId'
       description: 'True if value implements IAggregateId interface'
-      
+
     examples:
       - id: 'type-guard'
         code: |
           if (isAggregateId(someValue)) {
             console.log(someValue.toString());
           }
-          
+
     custom-tags:
       category: 'type-guard'
       pattern: 'validation'
@@ -76,7 +76,7 @@ functions:
   areAggregateIdsEqual:
     description: 'Helper function to compare two aggregate IDs for equality'
     business-context: 'Standardized comparison logic respecting custom equals implementations'
-    
+
     parameters:
       - name: 'id1'
         type: 'IAggregateId'
@@ -84,11 +84,11 @@ functions:
       - name: 'id2'
         type: 'IAggregateId'
         description: 'Second aggregate ID to compare'
-        
+
     returns:
       type: 'boolean'
       description: 'True if IDs are considered equal'
-      
+
     examples:
       - id: 'comparison'
         code: |
@@ -96,7 +96,7 @@ functions:
           if (areEqual) {
             console.log('Same aggregate instance');
           }
-          
+
     custom-tags:
       category: 'utility'
       pattern: 'comparison'

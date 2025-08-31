@@ -193,7 +193,7 @@ types:
   ACLContextInfo:
     description: 'Context metadata for ACL operations'
     business-context: 'Provides bounded context and system identification'
-    
+
     properties:
       - name: 'contextName'
         type: 'string'

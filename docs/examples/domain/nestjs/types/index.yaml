@@ -16,96 +16,96 @@ interfaces:
   VytchesDDDOptions:
     description: 'Main configuration options for VytchesDDD NestJS integration'
     business-context: 'Comprehensive configuration interface for setting up DDD patterns in NestJS applications'
-    
+
     properties:
       - name: 'features'
         type: 'string[]'
         description: 'Simple feature selection for intermediate complexity'
         optional: true
-        
+
       - name: 'autoDiscovery'
         type: 'boolean | AutoDiscoveryOptions'
         description: 'Legacy auto-discovery of DDD decorators for backward compatibility'
         optional: true
-        
+
       - name: 'discovery'
         type: 'object'
         description: 'Plugin-based discovery configuration for advanced scenarios'
         optional: true
-        
+
       - name: 'contexts'
         type: 'Record<string, ContextConfig>'
         description: 'Bounded contexts configuration for enterprise applications'
         optional: true
-        
+
       - name: 'cqrs'
         type: 'CQRSOptions'
         description: 'Command Query Responsibility Segregation configuration'
         optional: true
-        
+
       - name: 'events'
         type: 'EventOptions'
         description: 'Event system configuration for domain events'
         optional: true
-        
+
       - name: 'providers'
         type: 'Provider[]'
         description: 'Custom NestJS providers in pure NestJS style'
         optional: true
-        
+
   AutoDiscoveryOptions:
     description: 'Configuration for automatic service discovery'
     business-context: 'Enables automatic detection and registration of DDD decorated services'
-    
+
     properties:
       - name: 'enabled'
         type: 'boolean'
         description: 'Enable or disable auto-discovery functionality'
-        
+
       - name: 'patterns'
         type: 'string[]'
         description: 'File patterns to scan for decorated classes'
         optional: true
         default: '["**\/*.service.ts", "**\/*.handler.ts"]'
-        
+
       - name: 'contexts'
         type: 'string[]'
         description: 'Specific bounded contexts to discover'
         optional: true
-        
+
       - name: 'exclude'
         type: 'string[]'
         description: 'Patterns to exclude from discovery'
         optional: true
-        
+
   CQRSOptions:
     description: 'Command Query Responsibility Segregation configuration'
     business-context: 'Settings for implementing CQRS pattern in the application'
-    
+
   EventOptions:
     description: 'Event system configuration options'
     business-context: 'Configuration for domain event handling and publishing'
-    
+
   ACLOptions:
     description: 'Anti-Corruption Layer configuration'
     business-context: 'Settings for protecting domain from external system changes'
-    
+
   DomainServicesOptions:
     description: 'Domain Services configuration'
     business-context: 'Configuration for domain service registration and lifecycle'
-    
+
   ResilienceOptions:
     description: 'Resilience patterns configuration'
     business-context: 'Settings for circuit breakers, retries, and fault tolerance'
-    
+
   PoliciesOptions:
     description: 'Business policies configuration'
     business-context: 'Configuration for business rule validation and enforcement'
-    
+
   MessagingOptions:
     description: 'Messaging system configuration'
     business-context: 'Settings for message-driven architecture and saga patterns'
-    
+
   ContainerOptions:
     description: 'Custom container configuration'
     business-context: 'Advanced configuration for dependency injection container'

@@ -16,58 +16,58 @@ enums:
   EventStoreErrorCode:
     description: 'Enumeration of specific error codes for event store operations'
     business-context: 'Standardized error codes enabling precise error handling and monitoring in production systems'
-    
+
     values:
       - name: 'Default'
         value: "'ES_ERROR'"
         description: 'Generic event store error'
         business-context: 'Catch-all error code for unspecified event store issues'
-      
+
       - name: 'ConcurrencyConflict'
         value: "'ES_CONCURRENCY_CONFLICT'"
         description: 'Optimistic concurrency control violation'
         business-context: 'Occurs when multiple processes attempt to modify the same stream simultaneously'
-      
+
       - name: 'StreamNotFound'
         value: "'ES_STREAM_NOT_FOUND'"
         description: 'Requested stream does not exist'
         business-context: 'Stream lookup failure, typically indicates data consistency issues'
-      
+
       - name: 'StreamDeleted'
         value: "'ES_STREAM_DELETED'"
         description: 'Stream has been marked as deleted'
         business-context: 'Attempt to access logically deleted stream, part of soft deletion strategy'
-      
+
       - name: 'InvalidStreamVersion'
         value: "'ES_INVALID_STREAM_VERSION'"
         description: 'Stream version is invalid or out of range'
         business-context: 'Version validation failure, indicates data integrity issues'
-      
+
       - name: 'SerializationError'
         value: "'ES_SERIALIZATION_ERROR'"
         description: 'Event serialization failed'
         business-context: 'Event data cannot be converted to storage format, data compatibility issue'
-      
+
       - name: 'DeserializationError'
         value: "'ES_DESERIALIZATION_ERROR'"
         description: 'Event deserialization failed'
         business-context: 'Stored event data cannot be converted back to object format, version compatibility issue'
-      
+
       - name: 'ConnectionError'
         value: "'ES_CONNECTION_ERROR'"
         description: 'Event store connection failure'
         business-context: 'Infrastructure connectivity issues with underlying storage system'
-      
+
       - name: 'InvalidConfiguration'
         value: "'ES_INVALID_CONFIGURATION'"
         description: 'Event store configuration is invalid'
         business-context: 'Configuration validation failure, prevents event store initialization'
-      
+
       - name: 'SnapshotError'
         value: "'ES_SNAPSHOT_ERROR'"
         description: 'Snapshot operation failed'
         business-context: 'Snapshot creation or retrieval failure, affects performance optimization'
-      
+
       - name: 'StorageError'
         value: "'ES_STORAGE_ERROR'"
         description: 'Underlying storage system error'
@@ -82,45 +82,45 @@ types:
   EventStoreErrorOptions:
     description: 'Configuration options for event store error instances'
     business-context: 'Comprehensive error context for debugging and error analysis'
-    
+
     extends: 'DomainErrorOptions'
-    
+
     properties:
       - name: 'code'
         type: 'EventStoreErrorCode'
         description: 'Specific event store error code'
         optional: true
-      
+
       - name: 'streamId'
         type: 'string'
         description: 'Identifier of the stream associated with the error'
         optional: true
-      
+
       - name: 'expectedVersion'
         type: 'number'
         description: 'Expected version for concurrency control errors'
         optional: true
-      
+
       - name: 'actualVersion'
         type: 'number'
         description: 'Actual version found during concurrency control'
         optional: true
-      
+
       - name: 'position'
         type: 'bigint'
         description: 'Global position in event store where error occurred'
         optional: true
-      
+
       - name: 'eventType'
         type: 'string'
         description: 'Type of event associated with the error'
         optional: true
-      
+
       - name: 'data'
         type: 'unknown'
         description: 'Additional error-specific data'
         optional: true
-      
+
       - name: 'error'
         type: 'Error'
         description: 'Original underlying error that caused this event store error'
@@ -150,7 +150,7 @@ classes:
         cli:
           description: |
             ## EventStoreError
-            
+
             Base class for all event store errors.
             Provides structured error information including stream context, versions, and positions.
 
@@ -244,7 +244,7 @@ classes:
         cli:
           description: |
             ## EventStoreConcurrencyError
-            
+
             Concurrency conflict detection error.
             Thrown when expected stream version differs from actual version during updates.
 
@@ -746,7 +746,7 @@ functions:
             description: 'Event type if available'
             optional: true
           - name: 'error'
-            type: 'Error | undefined'  
+            type: 'Error | undefined'
             description: 'Original error if available'
             optional: true
           - name: 'data'

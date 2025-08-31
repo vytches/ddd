@@ -64,14 +64,14 @@ classes:
           - id: 'context-registration'
             code: |
               const registry = new ContextACLRegistry();
-              
+
               // Register adapters for different contexts
               registry.registerForContext(
                 'OrderManagement',
                 'inventory',
                 inventoryAdapter
               );
-              
+
               registry.registerForContext(
                 'Shipping',
                 'inventory',
@@ -102,7 +102,7 @@ classes:
                 'OrderManagement',
                 'inventory'
               );
-              
+
               const shippingInventory = registry.resolveInContext(
                 'Shipping',
                 'inventory'
@@ -157,7 +157,7 @@ classes:
                 'Shipping',
                 'tracking'
               );
-              
+
               // Now OrderManagement can resolve Shipping's adapter
               const tracking = registry.resolveWithFallback(
                 'OrderManagement',

@@ -31,7 +31,7 @@ classes:
         cli:
           description: |
             ## BaseSchedulerAdapter
-            
+
             Abstract base class for event scheduler implementations.
             Provides common functionality for job management, lifecycle, and event processing.
 
@@ -180,7 +180,7 @@ classes:
                 maxRetries: 5, 
                 priority: 'high' 
               });
-              
+
               console.log(job.id); // Generated job ID
               console.log(job.status); // JobStatus.PENDING
 
@@ -206,7 +206,7 @@ classes:
             code: |
               const event = new OrderReminderEvent('order-123', futureDate);
               const serialized = this.serializeEvent(event);
-              
+
               // Store in database, file, or message queue
               await storage.save(job.id, serialized);
 
@@ -232,7 +232,7 @@ classes:
             code: |
               const serialized = await storage.load(jobId);
               const event = this.deserializeEvent(serialized);
-              
+
               // Event is ready for processing
               await this.processEvent(event);
 
@@ -253,7 +253,7 @@ classes:
             code: |
               const scheduler = new MySchedulerAdapter();
               await scheduler.start();
-              
+
               console.log(scheduler.isRunning()); // true
 
         custom-tags:
@@ -362,10 +362,10 @@ classes:
             code: |
               // Fixed delay: always 1000ms
               const fixedDelay = this.calculateRetryDelay(3, 'fixed', 1000); // 1000ms
-              
+
               // Linear backoff: attempt * baseDelay
               const linearDelay = this.calculateRetryDelay(3, 'linear', 1000); // 3000ms
-              
+
               // Exponential backoff: baseDelay * 2^(attempt-1)
               const expDelay = this.calculateRetryDelay(3, 'exponential', 1000); // 4000ms
 
@@ -430,13 +430,13 @@ classes:
           - id: 'filter-examples'
             code: |
               const allJobs = await this.getAllJobs();
-              
+
               // Get pending jobs for a specific event type
               const pendingOrders = this.filterJobs(allJobs, {
                 status: JobStatus.PENDING,
                 eventType: 'OrderReminderEvent'
               });
-              
+
               // Get jobs scheduled in the next hour
               const upcomingJobs = this.filterJobs(allJobs, {
                 scheduledAfter: new Date(),
@@ -473,10 +473,10 @@ classes:
           - id: 'sorting-examples'
             code: |
               const jobs = await this.listJobs();
-              
+
               // Sort by scheduled time (earliest first)
               const bySchedule = this.sortJobs(jobs, 'scheduledAt', 'asc');
-              
+
               // Sort by creation time (newest first)
               const byCreation = this.sortJobs(jobs, 'createdAt', 'desc');
 
@@ -510,7 +510,7 @@ classes:
             code: |
               const allJobs = await this.getAllJobs();
               const page = this.paginateJobs(allJobs, 25, 50); // Page 3 (25 per page)
-              
+
               console.log(`Showing ${page.count} of ${page.total} jobs`);
               console.log(`Current offset: ${page.offset}`);
               page.jobs.forEach(job => console.log(job.id));

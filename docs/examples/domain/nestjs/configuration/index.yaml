@@ -15,7 +15,7 @@ hierarchy:
 file-doc:
   description: 'Configuration module exports'
   business-context: 'Manages VytchesDDD configuration within NestJS context'
-  
+
   formats:
     jsdoc:
       description: 'Configuration exports for VytchesDDD NestJS integration'

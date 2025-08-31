@@ -402,7 +402,7 @@ classes:
           - id: 'policy-build'
             code: |
               const policy = builder.build();
-              
+
               // Use the built policy
               const result = await policy.execute(async (ctx) => {
                 return await serviceOperation();
@@ -455,9 +455,9 @@ patterns:
         retryPolicy,
         bulkhead
       ];
-      
+
       const composite = new CompositeResilienceStrategy(strategies);
-      
+
       const result = await composite.execute(async (ctx) => {
         return await criticalOperation();
       }, { correlationId: 'manual-composite' });

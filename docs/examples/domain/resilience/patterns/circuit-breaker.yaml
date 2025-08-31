@@ -24,67 +24,67 @@ interfaces:
         Defines thresholds and timeouts for circuit breaker behavior,
         controlling when the circuit opens, how long it stays open, and
         conditions for recovery.
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Configuration'
-    
+
     properties:
       - name: 'failureThreshold'
         type: 'number'
         description: 'Number of failures before circuit opens'
-      
+
       - name: 'recoveryTimeout'
         type: 'number'
         description: 'Time in milliseconds before testing recovery'
-      
+
       - name: 'successThreshold'
         type: 'number'
         description: 'Successes needed in half-open state to close circuit'
         optional: true
-      
+
       - name: 'timeout'
         type: 'number'
         description: 'Operation timeout in milliseconds'
         optional: true
-      
+
       - name: 'name'
         type: 'string'
         description: 'Circuit breaker name for identification'
         optional: true
-  
+
   CircuitBreakerMetrics:
     interface-doc:
       description: 'Performance metrics for circuit breaker'
       business-context: |
         Provides operational metrics for monitoring circuit breaker
         effectiveness, failure patterns, and recovery behavior.
-      
+
       custom-tags:
         since: '1.0.0'
         pattern: 'Monitoring'
-    
+
     properties:
       - name: 'state'
         type: 'CircuitBreakerState'
         description: 'Current circuit state'
-      
+
       - name: 'failureCount'
         type: 'number'
         description: 'Number of consecutive failures'
-      
+
       - name: 'successCount'
         type: 'number'
         description: 'Number of consecutive successes'
-      
+
       - name: 'lastFailureTime'
         type: 'Date | null'
         description: 'Timestamp of last failure'
-      
+
       - name: 'lastSuccessTime'
         type: 'Date | null'
         description: 'Timestamp of last success'
-      
+
       - name: 'nextAttemptTime'
         type: 'Date | null'
         description: 'When circuit will test recovery'
@@ -176,7 +176,7 @@ classes:
               const result = await circuitBreaker.execute(async (ctx) => {
                 return await externalAPI.fetchUserData(userId);
               }, context);
-              
+
               console.log('Data retrieved:', result);
 
       getName:
@@ -242,7 +242,6 @@ classes:
           - id: 'open-error'
             code: |
               throw new CircuitBreakerOpenError('Circuit breaker is OPEN');
-
 
 # === USAGE PATTERNS ===
 patterns:
