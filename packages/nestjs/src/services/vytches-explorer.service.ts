@@ -91,11 +91,11 @@ export class VytchesExplorerService implements OnModuleInit {
     try {
       switch (type) {
         case 'command':
-          return this.moduleRef.get(ICommandBus, { strict: false });
+          return this.moduleRef.get('ICommandBus', { strict: false });
         case 'query':
-          return this.moduleRef.get(IQueryBus, { strict: false });
+          return this.moduleRef.get('IQueryBus', { strict: false });
         case 'event':
-          return this.moduleRef.get(IEventBus, { strict: false });
+          return this.moduleRef.get('IEventBus', { strict: false });
         default:
           return null;
       }
