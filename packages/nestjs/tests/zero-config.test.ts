@@ -50,10 +50,17 @@ describe('VytchesDDDModule - Zero Config', () => {
     });
   });
 
-  describe('forRoot() with features array', () => {
-    it('should accept features array for intermediate complexity', async () => {
+  describe('forRoot() with custom providers', () => {
+    it('should accept custom providers configuration', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [VytchesDDDModule.forRoot({ features: ['cqrs', 'events'] })],
+        imports: [
+          VytchesDDDModule.forRoot({
+            providers: [
+              { provide: 'ICommandBus', useValue: {} },
+              { provide: 'IQueryBus', useValue: {} },
+            ],
+          }),
+        ],
       }).compile();
 
       expect(moduleRef).toBeDefined();
@@ -65,9 +72,9 @@ describe('VytchesDDDModule - Zero Config', () => {
       expect(initError).toBeUndefined();
     });
 
-    it('should accept features array shorthand', async () => {
+    it('should work with empty options', async () => {
       const moduleRef = await Test.createTestingModule({
-        imports: [VytchesDDDModule.forRoot(['acl', 'cqrs'])],
+        imports: [VytchesDDDModule.forRoot({})],
       }).compile();
 
       expect(moduleRef).toBeDefined();
@@ -85,29 +92,13 @@ describe('VytchesDDDModule - Zero Config', () => {
       const moduleRef = await Test.createTestingModule({
         imports: [
           VytchesDDDModule.forRoot({
-            contexts: {
-              OrderManagement: {
-                modules: [],
-                accessMatrix: ['PaymentProcessing'],
-              },
-              PaymentProcessing: {
-                modules: [],
-                accessMatrix: [],
-              },
-            },
-            discovery: {
-              enabled: true,
-              parallel: true,
-              timeout: 5000,
-            },
-            cqrs: {
-              autoRegisterHandlers: true,
-            },
-            events: {
-              eventBus: {
-                type: 'unified',
-              },
-            },
+            providers: [
+              { provide: 'ICommandBus', useValue: {} },
+              { provide: 'IQueryBus', useValue: {} },
+              { provide: 'IEventBus', useValue: {} },
+            ],
+            imports: [],
+            exports: [],
           }),
         ],
       }).compile();
