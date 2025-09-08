@@ -1,0 +1,414 @@
+# ExampleEngine - Core Example Processing Engine
+# Enhanced Metadata System V2 - Complete example engine documentation
+
+# === FILE METADATA ===
+file-name: 'examples-engine'
+title: 'ExampleEngine - JSDoc Examples Processing Engine'
+description: 'High-performance example extraction and processing engine for JSDoc generation'
+business-context: 'Core component of Enhanced Metadata System V2, manages example extraction from markdown files for JSDoc injection'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ExampleEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Core example extraction and processing engine'
+      business-context: 'Central component of Enhanced Metadata System V2 for processing markdown examples and converting them to JSDoc-compatible format'
+
+      formats:
+        jsdoc:
+          description: 'Example processing engine with caching and validation'
+        cli:
+          description: |
+            ## ExampleEngine
+            High-performance example extraction engine for JSDoc generation
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Engine Pattern'
+        performance: 'Multi-level caching with global cache sharing'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates new ExampleEngine instance with caching'
+        business-context: 'Initializes file scanner, tag extractor, validator and cache systems'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const engine = new ExampleEngine();
+              // Automatically configured with caching and validation
+
+      clearGlobalCache:
+        description: 'Clear global cache across all instances'
+        business-context: 'Used between builds or for testing to ensure fresh cache state'
+
+        returns:
+          type: 'void'
+          description: 'Cache cleared globally'
+
+        custom-tags:
+          static: 'true'
+          cache-management: 'Global cache invalidation'
+
+        examples:
+          - id: 'testing'
+            code: |
+              ExampleEngine.clearGlobalCache();
+              // All instances now have fresh cache
+
+      scanFolder:
+        description: 'Scan directory for example files with intelligent caching'
+        business-context: 'Primary method for discovering markdown example files with metadata extraction'
+
+        parameters:
+          - name: 'folderPath'
+            type: 'string'
+            description: 'Absolute path to examples directory'
+
+        returns:
+          type: 'Promise<ExampleFile[]>'
+          description: 'Array of discovered example files with metadata'
+
+        custom-tags:
+          performance: 'Cached with deduplication'
+          async: 'true'
+
+        examples:
+          - id: 'domain'
+            code: |
+              const files = await engine.scanFolder('/docs/examples/domain/aggregates');
+              // Returns: ExampleFile[] with metadata
+
+      extractTaggedContent:
+        description: 'Extract @extract blocks from example files'
+        business-context: 'Core extraction logic that finds and processes @extract:methodName:domain:complexity blocks'
+
+        parameters:
+          - name: 'file'
+            type: 'ExampleFile'
+            description: 'Example file to process'
+          - name: 'tag'
+            type: 'string'
+            description: 'Tag pattern to extract (e.g., "commit:domain:basic")'
+
+        returns:
+          type: 'Promise<ExtractedExample | null>'
+          description: 'Extracted example or null if not found'
+
+        custom-tags:
+          async: 'true'
+          extraction: 'Tag-based content extraction'
+
+        examples:
+          - id: 'extract'
+            code: |
+              const example = await engine.extractTaggedContent(file, 'commit:domain:basic');
+              if (example) {
+                console.log(example.content); // TypeScript code block
+              }
+
+      formatOutput:
+        description: 'Format extracted content for target output type'
+        business-context: 'Transforms extracted markdown/code to JSDoc or CLI format'
+
+        parameters:
+          - name: 'content'
+            type: 'string'
+            description: 'Raw extracted content'
+          - name: 'outputType'
+            type: 'OutputType'
+            description: 'Target format: "jsdoc" or "cli"'
+
+        returns:
+          type: 'string'
+          description: 'Formatted content for target output'
+
+        examples:
+          - id: 'jsdoc'
+            code: |
+              const formatted = engine.formatOutput(content, 'jsdoc');
+              // Returns JSDoc-compatible format
+
+      getExamplesForMethod:
+        description: 'Find all examples for specific method across all layers'
+        business-context: 'Comprehensive method example search across domain, service, and integration layers'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method to find examples for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name to search in'
+
+        returns:
+          type: 'Promise<ExtractedExample[]>'
+          description: 'All found examples for the method'
+
+        custom-tags:
+          async: 'true'
+          search-scope: 'Multi-layer search'
+
+        examples:
+          - id: 'comprehensive'
+            code: |
+              const examples = await engine.getExamplesForMethod('commit', 'aggregates');
+              // Returns examples from domain/service/integration layers
+
+      getBestExampleForMethod:
+        description: 'Get highest priority example with layer and complexity preferences'
+        business-context: 'Intelligent example selection with prioritization for optimal JSDoc generation'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method to find example for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name to search in'
+          - name: 'preferredLayer'
+            type: 'LayerType'
+            description: 'Optional preferred layer (domain/service/integration)'
+          - name: 'preferredComplexity'
+            type: 'ComplexityLevel'
+            description: 'Optional preferred complexity (basic/intermediate/advanced)'
+
+        returns:
+          type: 'Promise<ExtractedExample | null>'
+          description: 'Best matching example or null'
+
+        custom-tags:
+          async: 'true'
+          prioritization: 'Layer and complexity preference system'
+
+        examples:
+          - id: 'prioritized'
+            code: |
+              const best = await engine.getBestExampleForMethod(
+                'commit', 'aggregates', 'domain', 'basic'
+              );
+              // Returns best matching example with preferences
+
+      validateExample:
+        description: 'Validate extracted example against layer-specific rules'
+        business-context: 'Quality assurance for generated examples ensuring they meet layer requirements'
+
+        parameters:
+          - name: 'example'
+            type: 'ExtractedExample'
+            description: 'Example to validate'
+
+        returns:
+          type: 'Promise<ValidationResult>'
+          description: 'Validation result with errors and warnings'
+
+        custom-tags:
+          async: 'true'
+          validation: 'Layer-specific rule validation'
+
+        examples:
+          - id: 'validation'
+            code: |
+              const result = await engine.validateExample(example);
+              if (!result.isValid) {
+                console.log(result.errors); // Validation errors
+              }
+
+      clearCache:
+        description: 'Clear instance-specific cache'
+        business-context: 'Cache invalidation for current engine instance'
+
+        returns:
+          type: 'void'
+          description: 'Instance cache cleared'
+
+        examples:
+          - id: 'local-clear'
+            code: |
+              engine.clearCache();
+              // This instance cache cleared
+
+      getCacheStats:
+        description: 'Get current cache statistics'
+        business-context: 'Performance monitoring and cache optimization'
+
+        returns:
+          type: '{ size: number; keys: string[]; }'
+          description: 'Cache size and key information'
+
+        examples:
+          - id: 'monitoring'
+            code: |
+              const stats = engine.getCacheStats();
+              console.log(`Cache size: ${stats.size}`);
+
+      validateExamples:
+        description: 'Batch validate multiple examples efficiently'
+        business-context: 'Performance-optimized bulk validation for large example sets'
+
+        parameters:
+          - name: 'examples'
+            type: 'ExtractedExample[]'
+            description: 'Array of examples to validate'
+
+        returns:
+          type: 'Promise<ValidationResult[]>'
+          description: 'Validation results for all examples'
+
+        custom-tags:
+          async: 'true'
+          batch-processing: 'Optimized bulk validation'
+
+        examples:
+          - id: 'bulk'
+            code: |
+              const results = await engine.validateExamples(examples);
+              const invalid = results.filter(r => !r.isValid);
+
+      getPackageStatistics:
+        description: 'Generate comprehensive statistics for package examples'
+        business-context: 'Analytics and reporting for example coverage and quality metrics'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package to analyze'
+
+        returns:
+          type: 'Promise<PackageStatistics>'
+          description: 'Complete statistics breakdown'
+
+        custom-tags:
+          async: 'true'
+          analytics: 'Comprehensive package analysis'
+
+        examples:
+          - id: 'analytics'
+            code: |
+              const stats = await engine.getPackageStatistics('aggregates');
+              console.log(`Total examples: ${stats.totalExamples}`);
+              console.log(`By layer:`, stats.examplesByLayer);
+
+# === INTERFACES ===
+interfaces:
+  IExampleEngine:
+    description: 'Core example extraction engine interface'
+    business-context: 'Contract for example processing engines in Enhanced Metadata System'
+
+    properties:
+      - name: 'scanFolder'
+        type: '(folderPath: string) => Promise<ExampleFile[]>'
+        description: 'Scan directory for example files'
+      - name: 'extractTaggedContent'
+        type: '(file: ExampleFile, tag: string) => Promise<ExtractedExample | null>'
+        description: 'Extract tagged content from file'
+      - name: 'formatOutput'
+        type: '(content: string, outputType: OutputType) => string'
+        description: 'Format content for output type'
+
+  IJSDocAdapter:
+    description: 'JSDoc-specific processing adapter interface'
+    business-context: 'Contract for JSDoc injection and processing operations'
+
+    properties:
+      - name: 'getExampleForMethod'
+        type: '(methodName: string, packageName: string, layer?: LayerType, complexity?: ComplexityLevel) => Promise<string>'
+        description: 'Get formatted example for JSDoc injection'
+      - name: 'injectIntoJSDoc'
+        type: '(code: string, methodName: string, packageName: string) => Promise<string>'
+        description: 'Inject examples into JSDoc comments'
+
+  ICLIAdapter:
+    description: 'CLI-specific output adapter interface'
+    business-context: 'Contract for CLI documentation generation and display'
+
+    properties:
+      - name: 'getCompleteExample'
+        type: '(packageName: string, framework?: string) => Promise<string>'
+        description: 'Generate complete example for CLI display'
+      - name: 'generateDocumentation'
+        type: '(options: GenerationOptions) => Promise<string>'
+        description: 'Generate formatted documentation'
+
+# === TYPES ===
+types:
+  LayerType:
+    description: 'Example organization layers in DDD architecture'
+    business-context: 'Hierarchical organization of examples by architectural layer'
+
+    values: "'domain' | 'service' | 'integration'"
+
+  ComplexityLevel:
+    description: 'Example complexity classification'
+    business-context: 'Progressive complexity levels for learning and JSDoc generation'
+
+    values: "'basic' | 'intermediate' | 'advanced'"
+
+  OutputType:
+    description: 'Target output format for example processing'
+    business-context: 'Different formatting needs for JSDoc vs CLI display'
+
+    values: "'jsdoc' | 'cli'"
+
+  ExampleFile:
+    description: 'Parsed example file with metadata'
+    business-context: 'Structured representation of markdown example files'
+
+    properties:
+      - name: 'filePath'
+        type: 'string'
+        description: 'Absolute path to example file'
+      - name: 'packageName'
+        type: 'string'
+        description: 'Associated package name'
+      - name: 'complexity'
+        type: 'ComplexityLevel'
+        description: 'Example complexity level'
+      - name: 'metadata'
+        type: 'ExampleMetadata'
+        description: 'Extracted file metadata'
+
+  ExtractedExample:
+    description: 'Processed example with layer and complexity information'
+    business-context: 'Ready-to-use example content with classification metadata'
+
+    properties:
+      - name: 'methodName'
+        type: 'string'
+        description: 'Target method name'
+      - name: 'layer'
+        type: 'LayerType'
+        description: 'Architectural layer'
+      - name: 'complexity'
+        type: 'ComplexityLevel'
+        description: 'Complexity classification'
+      - name: 'content'
+        type: 'string'
+        description: 'Formatted TypeScript code'
+
+  ValidationResult:
+    description: 'Example validation result with errors and warnings'
+    business-context: 'Quality assurance results for example validation'
+
+    properties:
+      - name: 'isValid'
+        type: 'boolean'
+        description: 'Overall validation status'
+      - name: 'errors'
+        type: 'ValidationError[]'
+        description: 'Critical validation errors'
+      - name: 'warnings'
+        type: 'ValidationWarning[]'
+        description: 'Non-critical validation warnings'

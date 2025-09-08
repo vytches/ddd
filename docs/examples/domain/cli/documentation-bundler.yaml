@@ -1,0 +1,176 @@
+# DocumentationBundler - CLI Bundle Generation System
+
+# === FILE METADATA ===
+file-name: 'documentation-bundler'
+title: 'DocumentationBundler - Multi-Package Bundle Generator'
+description: 'Advanced documentation bundler for creating comprehensive multi-package bundles'
+business-context: 'Enterprise documentation aggregation and bundle generation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  DocumentationBundler:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Multi-package documentation bundler with advanced filtering'
+      business-context: 'Aggregates documentation across packages for enterprise distribution'
+
+      formats:
+        jsdoc:
+          description: 'Creates comprehensive documentation bundles'
+        cli:
+          description: |
+            ## DocumentationBundler
+            Enterprise-grade documentation bundling system for multi-package scenarios
+
+      custom-tags:
+        since: '1.0.0'
+        bundle-generation: 'Multi-package aggregation'
+        filtering: 'Advanced example filtering and randomization'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates bundler with generator and config loader'
+        business-context: 'Initializes bundler with documentation infrastructure'
+
+        examples:
+          - id: 'basic-bundler'
+            code: |
+              const bundler = new DocumentationBundler();
+
+              const bundle = await bundler.createBundle({
+                packages: ['aggregates', 'cqrs', 'events'],
+                framework: 'nestjs',
+                maxExamples: 50
+              });
+
+      generateBundle:
+        description: 'Generate bundle (alias for createBundle for backward compatibility)'
+        business-context: 'Legacy API support for existing bundle generation workflows'
+
+        parameters:
+          - name: 'options'
+            type: 'BundleOptions'
+            description: 'Bundle generation configuration'
+
+        returns:
+          type: 'Promise<DocumentationBundle>'
+          description: 'Generated documentation bundle with metadata'
+
+        examples:
+          - id: 'generate-bundle'
+            code: |
+              const bundle = await bundler.generateBundle({
+                packages: ['domain-services', 'policies'],
+                complexityLevels: ['intermediate', 'advanced'],
+                llmOptimized: true
+              });
+
+              console.log(`Generated bundle with ${bundle.exampleCount} examples`);
+
+      createBundle:
+        description: 'Create a documentation bundle from multiple packages'
+        business-context: 'Main bundling operation for enterprise documentation distribution'
+
+        parameters:
+          - name: 'options'
+            type: 'BundleOptions'
+            description: 'Comprehensive bundle configuration with filtering options'
+
+        returns:
+          type: 'Promise<DocumentationBundle>'
+          description: 'Complete documentation bundle with aggregated content'
+
+        custom-tags:
+          main-operation: 'Primary bundle creation method'
+          performance: 'Optimized for large package sets'
+
+        examples:
+          - id: 'enterprise-bundle'
+            code: |
+              const enterpriseBundle = await bundler.createBundle({
+                packages: ['core', 'enterprise', 'resilience'],
+                framework: 'nestjs',
+                sections: ['examples', 'patterns', 'integration'],
+                maxExamples: 100,
+                randomize: true,
+                seed: 'reproducible-seed'
+              });
+
+              // Bundle ready for distribution
+              console.log(`Enterprise bundle: ${enterpriseBundle.packageCount} packages`);
+
+# === INTERFACES ===
+interfaces:
+  BundleOptions:
+    description: 'Comprehensive bundle generation configuration'
+    business-context: 'Enterprise bundle customization options'
+
+    properties:
+      - name: 'packages'
+        type: 'string[]'
+        description: 'Array of package names to include in bundle'
+      - name: 'complexityLevels'
+        type: 'string[] | undefined'
+        description: 'Optional complexity filter (basic, intermediate, advanced)'
+      - name: 'framework'
+        type: 'string | undefined'
+        description: 'Optional framework filter (nestjs, express, fastify)'
+      - name: 'sections'
+        type: 'string[] | undefined'
+        description: 'Optional sections to include in bundle'
+      - name: 'llmOptimized'
+        type: 'boolean | undefined'
+        description: 'Optimize content for LLM consumption'
+      - name: 'showRelated'
+        type: 'boolean | undefined'
+        description: 'Include related examples and cross-references'
+      - name: 'maxExamples'
+        type: 'number | undefined'
+        description: 'Maximum number of examples to include'
+      - name: 'randomize'
+        type: 'boolean | undefined'
+        description: 'Randomize example selection for variety'
+      - name: 'seed'
+        type: 'string | undefined'
+        description: 'Seed for reproducible randomization'
+      - name: 'outputPath'
+        type: 'string | undefined'
+        description: 'Custom output path for generated bundle'
+      - name: 'diOnly'
+        type: 'boolean | undefined'
+        description: 'Show only @vytches/ddd-di examples'
+
+  DocumentationBundle:
+    description: 'Generated documentation bundle with metadata and content'
+    business-context: 'Complete bundle output for enterprise documentation distribution'
+
+    properties:
+      - name: 'metadata'
+        type: 'object'
+        description: 'Bundle metadata with title, packages, generation info'
+      - name: 'content'
+        type: 'string'
+        description: 'Aggregated documentation content'
+      - name: 'examples'
+        type: 'ExampleDefinition[]'
+        description: 'Array of included example definitions'
+      - name: 'outputPath'
+        type: 'string | undefined'
+        description: 'Generated bundle output path'
+      - name: 'packageCount'
+        type: 'number | undefined'
+        description: 'Number of packages included in bundle'
+      - name: 'exampleCount'
+        type: 'number | undefined'
+        description: 'Total number of examples in bundle'

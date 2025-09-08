@@ -41,6 +41,31 @@ classes:
         architecture: 'Event-driven, CQRS compatible'
         scalability: 'Supports high-throughput event streaming'
 
+    # Properties
+    properties:
+      type:
+        description: 'Capability type identifier for event sourcing'
+        business-context: 'Identifies this capability as event sourcing type for capability management'
+        type: "'eventSourcing'"
+        readonly: true
+
+        formats:
+          jsdoc:
+            description: 'Event sourcing capability type identifier'
+
+    # Static Members
+    statics:
+      capabilityType:
+        description: 'Static getter that returns the capability type identifier'
+        business-context: 'Used for capability registration and discovery in the system'
+        returns:
+          type: 'string'
+          description: "Returns 'eventSourcing' as the capability type"
+
+        formats:
+          jsdoc:
+            description: 'Returns event sourcing capability type'
+
     # Methods
     methods:
       constructor:
@@ -94,6 +119,7 @@ classes:
 
         custom-tags:
           cleanup: 'Prevents memory leaks by clearing event store references'
+          optional: true
 
       setEventStore:
         description: 'Configures the event store instance for persistence operations'

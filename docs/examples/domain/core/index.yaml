@@ -1,0 +1,714 @@
+# Core Meta-Package - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Core Meta-Package - Enterprise DDD Building Blocks'
+description: 'Central meta-package providing stable API for core VytchesDDD components'
+business-context: 'Single entry point for enterprise applications consuming VytchesDDD library'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  IEventMetadata:
+    description: 'Metadata interface for domain events'
+    business-context: 'Provides event tracking, correlation, and audit information'
+
+    properties:
+      - name: 'eventId'
+        type: 'string'
+        description: 'Unique identifier for the event'
+        optional: true
+
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'When the event occurred'
+        optional: true
+
+      - name: 'correlationId'
+        type: 'string'
+        description: 'Correlation ID for related events'
+        optional: true
+
+      - name: 'causationId'
+        type: 'string'
+        description: 'ID of the event that caused this event'
+        optional: true
+
+      - name: 'aggregateId'
+        type: 'unknown'
+        description: 'ID of the aggregate that generated the event'
+        optional: true
+
+      - name: 'aggregateType'
+        type: 'string'
+        description: 'Type of the aggregate that generated the event'
+        optional: true
+
+  IDomainEvent:
+    description: 'Core interface for domain events'
+    business-context: 'Represents business events that occur within domain aggregates'
+
+    generic-parameters:
+      - name: 'P'
+        description: 'Payload type'
+        default: 'unknown'
+
+    properties:
+      - name: 'eventType'
+        type: 'string'
+        description: 'Type of the event'
+
+      - name: 'payload'
+        type: 'P | undefined'
+        description: 'Payload (data) of the event'
+        optional: true
+
+      - name: 'metadata'
+        type: 'IEventMetadata'
+        description: 'Event metadata'
+        optional: true
+
+  IEventStore:
+    description: 'Interface for event storage operations'
+    business-context: 'Defines contract for persisting and retrieving aggregate events'
+
+    methods:
+      getEvents:
+        description: 'Gets all events for an aggregate'
+        parameters:
+          - name: 'aggregateId'
+            type: 'unknown'
+            description: 'Identifier of the aggregate'
+        returns:
+          type: 'Promise<IDomainEvent[]>'
+          description: 'Promise resolving to array of events'
+
+      saveEvents:
+        description: 'Saves events for an aggregate'
+        parameters:
+          - name: 'aggregateId'
+            type: 'unknown'
+            description: 'Identifier of the aggregate'
+          - name: 'events'
+            type: 'IDomainEvent[]'
+            description: 'Events to save'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected aggregate version for optimistic concurrency'
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise resolving when events are saved'
+
+  IEntityId:
+    description: 'Core interface for entity identifiers'
+    business-context: 'Foundation for all domain entity identification in DDD patterns'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Value type of the identifier'
+        default: 'unknown'
+
+    properties:
+      - name: 'value'
+        type: 'T'
+        description: 'The actual value (readonly)'
+        readonly: true
+
+    methods:
+      getValue:
+        description: 'Get the raw value of the entity ID'
+        returns:
+          type: 'T'
+          description: 'The identifier value'
+
+      getType:
+        description: 'Get the type of the entity ID'
+        returns:
+          type: 'IdType'
+          description: 'The identifier type (uuid, integer, text, bigint)'
+
+      equals:
+        description: 'Compare two entity IDs for equality'
+        parameters:
+          - name: 'other'
+            type: 'IEntityId<T>'
+            description: 'Other entity ID to compare with'
+        returns:
+          type: 'boolean'
+          description: 'True if IDs are equal'
+
+  IAggregateRoot:
+    description: 'Core interface for aggregate root functionality'
+    business-context: 'Foundation for domain aggregates with event sourcing, versioning, and capability management'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Type of the aggregate identifier'
+        default: 'string'
+
+    methods:
+      getId:
+        description: 'Returns the aggregate identifier'
+        returns:
+          type: 'EntityId<TId>'
+          description: 'The unique identifier for this aggregate'
+
+      getVersion:
+        description: 'Returns the current version of the aggregate'
+        returns:
+          type: 'number'
+          description: 'Current version number for optimistic locking'
+
+      hasChanges:
+        description: 'Checks if the aggregate has uncommitted changes'
+        returns:
+          type: 'boolean'
+          description: 'True if there are uncommitted domain events'
+
+      commit:
+        description: 'Clears all uncommitted domain events and updates initial version'
+        business-context: 'Called after successful persistence to mark events as committed'
+
+  IAggregateConstructorParams:
+    description: 'Parameters for aggregate construction'
+    business-context: 'Defines minimal required data to create an aggregate instance'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Type of the aggregate identifier'
+        default: 'string'
+
+    properties:
+      - name: 'id'
+        type: 'EntityId<TId>'
+        description: 'Unique identifier for the aggregate'
+
+      - name: 'version'
+        type: 'number'
+        description: 'Initial version number, defaults to 0'
+        optional: true
+
+  IAggregateCapability:
+    description: 'Base interface for all aggregate capabilities'
+    business-context: 'Capabilities extend aggregate functionality with features like snapshots, versioning, and event sourcing'
+
+    methods:
+      attach:
+        description: 'Called when capability is attached to an aggregate'
+        parameters:
+          - name: 'aggregate'
+            type: 'IAggregateRoot<unknown>'
+            description: 'The aggregate to attach to'
+
+  IAggregateBuilder:
+    description: 'Builder interface for creating aggregates with capabilities'
+    business-context: 'Provides fluent API for configuring aggregate features before construction'
+
+    generic-parameters:
+      - name: 'TId'
+        description: 'Type of the aggregate identifier'
+
+    methods:
+      withSnapshots:
+        description: 'Adds snapshot capability'
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+      withVersioning:
+        description: 'Adds versioning capability'
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+      withEventSourcing:
+        description: 'Adds event sourcing capability'
+        parameters:
+          - name: 'eventStore'
+            type: 'IEventStore'
+            description: 'Optional event store instance'
+            optional: true
+        returns:
+          type: 'this'
+          description: 'Builder instance for method chaining'
+
+      build:
+        description: 'Builds the aggregate with all configured capabilities'
+        returns:
+          type: 'IAggregateRoot<TId>'
+          description: 'Configured aggregate instance'
+
+  IActor:
+    description: 'Interface representing an actor in the system'
+    business-context: 'Identifies who or what performed an action that resulted in domain events'
+
+    properties:
+      - name: 'type'
+        type: 'string | DefaultActorType'
+        description: 'Type of the actor (user, system, admin, etc.)'
+
+      - name: 'source'
+        type: 'string'
+        description: 'Source system or application'
+
+      - name: 'id'
+        type: 'string'
+        description: 'Unique identifier for the actor'
+        optional: true
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Additional actor metadata'
+        optional: true
+
+  ValueObjectValidator:
+    description: 'Interface for value object validation'
+    business-context: 'Defines validation contract for domain value objects'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Type of the value being validated'
+
+    methods:
+      validate:
+        description: 'Validates the provided value'
+        parameters:
+          - name: 'value'
+            type: 'T'
+            description: 'Value to validate'
+        returns:
+          type: 'boolean'
+          description: 'True if value is valid'
+
+# === TYPES ===
+types:
+  IdType:
+    description: 'Enumeration of supported entity ID types'
+    business-context: 'Defines the various identifier formats supported by the framework'
+
+    definition: "'uuid' | 'integer' | 'text' | 'bigint'"
+
+  ErrorCode:
+    description: 'Flexible error code type accepting both enum values and string literals'
+    business-context: 'Allows for both predefined error codes and custom error scenarios'
+
+    definition: 'DomainErrorCode | string'
+
+  DomainErrorOptions:
+    description: 'Configuration options for domain errors'
+    business-context: 'Provides context and metadata for domain-level errors'
+
+    definition: 'ErrorOptions & { domain?: string | object | undefined; code?: ErrorCode; data?: unknown; error?: Error | undefined; }'
+
+# === ENUMS ===
+enums:
+  DomainErrorCode:
+    description: 'Standard domain-level error codes'
+    business-context: 'Predefined error codes for common domain scenarios'
+
+    values:
+      - name: 'Default'
+        value: "'D_ERROR'"
+        description: 'Generic domain error'
+      - name: 'ValidationFailed'
+        value: "'D_VALIDATION_FAILED'"
+        description: 'Domain validation failure'
+      - name: 'NotFound'
+        value: "'D_NOT_FOUND'"
+        description: 'Requested domain entity not found'
+      - name: 'InvalidState'
+        value: "'D_INVALID_STATE'"
+        description: 'Aggregate in invalid state for operation'
+
+  ApplicationErrorCode:
+    description: 'Application-level error codes'
+    business-context: 'Error codes for application service layer issues'
+
+  FrameworkErrorCode:
+    description: 'Framework-level error codes'
+    business-context: 'Error codes for infrastructure and framework-related issues'
+
+  DefaultActorType:
+    description: 'Standard actor types in the system'
+    business-context: 'Predefined actor categories for event metadata'
+
+    values:
+      - name: 'USER'
+        value: "'user'"
+        description: 'Human user actor'
+      - name: 'SYSTEM'
+        value: "'system'"
+        description: 'System-initiated action'
+      - name: 'ADMIN'
+        value: "'admin'"
+        description: 'Administrative user'
+      - name: 'SERVICE'
+        value: "'service'"
+        description: 'External service actor'
+
+# === CLASSES ===
+classes:
+  Capability:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for aggregate capabilities'
+      business-context: 'Foundation for extending aggregate functionality with reusable capability patterns'
+
+      custom-tags:
+        abstract: 'Abstract base class'
+        generic-parameters: 'T extends string = string'
+
+  EntityId:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enterprise-grade EntityId implementation'
+      business-context: 'Fundamental building block for all entity identifiers in the DDD framework'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Core entity identifier with validation and type safety'
+        cli:
+          description: |
+            ## EntityId
+
+            Enterprise-grade entity identifier supporting multiple ID types:
+            - UUID: Standard universally unique identifiers
+            - Text: String-based identifiers  
+            - Integer: Numeric identifiers
+            - BigInt: Large numeric identifiers
+
+    # Methods
+    methods:
+      getValue:
+        description: 'Returns the stored identifier value'
+        business-context: 'Access the underlying ID value for business logic'
+
+        returns:
+          type: 'T'
+          description: 'The identifier value'
+
+        examples:
+          - id: 'get-text-value'
+            code: |
+              const id = EntityId.fromText('user-123');
+              const value = id.getValue(); // Returns: 'user-123'
+
+      getType:
+        description: 'Returns the identifier type'
+        business-context: 'Determine ID format for proper handling and validation'
+
+        returns:
+          type: 'IdType'
+          description: 'The identifier type (text, uuid, integer, bigint)'
+
+        examples:
+          - id: 'get-uuid-type'
+            code: |
+              const id = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+              const type = id.getType(); // Returns: 'uuid'
+
+      equals:
+        description: 'Compares this EntityId with another for equality'
+        business-context: 'Safe comparison ensuring both value and type match'
+
+        parameters:
+          - name: 'other'
+            type: 'IEntityId<T>'
+            description: 'Other EntityId to compare with'
+
+        returns:
+          type: 'boolean'
+          description: 'True if entities have same value and type'
+
+        examples:
+          - id: 'compare-ids'
+            code: |
+              const id1 = EntityId.fromText('user-123');
+              const id2 = EntityId.fromText('user-123');
+              const isEqual = id1.equals(id2); // Returns: true
+
+      createWithRandomUUID:
+        description: 'Creates a new EntityId with a randomly generated UUID'
+        business-context: 'Generate unique identifiers for new domain entities'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'New EntityId with random UUID'
+
+        examples:
+          - id: 'random-uuid'
+            code: |
+              const id = EntityId.createWithRandomUUID();
+              console.log(id.getValue()); // Returns: '550e8400-e29b-41d4-a716-446655440000'
+
+        custom-tags:
+          static: 'Static factory method'
+
+      fromUUID:
+        description: 'Creates an EntityId from a UUID string with validation'
+        business-context: 'Create typed UUID identifiers with built-in validation'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'UUID string to create EntityId from'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId from UUID string'
+
+        examples:
+          - id: 'from-uuid'
+            code: |
+              const id = EntityId.fromUUID('550e8400-e29b-41d4-a716-446655440000');
+              console.log(id.getType()); // Returns: 'uuid'
+
+        custom-tags:
+          static: 'Static factory method'
+
+      fromText:
+        description: 'Creates an EntityId from a text string with validation'
+        business-context: 'Create text-based identifiers for human-readable IDs'
+
+        parameters:
+          - name: 'value'
+            type: 'string'
+            description: 'Text string to create EntityId from'
+
+        returns:
+          type: 'EntityId<string>'
+          description: 'EntityId from text string'
+
+        examples:
+          - id: 'from-text'
+            code: |
+              const id = EntityId.fromText('user-123');
+              console.log(id.getValue()); // Returns: 'user-123'
+
+        custom-tags:
+          static: 'Static factory method'
+
+  AggregateRoot:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Core aggregate root implementation with event sourcing and capability support'
+      business-context: 'Central building block for domain aggregates following DDD patterns'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Enterprise aggregate root with event sourcing capabilities'
+        cli:
+          description: |
+            ## AggregateRoot
+
+            Core aggregate root providing:
+            - Event sourcing with domain events
+            - Optimistic concurrency control
+            - Extensible capability system
+            - State reconstruction from event history
+
+    # Methods
+    methods:
+      getId:
+        description: 'Get the unique identifier of this aggregate'
+        business-context: 'Access aggregate identifier for persistence and correlation'
+
+        returns:
+          type: 'EntityId<TId>'
+          description: 'The aggregate identifier'
+
+      commit:
+        description: 'Clear all uncommitted domain events and update initial version'
+        business-context: 'Mark events as persisted after successful repository save operation'
+
+        examples:
+          - id: 'commit-events'
+            code: |
+              const aggregate = new OrderAggregate(params);
+              aggregate.processOrder(orderData);
+
+              // After successful save to repository
+              aggregate.commit(); // Clears pending events
+
+  AggregateBuilder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Builder for creating aggregates with capabilities'
+      business-context: 'Fluent API for configuring aggregate features like snapshots, versioning, and event sourcing'
+
+      patterns: 'Builder Pattern'
+
+    # Methods
+    methods:
+      create:
+        description: 'Create new aggregate builder instance'
+        business-context: 'Entry point for building configured aggregates'
+
+        parameters:
+          - name: 'params'
+            type: '{ id: TId | EntityId<TId>; version?: number; }'
+            description: 'Aggregate construction parameters'
+
+        returns:
+          type: 'AggregateBuilder<TId>'
+          description: 'Builder instance for method chaining'
+
+        examples:
+          - id: 'create-builder'
+            code: |
+              const builder = AggregateBuilder.create({
+                id: EntityId.fromText('order-123'),
+                version: 0
+              });
+
+        custom-tags:
+          static: 'Static factory method'
+
+      build:
+        description: 'Build the aggregate with all configured capabilities'
+        business-context: 'Finalize aggregate construction with all enabled features'
+
+        parameters:
+          - name: 'AggregateClass'
+            type: 'new (params: IAggregateConstructorParams<TId>) => TAgg'
+            description: 'Optional aggregate class constructor'
+            optional: true
+
+        returns:
+          type: 'TAgg'
+          description: 'Fully configured aggregate instance'
+
+  BaseError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for all framework errors'
+      business-context: 'Foundation for structured error handling across domain, application, and framework layers'
+
+      custom-tags:
+        abstract: 'Abstract base class'
+        hierarchy: 'Base for all framework errors'
+
+  IDomainError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for domain-specific errors'
+      business-context: 'Standardized error handling for domain logic with context and metadata support'
+
+      custom-tags:
+        abstract: 'Abstract domain error'
+        extends: 'BaseError'
+
+  AggregateError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Comprehensive error classes for aggregate-specific domain errors'
+      business-context: 'Specialized errors for aggregate operations, versioning, and capability management'
+
+      extends: 'IDomainError'
+
+    # Methods
+    methods:
+      versionConflict:
+        description: 'Error for version conflicts in the aggregate'
+        business-context: 'Handle optimistic concurrency control violations'
+
+        parameters:
+          - name: 'aggregateType'
+            type: 'string'
+            description: 'Type of the aggregate'
+          - name: 'aggregateId'
+            type: 'string | number'
+            description: 'ID of the aggregate'
+          - name: 'currentVersion'
+            type: 'number'
+            description: 'Current aggregate version'
+          - name: 'expectedVersion'
+            type: 'number'
+            description: 'Expected aggregate version'
+
+        returns:
+          type: 'AggregateError'
+          description: 'Version conflict error instance'
+
+        custom-tags:
+          static: 'Static factory method'
+
+  BaseValueObject:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for domain value objects'
+      business-context: 'Foundation for immutable value objects following DDD patterns'
+
+      custom-tags:
+        abstract: 'Abstract base class'
+        immutable: 'Immutable value semantics'
+        generic-parameters: 'T - Type of the wrapped value'
+
+    # Methods
+    methods:
+      equals:
+        description: 'Compares this value object with another for equality'
+        business-context: 'Value-based equality comparison for domain value objects'
+
+        parameters:
+          - name: 'valueObject'
+            type: 'BaseValueObject<T>'
+            description: 'The value object to compare with'
+
+        returns:
+          type: 'boolean'
+          description: 'True if they are equal, false otherwise'
+
+      getValue:
+        description: 'Gets the underlying value'
+        business-context: 'Access wrapped value for business logic operations'
+
+        returns:
+          type: 'T'
+          description: 'The underlying value'

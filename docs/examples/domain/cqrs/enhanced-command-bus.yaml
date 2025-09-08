@@ -1,0 +1,208 @@
+# EnhancedCommandBus - Performance-Optimized Command Processing
+# Documentation for enhanced command bus with resilience patterns
+
+# === FILE METADATA ===
+file-name: 'enhanced-command-bus'
+title: 'EnhancedCommandBus - Enterprise Command Processing'
+description: 'Performance-optimized command bus with resilience patterns and caching'
+business-context: 'Provides enterprise-grade command processing with automatic retries, circuit breaking, and performance optimization'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  EnhancedCommandBusOptions:
+    description: 'Configuration options for enhanced command bus features'
+    business-context: 'Allows fine-tuning of performance, resilience, and batching capabilities'
+
+    properties:
+      enableMetrics:
+        description: 'Enable performance metrics collection for command execution'
+        business-context: 'Track command performance for monitoring and optimization'
+        type: 'boolean'
+        optional: true
+        default: false
+
+      enableCache:
+        description: 'Enable handler caching for performance optimization'
+        business-context: 'Reduces handler resolution overhead in high-throughput scenarios'
+        type: 'boolean'
+        optional: true
+        default: true
+
+      defaultTimeout:
+        description: 'Default timeout in milliseconds for command execution'
+        business-context: 'Prevents commands from running indefinitely and blocking resources'
+        type: 'number'
+        optional: true
+        default: 30000
+
+      defaultRetries:
+        description: 'Default number of retry attempts for failed commands'
+        business-context: 'Provides automatic recovery from transient failures'
+        type: 'number'
+        optional: true
+        default: 3
+
+      enableBatching:
+        description: 'Enable command batching for improved throughput'
+        business-context: 'Processes multiple commands together for better resource utilization'
+        type: 'boolean'
+        optional: true
+        default: false
+
+      maxBatchSize:
+        description: 'Maximum number of commands to process in a single batch'
+        business-context: 'Balances throughput with latency for batch processing'
+        type: 'number'
+        optional: true
+        default: 100
+
+      batchDelayMs:
+        description: 'Delay in milliseconds before processing a batch'
+        business-context: 'Allows accumulation of commands for more efficient batch processing'
+        type: 'number'
+        optional: true
+        default: 50
+
+      resilience:
+        description: 'Resilience pattern configurations for fault tolerance'
+        business-context: 'Comprehensive fault tolerance strategies for enterprise reliability'
+        type: 'object'
+        optional: true
+
+        properties:
+          circuitBreaker:
+            description: 'Circuit breaker configuration'
+            type: 'object'
+            properties:
+              enabled:
+                description: 'Enable circuit breaker pattern'
+                type: 'boolean'
+              failureThreshold:
+                description: 'Number of failures before opening circuit'
+                type: 'number'
+              resetTimeout:
+                description: 'Time in ms before attempting to close circuit'
+                type: 'number'
+              halfOpenMaxAttempts:
+                description: 'Max attempts in half-open state'
+                type: 'number'
+
+          retry:
+            description: 'Retry strategy configuration'
+            type: 'object'
+            properties:
+              enabled:
+                description: 'Enable retry pattern'
+                type: 'boolean'
+              maxAttempts:
+                description: 'Maximum retry attempts'
+                type: 'number'
+              baseDelay:
+                description: 'Base delay between retries in ms'
+                type: 'number'
+              maxDelay:
+                description: 'Maximum delay between retries in ms'
+                type: 'number'
+              backoffMultiplier:
+                description: 'Exponential backoff multiplier'
+                type: 'number'
+
+          timeout:
+            description: 'Timeout strategy configuration'
+            type: 'object'
+            properties:
+              enabled:
+                description: 'Enable timeout pattern'
+                type: 'boolean'
+              timeoutMs:
+                description: 'Timeout duration in milliseconds'
+                type: 'number'
+
+          bulkhead:
+            description: 'Bulkhead isolation configuration'
+            type: 'object'
+            properties:
+              enabled:
+                description: 'Enable bulkhead pattern'
+                type: 'boolean'
+              maxConcurrent:
+                description: 'Maximum concurrent executions'
+                type: 'number'
+              maxQueued:
+                description: 'Maximum queued requests'
+                type: 'number'
+
+# === CLASSES ===
+classes:
+  EnhancedCommandBus:
+    # Class Documentation
+    class-doc:
+      description: 'Performance-optimized command bus with enterprise resilience patterns'
+      business-context: 'Provides high-performance command processing with automatic fault tolerance, caching, and batching capabilities for enterprise applications'
+
+      formats:
+        jsdoc:
+          description: 'Enhanced command bus with resilience patterns and performance optimization'
+        cli:
+          description: |
+            ## EnhancedCommandBus
+
+            Enterprise-grade command bus implementation featuring:
+            - Handler caching for performance
+            - Automatic retry with exponential backoff
+            - Circuit breaker for fault isolation
+            - Bulkhead pattern for resource isolation
+            - Command batching for throughput
+            - Comprehensive metrics collection
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ICommandBus'
+        category: 'enhanced'
+
+# === USAGE PATTERNS ===
+usage-patterns:
+  - pattern: 'basic-configuration'
+    description: 'Configure enhanced command bus with resilience'
+    code: |
+      const commandBus = new EnhancedCommandBus({
+        enableMetrics: true,
+        enableCache: true,
+        defaultTimeout: 30000,
+        defaultRetries: 3,
+        resilience: {
+          circuitBreaker: {
+            enabled: true,
+            failureThreshold: 5,
+            resetTimeout: 60000
+          },
+          retry: {
+            enabled: true,
+            maxAttempts: 3,
+            baseDelay: 1000,
+            backoffMultiplier: 2
+          }
+        }
+      });
+
+  - pattern: 'batching-configuration'
+    description: 'Enable command batching for high throughput'
+    code: |
+      const batchedBus = new EnhancedCommandBus({
+        enableBatching: true,
+        maxBatchSize: 100,
+        batchDelayMs: 50,
+        enableCache: true
+      });
+
+      // Commands are automatically batched
+      await Promise.all([
+        batchedBus.execute(command1),
+        batchedBus.execute(command2),
+        batchedBus.execute(command3)
+      ]);

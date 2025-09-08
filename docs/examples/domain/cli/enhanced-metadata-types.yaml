@@ -1,0 +1,202 @@
+# Enhanced Metadata Types - Hierarchical Documentation System
+
+# === FILE METADATA ===
+file-name: 'enhanced-metadata-types'
+title: 'Enhanced Metadata Types - Hierarchical Documentation System'
+description: 'Core type definitions for Enhanced Metadata System V2 with hierarchical resolution'
+business-context: 'Provides type system for hierarchical metadata resolution, format-specific output, and configuration management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  MetadataValue:
+    description: 'Metadata value with format-specific overrides for Enhanced Metadata System V2'
+    business-context: 'Supports format-specific metadata values (JSDoc vs CLI) with hierarchical inheritance and default fallbacks'
+
+    properties:
+      - name: 'default'
+        type: 'string'
+        optional: true
+        description: 'Default metadata value used when no format-specific value is available'
+
+      - name: 'jsdoc'
+        type: 'string'
+        optional: true
+        description: 'JSDoc-specific metadata value optimized for JSDoc generation'
+
+      - name: 'cli'
+        type: 'string'
+        optional: true
+        description: 'CLI-specific metadata value optimized for command-line output'
+
+      - name: '[format: string]'
+        type: 'string | undefined'
+        description: 'Additional format-specific values for extensibility'
+
+    custom-tags:
+      since: '1.0.0'
+      format-support: 'JSDoc, CLI, and extensible custom formats'
+      hierarchical: 'Supports inheritance and format-specific overrides'
+
+  ParsedMetadata:
+    description: 'Parsed metadata record with format-specific values'
+    business-context: 'Container for all metadata key-value pairs with format-specific resolution support'
+
+    structure:
+      type: 'Record<string, MetadataValue>'
+      description: 'Record mapping metadata keys to their format-specific values'
+
+    custom-tags:
+      since: '1.0.0'
+      container: 'Metadata key-value storage with format support'
+
+  ConfigLevel:
+    description: 'Configuration level in hierarchical metadata resolution'
+    business-context: 'Represents single level in metadata hierarchy (global → package → file → local) with resolution strategy'
+
+    properties:
+      - name: 'source'
+        type: "'library' | 'package' | 'file' | 'local'"
+        description: 'Source level in the hierarchical resolution chain'
+
+      - name: 'strategy'
+        type: "'merge' | 'replace'"
+        description: 'Resolution strategy for combining with lower levels'
+
+      - name: 'scope'
+        type: 'string | undefined'
+        optional: true
+        description: 'Optional scope identifier for context-specific resolution'
+
+      - name: 'metadata'
+        type: 'ParsedMetadata'
+        description: 'Metadata values at this configuration level'
+
+    custom-tags:
+      since: '1.0.0'
+      hierarchical: 'Represents one level in metadata hierarchy'
+      resolution-strategies: 'Merge (combine) or Replace (override) lower levels'
+
+  ResolvedMetadata:
+    description: 'Final resolved metadata after hierarchical processing'
+    business-context: 'Final metadata result after applying hierarchical resolution and format-specific selection'
+
+    structure:
+      type: 'Record<string, string>'
+      description: 'Record mapping metadata keys to their final resolved string values'
+
+    custom-tags:
+      since: '1.0.0'
+      final-result: 'Output of hierarchical metadata resolution process'
+      format-resolved: 'Contains format-specific values selected for target output'
+
+  ExtractBlock:
+    description: 'Extracted block from Enhanced Metadata System with context and positioning'
+    business-context: 'Represents parsed content block with metadata, code, and location information for documentation generation'
+
+    properties:
+      - name: 'tag'
+        type: 'string'
+        description: 'Block tag identifier (e.g., "extract", "example")'
+
+      - name: 'target'
+        type: 'string'
+        description: 'Target element for the block (method, class, etc.)'
+
+      - name: 'context'
+        type: 'string'
+        description: 'Context information for the block'
+
+      - name: 'level'
+        type: 'string'
+        description: 'Complexity or detail level for the block'
+
+      - name: 'variant'
+        type: 'string | undefined'
+        optional: true
+        description: 'Optional variant identifier for multiple versions'
+
+      - name: 'metadata'
+        type: 'ResolvedMetadata'
+        description: 'Resolved metadata for this block'
+
+      - name: 'code'
+        type: 'string'
+        description: 'Code content of the block'
+
+      - name: 'startLine'
+        type: 'number'
+        description: 'Starting line number in source file'
+
+      - name: 'endLine'
+        type: 'number'
+        description: 'Ending line number in source file'
+
+    custom-tags:
+      since: '1.0.0'
+      extraction: 'Parsed content block with full context'
+      positioning: 'Includes line numbers for accurate source mapping'
+
+  GlobalSettings:
+    description: 'Global settings for Enhanced Metadata System V2'
+    business-context: 'Top-level configuration that applies to all packages and classes in the metadata hierarchy'
+
+    properties:
+      - name: 'strategy'
+        type: "'merge' | 'replace'"
+        description: 'Default resolution strategy for the entire system'
+
+      - name: 'metadata'
+        type: 'ParsedMetadata'
+        description: 'Global metadata values applied to all components'
+
+      - name: 'scope'
+        type: 'string | undefined'
+        optional: true
+        description: 'Optional global scope identifier'
+
+    custom-tags:
+      since: '1.0.0'
+      global-config: 'System-wide configuration settings'
+      inheritance-root: 'Top level of metadata hierarchy'
+
+  FormatRules:
+    description: 'Format-specific transformation rules for metadata processing'
+    business-context: 'Defines how metadata should be transformed for different output formats (JSDoc, CLI, etc.)'
+
+    structure:
+      type: 'Record<string, Record<string, (content: string) => string>>'
+      description: 'Nested record mapping formats to metadata keys to transformation functions'
+
+    properties:
+      - name: '[format: string]'
+        type: 'Record<string, (content: string) => string>'
+        description: 'Format-specific transformation rules'
+
+        properties:
+          - name: '[metadataKey: string]'
+            type: '(content: string) => string'
+            description: 'Transformation function for specific metadata key'
+
+    examples:
+      - id: 'format-rules-example'
+        code: |
+          const rules: FormatRules = {
+            jsdoc: {
+              description: (content) => content.trim(),
+              businessContext: (content) => `@businessContext ${content}`
+            },
+            cli: {
+              description: (content) => `## ${content}`,
+              businessContext: (content) => `**Context**: ${content}`
+            }
+          };
+
+    custom-tags:
+      since: '1.0.0'
+      transformation: 'Format-specific metadata transformation'
+      extensible: 'Supports custom formats and transformation rules'

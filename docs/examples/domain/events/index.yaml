@@ -1,0 +1,173 @@
+# Index - Events Package Exports
+# Documentation for the main entry point of @vytches/ddd-events package
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Events Package - Main Exports'
+description: 'Central export hub for event-driven architecture patterns'
+business-context: 'Entry point for implementing event-driven systems with unified event handling'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === MODULE DOCUMENTATION ===
+module-doc:
+  description: 'Complete event system with unified bus, processors, and decorators'
+  business-context: 'Enables event-driven architecture for enterprise applications with domain and integration events'
+
+  formats:
+    jsdoc:
+      description: '@vytches/ddd-events - Unified event system for domain and integration events'
+    cli:
+      description: |
+        ## DDD Events Package
+
+        Enterprise-grade event system with:
+        - Unified event bus for all event types
+        - Domain and integration event support
+        - Event processors and transformers
+        - Decorator-based event handlers
+        - Middleware pipeline support
+        - Auto-discovery for DI containers
+
+  custom-tags:
+    since: '1.0.0'
+    module: '@vytches/ddd-events'
+    exports: 'Event buses, dispatchers, handlers, and processors'
+
+# === EXPORTED ELEMENTS ===
+exports:
+  # Core Components
+  UniversalEventDispatcher:
+    description: 'Universal event dispatcher with middleware support'
+    source: './event-dispatcher'
+    category: 'core'
+
+  UnifiedEventBus:
+    description: 'Unified bus handling all event types'
+    source: './unified-event-bus'
+    category: 'core'
+
+  BaseEventBus:
+    description: 'Base class for custom event bus implementations'
+    source: './base-event-bus'
+    category: 'core'
+
+  CUSTOM_MIDDLEWARE_SYMBOL:
+    description: 'Symbol for custom middleware registration'
+    source: './base-event-bus'
+    category: 'core'
+
+  # Domain Events
+  DomainEvent:
+    description: 'Base class for domain events'
+    source: './domain'
+    category: 'domain'
+
+  # Integration Events
+  IntegrationEvent:
+    description: 'Base class for integration events'
+    source: './integration'
+    category: 'integration'
+
+  IntegrationEventProcessor:
+    description: 'Processor for integration events'
+    source: './integration'
+    category: 'integration'
+
+  DomainToIntegrationTransformer:
+    description: 'Transforms domain events to integration events'
+    source: './integration'
+    category: 'integration'
+
+  # Decorators
+  EventHandler:
+    description: 'Decorator for event handler registration'
+    source: './decorators'
+    category: 'decorators'
+
+  EventDiscoveryPlugin:
+    description: 'Auto-discovery plugin for event handlers'
+    source: './decorators'
+    category: 'decorators'
+
+  eventDiscoveryPlugin:
+    description: 'Instance of event discovery plugin'
+    source: './decorators'
+    category: 'decorators'
+
+# === TYPE EXPORTS ===
+type-exports:
+  IDomainEventBus:
+    description: 'Domain event bus interface'
+    source: './event-bus'
+    category: 'interfaces'
+
+  IIntegrationEventBus:
+    description: 'Integration event bus interface'
+    source: './event-bus'
+    category: 'interfaces'
+
+  IAuditEventBus:
+    description: 'Audit event bus interface'
+    source: './event-bus'
+    category: 'interfaces'
+
+  UnifiedEventHandler:
+    description: 'Unified event handler type'
+    source: './unified-event-bus'
+    category: 'types'
+
+  EventHandlerOptions:
+    description: 'Options for event handler decorator'
+    source: './decorators'
+    category: 'types'
+
+  DIHandlerMetadata:
+    description: 'Metadata for DI handler registration'
+    source: './decorators'
+    category: 'types'
+
+# === USAGE EXAMPLES ===
+examples:
+  - id: 'basic-import'
+    code: |
+      import { 
+        UnifiedEventBus,
+        DomainEvent,
+        EventHandler 
+      } from '@vytches/ddd-events';
+
+      // Define domain event
+      class OrderCreatedEvent extends DomainEvent {
+        constructor(public readonly orderId: string) {
+          super();
+        }
+      }
+
+      // Define event handler
+      @EventHandler(OrderCreatedEvent)
+      class OrderCreatedHandler {
+        async handle(event: OrderCreatedEvent): Promise<void> {
+          console.log('Order created:', event.orderId);
+        }
+      }
+
+  - id: 'unified-bus-usage'
+    code: |
+      import { 
+        UnifiedEventBus,
+        UniversalEventDispatcher 
+      } from '@vytches/ddd-events';
+
+      // Setup unified event system
+      const eventBus = new UnifiedEventBus();
+      const dispatcher = new UniversalEventDispatcher(eventBus);
+
+      // Publish mixed event types
+      await eventBus.publishMany([
+        new DomainEvent('OrderCreated', orderData),
+        new IntegrationEvent('CustomerNotified', notificationData)
+      ]);

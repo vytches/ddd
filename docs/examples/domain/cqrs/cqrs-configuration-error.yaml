@@ -1,0 +1,128 @@
+# CQRSConfigurationError - Configuration Error Handling
+# Documentation for CQRS configuration error class
+
+# === FILE METADATA ===
+file-name: 'cqrs-configuration.error'
+title: 'CQRSConfigurationError - Configuration Failure Handling'
+description: 'Error class for handling CQRS configuration issues'
+business-context: 'Provides detailed error information when CQRS module configuration fails'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  CQRSConfigurationError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when CQRS configuration is invalid or incomplete'
+      business-context: 'Ensures CQRS module is properly configured before application startup, preventing runtime failures'
+
+      formats:
+        jsdoc:
+          description: 'Error class for CQRS configuration validation failures'
+        cli:
+          description: |
+            ## CQRSConfigurationError
+
+            Configuration error class that validates CQRS setup including
+            command/query bus configuration, handler registration, and
+            middleware pipeline setup. Fails fast on misconfiguration.
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseError'
+        category: 'errors'
+
+    # Properties
+    properties:
+      component:
+        description: 'The CQRS component that failed configuration'
+        business-context: 'Identifies which part of CQRS setup failed for targeted debugging'
+        type: 'string'
+        readonly: true
+
+        formats:
+          jsdoc:
+            description: 'Name of the misconfigured CQRS component'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates a new CQRSConfigurationError with component context'
+        business-context: 'Initializes error with specific component that failed configuration'
+
+        parameters:
+          - name: 'component'
+            type: 'string'
+            description: 'The CQRS component that is misconfigured'
+          - name: 'message'
+            type: 'string'
+            description: 'Detailed error message describing the configuration issue'
+
+        examples:
+          - id: 'basic-usage'
+            code: |
+              if (!commandBus) {
+                throw new CQRSConfigurationError(
+                  'CommandBus',
+                  'CommandBus must be configured before use'
+                );
+              }
+
+          - id: 'handler-registration'
+            code: |
+              const validateHandlerRegistration = (handlerType: string) => {
+                if (!this.handlers.has(handlerType)) {
+                  throw new CQRSConfigurationError(
+                    'HandlerRegistry',
+                    `No handler registered for ${handlerType}`
+                  );
+                }
+              };
+
+# === USAGE PATTERNS ===
+usage-patterns:
+  - pattern: 'module-initialization'
+    description: 'Configuration validation during module startup'
+    code: |
+      class CQRSModule {
+        initialize(config: CQRSOptions) {
+          if (!config.commandBus && !config.queryBus) {
+            throw new CQRSConfigurationError(
+              'CQRSModule',
+              'At least one bus (command or query) must be configured'
+            );
+          }
+          
+          if (config.middleware && !Array.isArray(config.middleware)) {
+            throw new CQRSConfigurationError(
+              'Middleware',
+              'Middleware must be an array of ICQRSMiddleware instances'
+            );
+          }
+        }
+      }
+
+  - pattern: 'di-container-validation'
+    description: 'Validate DI container configuration'
+    code: |
+      const validateDIConfiguration = () => {
+        const requiredServices = ['ICommandBus', 'IQueryBus'];
+        
+        for (const service of requiredServices) {
+          if (!container.has(service)) {
+            throw new CQRSConfigurationError(
+              'DIContainer',
+              `Required service ${service} not registered in container`
+            );
+          }
+        }
+      };

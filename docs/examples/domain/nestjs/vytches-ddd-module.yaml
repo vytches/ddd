@@ -1,12 +1,12 @@
-# VytchesDDDModule - Universal Enhanced Metadata System V2
+# VytchesDDD Module - Main NestJS Integration Module
 
 # === FILE METADATA ===
-file-name: 'vytches-ddd-module'
+file-name: 'vytches-ddd.module'
 title: 'VytchesDDDModule - NestJS Integration Module'
-description: 'Main module for integrating VytchesDDD with NestJS applications'
-business-context: 'Enables enterprise DDD patterns in NestJS applications with minimal configuration'
+description: 'Main NestJS module for VytchesDDD integration following @nestjs/cqrs patterns'
+business-context: 'Provides clean integration between NestJS and VytchesDDD with automatic handler discovery'
 
-# === HIERARCHICAL STRATEGY ===
+# === HIERARCHY ===
 hierarchy:
   strategy: 'merge'
   scope: 'file'
@@ -21,133 +21,154 @@ classes:
 
     # Class Documentation
     class-doc:
-      description: 'NestJS module that provides seamless integration with VytchesDDD framework'
-      business-context: 'Bridges NestJS dependency injection with VytchesDDD service locator for enterprise DDD'
+      description: 'VytchesDDD NestJS Integration Module'
+      business-context: 'Simple, clean integration following @nestjs/cqrs patterns for maximum familiarity and reliability'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Main module providing VytchesDDD integration with NestJS'
+        cli:
+          description: |
+            ## VytchesDDDModule
+
+            Complete NestJS integration module providing:
+            - **Dynamic Module Configuration**: forRoot() and forTesting() methods
+            - **Automatic Handler Discovery**: Command, query, and event handler registration
+            - **Custom Provider Support**: Interface token mapping (IEventBus => UnifiedEventBus)
+            - **Global Module Support**: Optional global availability across application
+            - **Testing Support**: Pre-configured buses for unit and integration tests
 
       custom-tags:
         since: '1.0.0'
-        pattern: 'Module Pattern'
-        global: true
+        stability: 'stable'
+        pattern: 'dynamic-module'
+        framework: 'nestjs'
+        similar-to: '@nestjs/cqrs'
 
     # Methods
     methods:
       forRoot:
-        description: 'Configure root module with synchronous options'
-        business-context: 'Standard initialization for applications with static configuration'
+        description: 'Configure VytchesDDD module with custom providers'
+        business-context: 'Main configuration method for production applications with custom bus implementations'
 
         parameters:
           - name: 'options'
-            type: 'VytchesDDDOptions'
-            description: 'Configuration options'
+            type: 'VytchesDDDModuleOptions'
+            description: 'Configuration options including custom providers, default: {}'
             optional: true
 
         returns:
           type: 'DynamicModule'
-          description: 'Configured NestJS module'
+          description: 'Configured NestJS dynamic module with providers and exports'
+
+        custom-tags:
+          static: true
+          pattern: 'factory-method'
+          usage: 'production'
 
         examples:
-          - id: 'basic'
+          - id: 'basic-setup'
+            title: 'Basic Module Setup'
+            business-context: 'Standard production configuration with custom bus implementations'
             code: |
               @Module({
                 imports: [
                   VytchesDDDModule.forRoot({
-                    autoDiscovery: true
+                    providers: [
+                      { provide: 'ICommandBus', useClass: EnhancedCommandBus },
+                      { provide: 'IQueryBus', useClass: EnhancedQueryBus },
+                      { provide: 'IEventBus', useClass: UnifiedEventBus },
+                    ]
                   })
                 ]
               })
               export class AppModule {}
 
-      forRootAsync:
-        description: 'Configure module with async options'
-        business-context: 'For applications that need to load configuration asynchronously from external sources'
-
-        parameters:
-          - name: 'options'
-            type: 'VytchesDDDAsyncOptions'
-            description: 'Async configuration options'
-
-        returns:
-          type: 'DynamicModule'
-          description: 'Configured NestJS module'
-
-        examples:
-          - id: 'async-factory'
+          - id: 'minimal-setup'
+            title: 'Minimal Configuration'
+            business-context: 'Quick setup without custom providers, uses default services'
             code: |
-              VytchesDDDModule.forRootAsync({
-                imports: [ConfigModule],
-                inject: [ConfigService],
-                useFactory: async (config: ConfigService) => ({
-                  autoDiscovery: config.get('ddd.autoDiscovery')
-                })
+              @Module({
+                imports: [VytchesDDDModule.forRoot()]
+              })
+              export class AppModule {}
+
+          - id: 'interface-token-mapping'
+            title: 'Interface Token Mapping'
+            business-context: 'Enterprise pattern using abstract tokens for dependency injection'
+            code: |
+              import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+              import { IEventBus } from '@vytches/ddd-contracts';
+
+              VytchesDDDModule.forRoot({
+                providers: [
+                  { provide: ICommandBus, useClass: EnhancedCommandBus },
+                  { provide: IQueryBus, useClass: EnhancedQueryBus },
+                  { provide: IEventBus, useClass: UnifiedEventBus },
+                ]
               })
 
-      forContext:
-        description: 'Configure module for specific context with overrides'
-        business-context: 'Creates isolated bounded context for domain separation'
-
-        parameters:
-          - name: 'options'
-            type: 'VytchesDDDContextOptions'
-            description: 'Context-specific configuration'
+      forTesting:
+        description: 'Simple configuration for testing and basic usage'
+        business-context: 'Pre-configured module for unit and integration tests with default bus implementations'
 
         returns:
           type: 'DynamicModule'
-          description: 'Context-specific module configuration'
+          description: 'Testing-ready dynamic module with pre-configured bus implementations'
 
-        examples:
-          - id: 'bounded-context'
-            code: |
-              VytchesDDDModule.forContext({
-                name: 'OrderManagement',
-                isolated: true,
-                overrides: {
-                  resilience: { retry: { maxAttempts: 5 } }
-                }
-              })
-
-      forFeature:
-        description: 'Configure module for feature'
-        business-context: 'Register specific services and handlers for a feature module'
-
-        parameters:
-          - name: 'options'
-            type: 'VytchesDDDFeatureOptions'
-            description: 'Feature module configuration'
-
-        returns:
-          type: 'DynamicModule'
-          description: 'Feature-specific module configuration'
-
-        examples:
-          - id: 'feature-module'
-            code: |
-              VytchesDDDModule.forFeature({
-                services: [UserService, OrderService],
-                handlers: [CreateUserHandler],
-                context: 'UserManagement'
-              })
-
-      forTest:
-        description: 'Configure module for testing'
-        business-context: 'Provides test doubles and mock services for unit testing'
-
-        parameters:
-          - name: 'options'
-            type: 'VytchesDDDTestOptions'
-            description: 'Testing configuration options'
-            optional: true
-
-        returns:
-          type: 'DynamicModule'
-          description: 'Test-configured module with mocks'
+        custom-tags:
+          static: true
+          pattern: 'factory-method'
+          usage: 'testing'
 
         examples:
           - id: 'test-setup'
+            title: 'Testing Module Setup'
+            business-context: 'Simple test configuration with pre-configured buses'
             code: |
-              VytchesDDDModule.forTest({
-                mocks: {
-                  userService: mockUserService,
-                  eventBus: mockEventBus
-                },
-                debug: true
-              })
+              beforeEach(async () => {
+                const module = await Test.createTestingModule({
+                  imports: [VytchesDDDModule.forTesting()],
+                  providers: [UserService]
+                }).compile();
+                
+                service = module.get<UserService>(UserService);
+              });
+
+          - id: 'integration-test'
+            title: 'Integration Testing'
+            business-context: 'Full application testing with VytchesDDD integration'
+            code: |
+              const moduleFixture: TestingModule = await Test.createTestingModule({
+                imports: [
+                  VytchesDDDModule.forTesting(),
+                  UserModule,
+                  OrderModule
+                ]
+              }).compile();
+
+              app = moduleFixture.createNestApplication();
+              await app.init();
+
+# === DECORATORS ===
+decorators:
+  Global:
+    description: 'Makes module globally available across the application'
+    business-context: 'Ensures VytchesDDD services are available without reimporting the module'
+    from: '@nestjs/common'
+
+  Module:
+    description: 'NestJS module decorator defining the module metadata'
+    business-context: 'Standard NestJS pattern for module definition'
+    from: '@nestjs/common'
+
+# === IMPORTS ===
+imported-types:
+  DynamicModule:
+    description: 'NestJS dynamic module interface'
+    source: '@nestjs/common'
+
+  VytchesDDDModuleOptions:
+    description: 'Configuration options interface'
+    source: './types'

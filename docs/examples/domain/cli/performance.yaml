@@ -1,0 +1,312 @@
+# CLI Performance - High-Precision Timing Utilities
+# Enhanced Metadata System V2 - Performance measurement and profiling
+
+# === FILE METADATA ===
+file-name: 'performance'
+title: 'CLI Performance - Timing and Profiling System'
+description: 'High-precision performance measurement utilities for CLI operations'
+business-context: 'Performance monitoring and optimization tools for measuring CLI command execution times and system resource usage'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  Performance:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'High-precision timing and performance measurement utilities'
+      business-context: 'Zero-dependency performance monitoring system for CLI operations, command execution timing, and resource usage tracking'
+
+      formats:
+        jsdoc:
+          description: 'High-precision timing utilities'
+        cli:
+          description: |
+            ## Performance
+            Comprehensive performance measurement tools for CLI optimization and monitoring
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Utility Pattern'
+        features: 'High-precision timing, memory monitoring, benchmarking, profiling'
+        dependencies: 'Zero external dependencies'
+
+    # Methods
+    methods:
+      now:
+        description: 'Get high-precision timestamp in milliseconds'
+        business-context: 'Provides microsecond-precision timing using Node.js process.hrtime for accurate performance measurement'
+
+        returns:
+          type: 'number'
+          description: 'High-precision timestamp in milliseconds with microsecond precision'
+
+        custom-tags:
+          static: 'true'
+          precision: 'Microsecond precision using process.hrtime'
+
+        examples:
+          - id: 'timestamp-capture'
+            code: |
+              const startTime = Performance.now();
+              // Perform operation
+              const endTime = Performance.now();
+              const duration = endTime - startTime;
+
+      since:
+        description: 'Calculate elapsed time since a start timestamp'
+        business-context: 'Convenient helper for measuring operation duration with high precision'
+
+        parameters:
+          - name: 'startTime'
+            type: 'number'
+            description: 'Start timestamp from Performance.now()'
+
+        returns:
+          type: 'number'
+          description: 'Elapsed time in milliseconds with microsecond precision'
+
+        custom-tags:
+          static: 'true'
+
+        examples:
+          - id: 'duration-calculation'
+            code: |
+              const start = Performance.now();
+              await processCommand();
+              const elapsed = Performance.since(start);
+              console.log(`Command took ${elapsed.toFixed(2)}ms`);
+
+      start:
+        description: 'Start a named timer for later measurement'
+        business-context: 'Enables named timing sessions for tracking multiple concurrent operations'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Unique timer name identifier'
+
+        returns:
+          type: 'void'
+          description: 'Timer started and stored internally'
+
+        custom-tags:
+          static: 'true'
+
+        examples:
+          - id: 'named-timer'
+            code: |
+              Performance.start('template-generation');
+              await generateComponent();
+              const duration = Performance.end('template-generation');
+              console.log(`Generation took ${duration}ms`);
+
+      end:
+        description: 'End named timer and return elapsed time'
+        business-context: 'Completes named timing session and returns precise duration'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Timer name to end'
+
+        returns:
+          type: 'number'
+          description: 'Elapsed time in milliseconds since timer started'
+
+        custom-tags:
+          static: 'true'
+          throws: 'Error if timer name not found'
+
+        examples:
+          - id: 'timer-completion'
+            code: |
+              Performance.start('file-generation');
+              await writeFiles();
+              const fileTime = Performance.end('file-generation');
+
+      measure:
+        description: 'Measure execution time of synchronous or asynchronous function'
+        business-context: 'Automatic timing wrapper for functions with result and duration return'
+
+        parameters:
+          - name: 'fn'
+            type: '() => T | Promise<T>'
+            description: 'Function to measure (sync or async)'
+
+        returns:
+          type: '{ result: T; duration: number } | Promise<{ result: T; duration: number }>'
+          description: 'Object containing function result and execution duration'
+
+        custom-tags:
+          static: 'true'
+          overload: 'Supports both sync and async functions'
+
+        examples:
+          - id: 'function-measurement'
+            code: |
+              // Async measurement
+              const { result, duration } = await Performance.measure(async () => {
+                return await generateDocumentation();
+              });
+
+              // Sync measurement
+              const { result: count, duration: parseTime } = Performance.measure(() => {
+                return parseTemplates();
+              });
+
+      formatDuration:
+        description: 'Format duration in human-readable format'
+        business-context: 'Converts milliseconds to readable format with appropriate units (ms, s, m)'
+
+        parameters:
+          - name: 'milliseconds'
+            type: 'number'
+            description: 'Duration in milliseconds'
+
+        returns:
+          type: 'string'
+          description: 'Formatted duration string with appropriate units'
+
+        custom-tags:
+          static: 'true'
+          formatting: 'Automatic unit selection (ms, s, m, h)'
+
+        examples:
+          - id: 'duration-formatting'
+            code: |
+              console.log(Performance.formatDuration(1234)); // "1.23s"
+              console.log(Performance.formatDuration(89));   // "89ms"
+              console.log(Performance.formatDuration(125000)); // "2.08m"
+
+      benchmark:
+        description: 'Create performance benchmark for multiple operations'
+        business-context: 'Comparative performance testing for different algorithms or implementations'
+
+        parameters:
+          - name: 'operations'
+            type: 'Record<string, () => any>'
+            description: 'Named functions to benchmark'
+
+        returns:
+          type: 'Record<string, number>'
+          description: 'Execution times for each operation in milliseconds'
+
+        custom-tags:
+          static: 'true'
+          comparison: 'Side-by-side performance comparison'
+
+        examples:
+          - id: 'operation-benchmark'
+            code: |
+              const results = Performance.benchmark({
+                'template-engine-v1': () => oldTemplateEngine.render(template),
+                'template-engine-v2': () => newTemplateEngine.render(template),
+                'handlebars': () => handlebarsEngine.compile(template)()
+              });
+
+              // Results: { 'template-engine-v1': 15.2, 'template-engine-v2': 8.7, 'handlebars': 12.1 }
+
+      getMemoryUsage:
+        description: 'Get current memory usage information'
+        business-context: 'Monitor CLI memory consumption for optimization and leak detection'
+
+        returns:
+          type: '{ rss: number; heapTotal: number; heapUsed: number; external: number }'
+          description: 'Memory usage statistics in bytes'
+
+        custom-tags:
+          static: 'true'
+          monitoring: 'Real-time memory usage tracking'
+
+        examples:
+          - id: 'memory-monitoring'
+            code: |
+              const memory = Performance.getMemoryUsage();
+              console.log(`Heap used: ${(memory.heapUsed / 1024 / 1024).toFixed(2)}MB`);
+              console.log(`RSS: ${(memory.rss / 1024 / 1024).toFixed(2)}MB`);
+
+      formatMemory:
+        description: 'Format memory usage in human-readable format'
+        business-context: 'Converts bytes to readable memory units (B, KB, MB, GB)'
+
+        parameters:
+          - name: 'bytes'
+            type: 'number'
+            description: 'Memory usage in bytes'
+
+        returns:
+          type: 'string'
+          description: 'Formatted memory string with appropriate units'
+
+        custom-tags:
+          static: 'true'
+
+        examples:
+          - id: 'memory-formatting'
+            code: |
+              const memory = Performance.getMemoryUsage();
+              console.log(`Memory: ${Performance.formatMemory(memory.heapUsed)}`);
+              // Output: "Memory: 45.2MB"
+
+      getSummary:
+        description: 'Get comprehensive system performance summary'
+        business-context: 'Complete system overview for debugging and performance analysis'
+
+        returns:
+          type: '{ uptime: string; memory: string; cpu: string; platform: string }'
+          description: 'System performance summary with formatted values'
+
+        custom-tags:
+          static: 'true'
+          system-info: 'Complete performance overview'
+
+        examples:
+          - id: 'performance-summary'
+            code: |
+              const summary = Performance.getSummary();
+              console.log('System Performance:');
+              console.log(`  Uptime: ${summary.uptime}`);
+              console.log(`  Memory: ${summary.memory}`);
+              console.log(`  Platform: ${summary.platform}`);
+
+      profile:
+        description: 'Create performance profiler for development'
+        business-context: 'Development-mode profiling for detailed performance analysis and bottleneck identification'
+
+        parameters:
+          - name: 'enabled'
+            type: 'boolean'
+            description: 'Whether profiling is enabled (defaults to true)'
+
+        returns:
+          type: 'ProfilerInterface'
+          description: 'Profiler object with mark, measure, and analysis methods'
+
+        custom-tags:
+          static: 'true'
+          development: 'Detailed profiling for optimization'
+
+        examples:
+          - id: 'performance-profiling'
+            code: |
+              const profiler = Performance.profile(true);
+
+              profiler.mark('start-generation');
+              await generateComponents();
+              profiler.mark('end-generation');
+
+              const duration = profiler.measure('generation', 'start-generation', 'end-generation');
+
+              const entries = profiler.getEntries();
+              entries.forEach(entry => {
+                console.log(`${entry.name}: ${entry.duration}ms`);
+              });

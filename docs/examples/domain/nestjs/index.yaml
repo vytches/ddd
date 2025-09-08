@@ -3,8 +3,8 @@
 # === FILE METADATA ===
 file-name: 'index'
 title: 'NestJS Package Public API'
-description: 'Main export file for NestJS integration with VytchesDDD'
-business-context: 'Provides unified access to all NestJS adapter functionality'
+description: 'Main export file for clean NestJS integration with VytchesDDD'
+business-context: 'Provides simple, proven integration following @nestjs/cqrs patterns'
 
 # === HIERARCHY ===
 hierarchy:
@@ -13,21 +13,21 @@ hierarchy:
 
 # === FILE-LEVEL METADATA ===
 file-doc:
-  description: 'Central export hub for NestJS framework integration with VytchesDDD'
-  business-context: 'Simplifies imports by providing single entry point for NestJS-specific functionality'
+  description: 'Simple, clean NestJS integration for VytchesDDD Enterprise Domain-Driven Design framework'
+  business-context: 'Following @nestjs/cqrs patterns for familiar, proven integration with automatic handler discovery'
 
   formats:
     jsdoc:
-      description: 'NestJS adapter package exports and integrations'
+      description: 'NestJS integration package with auto-discovery and CQRS support'
     cli:
       description: |
-        ## NestJS Package Exports
+        ## NestJS Package - Clean Integration
 
-        Complete NestJS integration including:
-        - VytchesDDD module configuration
-        - Container adapter for dependency injection
-        - Type definitions and utilities
-        - Discovery services and configuration
+        Simple NestJS integration providing:
+        - **VytchesDDDModule**: Main module with forRoot() and forTesting() methods
+        - **VytchesExplorerService**: Automatic handler discovery following @nestjs/cqrs patterns
+        - **TypeScript Integration**: Full type support with interface tokens
+        - **Zero Configuration**: Works out of the box with sensible defaults
 
   custom-tags:
     since: '1.0.0'
@@ -35,39 +35,27 @@ file-doc:
     category: 'framework-integration'
     pattern: 'adapter-pattern'
     framework: 'nestjs'
+    lines-of-code: '~250'
+    complexity: 'simple'
 
 # === EXPORTS DOCUMENTATION ===
 exports:
   VytchesDDDModule:
     description: 'Main NestJS module for VytchesDDD integration'
-    business-context: 'Configures and initializes VytchesDDD services within NestJS application'
+    business-context: 'Configures VytchesDDD services within NestJS application with automatic handler discovery'
     source: './vytches-ddd.module'
+    type: 'class'
+    pattern: 'dynamic-module'
 
-  NestJSContainerAdapter:
-    description: 'Container adapter implementing dependency injection bridge pattern'
-    business-context: 'Enables VytchesDDD service locator to work with NestJS dependency injection'
-    source: './adapters/nestjs-container.adapter'
+  VytchesExplorerService:
+    description: 'Explorer service for automatic handler discovery'
+    business-context: 'Automatically discovers and registers command, query, and event handlers'
+    source: './services/vytches-explorer.service'
+    type: 'service'
+    pattern: 'discovery-service'
 
-  types:
-    description: 'Type definitions for NestJS integration'
-    business-context: 'Provides TypeScript interfaces and types for framework integration'
+  VytchesDDDModuleOptions:
+    description: 'Configuration options interface for VytchesDDD module'
+    business-context: 'Provides type-safe configuration for custom providers and module setup'
     source: './types'
-    type: 'namespace'
-
-  configuration:
-    description: 'Configuration interfaces and options for VytchesDDD module'
-    business-context: 'Module configuration contracts and setup options'
-    source: './configuration'
-    type: 'namespace'
-
-  discovery:
-    description: 'Auto-discovery services for handlers and domain services'
-    business-context: 'Automatic registration and discovery of VytchesDDD components'
-    source: './discovery'
-    type: 'namespace'
-
-  utils:
-    description: 'Utility functions for NestJS integration'
-    business-context: 'Helper functions for framework integration and configuration'
-    source: './utils'
-    type: 'namespace'
+    type: 'interface'

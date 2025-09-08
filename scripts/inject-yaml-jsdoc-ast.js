@@ -539,6 +539,40 @@ class ASTJSDocInjector {
   }
 
   /**
+   * Generate simple JSDoc for class properties
+   */
+  generatePropertyJSDoc(metadata, indent = '') {
+    const lines = [];
+    lines.push(`${indent}/**`);
+
+    if (metadata.description) {
+      lines.push(`${indent} * ${metadata.description}`);
+    }
+
+    if (metadata['business-context']) {
+      lines.push(`${indent} * @businessContext ${metadata['business-context']}`);
+    }
+
+    if (metadata.type) {
+      lines.push(`${indent} * @type {${metadata.type}}`);
+    }
+
+    if (metadata.readonly) {
+      lines.push(`${indent} * @readonly`);
+    }
+
+    // Add custom tags
+    if (metadata['custom-tags']) {
+      Object.entries(metadata['custom-tags']).forEach(([tag, value]) => {
+        lines.push(`${indent} * @${tag} ${value}`);
+      });
+    }
+
+    lines.push(`${indent} */`);
+    return lines.join('\n');
+  }
+
+  /**
    * Process TypeScript file using AST
    */
   async processFileWithAST(filePath, content) {
@@ -812,6 +846,50 @@ class ASTJSDocInjector {
               }
 
               console.log(`    ✅ Enhanced JSDoc for ${className} class`);
+            }
+
+            // Process class properties
+            if (classMetadata.properties) {
+              node.members.forEach(member => {
+                if (ts.isPropertyDeclaration(member) || ts.isGetAccessorDeclaration(member)) {
+                  const memberName = member.name?.getText(sourceFile);
+
+                  if (memberName && classMetadata.properties[memberName]) {
+                    const propertyMetadata = classMetadata.properties[memberName];
+
+                    // Check if property already has JSDoc
+                    const leadingComments = ts.getLeadingCommentRanges(content, member.pos);
+                    const hasJSDoc =
+                      leadingComments &&
+                      leadingComments.some(comment =>
+                        content.substring(comment.pos, comment.end).includes('/**')
+                      );
+
+                    if (!hasJSDoc) {
+                      // Get the indent for the property
+                      const memberStart = member.getStart(sourceFile);
+                      const lineStart = content.lastIndexOf('\n', memberStart - 1) + 1;
+                      const memberIndent = content
+                        .substring(lineStart, memberStart)
+                        .match(/^\s*/)[0];
+
+                      // Generate simple JSDoc for property
+                      const propertyJSDoc = this.generatePropertyJSDoc(
+                        propertyMetadata,
+                        memberIndent
+                      );
+
+                      modifications.push({
+                        start: lineStart,
+                        end: lineStart,
+                        text: propertyJSDoc + '\n',
+                      });
+
+                      console.log(`    ✅ Enhanced JSDoc for ${className}.${memberName} property`);
+                    }
+                  }
+                }
+              });
             }
 
             // Process class methods

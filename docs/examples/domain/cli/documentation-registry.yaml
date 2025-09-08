@@ -1,0 +1,205 @@
+# DocumentationRegistry - Example Documentation Management
+# Enhanced Metadata System V2 - Example discovery and query system
+
+# === FILE METADATA ===
+file-name: 'documentation-registry'
+title: 'DocumentationRegistry - Example Documentation System'
+description: 'Comprehensive example discovery, indexing, and query system for CLI documentation'
+business-context: 'Central registry managing all package examples with advanced querying, framework integration, and component discovery'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  DocumentationRegistry:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Example documentation registry with advanced querying'
+      business-context: 'Central documentation management system providing example discovery, indexing, querying, and framework integration support for Enhanced Metadata System V2'
+
+      formats:
+        jsdoc:
+          description: 'Documentation registry with query and framework support'
+        cli:
+          description: |
+            ## DocumentationRegistry
+            Advanced example management with querying and framework integration
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry Pattern'
+        features: 'Querying, framework integration, example discovery'
+        interface: 'IDocumentationRegistry'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Initialize documentation registry with workspace root'
+        business-context: 'Creates registry with workspace path for example discovery across all packages'
+
+        parameters:
+          - name: 'workspaceRoot'
+            type: 'string'
+            description: 'Optional workspace root path (defaults to current directory)'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const registry = new DocumentationRegistry('./workspace');
+              // Ready for example loading and querying
+
+      loadAll:
+        description: 'Load all example definitions from workspace packages'
+        business-context: 'Complete example discovery across all packages in workspace'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'All examples loaded and indexed'
+
+        custom-tags:
+          async: 'true'
+          discovery: 'Workspace-wide example loading'
+
+        examples:
+          - id: 'full-loading'
+            code: |
+              await registry.loadAll();
+              // All package examples now available for querying
+
+      findById:
+        description: 'Find specific example by unique identifier'
+        business-context: 'Direct example lookup for CLI operations and documentation generation'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Unique example identifier'
+
+        returns:
+          type: 'EnhancedExampleDefinition | undefined'
+          description: 'Found example definition or undefined'
+
+        examples:
+          - id: 'direct-lookup'
+            code: |
+              const example = registry.findById('aggregates:basic-usage');
+              if (example) {
+                console.log(example.title, example.framework);
+              }
+
+      query:
+        description: 'Query examples using advanced criteria and filters'
+        business-context: 'Flexible example discovery with package, framework, complexity, and pattern filtering'
+
+        parameters:
+          - name: 'options'
+            type: 'ExampleQueryOptions'
+            description: 'Query criteria including package, framework, complexity filters'
+
+        returns:
+          type: 'EnhancedExampleDefinition[]'
+          description: 'Array of matching examples'
+
+        examples:
+          - id: 'advanced-query'
+            code: |
+              const examples = registry.query({
+                package: 'aggregates',
+                framework: 'nestjs',
+                complexity: 'intermediate',
+                tags: ['event-sourcing']
+              });
+              console.log(`Found ${examples.length} matching examples`);
+
+      getAvailableFrameworks:
+        description: 'Get all frameworks available for a specific example'
+        business-context: 'Framework discovery for multi-framework example support'
+
+        parameters:
+          - name: 'exampleId'
+            type: 'string'
+            description: 'Example to check frameworks for'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of available framework names'
+
+        examples:
+          - id: 'framework-discovery'
+            code: |
+              const frameworks = registry.getAvailableFrameworks('policies:validation');
+              // Returns: ['nestjs', 'express', 'fastify']
+
+      getAvailableComponents:
+        description: 'Get framework-specific components for example integration'
+        business-context: 'Component discovery for framework-specific code generation'
+
+        parameters:
+          - name: 'exampleId'
+            type: 'string'
+            description: 'Example identifier'
+          - name: 'framework'
+            type: 'string'
+            description: 'Framework name'
+
+        returns:
+          type: 'FrameworkComponentType[]'
+          description: 'Array of available component types'
+
+        examples:
+          - id: 'component-discovery'
+            code: |
+              const components = registry.getAvailableComponents('cqrs:handlers', 'nestjs');
+              // Returns: ['service', 'controller', 'module']
+
+      getPackages:
+        description: 'Get all packages with available examples'
+        business-context: 'Package discovery for CLI package selection and documentation'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of package names with examples'
+
+        examples:
+          - id: 'package-listing'
+            code: |
+              const packages = registry.getPackages();
+              // Returns: ['aggregates', 'cqrs', 'policies', 'events']
+
+      getAllFrameworks:
+        description: 'Get all frameworks across all examples'
+        business-context: 'Complete framework catalog for CLI framework selection'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of all framework names'
+
+        examples:
+          - id: 'framework-catalog'
+            code: |
+              const frameworks = registry.getAllFrameworks();
+              // Returns: ['nestjs', 'express', 'fastify', 'standalone']
+
+# === CONSTANTS ===
+constants:
+  globalDocumentationRegistry:
+    description: 'Global singleton instance of documentation registry'
+    business-context: 'Shared registry instance for consistent example access across CLI operations'
+
+    type: 'DocumentationRegistry'
+
+    examples:
+      - id: 'global-access'
+        code: |
+          // Access global registry
+          await globalDocumentationRegistry.loadAll();
+          const examples = globalDocumentationRegistry.query({ package: 'aggregates' });
+          // Shared instance across entire CLI application

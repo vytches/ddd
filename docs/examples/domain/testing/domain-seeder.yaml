@@ -1,0 +1,355 @@
+# DomainSeeder - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'domain-seeder'
+title: 'DomainSeeder - Advanced Test Data Generation'
+description: 'Main orchestrator class for DDD-native test data seeding'
+business-context: 'Central entry point for all seeding operations with factory methods for different seeder types'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  DomainSeeder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Main orchestrator class for DDD-native test data seeding'
+      business-context: 'Central entry point providing factory methods for different types of seeders and scenarios'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Advanced test data seeding with DDD patterns'
+        cli:
+          description: |
+            ## DomainSeeder
+
+            Advanced test data generation orchestrator for DDD scenarios.
+            Provides factory methods for aggregate seeding, event sourcing, 
+            geographic scenarios, AI-enhanced generation, and crisis simulation.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Factory Pattern'
+        architecture: 'Streaming-first architecture for performance'
+        integration: 'Deep integration with all VytchesDDD packages'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates new DomainSeeder instance with optional configuration'
+        business-context: 'Initialize seeder with custom configuration overriding global settings'
+
+        parameters:
+          - name: 'config'
+            type: 'DomainSeederConfig'
+            description: 'Optional configuration for this seeder instance'
+            optional: true
+
+      configure:
+        description: 'Sets global configuration for all DomainSeeder instances'
+        business-context: 'Establish consistent seeding behavior across entire test suite'
+
+        parameters:
+          - name: 'config'
+            type: 'DomainSeederConfig'
+            description: 'Global configuration to apply'
+
+        custom-tags:
+          static: 'Static method'
+          global: 'Affects all instances'
+
+      forAggregate:
+        description: 'Creates aggregate-specific seeder for type-safe aggregate generation'
+        business-context: 'Generate properly constructed aggregates with business rule compliance'
+
+        parameters:
+          - name: 'AggregateClass'
+            type: 'new (...args: any[]) => T'
+            description: 'Constructor function for the aggregate type'
+
+        returns:
+          type: 'AggregateSeeder<T>'
+          description: 'AggregateSeeder instance configured for the specific aggregate'
+
+        examples:
+          - id: 'user-aggregate-seeding'
+            description: 'Type-safe user aggregate generation'
+            code: |
+              const userSeeder = DomainSeeder.forAggregate(UserAggregate)
+                .withDefaults({ status: 'active' })
+                .withSequence('email', n => `user${n}@example.com`);
+
+              const user = await userSeeder.build();
+              const users = await userSeeder.buildMany(10);
+
+        custom-tags:
+          static: 'Static factory method'
+          type-safety: 'Type-safe aggregate generation'
+
+      eventSourcedScenario:
+        description: 'Creates event sourcing seeder for generating event streams and histories'
+        business-context: 'Generate complete event sourced scenarios with proper temporal ordering'
+
+        parameters:
+          - name: 'scenarioName'
+            type: 'string'
+            description: 'Descriptive name for the event sourcing scenario'
+
+        returns:
+          type: 'EventSourcedSeeder'
+          description: 'EventSourcedSeeder instance for building event streams'
+
+        examples:
+          - id: 'order-lifecycle-events'
+            description: 'Complete order lifecycle with event sourcing'
+            code: |
+              const orderHistory = await DomainSeeder.eventSourcedScenario('order-lifecycle')
+                .withEventStream(stream =>
+                  stream
+                    .start('OrderCreated', { orderId: 'order-123', amount: 1000 })
+                    .after('2h', 'PaymentProcessed', { paymentId: 'pay-456' })
+                    .after('1h', 'OrderShipped', { trackingNumber: 'TRK789' })
+                )
+                .withSnapshots({ every: 5 })
+                .generateWithHistory();
+
+        custom-tags:
+          static: 'Static factory method'
+          event-sourcing: 'Event sourcing patterns'
+
+      scenario:
+        description: 'Creates complex scenario seeder for multi-aggregate coordinated scenarios'
+        business-context: 'Generate realistic business scenarios with multiple interrelated aggregates'
+
+        parameters:
+          - name: 'scenarioName'
+            type: 'string'
+            description: 'Descriptive name for the complex scenario'
+
+        returns:
+          type: 'ScenarioSeeder'
+          description: 'ScenarioSeeder instance for building complex domain scenarios'
+
+        examples:
+          - id: 'marketplace-ecosystem'
+            description: 'Complete marketplace with users, products, and orders'
+            code: |
+              const marketplaceScenario = await DomainSeeder.scenario('active-marketplace')
+                .withAggregates({
+                  users: 1000,
+                  products: 500,
+                  orders: 2000
+                })
+                .withRelationships({
+                  'users.orders': { min: 0, max: 10, avg: 3 },
+                  'products.orders': { min: 1, max: 100, avg: 20 }
+                })
+                .withTimeline('6months')
+                .seed();
+
+        custom-tags:
+          static: 'Static factory method'
+          complexity: 'Multi-aggregate coordination'
+
+      geographicScenario:
+        description: 'Creates geographic seeder for location-aware scenarios'
+        business-context: 'Generate location-based test data with spatial relationships'
+
+        parameters:
+          - name: 'scenarioName'
+            type: 'string'
+            description: 'Descriptive name for the geographic scenario'
+
+        returns:
+          type: 'GeographicSeeder'
+          description: 'GeographicSeeder instance for location-based seeding'
+
+        examples:
+          - id: 'neighborhood-community'
+            description: 'Geographic community with businesses and users'
+            code: |
+              const neighborhoodScenario = await DomainSeeder.geographicScenario('warsaw-mokotow')
+                .withBoundaries({
+                  center: { lat: 52.1946, lng: 21.0147 },
+                  radius: 2000,
+                  density: 'urban'
+                })
+                .withUsers({ count: 500, verificationRate: 0.8 })
+                .withBusinesses({ types: ['restaurant', 'pharmacy'], density: 'medium' })
+                .seed();
+
+        custom-tags:
+          static: 'Static factory method'
+          geographic: 'Location-based seeding'
+
+      aiEnhancedScenario:
+        description: 'Creates AI-enhanced seeder for intelligent, realistic data generation'
+        business-context: 'Generate highly realistic test data using AI models for natural behavior patterns'
+
+        parameters:
+          - name: 'scenarioName'
+            type: 'string'
+            description: 'Descriptive name for the AI-enhanced scenario'
+
+        returns:
+          type: 'AIEnhancedSeeder'
+          description: 'AIEnhancedSeeder instance for intelligent data generation'
+
+        examples:
+          - id: 'realistic-community'
+            description: 'AI-generated realistic community profiles'
+            code: |
+              const intelligentScenario = await DomainSeeder.aiEnhancedScenario('realistic-community')
+                .withAI({
+                  provider: 'openai',
+                  model: 'gpt-4',
+                  context: 'urban-polish-community'
+                })
+                .generateRealisticProfiles({
+                  count: 1000,
+                  diversity: 'high',
+                  behaviorPatterns: ['community-focused', 'tech-savvy']
+                })
+                .seed();
+
+        custom-tags:
+          static: 'Static factory method'
+          ai: 'AI-enhanced generation'
+
+      crisisScenario:
+        description: 'Creates crisis scenario seeder for emergency and edge-case simulation'
+        business-context: 'Test system behavior under crisis conditions and emergency scenarios'
+
+        parameters:
+          - name: 'scenarioName'
+            type: 'string'
+            description: 'Descriptive name for the crisis scenario'
+
+        returns:
+          type: 'ScenarioSeeder'
+          description: 'ScenarioSeeder instance configured for crisis simulation'
+
+        examples:
+          - id: 'natural-disaster'
+            description: 'Crisis scenario with emergency response patterns'
+            code: |
+              const crisisTest = await DomainSeeder.crisisScenario('neighborhood-flooding')
+                .withBaseline('active-community')
+                .injectCrisis({
+                  type: 'natural-disaster',
+                  subtype: 'flooding',
+                  severity: 'high',
+                  triggerAt: 'day-30',
+                  duration: '6hours',
+                  affectedArea: 0.6
+                })
+                .withEmergencyResponse({ alertPropagation: 'exponential' })
+                .seed();
+
+        custom-tags:
+          static: 'Static factory method'
+          crisis: 'Emergency simulation'
+
+      multiTenantScenario:
+        description: 'Creates multi-tenant scenario seeder for tenant isolation testing'
+        business-context: 'Test multi-tenant scenarios with proper data isolation and tenant-specific behavior'
+
+        parameters:
+          - name: 'scenarioName'
+            type: 'string'
+            description: 'Descriptive name for the multi-tenant scenario'
+
+        returns:
+          type: 'ScenarioSeeder'
+          description: 'ScenarioSeeder instance configured for multi-tenancy'
+
+        examples:
+          - id: 'saas-platform'
+            description: 'Multi-tenant SaaS platform with isolation validation'
+            code: |
+              const multiTenantScenario = await DomainSeeder.multiTenantScenario('saas-platform')
+                .withTenants([
+                  { id: 'tenant-1', plan: 'enterprise', users: 1000 },
+                  { id: 'tenant-2', plan: 'starter', users: 50 }
+                ])
+                .withIsolationValidation(true)
+                .seed();
+
+        custom-tags:
+          static: 'Static factory method'
+          multi-tenancy: 'Tenant isolation testing'
+
+      sagaScenario:
+        description: 'Creates saga scenario seeder for workflow and compensation pattern testing'
+        business-context: 'Generate complex saga workflows with proper compensation patterns and failure scenarios'
+
+        parameters:
+          - name: 'scenarioName'
+            type: 'string'
+            description: 'Descriptive name for the saga scenario'
+
+        returns:
+          type: 'ScenarioSeeder'
+          description: 'ScenarioSeeder instance configured for saga workflows'
+
+        examples:
+          - id: 'order-payment-saga'
+            description: 'Complete saga workflow with compensation actions'
+            code: |
+              const sagaScenario = await DomainSeeder.sagaScenario('order-payment-workflow')
+                .withWorkflowSteps([
+                  'CreateOrder',
+                  'ReserveInventory',
+                  'ProcessPayment',
+                  'ShipOrder'
+                ])
+                .withCompensationActions({
+                  'ProcessPayment': 'RefundPayment',
+                  'ReserveInventory': 'ReleaseInventory'
+                })
+                .withFailureScenarios(['payment-declined', 'inventory-unavailable'])
+                .seed();
+
+        custom-tags:
+          static: 'Static factory method'
+          saga: 'Workflow pattern testing'
+
+      getGlobalConfig:
+        description: 'Gets the current global configuration'
+        business-context: 'Inspect current global seeding configuration for debugging'
+
+        returns:
+          type: 'Readonly<DomainSeederConfig>'
+          description: 'Current global configuration object'
+
+        custom-tags:
+          static: 'Static method'
+          readonly: 'Returns immutable configuration'
+
+      resetGlobalConfig:
+        description: 'Resets the global configuration to defaults'
+        business-context: 'Restore default seeding behavior for clean test isolation'
+
+        custom-tags:
+          static: 'Static method'
+          cleanup: 'Configuration cleanup'
+
+      getConfig:
+        description: 'Gets the instance configuration'
+        business-context: 'Inspect current instance seeding configuration'
+
+        returns:
+          type: 'Readonly<DomainSeederConfig>'
+          description: 'Current instance configuration object'
+
+        custom-tags:
+          readonly: 'Returns immutable configuration'

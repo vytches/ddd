@@ -1,0 +1,338 @@
+# PatternRegistry - DDD Pattern Management System
+# Enhanced Metadata System V2 - Pattern definitions and dependency management
+
+# === FILE METADATA ===
+file-name: 'pattern-registry'
+title: 'PatternRegistry - DDD Pattern Management System'
+description: 'Comprehensive pattern registry for DDD component definitions, dependencies, and code generation'
+business-context: 'Central registry managing all DDD patterns with dependency resolution, validation, and intelligent suggestions'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  PatternDefinition:
+    description: 'Complete definition of a DDD pattern with metadata'
+    business-context: 'Structured pattern information for code generation, dependency management, and documentation'
+
+    properties:
+      - name: 'name'
+        type: 'ComponentType'
+        description: 'Pattern type identifier'
+      - name: 'displayName'
+        type: 'string'
+        description: 'Human-readable pattern name'
+      - name: 'description'
+        type: 'string'
+        description: 'Pattern description and purpose'
+      - name: 'category'
+        type: "'domain' | 'application' | 'infrastructure' | 'patterns'"
+        description: 'Architectural layer categorization'
+      - name: 'dependencies'
+        type: 'ComponentType[]'
+        description: 'Required pattern dependencies'
+      - name: 'templates'
+        type: 'string[]'
+        description: 'Available template file paths'
+      - name: 'complexity'
+        type: "'basic' | 'intermediate' | 'advanced'"
+        description: 'Pattern implementation complexity'
+      - name: 'frameworks'
+        type: 'string[]'
+        description: 'Supported framework integrations'
+
+# === CLASSES ===
+classes:
+  PatternRegistry:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Comprehensive DDD pattern registry with dependency management'
+      business-context: 'Central pattern management system providing pattern definitions, dependency resolution, validation, and intelligent code generation suggestions'
+
+      formats:
+        jsdoc:
+          description: 'Pattern registry with dependency resolution'
+        cli:
+          description: |
+            ## PatternRegistry
+            Complete DDD pattern management system with intelligent suggestions
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry Pattern'
+        features: 'Dependency resolution, validation, suggestions'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Initialize pattern registry with built-in patterns'
+        business-context: 'Creates registry instance with all standard DDD patterns pre-loaded'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const registry = new PatternRegistry();
+              // Pre-loaded with all DDD patterns
+
+      create:
+        description: 'Factory method to create pattern registry instance'
+        business-context: 'Convenient factory method for registry creation'
+
+        returns:
+          type: 'PatternRegistry'
+          description: 'New registry instance with built-in patterns'
+
+        custom-tags:
+          static: 'true'
+          factory: 'Factory method'
+
+        examples:
+          - id: 'factory'
+            code: |
+              const registry = PatternRegistry.create();
+              // Clean factory method approach
+
+      getPattern:
+        description: 'Get pattern definition by component type'
+        business-context: 'Retrieve complete pattern information for code generation and validation'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Pattern type to retrieve'
+
+        returns:
+          type: 'PatternDefinition'
+          description: 'Complete pattern definition with metadata'
+
+        examples:
+          - id: 'pattern-lookup'
+            code: |
+              const aggregate = registry.getPattern('aggregate');
+              console.log(aggregate.dependencies); // Required patterns
+              console.log(aggregate.templates); // Available templates
+
+      getAllPatterns:
+        description: 'Get all registered pattern definitions'
+        business-context: 'Complete pattern catalog for documentation and discovery'
+
+        returns:
+          type: 'PatternDefinition[]'
+          description: 'Array of all pattern definitions'
+
+        examples:
+          - id: 'catalog'
+            code: |
+              const patterns = registry.getAllPatterns();
+              patterns.forEach(p => console.log(p.displayName));
+
+      getPatternsByCategory:
+        description: 'Filter patterns by architectural category'
+        business-context: 'Architectural layer organization for clean DDD implementation'
+
+        parameters:
+          - name: 'category'
+            type: "'domain' | 'application' | 'infrastructure' | 'patterns'"
+            description: 'Architectural category to filter by'
+
+        returns:
+          type: 'PatternDefinition[]'
+          description: 'Patterns in the specified category'
+
+        examples:
+          - id: 'domain-patterns'
+            code: |
+              const domainPatterns = registry.getPatternsByCategory('domain');
+              // Returns: aggregates, entities, value-objects, etc.
+
+      getPatternsByComplexity:
+        description: 'Filter patterns by implementation complexity'
+        business-context: 'Progressive learning and appropriate pattern selection based on team skill level'
+
+        parameters:
+          - name: 'complexity'
+            type: "'basic' | 'intermediate' | 'advanced'"
+            description: 'Complexity level to filter by'
+
+        returns:
+          type: 'PatternDefinition[]'
+          description: 'Patterns at the specified complexity level'
+
+        examples:
+          - id: 'beginner-patterns'
+            code: |
+              const basicPatterns = registry.getPatternsByComplexity('basic');
+              // Returns patterns suitable for beginners
+
+      getPatternsByFramework:
+        description: 'Filter patterns by framework compatibility'
+        business-context: 'Framework-specific pattern selection for optimal integration'
+
+        parameters:
+          - name: 'framework'
+            type: 'string'
+            description: 'Framework name (nestjs, express, fastify, etc.)'
+
+        returns:
+          type: 'PatternDefinition[]'
+          description: 'Framework-compatible patterns'
+
+        examples:
+          - id: 'nestjs-patterns'
+            code: |
+              const nestjsPatterns = registry.getPatternsByFramework('nestjs');
+              // Returns patterns with NestJS integration support
+
+      hasPattern:
+        description: 'Check if pattern type is registered'
+        business-context: 'Pattern validation before code generation operations'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Pattern type to check'
+
+        returns:
+          type: 'boolean'
+          description: 'true if pattern exists'
+
+        examples:
+          - id: 'validation'
+            code: |
+              if (registry.hasPattern('aggregate')) {
+                console.log('Aggregate pattern available');
+              }
+
+      registerPattern:
+        description: 'Register custom pattern definition'
+        business-context: 'Extensibility for organization-specific patterns and customizations'
+
+        parameters:
+          - name: 'pattern'
+            type: 'PatternDefinition'
+            description: 'Custom pattern to register'
+
+        returns:
+          type: 'void'
+          description: 'Pattern registered successfully'
+
+        examples:
+          - id: 'custom-pattern'
+            code: |
+              registry.registerPattern({
+                name: 'custom-service',
+                displayName: 'Custom Service',
+                description: 'Organization-specific service pattern',
+                category: 'application',
+                dependencies: ['entity'],
+                templates: ['./templates/custom-service.hbs'],
+                complexity: 'intermediate',
+                frameworks: ['nestjs']
+              });
+
+      getPatternDependencies:
+        description: 'Get direct dependencies for a pattern'
+        business-context: 'Immediate dependency identification for code generation planning'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Pattern to get dependencies for'
+
+        returns:
+          type: 'ComponentType[]'
+          description: 'Array of direct dependencies'
+
+        examples:
+          - id: 'direct-deps'
+            code: |
+              const deps = registry.getPatternDependencies('aggregate');
+              // Returns: ['entity', 'value-object'] (direct only)
+
+      getAllDependencies:
+        description: 'Get complete dependency tree recursively'
+        business-context: 'Complete dependency resolution for comprehensive code generation'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Pattern to get full dependency tree for'
+
+        returns:
+          type: 'ComponentType[]'
+          description: 'Complete flattened dependency tree'
+
+        examples:
+          - id: 'full-tree'
+            code: |
+              const allDeps = registry.getAllDependencies('aggregate');
+              // Returns complete dependency tree, flattened
+
+      getSuggestions:
+        description: 'Get intelligent pattern suggestions based on existing patterns'
+        business-context: 'Smart recommendations for next patterns to implement based on current project state'
+
+        parameters:
+          - name: 'existingPatterns'
+            type: 'ComponentType[]'
+            description: 'Currently implemented patterns'
+
+        returns:
+          type: 'ComponentType[]'
+          description: 'Suggested patterns to implement next'
+
+        examples:
+          - id: 'smart-suggestions'
+            code: |
+              const current = ['entity', 'value-object'];
+              const suggestions = registry.getSuggestions(current);
+              // Might suggest: ['aggregate', 'repository']
+
+      validatePatternCombination:
+        description: 'Validate pattern combination for consistency and completeness'
+        business-context: 'Comprehensive validation ensuring proper DDD pattern usage and dependency satisfaction'
+
+        parameters:
+          - name: 'patterns'
+            type: 'ComponentType[]'
+            description: 'Pattern combination to validate'
+
+        returns:
+          type: 'ValidationResult'
+          description: 'Validation result with missing dependencies and conflicts'
+
+        examples:
+          - id: 'validation-check'
+            code: |
+              const result = registry.validatePatternCombination(['aggregate', 'repository']);
+              if (!result.isValid) {
+                console.log('Missing:', result.missingDependencies);
+                console.log('Conflicts:', result.conflicts);
+              }
+
+      generatePatternDocumentation:
+        description: 'Generate comprehensive documentation for a pattern'
+        business-context: 'Automated pattern documentation for developer guidance and onboarding'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Pattern to document'
+
+        returns:
+          type: 'string'
+          description: 'Generated markdown documentation'
+
+        examples:
+          - id: 'documentation'
+            code: |
+              const docs = registry.generatePatternDocumentation('aggregate');
+              // Returns complete markdown documentation

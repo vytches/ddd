@@ -2,7 +2,7 @@
 
 # === FILE METADATA ===
 file-name: 'observability/index'
-title: 'ResilienceObservability - Metrics and Monitoring'  
+title: 'ResilienceObservability - Metrics and Monitoring'
 description: 'Observability components for resilience patterns monitoring'
 business-context: |
   Provides comprehensive observability for resilience patterns including
@@ -59,14 +59,6 @@ types:
   MetricRegistry:
     description: 'Registry for managing metric collectors'
     business-context: 'Central registry for all resilience metrics'
-
-  MetricType:
-    description: 'Enumeration of supported metric types'
-    business-context: 'Defines available metric collection types'
-
-  MetricValue:
-    description: 'Numeric value for metrics with timestamp'
-    business-context: 'Time-series data point for metrics'
 
   ObservabilityEvent:
     description: 'Event data for resilience pattern operations'

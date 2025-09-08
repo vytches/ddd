@@ -1,0 +1,212 @@
+# Workflows Types - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'types'
+title: 'CLI Workflows Types - Core Workflow Infrastructure'
+description: 'Core type definitions for CLI workflow system'
+business-context: 'Enterprise CLI workflow orchestration with context management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  WorkflowContext:
+    description: 'Context object passed through workflow execution with session management'
+    business-context: 'Central state management for multi-step CLI workflows'
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Context pattern for workflow orchestration'
+      capabilities: 'Session tracking, step progression, metadata storage'
+
+    properties:
+      - name: 'workflowType'
+        type: 'string'
+        description: 'Type identifier for the workflow being executed'
+      - name: 'projectPath'
+        type: 'string | undefined'
+        description: 'Optional target project path for generation'
+      - name: 'domainName'
+        type: 'string | undefined'
+        description: 'Optional domain name for DDD modeling'
+      - name: 'step'
+        type: 'number'
+        description: 'Current workflow step number (1-based)'
+      - name: 'totalSteps'
+        type: 'number'
+        description: 'Total number of steps in workflow'
+      - name: 'data'
+        type: 'Record<string, unknown>'
+        description: 'Dynamic workflow data storage'
+      - name: 'metadata'
+        type: 'object'
+        description: 'Workflow execution metadata with timestamps'
+      - name: 'answers'
+        type: 'Record<string, unknown> | undefined'
+        description: 'User responses to workflow prompts'
+      - name: 'config'
+        type: 'Record<string, unknown> | undefined'
+        description: 'Workflow configuration options'
+      - name: 'outputPath'
+        type: 'string | undefined'
+        description: 'Target output path for generated files'
+
+  WorkflowStep:
+    description: 'Individual workflow step definition with execution logic'
+    business-context: 'Atomic workflow operations with conditional execution'
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Step pattern for workflow orchestration'
+      capabilities: 'Async execution, conditional skipping, context transformation'
+
+    properties:
+      - name: 'id'
+        type: 'string'
+        description: 'Unique step identifier'
+      - name: 'name'
+        type: 'string'
+        description: 'Human-readable step name'
+      - name: 'description'
+        type: 'string'
+        description: 'Detailed step description'
+      - name: 'execute'
+        type: '(context: WorkflowContext) => Promise<WorkflowContext>'
+        description: 'Step execution function that transforms context'
+      - name: 'canSkip'
+        type: 'boolean | undefined'
+        description: 'Whether step can be skipped'
+      - name: 'condition'
+        type: '(context: WorkflowContext) => boolean | undefined'
+        description: 'Conditional execution predicate'
+
+  WorkflowResult:
+    description: 'Result of workflow execution with comprehensive output tracking'
+    business-context: 'Complete workflow execution report with generated artifacts'
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Result pattern for workflow completion'
+      capabilities: 'Success tracking, file tracking, error handling'
+
+    properties:
+      - name: 'success'
+        type: 'boolean'
+        description: 'Whether workflow completed successfully'
+      - name: 'context'
+        type: 'WorkflowContext'
+        description: 'Final workflow context after execution'
+      - name: 'generatedFiles'
+        type: 'string[]'
+        description: 'List of files actually generated'
+      - name: 'plannedFiles'
+        type: 'string[]'
+        description: 'List of files planned for generation'
+      - name: 'boundedContexts'
+        type: 'string[]'
+        description: 'Bounded contexts identified or created'
+      - name: 'patterns'
+        type: 'string[]'
+        description: 'DDD patterns applied in workflow'
+      - name: 'hasDatabase'
+        type: 'boolean'
+        description: 'Whether database integration was configured'
+      - name: 'hasMonitoring'
+        type: 'boolean'
+        description: 'Whether monitoring was configured'
+      - name: 'error'
+        type: 'Error | undefined'
+        description: 'Error information if workflow failed'
+
+  DomainBuilderOptions:
+    description: 'Domain builder workflow configuration options'
+    business-context: 'Comprehensive domain modeling workflow configuration'
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Options pattern for domain builder'
+      capabilities: 'Multi-framework support, pattern selection, compliance configuration'
+
+    properties:
+      - name: 'domainName'
+        type: 'string | undefined'
+        description: 'Target domain name for modeling'
+      - name: 'structure'
+        type: 'string'
+        description: 'Project structure template to use'
+      - name: 'framework'
+        type: 'string'
+        description: 'Target framework for integration'
+      - name: 'guided'
+        type: 'boolean'
+        description: 'Whether to use guided mode with prompts'
+      - name: 'patterns'
+        type: 'string[]'
+        description: 'DDD patterns to include'
+      - name: 'boundedContexts'
+        type: 'string[]'
+        description: 'Bounded contexts to generate'
+      - name: 'compliance'
+        type: 'string[]'
+        description: 'Compliance frameworks to apply'
+      - name: 'security'
+        type: 'string[]'
+        description: 'Security patterns to include'
+      - name: 'monitoring'
+        type: 'boolean'
+        description: 'Whether to include monitoring setup'
+      - name: 'dryRun'
+        type: 'boolean'
+        description: 'Whether to perform dry run without file generation'
+
+  DomainModelingOptions:
+    description: 'Domain modeling workflow options for architectural planning'
+    business-context: 'Domain-driven design modeling configuration'
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Options pattern for domain modeling'
+      capabilities: 'Interactive modeling, framework selection, pattern application'
+
+    properties:
+      - name: 'interactive'
+        type: 'boolean | undefined'
+        description: 'Whether to use interactive modeling mode'
+      - name: 'outputPath'
+        type: 'string | undefined'
+        description: 'Target path for generated models'
+      - name: 'framework'
+        type: 'string | undefined'
+        description: 'Target framework for integration'
+      - name: 'patterns'
+        type: 'string[] | undefined'
+        description: 'DDD patterns to apply'
+
+  ComponentGenerationOptions:
+    description: 'Component generation workflow options for specific component creation'
+    business-context: 'Individual component generation with framework integration'
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Options pattern for component generation'
+      capabilities: 'Type-specific generation, framework integration, pattern application'
+
+    properties:
+      - name: 'componentType'
+        type: 'string'
+        description: 'Type of component to generate'
+      - name: 'name'
+        type: 'string'
+        description: 'Component name'
+      - name: 'framework'
+        type: 'string'
+        description: 'Target framework'
+      - name: 'patterns'
+        type: 'string[]'
+        description: 'DDD patterns to apply'
+      - name: 'outputPath'
+        type: 'string'
+        description: 'Output path for generated component'
