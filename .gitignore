@@ -125,3 +125,4 @@ packages/*/examples/metadata.cjs
 **/.vytches-ddd/
 **/session-*.json
 repomix-output.md
+docs/api/

@@ -1,0 +1,221 @@
+# Hybrid Template Engine - Handlebars Template Engine with Caching
+
+# === FILE METADATA ===
+file-name: 'hybrid-template-engine'
+title: 'HybridTemplateEngine - Advanced Template Rendering System'
+description: 'Handlebars-based template engine with caching and content loading'
+business-context: 'High-performance template rendering for code generation with intelligent caching'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  HybridTemplateEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Advanced template engine with Handlebars and intelligent caching'
+      business-context: 'Enterprise template rendering system for code generation with performance optimization'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Handlebars template engine with caching'
+        cli:
+          description: |
+            ## HybridTemplateEngine
+            Advanced template rendering system with intelligent caching and content loading
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Template Engine Pattern'
+        category: 'Code Generation'
+        features: 'Handlebars rendering, template caching, content loading, helper registration'
+        performance: 'Multi-level caching for templates and content'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Create new HybridTemplateEngine instance with default configuration'
+        business-context: 'Initialize template engine with Handlebars, helpers, and caching system'
+
+        examples:
+          - id: 'basic-engine'
+            code: |
+              const engine = new HybridTemplateEngine();
+              // Ready for template rendering with caching
+          - id: 'production-ready'
+            code: |
+              const engine = new HybridTemplateEngine();
+              // Pre-configured with helpers and optimized caching
+
+        custom-tags:
+          handlebars: 'Initializes Handlebars engine'
+          caching: 'Sets up template and content caching'
+          helpers: 'Registers template helper functions'
+
+      registerHelpers:
+        description: 'Register custom Handlebars helper functions'
+        business-context: 'Internal method for registering template helpers for enhanced functionality'
+
+        examples:
+          - id: 'internal-helpers'
+            code: |
+              // Internal method - registers helpers automatically
+              // Provides functions for template processing
+
+        custom-tags:
+          private: true
+          handlebars: 'Registers Handlebars helper functions'
+          initialization: 'Called during constructor'
+
+      render:
+        description: 'Render template with data using Handlebars engine'
+        business-context: 'Main template rendering method with intelligent caching and content loading'
+
+        parameters:
+          - name: 'layout'
+            type: 'string'
+            description: 'Template layout name or path to render'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Template data object with variables for rendering'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to rendered template content'
+
+        examples:
+          - id: 'basic-render'
+            code: |
+              const engine = new HybridTemplateEngine();
+              const output = await engine.render('component', {
+                className: 'UserService',
+                methods: ['create', 'update', 'delete']
+              });
+          - id: 'complex-data'
+            code: |
+              const output = await engine.render('entity-template', {
+                entityName: 'User',
+                properties: [
+                  { name: 'id', type: 'EntityId' },
+                  { name: 'email', type: 'string' }
+                ],
+                framework: 'nestjs'
+              });
+
+        custom-tags:
+          async: true
+          handlebars: 'Uses Handlebars template engine'
+          caching: 'Leverages template and content caching'
+          main-method: 'Primary template rendering interface'
+
+      loadTemplate:
+        description: 'Load template file from disk with caching'
+        business-context: 'Internal method for efficient template loading with cache management'
+
+        parameters:
+          - name: 'templatePath'
+            type: 'string'
+            description: 'Path to template file to load'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to template content'
+
+        examples:
+          - id: 'internal-load'
+            code: |
+              // Internal method - loads and caches template files
+              // Used automatically by render() method
+
+        custom-tags:
+          private: true
+          async: true
+          caching: 'Template file caching for performance'
+          filesystem: 'Disk-based template loading'
+
+      loadMarkdownContent:
+        description: 'Load markdown content files with processing'
+        business-context: 'Internal method for loading and processing markdown documentation content'
+
+        parameters:
+          - name: 'contentPath'
+            type: 'string'
+            description: 'Path to markdown content file'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to processed markdown content'
+
+        examples:
+          - id: 'internal-markdown'
+            code: |
+              // Internal method - loads markdown documentation
+              // Processes content for template integration
+
+        custom-tags:
+          private: true
+          async: true
+          markdown: 'Markdown content processing'
+          documentation: 'Handles documentation content'
+
+      loadFrameworkContent:
+        description: 'Load framework-specific content and templates'
+        business-context: 'Internal method for loading framework-specific templates and configurations'
+
+        parameters:
+          - name: 'framework'
+            type: 'string'
+            description: 'Framework name (nestjs, express, etc.)'
+          - name: 'contentType'
+            type: 'string'
+            description: 'Type of content to load'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to framework-specific content'
+
+        examples:
+          - id: 'internal-framework'
+            code: |
+              // Internal method - loads framework-specific content
+              // Supports NestJS, Express, and other frameworks
+
+        custom-tags:
+          private: true
+          async: true
+          framework-specific: 'Supports multiple frameworks'
+          content-loading: 'Dynamic content loading by framework'
+
+      clearCache:
+        description: 'Clear all template and content caches'
+        business-context: 'Cache management for forcing fresh template loading and development workflow'
+
+        returns:
+          type: 'void'
+          description: 'No return value, all caches are cleared'
+
+        examples:
+          - id: 'cache-clear'
+            code: |
+              const engine = new HybridTemplateEngine();
+              engine.clearCache();
+              // Next render() calls will reload templates from disk
+          - id: 'development-workflow'
+            code: |
+              // During development, clear cache to see template changes
+              engine.clearCache();
+              const freshOutput = await engine.render('component', data);
+
+        custom-tags:
+          cache-management: true
+          development: 'Useful during template development'
+          performance: 'Clears both template and content caches'

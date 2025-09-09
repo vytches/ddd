@@ -1,0 +1,46 @@
+# Index - Event Scheduling Adapters
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Event Scheduling Adapters Public API'
+description: 'Export file for event scheduler adapter implementations'
+business-context: 'Provides access to all available scheduler adapter implementations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Scheduler adapter implementations for different backend systems'
+  business-context: 'Enables pluggable scheduler backends for different deployment scenarios'
+
+  formats:
+    jsdoc:
+      description: 'Event scheduler adapter exports'
+    cli:
+      description: |
+        ## Event Scheduling Adapters
+        
+        Available scheduler adapters:
+        - BaseSchedulerAdapter - Foundation for custom implementations
+        - InMemorySchedulerAdapter - Development and testing adapter
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'adapters'
+    pattern: 'adapter-pattern'
+
+# === EXPORTS DOCUMENTATION ===
+exports:
+  BaseSchedulerAdapter:
+    description: 'Abstract base class for scheduler adapters'
+    business-context: 'Foundation for implementing custom scheduler backends'
+    source: './BaseSchedulerAdapter'
+
+  InMemorySchedulerAdapter:
+    description: 'In-memory scheduler adapter implementation'
+    business-context: 'Simple scheduler for development, testing, and lightweight scenarios'
+    source: './InMemorySchedulerAdapter'

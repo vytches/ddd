@@ -1,0 +1,146 @@
+# Package Config Loader - Package Configuration Management
+
+# === FILE METADATA ===
+file-name: 'package-config-loader'
+title: 'PackageConfigLoader - Package Configuration Management'
+description: 'Loads and validates package-specific configuration files with caching'
+business-context: 'Centralized configuration management for CLI package operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  PackageConfigLoader:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Package configuration loader with caching and validation'
+      business-context: 'Manages package-specific configuration files for CLI operations'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Cached package configuration loader'
+        cli:
+          description: |
+            ## Package Configuration Manager
+            Handles loading, caching, and validation of package configurations
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Loader Pattern'
+        category: 'Configuration Management'
+        caching: 'In-memory configuration cache'
+
+    # Methods
+    methods:
+      loadPackageConfig:
+        description: 'Load configuration for a specific package'
+        business-context: 'Retrieves package configuration with automatic caching and validation'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Name of the package to load configuration for'
+
+        returns:
+          type: 'Promise<PackageExampleConfig>'
+          description: 'Promise resolving to validated package configuration'
+
+        examples:
+          - id: 'basic-load'
+            code: |
+              const loader = new PackageConfigLoader();
+              const config = await loader.loadPackageConfig('aggregates');
+              // Returns validated configuration with examples and metadata
+          - id: 'error-handling'
+            code: |
+              try {
+                const config = await loader.loadPackageConfig('unknown-package');
+              } catch (error) {
+                console.error('Failed to load package config:', error.message);
+              }
+
+        custom-tags:
+          async: true
+          caching: 'Results cached in memory'
+          validation: 'Automatic configuration validation'
+
+      getAvailablePackages:
+        description: 'Get list of all available packages with configurations'
+        business-context: 'Discovery method for finding all configurable packages'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Promise resolving to array of available package names'
+
+        examples:
+          - id: 'list-packages'
+            code: |
+              const loader = new PackageConfigLoader();
+              const packages = await loader.getAvailablePackages();
+              console.log('Available packages:', packages);
+              // ['aggregates', 'value-objects', 'repositories', ...]
+          - id: 'package-selection'
+            code: |
+              const packages = await loader.getAvailablePackages();
+              const selectedPackage = packages[0];
+              const config = await loader.loadPackageConfig(selectedPackage);
+
+        custom-tags:
+          async: true
+          discovery: 'Package discovery functionality'
+
+      validateConfig:
+        description: 'Validate package configuration structure'
+        business-context: 'Internal validation ensuring configuration integrity'
+
+        parameters:
+          - name: 'config'
+            type: 'unknown'
+            description: 'Configuration object to validate'
+
+        returns:
+          type: 'PackageExampleConfig'
+          description: 'Validated and typed configuration object'
+
+        examples:
+          - id: 'validation'
+            code: |
+              // Internal method - validates configuration structure
+              // Ensures all required fields are present and properly typed
+
+        custom-tags:
+          private: true
+          validation: 'Schema validation logic'
+
+      clearCache:
+        description: 'Clear the internal configuration cache'
+        business-context: 'Cache management for forcing fresh configuration loads'
+
+        returns:
+          type: 'void'
+          description: 'No return value, cache is cleared'
+
+        examples:
+          - id: 'cache-clear'
+            code: |
+              const loader = new PackageConfigLoader();
+              loader.clearCache();
+              // Next loadPackageConfig() calls will reload from disk
+          - id: 'refresh-config'
+            code: |
+              // Clear cache and reload configuration
+              loader.clearCache();
+              const freshConfig = await loader.loadPackageConfig('aggregates');
+
+        custom-tags:
+          cache-management: true
+          side-effects: 'Clears internal cache state'

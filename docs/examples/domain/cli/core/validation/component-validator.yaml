@@ -1,0 +1,441 @@
+# Component Validator - CLI Component Generation Validation
+
+# === FILE METADATA ===
+file-name: 'component-validator'
+title: 'ComponentValidator - Intelligent Component Generation Validation'
+description: 'Advanced validation system for CLI component generation with conflict detection and context analysis'
+business-context: 'Comprehensive validation engine that ensures proper component naming, prevents conflicts, and provides intelligent suggestions for DDD component generation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ComponentValidator:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Advanced validation system for CLI component generation'
+      business-context: 'Comprehensive validation engine that ensures proper naming conventions, prevents conflicts with existing components, analyzes project context, and provides intelligent suggestions for Domain-Driven Design component generation'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Intelligent component generation validation system'
+        cli:
+          description: |
+            ## ComponentValidator
+            Advanced validation engine for DDD component generation with conflict detection, naming validation, and context analysis
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Validator Pattern'
+        category: 'CLI Validation'
+        features: 'Naming validation, conflict detection, project analysis, dependency analysis, intelligent suggestions'
+        ddd-aware: 'Domain-Driven Design component validation and best practices'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Create new ComponentValidator instance'
+        business-context: 'Initialize validator with comprehensive validation rules for different DDD component types'
+
+        examples:
+          - id: 'basic-constructor'
+            code: |
+              const validator = new ComponentValidator();
+              // Ready for comprehensive component validation
+
+        custom-tags:
+          initialization: 'Sets up validation rules for all DDD component types'
+          rule-configuration: 'Configures naming conventions and conflict detection'
+
+      create:
+        description: 'Factory method to create validator'
+        business-context: 'Static factory for creating configured ComponentValidator instance with optimal validation settings'
+
+        returns:
+          type: 'ComponentValidator'
+          description: 'New configured component validator instance'
+
+        examples:
+          - id: 'factory-creation'
+            code: |
+              const validator = ComponentValidator.create();
+              // Optimally configured for DDD component validation
+          - id: 'validation-workflow'
+            code: |
+              const validator = ComponentValidator.create();
+              const result = await validator.validateComponent('aggregate', 'User', context);
+
+        custom-tags:
+          static: true
+          factory: true
+          optimal-config: 'Pre-configured with DDD validation best practices'
+
+      validateComponent:
+        description: 'Validate component generation request'
+        business-context: 'Main validation method that analyzes component naming, checks for conflicts, examines project context, and provides comprehensive validation results'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Type of DDD component to validate (aggregate, entity, service, etc.)'
+          - name: 'name'
+            type: 'string'
+            description: 'Proposed component name to validate'
+          - name: 'context'
+            type: 'ValidationContext'
+            description: 'Project context and validation configuration'
+
+        returns:
+          type: 'Promise<ValidationResult>'
+          description: 'Promise resolving to comprehensive validation results with suggestions'
+
+        examples:
+          - id: 'component-validation'
+            code: |
+              const result = await validator.validateComponent(
+                'aggregate',
+                'UserProfile',
+                validationContext
+              );
+              if (result.isValid) {
+                console.log('Component validation passed');
+              }
+          - id: 'validation-with-suggestions'
+            code: |
+              const result = await validator.validateComponent(
+                'entity',
+                'order',
+                context
+              );
+              result.suggestions.forEach(s => console.log(s.message));
+          - id: 'conflict-detection'
+            code: |
+              const result = await validator.validateComponent(
+                'service',
+                'PaymentService',
+                context
+              );
+              if (!result.isValid) {
+                console.log('Conflicts found:', result.errors);
+              }
+
+        custom-tags:
+          async: true
+          main-method: 'Primary validation interface'
+          comprehensive: 'Complete component validation with conflict detection'
+          intelligent: 'AI-powered validation with contextual suggestions'
+
+      setupValidationRules:
+        description: 'Setup validation rules for different component types'
+        business-context: 'Internal method for configuring comprehensive validation rules specific to each DDD component type including naming patterns and architectural constraints'
+
+        returns:
+          type: 'void'
+          description: 'No return value, configures internal validation rules'
+
+        examples:
+          - id: 'rules-setup'
+            code: |
+              // Internal method - configures validation rules
+              // Aggregate rules: PascalCase, unique names, business focus
+              // Entity rules: PascalCase, identity patterns
+              // Service rules: Service suffix, business operations
+
+        custom-tags:
+          private: true
+          initialization: 'Configures DDD component-specific validation rules'
+          ddd-patterns: 'Implements Domain-Driven Design naming and structural patterns'
+
+      validateNaming:
+        description: 'Validate naming conventions'
+        business-context: 'Internal method for validating component names against DDD naming conventions, case standards, and business domain appropriateness'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Component type for specific naming rules'
+          - name: 'name'
+            type: 'string'
+            description: 'Component name to validate'
+
+        returns:
+          type: 'ValidationResult'
+          description: 'Naming validation results with specific feedback'
+
+        examples:
+          - id: 'naming-validation'
+            code: |
+              // Internal method - validates naming conventions
+              // PascalCase for classes, camelCase for methods
+              // Business-appropriate terminology, DDD patterns
+
+        custom-tags:
+          private: true
+          naming-conventions: 'Enforces DDD and TypeScript naming standards'
+          business-validation: 'Ensures domain-appropriate terminology'
+
+      checkConflicts:
+        description: 'Check for conflicts with existing components'
+        business-context: 'Internal method for scanning project structure to detect naming conflicts, similar components, and potential architectural issues'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Component type for conflict analysis'
+          - name: 'name'
+            type: 'string'
+            description: 'Component name to check for conflicts'
+          - name: 'context'
+            type: 'ValidationContext'
+            description: 'Project context for conflict analysis'
+
+        returns:
+          type: 'Promise<ConflictResult>'
+          description: 'Promise resolving to conflict detection results'
+
+        examples:
+          - id: 'conflict-detection'
+            code: |
+              // Internal method - detects component conflicts
+              // Existing files, similar names, architectural violations
+              // Suggests alternatives and resolutions
+
+        custom-tags:
+          private: true
+          async: true
+          conflict-detection: 'Advanced conflict analysis and resolution'
+          project-scanning: 'Comprehensive project structure analysis'
+
+      analyzeProjectContext:
+        description: 'Analyze project context'
+        business-context: 'Internal method for analyzing project structure, dependencies, patterns, and architectural decisions to provide contextual validation'
+
+        parameters:
+          - name: 'context'
+            type: 'ValidationContext'
+            description: 'Project context to analyze for validation insights'
+
+        returns:
+          type: 'Promise<ProjectAnalysis>'
+          description: 'Promise resolving to project context analysis'
+
+        examples:
+          - id: 'context-analysis'
+            code: |
+              // Internal method - analyzes project context
+              // Directory structure, existing patterns, dependencies
+              // Framework detection, architectural analysis
+
+        custom-tags:
+          private: true
+          async: true
+          context-analysis: 'Deep project structure and pattern analysis'
+          architectural: 'Identifies existing architectural patterns and constraints'
+
+      analyzeDependencies:
+        description: 'Analyze dependencies and suggest related components'
+        business-context: 'Internal method for analyzing component dependencies and suggesting related components that might be needed for complete DDD implementation'
+
+        parameters:
+          - name: 'type'
+            type: 'ComponentType'
+            description: 'Component type for dependency analysis'
+          - name: 'name'
+            type: 'string'
+            description: 'Component name for relationship analysis'
+          - name: 'context'
+            type: 'ValidationContext'
+            description: 'Project context for dependency analysis'
+
+        returns:
+          type: 'Promise<DependencyAnalysis>'
+          description: 'Promise resolving to dependency analysis with suggestions'
+
+        examples:
+          - id: 'dependency-analysis'
+            code: |
+              // Internal method - analyzes component dependencies
+              // Suggests related aggregates, entities, services
+              // Identifies missing domain building blocks
+
+        custom-tags:
+          private: true
+          async: true
+          dependency-analysis: 'Intelligent component relationship analysis'
+          suggestions: 'Provides architectural completeness recommendations'
+
+      calculateConfidence:
+        description: 'Calculate confidence score for validation'
+        business-context: 'Internal algorithm for computing confidence scores based on validation results, project analysis, and pattern matching'
+
+        parameters:
+          - name: 'validationResults'
+            type: 'ValidationResult[]'
+            description: 'Array of validation results to analyze'
+
+        returns:
+          type: 'number'
+          description: 'Confidence score between 0 and 1'
+
+        examples:
+          - id: 'confidence-calculation'
+            code: |
+              // Internal method - calculates validation confidence
+              // Factors: naming quality, conflict absence, context fit
+              // Returns score for recommendation strength
+
+        custom-tags:
+          private: true
+          algorithmic: 'Advanced confidence scoring algorithm'
+          machine-learning: 'Pattern-based confidence calculation'
+
+      findExistingComponents:
+        description: 'Find existing components with similar names'
+        business-context: 'Internal method for searching project for existing components with similar names to prevent duplication and suggest alternatives'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Component name to search for similarities'
+          - name: 'context'
+            type: 'ValidationContext'
+            description: 'Project context for component search'
+
+        returns:
+          type: 'Promise<ExistingComponent[]>'
+          description: 'Promise resolving to array of similar existing components'
+
+        examples:
+          - id: 'similarity-search'
+            code: |
+              // Internal method - finds similar components
+              // Fuzzy matching, pattern recognition
+              // Prevents duplication, suggests alternatives
+
+        custom-tags:
+          private: true
+          async: true
+          similarity-search: 'Advanced fuzzy matching for component names'
+          deduplication: 'Prevents component duplication and confusion'
+
+      scanDirectory:
+        description: 'Recursively scan directory for files'
+        business-context: 'Internal utility for comprehensive directory traversal to analyze project structure and identify existing components'
+
+        parameters:
+          - name: 'dirPath'
+            type: 'string'
+            description: 'Directory path to scan recursively'
+          - name: 'extensions'
+            type: 'string[]'
+            description: 'File extensions to include in scan'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Promise resolving to array of matching file paths'
+
+        examples:
+          - id: 'directory-scanning'
+            code: |
+              // Internal method - recursive directory scan
+              // Finds TypeScript files, analyzes structure
+              // Respects .gitignore and common exclusions
+
+        custom-tags:
+          private: true
+          async: true
+          recursive: 'Deep directory traversal and analysis'
+          file-discovery: 'Comprehensive project file discovery'
+
+      extractComponentName:
+        description: 'Extract component name from file name'
+        business-context: 'Internal utility for extracting clean component names from file paths using naming convention patterns'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path to extract component name from'
+
+        returns:
+          type: 'string'
+          description: 'Extracted component name'
+
+        examples:
+          - id: 'name-extraction'
+            code: |
+              // Internal method - extracts component names
+              // user-service.ts -> UserService
+              // order.aggregate.ts -> OrderAggregate
+
+        custom-tags:
+          private: true
+          synchronous: true
+          name-extraction: 'Intelligent component name extraction from file paths'
+          pattern-matching: 'Uses naming convention patterns for extraction'
+
+      detectComponentType:
+        description: 'Detect component type from file name'
+        business-context: 'Internal method for identifying DDD component types from file naming patterns and directory structure'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path to analyze for component type'
+
+        returns:
+          type: 'ComponentType | null'
+          description: 'Detected component type or null if unrecognized'
+
+        examples:
+          - id: 'type-detection'
+            code: |
+              // Internal method - detects component types
+              // *.aggregate.ts -> 'aggregate'
+              // *.service.ts -> 'service'
+              // *.entity.ts -> 'entity'
+
+        custom-tags:
+          private: true
+          synchronous: true
+          type-detection: 'Pattern-based component type identification'
+          ddd-patterns: 'Recognizes Domain-Driven Design component patterns'
+
+      displayValidationResults:
+        description: 'Display validation results'
+        business-context: 'User interface method for presenting validation results in formatted, actionable output with suggestions and recommendations'
+
+        parameters:
+          - name: 'result'
+            type: 'ValidationResult'
+            description: 'Validation results to display to user'
+
+        returns:
+          type: 'void'
+          description: 'No return value, outputs formatted validation results'
+
+        examples:
+          - id: 'results-display'
+            code: |
+              const result = await validator.validateComponent('aggregate', 'User', context);
+              validator.displayValidationResults(result);
+              // Formatted output with errors, warnings, suggestions
+          - id: 'validation-feedback'
+            code: |
+              // Displays comprehensive validation feedback
+              // Errors in red, warnings in yellow, suggestions highlighted
+              // Actionable recommendations for component improvement
+
+        custom-tags:
+          synchronous: true
+          ui: 'User interface for validation feedback'
+          formatting: 'Rich console output with colors and structure'
+          actionable: 'Provides clear next steps and recommendations'

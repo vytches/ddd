@@ -585,6 +585,47 @@ class ASTJSDocInjector {
     // Collect all modifications
     const modifications = [];
 
+    // Load file metadata first
+    const fileBaseName = path.basename(filePath, '.d.ts');
+    const relativePath = path.relative(path.join('packages', packageName, 'dist'), filePath);
+    const dirName = path.dirname(relativePath);
+    const metadataKey =
+      dirName && dirName !== '.'
+        ? `${dirName}/${fileBaseName}`.replace(/\\/g, '/')
+        : fileBaseName;
+
+    await this.loadClassMetadata(packageName, metadataKey, filePath);
+    const key = `${packageName}-${metadataKey.toLowerCase()}`;
+    const metadata = this.classMetadata.get(key);
+
+    // Check for file-level JSDoc documentation
+    if (metadata?.['file-doc']) {
+      console.log(`  🔍 Found file-level documentation for: ${fileBaseName}`);
+      
+      // Check if file already has leading JSDoc comment
+      const hasFileJSDoc = content.trim().startsWith('/**');
+      
+      if (!hasFileJSDoc || this.forceMode) {
+        // Generate file-level JSDoc using hierarchical resolution
+        const fileJSDoc = this.generateJSDoc(
+          {}, // Empty object forces hierarchical resolution
+          '',
+          packageName,
+          fileBaseName
+          // No className or methodName for file-level JSDoc
+        );
+        
+        // Insert at the very beginning of the file
+        modifications.push({
+          start: 0,
+          end: 0,
+          text: fileJSDoc + '\n',
+        });
+        
+        console.log(`    ✅ Enhanced file-level JSDoc for ${fileBaseName}`);
+      }
+    }
+
     // Visit all nodes in the AST
     const visit = async node => {
       // Process interfaces
@@ -1039,6 +1080,78 @@ class ASTJSDocInjector {
               });
 
               console.log(`    ✅ Enhanced JSDoc for function ${functionName}`);
+            }
+          }
+        }
+      }
+
+      // Process enums
+      if (ts.isEnumDeclaration(node)) {
+        const enumName = node.name?.text;
+        if (enumName) {
+          console.log(`  🔍 Found enum: ${enumName}`);
+
+          // Load metadata for this file
+          const fileBaseName = path.basename(filePath, '.d.ts');
+
+          // For subdirectory files, include the subdirectory in the key to avoid collisions
+          const relativePath = path.relative(path.join('packages', packageName, 'dist'), filePath);
+          const dirName = path.dirname(relativePath);
+          const metadataKey =
+            dirName && dirName !== '.'
+              ? `${dirName}/${fileBaseName}`.replace(/\\/g, '/')
+              : fileBaseName;
+
+          await this.loadClassMetadata(packageName, metadataKey, filePath);
+          const key = `${packageName}-${metadataKey.toLowerCase()}`;
+          const metadata = this.classMetadata.get(key);
+
+          if (this.debug) {
+            console.log(`    📋 Metadata key: ${key}`);
+            console.log(`    📋 Has metadata: ${!!metadata}`);
+            if (metadata) {
+              console.log(`    📋 Has enums: ${!!metadata.enums}`);
+              console.log(
+                `    📋 Enum names: ${metadata.enums ? Object.keys(metadata.enums).join(', ') : 'none'}`
+              );
+            }
+          }
+
+          if (metadata?.enums?.[enumName]) {
+            const enumMetadata = metadata.enums[enumName];
+
+            // Check if enum already has JSDoc
+            const leadingComments = ts.getLeadingCommentRanges(content, node.pos);
+            const hasJSDoc =
+              leadingComments &&
+              leadingComments.some(comment =>
+                content.substring(comment.pos, comment.end).includes('/**')
+              );
+
+            if (!hasJSDoc || this.forceMode) {
+              // Generate JSDoc using hierarchical resolution for enums
+              const enumJSDoc = this.generateJSDoc(
+                {}, // Empty object forces hierarchical resolution
+                '',
+                packageName,
+                fileBaseName,
+                enumName
+                // No methodName for enum-level JSDoc
+              );
+
+              // Find the actual start of the enum declaration
+              const enumStart = node.getStart(sourceFile);
+              // Find the start of the line containing the enum
+              const lineStart = content.lastIndexOf('\n', enumStart - 1) + 1;
+
+              // Insert JSDoc at the beginning of the line
+              modifications.push({
+                start: lineStart,
+                end: lineStart,
+                text: enumJSDoc + '\n',
+              });
+
+              console.log(`    ✅ Enhanced JSDoc for enum ${enumName}`);
             }
           }
         }

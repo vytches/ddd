@@ -284,6 +284,38 @@ interfaces:
           type: 'boolean'
           description: 'True if value is valid'
 
+  IAggregateEventHandler:
+    description: 'Handler function for processing aggregate events'
+    business-context: 'Used internally by aggregates to handle domain events during replay and processing'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Type of the event payload'
+        default: 'unknown'
+
+    callable: true
+    parameters:
+      - name: 'payload'
+        type: 'T'
+        description: 'Event payload data'
+      - name: 'metadata'
+        type: 'IEventMetadata'
+        description: 'Optional event metadata'
+        optional: true
+
+    returns:
+      type: 'void'
+      description: 'No return value'
+
+  ErrorOptions:
+    description: 'Base options interface for error construction'
+    business-context: 'Extensible options for error metadata and context'
+
+    index-signature:
+      key-type: 'string'
+      value-type: 'unknown'
+      description: 'Additional error properties'
+
 # === TYPES ===
 types:
   IdType:
@@ -303,6 +335,17 @@ types:
     business-context: 'Provides context and metadata for domain-level errors'
 
     definition: 'ErrorOptions & { domain?: string | object | undefined; code?: ErrorCode; data?: unknown; error?: Error | undefined; }'
+
+  CapabilityConstructor:
+    description: 'Constructor type for aggregate capabilities'
+    business-context: 'Type definition for capability class constructors with static type metadata'
+
+    generic-parameters:
+      - name: 'T'
+        description: 'Type of capability extending Capability'
+        default: 'Capability'
+
+    definition: '(new (...args: any[]) => T) & { capabilityType: string; }'
 
 # === ENUMS ===
 enums:
@@ -328,9 +371,43 @@ enums:
     description: 'Application-level error codes'
     business-context: 'Error codes for application service layer issues'
 
+    values:
+      - name: 'Default'
+        value: "'A_ERROR_OCCURED'"
+        description: 'Generic application error'
+      - name: 'NotFound'
+        value: "'A_NOT_FOUND'"
+        description: 'Application resource not found'
+      - name: 'ValidationFailed'
+        value: "'A_VALIDATION_FAILED'"
+        description: 'Application validation failure'
+      - name: 'Unauthorized'
+        value: "'A_UNAUTHORIZED'"
+        description: 'Unauthorized application access'
+      - name: 'DatabaseError'
+        value: "'A_DATABASE_ERROR'"
+        description: 'Database operation failure'
+
   FrameworkErrorCode:
     description: 'Framework-level error codes'
     business-context: 'Error codes for infrastructure and framework-related issues'
+
+    values:
+      - name: 'Default'
+        value: "'F_SERVER_ERROR'"
+        description: 'Generic framework error'
+      - name: 'NotFound'
+        value: "'F_NOT_FOUND'"
+        description: 'Framework resource not found'
+      - name: 'ValidationFailed'
+        value: "'F_VALIDATION_FAILED'"
+        description: 'Framework validation failure'
+      - name: 'ConfigurationError'
+        value: "'F_CONFIGURATION_ERROR'"
+        description: 'Framework configuration issue'
+      - name: 'DependencyError'
+        value: "'F_DEPENDENCY_ERROR'"
+        description: 'Framework dependency problem'
 
   DefaultActorType:
     description: 'Standard actor types in the system'
@@ -712,3 +789,147 @@ classes:
         returns:
           type: 'T'
           description: 'The underlying value'
+
+  MissingValueError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Domain error for missing required values'
+      business-context: 'Thrown when required domain values are null, undefined, or empty'
+
+      extends: 'IDomainError'
+
+    # Methods
+    methods:
+      withValue:
+        description: 'Create error with value context'
+        business-context: 'Factory method for creating missing value errors with context'
+
+        parameters:
+          - name: 'msg'
+            type: 'string'
+            description: 'Error message'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error context data'
+            optional: true
+
+        returns:
+          type: 'MissingValueError'
+          description: 'Missing value error instance'
+
+        custom-tags:
+          static: 'Static factory method'
+
+  InvalidParameterError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Domain error for invalid parameters'
+      business-context: 'Thrown when parameter values fail domain validation rules'
+
+      extends: 'IDomainError'
+
+    # Methods
+    methods:
+      withParameter:
+        description: 'Create error with parameter context'
+        business-context: 'Factory method for creating invalid parameter errors with parameter name'
+
+        parameters:
+          - name: 'parameter'
+            type: 'string'
+            description: 'Name of the invalid parameter'
+          - name: 'msg'
+            type: 'string'
+            description: 'Optional error message'
+            optional: true
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error context data'
+            optional: true
+
+        returns:
+          type: 'InvalidParameterError'
+          description: 'Invalid parameter error instance'
+
+        custom-tags:
+          static: 'Static factory method'
+
+  DuplicateError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Domain error for duplicate entities'
+      business-context: 'Thrown when attempting to create entities with existing identifiers'
+
+      extends: 'IDomainError'
+
+    # Methods
+    methods:
+      withEntityId:
+        description: 'Create error with entity ID context'
+        business-context: 'Factory method for duplicate entity errors with entity identifier'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'ID of the duplicate entity'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error context data'
+            optional: true
+
+        returns:
+          type: 'DuplicateError'
+          description: 'Duplicate error instance'
+
+        custom-tags:
+          static: 'Static factory method'
+
+  NotFoundError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Domain error for missing entities'
+      business-context: 'Thrown when requested domain entities cannot be found'
+
+      extends: 'IDomainError'
+
+    # Methods
+    methods:
+      withEntityId:
+        description: 'Create error with entity ID context'
+        business-context: 'Factory method for not found errors with entity identifier'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'ID of the missing entity'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Optional error context data'
+            optional: true
+
+        returns:
+          type: 'NotFoundError'
+          description: 'Not found error instance'
+
+        custom-tags:
+          static: 'Static factory method'

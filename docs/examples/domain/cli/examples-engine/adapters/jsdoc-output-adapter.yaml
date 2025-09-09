@@ -1,0 +1,314 @@
+# JSDoc Output Adapter - Pure JSDoc Formatting Component
+
+# === FILE METADATA ===
+file-name: 'jsdoc-output-adapter'
+title: 'JsDocOutputAdapter - Pure JSDoc Formatting Adapter'
+description: 'Specialized JSDoc formatting adapter focused on clean TypeScript documentation generation'
+business-context: 'Pure JSDoc formatting component following single responsibility principle for Enhanced Metadata System V2 with focus on TypeScript declaration file documentation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  JsDocOutputAdapter:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Pure JSDoc formatting adapter with single responsibility principle'
+      business-context: 'Specialized formatting component for Enhanced Metadata System V2 that focuses exclusively on JSDoc comment generation without metadata loading concerns'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Pure JSDoc formatting adapter - no metadata loading logic'
+        cli:
+          description: |
+            ## JsDocOutputAdapter
+            Single-responsibility JSDoc formatting component with clean separation of concerns
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Adapter Pattern'
+        category: 'Enhanced Metadata System'
+        features: 'Pure JSDoc formatting, single responsibility, tag formatting, example blocks'
+        responsibility: 'Pure formatting without metadata loading logic'
+
+    # Methods
+    methods:
+      format:
+        description: 'Format resolved metadata as JSDoc comment'
+        business-context: 'Main public method that transforms resolved metadata into complete JSDoc comment blocks for TypeScript declaration files'
+
+        parameters:
+          - name: 'metadata'
+            type: 'ResolvedMetadata'
+            description: 'Resolved metadata structure to format as JSDoc'
+
+        returns:
+          type: 'string'
+          description: 'Complete JSDoc comment block formatted for TypeScript'
+
+        examples:
+          - id: 'basic-formatting'
+            code: |
+              const adapter = new JsDocOutputAdapter();
+              const jsdoc = adapter.format({
+                description: "Method description",
+                businessContext: "Business use case",
+                since: "1.0.0"
+              });
+              // Returns properly formatted JSDoc comment
+          - id: 'complex-metadata'
+            code: |
+              const complexMetadata = {
+                description: "Complex method description",
+                businessContext: "Advanced business scenario",
+                param: "Parameter description",
+                returns: "Return value description",
+                example: "const result = method();",
+                warning: "Important usage warning"
+              };
+              const jsdoc = adapter.format(complexMetadata);
+
+        custom-tags:
+          main-method: 'Primary public formatting interface'
+          single-responsibility: 'Pure formatting without loading concerns'
+          metadata-transformation: 'Transforms resolved metadata to JSDoc format'
+          typescript-optimized: 'Optimized for TypeScript declaration files'
+
+      formatSingleTag:
+        description: 'Format metadata as single-line JSDoc tag for injection'
+        business-context: 'Utility method for creating individual JSDoc tags for targeted injection into existing documentation'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Metadata key to format as JSDoc tag name'
+          - name: 'value'
+            type: 'string'
+            description: 'Metadata value to format as JSDoc tag content'
+
+        returns:
+          type: 'string'
+          description: 'Single formatted JSDoc tag line'
+
+        examples:
+          - id: 'single-tag'
+            code: |
+              const tag = adapter.formatSingleTag("businessContext", "User management workflow");
+              // Returns: "@businessContext User management workflow"
+          - id: 'custom-tag'
+            code: |
+              const customTag = adapter.formatSingleTag("complexity-level", "intermediate");
+              // Returns: "@complexity-level intermediate"
+
+        custom-tags:
+          utility-method: 'Specialized tag formatting utility'
+          injection-support: 'Supports targeted JSDoc tag injection'
+          single-line: 'Generates single-line JSDoc tags'
+
+      formatExamples:
+        description: 'Format examples as JSDoc @example blocks'
+        business-context: 'Specialized method for formatting code examples into proper JSDoc @example blocks with TypeScript code formatting'
+
+        parameters:
+          - name: 'examples'
+            type: 'string[]'
+            description: 'Array of code example strings to format as JSDoc @example blocks'
+
+        returns:
+          type: 'string'
+          description: 'Formatted JSDoc @example blocks with proper TypeScript code formatting'
+
+        examples:
+          - id: 'example-formatting'
+            code: |
+              const examples = [
+                "const user = new User();",
+                "const result = await service.process(data);"
+              ];
+              const formatted = adapter.formatExamples(examples);
+              // Returns multiple @example blocks with TypeScript formatting
+          - id: 'complex-examples'
+            code: |
+              const complexExamples = [
+                `// Basic usage
+                const instance = new Component();
+                const result = instance.method();`,
+                
+                `// Advanced scenario  
+                try {
+                  const result = await instance.asyncMethod();
+                  console.log(result);
+                } catch (error) {
+                  console.error(error);
+                }`
+              ];
+              const examples = adapter.formatExamples(complexExamples);
+
+        custom-tags:
+          example-formatting: 'Specialized @example block generation'
+          typescript-code: 'TypeScript code block formatting'
+          multiple-examples: 'Supports multiple example blocks'
+
+      addStandardTags:
+        description: 'Add standard JSDoc tags from metadata'
+        business-context: 'Internal utility that processes standard JSDoc tags like @param, @returns, @throws for proper documentation structure'
+
+        parameters:
+          - name: 'metadata'
+            type: 'ResolvedMetadata'
+            description: 'Metadata containing standard JSDoc tag information'
+          - name: 'tags'
+            type: 'string[]'
+            description: 'Accumulator array for building JSDoc tag lines'
+
+        examples:
+          - id: 'standard-tags'
+            code: |
+              // Internal method - processes standard JSDoc tags
+              // Handles: @param, @returns, @throws, @see, @since
+              // Creates properly formatted JSDoc tag lines
+          - id: 'tag-processing'
+            code: |
+              // Example processing:
+              // metadata.param -> "@param {Type} name Description"
+              // metadata.returns -> "@returns {Type} Description"
+              // metadata.throws -> "@throws {ErrorType} When error occurs"
+
+        custom-tags:
+          private: true
+          standard-processing: 'Handles standard JSDoc tag formatting'
+          internal-utility: 'Internal tag processing method'
+
+      addCustomTags:
+        description: 'Add custom metadata tags to JSDoc'
+        business-context: 'Internal utility that processes custom metadata tags specific to Enhanced Metadata System V2 for rich business context documentation'
+
+        parameters:
+          - name: 'metadata'
+            type: 'ResolvedMetadata'
+            description: 'Metadata containing custom tag information'
+          - name: 'tags'
+            type: 'string[]'
+            description: 'Accumulator array for building JSDoc tag lines'
+
+        examples:
+          - id: 'custom-tags'
+            code: |
+              // Internal method - processes Enhanced Metadata System custom tags
+              // Handles: @businessContext, @pattern, @category, @features
+              // Creates specialized JSDoc tags for rich documentation
+          - id: 'custom-processing'
+            code: |
+              // Example processing:
+              // businessContext -> "@businessContext Business use case"
+              // pattern -> "@pattern Adapter Pattern"
+              // category -> "@category Enhanced Metadata System"
+
+        custom-tags:
+          private: true
+          custom-processing: 'Handles Enhanced Metadata System custom tags'
+          business-context: 'Enables rich business context documentation'
+
+      addExamples:
+        description: 'Add formatted examples to JSDoc tags'
+        business-context: 'Internal utility that processes code examples from metadata and formats them as proper JSDoc @example blocks'
+
+        parameters:
+          - name: 'metadata'
+            type: 'ResolvedMetadata'
+            description: 'Metadata containing example code information'
+          - name: 'tags'
+            type: 'string[]'
+            description: 'Accumulator array for building JSDoc tag lines'
+
+        examples:
+          - id: 'example-addition'
+            code: |
+              // Internal method - processes examples from metadata
+              // Converts example strings to @example blocks
+              // Ensures proper TypeScript code formatting
+          - id: 'example-processing'
+            code: |
+              // Example processing:
+              // metadata.examples -> Multiple @example blocks
+              // Handles code formatting and indentation
+              // Maintains TypeScript syntax highlighting
+
+        custom-tags:
+          private: true
+          example-processing: 'Converts metadata examples to JSDoc @example blocks'
+          code-formatting: 'Handles TypeScript code formatting'
+
+      getJSDocTagName:
+        description: 'Map metadata keys to JSDoc tag names'
+        business-context: 'Internal utility that maps Enhanced Metadata System property names to corresponding JSDoc tag names with proper formatting conventions'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Metadata property key to map to JSDoc tag'
+
+        returns:
+          type: 'string'
+          description: 'Corresponding JSDoc tag name with proper formatting'
+
+        examples:
+          - id: 'tag-mapping'
+            code: |
+              // Internal method - maps metadata keys to JSDoc tags
+              // "businessContext" -> "@businessContext"
+              // "returns" -> "@returns"  
+              // "customTag" -> "@custom-tag"
+          - id: 'mapping-examples'
+            code: |
+              // Standard mappings:
+              // description -> (no tag, goes to main description)
+              // businessContext -> @businessContext
+              // since -> @since
+              // Custom tags maintain kebab-case format
+
+        custom-tags:
+          private: true
+          key-mapping: 'Metadata key to JSDoc tag name conversion'
+          naming-convention: 'Enforces JSDoc tag naming standards'
+
+      formatCustomTagName:
+        description: 'Format custom tag name from metadata key'
+        business-context: 'Internal utility that converts camelCase metadata keys to kebab-case JSDoc tag names following JSDoc naming conventions'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'CamelCase metadata key to format as JSDoc tag name'
+
+        returns:
+          type: 'string'
+          description: 'Formatted JSDoc custom tag name in kebab-case'
+
+        examples:
+          - id: 'tag-formatting'
+            code: |
+              // Internal method - formats custom tag names
+              // "customTag" -> "@custom-tag"
+              // "documentationUrl" -> "@documentation-url"  
+              // "complexityNote" -> "@complexity-note"
+          - id: 'formatting-rules'
+            code: |
+              // Formatting rules:
+              // camelCase -> kebab-case
+              // Adds @ prefix for JSDoc tags
+              // Maintains readability and JSDoc conventions
+
+        custom-tags:
+          private: true
+          name-formatting: 'CamelCase to kebab-case conversion'
+          jsdoc-conventions: 'Follows JSDoc tag naming standards'

@@ -1,0 +1,795 @@
+# Colors - Terminal Styling Utilities
+
+# === FILE METADATA ===
+file-name: 'colors'
+title: 'Colors - Terminal ANSI Styling'
+description: 'Minimal ANSI color and styling utilities for CLI output'
+business-context: 'Terminal output formatting for user-friendly CLI experiences'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  Colors:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Terminal color and styling utilities for CLI applications'
+      business-context: 'Provides consistent, cross-platform terminal styling without external dependencies'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'ANSI color utilities for terminal output'
+        cli:
+          description: |
+            ## Colors Utilities
+            Zero-dependency ANSI terminal styling
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Utility Pattern'
+        category: 'Terminal Styling'
+
+    # Methods
+    methods:
+      black:
+        description: 'Apply black color to text'
+        business-context: 'Standard text coloring for CLI output'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with black ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const blackText = Colors.black('Important message');
+              console.log(blackText); // Outputs black text in terminal
+
+      red:
+        description: 'Apply red color to text'
+        business-context: 'Error indication and critical messages'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with red ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const errorText = Colors.red('Error: Operation failed');
+              console.log(errorText); // Red text for errors
+
+      green:
+        description: 'Apply green color to text'
+        business-context: 'Success indication and positive feedback'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with green ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const successText = Colors.green('✓ Operation completed');
+              console.log(successText); // Green text for success
+
+      yellow:
+        description: 'Apply yellow color to text'
+        business-context: 'Warning indication and cautionary messages'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with yellow ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const warningText = Colors.yellow('⚠ Warning: Check configuration');
+              console.log(warningText); // Yellow text for warnings
+
+      blue:
+        description: 'Apply blue color to text'
+        business-context: 'Information display and neutral content'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with blue ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const infoText = Colors.blue('Info: Processing started');
+              console.log(infoText); // Blue text for information
+
+      magenta:
+        description: 'Apply magenta color to text'
+        business-context: 'Highlighting and special content emphasis'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with magenta ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const highlightText = Colors.magenta('Special: Premium feature');
+              console.log(highlightText); // Magenta text for highlights
+
+      cyan:
+        description: 'Apply cyan color to text'
+        business-context: 'Debug information and technical details'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with cyan ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const debugText = Colors.cyan('Debug: Variable value = 42');
+              console.log(debugText); // Cyan text for debug info
+
+      white:
+        description: 'Apply white color to text'
+        business-context: 'High contrast text and emphasis'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with white ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const whiteText = Colors.white('Emphasized content');
+              console.log(whiteText); // White text for emphasis
+
+      gray:
+        description: 'Apply gray color to text'
+        business-context: 'Muted content and secondary information'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with gray ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const mutedText = Colors.gray('Additional details...');
+              console.log(mutedText); // Gray text for secondary info
+
+      brightRed:
+        description: 'Apply bright red color to text'
+        business-context: 'Critical errors and urgent attention'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with bright red ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const criticalText = Colors.brightRed('CRITICAL: System failure');
+              console.log(criticalText); // Bright red for critical errors
+
+      brightGreen:
+        description: 'Apply bright green color to text'
+        business-context: 'Major success and completion indicators'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with bright green ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const completionText = Colors.brightGreen('✅ All tests passed!');
+              console.log(completionText); // Bright green for major success
+
+      brightYellow:
+        description: 'Apply bright yellow color to text'
+        business-context: 'Important warnings and attention-grabbing messages'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with bright yellow ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const alertText = Colors.brightYellow('ATTENTION: Update required');
+              console.log(alertText); // Bright yellow for important warnings
+
+      brightBlue:
+        description: 'Apply bright blue color to text'
+        business-context: 'Primary information and key content highlighting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with bright blue ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const primaryText = Colors.brightBlue('Primary: Main content');
+              console.log(primaryText); // Bright blue for primary info
+
+      brightMagenta:
+        description: 'Apply bright magenta color to text'
+        business-context: 'Special features and premium content indicators'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with bright magenta ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const specialText = Colors.brightMagenta('✨ Premium Feature');
+              console.log(specialText); // Bright magenta for special content
+
+      brightCyan:
+        description: 'Apply bright cyan color to text'
+        business-context: 'Technical information and development details'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with bright cyan ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const techText = Colors.brightCyan('Tech: API response time: 45ms');
+              console.log(techText); // Bright cyan for technical details
+
+      brightWhite:
+        description: 'Apply bright white color to text'
+        business-context: 'Maximum emphasis and critical highlights'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to color'
+
+        returns:
+          type: 'string'
+          description: 'Text with bright white ANSI color codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const emphasizedText = Colors.brightWhite('IMPORTANT: Read carefully');
+              console.log(emphasizedText); // Bright white for maximum emphasis
+
+      bold:
+        description: 'Apply bold styling to text'
+        business-context: 'Text emphasis and importance indication'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to make bold'
+
+        returns:
+          type: 'string'
+          description: 'Text with bold ANSI styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const boldText = Colors.bold('Important Message');
+              console.log(boldText); // Bold text for emphasis
+
+      dim:
+        description: 'Apply dim styling to text'
+        business-context: 'Secondary information and reduced emphasis'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to dim'
+
+        returns:
+          type: 'string'
+          description: 'Text with dim ANSI styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const dimText = Colors.dim('Optional details');
+              console.log(dimText); // Dimmed text for secondary info
+
+      italic:
+        description: 'Apply italic styling to text'
+        business-context: 'Stylistic emphasis and quotes'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to italicize'
+
+        returns:
+          type: 'string'
+          description: 'Text with italic ANSI styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const italicText = Colors.italic('Note: This is a comment');
+              console.log(italicText); // Italic text for stylistic emphasis
+
+      underline:
+        description: 'Apply underline styling to text'
+        business-context: 'Link indication and text highlighting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to underline'
+
+        returns:
+          type: 'string'
+          description: 'Text with underline ANSI styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const underlinedText = Colors.underline('https://example.com');
+              console.log(underlinedText); // Underlined text for links
+
+      strikethrough:
+        description: 'Apply strikethrough styling to text'
+        business-context: 'Deprecated content and crossed-out text'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to strike through'
+
+        returns:
+          type: 'string'
+          description: 'Text with strikethrough ANSI styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const struckText = Colors.strikethrough('Old method (deprecated)');
+              console.log(struckText); // Strikethrough for deprecated content
+
+      bgBlack:
+        description: 'Apply black background to text'
+        business-context: 'Background emphasis and text highlighting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with black background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const bgText = Colors.bgBlack(Colors.white('Highlighted'));
+              console.log(bgText); // White text on black background
+
+      bgRed:
+        description: 'Apply red background to text'
+        business-context: 'Error highlighting and critical alerts'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with red background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const errorBg = Colors.bgRed(Colors.white('ERROR'));
+              console.log(errorBg); // White text on red background
+
+      bgGreen:
+        description: 'Apply green background to text'
+        business-context: 'Success highlighting and positive indicators'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with green background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const successBg = Colors.bgGreen(Colors.black('SUCCESS'));
+              console.log(successBg); // Black text on green background
+
+      bgYellow:
+        description: 'Apply yellow background to text'
+        business-context: 'Warning highlighting and caution indicators'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with yellow background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const warningBg = Colors.bgYellow(Colors.black('WARNING'));
+              console.log(warningBg); // Black text on yellow background
+
+      bgBlue:
+        description: 'Apply blue background to text'
+        business-context: 'Information highlighting and content blocks'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with blue background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const infoBg = Colors.bgBlue(Colors.white('INFO'));
+              console.log(infoBg); // White text on blue background
+
+      bgMagenta:
+        description: 'Apply magenta background to text'
+        business-context: 'Special highlighting and premium indicators'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with magenta background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const specialBg = Colors.bgMagenta(Colors.white('SPECIAL'));
+              console.log(specialBg); // White text on magenta background
+
+      bgCyan:
+        description: 'Apply cyan background to text'
+        business-context: 'Debug highlighting and technical blocks'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with cyan background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const debugBg = Colors.bgCyan(Colors.black('DEBUG'));
+              console.log(debugBg); // Black text on cyan background
+
+      bgWhite:
+        description: 'Apply white background to text'
+        business-context: 'High contrast highlighting and emphasis'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with background color'
+
+        returns:
+          type: 'string'
+          description: 'Text with white background ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const contrastBg = Colors.bgWhite(Colors.black('NOTICE'));
+              console.log(contrastBg); // Black text on white background
+
+      strip:
+        description: 'Remove all ANSI color codes from text'
+        business-context: 'Clean text extraction and logging to files'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text with ANSI codes to clean'
+
+        returns:
+          type: 'string'
+          description: 'Plain text without ANSI codes'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const coloredText = Colors.red('Error message');
+              const plainText = Colors.strip(coloredText);
+              console.log(plainText); // Plain text without colors
+
+      isColorSupported:
+        description: 'Check if terminal supports ANSI colors'
+        business-context: 'Color capability detection for cross-platform compatibility'
+
+        returns:
+          type: 'boolean'
+          description: 'True if terminal supports colors'
+
+        examples:
+          - id: 'basic'
+            code: |
+              if (Colors.isColorSupported()) {
+                console.log(Colors.green('Colors are supported!'));
+              } else {
+                console.log('Using plain text mode');
+              }
+
+      success:
+        description: 'Apply success styling (bright green)'
+        business-context: 'Consistent success message formatting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Success message text'
+
+        returns:
+          type: 'string'
+          description: 'Text with success styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const message = Colors.success('Operation completed successfully!');
+              console.log(message); // Bright green success message
+
+      warning:
+        description: 'Apply warning styling (bright yellow)'
+        business-context: 'Consistent warning message formatting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Warning message text'
+
+        returns:
+          type: 'string'
+          description: 'Text with warning styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const message = Colors.warning('Configuration may be outdated');
+              console.log(message); // Bright yellow warning message
+
+      error:
+        description: 'Apply error styling (bright red)'
+        business-context: 'Consistent error message formatting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Error message text'
+
+        returns:
+          type: 'string'
+          description: 'Text with error styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const message = Colors.error('Operation failed with errors');
+              console.log(message); // Bright red error message
+
+      info:
+        description: 'Apply info styling (bright blue)'
+        business-context: 'Consistent information message formatting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Information message text'
+
+        returns:
+          type: 'string'
+          description: 'Text with info styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const message = Colors.info('Processing 150 files...');
+              console.log(message); // Bright blue info message
+
+      debug:
+        description: 'Apply debug styling (dim cyan)'
+        business-context: 'Consistent debug message formatting'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Debug message text'
+
+        returns:
+          type: 'string'
+          description: 'Text with debug styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const message = Colors.debug('Variable state: initialized');
+              console.log(message); // Dim cyan debug message
+
+      highlight:
+        description: 'Apply highlight styling (bright magenta)'
+        business-context: 'Content emphasis and special attention'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to highlight'
+
+        returns:
+          type: 'string'
+          description: 'Text with highlight styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const message = Colors.highlight('Premium Feature Unlocked!');
+              console.log(message); // Bright magenta highlighted text
+
+      muted:
+        description: 'Apply muted styling (dim gray)'
+        business-context: 'Secondary information and less important content'
+        
+        parameters:
+          - name: 'text'
+            type: 'string'
+            description: 'Text to mute'
+
+        returns:
+          type: 'string'
+          description: 'Text with muted styling'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const message = Colors.muted('Optional configuration details');
+              console.log(message); // Dim gray muted text
+
+      progressBar:
+        description: 'Create ASCII progress bar with colors'
+        business-context: 'Visual progress indication for long-running operations'
+        
+        parameters:
+          - name: 'completed'
+            type: 'number'
+            description: 'Number of completed items'
+          - name: 'total'
+            type: 'number'
+            description: 'Total number of items'
+          - name: 'width'
+            type: 'number'
+            description: 'Progress bar width in characters (default: 40)'
+
+        returns:
+          type: 'string'
+          description: 'Formatted progress bar with percentage'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const progress = Colors.progressBar(75, 100, 20);
+              console.log(progress); // [████████████████████] 75%
+          - id: 'custom-width'
+            code: |
+              const progress = Colors.progressBar(25, 50, 10);
+              console.log(progress); // [█████     ] 50%
+
+        custom-tags:
+          visual: 'Creates visual progress indicators'
+          configurable: 'Adjustable width and styling'

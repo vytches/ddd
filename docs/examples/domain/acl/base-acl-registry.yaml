@@ -42,110 +42,173 @@ classes:
         abstract: 'true'
 
     methods:
-      constructor:
-        description: 'Initializes base registry with core capabilities'
-        business-context: 'Sets up foundational registry infrastructure'
+      register:
+        description: 'Registers an ACL adapter with optional metadata'
+        business-context: 'Central registration point for ACL adapters with metadata tracking'
 
         parameters:
-          - name: 'options'
-            type: 'RegistryOptions'
-            description: 'Registry configuration'
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name to register adapter under'
+          - name: 'adapter'
+            type: 'IACLAdapter<TDomain, TExternal>'
+            description: 'ACL adapter instance'
+          - name: 'metadata'
+            type: 'Partial<ACLRegistrationMetadata>'
+            description: 'Optional registration metadata'
             optional: true
 
-      registerAdapter:
-        description: 'Registers adapter with metadata'
-        business-context: 'Adds adapter to registry with rich metadata'
-        visibility: 'protected'
+        returns:
+          type: 'this'
+          description: 'Registry instance for method chaining'
+
+        generic: 'TDomain, TExternal'
+
+        examples:
+          - id: 'basic-registration'
+            code: |
+              const registry = new ACLRegistry();
+              registry.register('PaymentContext', paymentAdapter, {
+                description: 'Payment processing adapter',
+                version: '1.0.0'
+              });
+
+      get:
+        description: 'Retrieves registered adapter by context name'
+        business-context: 'Safe adapter retrieval with type casting'
 
         parameters:
-          - name: 'key'
+          - name: 'contextName'
             type: 'string'
-            description: 'Unique adapter identifier'
-          - name: 'adapter'
-            type: 'IACLAdapter'
-            description: 'Adapter instance'
-          - name: 'metadata'
-            type: 'ACLRegistrationMetadata'
-            description: 'Registration metadata'
+            description: 'Context name to retrieve adapter for'
 
         returns:
-          type: 'void'
+          type: 'IACLAdapter<TDomain, TExternal> | undefined'
+          description: 'Adapter instance or undefined if not found'
 
-      validateAdapter:
-        description: 'Validates adapter before registration'
-        business-context: 'Ensures adapter meets registry requirements'
-        visibility: 'protected'
-        abstract: true
+        generic: 'TDomain, TExternal'
+
+        examples:
+          - id: 'safe-retrieval'
+            code: |
+              const adapter = registry.get<Order, ExternalOrder>('OrderContext');
+              if (adapter) {
+                const result = await adapter.execute('create', order);
+              }
+
+      getRequired:
+        description: 'Retrieves registered adapter, throwing if not found'
+        business-context: 'Fail-fast adapter retrieval for required dependencies'
 
         parameters:
-          - name: 'adapter'
-            type: 'IACLAdapter'
-            description: 'Adapter to validate'
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name to retrieve adapter for'
+
+        returns:
+          type: 'IACLAdapter<TDomain, TExternal>'
+          description: 'Adapter instance'
+
+        throws:
+          - type: 'Error'
+            description: 'When adapter not found for context'
+
+        generic: 'TDomain, TExternal'
+
+        examples:
+          - id: 'required-retrieval'
+            code: |
+              // Throws error if adapter not registered
+              const adapter = registry.getRequired<User, ExternalUser>('UserContext');
+              const result = await adapter.execute('update', user);
+
+      hasContext:
+        description: 'Checks if adapter is registered for given context'
+        business-context: 'Context availability checking before adapter usage'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name to check'
 
         returns:
           type: 'boolean'
-          description: 'Validation result'
+          description: 'True if adapter is registered'
 
-      onAdapterRegistered:
-        description: 'Hook called after adapter registration'
-        business-context: 'Enables post-registration processing'
-        visibility: 'protected'
+        examples:
+          - id: 'context-check'
+            code: |
+              if (registry.hasContext('PaymentContext')) {
+                const adapter = registry.getRequired('PaymentContext');
+                // Use adapter safely
+              }
 
-        parameters:
-          - name: 'key'
-            type: 'string'
-            description: 'Adapter key'
-          - name: 'adapter'
-            type: 'IACLAdapter'
-            description: 'Registered adapter'
-
-        returns:
-          type: 'void'
-
-      onAdapterUnregistered:
-        description: 'Hook called after adapter removal'
-        business-context: 'Enables cleanup after adapter removal'
-        visibility: 'protected'
-
-        parameters:
-          - name: 'key'
-            type: 'string'
-            description: 'Adapter key'
+      getRegisteredContexts:
+        description: 'Returns list of all registered context names'
+        business-context: 'Registry introspection for debugging and monitoring'
 
         returns:
-          type: 'void'
+          type: 'string[]'
+          description: 'Array of registered context names'
 
-# === TYPES ===
-types:
+        examples:
+          - id: 'list-contexts'
+            code: |
+              const contexts = registry.getRegisteredContexts();
+              console.log('Registered contexts:', contexts);
+              // Output: ['PaymentContext', 'OrderContext', 'UserContext']
+
+      getRegistryName:
+        description: 'Returns the name of this registry implementation'
+        business-context: 'Registry identification for metadata and logging'
+        visibility: 'protected'
+        abstract: true
+
+        returns:
+          type: 'string'
+          description: 'Registry implementation name'
+
+      exportAdapters:
+        description: 'Exports all registered adapters as Map'
+        business-context: 'Bulk operations and registry migration support'
+
+        returns:
+          type: 'Map<string, IACLAdapter<unknown, unknown>>'
+          description: 'Copy of all registered adapters'
+
+        examples:
+          - id: 'export-adapters'
+            code: |
+              const adapters = registry.exportAdapters();
+              for (const [context, adapter] of adapters) {
+                console.log(`Context: ${context}, Operations: ${adapter.getContextInfo().supportedOperations}`);
+              }
+
+# === INTERFACES ===
+interfaces:
   ACLRegistrationMetadata:
-    description: 'Metadata for adapter registration'
-    business-context: 'Rich metadata for adapter discovery and management'
+    description: 'Metadata for ACL adapter registration'
+    business-context: 'Essential metadata for tracking adapter registration and management'
 
     properties:
+      - name: 'contextName'
+        type: 'string'
+        description: 'Context name the adapter is registered under'
       - name: 'registeredAt'
         type: 'Date'
-        description: 'Registration timestamp'
-      - name: 'context'
+        description: 'Timestamp when adapter was registered'
+      - name: 'registeredBy'
         type: 'string'
-        description: 'Bounded context name'
+        description: 'Name of the registry that registered this adapter'
+      - name: 'description'
+        type: 'string'
+        description: 'Optional human-readable description'
         optional: true
       - name: 'version'
         type: 'string'
-        description: 'Adapter version'
+        description: 'Optional version identifier'
         optional: true
-      - name: 'tags'
-        type: 'string[]'
-        description: 'Searchable tags'
-        optional: true
-      - name: 'description'
-        type: 'string'
-        description: 'Human-readable description'
-        optional: true
-      - name: 'capabilities'
-        type: 'string[]'
-        description: 'Supported capabilities'
-        optional: true
-      - name: 'dependencies'
-        type: 'string[]'
-        description: 'Required dependencies'
+      - name: 'source'
+        type: "'direct' | 'module' | 'import' | 'versioned' | 'enhanced'"
+        description: 'Source type indicating how adapter was registered'
         optional: true

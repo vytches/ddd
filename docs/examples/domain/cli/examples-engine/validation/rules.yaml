@@ -1,0 +1,236 @@
+# Validation Rules - Enhanced Metadata System Quality Control
+
+# === FILE METADATA ===
+file-name: 'rules'
+title: 'Validation Rules - Quality Control System'
+description: 'Comprehensive validation rules for Enhanced Metadata System quality control'
+business-context: |
+  Core quality control system providing comprehensive validation rules for Enhanced
+  Metadata System examples, ensuring enterprise-grade code quality, DDD pattern
+  compliance, and best practice adherence across all generated documentation.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CONSTANTS ===
+constants:
+  DEFAULT_VALIDATION_RULES:
+    description: 'Default validation rules per architecture layer'
+    business-context: |
+      Comprehensive validation rules organized by DDD architecture layers,
+      providing layer-specific quality controls for domain, service, and
+      integration examples with enterprise-grade validation criteria.
+
+    type: 'ExampleValidationRules'
+    
+    formats:
+      jsdoc:
+        description: 'Default validation rules per architecture layer'
+      cli:
+        description: |
+          ## DEFAULT_VALIDATION_RULES
+          Layer-specific validation providing:
+          - Domain layer validation (aggregates, entities, value objects)
+          - Service layer validation (application services, handlers)
+          - Integration layer validation (adapters, repositories, external APIs)
+          - Best practice enforcement per layer
+
+    custom-tags:
+      since: '1.0.0'
+      pattern: 'Configuration Pattern'
+      category: 'Quality Control'
+      features: 'Layer validation, quality control, best practices, DDD compliance'
+      validation-engine: 'Core validation configuration'
+
+    examples:
+      - id: 'validation-usage'
+        code: |
+          const rules = DEFAULT_VALIDATION_RULES;
+          console.log('Domain rules:', rules.domain);
+          console.log('Service rules:', rules.service);
+          console.log('Integration rules:', rules.integration);
+
+  COMPILATION_PATTERNS:
+    description: 'Compilation check patterns for TypeScript validation'
+    business-context: |
+      Essential compilation patterns ensuring examples compile correctly
+      with proper imports, avoiding forbidden patterns, and maintaining
+      TypeScript compilation compatibility across all layers.
+
+    type: 'object'
+    
+    properties:
+      - name: 'requiredImports'
+        type: 'object'
+        description: 'Required imports per architecture layer'
+        properties:
+          - name: 'domain'
+            type: 'string[]'
+            description: 'Required imports for domain layer examples'
+          - name: 'service'
+            type: 'string[]'
+            description: 'Required imports for service layer examples'
+          - name: 'integration'
+            type: 'string[]'
+            description: 'Required imports for integration layer examples'
+      - name: 'forbiddenPatterns'
+        type: 'RegExp[]'
+        description: 'Patterns that should be avoided in examples'
+
+    examples:
+      - id: 'compilation-check'
+        code: |
+          const patterns = COMPILATION_PATTERNS;
+          const domainImports = patterns.requiredImports.domain;
+          const forbidden = patterns.forbiddenPatterns;
+          
+          // Validate example compilation
+          const isValid = validateCompilation(example, patterns);
+
+  BEST_PRACTICES:
+    description: 'Best practice patterns for Enhanced Metadata System examples'
+    business-context: |
+      Comprehensive best practice enforcement covering naming conventions,
+      code structure, and DDD pattern compliance to ensure all generated
+      examples follow enterprise standards and domain-driven design principles.
+
+    type: 'object'
+    
+    properties:
+      - name: 'naming'
+        type: 'object'
+        description: 'Naming convention patterns'
+        properties:
+          - name: 'variablePatterns'
+            type: 'RegExp[]'
+            description: 'Acceptable variable naming patterns'
+          - name: 'constantPatterns'
+            type: 'RegExp[]'
+            description: 'Acceptable constant naming patterns'
+      - name: 'structure'
+        type: 'object'
+        description: 'Code structure requirements'
+        properties:
+          - name: 'maxNestingLevel'
+            type: 'number'
+            description: 'Maximum allowed nesting depth'
+          - name: 'preferExplicitTypes'
+            type: 'boolean'
+            description: 'Whether to prefer explicit type annotations'
+          - name: 'requireErrorHandling'
+            type: 'string[]'
+            description: 'Operations that require error handling'
+      - name: 'dddPatterns'
+        type: 'object'
+        description: 'Domain-Driven Design pattern requirements'
+        properties:
+          - name: 'domain'
+            type: 'object'
+            description: 'Domain layer pattern requirements'
+          - name: 'service'
+            type: 'object'
+            description: 'Service layer pattern requirements'
+          - name: 'integration'
+            type: 'object'
+            description: 'Integration layer pattern requirements'
+
+    custom-tags:
+      ddd-compliance: 'Enforces Domain-Driven Design patterns'
+      quality-control: 'Enterprise-grade quality standards'
+
+    examples:
+      - id: 'best-practices-check'
+        code: |
+          const practices = BEST_PRACTICES;
+          
+          // Check naming conventions
+          const namingValid = practices.naming.variablePatterns.some(
+            pattern => pattern.test(variableName)
+          );
+          
+          // Check DDD patterns for domain layer
+          const domainPatterns = practices.dddPatterns.domain;
+          const mustUsePatterns = domainPatterns.mustUse;
+
+  LINE_COUNTING_RULES:
+    description: 'Line counting rules for example complexity measurement'
+    business-context: |
+      Intelligent line counting rules that exclude boilerplate code and
+      focus on meaningful business logic lines, providing accurate complexity
+      measurement for Enhanced Metadata System example validation.
+
+    type: 'object'
+    
+    properties:
+      - name: 'excludeFromCount'
+        type: 'RegExp[]'
+        description: 'Patterns to exclude from line counting (comments, imports, etc.)'
+      - name: 'countAsOne'
+        type: 'RegExp[]'
+        description: 'Patterns that count as single logical line regardless of formatting'
+
+    examples:
+      - id: 'line-counting'
+        code: |
+          const rules = LINE_COUNTING_RULES;
+          const excludePatterns = rules.excludeFromCount;
+          const singleLinePatterns = rules.countAsOne;
+          
+          // Count meaningful lines in example
+          const meaningfulLines = countMeaningfulLines(code, rules);
+
+  QUALITY_THRESHOLDS:
+    description: 'Quality thresholds for Enhanced Metadata System validation'
+    business-context: |
+      Enterprise-grade quality thresholds ensuring all generated examples
+      meet minimum quality standards including example quality score,
+      complexity limits, documentation coverage, and cyclomatic complexity.
+
+    type: 'object'
+    
+    properties:
+      - name: 'minExampleQuality'
+        type: 'number'
+        description: 'Minimum quality score for examples (0-100)'
+      - name: 'maxComplexityScore'
+        type: 'number'
+        description: 'Maximum allowed complexity score'
+      - name: 'requiredDocumentationCoverage'
+        type: 'number'
+        description: 'Required documentation coverage percentage'
+      - name: 'maxCyclomaticComplexity'
+        type: 'number'
+        description: 'Maximum cyclomatic complexity for examples'
+
+    custom-tags:
+      enterprise-grade: 'Enterprise quality standards'
+      complexity-control: 'Complexity measurement and limits'
+
+    examples:
+      - id: 'quality-check'
+        code: |
+          const thresholds = QUALITY_THRESHOLDS;
+          
+          // Validate example quality
+          const qualityScore = calculateQualityScore(example);
+          const isQualityGood = qualityScore >= thresholds.minExampleQuality;
+          
+          // Check complexity
+          const complexity = calculateComplexity(example);
+          const isComplexityOk = complexity <= thresholds.maxComplexityScore;
+
+# === PATTERNS ===
+patterns:
+  - name: 'Configuration Pattern'
+    description: 'Centralized configuration with typed constants'
+    usage: 'Used for organizing validation rules and quality control settings'
+
+  - name: 'Quality Control Pattern'
+    description: 'Systematic quality enforcement through configurable rules'
+    usage: 'Applied to all Enhanced Metadata System example validation'
+
+  - name: 'Layer-Specific Validation'
+    description: 'Different validation rules per DDD architecture layer'
+    usage: 'Ensures layer-appropriate patterns and practices'

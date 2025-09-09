@@ -40,95 +40,126 @@ classes:
         since: '1.0.0'
         pattern: 'Middleware Pattern'
         implements: 'ACLMiddleware'
+        abstract: true
 
     methods:
-      process:
-        description: 'Processes request through middleware chain'
-        business-context: 'Intercepts and enhances ACL operations'
+      execute:
+        description: 'Processes ACL operation through middleware pipeline'
+        business-context: 'Intercepts and enhances ACL operations with cross-cutting concerns'
         abstract: true
 
         parameters:
-          - name: 'context'
-            type: 'MiddlewareContext'
-            description: 'Request context with operation details'
+          - name: 'operation'
+            type: 'string'
+            description: 'Name of the operation being performed'
+          - name: 'domainModel'
+            type: 'any'
+            description: 'Domain model being processed'
+          - name: 'options'
+            type: 'ExecuteOptions'
+            description: 'Execution options and context'
           - name: 'next'
-            type: 'NextFunction'
-            description: 'Next middleware in pipeline'
+            type: '() => Promise<Result<T, ACLError>>'
+            description: 'Next function in the middleware chain'
 
         returns:
-          type: 'Promise<Result<any, ACLError>>'
-          description: 'Processed result or error'
+          type: 'Promise<Result<T, ACLError>>'
+          description: 'Result of the middleware processing'
+
+        generic: 'T'
 
         examples:
-          - id: 'middleware-implementation'
+          - id: 'logging-middleware'
             code: |
               class LoggingMiddleware extends BaseACLMiddleware {
-                async process(
-                  context: MiddlewareContext,
-                  next: NextFunction
-                ): Promise<Result<any, ACLError>> {
-                  const startTime = Date.now();
-                  console.log(`[ACL] Starting ${context.operation}`);
+                async execute<T>(
+                  operation: string,
+                  domainModel: any,
+                  options: ExecuteOptions,
+                  next: () => Promise<Result<T, ACLError>>
+                ): Promise<Result<T, ACLError>> {
+                  console.log(`Starting ACL operation: ${operation}`);
                   
-                  try {
-                    const result = await next(context);
-                    const duration = Date.now() - startTime;
-                    console.log(`[ACL] Completed in ${duration}ms`);
-                    return result;
-                  } catch (error) {
-                    console.error(`[ACL] Failed:`, error);
-                    throw error;
+                  const startTime = Date.now();
+                  const result = await next();
+                  const duration = Date.now() - startTime;
+                  
+                  if (result.isSuccess()) {
+                    console.log(`ACL operation ${operation} completed in ${duration}ms`);
+                  } else {
+                    console.error(`ACL operation ${operation} failed:`, result.error);
                   }
+                  
+                  return result;
                 }
               }
 
-      preProcess:
-        description: 'Hook for pre-processing logic'
-        business-context: 'Executes before main operation'
-        visibility: 'protected'
+          - id: 'caching-middleware'
+            code: |
+              class CachingMiddleware extends BaseACLMiddleware {
+                private cache = new Map<string, any>();
 
-        parameters:
-          - name: 'context'
-            type: 'MiddlewareContext'
-            description: 'Request context'
+                async execute<T>(
+                  operation: string,
+                  domainModel: any,
+                  options: ExecuteOptions,
+                  next: () => Promise<Result<T, ACLError>>
+                ): Promise<Result<T, ACLError>> {
+                  const cacheKey = `${operation}:${JSON.stringify(domainModel)}`;
+                  
+                  // For fetch operations, check cache first
+                  if (operation === 'fetch' && this.cache.has(cacheKey)) {
+                    return Result.success(this.cache.get(cacheKey));
+                  }
+                  
+                  const result = await next();
+                  
+                  // Cache successful fetch operations
+                  if (result.isSuccess() && operation === 'fetch') {
+                    this.cache.set(cacheKey, result.value);
+                  }
+                  
+                  return result;
+                }
+              }
 
-        returns:
-          type: 'Promise<void>'
-          description: 'Completes when pre-processing done'
+          - id: 'retry-middleware'
+            code: |
+              class RetryMiddleware extends BaseACLMiddleware {
+                constructor(
+                  private maxAttempts = 3,
+                  private baseDelay = 1000
+                ) {
+                  super();
+                }
 
-      postProcess:
-        description: 'Hook for post-processing logic'
-        business-context: 'Executes after main operation'
-        visibility: 'protected'
-
-        parameters:
-          - name: 'context'
-            type: 'MiddlewareContext'
-            description: 'Request context'
-          - name: 'result'
-            type: 'Result<any, ACLError>'
-            description: 'Operation result'
-
-        returns:
-          type: 'Promise<Result<any, ACLError>>'
-          description: 'Potentially modified result'
-
-      onError:
-        description: 'Error handling hook'
-        business-context: 'Handles and potentially recovers from errors'
-        visibility: 'protected'
-
-        parameters:
-          - name: 'context'
-            type: 'MiddlewareContext'
-            description: 'Request context'
-          - name: 'error'
-            type: 'ACLError'
-            description: 'Error that occurred'
-
-        returns:
-          type: 'Promise<Result<any, ACLError>>'
-          description: 'Recovery result or rethrown error'
+                async execute<T>(
+                  operation: string,
+                  domainModel: any,
+                  options: ExecuteOptions,
+                  next: () => Promise<Result<T, ACLError>>
+                ): Promise<Result<T, ACLError>> {
+                  let lastError: ACLError;
+                  
+                  for (let attempt = 1; attempt <= this.maxAttempts; attempt++) {
+                    const result = await next();
+                    
+                    if (result.isSuccess()) {
+                      return result;
+                    }
+                    
+                    lastError = result.error;
+                    
+                    // Don't retry on the last attempt
+                    if (attempt < this.maxAttempts) {
+                      const delay = this.baseDelay * Math.pow(2, attempt - 1);
+                      await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                  }
+                  
+                  return Result.failure(lastError!);
+                }
+              }
 
 # === MIDDLEWARE EXAMPLES ===
 examples:

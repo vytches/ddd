@@ -14,238 +14,177 @@ hierarchy:
   strategy: 'merge'
   scope: 'file'
 
+# === INTERFACES ===
+interfaces:
+  ImportOptions:
+    description: 'Configuration options for importing adapters from context registry'
+    business-context: 'Controls how adapters are imported from other registries'
+
+    properties:
+      - name: 'overwriteConflicts'
+        type: 'boolean'
+        description: 'Whether to overwrite existing adapters when conflicts occur'
+        optional: true
+      - name: 'validateAdapters'
+        type: 'boolean'
+        description: 'Whether to validate adapters during import'
+        optional: true
+
+  ImportResult:
+    description: 'Result of importing adapters from context registry'
+    business-context: 'Provides feedback on import operation success and failures'
+
+    properties:
+      - name: 'imported'
+        type: 'string[]'
+        description: 'Array of successfully imported context names'
+      - name: 'skipped'
+        type: 'string[]'
+        description: 'Array of skipped context names due to conflicts'
+      - name: 'conflicts'
+        type: 'Array<{ contextName: string; reason: string }>'
+        description: 'Array of conflicts encountered during import'
+
 # === CLASSES ===
 classes:
   ACLRegistry:
     class-doc:
-      description: 'Singleton registry for ACL adapter management'
+      description: 'Global registry for ACL adapters extending BaseACLRegistry'
       business-context: |
         Central hub for registering and resolving ACL adapters, supporting
-        dynamic adapter discovery, lazy loading, and context-based routing
+        dynamic adapter registration, discovery, and import/export capabilities
         for enterprise integration scenarios.
 
       formats:
         jsdoc:
-          description: 'Global ACL adapter registry with discovery support'
+          description: 'Global ACL adapter registry with import/export support'
         cli:
           description: |
             ## ACLRegistry
             Centralized adapter management providing:
             - Adapter registration and discovery
             - Context-based adapter resolution
-            - Lazy loading and caching
-            - Import/export capabilities
+            - Import/export from other registries
+            - Direct and enhanced adapter registration
 
       custom-tags:
         since: '1.0.0'
         pattern: 'Registry Pattern'
-        singleton: 'true'
+        extends: 'BaseACLRegistry'
 
     methods:
-      getInstance:
-        description: 'Returns singleton registry instance'
-        business-context: 'Ensures single point of adapter management'
-        static: true
+      getRegistryName:
+        description: 'Returns the name of this registry'
+        business-context: 'Identifies this registry in logs and debugging'
+        visibility: 'protected'
 
         returns:
-          type: 'ACLRegistry'
-          description: 'Singleton registry instance'
+          type: 'string'
+          description: 'Registry name identifier'
 
         examples:
-          - id: 'get-instance'
+          - id: 'registry-name'
             code: |
-              const registry = ACLRegistry.getInstance();
-              registry.register('payments', paymentAdapter);
+              // Internal method - returns 'GlobalACLRegistry'
+              const name = this.getRegistryName();
 
-      register:
-        description: 'Registers an ACL adapter with the registry'
-        business-context: 'Makes adapter available for application use'
+      importFromContext:
+        description: 'Imports adapters from a context-specific registry'
+        business-context: 'Enables bulk migration of adapters from context registries to global registry'
 
         parameters:
-          - name: 'key'
-            type: 'string'
-            description: 'Unique adapter identifier'
-          - name: 'adapter'
-            type: 'IACLAdapter'
-            description: 'Adapter instance to register'
+          - name: 'contextRegistry'
+            type: 'ContextACLRegistry'
+            description: 'Source context registry to import from'
           - name: 'options'
-            type: 'RegistrationOptions'
-            description: 'Registration configuration'
-            optional: true
+            type: 'ImportOptions'
+            description: 'Import configuration options'
+            default: '{}'
 
         returns:
-          type: 'void'
+          type: 'ImportResult'
+          description: 'Result containing imported, skipped, and conflicted adapters'
 
         examples:
-          - id: 'register-adapter'
+          - id: 'import-from-context'
             code: |
-              registry.register(
-                'order-service',
-                orderAdapter,
-                { 
-                  context: 'Orders',
-                  version: '2.0',
-                  lazy: true 
-                }
-              );
+              const contextRegistry = new ContextACLRegistry('OrderContext');
+              const result = globalRegistry.importFromContext(contextRegistry, {
+                overwriteConflicts: true,
+                validateAdapters: true
+              });
+              
+              console.log(`Imported: ${result.imported.length} adapters`);
+              console.log(`Skipped: ${result.skipped.length} adapters`);
+              console.log(`Conflicts: ${result.conflicts.length}`);
 
-      resolve:
-        description: 'Retrieves registered adapter by key'
-        business-context: 'Locates appropriate adapter for integration needs'
-
-        parameters:
-          - name: 'key'
-            type: 'string'
-            description: 'Adapter identifier'
-
-        returns:
-          type: 'IACLAdapter | undefined'
-          description: 'Adapter instance or undefined'
-
-        examples:
-          - id: 'resolve-adapter'
-            code: |
-              const adapter = registry.resolve<OrderAdapter>('order-service');
-              if (adapter) {
-                await adapter.execute('sync', orderData);
-              }
-
-      resolveOrThrow:
-        description: 'Retrieves adapter or throws if not found'
-        business-context: 'Ensures adapter availability for critical operations'
-
-        parameters:
-          - name: 'key'
-            type: 'string'
-            description: 'Adapter identifier'
-
-        returns:
-          type: 'IACLAdapter'
-          description: 'Adapter instance'
-
-        throws:
-          - type: 'AdapterNotFoundError'
-            description: 'When adapter is not registered'
-
-      findByContext:
-        description: 'Finds all adapters for a bounded context'
-        business-context: 'Discovers adapters within specific domain boundary'
+      registerDirect:
+        description: 'Registers a standard ACL adapter directly'
+        business-context: 'Simplified registration for basic ACL adapters without middleware'
 
         parameters:
           - name: 'contextName'
             type: 'string'
-            description: 'Bounded context name'
-
-        returns:
-          type: 'IACLAdapter[]'
-          description: 'Array of matching adapters'
-
-        examples:
-          - id: 'find-by-context'
-            code: |
-              const orderAdapters = registry.findByContext('Orders');
-              // Returns all adapters registered for Orders context
-
-      unregister:
-        description: 'Removes adapter from registry'
-        business-context: 'Cleans up unused adapters and frees resources'
-
-        parameters:
-          - name: 'key'
+            description: 'Context name for the adapter'
+          - name: 'adapter'
+            type: 'IACLAdapter<TDomain, TExternal>'
+            description: 'ACL adapter instance to register'
+          - name: 'description'
             type: 'string'
-            description: 'Adapter identifier to remove'
+            description: 'Optional description for the adapter'
+            optional: true
 
         returns:
-          type: 'boolean'
-          description: 'True if adapter was removed'
+          type: 'this'
+          description: 'Registry instance for method chaining'
 
-      clear:
-        description: 'Removes all registered adapters'
-        business-context: 'Resets registry for testing or shutdown'
-
-        returns:
-          type: 'void'
-
-      getAll:
-        description: 'Returns all registered adapters'
-        business-context: 'Provides registry introspection capabilities'
-
-        returns:
-          type: 'Map<string, IACLAdapter>'
-          description: 'Map of all adapters'
-
-      import:
-        description: 'Imports adapters from configuration'
-        business-context: 'Bulk adapter registration from external config'
-
-        parameters:
-          - name: 'config'
-            type: 'ImportOptions'
-            description: 'Import configuration'
-
-        returns:
-          type: 'Promise<void>'
+        generic: 'TDomain, TExternal'
 
         examples:
-          - id: 'import-config'
+          - id: 'register-direct'
             code: |
-              await registry.import({
-                adapters: [
-                  { key: 'payments', module: './adapters/payment' },
-                  { key: 'shipping', module: './adapters/shipping' }
-                ],
-                lazy: true,
-                validate: true
-              });
+              const registry = new ACLRegistry();
+              registry.registerDirect(
+                'PaymentContext',
+                paymentAdapter,
+                'Payment processing adapter'
+              ).registerDirect(
+                'OrderContext',
+                orderAdapter,
+                'Order management adapter'
+              );
 
-      export:
-        description: 'Exports current registry configuration'
-        business-context: 'Serializes registry state for persistence'
+      registerEnhanced:
+        description: 'Registers an enhanced ACL adapter with middleware support'
+        business-context: 'Registration for advanced ACL adapters with middleware pipeline capabilities'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name for the adapter'
+          - name: 'adapter'
+            type: 'IEnhancedACLAdapter<TDomain, TExternal>'
+            description: 'Enhanced ACL adapter instance to register'
+          - name: 'description'
+            type: 'string'
+            description: 'Optional description for the adapter'
+            optional: true
 
         returns:
-          type: 'RegistrySnapshot'
-          description: 'Registry configuration snapshot'
+          type: 'this'
+          description: 'Registry instance for method chaining'
 
-# === TYPES ===
-types:
-  ImportOptions:
-    description: 'Configuration for bulk adapter import'
-    business-context: 'Enables configuration-driven adapter setup'
+        generic: 'TDomain, TExternal'
 
-    properties:
-      - name: 'adapters'
-        type: 'AdapterConfig[]'
-        description: 'Array of adapter configurations'
-      - name: 'lazy'
-        type: 'boolean'
-        description: 'Enable lazy loading'
-        optional: true
-      - name: 'validate'
-        type: 'boolean'
-        description: 'Validate adapters on import'
-        optional: true
-      - name: 'override'
-        type: 'boolean'
-        description: 'Override existing adapters'
-        optional: true
+        examples:
+          - id: 'register-enhanced'
+            code: |
+              const enhancedAdapter = new EnhancedACLAdapter(translator, api);
+              enhancedAdapter.use(new LoggingMiddleware());
+              
+              registry.registerEnhanced(
+                'AdvancedPaymentContext',
+                enhancedAdapter,
+                'Enhanced payment adapter with middleware'
+              );
 
-  RegistrationOptions:
-    description: 'Options for adapter registration'
-
-    properties:
-      - name: 'context'
-        type: 'string'
-        description: 'Bounded context name'
-        optional: true
-      - name: 'version'
-        type: 'string'
-        description: 'Adapter version'
-        optional: true
-      - name: 'lazy'
-        type: 'boolean'
-        description: 'Enable lazy initialization'
-        optional: true
-      - name: 'metadata'
-        type: 'Record<string, any>'
-        description: 'Additional metadata'
-        optional: true

@@ -38,33 +38,298 @@ classes:
 
       custom-tags:
         since: '1.0.0'
-        extends: 'Error'
+        extends: 'IDomainError'
         category: 'Error Handling'
+
+    properties:
+      - name: 'contextName'
+        type: 'string'
+        description: 'Name of the ACL context where the error occurred'
+        readonly: true
+      - name: 'operation'
+        type: 'string'
+        description: 'Operation that was being performed when error occurred'
+        readonly: true
+        optional: true
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Additional metadata associated with the error'
+        optional: true
 
     methods:
       constructor:
-        description: 'Creates ACL error with message and optional details'
+        description: 'Creates ACL error with message, context, operation and optional error'
         business-context: 'Captures failure context for debugging and recovery'
 
         parameters:
           - name: 'message'
             type: 'string'
             description: 'Error message describing the failure'
-          - name: 'details'
-            type: 'object'
-            description: 'Optional additional error context'
+          - name: 'contextName'
+            type: 'string'
+            description: 'Name of the ACL context'
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation that failed'
+            optional: true
+          - name: 'error'
+            type: 'Error'
+            description: 'Original error that caused the failure'
             optional: true
 
         examples:
           - id: 'basic-error'
             code: |
-              throw new ACLError(
+              const error = new ACLError(
                 'Translation failed',
-                { 
-                  operation: 'create',
-                  context: 'Orders',
-                  externalSystem: 'ERP'
-                }
+                'OrderContext',
+                'CREATE',
+                originalError
+              );
+
+      translationFailed:
+        description: 'Creates error for translation failures'
+        business-context: 'Factory method for translation-specific errors with direction context'
+        static: true
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context where translation failed'
+          - name: 'direction'
+            type: '"TO_EXTERNAL" | "FROM_EXTERNAL"'
+            description: 'Direction of the failed translation'
+          - name: 'error'
+            type: 'Error'
+            description: 'Original error that caused translation failure'
+
+        returns:
+          type: 'ACLError'
+          description: 'ACLError instance with translation context'
+
+        examples:
+          - id: 'translation-failed'
+            code: |
+              const error = ACLError.translationFailed(
+                'OrderContext',
+                'TO_EXTERNAL',
+                new Error('Invalid date format')
+              );
+
+      operationFailed:
+        description: 'Creates error for general operation failures'
+        business-context: 'Factory method for operation-specific failures'
+        static: true
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context where operation failed'
+          - name: 'operation'
+            type: 'string'
+            description: 'Name of the failed operation'
+          - name: 'error'
+            type: 'Error'
+            description: 'Original error that caused operation failure'
+
+        returns:
+          type: 'ACLError'
+          description: 'ACLError instance with operation context'
+
+        examples:
+          - id: 'operation-failed'
+            code: |
+              const error = ACLError.operationFailed(
+                'PaymentContext',
+                'processPayment',
+                new Error('Payment gateway timeout')
+              );
+
+      unsupportedOperation:
+        description: 'Creates error for unsupported operations'
+        business-context: 'Factory method for unsupported operation scenarios'
+        static: true
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context where unsupported operation was attempted'
+          - name: 'operation'
+            type: 'string'
+            description: 'Name of the unsupported operation'
+
+        returns:
+          type: 'ACLError'
+          description: 'ACLError instance for unsupported operation'
+
+        examples:
+          - id: 'unsupported-operation'
+            code: |
+              const error = ACLError.unsupportedOperation(
+                'LegacyOrderContext',
+                'bulkUpdate'
+              );
+
+      externalSystemUnavailable:
+        description: 'Creates error for external system unavailability'
+        business-context: 'Factory method for external system connection failures'
+        static: true
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context trying to access external system'
+          - name: 'systemName'
+            type: 'string'
+            description: 'Name of the unavailable external system'
+
+        returns:
+          type: 'ACLError'
+          description: 'ACLError instance for system unavailability'
+
+        examples:
+          - id: 'system-unavailable'
+            code: |
+              const error = ACLError.externalSystemUnavailable(
+                'InventoryContext',
+                'LegacyInventoryAPI'
+              );
+
+  TranslationError:
+    class-doc:
+      description: 'Error during model translation between domain and external'
+      business-context: |
+        Represents failures in the translation process between domain models
+        and external representations, often due to incompatible data structures,
+        missing required fields, or validation failures.
+
+      formats:
+        jsdoc:
+          description: 'Model translation failure error with source and direction'
+        cli:
+          description: |
+            ## TranslationError
+            Translation failure with details about:
+            - Source model data
+            - Translation direction
+            - Context information
+            - Original error cause
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ACLError'
+        pattern: 'Translator Pattern'
+
+    properties:
+      - name: 'sourceModel'
+        type: 'unknown'
+        description: 'The source model that failed translation'
+        readonly: true
+      - name: 'direction'
+        type: '"TO_EXTERNAL" | "FROM_EXTERNAL"'
+        description: 'Direction of the failed translation'
+        readonly: true
+
+    methods:
+      constructor:
+        description: 'Creates translation error with source model and direction'
+        business-context: 'Captures translation failure details for debugging'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Description of translation failure'
+          - name: 'contextName'
+            type: 'string'
+            description: 'Name of the ACL context'
+          - name: 'sourceModel'
+            type: 'unknown'
+            description: 'Source model that failed translation'
+          - name: 'direction'
+            type: '"TO_EXTERNAL" | "FROM_EXTERNAL"'
+            description: 'Translation direction'
+          - name: 'error'
+            type: 'Error'
+            description: 'Original error that caused translation failure'
+            optional: true
+
+        examples:
+          - id: 'translation-error'
+            code: |
+              const translationError = new TranslationError(
+                'Invalid date format in order',
+                'OrderContext',
+                domainOrder,
+                'TO_EXTERNAL',
+                validationError
+              );
+
+      forToExternal:
+        description: 'Creates translation error for domain-to-external conversion'
+        business-context: 'Factory method for outbound translation failures'
+        static: true
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the failure'
+          - name: 'contextName'
+            type: 'string'
+            description: 'Name of the ACL context'
+          - name: 'sourceModel'
+            type: 'unknown'
+            description: 'Domain model that failed conversion'
+          - name: 'error'
+            type: 'Error'
+            description: 'Original error that caused failure'
+            optional: true
+
+        returns:
+          type: 'TranslationError'
+          description: 'TranslationError instance for TO_EXTERNAL direction'
+
+        examples:
+          - id: 'to-external-error'
+            code: |
+              const error = TranslationError.forToExternal(
+                'Cannot convert domain order to legacy format',
+                'OrderContext',
+                domainOrder,
+                validationError
+              );
+
+      forFromExternal:
+        description: 'Creates translation error for external-to-domain conversion'
+        business-context: 'Factory method for inbound translation failures'
+        static: true
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the failure'
+          - name: 'contextName'
+            type: 'string'
+            description: 'Name of the ACL context'
+          - name: 'sourceModel'
+            type: 'unknown'
+            description: 'External model that failed conversion'
+          - name: 'error'
+            type: 'Error'
+            description: 'Original error that caused failure'
+            optional: true
+
+        returns:
+          type: 'TranslationError'
+          description: 'TranslationError instance for FROM_EXTERNAL direction'
+
+        examples:
+          - id: 'from-external-error'
+            code: |
+              const error = TranslationError.forFromExternal(
+                'Legacy order data missing required fields',
+                'OrderContext',
+                legacyOrder,
+                validationError
               );
 
   AdapterNotFoundError:
@@ -89,75 +354,48 @@ classes:
         business-context: 'Identifies which adapter is missing for troubleshooting'
 
         parameters:
-          - name: 'adapterKey'
+          - name: 'contextName'
             type: 'string'
-            description: 'Key of the missing adapter'
-          - name: 'availableAdapters'
-            type: 'string[]'
-            description: 'List of registered adapter keys'
+            description: 'Context name where adapter was requested'
+          - name: 'adapterName'
+            type: 'string'
+            description: 'Name of the missing adapter'
+          - name: 'error'
+            type: 'Error'
+            description: 'Optional original error'
             optional: true
 
         examples:
-          - id: 'adapter-not-found'
+          - id: 'adapter-constructor'
             code: |
-              throw new AdapterNotFoundError(
-                'payment-service',
-                ['order-service', 'inventory-service']
+              const error = new AdapterNotFoundError(
+                'PaymentContext',
+                'payment-processor-v2'
               );
 
-  TranslationError:
-    class-doc:
-      description: 'Error during model translation between domain and external'
-      business-context: |
-        Represents failures in the translation process between domain models
-        and external representations, often due to incompatible data structures,
-        missing required fields, or validation failures.
-
-      formats:
-        jsdoc:
-          description: 'Model translation failure error'
-        cli:
-          description: |
-            ## TranslationError
-            Translation failure with details about:
-            - Source model type
-            - Target model type
-            - Specific field failures
-            - Validation errors
-
-      custom-tags:
-        since: '1.0.0'
-        extends: 'ACLError'
-        pattern: 'Translator Pattern'
-
-    methods:
-      constructor:
-        description: 'Creates translation error with context'
-        business-context: 'Captures translation failure details for debugging'
+      forContext:
+        description: 'Creates adapter not found error for specific context'
+        business-context: 'Factory method for context-specific adapter lookup failures'
+        static: true
 
         parameters:
-          - name: 'message'
+          - name: 'contextName'
             type: 'string'
-            description: 'Description of translation failure'
-          - name: 'sourceModel'
+            description: 'Context name where adapter was requested'
+          - name: 'adapterName'
             type: 'string'
-            description: 'Source model type name'
-          - name: 'targetModel'
-            type: 'string'
-            description: 'Target model type name'
-          - name: 'failedFields'
-            type: 'string[]'
-            description: 'Fields that failed translation'
-            optional: true
+            description: 'Name of the missing adapter'
+
+        returns:
+          type: 'AdapterNotFoundError'
+          description: 'AdapterNotFoundError instance for the context'
 
         examples:
-          - id: 'translation-failure'
+          - id: 'for-context'
             code: |
-              throw new TranslationError(
-                'Incompatible date format',
-                'OrderAggregate',
-                'LegacyOrderDTO',
-                ['createdDate', 'shippingDate']
+              const error = AdapterNotFoundError.forContext(
+                'InventoryContext',
+                'legacy-inventory-adapter'
               );
 
 # === ERROR HANDLING PATTERNS ===

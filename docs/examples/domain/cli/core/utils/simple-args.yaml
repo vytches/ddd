@@ -1,0 +1,121 @@
+# Simple Args Parser - Command Line Argument Processing
+
+# === FILE METADATA ===
+file-name: 'simple-args'
+title: 'SimpleArgsParser - CLI Argument Processing'
+description: 'Zero-dependency command line argument parser with component shortcuts'
+business-context: 'Argument parsing for CLI applications with kebab-case conversion'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ParsedArgs:
+    description: 'Structure for parsed command line arguments'
+    business-context: 'Standardized format for CLI argument processing results'
+    
+    properties:
+      - name: 'command'
+        type: 'string | undefined'
+        description: 'Primary command name extracted from arguments'
+      - name: 'args'
+        type: 'string[]'
+        description: 'Positional arguments array without flags'
+      - name: 'options'
+        type: 'Record<string, any>'
+        description: 'Parsed flag options with kebab-case converted to camelCase'
+
+# === CLASSES ===
+classes:
+  SimpleArgsParser:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Lightweight command line argument parser with component shortcuts'
+      business-context: 'Provides argument parsing for CLI applications without external dependencies'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Zero-dependency CLI argument parser'
+        cli:
+          description: |
+            ## CLI Argument Parser
+            Complete argument processing with component shortcuts
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Utility Pattern'
+        category: 'CLI Processing'
+        dependencies: 'Zero external dependencies'
+
+    # Methods
+    methods:
+      parse:
+        description: 'Parse command line arguments into structured format'
+        business-context: 'Main parsing method converting raw argv into usable CLI data structure'
+
+        parameters:
+          - name: 'argv'
+            type: 'string[]'
+            description: 'Raw command line arguments array (typically process.argv.slice(2))'
+
+        returns:
+          type: 'ParsedArgs'
+          description: 'Structured object with command, arguments, and options'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const args = SimpleArgsParser.parse(['generate', 'User', '--output', './src']);
+              // Result: { command: 'generate', args: ['User'], options: { output: './src' } }
+          - id: 'component-shortcuts'
+            code: |
+              const args = SimpleArgsParser.parse(['create', '--aggregate', '--domain', 'orders']);
+              // Component shortcuts automatically expanded
+              // Result: { command: 'create', args: [], options: { aggregate: true, domain: 'orders' } }
+          - id: 'kebab-conversion'
+            code: |
+              const args = SimpleArgsParser.parse(['--output-dir', './dist', '--dry-run']);
+              // Kebab-case converted to camelCase
+              // Result: { command: undefined, args: [], options: { outputDir: './dist', dryRun: true } }
+
+        custom-tags:
+          static: true
+          parser: 'Converts kebab-case to camelCase'
+          shortcuts: 'Supports component type shortcuts'
+
+      showHelp:
+        description: 'Display help information for CLI commands'
+        business-context: 'Provides user assistance and command documentation for CLI applications'
+
+        parameters:
+          - name: 'commandName'
+            type: 'string'
+            description: 'Optional command name for specific help (shows general help if omitted)'
+
+        returns:
+          type: 'void'
+          description: 'Outputs help text to console'
+
+        examples:
+          - id: 'general-help'
+            code: |
+              SimpleArgsParser.showHelp();
+              // Displays general CLI usage and available commands
+          - id: 'command-help'
+            code: |
+              SimpleArgsParser.showHelp('generate');
+              // Shows specific help for generate command
+
+        custom-tags:
+          static: true
+          output: 'Console output'
+          help-system: 'Built-in documentation'

@@ -1,0 +1,419 @@
+# FileSystem - Enhanced File Operations
+
+# === FILE METADATA ===
+file-name: 'file-system'
+title: 'FileSystem - Enhanced File Operations'
+description: 'Enhanced file system utilities with enterprise-grade features'
+business-context: 'File scaffolding and management for CLI operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  FileSystem:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enhanced file system operations with CLI integration'
+      business-context: 'Core file management utilities for code generation and scaffolding'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'File system utilities for CLI operations'
+        cli:
+          description: |
+            ## FileSystem Utilities
+            Enhanced file operations with Node.js integration
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Utility Pattern'
+        category: 'File Operations'
+
+    # Methods
+    methods:
+      exists:
+        description: 'Check if file or directory exists at specified path'
+        business-context: 'Path validation for code generation safety'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File system path to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if path exists, false otherwise'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const exists = FileSystem.exists('./src/domain/User.ts');
+              if (exists) {
+                console.log('File already exists');
+              }
+
+      isDirectory:
+        description: 'Check if path points to a directory'
+        business-context: 'Directory validation for code organization'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to check for directory type'
+
+        returns:
+          type: 'boolean'
+          description: 'True if path is directory'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const isDir = FileSystem.isDirectory('./src/domain');
+              if (isDir) {
+                console.log('Directory found');
+              }
+
+      isFile:
+        description: 'Check if path points to a regular file'
+        business-context: 'File type validation for processing'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to check for file type'
+
+        returns:
+          type: 'boolean'
+          description: 'True if path is regular file'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const isFile = FileSystem.isFile('./package.json');
+              if (isFile) {
+                console.log('File found');
+              }
+
+      createDirectory:
+        description: 'Create directory and all parent directories recursively'
+        business-context: 'Directory scaffolding for code generation'
+        
+        parameters:
+          - name: 'dirPath'
+            type: 'string'
+            description: 'Directory path to create'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when directory is created'
+
+        examples:
+          - id: 'basic'
+            code: |
+              await FileSystem.createDirectory('./src/domain/entities');
+              console.log('Directory structure created');
+
+        custom-tags:
+          async: true
+          recursive: 'Creates parent directories as needed'
+
+      readFile:
+        description: 'Read file content as UTF-8 string'
+        business-context: 'Template and configuration file reading'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to file to read'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to file content'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const content = await FileSystem.readFile('./template.ts');
+              console.log('Template loaded:', content.length, 'characters');
+
+        custom-tags:
+          async: true
+          encoding: 'UTF-8'
+
+      writeFile:
+        description: 'Write string content to file'
+        business-context: 'Code generation and file output'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path where to write file'
+          - name: 'content'
+            type: 'string'
+            description: 'String content to write'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when file is written'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const code = generateTypeScriptClass('User');
+              await FileSystem.writeFile('./src/User.ts', code);
+              console.log('Generated User.ts successfully');
+
+        custom-tags:
+          async: true
+          atomic: 'Writes complete file atomically'
+
+      copyFile:
+        description: 'Copy file from source to destination'
+        business-context: 'Template copying and file duplication'
+        
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Source file path'
+          - name: 'destination'
+            type: 'string'
+            description: 'Destination file path'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when file is copied'
+
+        examples:
+          - id: 'basic'
+            code: |
+              await FileSystem.copyFile('./templates/entity.ts', './src/User.ts');
+              console.log('Template copied successfully');
+
+        custom-tags:
+          async: true
+          atomic: 'Atomic copy operation'
+
+      listDirectory:
+        description: 'List all files and directories in specified directory'
+        business-context: 'Project structure analysis and file discovery'
+        
+        parameters:
+          - name: 'dirPath'
+            type: 'string'
+            description: 'Directory path to list'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Promise resolving to array of file/directory names'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const files = await FileSystem.listDirectory('./src/domain');
+              console.log('Found files:', files.length);
+              files.forEach(file => console.log('-', file));
+
+        custom-tags:
+          async: true
+          directory-only: 'Lists immediate children only'
+
+      getStats:
+        description: 'Get detailed file system statistics'
+        business-context: 'File metadata analysis for processing decisions'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to get statistics for'
+
+        returns:
+          type: 'Promise<fs.Stats>'
+          description: 'Promise resolving to Node.js fs.Stats object'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const stats = await FileSystem.getStats('./src/User.ts');
+              console.log('File size:', stats.size, 'bytes');
+              console.log('Modified:', stats.mtime);
+
+        custom-tags:
+          async: true
+          detailed: 'Includes size, timestamps, permissions'
+
+      findFiles:
+        description: 'Find files matching regular expression pattern'
+        business-context: 'Code file discovery and pattern matching'
+        
+        parameters:
+          - name: 'directory'
+            type: 'string'
+            description: 'Directory to search in'
+          - name: 'pattern'
+            type: 'RegExp'
+            description: 'Regular expression pattern to match'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Promise resolving to array of matching file paths'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const tsFiles = await FileSystem.findFiles('./src', /\.ts$/);
+              console.log('Found TypeScript files:', tsFiles.length);
+              tsFiles.forEach(file => console.log('-', file));
+
+        custom-tags:
+          async: true
+          recursive: 'Searches subdirectories recursively'
+
+      resolvePath:
+        description: 'Resolve relative path to absolute path'
+        business-context: 'Path normalization for CLI operations'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Relative or absolute path to resolve'
+
+        returns:
+          type: 'string'
+          description: 'Absolute path'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const absolute = FileSystem.resolvePath('./src/User.ts');
+              console.log('Absolute path:', absolute);
+
+        custom-tags:
+          sync: true
+          normalization: 'Resolves . and .. references'
+
+      relativePath:
+        description: 'Get relative path from one location to another'
+        business-context: 'Import path calculation for generated code'
+        
+        parameters:
+          - name: 'from'
+            type: 'string'
+            description: 'Starting path'
+          - name: 'to'
+            type: 'string'
+            description: 'Target path'
+
+        returns:
+          type: 'string'
+          description: 'Relative path from source to target'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const relative = FileSystem.relativePath('./src/domain', './src/User.ts');
+              console.log('Relative path:', relative); // '../User.ts'
+
+        custom-tags:
+          sync: true
+          import-friendly: 'Suitable for import statements'
+
+      joinPath:
+        description: 'Join multiple path segments using proper separators'
+        business-context: 'Cross-platform path construction'
+        
+        parameters:
+          - name: 'paths'
+            type: 'string[]'
+            description: 'Path segments to join'
+
+        returns:
+          type: 'string'
+          description: 'Joined path with proper separators'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const path = FileSystem.joinPath('src', 'domain', 'entities', 'User.ts');
+              console.log('Joined path:', path);
+
+        custom-tags:
+          sync: true
+          cross-platform: 'Uses correct separators for OS'
+
+      getExtension:
+        description: 'Get file extension including the dot'
+        business-context: 'File type identification for processing'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path to extract extension from'
+
+        returns:
+          type: 'string'
+          description: 'File extension including dot (e.g., ".ts")'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const ext = FileSystem.getExtension('./src/User.ts');
+              console.log('Extension:', ext); // '.ts'
+
+        custom-tags:
+          sync: true
+          includes-dot: 'Returns extension with leading dot'
+
+      getBaseName:
+        description: 'Get file name without extension'
+        business-context: 'Component name extraction from file paths'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path to extract base name from'
+
+        returns:
+          type: 'string'
+          description: 'File name without extension'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const base = FileSystem.getBaseName('./src/domain/User.ts');
+              console.log('Base name:', base); // 'User'
+
+        custom-tags:
+          sync: true
+          name-extraction: 'Useful for component naming'
+
+      getDirectoryName:
+        description: 'Get directory path containing the file'
+        business-context: 'Parent directory identification for file organization'
+        
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path to extract directory from'
+
+        returns:
+          type: 'string'
+          description: 'Directory path containing the file'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const dir = FileSystem.getDirectoryName('./src/domain/User.ts');
+              console.log('Directory:', dir); // './src/domain'
+
+        custom-tags:
+          sync: true
+          parent-directory: 'Returns containing directory path'
