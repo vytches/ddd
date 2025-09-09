@@ -155,7 +155,7 @@ classes:
             code: |
               // Get specific version
               const v20 = registry.get<Payment, StripePayment>('PaymentContext', '2.0.0');
-              
+
               // Get latest version
               const latest = registry.get<Payment, StripePayment>('PaymentContext');
 
@@ -220,7 +220,7 @@ classes:
             code: |
               const versionedRegistry = new VersionedACLRegistry();
               versionedRegistry.registerVersioned('Payments', '2.1.0', paymentAdapter);
-              
+
               const adapter = new VersionedACLAdapter(versionedRegistry, 'Payments');
 
       execute:
@@ -250,7 +250,7 @@ classes:
             code: |
               // Execute with latest version
               const result = await adapter.execute('create', orderData);
-              
+
               // Execute with specific version
               const resultV20 = await adapter.execute(
                 'create',

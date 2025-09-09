@@ -22,7 +22,7 @@ file-doc:
     cli:
       description: |
         ## Event Scheduling Package Exports
-        
+
         Complete event scheduling system including:
         - Scheduled event management
         - Multiple scheduler adapters

@@ -16,7 +16,7 @@ interfaces:
   ParsedArgs:
     description: 'Structure for parsed command line arguments'
     business-context: 'Standardized format for CLI argument processing results'
-    
+
     properties:
       - name: 'command'
         type: 'string | undefined'

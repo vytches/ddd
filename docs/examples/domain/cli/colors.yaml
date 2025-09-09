@@ -43,7 +43,7 @@ classes:
       black:
         description: 'Apply black color to text'
         business-context: 'Standard text coloring for CLI output'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -62,7 +62,7 @@ classes:
       red:
         description: 'Apply red color to text'
         business-context: 'Error indication and critical messages'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -81,7 +81,7 @@ classes:
       green:
         description: 'Apply green color to text'
         business-context: 'Success indication and positive feedback'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -100,7 +100,7 @@ classes:
       yellow:
         description: 'Apply yellow color to text'
         business-context: 'Warning indication and cautionary messages'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -119,7 +119,7 @@ classes:
       blue:
         description: 'Apply blue color to text'
         business-context: 'Information display and neutral content'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -138,7 +138,7 @@ classes:
       magenta:
         description: 'Apply magenta color to text'
         business-context: 'Highlighting and special content emphasis'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -157,7 +157,7 @@ classes:
       cyan:
         description: 'Apply cyan color to text'
         business-context: 'Debug information and technical details'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -176,7 +176,7 @@ classes:
       white:
         description: 'Apply white color to text'
         business-context: 'High contrast text and emphasis'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -195,7 +195,7 @@ classes:
       gray:
         description: 'Apply gray color to text'
         business-context: 'Muted content and secondary information'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -214,7 +214,7 @@ classes:
       brightRed:
         description: 'Apply bright red color to text'
         business-context: 'Critical errors and urgent attention'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -233,7 +233,7 @@ classes:
       brightGreen:
         description: 'Apply bright green color to text'
         business-context: 'Major success and completion indicators'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -252,7 +252,7 @@ classes:
       brightYellow:
         description: 'Apply bright yellow color to text'
         business-context: 'Important warnings and attention-grabbing messages'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -271,7 +271,7 @@ classes:
       brightBlue:
         description: 'Apply bright blue color to text'
         business-context: 'Primary information and key content highlighting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -290,7 +290,7 @@ classes:
       brightMagenta:
         description: 'Apply bright magenta color to text'
         business-context: 'Special features and premium content indicators'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -309,7 +309,7 @@ classes:
       brightCyan:
         description: 'Apply bright cyan color to text'
         business-context: 'Technical information and development details'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -328,7 +328,7 @@ classes:
       brightWhite:
         description: 'Apply bright white color to text'
         business-context: 'Maximum emphasis and critical highlights'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -347,7 +347,7 @@ classes:
       bold:
         description: 'Apply bold styling to text'
         business-context: 'Text emphasis and importance indication'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -366,7 +366,7 @@ classes:
       dim:
         description: 'Apply dim styling to text'
         business-context: 'Secondary information and reduced emphasis'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -385,7 +385,7 @@ classes:
       italic:
         description: 'Apply italic styling to text'
         business-context: 'Stylistic emphasis and quotes'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -404,7 +404,7 @@ classes:
       underline:
         description: 'Apply underline styling to text'
         business-context: 'Link indication and text highlighting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -423,7 +423,7 @@ classes:
       strikethrough:
         description: 'Apply strikethrough styling to text'
         business-context: 'Deprecated content and crossed-out text'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -442,7 +442,7 @@ classes:
       bgBlack:
         description: 'Apply black background to text'
         business-context: 'Background emphasis and text highlighting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -461,7 +461,7 @@ classes:
       bgRed:
         description: 'Apply red background to text'
         business-context: 'Error highlighting and critical alerts'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -480,7 +480,7 @@ classes:
       bgGreen:
         description: 'Apply green background to text'
         business-context: 'Success highlighting and positive indicators'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -499,7 +499,7 @@ classes:
       bgYellow:
         description: 'Apply yellow background to text'
         business-context: 'Warning highlighting and caution indicators'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -518,7 +518,7 @@ classes:
       bgBlue:
         description: 'Apply blue background to text'
         business-context: 'Information highlighting and content blocks'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -537,7 +537,7 @@ classes:
       bgMagenta:
         description: 'Apply magenta background to text'
         business-context: 'Special highlighting and premium indicators'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -556,7 +556,7 @@ classes:
       bgCyan:
         description: 'Apply cyan background to text'
         business-context: 'Debug highlighting and technical blocks'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -575,7 +575,7 @@ classes:
       bgWhite:
         description: 'Apply white background to text'
         business-context: 'High contrast highlighting and emphasis'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -594,7 +594,7 @@ classes:
       strip:
         description: 'Remove all ANSI color codes from text'
         business-context: 'Clean text extraction and logging to files'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -631,7 +631,7 @@ classes:
       success:
         description: 'Apply success styling (bright green)'
         business-context: 'Consistent success message formatting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -650,7 +650,7 @@ classes:
       warning:
         description: 'Apply warning styling (bright yellow)'
         business-context: 'Consistent warning message formatting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -669,7 +669,7 @@ classes:
       error:
         description: 'Apply error styling (bright red)'
         business-context: 'Consistent error message formatting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -688,7 +688,7 @@ classes:
       info:
         description: 'Apply info styling (bright blue)'
         business-context: 'Consistent information message formatting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -707,7 +707,7 @@ classes:
       debug:
         description: 'Apply debug styling (dim cyan)'
         business-context: 'Consistent debug message formatting'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -726,7 +726,7 @@ classes:
       highlight:
         description: 'Apply highlight styling (bright magenta)'
         business-context: 'Content emphasis and special attention'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -745,7 +745,7 @@ classes:
       muted:
         description: 'Apply muted styling (dim gray)'
         business-context: 'Secondary information and less important content'
-        
+
         parameters:
           - name: 'text'
             type: 'string'
@@ -764,7 +764,7 @@ classes:
       progressBar:
         description: 'Create ASCII progress bar with colors'
         business-context: 'Visual progress indication for long-running operations'
-        
+
         parameters:
           - name: 'completed'
             type: 'number'

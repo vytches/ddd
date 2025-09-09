@@ -113,7 +113,7 @@ classes:
                 overwriteConflicts: true,
                 validateAdapters: true
               });
-              
+
               console.log(`Imported: ${result.imported.length} adapters`);
               console.log(`Skipped: ${result.skipped.length} adapters`);
               console.log(`Conflicts: ${result.conflicts.length}`);
@@ -181,10 +181,9 @@ classes:
             code: |
               const enhancedAdapter = new EnhancedACLAdapter(translator, api);
               enhancedAdapter.use(new LoggingMiddleware());
-              
+
               registry.registerEnhanced(
                 'AdvancedPaymentContext',
                 enhancedAdapter,
                 'Enhanced payment adapter with middleware'
               );
-

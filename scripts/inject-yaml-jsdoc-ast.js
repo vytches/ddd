@@ -590,9 +590,7 @@ class ASTJSDocInjector {
     const relativePath = path.relative(path.join('packages', packageName, 'dist'), filePath);
     const dirName = path.dirname(relativePath);
     const metadataKey =
-      dirName && dirName !== '.'
-        ? `${dirName}/${fileBaseName}`.replace(/\\/g, '/')
-        : fileBaseName;
+      dirName && dirName !== '.' ? `${dirName}/${fileBaseName}`.replace(/\\/g, '/') : fileBaseName;
 
     await this.loadClassMetadata(packageName, metadataKey, filePath);
     const key = `${packageName}-${metadataKey.toLowerCase()}`;
@@ -601,10 +599,10 @@ class ASTJSDocInjector {
     // Check for file-level JSDoc documentation
     if (metadata?.['file-doc']) {
       console.log(`  🔍 Found file-level documentation for: ${fileBaseName}`);
-      
+
       // Check if file already has leading JSDoc comment
       const hasFileJSDoc = content.trim().startsWith('/**');
-      
+
       if (!hasFileJSDoc || this.forceMode) {
         // Generate file-level JSDoc using hierarchical resolution
         const fileJSDoc = this.generateJSDoc(
@@ -614,14 +612,14 @@ class ASTJSDocInjector {
           fileBaseName
           // No className or methodName for file-level JSDoc
         );
-        
+
         // Insert at the very beginning of the file
         modifications.push({
           start: 0,
           end: 0,
           text: fileJSDoc + '\n',
         });
-        
+
         console.log(`    ✅ Enhanced file-level JSDoc for ${fileBaseName}`);
       }
     }

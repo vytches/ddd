@@ -43,7 +43,7 @@ classes:
       exists:
         description: 'Check if file or directory exists at specified path'
         business-context: 'Path validation for code generation safety'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -64,7 +64,7 @@ classes:
       isDirectory:
         description: 'Check if path points to a directory'
         business-context: 'Directory validation for code organization'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -85,7 +85,7 @@ classes:
       isFile:
         description: 'Check if path points to a regular file'
         business-context: 'File type validation for processing'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -106,7 +106,7 @@ classes:
       createDirectory:
         description: 'Create directory and all parent directories recursively'
         business-context: 'Directory scaffolding for code generation'
-        
+
         parameters:
           - name: 'dirPath'
             type: 'string'
@@ -129,7 +129,7 @@ classes:
       readFile:
         description: 'Read file content as UTF-8 string'
         business-context: 'Template and configuration file reading'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -152,7 +152,7 @@ classes:
       writeFile:
         description: 'Write string content to file'
         business-context: 'Code generation and file output'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -179,7 +179,7 @@ classes:
       copyFile:
         description: 'Copy file from source to destination'
         business-context: 'Template copying and file duplication'
-        
+
         parameters:
           - name: 'source'
             type: 'string'
@@ -205,7 +205,7 @@ classes:
       listDirectory:
         description: 'List all files and directories in specified directory'
         business-context: 'Project structure analysis and file discovery'
-        
+
         parameters:
           - name: 'dirPath'
             type: 'string'
@@ -229,7 +229,7 @@ classes:
       getStats:
         description: 'Get detailed file system statistics'
         business-context: 'File metadata analysis for processing decisions'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -253,7 +253,7 @@ classes:
       findFiles:
         description: 'Find files matching regular expression pattern'
         business-context: 'Code file discovery and pattern matching'
-        
+
         parameters:
           - name: 'directory'
             type: 'string'
@@ -280,7 +280,7 @@ classes:
       resolvePath:
         description: 'Resolve relative path to absolute path'
         business-context: 'Path normalization for CLI operations'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -303,7 +303,7 @@ classes:
       relativePath:
         description: 'Get relative path from one location to another'
         business-context: 'Import path calculation for generated code'
-        
+
         parameters:
           - name: 'from'
             type: 'string'
@@ -329,7 +329,7 @@ classes:
       joinPath:
         description: 'Join multiple path segments using proper separators'
         business-context: 'Cross-platform path construction'
-        
+
         parameters:
           - name: 'paths'
             type: 'string[]'
@@ -352,7 +352,7 @@ classes:
       getExtension:
         description: 'Get file extension including the dot'
         business-context: 'File type identification for processing'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -375,7 +375,7 @@ classes:
       getBaseName:
         description: 'Get file name without extension'
         business-context: 'Component name extraction from file paths'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -398,7 +398,7 @@ classes:
       getDirectoryName:
         description: 'Get directory path containing the file'
         business-context: 'Parent directory identification for file organization'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'

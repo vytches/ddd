@@ -191,7 +191,7 @@ imported:
   MetadataSource:
     description: 'Hierarchical metadata source with strategy configuration'
     business-context: 'Represents metadata from specific hierarchy level (global, package, class, method) with resolution strategy'
-  
+
   ResolvedMetadata:
     description: 'Fully processed metadata after hierarchical resolution'
     business-context: 'Final metadata structure after applying resolution strategies across hierarchy levels'

@@ -16,7 +16,7 @@ interfaces:
   ChatMessage:
     description: 'Single message in conversation history'
     business-context: 'Represents individual AI or user message with metadata'
-    
+
     properties:
       - name: 'id'
         type: 'string'
@@ -38,7 +38,7 @@ interfaces:
   ChatSession:
     description: 'Complete conversation session with messages'
     business-context: 'Groups related messages into logical conversation sessions'
-    
+
     properties:
       - name: 'id'
         type: 'string'
@@ -63,7 +63,7 @@ interfaces:
   ChatHistoryConfig:
     description: 'Configuration options for chat history management'
     business-context: 'Controls storage limits, cleanup, and persistence settings'
-    
+
     properties:
       - name: 'enabled'
         type: 'boolean'
@@ -686,7 +686,7 @@ exports:
   chatHistory:
     description: 'Default ChatHistory instance'
     business-context: 'Pre-configured singleton instance for immediate use'
-    
+
     examples:
       - id: 'use-default'
         code: |

@@ -24,7 +24,7 @@ constants:
       integration examples with enterprise-grade validation criteria.
 
     type: 'ExampleValidationRules'
-    
+
     formats:
       jsdoc:
         description: 'Default validation rules per architecture layer'
@@ -60,7 +60,7 @@ constants:
       TypeScript compilation compatibility across all layers.
 
     type: 'object'
-    
+
     properties:
       - name: 'requiredImports'
         type: 'object'
@@ -85,7 +85,7 @@ constants:
           const patterns = COMPILATION_PATTERNS;
           const domainImports = patterns.requiredImports.domain;
           const forbidden = patterns.forbiddenPatterns;
-          
+
           // Validate example compilation
           const isValid = validateCompilation(example, patterns);
 
@@ -97,7 +97,7 @@ constants:
       examples follow enterprise standards and domain-driven design principles.
 
     type: 'object'
-    
+
     properties:
       - name: 'naming'
         type: 'object'
@@ -144,12 +144,12 @@ constants:
       - id: 'best-practices-check'
         code: |
           const practices = BEST_PRACTICES;
-          
+
           // Check naming conventions
           const namingValid = practices.naming.variablePatterns.some(
             pattern => pattern.test(variableName)
           );
-          
+
           // Check DDD patterns for domain layer
           const domainPatterns = practices.dddPatterns.domain;
           const mustUsePatterns = domainPatterns.mustUse;
@@ -162,7 +162,7 @@ constants:
       measurement for Enhanced Metadata System example validation.
 
     type: 'object'
-    
+
     properties:
       - name: 'excludeFromCount'
         type: 'RegExp[]'
@@ -177,7 +177,7 @@ constants:
           const rules = LINE_COUNTING_RULES;
           const excludePatterns = rules.excludeFromCount;
           const singleLinePatterns = rules.countAsOne;
-          
+
           // Count meaningful lines in example
           const meaningfulLines = countMeaningfulLines(code, rules);
 
@@ -189,7 +189,7 @@ constants:
       complexity limits, documentation coverage, and cyclomatic complexity.
 
     type: 'object'
-    
+
     properties:
       - name: 'minExampleQuality'
         type: 'number'
@@ -212,11 +212,11 @@ constants:
       - id: 'quality-check'
         code: |
           const thresholds = QUALITY_THRESHOLDS;
-          
+
           // Validate example quality
           const qualityScore = calculateQualityScore(example);
           const isQualityGood = qualityScore >= thresholds.minExampleQuality;
-          
+
           // Check complexity
           const complexity = calculateComplexity(example);
           const isComplexityOk = complexity <= thresholds.maxComplexityScore;

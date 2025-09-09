@@ -22,7 +22,7 @@ file-doc:
     cli:
       description: |
         ## Event Scheduling Adapters
-        
+
         Available scheduler adapters:
         - BaseSchedulerAdapter - Foundation for custom implementations
         - InMemorySchedulerAdapter - Development and testing adapter

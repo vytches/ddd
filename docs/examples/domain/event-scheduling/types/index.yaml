@@ -22,7 +22,7 @@ file-doc:
     cli:
       description: |
         ## Event Scheduling Types
-        
+
         Complete type system including:
         - Core scheduling interfaces
         - Job management types
@@ -48,7 +48,7 @@ interfaces:
         returns:
           type: 'string'
           description: 'Adapter type identifier'
-        
+
         custom-tags:
           readonly: true
           required: true
@@ -59,7 +59,7 @@ interfaces:
         returns:
           type: 'boolean'
           description: 'True if scheduler is running, false otherwise'
-        
+
         custom-tags:
           readonly: true
           required: true

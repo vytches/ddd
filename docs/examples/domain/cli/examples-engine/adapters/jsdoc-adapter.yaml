@@ -47,7 +47,7 @@ classes:
       constructor:
         description: 'Initializes JSDocAdapter with Enhanced Metadata System integration'
         business-context: 'Sets up adapter with enhanced metadata processing, tag extraction, and example engine integration for comprehensive JSDoc generation'
-        
+
         examples:
           - id: 'basic-initialization'
             code: |
@@ -57,7 +57,7 @@ classes:
       getDescriptionForMethod:
         description: 'Retrieves method description from Enhanced Metadata System'
         business-context: 'Primary method for extracting method descriptions using hierarchical metadata resolution with Enhanced Metadata System V2'
-        
+
         parameters:
           - name: 'methodName'
             type: 'string'
@@ -65,11 +65,11 @@ classes:
           - name: 'packageName'
             type: 'string'
             description: 'Package containing the method'
-        
+
         returns:
           type: 'Promise<string>'
           description: 'Method description from metadata'
-        
+
         examples:
           - id: 'get-description'
             code: |
@@ -82,7 +82,7 @@ classes:
       getBusinessContextForMethod:
         description: 'Retrieves method business context from Enhanced Metadata System'
         business-context: 'Extracts business context explaining why and when to use specific methods in enterprise scenarios'
-        
+
         parameters:
           - name: 'methodName'
             type: 'string'
@@ -90,11 +90,11 @@ classes:
           - name: 'packageName'
             type: 'string'
             description: 'Package containing the method'
-        
+
         returns:
           type: 'Promise<string>'
           description: 'Business context explaining method usage'
-        
+
         examples:
           - id: 'get-business-context'
             code: |
@@ -107,7 +107,7 @@ classes:
       getEnhancedMetadataForMethod:
         description: 'Retrieves complete enhanced metadata using hierarchical resolution'
         business-context: 'Advanced method that processes global settings hierarchy and provides comprehensive metadata for JSDoc generation'
-        
+
         parameters:
           - name: 'methodName'
             type: 'string'
@@ -118,14 +118,14 @@ classes:
           - name: '_filePath'
             type: 'string'
             description: 'File path for context-specific metadata'
-        
+
         returns:
           type: 'Promise<{[key: string]: string} | null>'
           description: 'Complete enhanced metadata or null if not found'
-        
+
         custom-tags:
           enhanced-metadata: 'Uses Enhanced Metadata System V2 hierarchical resolution'
-          
+
         examples:
           - id: 'enhanced-metadata'
             code: |
@@ -141,7 +141,7 @@ classes:
       getExampleForMethod:
         description: 'Retrieves code examples with layer and complexity filtering'
         business-context: 'Intelligent example selection based on complexity level and architectural layer for contextual documentation'
-        
+
         parameters:
           - name: 'methodName'
             type: 'string'
@@ -157,11 +157,11 @@ classes:
             type: 'ComplexityLevel'
             description: 'Complexity level filter'
             optional: true
-        
+
         returns:
           type: 'Promise<string>'
           description: 'Code example matching criteria'
-        
+
         examples:
           - id: 'layer-specific-example'
             code: |
@@ -176,7 +176,7 @@ classes:
       injectIntoJSDoc:
         description: 'Injects Enhanced Metadata System content into JSDoc comments'
         business-context: 'Main injection method that processes TypeScript code and enhances JSDoc comments with hierarchical metadata'
-        
+
         parameters:
           - name: 'code'
             type: 'string'
@@ -187,14 +187,14 @@ classes:
           - name: 'packageName'
             type: 'string'
             description: 'Package name for context'
-        
+
         returns:
           type: 'Promise<string>'
           description: 'Enhanced TypeScript code with JSDoc'
-        
+
         custom-tags:
           core-functionality: 'Primary JSDoc injection method'
-          
+
         examples:
           - id: 'inject-jsdoc'
             code: |
@@ -208,7 +208,7 @@ classes:
       processEnhancedBlocks:
         description: 'Processes enhanced JSDoc blocks with metadata support'
         business-context: 'Advanced processing for enhanced JSDoc blocks that support Enhanced Metadata System V2 directives and hierarchical resolution'
-        
+
         parameters:
           - name: 'filePath'
             type: 'string'
@@ -216,11 +216,11 @@ classes:
           - name: 'methodName'
             type: 'string'
             description: 'Method name to process'
-        
+
         returns:
           type: 'Promise<string | null>'
           description: 'Processed enhanced block or null'
-        
+
         examples:
           - id: 'process-enhanced'
             code: |
@@ -235,7 +235,7 @@ classes:
       processInjectionDirectives:
         description: 'Processes JSDoc directives using YAML metadata system'
         business-context: 'Core processing method that handles YAML-based metadata directives and applies Enhanced Metadata System V2 hierarchical resolution'
-        
+
         parameters:
           - name: 'code'
             type: 'string'
@@ -243,14 +243,14 @@ classes:
           - name: 'filePath'
             type: 'string'
             description: 'File path for context'
-        
+
         returns:
           type: 'Promise<string>'
           description: 'Code with processed directives'
-        
+
         custom-tags:
           yaml-processing: 'Handles YAML metadata directives'
-          
+
         examples:
           - id: 'process-directives'
             code: |
@@ -263,7 +263,7 @@ classes:
       injectWithParameters:
         description: 'Enhanced injection with parameter support for complex scenarios'
         business-context: 'Advanced injection method supporting parameterized metadata injection with layer, complexity, and example filtering'
-        
+
         parameters:
           - name: 'code'
             type: 'string'
@@ -288,11 +288,11 @@ classes:
               - name: 'examples'
                 type: 'number'
                 description: 'Number of examples to include'
-        
+
         returns:
           type: 'Promise<string>'
           description: 'Enhanced code with parameterized injection'
-        
+
         examples:
           - id: 'parameterized-injection'
             code: |
@@ -313,7 +313,7 @@ interfaces:
   IJSDocAdapter:
     description: 'Interface contract for JSDoc adapters'
     business-context: 'Defines the contract for JSDoc processing adapters in the Enhanced Metadata System'
-    
+
     methods:
       getDescriptionForMethod:
         description: 'Contract for retrieving method descriptions'
@@ -327,7 +327,7 @@ types:
   LayerType:
     description: 'Architectural layer enumeration'
     business-context: 'Defines architectural layers for example filtering'
-  
+
   ComplexityLevel:
     description: 'Complexity level enumeration'
     business-context: 'Defines complexity levels for progressive examples'
