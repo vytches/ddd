@@ -67,17 +67,18 @@ describe('VytchesDDDModule', () => {
       };
 
       module = await Test.createTestingModule({
-        imports: [VytchesDDDModule.forRoot({
-          providers: [customProvider],
-        })],
+        imports: [
+          VytchesDDDModule.forRoot({
+            providers: [customProvider],
+          }),
+        ],
       }).compile();
 
       expect(module).toBeDefined();
-      
+
       const customService = module.get('CustomService');
       expect(customService).toEqual({ test: 'value' });
     });
-
   });
 
   describe('forTesting', () => {
@@ -100,7 +101,7 @@ describe('VytchesDDDModule', () => {
       }).compile();
 
       expect(module).toBeDefined();
-      
+
       // These services are provided by forTesting() with lazy-loaded factories
       const commandBus = module.get('ICommandBus');
       expect(commandBus).toBeDefined();

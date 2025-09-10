@@ -30,13 +30,13 @@ export function isConstructor(value: unknown): boolean {
 /**
  * Helper to get metadata from a class
  */
-export function getMetadata(key: string | symbol, target: unknown): unknown {
+export function getMetadata(key: string | symbol, target: object): unknown {
   return Reflect.getMetadata(key, target);
 }
 
 /**
  * Helper to set metadata on a class
  */
-export function setMetadata(key: string | symbol, value: unknown, target: unknown): void {
+export function setMetadata(key: string | symbol, value: unknown, target: object): void {
   Reflect.defineMetadata(key, value, target);
 }

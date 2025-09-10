@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import type { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
-import type { UnifiedEventBus } from '@vytches/ddd-events';
+import type {
+  CommandBus,
+  ICommand,
+  ICommandHandler,
+  IQuery,
+  IQueryHandler,
+  QueryBus,
+} from '@vytches/ddd-cqrs';
+import type { UnifiedEventBus, UnifiedEventHandler } from '@vytches/ddd-events';
 import type { NestJSContainerAdapter } from '../adapters/nestjs-container.adapter';
 import {
   COMMAND_HANDLER_METADATA,
@@ -11,7 +18,7 @@ import {
   QUERY_HANDLER_METADATA,
   SAGA_METADATA,
 } from '../constants';
-import type { AutoDiscoveryOptions } from '../types';
+import type { AutoDiscoveryOptions } from '../types/index';
 
 /**
  * Represents a class constructor with metadata
@@ -32,12 +39,19 @@ interface ModuleMetadata {
  */
 interface DecoratorMetadata {
   serviceId?: string;
-  lifetime?: string;
+  lifetime?: import('@vytches/ddd-di').ServiceLifetime;
   context?: string;
   tags?: string[];
   commandType?: string;
   queryType?: string;
   eventTypes?: string[];
+}
+
+/**
+ * Represents an event handler with a handle method
+ */
+interface EventHandler {
+  handle: UnifiedEventHandler;
 }
 
 /**
@@ -137,7 +151,10 @@ export class AutoDiscoveryService {
   /**
    * Register a domain service
    */
-  private async registerDomainService(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
+  private async registerDomainService(
+    target: ClassConstructor,
+    metadata: DecoratorMetadata
+  ): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -156,7 +173,10 @@ export class AutoDiscoveryService {
   /**
    * Register a command handler
    */
-  private async registerCommandHandler(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
+  private async registerCommandHandler(
+    target: ClassConstructor,
+    metadata: DecoratorMetadata
+  ): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -166,7 +186,7 @@ export class AutoDiscoveryService {
     const commandBus = this.adapter.resolve<CommandBus>('commandBus');
     if (commandBus && 'register' in commandBus) {
       // Create handler instance
-      const handler = this.adapter.resolve<unknown>(target);
+      const handler = this.adapter.resolve<ICommandHandler<ICommand, void>>(target);
 
       // Register with command bus
       commandBus.register(metadata.commandType, handler);
@@ -182,7 +202,10 @@ export class AutoDiscoveryService {
   /**
    * Register a query handler
    */
-  private async registerQueryHandler(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
+  private async registerQueryHandler(
+    target: ClassConstructor,
+    metadata: DecoratorMetadata
+  ): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -192,7 +215,7 @@ export class AutoDiscoveryService {
     const queryBus = this.adapter.resolve<QueryBus>('queryBus');
     if (queryBus && 'register' in queryBus) {
       // Create handler instance
-      const handler = this.adapter.resolve<unknown>(target);
+      const handler = this.adapter.resolve<IQueryHandler<IQuery<unknown>, unknown>>(target);
 
       // Register with query bus
       queryBus.register(metadata.queryType, handler);
@@ -208,7 +231,10 @@ export class AutoDiscoveryService {
   /**
    * Register an event handler
    */
-  private async registerEventHandler(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
+  private async registerEventHandler(
+    target: ClassConstructor,
+    metadata: DecoratorMetadata
+  ): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -218,13 +244,13 @@ export class AutoDiscoveryService {
     const eventBus = this.adapter.resolve<UnifiedEventBus>('eventBus');
     if (eventBus && 'subscribe' in eventBus) {
       // Create handler instance
-      const handler = this.adapter.resolve<unknown>(target);
+      const handler = this.adapter.resolve<EventHandler>(target);
 
       // Subscribe to events
       if (metadata.eventTypes && Array.isArray(metadata.eventTypes)) {
         metadata.eventTypes.forEach((eventType: string) => {
           if (handler && handler.handle) {
-            eventBus.subscribe(eventType, handler.handle.bind(handler));
+            eventBus.subscribe(eventType, handler.handle);
           }
         });
       }
