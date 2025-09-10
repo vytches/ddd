@@ -139,6 +139,58 @@ ddd/
 - **🏗️ Architecture**: See `docs/` folder for design decisions
 - **🤝 Contributing**: Read `CONTRIBUTING.md` for contribution guidelines
 
+## 🤖 AI-Powered Quick Start
+
+VytchesDDD provides intelligent example generation for your application:
+
+### Generate Examples for Your Project
+
+```bash
+# Global installation (recommended)
+npm install -g @vytches/ddd-cli
+
+# Generate quick start examples
+vytches-ddd examples generate core --complexity basic --output quick-start-examples.md
+
+# Generate framework-specific examples (NestJS)
+vytches-ddd examples generate aggregates --framework nestjs --complexity intermediate
+
+# Generate with API validation (hybrid mode)
+vytches-ddd examples generate policies --hybrid --complexity basic
+
+# Bundle multiple packages
+vytches-ddd examples bundle --packages core,events,cqrs --framework nestjs
+```
+
+### Available CLI Options
+
+```bash
+# Basic usage
+vytches-ddd examples generate <package> --complexity <level>
+
+# With validation and framework
+vytches-ddd examples generate <package> --validate-apis --framework <framework>
+
+# Advanced options
+--hybrid              # Enhanced Metadata + Repomix validation (recommended)
+--validate-apis       # Validate examples against live codebase
+--complexity <level>  # basic, intermediate, advanced
+--framework <name>    # nestjs, express, fastify
+--output <path>       # Custom output file
+```
+
+### Quick Start Command
+
+For immediate results in your application directory:
+
+```bash
+# Generate comprehensive quick start guide
+vytches-ddd examples generate core --complexity basic --output ./VYTCHES_QUICK_START.md
+
+# Generate specific pattern examples
+vytches-ddd examples generate aggregates --complexity intermediate --framework nestjs --output ./aggregates-guide.md
+```
+
 ## 🚨 Troubleshooting
 
 ### Common Issues

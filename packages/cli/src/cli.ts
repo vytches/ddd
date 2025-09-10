@@ -12,6 +12,7 @@ import { Performance } from './core/utils/performance';
 import { generateCommand } from './commands/generate';
 import { domainBuilderCommand } from './commands/domain-builder';
 import { examplesCommand } from './commands/examples';
+import { quickStartCommand } from './commands/quick-start';
 
 /**
  * Main CLI entry point
@@ -57,6 +58,11 @@ async function main(): Promise<void> {
         await examplesCommand.action(parsed.args, parsed.options);
         break;
 
+      case 'quick-start':
+      case 'qs':
+        await quickStartCommand.action(parsed.args, parsed.options);
+        break;
+
       default:
         if (!parsed.command) {
           console.log(Colors.yellow('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder'));
@@ -65,6 +71,7 @@ async function main(): Promise<void> {
           console.log('  generate, g      Generate DDD components');
           console.log('  domain           Build complete domains');
           console.log('  examples         Manage and work with examples');
+          console.log('  quick-start, qs  Generate AI-powered quick start guide');
           console.log('');
           console.log('Use --help with any command for more information');
         } else {

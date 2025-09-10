@@ -6,6 +6,7 @@ import type { ExampleDefinition, PackageExampleConfig } from '../types/example-t
 import { logger } from '../core/utils/logger';
 import { HierarchicalMetadataResolver } from '../examples-engine/hierarchy/hierarchical-metadata-resolver';
 import type { ResolvedMetadata } from '../examples-engine/hierarchy/types';
+import { RepomixIntegration } from '../utils/repomix-integration';
 import path from 'path';
 import fs from 'fs/promises';
 import * as yaml from 'js-yaml';
@@ -23,6 +24,9 @@ export interface GenerateDocumentationOptions {
   diOnly?: boolean;
   outputPath?: string;
   enhancedMetadata?: boolean;
+  repomixSync?: boolean;
+  validateApis?: boolean;
+  hybrid?: boolean;
 }
 
 export interface GenerateDocumentationResult {
@@ -112,6 +116,20 @@ export class DocumentationGenerator {
   async generate(options: GenerateDocumentationOptions): Promise<GenerateDocumentationResult> {
     logger.info(`🚀 Generating documentation for ${options.packageName}...`);
 
+    // NEW: Repomix integration modes
+    if (options.hybrid || options.repomixSync || options.validateApis) {
+      return await this.generateWithRepomixIntegration(options);
+    }
+
+    // Traditional Enhanced Metadata flow
+    return await this.generateTraditional(options);
+  }
+
+  private async generateTraditional(
+    options: GenerateDocumentationOptions
+  ): Promise<GenerateDocumentationResult> {
+    logger.info(`📚 Using Enhanced Metadata System for ${options.packageName}`);
+
     // 1. Load package configuration
     const packageConfig = await this.configLoader.loadPackageConfig(options.packageName);
 
@@ -179,6 +197,126 @@ export class DocumentationGenerator {
       randomizedExamples: selectedExamples.randomized,
       sectionsIncluded,
     };
+  }
+
+  private async generateWithRepomixIntegration(
+    options: GenerateDocumentationOptions
+  ): Promise<GenerateDocumentationResult> {
+    logger.info(`🤖 Using Hybrid Mode (Enhanced Metadata + Repomix) for ${options.packageName}`);
+
+    // 1. Load Enhanced Metadata (traditional flow)
+    const traditionalResult = await this.generateTraditional({
+      ...options,
+      // Disable repomix flags to prevent infinite recursion
+      hybrid: false,
+      repomixSync: false,
+      validateApis: false,
+    });
+
+    // 2. Validate APIs against current codebase
+    if (options.validateApis || options.hybrid) {
+      logger.info('🔍 Validating APIs against current codebase...');
+      await this.validateExampleApis(options.packageName, traditionalResult);
+    }
+
+    // 3. Sync examples with repomix if requested
+    if (options.repomixSync || options.hybrid) {
+      logger.info('🔄 Syncing examples with current codebase...');
+      const syncedResult = await this.syncWithRepomix(traditionalResult, options);
+      return syncedResult;
+    }
+
+    return traditionalResult;
+  }
+
+  private async validateExampleApis(
+    packageName: string,
+    result: GenerateDocumentationResult
+  ): Promise<void> {
+    // Extract APIs from examples
+    const apis = this.extractApisFromExamples(result.examplesUsed);
+
+    if (apis.length === 0) {
+      logger.info('⚠️  No APIs found in examples to validate');
+      return;
+    }
+
+    // Validate against repomix
+    const validation = await RepomixIntegration.validateApis(packageName, apis);
+
+    if (validation.valid) {
+      logger.success(`✅ All ${apis.length} APIs validated successfully`);
+    } else {
+      logger.warn(`⚠️  Found ${validation.missingApis.length} potentially missing APIs:`);
+      validation.missingApis.forEach(api => {
+        logger.warn(`   - ${api}`);
+      });
+
+      if (validation.suggestions.length > 0) {
+        logger.info('💡 Suggestions:');
+        validation.suggestions.forEach(suggestion => {
+          logger.info(`   ${suggestion}`);
+        });
+      }
+    }
+  }
+
+  private async syncWithRepomix(
+    result: GenerateDocumentationResult,
+    options: GenerateDocumentationOptions
+  ): Promise<GenerateDocumentationResult> {
+    // Extract current APIs from repomix
+    const currentApis = await RepomixIntegration.extractPackageApis(options.packageName);
+
+    logger.info(`📊 Found ${currentApis.length} APIs in current codebase`);
+
+    // For now, just log the sync info - full sync implementation would require
+    // more complex logic to update YAML files
+    const exampleApis = this.extractApisFromExamples(result.examplesUsed);
+    const missingInExamples = currentApis.filter(
+      api => !exampleApis.some(exampleApi => exampleApi.includes(api))
+    );
+
+    if (missingInExamples.length > 0) {
+      logger.warn(`📋 APIs available but not shown in examples (${missingInExamples.length}):`);
+      missingInExamples.slice(0, 5).forEach(api => {
+        logger.warn(`   - ${api}`);
+      });
+      if (missingInExamples.length > 5) {
+        logger.warn(`   ... and ${missingInExamples.length - 5} more`);
+      }
+    }
+
+    return result;
+  }
+
+  private extractApisFromExamples(examples: ExampleDefinition[]): string[] {
+    const apis: string[] = [];
+
+    for (const example of examples) {
+      // For now, extract APIs from example name and description
+      // This is a simplified implementation - in full implementation we'd need to
+      // read the actual example files or use the templateEngine to get rendered content
+
+      // Extract class names from example names and descriptions
+      const text = `${example.name} ${example.description}`;
+
+      // Look for class patterns in text (simplified)
+      const classMatches = text.match(
+        /\b[A-Z]\w+(?:Root|Service|Builder|Handler|Manager|Repository|Bus|Event)\b/g
+      );
+      if (classMatches) {
+        apis.push(...classMatches);
+      }
+
+      // Extract method patterns
+      const methodMatches = text.match(/\b\w+\.\w+(?:\(\))?/g);
+      if (methodMatches) {
+        apis.push(...methodMatches.map((call: string) => call.replace('()', '').replace('(', '')));
+      }
+    }
+
+    return [...new Set(apis)]; // Remove duplicates
   }
 
   private determineSections(

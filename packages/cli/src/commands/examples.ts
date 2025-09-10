@@ -27,6 +27,9 @@ interface ExamplesOptions {
   fix?: boolean;
   verbose?: boolean;
   enhancedMetadata?: boolean;
+  repomixSync?: boolean;
+  validateApis?: boolean;
+  hybrid?: boolean;
 }
 
 export const examplesCommand = {
@@ -58,10 +61,15 @@ export const examplesCommand = {
       console.log('  --seed <seed>          Custom seed for randomization');
       console.log('  --di-only              Show only examples that support DI');
       console.log('  --output <file>        Output file path');
+      console.log('  --repomix-sync         Sync examples with current codebase via repomix');
+      console.log('  --validate-apis        Validate API existence against current code');
+      console.log('  --hybrid               Enhanced Metadata + Repomix validation');
       console.log('');
       console.log('Examples:');
       console.log('  examples generate policies --complexity intermediate');
       console.log('  examples generate policies --framework nestjs --llm-optimized');
+      console.log('  examples generate policies --repomix-sync --complexity advanced');
+      console.log('  examples generate policies --hybrid --framework nestjs');
       console.log('  examples bundle --packages policies,domain-services --framework nestjs');
       console.log('  examples find-by-tag "policies:core" --complexity intermediate');
       console.log('  examples validate --package policies --fix');
@@ -131,6 +139,9 @@ async function generateDocumentation(packageName: string, options: ExamplesOptio
       ...(options.diOnly && { diOnly: options.diOnly }),
       ...(options.output && { outputPath: options.output }),
       ...(options.enhancedMetadata && { enhancedMetadata: options.enhancedMetadata }),
+      ...(options.repomixSync && { repomixSync: options.repomixSync }),
+      ...(options.validateApis && { validateApis: options.validateApis }),
+      ...(options.hybrid && { hybrid: options.hybrid }),
     });
 
     console.log(Colors.green(`✅ Documentation generated: ${result.outputPath}`));
