@@ -132,8 +132,9 @@ export class PackageConfigLoader {
     // Validate complexity levels
     const validComplexityLevels = ['basic', 'intermediate', 'advanced'];
     for (const [key, complexityConfig] of Object.entries(config.complexityLevels)) {
-      if (!validComplexityLevels.includes(complexityConfig.level)) {
-        throw new Error(`Invalid complexity level: ${complexityConfig.level} in ${packageName}`);
+      const level = (complexityConfig as Record<string, unknown>).level as string;
+      if (!validComplexityLevels.includes(level)) {
+        throw new Error(`Invalid complexity level: ${level} in ${packageName}`);
       }
     }
 

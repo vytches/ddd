@@ -6,11 +6,8 @@ import {
   BaseBusinessPolicy,
   SpecificationPolicy,
 } from '../core/base/base-business-policy';
-import type {
-  IBusinessPolicy,
-  PolicyContext,
-  PolicyRequest,
-} from '../core/interfaces/business-policy.interface';
+import type { IBusinessPolicy, PolicyRequest } from '../core/interfaces/business-policy.interface';
+import type { PolicyContext } from '../core/shared';
 import type { PolicyViolation, PolicyViolationSeverity } from '../core/models/policy-violation';
 import type {
   IConditionalPolicyBuilder,

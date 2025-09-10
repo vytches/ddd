@@ -1,12 +1,12 @@
 import type {
-  IDomainEvent,
-  IEventMetadata,
-  IEventUpcaster,
-  IAuditEvent,
-  IEventStore,
   Capability,
   CapabilityConstructor,
   EntityId,
+  IAuditEvent,
+  IDomainEvent,
+  IEventMetadata,
+  IEventStore,
+  IEventUpcaster,
 } from '@vytches/ddd-contracts';
 
 // ==========================================
@@ -92,7 +92,7 @@ export interface IAggregateRoot<TId = string> {
  * Parameters for aggregate construction.
  * Defines the minimal required data to create an aggregate instance.
  */
-export interface IAggregateConstructorParams<TId> {
+export interface IAggregateConstructorParams<TId = string> {
   /** Unique identifier for the aggregate */
   id: EntityId<TId>;
   /** Initial version number, defaults to 0 */
@@ -377,8 +377,12 @@ export type AggregateWithCapabilities<
 /**
  * Factory interface for creating and rebuilding aggregates.
  * Provides standard methods for aggregate lifecycle management.
+ * @template TId - The type of the aggregate ID value (string, number, etc.)
  */
-export interface IAggregateFactory<TId, TAggregate extends IAggregateRoot<TId>> {
+export interface IAggregateFactory<
+  TId = string,
+  TAggregate extends IAggregateRoot<TId> = IAggregateRoot<TId>,
+> {
   /**
    * Creates a new aggregate instance
    */

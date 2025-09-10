@@ -1,0 +1,70 @@
+{
+  "timestamp": "2025-08-19T11:59:10.184Z",
+  "circularDependencies": {
+    "status": "passed",
+    "details": [
+      {
+        "package": "@vytches/ddd-core",
+        "status": "passed"
+      },
+      {
+        "package": "@vytches/ddd-repositories",
+        "status": "passed"
+      },
+      {
+        "package": "@vytches/ddd-testing",
+        "status": "passed"
+      },
+      {
+        "package": "@vytches/ddd-contracts",
+        "status": "passed"
+      },
+      {
+        "package": "@vytches/ddd-events",
+        "status": "passed"
+      },
+      {
+        "package": "@vytches/ddd-domain-primitives",
+        "status": "passed"
+      },
+      {
+        "package": "@vytches/ddd-value-objects",
+        "status": "passed"
+      },
+      {
+        "package": "@vytches/ddd-aggregates",
+        "status": "passed"
+      }
+    ]
+  },
+  "moduleBoundaries": {
+    "status": "pending",
+    "violations": []
+  },
+  "bundleSizes": {
+    "status": "passed",
+    "packages": {
+      "@vytches/ddd-core": {
+        "maxSize": 2,
+        "currentSize": 0
+      },
+      "@vytches/ddd-utils": {
+        "maxSize": 10,
+        "currentSize": 0
+      },
+      "@vytches/ddd-contracts": {
+        "maxSize": 15,
+        "currentSize": 0
+      },
+      "@vytches/ddd-domain-primitives": {
+        "maxSize": 50,
+        "currentSize": 0
+      }
+    }
+  },
+  "layerCompliance": {
+    "status": "passed",
+    "violations": []
+  },
+  "overallStatus": "passed"
+}

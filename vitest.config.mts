@@ -125,6 +125,10 @@ export default defineConfig({
       '@vytches/ddd-di': new URL('./packages/di/src/index.ts', import.meta.url).pathname,
       '@vytches/ddd-event-store': new URL('./packages/event-store/src/index.ts', import.meta.url)
         .pathname,
+      '@vytches/ddd-process-managers': new URL(
+        './packages/process-managers/src/index.ts',
+        import.meta.url
+      ).pathname,
     },
   },
 });

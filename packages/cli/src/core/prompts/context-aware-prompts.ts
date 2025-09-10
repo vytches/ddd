@@ -704,8 +704,8 @@ export class SmartPrompts {
     return {
       type: 'input',
       message: `Enter ${componentType} name:`,
-      validate: (input: string) => {
-        if (!input || input.trim().length === 0) {
+      validate: (input: unknown) => {
+        if (typeof input !== 'string' || !input || input.trim().length === 0) {
           return 'Component name is required';
         }
         if (!/^[A-Z][a-zA-Z0-9]*$/.test(input)) {

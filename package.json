@@ -106,6 +106,12 @@
     "quality:performance": "node scripts/quality-gates/performance-monitor.js",
     "quality:baseline": "node scripts/quality-gates/quality-gates.js --baseline --parallel",
     "quality:verbose": "node scripts/quality-gates/quality-gates.js --verbose",
+    "deps:check": "npx dependency-cruiser packages/*/src --config .dependency-cruiser.js",
+    "deps:circular": "npx madge --circular packages/*/src/index.ts",
+    "deps:graph": "npx dependency-cruiser packages/*/src --config .dependency-cruiser.js --output-type dot | dot -T svg > dependency-graph.svg",
+    "architecture:check": "node scripts/architecture-monitor.js",
+    "architecture:report": "node scripts/architecture-monitor.js > architecture-report.txt",
+    "architecture:ci": "pnpm deps:circular && pnpm quality:bundle && echo '✅ Architecture CI validation passed'",
     "// === JSDOC & DOCUMENTATION ===": "",
     "jsdoc:generate": "node scripts/jsdoc-generator.js",
     "jsdoc:generate:package": "node scripts/jsdoc-generator.js --package",
@@ -152,8 +158,8 @@
     "publish:dry-run": "lerna publish --no-git-tag-version --no-push --yes",
     "// === RELEASE WORKFLOWS ===": "",
     "publish:check": "bash scripts/pre-publish-check.sh",
-    "prerelease": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build:production && pnpm quality && pnpm security:audit",
-    "prerelease:fast": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build && pnpm quality",
+    "prerelease": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build:production && pnpm quality && pnpm architecture:ci && pnpm security:audit",
+    "prerelease:fast": "pnpm format:check && pnpm lint && pnpm type-check && pnpm test && pnpm build && pnpm quality && pnpm architecture:check",
     "release:preview": "bash scripts/preview-release.sh",
     "release": "NX_DAEMON=false lerna publish",
     "release:changed": "NX_DAEMON=false lerna changed",
@@ -234,7 +240,8 @@
       "esbuild": ">=0.25.0",
       "axios": ">=1.11.0",
       "form-data": ">=4.0.4",
-      "on-headers": ">=1.1.0"
+      "on-headers": ">=1.1.0",
+      "tmp": ">=0.2.4"
     }
   },
   "config": {

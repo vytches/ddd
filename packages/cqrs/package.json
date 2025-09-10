@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-cqrs",
-  "version": "0.7.0",
+  "version": "0.15.0",
   "description": "Command Query Responsibility Segregation patterns",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -61,6 +61,7 @@
   },
   "dependencies": {
     "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-events": "workspace:*"
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-resilience": "workspace:*"
   }
 }

@@ -1,4 +1,5 @@
 import type { IAuditEvent, IEventStore, IEventUpcaster, IDomainEvent } from '../events';
+import type { IAggregateSnapshot } from '../shared';
 import type { IAggregateCapability, IProjectionCapability } from './capability-base';
 
 export interface ISnapshotCapability<TState = unknown, TMeta = unknown>
@@ -187,25 +188,4 @@ export interface IDeadLetterCapability<TReadModel = unknown>
   clearDeadLetterQueue(projectionId: string): Promise<void>;
 }
 
-export interface IAggregateSnapshot<TState = unknown, TMeta = unknown> {
-  /** Aggregate ID */
-  aggregateId: unknown;
-
-  /** Aggregate version */
-  version: number;
-
-  /** Aggregate type */
-  aggregateType: string;
-
-  /** Aggregate state */
-  state: TState;
-
-  /** When the snapshot was created */
-  timestamp: Date;
-
-  /** Snapshot metadata (optional) */
-  metadata?: TMeta | undefined;
-
-  /** ID of the last event included in the snapshot (optional) */
-  lastEventId?: string | undefined;
-}
+// IAggregateSnapshot is imported and used above, no need to re-export

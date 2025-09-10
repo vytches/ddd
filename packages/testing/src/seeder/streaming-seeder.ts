@@ -11,7 +11,7 @@ import type {
   IStreamingSeeder,
   SeederResult,
   SeedableAggregate,
-} from './domain-seeder.js';
+} from './shared-seeder-types.js';
 import { EventEmitter } from 'events';
 
 /**

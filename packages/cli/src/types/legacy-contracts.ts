@@ -49,10 +49,10 @@ export interface PackageExampleConfig {
   tags?: TagSystem;
   relatedPackages?: RelatedPackage[] | Record<string, any>;
   sections?: string[];
-  complexityLevels?: Record<string, any>;
+  complexityLevels?: Record<string, unknown>;
   tagFinder?: {
     seed?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

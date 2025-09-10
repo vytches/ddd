@@ -1,0 +1,197 @@
+name: Architecture Check
+
+# Dedicated workflow for architecture validation
+# Runs on every PR and weekly schedule to ensure architectural integrity
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "packages/**/*.ts"
+      - "packages/**/*.tsx"
+      - "packages/**/package.json"
+      - ".dependency-cruiser.js"
+      - ".eslintrc.json"
+  schedule:
+    # Run weekly on Monday at 9 AM UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      verbose:
+        description: "Enable verbose output"
+        required: false
+        default: "false"
+
+jobs:
+  architecture-validation:
+    name: Validate Architecture
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Check for circular dependencies (between packages)
+        run: |
+          echo "🔍 Checking for circular dependencies between packages..."
+
+          # List of critical packages to check
+          PACKAGES="core repositories testing contracts events domain-primitives value-objects aggregates"
+
+          for pkg in $PACKAGES; do
+            echo "Checking @vytches/ddd-$pkg..."
+            if [ -f "packages/$pkg/src/index.ts" ]; then
+              npx madge --circular "packages/$pkg/src/index.ts" 2>&1 | tee -a circular-check.log
+            fi
+          done
+
+          # Check if any circular dependencies were found
+          if grep -q "Found.*circular" circular-check.log; then
+            echo "❌ CRITICAL: Circular dependencies detected between packages!"
+            echo "This violates our clean architecture principles (ADR-0021)"
+            cat circular-check.log
+            exit 1
+          else
+            echo "✅ No circular dependencies between packages"
+          fi
+
+      - name: Validate module boundaries with dependency-cruiser
+        run: |
+          echo "🔍 Validating module boundaries..."
+
+          npx dependency-cruiser packages/*/src \
+            --config .dependency-cruiser.js \
+            --output-type err-long 2>&1 | tee dep-cruiser.log || true
+
+          # Check for errors
+          if grep -q "error" dep-cruiser.log; then
+            echo "❌ Module boundary violations detected!"
+            echo "These violations break our layered architecture:"
+            grep "error" dep-cruiser.log
+            exit 1
+          else
+            echo "✅ Module boundaries are correctly enforced"
+          fi
+
+      - name: Analyze layer dependencies
+        run: |
+          echo "📊 Analyzing architectural layers..."
+
+          # Foundation layer should have no dependencies
+          echo "Checking Foundation Layer (contracts, utils, domain-primitives)..."
+          for pkg in contracts utils domain-primitives; do
+            if [ -f "packages/$pkg/package.json" ]; then
+              echo "  Checking $pkg dependencies..."
+              DEPS=$(cat "packages/$pkg/package.json" | grep -A20 '"dependencies"' | grep '@vytches/ddd' || true)
+              if [ -n "$DEPS" ]; then
+                echo "    Dependencies found: $DEPS"
+                # Only utils can depend on contracts
+                if [ "$pkg" != "utils" ] || ! echo "$DEPS" | grep -q "contracts"; then
+                  if [ "$pkg" != "domain-primitives" ]; then
+                    echo "    ⚠️ Warning: Foundation package $pkg has internal dependencies"
+                  fi
+                fi
+              else
+                echo "    ✅ No internal dependencies"
+              fi
+            fi
+          done
+
+          # Core layer should only depend on foundation
+          echo "Checking Core Layer (value-objects, testing, logging, validation)..."
+          for pkg in value-objects testing logging validation; do
+            if [ -f "packages/$pkg/package.json" ]; then
+              echo "  Checking $pkg dependencies..."
+              DEPS=$(cat "packages/$pkg/package.json" | grep -A20 '"dependencies"' | grep '@vytches/ddd' | grep -v 'contracts\|utils\|domain-primitives' || true)
+              if [ -n "$DEPS" ]; then
+                echo "    ⚠️ Warning: Core package $pkg depends on higher layers: $DEPS"
+              else
+                echo "    ✅ Only depends on foundation layer"
+              fi
+            fi
+          done
+
+      - name: Check bundle sizes
+        run: |
+          echo "📦 Monitoring bundle sizes..."
+
+          node scripts/quality-gates/bundle-size-monitor.js 2>&1 | tee bundle-report.log
+
+          # Critical size checks
+          CORE_SIZE=$(grep "core:" bundle-report.log | grep -oE '[0-9]+(\.[0-9]+)?KB' | head -1 | grep -oE '[0-9]+(\.[0-9]+)?' || echo "999")
+
+          echo "Core package size: ${CORE_SIZE}KB"
+
+          # Core should be under 2KB (it's a meta-package)
+          if (( $(echo "$CORE_SIZE > 2" | bc -l) )); then
+            echo "❌ Core package is too large (${CORE_SIZE}KB > 2KB)"
+            echo "This suggests circular dependencies or incorrect bundling!"
+            exit 1
+          fi
+
+          echo "✅ Bundle sizes are within acceptable limits"
+
+      - name: Generate dependency graph
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.verbose == 'true'
+        run: |
+          echo "📊 Generating dependency graph..."
+
+          # Generate visual dependency graph
+          npx dependency-cruiser packages/*/src \
+            --config .dependency-cruiser.js \
+            --output-type dot | dot -T svg > dependency-graph.svg
+
+          echo "Dependency graph generated as dependency-graph.svg"
+
+      - name: Upload dependency graph
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.verbose == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-graph
+          path: dependency-graph.svg
+
+      - name: Architecture validation summary
+        if: always()
+        run: |
+          echo "="
+          echo "📋 ARCHITECTURE VALIDATION SUMMARY"
+          echo "="
+          echo ""
+
+          if [ -f circular-check.log ] && ! grep -q "Found.*circular" circular-check.log; then
+            echo "✅ Circular Dependencies: PASSED"
+          else
+            echo "❌ Circular Dependencies: FAILED"
+          fi
+
+          if [ -f dep-cruiser.log ] && ! grep -q "error" dep-cruiser.log; then
+            echo "✅ Module Boundaries: PASSED"
+          else
+            echo "❌ Module Boundaries: FAILED"
+          fi
+
+          if [ -f bundle-report.log ]; then
+            echo "✅ Bundle Sizes: CHECKED"
+          else
+            echo "⚠️ Bundle Sizes: NOT CHECKED"
+          fi
+
+          echo ""
+          echo "For more details, see ADR-0021: Circular Dependency Resolution"

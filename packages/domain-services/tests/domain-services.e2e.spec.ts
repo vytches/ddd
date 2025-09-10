@@ -7,15 +7,14 @@
  * wszystkich komponentów, bez mocków, symulując rzeczywisty przepływ biznesowy.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
-import type { IUnitOfWork } from '@vytches/ddd-core';
-import { AggregateRoot, EntityId } from '@vytches/ddd-core';
-import type { IAggregateRoot, IRepository } from '@vytches/ddd-core';
-import { LibUtils } from '@vytches/ddd-utils';
-import { safeRun } from '@vytches/ddd-utils';
+import { EntityId } from '@vytches/ddd-contracts';
+import { AggregateRoot } from '@vytches/ddd-core';
 import { UnifiedEventBus } from '@vytches/ddd-events';
+import type { IRepository, IUnitOfWork } from '@vytches/ddd-repositories';
+import { LibUtils, safeRun } from '@vytches/ddd-utils';
 import {
   DomainService,
   EventAwareDomainService,
@@ -112,19 +111,19 @@ class CustomerNotifiedEvent extends DomainEventBase {
 }
 
 // Agregaty
-class Product extends AggregateRoot {
+class Product extends AggregateRoot<string> {
   private _name: string;
   private _price: number;
   private _inStock: number;
 
-  private constructor(id: EntityId, name: string, price: number, inStock = 0) {
+  private constructor(id: EntityId<string>, name: string, price: number, inStock = 0) {
     super({ id, version: 0 });
     this._name = name;
     this._price = price;
     this._inStock = inStock;
   }
 
-  static create(id: EntityId, name: string, price: number): Product {
+  static create(id: EntityId<string>, name: string, price: number): Product {
     const product = new Product(id, name, price);
     product.apply(new ProductCreatedEvent(id.toString(), name, price));
     return product;
@@ -162,17 +161,17 @@ class Product extends AggregateRoot {
   }
 }
 
-class Customer extends AggregateRoot {
+class Customer extends AggregateRoot<string> {
   private _email: string;
   private _name: string;
 
-  private constructor(id: EntityId, email: string, name: string) {
+  private constructor(id: EntityId<string>, email: string, name: string) {
     super({ id });
     this._email = email;
     this._name = name;
   }
 
-  static register(id: EntityId, email: string, name: string): Customer {
+  static register(id: EntityId<string>, email: string, name: string): Customer {
     const customer = new Customer(id, email, name);
     customer.apply(new CustomerRegisteredEvent(id.toString(), email));
     return customer;
@@ -188,7 +187,7 @@ class Customer extends AggregateRoot {
 }
 
 interface OrderItem {
-  productId: EntityId;
+  productId: EntityId<string>;
   quantity: number;
   price: number;
 }
@@ -201,24 +200,24 @@ enum OrderStatus {
   Cancelled = 'cancelled',
 }
 
-class Order extends AggregateRoot {
-  private _customerId: EntityId;
+class Order extends AggregateRoot<string> {
+  private _customerId: EntityId<string>;
   private _items: OrderItem[] = [];
   private _status: OrderStatus = OrderStatus.Created;
   private _shippingCode?: string;
 
-  private constructor(id: EntityId, customerId: EntityId) {
+  private constructor(id: EntityId<string>, customerId: EntityId<string>) {
     super({ id });
     this._customerId = customerId;
   }
 
-  static create(id: EntityId, customerId: EntityId): Order {
+  static create(id: EntityId<string>, customerId: EntityId<string>): Order {
     const order = new Order(id, customerId);
     order.apply(new OrderCreatedEvent(id.toString(), customerId.toString(), []));
     return order;
   }
 
-  get customerId(): EntityId {
+  get customerId(): EntityId<string> {
     return this._customerId;
   }
 
@@ -238,7 +237,7 @@ class Order extends AggregateRoot {
     return this._items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }
 
-  addItem(productId: EntityId, quantity: number, price: number): void {
+  addItem(productId: EntityId<string>, quantity: number, price: number): void {
     if (this._status !== OrderStatus.Created) {
       throw new Error('Cannot add items to an order that is not in Created status');
     }
@@ -298,7 +297,7 @@ class Order extends AggregateRoot {
 }
 
 // Implementacja InMemoryRepository
-class InMemoryRepository<T extends IAggregateRoot<any>> implements IRepository<T> {
+class InMemoryRepository<T extends AggregateRoot> implements IRepository<T> {
   protected items: Map<string, T> = new Map();
 
   async findById(id: any): Promise<T | null> {
@@ -384,7 +383,7 @@ class InMemoryUnitOfWork implements IUnitOfWork {
     return this.eventBus;
   }
 
-  collectEvents(aggregate: IAggregateRoot<any>): void {
+  collectEvents(aggregate: AggregateRoot<string>): void {
     const events = aggregate.getDomainEvents();
     this.pendingEvents.push(...events);
     aggregate.commit();
@@ -419,7 +418,7 @@ class ProductService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  async addProductStock(productId: EntityId, quantity: number): Promise<Product> {
+  async addProductStock(productId: EntityId<string>, quantity: number): Promise<Product> {
     if (!this.unitOfWork) {
       throw new Error('Unit of Work not set');
     }
@@ -449,8 +448,8 @@ class ProductService extends UnitOfWorkAwareDomainService {
     return productRepo.findAll();
   }
 
-  private collectEvents(aggregate: IAggregateRoot<any>): void {
-    (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate);
+  private collectEvents(aggregate: AggregateRoot<string>): void {
+    (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate as any);
   }
 }
 
@@ -478,8 +477,8 @@ class CustomerService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  private collectEvents(aggregate: IAggregateRoot<any>): void {
-    (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate);
+  private collectEvents(aggregate: AggregateRoot<string>): void {
+    (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate as any);
   }
 }
 
@@ -489,7 +488,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
     super('order-service');
   }
 
-  async createOrder(customerId: EntityId): Promise<Order> {
+  async createOrder(customerId: EntityId<string>): Promise<Order> {
     if (!this.unitOfWork) {
       throw new Error('Unit of Work not set');
     }
@@ -513,7 +512,11 @@ class OrderService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  async addOrderItem(orderId: EntityId, productId: EntityId, quantity: number): Promise<Order> {
+  async addOrderItem(
+    orderId: EntityId<string>,
+    productId: EntityId<string>,
+    quantity: number
+  ): Promise<Order> {
     if (!this.unitOfWork) {
       throw new Error('Unit of Work not set');
     }
@@ -549,7 +552,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  async confirmOrder(orderId: EntityId): Promise<Order> {
+  async confirmOrder(orderId: EntityId<string>): Promise<Order> {
     if (!this.unitOfWork) {
       throw new Error('Unit of Work not set');
     }
@@ -568,7 +571,7 @@ class OrderService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  async shipOrder(orderId: EntityId): Promise<Order> {
+  async shipOrder(orderId: EntityId<string>): Promise<Order> {
     if (!this.unitOfWork) {
       throw new Error('Unit of Work not set');
     }
@@ -592,8 +595,8 @@ class OrderService extends UnitOfWorkAwareDomainService {
     });
   }
 
-  private collectEvents(aggregate: IAggregateRoot<any>): void {
-    (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate);
+  private collectEvents(aggregate: AggregateRoot<string>): void {
+    (this.unitOfWork as InMemoryUnitOfWork).collectEvents(aggregate as any);
   }
 }
 
@@ -629,7 +632,7 @@ class NotificationService extends EventAwareDomainService implements IAsyncDomai
     this.notifyCustomer(new EntityId(event.customerId, 'uuid'), message);
   }
 
-  notifyCustomer(customerId: EntityId, message: string): void {
+  notifyCustomer(customerId: EntityId<string>, message: string): void {
     if (!this.eventBus) {
       throw new Error('Event bus not set');
     }
@@ -744,8 +747,14 @@ describe.skip('Domain Services - End-to-End Tests (DISABLED - missing container 
       const mouse = await productService.createProduct(productName2, productPrice2);
 
       // Act: Add stock to products
-      await productService.addProductStock(laptop.getId(), productStock1);
-      await productService.addProductStock(mouse.getId(), productStock2);
+      await productService.addProductStock(
+        laptop.getId() as unknown as EntityId<string>,
+        productStock1
+      );
+      await productService.addProductStock(
+        mouse.getId() as unknown as EntityId<string>,
+        productStock2
+      );
 
       // Act: Register customer
       const customer = await customerService.registerCustomer(customerEmail, customerName);
@@ -754,20 +763,40 @@ describe.skip('Domain Services - End-to-End Tests (DISABLED - missing container 
       const order = await orderService.createOrder(customer.getId());
 
       // Act: Add items to order
-      await orderService.addOrderItem(order.getId(), laptop.getId(), orderQuantity1);
-      await orderService.addOrderItem(order.getId(), mouse.getId(), orderQuantity2);
+      await orderService.addOrderItem(
+        order.getId() as unknown as EntityId<string>,
+        laptop.getId() as unknown as EntityId<string>,
+        orderQuantity1
+      );
+      await orderService.addOrderItem(
+        order.getId() as unknown as EntityId<string>,
+        mouse.getId() as unknown as EntityId<string>,
+        orderQuantity2
+      );
 
       // Act: Confirm order
-      const confirmedOrder = await orderService.confirmOrder(order.getId());
+      const confirmedOrder = await orderService.confirmOrder(
+        order.getId() as unknown as EntityId<string>
+      );
       const confirmedOrderStatus = confirmedOrder.status;
 
       // Act: Ship order
-      const shippedOrder = await orderService.shipOrder(order.getId());
+      const shippedOrder = await orderService.shipOrder(
+        order.getId() as unknown as EntityId<string>
+      );
 
       // Act: Get updated products
       const allProducts = await productService.getAllProducts();
-      const updatedLaptop = allProducts.find(p => p.getId().equals(laptop.getId()))!;
-      const updatedMouse = allProducts.find(p => p.getId().equals(mouse.getId()))!;
+      const updatedLaptop = allProducts.find(p =>
+        (p.getId() as unknown as EntityId<string>).equals(
+          laptop.getId() as unknown as EntityId<string>
+        )
+      )!;
+      const updatedMouse = allProducts.find(p =>
+        (p.getId() as unknown as EntityId<string>).equals(
+          mouse.getId() as unknown as EntityId<string>
+        )
+      )!;
 
       // Assert: Product stock changes
       expect(updatedLaptop.inStock).toBe(productStock1 - orderQuantity1); // 9
@@ -812,7 +841,10 @@ describe.skip('Domain Services - End-to-End Tests (DISABLED - missing container 
 
       // Act: Create product with limited stock
       const watch = await productService.createProduct(productName, productPrice);
-      await productService.addProductStock(watch.getId(), initialStock);
+      await productService.addProductStock(
+        watch.getId() as unknown as EntityId<string>,
+        initialStock
+      );
 
       // Act: Register customer
       const customer = await customerService.registerCustomer(customerEmail, customerName);
@@ -822,14 +854,22 @@ describe.skip('Domain Services - End-to-End Tests (DISABLED - missing container 
 
       // Act & Assert: Try to add more items than available
       const [error] = await safeRun(() =>
-        orderService.addOrderItem(order.getId(), watch.getId(), requestedQuantity)
+        orderService.addOrderItem(
+          order.getId() as unknown as EntityId<string>,
+          watch.getId() as unknown as EntityId<string>,
+          requestedQuantity
+        )
       );
 
       expect(error?.message).toBe(`Not enough ${productName} in stock`);
 
       // Assert: Product stock remains unchanged
       const allProducts = await productService.getAllProducts();
-      const unchangedWatch = allProducts.find(p => p.getId().equals(watch.getId()))!;
+      const unchangedWatch = allProducts.find(p =>
+        (p.getId() as unknown as EntityId<string>).equals(
+          watch.getId() as unknown as EntityId<string>
+        )
+      )!;
       expect(unchangedWatch.inStock).toBe(initialStock);
     });
 
@@ -840,7 +880,7 @@ describe.skip('Domain Services - End-to-End Tests (DISABLED - missing container 
 
       // Act: Register customer and create empty order
       const customer = await customerService.registerCustomer(customerEmail, customerName);
-      const order = await orderService.createOrder(customer.getId());
+      const order = await orderService.createOrder(customer.getId() as unknown as EntityId<string>);
 
       // Act & Assert: Try to confirm empty order
       const [error] = await safeRun(() => orderService.confirmOrder(order.getId()));
@@ -867,7 +907,7 @@ describe.skip('Domain Services - End-to-End Tests (DISABLED - missing container 
       const customer = await customerService.registerCustomer(customerEmail, customerName);
 
       // Act: Create order with item but don't confirm
-      const order = await orderService.createOrder(customer.getId());
+      const order = await orderService.createOrder(customer.getId() as unknown as EntityId<string>);
       await orderService.addOrderItem(order.getId(), console.getId(), 1);
 
       // Act & Assert: Try to ship non-confirmed order

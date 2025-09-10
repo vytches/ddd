@@ -253,13 +253,13 @@ export class DocumentationGenerator {
     }
 
     // Apply smart selection
-    const maxExamples = options.maxExamples || tagFinderConfig.maxExamples || 3;
-    const seed = options.seed || tagFinderConfig.seed;
+    const maxExamples = options.maxExamples || (tagFinderConfig.maxExamples as number) || 3;
+    const seed = options.seed || (tagFinderConfig.seed as string);
 
     const selectOptions: SelectOptions = {
       maxExamples,
       randomize: options.randomize,
-      priorityTags: tagFinderConfig.priorityTags,
+      priorityTags: (tagFinderConfig.priorityTags as string[]) || [],
     };
 
     if (seed !== undefined) {
@@ -343,7 +343,7 @@ export class DocumentationGenerator {
   /**
    * Extract examples from various formats into a consistent structure
    */
-  private extractExamples(examples: any): string[] {
+  private extractExamples(examples: unknown): string[] {
     if (!examples || !Array.isArray(examples)) {
       return [];
     }
@@ -448,10 +448,13 @@ export class DocumentationGenerator {
           for (const [methodName, methodMetadata] of Object.entries(allMethodsMetadata)) {
             if (methodMetadata) {
               component.methods[methodName] = {
-                description: methodMetadata.description || '',
-                businessContext: methodMetadata.businessContext || '',
-                parameters: methodMetadata.parameters || [],
-                returns: methodMetadata.returns || { type: 'void', description: '' },
+                description: (methodMetadata.description as string) || '',
+                businessContext: (methodMetadata.businessContext as string) || '',
+                parameters: (methodMetadata.parameters as unknown[]) || [],
+                returns: (methodMetadata.returns as { type: string; description: string }) || {
+                  type: 'void',
+                  description: '',
+                },
                 examples: this.extractExamples(methodMetadata.examples || []),
               };
             }

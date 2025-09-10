@@ -1,6 +1,6 @@
 import type { IBusinessPolicy } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolationSeverity } from '../core/models/policy-violation';
-import type { PolicyBuildStep } from './policy-builder';
+import type { PolicyBuildStep } from './policy-builder-types';
 import type { IPolicyBuilder, IPolicyStepBuilder } from './policy-builder.interface';
 
 export class PolicyStepBuilder<T> implements IPolicyStepBuilder<T> {

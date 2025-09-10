@@ -1,4 +1,4 @@
-import type { PackageExampleConfig } from '../types/legacy-contracts';
+import type { PackageExampleConfig, ExampleDefinition } from '../types/legacy-contracts';
 import path from 'path';
 import fs from 'fs/promises';
 import yaml from 'js-yaml';
@@ -126,8 +126,11 @@ export class YamlPackageConfigLoader {
     }
   }
 
-  private async findYamlExamples(rootDir: string, packageName: string): Promise<any[]> {
-    const examples: any[] = [];
+  private async findYamlExamples(
+    rootDir: string,
+    packageName: string
+  ): Promise<ExampleDefinition[]> {
+    const examples: ExampleDefinition[] = [];
     const examplesDir = path.join(rootDir, 'docs', 'examples', 'domain', packageName);
 
     try {
@@ -140,17 +143,17 @@ export class YamlPackageConfigLoader {
 
           try {
             const yamlContent = await fs.readFile(yamlPath, 'utf-8');
-            const yamlData = yaml.load(yamlContent) as any;
+            const yamlData = yaml.load(yamlContent) as Record<string, unknown>;
 
             // Extract basic example info
             examples.push({
               id: `${className}-basic`,
-              name: yamlData.title || this.formatDisplayName(className),
+              name: (yamlData.title as string) || this.formatDisplayName(className),
               file: `${className}.yaml`,
               tags: [`${packageName}:core`],
               complexity: 'basic',
               priority: 'high',
-              description: yamlData.description || '',
+              description: (yamlData.description as string) || '',
             });
           } catch (err) {
             logger.debug(`Failed to parse YAML file ${item.name}`);

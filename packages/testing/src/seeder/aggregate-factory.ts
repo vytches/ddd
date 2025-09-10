@@ -8,7 +8,7 @@
 
 import type { EntityId } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
-import type { DomainSeederConfig, SeedableAggregate } from './domain-seeder.js';
+import type { DomainSeederConfig, SeedableAggregate } from './shared-seeder-types.js';
 
 /**
  * Sequence generator function type

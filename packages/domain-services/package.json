@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-domain-services",
-  "version": "0.7.0",
+  "version": "0.15.0",
   "description": "Domain services and domain logic coordination",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -44,6 +44,7 @@
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-repositories": "workspace:*",
     "@vytches/ddd-validation": "workspace:*"
   },
   "devDependencies": {

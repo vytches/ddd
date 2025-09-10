@@ -364,13 +364,13 @@ describe('${componentName}', () => {
     switch (componentType) {
       case 'entity':
       case 'aggregate':
-        return 'id: EntityId, props: any';
+        return 'id: EntityId, props: Record<string, unknown>';
       case 'value-object':
-        return 'props: any';
+        return 'props: Record<string, unknown>';
       case 'service':
         return '';
       default:
-        return 'props: any';
+        return 'props: Record<string, unknown>';
     }
   }
 

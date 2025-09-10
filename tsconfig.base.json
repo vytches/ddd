@@ -50,6 +50,7 @@
       "@vytches/ddd-messaging": ["packages/messaging/src/index.ts"],
       "@vytches/ddd-policies": ["packages/policies/src/index.ts"],
       "@vytches/ddd-projections": ["packages/projections/src/index.ts"],
+      "@vytches/ddd-process-managers": ["packages/process-managers/src/index.ts"],
       "@vytches/ddd-repositories": ["packages/repositories/src/index.ts"],
       "@vytches/ddd-resilience": ["packages/resilience/src/index.ts"],
       "@vytches/ddd-testing": ["packages/testing/src/index.ts"],

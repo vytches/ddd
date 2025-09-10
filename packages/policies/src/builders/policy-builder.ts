@@ -8,6 +8,7 @@ import {
 import type { IBusinessPolicy, PolicyRequest } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation, PolicyViolationSeverity } from '../core/models/policy-violation';
 import { ConditionalPolicyBuilder } from './conditional-policy-builder';
+import type { PolicyBuildStep } from './policy-builder-types';
 import type {
   IConditionalPolicyBuilder,
   IPolicyBuilder,
@@ -358,30 +359,6 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
       this.config
     );
   }
-}
-
-export interface PolicyBuildStep<T> {
-  type:
-    | 'specification'
-    | 'async-specification'
-    | 'predicate'
-    | 'async-predicate'
-    | 'rules'
-    | 'group-or'
-    | 'conditional';
-  specification?: ISpecification<T>;
-  asyncSpecification?: IAsyncSpecification<T>;
-  predicate?: (entity: T, context?: unknown) => boolean;
-  asyncPredicate?: (entity: T, context?: unknown) => Promise<boolean>;
-  rulesBuilder?: (entity: T) => boolean;
-  groups?: IPolicyGroup<T>[];
-  isRequired: boolean;
-  errorCode: string;
-  errorMessage: string;
-  severity: PolicyViolationSeverity;
-  field?: string;
-  details?: Record<string, unknown>;
-  logicOperator?: 'AND' | 'OR';
 }
 
 // Helper policy implementations

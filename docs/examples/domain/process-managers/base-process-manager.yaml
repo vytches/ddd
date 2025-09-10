@@ -1,0 +1,411 @@
+# BaseProcessManager - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'base-process-manager'
+title: 'BaseProcessManager - Enterprise Process Coordination'
+description: 'Abstract base class providing common functionality for process managers'
+business-context: 'Foundation for implementing long-running business workflows with state management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  BaseProcessManager:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Abstract base class for all process managers providing common functionality and enforcing the process manager contract'
+      business-context: 'Provides foundation for implementing business workflow coordination with state management, event handling, and lifecycle tracking'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Abstract base class for process managers with state management and lifecycle coordination'
+        cli:
+          description: |
+            ## BaseProcessManager
+
+            Abstract base class that provides common functionality for all process managers
+            in the VytchesDDD ecosystem. Handles state management, lifecycle tracking,
+            timeout management, and provides helper methods for result creation.
+
+      custom-tags:
+        since: '1.0.0'
+        abstract: true
+        generic: 'TState extends IProcessManagerState'
+
+    # Constructor
+    methods:
+      constructor:
+        description: 'Creates a new process manager instance with initial state and configuration'
+        business-context: 'Initializes a process manager with unique identity, type classification, and optional timeout configuration'
+
+        parameters:
+          - name: 'id'
+            type: 'string'
+            description: 'Unique identifier for this process manager instance'
+          - name: 'type'
+            type: 'string'
+            description: 'Type identifier for this process manager class'
+          - name: 'initialState'
+            type: 'TState'
+            description: 'Initial state object for the process manager'
+          - name: 'createdAt'
+            type: 'Date'
+            description: 'Optional creation timestamp (defaults to current time)'
+            optional: true
+          - name: 'timeout'
+            type: 'number'
+            description: 'Optional timeout in milliseconds for the entire process'
+            optional: true
+
+        examples:
+          - id: 'basic-construction'
+            code: |
+              const orderProcess = new OrderProcessManager(
+                'order-123',
+                'OrderFulfillment',
+                { orderId: 'order-123', status: 'pending', version: 1 }
+              );
+
+      # Getters
+      state:
+        description: 'Gets the current state of the process manager'
+        business-context: 'Provides read-only access to the current process state for monitoring and decision making'
+
+        returns:
+          type: 'TState'
+          description: 'Copy of the current process state'
+
+        examples:
+          - id: 'state-access'
+            code: |
+              const currentState = processManager.state;
+              console.log(`Order status: ${currentState.status}`);
+
+      status:
+        description: 'Gets the current status of the process manager'
+        business-context: 'Indicates the lifecycle stage of the process for monitoring and operational control'
+
+        returns:
+          type: 'ProcessManagerStatus'
+          description: 'Current process status (CREATED, RUNNING, WAITING, COMPLETED, FAILED, TIMED_OUT)'
+
+        examples:
+          - id: 'status-check'
+            code: |
+              if (processManager.status === ProcessManagerStatus.COMPLETED) {
+                console.log('Process completed successfully');
+              }
+
+      updatedAt:
+        description: 'Gets the timestamp when the process manager was last updated'
+        business-context: 'Provides audit trail information for process tracking and performance monitoring'
+
+        returns:
+          type: 'Date'
+          description: 'Timestamp of the last update'
+
+        examples:
+          - id: 'audit-tracking'
+            code: |
+              const timeSinceUpdate = Date.now() - processManager.updatedAt.getTime();
+              console.log(`Last updated ${timeSinceUpdate}ms ago`);
+
+      timeout:
+        description: 'Gets the configured timeout for the process manager'
+        business-context: 'Returns the maximum allowed time for process completion, used for SLA monitoring and timeout handling'
+
+        returns:
+          type: 'number | undefined'
+          description: 'Timeout in milliseconds, or undefined if no timeout configured'
+
+        examples:
+          - id: 'timeout-check'
+            code: |
+              const timeout = processManager.timeout;
+              if (timeout && processManager.isTimedOut()) {
+                console.log(`Process exceeded ${timeout}ms timeout`);
+              }
+
+      # Abstract Methods (documented but not implemented)
+      canHandle:
+        description: 'Abstract method that must be implemented to determine if the process manager can handle a specific event'
+        business-context: 'Enables event routing and filtering to ensure events are processed by the correct process manager instance'
+
+        parameters:
+          - name: 'event'
+            type: 'IProcessManagerEvent'
+            description: 'The domain event to evaluate for handling capability'
+
+        returns:
+          type: 'boolean'
+          description: 'True if this process manager can handle the event'
+
+        custom-tags:
+          abstract: true
+
+        examples:
+          - id: 'event-filtering'
+            code: |
+              canHandle(event: IProcessManagerEvent): boolean {
+                return event.aggregateId === this.state.orderId &&
+                       ['OrderCreated', 'PaymentProcessed'].includes(event.eventType);
+              }
+
+      handle:
+        description: 'Abstract method that must be implemented to handle events and orchestrate workflow steps'
+        business-context: 'Core orchestration method that processes business events and coordinates the next steps in the workflow'
+
+        parameters:
+          - name: 'event'
+            type: 'IProcessManagerEvent'
+            description: 'The domain event to process'
+          - name: 'context'
+            type: 'IProcessManagerContext'
+            description: 'Processing context with services and metadata'
+
+        returns:
+          type: 'Promise<ProcessManagerResult>'
+          description: 'Result containing commands/events to emit and continuation status'
+
+        custom-tags:
+          abstract: true
+
+        examples:
+          - id: 'event-handling'
+            code: |
+              async handle(event: IProcessManagerEvent, context: IProcessManagerContext): Promise<ProcessManagerResult> {
+                if (event.eventType === 'OrderCreated') {
+                  this.updateState({ status: 'processing-payment' });
+                  return this.createSuccessResult([
+                    { type: 'ProcessPayment', payload: { orderId: event.aggregateId } }
+                  ]);
+                }
+                return this.createSuccessResult();
+              }
+
+      isComplete:
+        description: 'Abstract method to determine if the process is complete and can be finalized'
+        business-context: 'Defines completion criteria for the business workflow, enabling automatic cleanup and archival'
+
+        returns:
+          type: 'boolean'
+          description: 'True if the process is complete'
+
+        custom-tags:
+          abstract: true
+
+        examples:
+          - id: 'completion-check'
+            code: |
+              isComplete(): boolean {
+                return this.state.status === 'order-delivered' ||
+                       this.state.status === 'order-cancelled';
+              }
+
+      getCorrelationData:
+        description: 'Abstract method to get correlation data for event routing'
+        business-context: 'Provides routing information to ensure related events are directed to the correct process manager instance'
+
+        returns:
+          type: 'Record<string, unknown>'
+          description: 'Correlation data object for event routing'
+
+        custom-tags:
+          abstract: true
+
+        examples:
+          - id: 'correlation-data'
+            code: |
+              getCorrelationData(): Record<string, unknown> {
+                return {
+                  orderId: this.state.orderId,
+                  customerId: this.state.customerId,
+                  processType: 'OrderFulfillment'
+                };
+              }
+
+      # Concrete Methods
+      isTimedOut:
+        description: 'Checks if the process has timed out based on configured timeout and creation time'
+        business-context: 'Enables automatic timeout detection for SLA monitoring and process escalation'
+
+        returns:
+          type: 'boolean'
+          description: 'True if the process has exceeded its timeout'
+
+        examples:
+          - id: 'timeout-detection'
+            code: |
+              if (processManager.isTimedOut()) {
+                console.log('Process has timed out - escalating to supervisor');
+                processManager.fail(new Error('Process timeout exceeded'));
+              }
+
+      updateState:
+        description: 'Updates the internal state of the process manager with version control'
+        business-context: 'Maintains process state with automatic versioning and timestamp tracking for audit trails'
+
+        parameters:
+          - name: 'newState'
+            type: 'Partial<TState>'
+            description: 'Partial state update to apply'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'state-update'
+            code: |
+              // Update order status after payment processing
+              processManager.updateState({ 
+                status: 'payment-complete',
+                paymentId: 'pay-123'
+              });
+
+      complete:
+        description: 'Marks the process as complete and logs the completion'
+        business-context: 'Finalizes the business process workflow and enables cleanup and archival'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'completion'
+            code: |
+              // Mark order fulfillment as complete
+              processManager.complete();
+              console.log(`Process ${processManager.id} completed successfully`);
+
+      fail:
+        description: 'Marks the process as failed with an error and logs the failure'
+        business-context: 'Handles business process failures with error tracking and enables compensating actions'
+
+        parameters:
+          - name: 'error'
+            type: 'Error'
+            description: 'The error that caused the process failure'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'failure-handling'
+            code: |
+              try {
+                await processPayment();
+              } catch (error) {
+                processManager.fail(error);
+                // Trigger compensation workflow
+              }
+
+      # Protected Methods
+      setRunning:
+        description: 'Sets the status to running and updates the timestamp'
+        business-context: 'Indicates active processing state for monitoring and operational visibility'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          access: 'protected'
+
+      setWaiting:
+        description: 'Sets the status to waiting and updates the timestamp'
+        business-context: 'Indicates waiting state for external dependencies or human intervention'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          access: 'protected'
+
+      setTimedOut:
+        description: 'Sets the status to timed out and updates the timestamp with logging'
+        business-context: 'Handles automatic timeout detection and escalation procedures'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          access: 'protected'
+
+      createSuccessResult:
+        description: 'Helper method to create a successful result with optional commands and events'
+        business-context: 'Standardizes successful result creation for consistent workflow orchestration'
+
+        parameters:
+          - name: 'commands'
+            type: "ProcessManagerResult['commands']"
+            description: 'Optional commands to emit'
+            optional: true
+          - name: 'events'
+            type: "ProcessManagerResult['events']"
+            description: 'Optional events to emit'
+            optional: true
+          - name: 'shouldContinue'
+            type: 'boolean'
+            description: 'Whether the process should continue (defaults to true)'
+            optional: true
+
+        returns:
+          type: 'ProcessManagerResult'
+          description: 'Successful result object'
+
+        custom-tags:
+          access: 'protected'
+
+        examples:
+          - id: 'success-result'
+            code: |
+              return this.createSuccessResult(
+                [{ type: 'SendNotification', payload: { message: 'Order shipped' } }],
+                [{ eventType: 'OrderShipped', payload: { orderId: this.state.orderId } }]
+              );
+
+      createFailureResult:
+        description: 'Helper method to create a failure result with error information'
+        business-context: 'Standardizes failure result creation for consistent error handling and compensation'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message describing the failure'
+          - name: 'code'
+            type: 'string'
+            description: 'Optional error code for categorization'
+            optional: true
+          - name: 'details'
+            type: 'unknown'
+            description: 'Optional additional error details'
+            optional: true
+
+        returns:
+          type: 'ProcessManagerResult'
+          description: 'Failure result object'
+
+        custom-tags:
+          access: 'protected'
+
+        examples:
+          - id: 'failure-result'
+            code: |
+              return this.createFailureResult(
+                'Payment processing failed',
+                'PAYMENT_DECLINED',
+                { attemptNumber: 3, reason: 'Insufficient funds' }
+              );

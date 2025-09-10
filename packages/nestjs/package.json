@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-nestjs",
-  "version": "1.0.0",
+  "version": "6.0.0",
   "description": "NestJS adapter for VytchesDDD - Enterprise Domain-Driven Design framework integration",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -46,15 +46,17 @@
     "directory": "packages/nestjs"
   },
   "dependencies": {
-    "@vytches/ddd-di": "workspace:*"
+    "@vytches/ddd-acl": "workspace:*",
+    "@vytches/ddd-core": "workspace:*",
+    "@vytches/ddd-cqrs": "workspace:*",
+    "@vytches/ddd-di": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-logging": "workspace:*",
+    "@vytches/ddd-resilience": "workspace:*"
   },
   "peerDependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/core": "^10.0.0",
-    "@vytches/ddd-core": "workspace:*",
-    "@vytches/ddd-cqrs": "workspace:*",
-    "@vytches/ddd-events": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
     "reflect-metadata": "^0.1.13 || ^0.2.0",
     "rxjs": "^7.0.0"
   },
@@ -64,18 +66,6 @@
     },
     "@nestjs/core": {
       "optional": false
-    },
-    "@vytches/ddd-core": {
-      "optional": true
-    },
-    "@vytches/ddd-cqrs": {
-      "optional": true
-    },
-    "@vytches/ddd-events": {
-      "optional": true
-    },
-    "@vytches/ddd-utils": {
-      "optional": true
     }
   },
   "devDependencies": {
@@ -86,8 +76,9 @@
     "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-process-managers": "workspace:*",
     "@vytches/ddd-testing": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
     "typescript": "^5.3.3",

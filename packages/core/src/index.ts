@@ -34,15 +34,8 @@ export {
 
 export type { DomainErrorOptions } from '@vytches/ddd-domain-primitives';
 
-// Repositories - re-exported from repositories package
-export { IBaseRepository, VersionError } from '@vytches/ddd-repositories';
-export type {
-  IExtendedRepository,
-  IRepository,
-  IRepositoryAggregate,
-  IRepositoryProvider,
-  IUnitOfWork,
-} from '@vytches/ddd-repositories';
-
 // Actor - re-exported from domain-primitives
 export type { IActor } from '@vytches/ddd-domain-primitives';
+
+// NOTE: Repositories and Process Managers removed from core to prevent circular dependencies
+// Import directly from @vytches/ddd-repositories and @vytches/ddd-process-managers in your application

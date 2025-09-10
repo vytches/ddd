@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-core",
-  "version": "0.7.0",
+  "version": "0.15.0",
   "description": "Meta-package: Enterprise API stability for DDD building blocks",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -67,8 +67,6 @@
     "@vytches/ddd-aggregates": "workspace:*",
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
-    "@vytches/ddd-logging": "workspace:*",
-    "@vytches/ddd-repositories": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
     "@vytches/ddd-value-objects": "workspace:*"
   }

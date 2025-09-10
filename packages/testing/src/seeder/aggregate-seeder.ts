@@ -17,7 +17,7 @@ import type {
   IStreamingSeeder,
   SeederResult,
   SeedableAggregate,
-} from './domain-seeder.js';
+} from './shared-seeder-types.js';
 
 /**
  * Configuration for aggregate-specific seeding behavior

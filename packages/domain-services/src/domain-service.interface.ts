@@ -1,5 +1,5 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
-import type { IUnitOfWork } from '@vytches/ddd-core';
+import type { IUnitOfWork } from '@vytches/ddd-repositories';
 
 export interface IDomainService {
   /**

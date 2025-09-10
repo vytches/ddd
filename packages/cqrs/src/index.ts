@@ -5,7 +5,10 @@ export type { ICommand, ICommandHandler, IQuery, IQueryHandler } from './interfa
 export { ICommandBus, IQueryBus } from './abstracts';
 
 // Concrete implementations
-export { CommandBus, EnhancedCommandBus, EnhancedQueryBus, QueryBus } from './implementations';
+export { CommandBus, QueryBus } from './implementations';
+
+// Enhanced implementations (require @vytches/ddd-resilience)
+export { EnhancedCommandBus, EnhancedQueryBus } from './implementations/enhanced';
 
 // Decorators
 export { CommandHandler, QueryHandler } from './decorators';

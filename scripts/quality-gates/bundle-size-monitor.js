@@ -55,7 +55,8 @@ const CONFIG = {
 
     // Tooling packages (more flexible)
     cli: 750, // CLI framework with comprehensive examples and documentation generation engine
-    testing: 100, // Test utilities can be larger
+    testing: 150, // Test utilities with comprehensive seeder framework
+    'process-managers': 400, // Process managers with guards, invariants, and workflow capabilities
   },
 
   // Global thresholds

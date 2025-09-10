@@ -179,6 +179,9 @@ export type {
 
 export * from '@vytches/ddd-event-store';
 export * from '@vytches/ddd-projections';
+// Process Managers exports
+// Everything from process-managers is re-exported, including core module with ProcessSnapshot class
+export * from '@vytches/ddd-process-managers';
 
 // ===== INTEGRATION LAYER =====
 export * from '@vytches/ddd-acl';

@@ -1,16 +1,17 @@
 // Error types and base classes
 export {
-  BaseError,
-  IDomainError,
-  MissingValueError,
-  InvalidParameterError,
-  DuplicateError,
-  NotFoundError,
-  DomainErrorCode,
   ApplicationErrorCode,
+  BaseError,
+  DomainErrorCode,
+  DuplicateError,
   FrameworkErrorCode,
-  type ErrorOptions,
+  IDomainError,
+  InvalidParameterError,
+  MissingValueError,
+  NotFoundError,
   type DomainErrorOptions,
+  type ErrorCode,
+  type ErrorOptions,
 } from './errors';
 
 // Actor interfaces and types

@@ -7,9 +7,9 @@ import type {
   IPolicyConditionalBuilder,
   IPolicyConditionalElse,
   PolicyCondition,
-  PolicyContext,
   PolicyRequest,
 } from '../interfaces/business-policy.interface';
+import type { PolicyContext } from '../shared';
 import { PolicyViolation } from '../models/policy-violation';
 
 export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {

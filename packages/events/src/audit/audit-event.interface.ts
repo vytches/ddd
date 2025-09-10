@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IActor } from '@vytches/ddd-core';
+import type { IActor } from '@vytches/ddd-domain-primitives';
 
 /**
  * Standard audit action types for compliance and monitoring.

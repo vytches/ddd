@@ -160,13 +160,13 @@ export class WorkflowEngine {
     }
 
     const prompt = step.prompt;
-    let answer: any;
+    let answer: unknown;
 
     switch (prompt.type) {
       case 'input':
         answer = await Prompts.ask({
           message: prompt.message,
-          ...(prompt.default && { default: prompt.default }),
+          ...(prompt.default !== undefined && { default: String(prompt.default) }),
           ...(prompt.validate && { validate: prompt.validate }),
         });
         break;
@@ -188,7 +188,7 @@ export class WorkflowEngine {
         answer = await Prompts.select({
           message: prompt.message,
           choices,
-          default: prompt.default,
+          ...(prompt.default !== undefined && { default: Number(prompt.default) }),
         });
         break;
 
@@ -215,7 +215,7 @@ export class WorkflowEngine {
       case 'confirm':
         answer = await Prompts.confirm({
           message: prompt.message,
-          default: prompt.default,
+          ...(prompt.default !== undefined && { default: Boolean(prompt.default) }),
         });
         break;
 
@@ -359,7 +359,8 @@ export class WorkflowEngine {
           type: 'input',
           message: 'Describe your business domain',
           validate: input =>
-            input.length > 10 || 'Please provide a detailed description (at least 10 characters)',
+            (typeof input === 'string' && input.length > 10) ||
+            'Please provide a detailed description (at least 10 characters)',
         },
         next: 'domain-name',
       },
@@ -372,7 +373,7 @@ export class WorkflowEngine {
           type: 'input',
           message: 'What is the name of your domain?',
           validate: input =>
-            /^[A-Za-z][A-Za-z0-9\s]*$/.test(input) ||
+            (typeof input === 'string' && /^[A-Za-z][A-Za-z0-9\s]*$/.test(input)) ||
             'Domain name must start with a letter and contain only letters, numbers, and spaces',
         },
         next: 'architecture-type',
@@ -557,7 +558,7 @@ export class WorkflowEngine {
           type: 'input',
           message: 'Component name (PascalCase)',
           validate: input =>
-            /^[A-Z][a-zA-Z0-9]*$/.test(input) ||
+            (typeof input === 'string' && /^[A-Z][a-zA-Z0-9]*$/.test(input)) ||
             'Name must be in PascalCase (e.g., OrderAggregate)',
         },
         next: 'generate-component',
@@ -569,7 +570,8 @@ export class WorkflowEngine {
         type: 'action',
         action: async context => {
           // Component generation logic will be implemented here
-          const { 'component-type': type, 'component-name': name } = context.answers;
+          const type = context.answers?.['component-type'] || 'unknown';
+          const name = context.answers?.['component-name'] || 'Unknown';
           console.log(Colors.info(`Generating ${type}: ${name}`));
         },
         next: 'completion',
