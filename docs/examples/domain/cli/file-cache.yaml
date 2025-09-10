@@ -1,0 +1,309 @@
+# FileCache - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'file-cache'
+title: 'FileCache - High-Performance File Caching'
+description: 'Intelligent file caching system with metadata optimization'
+business-context: 'Performance optimization through intelligent file and metadata caching'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  CachedFile:
+    description: 'Cached file representation with metadata'
+    business-context: 'Data structure for efficient file and metadata storage'
+
+    properties:
+      - name: 'content'
+        type: 'string'
+        description: 'Raw file content'
+
+      - name: 'parsedMetadata'
+        type: 'MetadataParseResult'
+        optional: true
+        description: 'Cached parsed metadata result'
+
+      - name: 'parsedMethods'
+        type: 'Map<string, MetadataParseResult>'
+        optional: true
+        description: 'Method-specific metadata cache'
+
+      - name: 'lastModified'
+        type: 'number'
+        description: 'File last modified timestamp for cache invalidation'
+
+      - name: 'size'
+        type: 'number'
+        description: 'File size in bytes for memory tracking'
+
+# === CLASSES ===
+classes:
+  FileCache:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'High-performance file caching system with intelligent invalidation'
+      business-context: 'Optimizes CLI performance by caching file operations and metadata parsing results'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Singleton file cache with metadata optimization'
+        cli:
+          description: |
+            ## FileCache
+
+            High-performance caching system that dramatically improves CLI operation speed
+            by caching file content, parsed metadata, and method-specific results.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Singleton Pattern, Cache Pattern'
+        features: 'File caching, metadata caching, cache statistics, memory tracking'
+        performance: 'Optimizes file I/O and metadata parsing operations'
+
+    # Methods
+    methods:
+      getInstance:
+        description: 'Get singleton FileCache instance'
+        business-context: 'Ensures single cache instance across CLI operations'
+
+        returns:
+          type: 'FileCache'
+          description: 'Singleton FileCache instance'
+
+        examples:
+          - id: 'get-instance'
+            code: |
+              const cache = FileCache.getInstance();
+              // Same instance returned across all calls
+
+        custom-tags:
+          static: 'true'
+          singleton: 'Returns same instance globally'
+
+      getFileContent:
+        description: 'Get file content with intelligent caching'
+        business-context: 'Optimizes file reading operations with cache invalidation based on modification time'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Absolute path to file'
+
+        returns:
+          type: 'Promise<string | null>'
+          description: 'File content or null if not found'
+
+        examples:
+          - id: 'cached-content'
+            code: |
+              const content = await cache.getFileContent('/path/to/file.yaml');
+              // First call: reads from disk, caches result
+              // Subsequent calls: returns cached content if unchanged
+
+        custom-tags:
+          async: 'true'
+          cache-key: 'file path'
+          invalidation: 'modification time based'
+
+      getParsedMetadata:
+        description: 'Get parsed metadata with caching'
+        business-context: 'Caches expensive metadata parsing operations to improve performance'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to metadata file'
+
+          - name: 'parser'
+            type: '(content: string) => MetadataParseResult'
+            description: 'Parser function for metadata extraction'
+
+        returns:
+          type: 'Promise<MetadataParseResult | null>'
+          description: 'Parsed metadata result or null if not found'
+
+        examples:
+          - id: 'parsed-metadata'
+            code: |
+              const result = await cache.getParsedMetadata(
+                'class.yaml',
+                content => parseYAMLMetadata(content)
+              );
+              // Parser function called only on cache miss
+
+        custom-tags:
+          async: 'true'
+          parser-function: 'Custom parsing logic'
+
+      getMethodMetadata:
+        description: 'Get method-specific metadata with caching'
+        business-context: 'Optimizes method-level metadata access for batch operations'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to file containing method metadata'
+
+          - name: 'methodName'
+            type: 'string'
+            description: 'Name of method to extract metadata for'
+
+          - name: 'parser'
+            type: '(content: string, methodName: string) => MetadataParseResult | null'
+            description: 'Method-specific parser function'
+
+        returns:
+          type: 'Promise<MetadataParseResult | null>'
+          description: 'Method metadata or null if not found'
+
+        examples:
+          - id: 'method-metadata'
+            code: |
+              const methodData = await cache.getMethodMetadata(
+                'aggregate.yaml',
+                'commit',
+                (content, method) => parseMethodMetadata(content, method)
+              );
+
+        custom-tags:
+          async: 'true'
+          method-level: 'Fine-grained caching'
+
+      preWarmClassFile:
+        description: 'Pre-warm cache for entire class file with all methods'
+        business-context: 'Batch optimization that loads all method metadata at once to minimize file operations'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to class file'
+
+          - name: 'methodNames'
+            type: 'string[]'
+            description: 'Array of method names to pre-warm'
+
+          - name: 'methodParser'
+            type: '(content: string, methodName: string) => MetadataParseResult | null'
+            description: 'Parser for method-specific metadata'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Pre-warming completed'
+
+        examples:
+          - id: 'pre-warm'
+            code: |
+              await cache.preWarmClassFile(
+                'aggregate-root.yaml',
+                ['commit', 'apply', 'loadFromHistory'],
+                parseMethodMetadata
+              );
+              // All methods now cached for fast access
+
+        custom-tags:
+          async: 'true'
+          batch-optimization: 'Loads multiple methods at once'
+          performance: 'Minimizes file I/O operations'
+
+      clearFile:
+        description: 'Clear cache for specific file'
+        business-context: 'Enables selective cache invalidation for updated files'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path of file to clear from cache'
+
+        examples:
+          - id: 'clear-file'
+            code: |
+              cache.clearFile('/path/to/updated-file.yaml');
+              // File will be re-read on next access
+
+      clear:
+        description: 'Clear entire cache'
+        business-context: 'Complete cache reset for fresh state'
+
+        examples:
+          - id: 'clear-all'
+            code: |
+              cache.clear();
+              // All cached content and metadata cleared
+
+      getStats:
+        description: 'Get comprehensive cache statistics'
+        business-context: 'Performance monitoring and cache effectiveness analysis'
+
+        returns:
+          type: 'CacheStats'
+          description: 'Cache performance statistics'
+
+        examples:
+          - id: 'cache-stats'
+            code: |
+              const stats = cache.getStats();
+              console.log(`Hit rate: ${stats.hitRate}%`);
+              console.log(`Cache size: ${stats.cacheSize} items`);
+              console.log(`Memory usage: ${stats.reads} reads, ${stats.parses} parses`);
+
+        custom-tags:
+          monitoring: 'Performance analysis'
+          metrics: 'Hit rate, cache size, operation counts'
+
+      getMemoryUsage:
+        description: 'Get current memory usage of cache'
+        business-context: 'Memory monitoring for cache size optimization'
+
+        returns:
+          type: 'number'
+          description: 'Approximate memory usage in bytes'
+
+        examples:
+          - id: 'memory-usage'
+            code: |
+              const usage = cache.getMemoryUsage();
+              console.log(`Cache using ${usage} bytes`);
+
+        custom-tags:
+          memory-monitoring: 'Tracks cache memory consumption'
+
+# === TYPES ===
+types:
+  CacheStats:
+    description: 'Cache performance statistics'
+    business-context: 'Comprehensive metrics for cache performance analysis'
+
+    properties:
+      - name: 'cacheSize'
+        type: 'number'
+        description: 'Number of items in cache'
+
+      - name: 'hitRate'
+        type: 'number'
+        description: 'Cache hit rate percentage'
+
+      - name: 'hits'
+        type: 'number'
+        description: 'Total cache hits'
+
+      - name: 'misses'
+        type: 'number'
+        description: 'Total cache misses'
+
+      - name: 'reads'
+        type: 'number'
+        description: 'Total file read operations'
+
+      - name: 'parses'
+        type: 'number'
+        description: 'Total parse operations'

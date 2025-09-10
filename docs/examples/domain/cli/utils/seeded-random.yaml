@@ -1,0 +1,250 @@
+# Seeded Random - Reproducible Random Number Generation
+
+# === FILE METADATA ===
+file-name: 'seeded-random'
+title: 'SeededRandom - Reproducible Random Number Generator'
+description: 'Simple seeded random number generator for reproducible randomization'
+business-context: 'Deterministic randomization for testing and reproducible example generation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  SeededRandom:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Reproducible random number generator for deterministic output'
+      business-context: 'Provides deterministic randomization for testing and example generation'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Simple seeded random number generator'
+        cli:
+          description: |
+            ## SeededRandom
+            Reproducible random number generator for consistent results
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Utility Pattern'
+        category: 'Random Generation'
+        features: 'Seeded randomization, array manipulation, deterministic output'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Create new SeededRandom instance with optional seed'
+        business-context: 'Initialize generator with seed for reproducible sequences'
+
+        parameters:
+          - name: 'seed'
+            type: 'string'
+            description: 'Optional seed string for reproducible randomization'
+            optional: true
+
+        examples:
+          - id: 'basic'
+            code: |
+              const random = new SeededRandom();
+              // Random seed, different output each time
+          - id: 'seeded'
+            code: |
+              const random = new SeededRandom('test-seed');
+              // Same seed, same sequence every time
+
+        custom-tags:
+          seeded: 'Deterministic seed-based initialization'
+
+      next:
+        description: 'Generate next random number between 0 and 1'
+        business-context: 'Core random number generation method for floating point values'
+
+        returns:
+          type: 'number'
+          description: 'Random number between 0 (inclusive) and 1 (exclusive)'
+
+        examples:
+          - id: 'basic-random'
+            code: |
+              const random = new SeededRandom('seed');
+              const value = random.next(); // 0.123456...
+              // Always same value for same seed
+
+        custom-tags:
+          deterministic: 'Same seed produces same sequence'
+          range: '0 <= value < 1'
+
+      nextInt:
+        description: 'Generate random integer between min and max (inclusive)'
+        business-context: 'Integer generation for array indexing and discrete selections'
+
+        parameters:
+          - name: 'min'
+            type: 'number'
+            description: 'Minimum value (inclusive)'
+          - name: 'max'
+            type: 'number'
+            description: 'Maximum value (inclusive)'
+
+        returns:
+          type: 'number'
+          description: 'Random integer between min and max (inclusive)'
+
+        examples:
+          - id: 'dice-roll'
+            code: |
+              const random = new SeededRandom('dice');
+              const roll = random.nextInt(1, 6); // 1, 2, 3, 4, 5, or 6
+          - id: 'index-selection'
+            code: |
+              const items = ['a', 'b', 'c', 'd'];
+              const index = random.nextInt(0, items.length - 1);
+              const selected = items[index];
+
+        custom-tags:
+          inclusive: 'Both min and max values can be returned'
+          integer: 'Returns whole numbers only'
+
+      nextBoolean:
+        description: 'Generate random boolean value'
+        business-context: 'Binary decisions and conditional logic in tests'
+
+        returns:
+          type: 'boolean'
+          description: 'Random true or false value'
+
+        examples:
+          - id: 'coin-flip'
+            code: |
+              const random = new SeededRandom('coin');
+              const heads = random.nextBoolean(); // true or false
+          - id: 'conditional'
+            code: |
+              if (random.nextBoolean()) {
+                console.log('Randomly chosen branch');
+              }
+
+        custom-tags:
+          binary: '50/50 chance for true/false'
+
+      shuffle:
+        description: 'Shuffle array in place using Fisher-Yates algorithm'
+        business-context: 'Randomize order of examples, test data, or options'
+
+        parameters:
+          - name: 'array'
+            type: 'T[]'
+            description: 'Array to shuffle in place'
+
+        returns:
+          type: 'T[]'
+          description: 'The same array reference, shuffled in place'
+
+        examples:
+          - id: 'shuffle-examples'
+            code: |
+              const examples = ['basic', 'advanced', 'expert'];
+              const random = new SeededRandom('shuffle');
+              random.shuffle(examples);
+              // Same seed = same shuffled order
+          - id: 'test-data'
+            code: |
+              const testCases = [case1, case2, case3, case4];
+              random.shuffle(testCases);
+              // Randomized execution order
+
+        custom-tags:
+          in-place: 'Modifies original array'
+          fisher-yates: 'Uses optimal shuffling algorithm'
+
+      pick:
+        description: 'Pick random element from array'
+        business-context: 'Select random example, test case, or option from collection'
+
+        parameters:
+          - name: 'array'
+            type: 'T[]'
+            description: 'Array to pick from'
+
+        returns:
+          type: 'T'
+          description: 'Random element from the array'
+
+        examples:
+          - id: 'pick-example'
+            code: |
+              const colors = ['red', 'green', 'blue'];
+              const random = new SeededRandom('pick');
+              const color = random.pick(colors); // 'green'
+          - id: 'pick-template'
+            code: |
+              const templates = ['basic', 'advanced', 'custom'];
+              const template = random.pick(templates);
+
+        custom-tags:
+          single-selection: 'Returns one element only'
+          uniform: 'Equal probability for each element'
+
+      pickN:
+        description: 'Pick N random elements from array without replacement'
+        business-context: 'Select multiple random examples or create sample subsets'
+
+        parameters:
+          - name: 'array'
+            type: 'T[]'
+            description: 'Array to pick from'
+          - name: 'n'
+            type: 'number'
+            description: 'Number of elements to pick'
+
+        returns:
+          type: 'T[]'
+          description: 'Array of N random elements without duplicates'
+
+        examples:
+          - id: 'pick-multiple'
+            code: |
+              const items = ['a', 'b', 'c', 'd', 'e'];
+              const random = new SeededRandom('multi');
+              const selected = random.pickN(items, 3); // ['b', 'e', 'a']
+          - id: 'sample-subset'
+            code: |
+              const allExamples = getExamples();
+              const sampleExamples = random.pickN(allExamples, 5);
+              // 5 random examples for quick testing
+
+        custom-tags:
+          no-replacement: 'No duplicate selections'
+          subset: 'Returns smaller array from original'
+
+      hashCode:
+        description: 'Convert string to hash code for seed initialization'
+        business-context: 'Internal method for converting string seeds to numeric values'
+
+        parameters:
+          - name: 'str'
+            type: 'string'
+            description: 'String to convert to hash code'
+
+        returns:
+          type: 'number'
+          description: 'Numeric hash code for the string'
+
+        examples:
+          - id: 'internal-hash'
+            code: |
+              // Internal method - converts seed strings to numbers
+              // Used automatically by constructor
+
+        custom-tags:
+          private: true
+          internal: 'String to number conversion for seeds'

@@ -1,0 +1,39 @@
+# NestJS Discovery Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'NestJS Discovery Module'
+description: 'Service discovery and metadata scanning for VytchesDDD decorators'
+business-context: 'Enables automatic discovery of DDD components in NestJS applications'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-DOC ===
+file-doc:
+  description: 'Discovery module exports for automatic component registration'
+  business-context: 'Provides automatic discovery and registration of domain services, handlers, and aggregates'
+
+  formats:
+    jsdoc:
+      description: 'Discovery service exports'
+    cli:
+      description: |
+        ## Discovery Module
+        Automatic discovery and registration of DDD components in NestJS
+
+  custom-tags:
+    since: '1.0.0'
+    module: 'discovery'
+
+# === EXPORTS ===
+exports:
+  - name: 'VytchesDiscoveryService'
+    from: './vytches-discovery.service'
+    description: 'Service for discovering VytchesDDD decorated components'
+    business-context: 'Scans application modules for DDD decorators and registers components'
+  - name: 'DiscoveryPlugin'
+    from: './discovery-plugin.interface'
+    description: 'Plugin interface for custom discovery strategies'

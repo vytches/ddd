@@ -1,0 +1,605 @@
+# Context Aware Prompts - Intelligent CLI Interaction System
+
+# === FILE METADATA ===
+file-name: 'context-aware-prompts'
+title: 'ContextAwarePromptEngine - Intelligent CLI User Interaction'
+description: 'Advanced prompt engine with project context analysis for intelligent CLI suggestions'
+business-context: 'Core CLI interaction system providing intelligent prompts and suggestions based on project analysis'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ContextAwarePromptEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Intelligent prompt engine with project context analysis'
+      business-context: 'Core CLI interaction system that analyzes project structure, patterns, and dependencies to provide contextually relevant suggestions and prompts'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Context-aware prompt engine with project analysis'
+        cli:
+          description: |
+            ## ContextAwarePromptEngine
+            Intelligent CLI interaction system with comprehensive project analysis and smart suggestions
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Context Analysis Pattern'
+        category: 'CLI Interaction'
+        features: 'Project analysis, intelligent suggestions, context adaptation, framework detection'
+        intelligence: 'AI-powered context understanding and suggestion generation'
+
+    # Methods
+    methods:
+      create:
+        description: 'Factory method to create prompt engine'
+        business-context: 'Static factory for creating configured ContextAwarePromptEngine instance with optimal settings'
+
+        returns:
+          type: 'ContextAwarePromptEngine'
+          description: 'New configured prompt engine instance'
+
+        examples:
+          - id: 'basic-factory'
+            code: |
+              const promptEngine = ContextAwarePromptEngine.create();
+              // Ready for intelligent project analysis
+
+        custom-tags:
+          factory: true
+          static: true
+          initialization: 'Sets up prompt engine with analysis capabilities'
+
+      analyzeContext:
+        description: 'Analyze project context for intelligent suggestions'
+        business-context: 'Comprehensive project analysis including directory structure, patterns, dependencies, and frameworks to understand project context'
+
+        parameters:
+          - name: 'context'
+            type: 'WorkflowContext'
+            description: 'Workflow context containing project path and metadata'
+
+        returns:
+          type: 'Promise<ProjectAnalysis>'
+          description: 'Promise resolving to comprehensive project analysis results'
+
+        examples:
+          - id: 'project-analysis'
+            code: |
+              const analysis = await promptEngine.analyzeContext(workflowContext);
+              console.log('Detected patterns:', analysis.patterns);
+              console.log('Frameworks:', analysis.frameworks);
+          - id: 'cached-analysis'
+            code: |
+              // Uses intelligent caching for performance
+              const analysis = await promptEngine.analyzeContext(context);
+              // Subsequent calls use cached results
+
+        custom-tags:
+          async: true
+          caching: 'Intelligent project analysis caching'
+          comprehensive: 'Full project structure and pattern analysis'
+
+      generateSuggestions:
+        description: 'Generate intelligent suggestions for prompts'
+        business-context: 'AI-powered suggestion generation based on project analysis, user context, and best practices'
+
+        parameters:
+          - name: 'prompt'
+            type: 'ContextAwarePrompt'
+            description: 'Context-aware prompt configuration'
+          - name: 'context'
+            type: 'WorkflowContext'
+            description: 'Current workflow context'
+
+        returns:
+          type: 'Promise<PromptSuggestion[]>'
+          description: 'Promise resolving to array of intelligent suggestions'
+
+        examples:
+          - id: 'component-suggestions'
+            code: |
+              const suggestions = await promptEngine.generateSuggestions(
+                componentPrompt,
+                workflowContext
+              );
+              suggestions.forEach(s => console.log(s.text, s.reasoning));
+          - id: 'contextual-suggestions'
+            code: |
+              // Generates suggestions based on project patterns
+              const suggestions = await promptEngine.generateSuggestions(
+                prompt,
+                context
+              );
+
+        custom-tags:
+          async: true
+          ai-powered: 'Uses project analysis for intelligent suggestions'
+          contextual: 'Suggestions based on project patterns and context'
+
+      adaptPrompt:
+        description: 'Adapt prompt based on context'
+        business-context: 'Dynamic prompt adaptation based on project analysis to provide most relevant user experience'
+
+        parameters:
+          - name: 'prompt'
+            type: 'ContextAwarePrompt'
+            description: 'Original prompt configuration'
+          - name: 'context'
+            type: 'WorkflowContext'
+            description: 'Current workflow context'
+
+        returns:
+          type: 'Promise<PromptConfig>'
+          description: 'Promise resolving to adapted prompt configuration'
+
+        examples:
+          - id: 'prompt-adaptation'
+            code: |
+              const adaptedPrompt = await promptEngine.adaptPrompt(
+                basePrompt,
+                workflowContext
+              );
+              // Prompt adapted to project context and patterns
+
+        custom-tags:
+          async: true
+          adaptive: 'Dynamic prompt modification based on context'
+          optimization: 'Optimizes user experience based on project analysis'
+
+      analyzeProjectStructure:
+        description: 'Analyze project directory structure'
+        business-context: 'Internal method for comprehensive directory structure analysis to understand project organization and patterns'
+
+        parameters:
+          - name: 'projectPath'
+            type: 'string'
+            description: 'Root project path to analyze'
+
+        returns:
+          type: 'Promise<DirectoryAnalysis>'
+          description: 'Promise resolving to directory structure analysis'
+
+        examples:
+          - id: 'structure-analysis'
+            code: |
+              // Internal method - analyzes directory patterns
+              // Identifies src/, test/, docs/ structure
+              // Detects domain organization patterns
+
+        custom-tags:
+          private: true
+          async: true
+          analysis: 'Comprehensive directory structure analysis'
+          pattern-detection: 'Identifies organizational patterns'
+
+      detectPatterns:
+        description: 'Detect DDD and architectural patterns'
+        business-context: 'Internal method for identifying Domain-Driven Design patterns, architectural styles, and code organization patterns in project'
+
+        parameters:
+          - name: 'projectPath'
+            type: 'string'
+            description: 'Project path to analyze for patterns'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Promise resolving to array of detected patterns'
+
+        examples:
+          - id: 'pattern-detection'
+            code: |
+              // Internal method - detects architectural patterns
+              // DDD patterns: Aggregates, Value Objects, Repositories
+              // Architectural patterns: CQRS, Event Sourcing, Hexagonal
+
+        custom-tags:
+          private: true
+          async: true
+          pattern-recognition: 'Identifies DDD and architectural patterns'
+          intelligent: 'Advanced pattern matching algorithms'
+
+      analyzeDependencies:
+        description: 'Analyze project dependencies'
+        business-context: 'Internal method for package.json analysis to understand project dependencies, frameworks, and technology stack'
+
+        parameters:
+          - name: 'projectPath'
+            type: 'string'
+            description: 'Project path containing package.json'
+
+        returns:
+          type: 'Promise<DependencyAnalysis>'
+          description: 'Promise resolving to dependency analysis results'
+
+        examples:
+          - id: 'dependency-analysis'
+            code: |
+              // Internal method - analyzes package.json
+              // Categorizes dependencies by type and purpose
+              // Detects framework usage and versions
+
+        custom-tags:
+          private: true
+          async: true
+          dependency-analysis: 'Comprehensive package dependency analysis'
+          categorization: 'Groups dependencies by purpose and type'
+
+      detectFrameworks:
+        description: 'Detect frameworks in use'
+        business-context: 'Internal method for identifying web frameworks, testing frameworks, and other technology frameworks used in project'
+
+        parameters:
+          - name: 'dependencies'
+            type: 'string[]'
+            description: 'Array of project dependencies to analyze'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of detected framework names'
+
+        examples:
+          - id: 'framework-detection'
+            code: |
+              // Internal method - identifies frameworks
+              // Detects: NestJS, Express, React, Vue, Angular
+              // Testing: Jest, Vitest, Mocha, Cypress
+
+        custom-tags:
+          private: true
+          synchronous: true
+          framework-detection: 'Identifies popular web and testing frameworks'
+          comprehensive: 'Covers wide range of JavaScript/TypeScript frameworks'
+
+      analyzeNamingConventions:
+        description: 'Analyze naming conventions'
+        business-context: 'Internal method for identifying naming patterns, coding conventions, and style preferences used in project'
+
+        parameters:
+          - name: 'projectPath'
+            type: 'string'
+            description: 'Project path to analyze for naming patterns'
+
+        returns:
+          type: 'Promise<NamingAnalysis>'
+          description: 'Promise resolving to naming convention analysis'
+
+        examples:
+          - id: 'naming-analysis'
+            code: |
+              // Internal method - analyzes naming patterns
+              // Detects: camelCase, PascalCase, kebab-case
+              // File naming: .service.ts, .controller.ts, .spec.ts
+
+        custom-tags:
+          private: true
+          async: true
+          convention-analysis: 'Identifies coding style and naming patterns'
+          pattern-matching: 'Uses regex and heuristics for pattern detection'
+
+      generateContextSuggestions:
+        description: 'Generate context-based suggestions'
+        business-context: 'Internal method for creating intelligent suggestions based on current workflow context and user intent'
+
+        parameters:
+          - name: 'prompt'
+            type: 'ContextAwarePrompt'
+            description: 'Prompt configuration for suggestions'
+          - name: 'analysis'
+            type: 'ProjectAnalysis'
+            description: 'Project analysis results'
+
+        returns:
+          type: 'PromptSuggestion[]'
+          description: 'Array of contextually relevant suggestions'
+
+        examples:
+          - id: 'context-suggestions'
+            code: |
+              // Internal method - generates smart suggestions
+              // Based on project patterns and user context
+              // Prioritizes by relevance and best practices
+
+        custom-tags:
+          private: true
+          intelligent: 'AI-powered suggestion generation'
+          contextual: 'Uses project analysis for relevant suggestions'
+
+      generateProjectSuggestions:
+        description: 'Generate project-level suggestions'
+        business-context: 'Internal method for creating project-wide improvement suggestions based on analysis results'
+
+        parameters:
+          - name: 'analysis'
+            type: 'ProjectAnalysis'
+            description: 'Comprehensive project analysis'
+
+        returns:
+          type: 'PromptSuggestion[]'
+          description: 'Array of project improvement suggestions'
+
+        examples:
+          - id: 'project-suggestions'
+            code: |
+              // Internal method - suggests project improvements
+              // Architecture recommendations, missing patterns
+              // Best practice implementations
+
+        custom-tags:
+          private: true
+          advisory: 'Provides project improvement recommendations'
+          best-practices: 'Based on DDD and architectural best practices'
+
+      categorizeDependency:
+        description: 'Categorize dependency by name'
+        business-context: 'Internal utility for classifying dependencies into categories like framework, utility, testing, or development tools'
+
+        parameters:
+          - name: 'depName'
+            type: 'string'
+            description: 'Dependency name to categorize'
+
+        returns:
+          type: 'string'
+          description: 'Category classification for dependency'
+
+        examples:
+          - id: 'dependency-categorization'
+            code: |
+              // Internal method - classifies dependencies
+              // Categories: framework, utility, testing, dev-tools
+              // Used for intelligent project analysis
+
+        custom-tags:
+          private: true
+          synchronous: true
+          classification: 'Categorizes dependencies by purpose'
+          utility: 'Helper method for dependency analysis'
+
+      extractDomainWords:
+        description: 'Extract domain words from project context'
+        business-context: 'Internal method for identifying domain-specific terminology and business concepts from project structure and code'
+
+        parameters:
+          - name: 'context'
+            type: 'WorkflowContext'
+            description: 'Workflow context to analyze for domain words'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of extracted domain-specific terms'
+
+        examples:
+          - id: 'domain-extraction'
+            code: |
+              // Internal method - extracts business terms
+              // Identifies domain concepts from file names and paths
+              // Used for intelligent naming suggestions
+
+        custom-tags:
+          private: true
+          domain-analysis: 'Identifies business domain terminology'
+          linguistic: 'Text analysis for domain concept extraction'
+
+      scanAllFiles:
+        description: 'Scan all TypeScript files in project'
+        business-context: 'Internal method for comprehensive file scanning to analyze code patterns, imports, and architectural decisions'
+
+        parameters:
+          - name: 'projectPath'
+            type: 'string'
+            description: 'Root project path to scan'
+
+        returns:
+          type: 'Promise<FileAnalysis[]>'
+          description: 'Promise resolving to array of file analysis results'
+
+        examples:
+          - id: 'file-scanning'
+            code: |
+              // Internal method - scans all TypeScript files
+              // Analyzes imports, exports, class patterns
+              // Builds comprehensive project understanding
+
+        custom-tags:
+          private: true
+          async: true
+          comprehensive: 'Scans entire TypeScript codebase'
+          analysis: 'Deep code pattern analysis'
+
+      scanDirectory:
+        description: 'Recursively scan directory for TypeScript files'
+        business-context: 'Internal utility for recursive directory traversal to identify and analyze TypeScript files'
+
+        parameters:
+          - name: 'dirPath'
+            type: 'string'
+            description: 'Directory path to scan recursively'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Promise resolving to array of TypeScript file paths'
+
+        examples:
+          - id: 'directory-scanning'
+            code: |
+              // Internal method - recursive directory traversal
+              // Finds all .ts and .tsx files
+              // Respects .gitignore and common exclusions
+
+        custom-tags:
+          private: true
+          async: true
+          recursive: 'Deep directory traversal'
+          file-discovery: 'Finds TypeScript files in project structure'
+
+      displayAnalysis:
+        description: 'Display project analysis results'
+        business-context: 'User interface method for presenting project analysis results in formatted, readable output'
+
+        parameters:
+          - name: 'analysis'
+            type: 'ProjectAnalysis'
+            description: 'Project analysis results to display'
+
+        returns:
+          type: 'void'
+          description: 'No return value, outputs analysis to console'
+
+        examples:
+          - id: 'analysis-display'
+            code: |
+              promptEngine.displayAnalysis(analysis);
+              // Formatted output showing patterns, frameworks, suggestions
+
+        custom-tags:
+          synchronous: true
+          ui: 'User interface for analysis results'
+          formatting: 'Structured console output'
+
+  SmartPrompts:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Static factory class for creating intelligent context-aware prompts'
+      business-context: 'Utility class providing pre-configured intelligent prompts for common CLI workflows with smart defaults and suggestions'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Smart prompt factory with context awareness'
+        cli:
+          description: |
+            ## SmartPrompts
+            Factory for intelligent CLI prompts with context-aware suggestions and auto-detection
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Factory Pattern'
+        category: 'CLI Interaction'
+        features: 'Pre-configured prompts, intelligent defaults, context adaptation'
+
+    # Methods
+    methods:
+      componentName:
+        description: 'Create component name prompt with intelligent suggestions'
+        business-context: 'Factory method for creating intelligent component naming prompts with suggestions based on project patterns and conventions'
+
+        parameters:
+          - name: 'componentType'
+            type: 'string'
+            description: 'Type of component to create (aggregate, entity, service, etc.)'
+
+        returns:
+          type: 'ContextAwarePrompt'
+          description: 'Configured context-aware prompt for component naming'
+
+        examples:
+          - id: 'component-naming'
+            code: |
+              const prompt = SmartPrompts.componentName('aggregate');
+              // Intelligent suggestions based on domain and patterns
+          - id: 'service-naming'
+            code: |
+              const servicePrompt = SmartPrompts.componentName('service');
+              // Context-aware naming for service components
+
+        custom-tags:
+          static: true
+          factory: true
+          intelligent: 'Provides smart naming suggestions'
+          contextual: 'Adapts to project patterns and conventions'
+
+      frameworkSelection:
+        description: 'Create framework selection prompt with auto-detection'
+        business-context: 'Factory method for creating framework selection prompts that auto-detect existing frameworks and suggest compatible options'
+
+        returns:
+          type: 'ContextAwarePrompt'
+          description: 'Configured prompt for framework selection with auto-detection'
+
+        examples:
+          - id: 'framework-selection'
+            code: |
+              const prompt = SmartPrompts.frameworkSelection();
+              // Auto-detects existing frameworks and suggests compatible options
+          - id: 'integration-selection'
+            code: |
+              const frameworkPrompt = SmartPrompts.frameworkSelection();
+              // Intelligent framework compatibility suggestions
+
+        custom-tags:
+          static: true
+          factory: true
+          auto-detection: 'Automatically detects existing frameworks'
+          compatibility: 'Suggests compatible framework options'
+
+      architectureSelection:
+        description: 'Create architecture selection prompt with detection'
+        business-context: 'Factory method for creating architectural pattern selection prompts with automatic pattern detection and recommendations'
+
+        returns:
+          type: 'ContextAwarePrompt'
+          description: 'Configured prompt for architecture selection with pattern detection'
+
+        examples:
+          - id: 'architecture-selection'
+            code: |
+              const prompt = SmartPrompts.architectureSelection();
+              // Detects current patterns and suggests architectural improvements
+          - id: 'pattern-selection'
+            code: |
+              const archPrompt = SmartPrompts.architectureSelection();
+              // Intelligent architecture pattern recommendations
+
+        custom-tags:
+          static: true
+          factory: true
+          pattern-detection: 'Detects existing architectural patterns'
+          recommendations: 'Suggests architectural improvements'
+
+# === FILE-LEVEL ELEMENTS ===
+interfaces:
+  CommandSuggestion:
+    description: 'Command suggestion interface for CLI recommendations'
+    business-context: 'Structured representation of intelligent command suggestions with priority and categorization'
+
+    properties:
+      - name: 'command'
+        type: 'string'
+        description: 'Suggested command string'
+      - name: 'description'
+        type: 'string'
+        description: 'Human-readable description of command purpose'
+      - name: 'reason'
+        type: 'string'
+        description: 'Explanation of why this command is suggested'
+      - name: 'priority'
+        type: "'high' | 'medium' | 'low'"
+        description: 'Suggestion priority level'
+      - name: 'category'
+        type: "'next-step' | 'improvement' | 'fix' | 'enhancement'"
+        description: 'Categorization of suggestion type'
+      - name: 'confidence'
+        type: 'number'
+        description: 'Confidence score for suggestion accuracy (0-1)'
+
+    custom-tags:
+      priority-based: 'Supports priority-based suggestion ordering'
+      categorized: 'Organized by suggestion type and purpose'
+      confidence-scoring: 'Includes accuracy confidence metrics'

@@ -1,0 +1,130 @@
+# EnhancedJSDocAdapter - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'enhanced-jsdoc-adapter'
+title: 'EnhancedJSDocAdapter - JSDoc Format Conversion'
+description: 'Convert extract blocks to JSDoc format with enhanced metadata'
+business-context: 'Transforms enhanced metadata blocks into standardized JSDoc documentation format'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  EnhancedJSDocAdapter:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enhanced JSDoc format converter for metadata extraction blocks'
+      business-context: 'Transforms structured metadata into standardized JSDoc format for TypeScript declaration files'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Converts extract blocks to JSDoc documentation format'
+        cli:
+          description: |
+            ## EnhancedJSDocAdapter
+
+            Advanced JSDoc format converter that transforms enhanced metadata blocks
+            into standardized JSDoc documentation for TypeScript declaration files.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Adapter Pattern, Transformer Pattern'
+        features: 'JSDoc conversion, metadata transformation, block formatting'
+
+    # Methods
+    methods:
+      formatBlock:
+        description: 'Convert extract block to JSDoc format'
+        business-context: 'Transforms single metadata block into JSDoc comment structure'
+
+        parameters:
+          - name: 'block'
+            type: 'ExtractBlock'
+            description: 'Enhanced metadata block to convert'
+
+        returns:
+          type: 'string'
+          description: 'Formatted JSDoc comment string'
+
+        examples:
+          - id: 'format-block'
+            code: |
+              const adapter = new EnhancedJSDocAdapter();
+              const jsdocString = adapter.formatBlock(extractBlock);
+              // Output: formatted JSDoc comment
+
+        custom-tags:
+          transformation: 'Metadata block to JSDoc conversion'
+
+      formatMethodDoc:
+        description: 'Format multiple blocks for method documentation'
+        business-context: 'Combines multiple metadata blocks into comprehensive method JSDoc documentation'
+
+        parameters:
+          - name: 'blocks'
+            type: 'ExtractBlock[]'
+            description: 'Array of extract blocks to format'
+
+        returns:
+          type: 'string'
+          description: 'Complete method JSDoc documentation'
+
+        examples:
+          - id: 'method-doc'
+            code: |
+              const methodDoc = adapter.formatMethodDoc([
+                descriptionBlock,
+                parametersBlock,
+                examplesBlock
+              ]);
+              // Output: complete JSDoc for method
+
+        custom-tags:
+          aggregation: 'Combines multiple blocks into single documentation'
+
+      getJSDocTagName:
+        description: 'Map metadata keys to JSDoc tags'
+        business-context: 'Internal mapping utility for consistent JSDoc tag generation'
+        visibility: 'private'
+
+        custom-tags:
+          mapping: 'Metadata key to JSDoc tag conversion'
+
+      generateJSDocComment:
+        description: 'Generate complete JSDoc comment'
+        business-context: 'Creates properly formatted JSDoc comment with indentation and structure'
+
+        parameters:
+          - name: 'blocks'
+            type: 'ExtractBlock[]'
+            description: 'Extract blocks to include in comment'
+
+          - name: 'indent'
+            type: 'string'
+            optional: true
+            description: 'Optional indentation string for formatting'
+
+        returns:
+          type: 'string'
+          description: 'Complete formatted JSDoc comment'
+
+        examples:
+          - id: 'generate-comment'
+            code: |
+              const jsdocComment = adapter.generateJSDocComment(
+                extractBlocks,
+                '    ' // 4-space indentation
+              );
+              // Output: properly indented JSDoc comment
+
+        custom-tags:
+          formatting: 'Handles indentation and JSDoc structure'

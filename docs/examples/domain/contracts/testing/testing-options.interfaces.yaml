@@ -1,0 +1,36 @@
+# Testing Options Interfaces - Test Configuration Contracts
+
+# === FILE METADATA ===
+file-name: 'testing-options.interfaces'
+title: 'Testing Configuration Option Interfaces'
+description: 'Configuration contracts for test environments and behaviors'
+business-context: 'Foundation for configuring test harnesses and testing utilities'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Testing configuration option interfaces'
+  business-context: 'Contracts for configuring test environments, behaviors, and utilities'
+
+  formats:
+    jsdoc:
+      description: 'Testing configuration contracts'
+    cli:
+      description: |
+        ## Testing Options Interfaces
+
+        Test configuration supporting:
+        - Test harness options
+        - Test clock configuration
+        - Test scenario settings
+        - Mock configuration options
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'testing-configuration'
+    usage: 'test-setup'

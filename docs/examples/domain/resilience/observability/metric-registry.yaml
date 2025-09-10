@@ -1,0 +1,486 @@
+# MetricRegistry - Observability Implementation Classes
+
+# === FILE METADATA ===
+file-name: 'observability/metric-registry'
+title: 'MetricRegistry - Metrics Management'
+description: 'Implementation classes for metrics registry and event bus'
+business-context: |
+  Provides concrete implementations of metric registry and observability event bus
+  for collecting, storing, and distributing metrics and events in resilience patterns.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  DefaultMetricRegistry:
+    class-doc:
+      description: 'Default implementation of metric registry'
+      business-context: |
+        In-memory metric registry that collects and manages metrics from
+        various resilience patterns, providing a centralized view of system health.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry Pattern'
+
+    methods:
+      constructor:
+        description: 'Creates new metric registry instance'
+        business-context: 'Initializes empty registry for metric collection'
+
+      register:
+        description: 'Registers a new metric'
+        business-context: 'Adds metric to registry for tracking'
+
+        parameters:
+          - name: 'metric'
+            type: 'Metric'
+            description: 'Metric to register'
+
+      unregister:
+        description: 'Unregisters a metric'
+        business-context: 'Removes metric from tracking'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Metric name to remove'
+
+      get:
+        description: 'Gets metric by name'
+        business-context: 'Retrieves specific metric for monitoring'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Metric name'
+
+        returns:
+          type: 'Metric | undefined'
+          description: 'Metric if found'
+
+      getAll:
+        description: 'Gets all registered metrics'
+        business-context: 'Retrieves complete metrics snapshot'
+
+        returns:
+          type: 'Metric[]'
+          description: 'All registered metrics'
+
+      clear:
+        description: 'Clears all metrics'
+        business-context: 'Resets registry for testing or maintenance'
+
+      getCollectors:
+        description: 'Gets all registered collectors'
+        business-context: 'Retrieves list of metric collectors for monitoring'
+
+        returns:
+          type: 'ReadonlyArray<MetricCollector>'
+          description: 'All registered collectors'
+
+      collectAll:
+        description: 'Collects metrics from all collectors'
+        business-context: 'Aggregates metrics from all registered collectors'
+
+        returns:
+          type: 'ReadonlyArray<Metric | HistogramMetric | TimerMetric>'
+          description: 'All collected metrics'
+
+      getCollector:
+        description: 'Gets specific collector by name'
+        business-context: 'Retrieves individual collector for targeted monitoring'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Collector name'
+
+        returns:
+          type: 'MetricCollector | undefined'
+          description: 'Collector if found'
+
+      getCollectorNames:
+        description: 'Gets names of all collectors'
+        business-context: 'Lists all registered collector identifiers'
+
+        returns:
+          type: 'ReadonlyArray<string>'
+          description: 'Collector names'
+
+  DefaultObservabilityEventBus:
+    class-doc:
+      description: 'Default implementation of observability event bus'
+      business-context: |
+        Event distribution system for observability events, enabling
+        real-time monitoring and alerting on resilience pattern activities.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Event Bus Pattern'
+
+    methods:
+      constructor:
+        description: 'Creates new event bus instance'
+        business-context: 'Initializes event distribution system'
+
+      emit:
+        description: 'Emits an observability event'
+        business-context: 'Broadcasts event to all registered listeners'
+
+        parameters:
+          - name: 'event'
+            type: 'ObservabilityEvent'
+            description: 'Event to broadcast'
+
+      subscribe:
+        description: 'Subscribes to specific event type'
+        business-context: 'Registers listener for event monitoring'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type to monitor'
+          - name: 'listener'
+            type: 'ObservabilityEventListener'
+            description: 'Event handler'
+
+      unsubscribe:
+        description: 'Unsubscribes from event type'
+        business-context: 'Removes listener from event monitoring'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type'
+          - name: 'listener'
+            type: 'ObservabilityEventListener'
+            description: 'Listener to remove'
+
+      getListenerCount:
+        description: 'Gets count of listeners for event type'
+        business-context: 'Monitors event bus subscription metrics'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type'
+            optional: true
+
+        returns:
+          type: 'number'
+          description: 'Number of listeners'
+
+      subscribeAll:
+        description: 'Subscribes to all event types'
+        business-context: 'Registers global listener for all events'
+
+        parameters:
+          - name: 'listener'
+            type: 'ObservabilityEventListener'
+            description: 'Global event handler'
+
+      clear:
+        description: 'Removes all listeners'
+        business-context: 'Cleans up all event subscriptions'
+
+      getEventTypes:
+        description: 'Gets all registered event types'
+        business-context: 'Lists all event types with active listeners'
+
+        returns:
+          type: 'ReadonlyArray<string>'
+          description: 'Event type names'
+
+  GlobalMetricRegistry:
+    class-doc:
+      description: 'Global singleton metric registry'
+      business-context: |
+        Application-wide metric registry providing centralized access
+        to all resilience metrics across the system.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Singleton Pattern'
+
+    methods:
+      getInstance:
+        description: 'Gets singleton registry instance'
+        business-context: 'Provides global access to metric registry'
+
+        returns:
+          type: 'MetricRegistry'
+          description: 'Global registry instance'
+
+      reset:
+        description: 'Resets the global registry instance'
+        business-context: 'Clears singleton instance for testing or reinitialization'
+
+  GlobalObservabilityEventBus:
+    class-doc:
+      description: 'Global singleton event bus'
+      business-context: |
+        Application-wide event bus for distributing observability
+        events across all components and monitoring systems.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Singleton Pattern'
+
+    methods:
+      getInstance:
+        description: 'Gets singleton event bus instance'
+        business-context: 'Provides global access to event bus'
+
+        returns:
+          type: 'ObservabilityEventBus'
+          description: 'Global event bus instance'
+
+      reset:
+        description: 'Resets the global event bus instance'
+        business-context: 'Clears singleton instance for testing or reinitialization'
+
+  ObservabilityEventFactory:
+    class-doc:
+      description: 'Factory for creating observability events'
+      business-context: |
+        Provides standardized event creation for resilience patterns,
+        ensuring consistent event structure for monitoring systems.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Factory Pattern'
+
+    methods:
+      createEvent:
+        description: 'Creates a new observability event'
+        business-context: 'Generates standardized event for monitoring'
+
+        parameters:
+          - name: 'type'
+            type: 'string'
+            description: 'Event type'
+          - name: 'source'
+            type: 'string'
+            description: 'Event source'
+          - name: 'data'
+            type: 'unknown'
+            description: 'Event payload'
+          - name: 'metadata'
+            type: 'Record<string, unknown>'
+            description: 'Additional metadata'
+            optional: true
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Created event'
+
+      createCircuitBreakerEvent:
+        description: 'Creates circuit breaker specific event'
+        business-context: 'Generates event for circuit breaker state changes'
+
+        parameters:
+          - name: 'circuitName'
+            type: 'string'
+            description: 'Circuit breaker name'
+          - name: 'state'
+            type: 'CircuitBreakerState'
+            description: 'New state'
+          - name: 'previousState'
+            type: 'CircuitBreakerState'
+            description: 'Previous state'
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Circuit breaker event'
+
+      createRetryEvent:
+        description: 'Creates retry pattern event'
+        business-context: 'Generates event for retry attempts'
+
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name'
+          - name: 'attempt'
+            type: 'number'
+            description: 'Attempt number'
+          - name: 'success'
+            type: 'boolean'
+            description: 'Whether attempt succeeded'
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Retry event'
+
+      createBulkheadEvent:
+        description: 'Creates bulkhead pattern event'
+        business-context: 'Generates event for bulkhead operations'
+
+        parameters:
+          - name: 'bulkheadName'
+            type: 'string'
+            description: 'Bulkhead name'
+          - name: 'action'
+            type: 'string'
+            description: 'Action type'
+          - name: 'activeCount'
+            type: 'number'
+            description: 'Active operations'
+          - name: 'queuedCount'
+            type: 'number'
+            description: 'Queued operations'
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Bulkhead event'
+
+      createExecutionEvent:
+        description: 'Creates execution tracking event'
+        business-context: 'Generates event for operation execution tracking'
+
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Event source identifier'
+          - name: 'patternType'
+            type: 'string'
+            description: 'Resilience pattern type'
+          - name: 'success'
+            type: 'boolean'
+            description: 'Whether execution succeeded'
+          - name: 'duration'
+            type: 'number'
+            description: 'Execution duration in milliseconds'
+          - name: 'additionalData'
+            type: 'Record<string, unknown>'
+            description: 'Additional event data'
+            optional: true
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Execution event'
+
+      createCircuitBreakerStateChangeEvent:
+        description: 'Creates circuit breaker state transition event'
+        business-context: 'Generates event for circuit breaker state changes'
+
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Circuit breaker identifier'
+          - name: 'oldState'
+            type: 'string'
+            description: 'Previous circuit state'
+          - name: 'newState'
+            type: 'string'
+            description: 'New circuit state'
+          - name: 'additionalData'
+            type: 'Record<string, unknown>'
+            description: 'Additional event data'
+            optional: true
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'State change event'
+
+      createRetryAttemptEvent:
+        description: 'Creates retry attempt event'
+        business-context: 'Generates event for retry pattern attempts'
+
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Retry source identifier'
+          - name: 'attempt'
+            type: 'number'
+            description: 'Current attempt number'
+          - name: 'maxAttempts'
+            type: 'number'
+            description: 'Maximum attempts allowed'
+          - name: 'delay'
+            type: 'number'
+            description: 'Delay before retry in milliseconds'
+          - name: 'additionalData'
+            type: 'Record<string, unknown>'
+            description: 'Additional event data'
+            optional: true
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Retry attempt event'
+
+      createBulkheadRejectionEvent:
+        description: 'Creates bulkhead rejection event'
+        business-context: 'Generates event when bulkhead rejects execution'
+
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Bulkhead identifier'
+          - name: 'reason'
+            type: "'QUEUE_FULL' | 'MAX_CONCURRENCY'"
+            description: 'Rejection reason'
+          - name: 'activeExecutions'
+            type: 'number'
+            description: 'Current active executions'
+          - name: 'queuedExecutions'
+            type: 'number'
+            description: 'Current queued executions'
+          - name: 'additionalData'
+            type: 'Record<string, unknown>'
+            description: 'Additional event data'
+            optional: true
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Bulkhead rejection event'
+
+      createTimeoutEvent:
+        description: 'Creates timeout event'
+        business-context: 'Generates event when operation times out'
+
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Operation identifier'
+          - name: 'timeoutDuration'
+            type: 'number'
+            description: 'Configured timeout in milliseconds'
+          - name: 'actualDuration'
+            type: 'number'
+            description: 'Actual execution time before timeout'
+          - name: 'additionalData'
+            type: 'Record<string, unknown>'
+            description: 'Additional event data'
+            optional: true
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Timeout event'
+
+      createCustomEvent:
+        description: 'Creates custom observability event'
+        business-context: 'Generates custom event for specialized monitoring'
+
+        parameters:
+          - name: 'source'
+            type: 'string'
+            description: 'Event source identifier'
+          - name: 'eventType'
+            type: 'string'
+            description: 'Custom event type'
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Event payload data'
+          - name: 'severity'
+            type: "'info' | 'warn' | 'error'"
+            description: 'Event severity level'
+            optional: true
+
+        returns:
+          type: 'ObservabilityEvent'
+          description: 'Custom event'

@@ -2,8 +2,7 @@ import type { OnModuleInit } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import type { DiscoveryService, MetadataScanner, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import type { IEventBus } from '@vytches/ddd-contracts';
-import type { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+// Note: Bus types are resolved dynamically through module refs
 
 /**
  * VytchesExplorerService - Clean handler discovery following @nestjs/cqrs patterns

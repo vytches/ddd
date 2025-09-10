@@ -13,6 +13,39 @@ hierarchy:
 
 # === TYPES ===
 types:
+  ErrorCode:
+    description: 'Union type of all available error codes'
+    business-context: 'Flexible error code type accepting enum values and custom strings'
+
+    formats:
+      jsdoc:
+        description: 'Flexible error code type accepting enum values or strings'
+      cli:
+        description: |
+          ## ErrorCode
+          Union type that accepts:
+          - DomainErrorCode enum values
+          - Custom string literals
+          - Allows flexible error classification
+
+    examples:
+      - id: 'error-code-usage'
+        code: |
+          // Using enum value
+          const errorCode: ErrorCode = DomainErrorCode.ValidationFailed;
+
+          // Using custom string
+          const customCode: ErrorCode = 'CUSTOM_BUSINESS_ERROR';
+
+          // In error creation
+          const error = new IDomainError('Something failed', {
+            code: DomainErrorCode.NotFound
+          });
+
+    custom-tags:
+      since: '1.0.0'
+      type-kind: 'union'
+
   DomainErrorOptions:
     description: 'Type definition for domain error options'
     business-context: 'Flexible error configuration supporting domain context, error codes, and custom data'
@@ -28,6 +61,22 @@ types:
           - Error codes
           - Custom data
           - Wrapped errors
+
+    examples:
+      - id: 'domain-error-options'
+        code: |
+          const options: DomainErrorOptions = {
+            domain: 'UserManagement',
+            code: DomainErrorCode.ValidationFailed,
+            data: { field: 'email', value: 'invalid' },
+            error: originalError
+          };
+
+          const error = new IDomainError('Validation failed', options);
+
+    custom-tags:
+      since: '1.0.0'
+      extends: 'ErrorOptions'
 
 # === CLASSES ===
 classes:

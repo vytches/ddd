@@ -1,0 +1,343 @@
+# CLI Types and Interfaces - Core Type Definitions
+
+# === FILE METADATA ===
+file-name: 'types'
+title: 'VytchesDDD CLI Core Types'
+description: 'Core type definitions and interfaces for CLI configuration and operations'
+business-context: 'Foundational types for CLI configuration, commands, and template processing'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  CLIConfig:
+    description: 'Main CLI configuration interface'
+    business-context: 'Defines project-specific CLI settings and generation preferences'
+
+    properties:
+      - name: 'debug'
+        type: 'boolean'
+        description: 'Enable debug logging and verbose output'
+        business-context: 'Development and troubleshooting support'
+
+      - name: 'outputDir'
+        type: 'string'
+        description: 'Target directory for generated code files'
+        business-context: 'Controls file generation location for project organization'
+
+      - name: 'templateDir'
+        type: 'string'
+        description: 'Directory containing custom template files'
+        business-context: 'Enables custom template support for organization-specific patterns'
+
+      - name: 'projectStructure'
+        type: 'ProjectStructure'
+        description: 'Target architectural pattern for code generation'
+        business-context: 'Determines folder structure and architectural patterns'
+
+      - name: 'framework'
+        type: 'FrameworkType'
+        description: 'Target web framework for generated code'
+        business-context: 'Controls framework-specific imports and patterns'
+
+      - name: 'patterns'
+        type: 'string[]'
+        description: 'Array of DDD patterns to include in generation'
+        business-context: 'Enables selective pattern application for domain complexity'
+
+      - name: 'plugins'
+        type: 'string[]'
+        description: 'List of CLI plugins to load'
+        business-context: 'Extensibility for custom commands and generators'
+
+  Command:
+    description: 'CLI command definition structure'
+    business-context: 'Defines extensible command structure for CLI operations'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Primary command name for CLI invocation'
+        business-context: 'Command identifier for user interface'
+
+      - name: 'description'
+        type: 'string'
+        description: 'Human-readable command description'
+        business-context: 'Help text and documentation for users'
+
+      - name: 'aliases'
+        type: 'string[]'
+        description: 'Optional alternative command names'
+        business-context: 'Convenience shortcuts for frequently used commands'
+        optional: true
+
+      - name: 'options'
+        type: 'CommandOption[]'
+        description: 'Command-specific options and flags'
+        business-context: 'Configurable behavior for command execution'
+        optional: true
+
+      - name: 'action'
+        type: 'CommandAction'
+        description: 'Function executed when command is invoked'
+        business-context: 'Core command implementation and business logic'
+
+      - name: 'examples'
+        type: 'string[]'
+        description: 'Example usage strings for help documentation'
+        business-context: 'User guidance and help system'
+        optional: true
+
+  CommandOption:
+    description: 'Command option configuration for CLI flags'
+    business-context: 'Defines command-line flags and their behavior'
+
+    properties:
+      - name: 'flags'
+        type: 'string'
+        description: 'Command flag specification (e.g., "-f, --framework <type>")'
+        business-context: 'Command-line interface specification'
+
+      - name: 'description'
+        type: 'string'
+        description: 'Help text for the command option'
+        business-context: 'User documentation for command flags'
+
+      - name: 'defaultValue'
+        type: 'string | boolean'
+        description: 'Default value when flag is not provided'
+        business-context: 'Sensible defaults for improved user experience'
+        optional: true
+
+      - name: 'required'
+        type: 'boolean'
+        description: 'Whether this option is mandatory'
+        business-context: 'Input validation and error prevention'
+        optional: true
+
+      - name: 'choices'
+        type: 'string[]'
+        description: 'Valid values for this option'
+        business-context: 'Input validation and auto-completion support'
+        optional: true
+
+  Template:
+    description: 'Template definition for code generation'
+    business-context: 'Defines code generation templates with context substitution'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Template identifier for selection and referencing'
+        business-context: 'Template registry and selection system'
+
+      - name: 'path'
+        type: 'string'
+        description: 'File system path to template file'
+        business-context: 'Template location for processing engine'
+
+      - name: 'variables'
+        type: 'Record<string, unknown>'
+        description: 'Context variables for template substitution'
+        business-context: 'Data binding for dynamic code generation'
+
+      - name: 'conditions'
+        type: 'TemplateCondition[]'
+        description: 'Conditional logic for template application'
+        business-context: 'Smart template selection based on context'
+        optional: true
+
+  TemplateCondition:
+    description: 'Conditional logic for template processing'
+    business-context: 'Enables context-aware template selection and processing'
+
+    properties:
+      - name: 'variable'
+        type: 'string'
+        description: 'Template variable to evaluate'
+        business-context: 'Context variable for conditional logic'
+
+      - name: 'operator'
+        type: "'equals' | 'not-equals' | 'contains' | 'exists'"
+        description: 'Comparison operator for condition evaluation'
+        business-context: 'Logic operators for template conditions'
+
+      - name: 'value'
+        type: 'unknown'
+        description: 'Expected value for condition comparison'
+        business-context: 'Comparison target for conditional logic'
+
+  TemplateContext:
+    description: 'Template processing context with available variables'
+    business-context: 'Data context for template rendering and variable substitution'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Component name for generation'
+        business-context: 'Primary identifier for generated component'
+        optional: true
+
+      - name: 'className'
+        type: 'string'
+        description: 'Generated class name with proper casing'
+        business-context: 'TypeScript class name for code generation'
+        optional: true
+
+      - name: 'fileName'
+        type: 'string'
+        description: 'Generated file name with extensions'
+        business-context: 'File system naming for generated files'
+        optional: true
+
+      - name: 'packageName'
+        type: 'string'
+        description: 'NPM package name for imports'
+        business-context: 'Module import resolution for generated code'
+        optional: true
+
+      - name: 'projectStructure'
+        type: 'ProjectStructure'
+        description: 'Target architectural pattern'
+        business-context: 'Architectural context for code generation'
+        optional: true
+
+      - name: 'framework'
+        type: 'FrameworkType'
+        description: 'Target framework type'
+        business-context: 'Framework-specific code patterns'
+        optional: true
+
+      - name: 'timestamp'
+        type: 'string'
+        description: 'Generation timestamp for file headers'
+        business-context: 'Code generation tracking and documentation'
+        optional: true
+
+      - name: 'author'
+        type: 'string'
+        description: 'Author name for file headers'
+        business-context: 'Code ownership and documentation'
+        optional: true
+
+# === TYPES ===
+types:
+  CommandAction:
+    description: 'Function type for CLI command implementations'
+    business-context: 'Standard signature for all CLI command handlers'
+
+    signature: '(args: string[], options: Record<string, unknown>) => Promise<void>'
+
+    parameters:
+      - name: 'args'
+        type: 'string[]'
+        description: 'Positional arguments passed to command'
+        business-context: 'User input for command execution'
+
+      - name: 'options'
+        type: 'Record<string, unknown>'
+        description: 'Named options and flags from command line'
+        business-context: 'Command configuration from CLI flags'
+
+    returns:
+      type: 'Promise<void>'
+      description: 'Async completion of command execution'
+
+    examples:
+      - id: 'command-implementation'
+        description: 'Implement CLI command action'
+        code: |
+          import type { CommandAction } from '@vytches/ddd-cli';
+
+          const generateEntity: CommandAction = async (args, options) => {
+            const entityName = args[0];
+            const framework = options.framework as string;
+            const outputDir = options.outputDir as string;
+            
+            console.log(`Generating ${entityName} entity for ${framework}`);
+            // Implementation logic here
+          };
+
+  ProjectStructure:
+    description: 'Supported architectural patterns for code organization'
+    business-context: 'Defines project structure options for different architectural styles'
+
+    union-values:
+      - value: 'clean-architecture'
+        description: 'Clean Architecture with dependency inversion'
+        business-context: 'Uncle Bob Martin clean architecture pattern'
+
+      - value: 'hexagonal'
+        description: 'Hexagonal architecture (Ports and Adapters)'
+        business-context: 'Alistair Cockburn hexagonal architecture pattern'
+
+      - value: 'onion'
+        description: 'Onion architecture with concentric layers'
+        business-context: 'Jeffrey Palermo onion architecture pattern'
+
+      - value: 'modular-monolith'
+        description: 'Modular monolith with bounded contexts'
+        business-context: 'DDD modular monolith with clear boundaries'
+
+      - value: 'microservices'
+        description: 'Microservices architecture patterns'
+        business-context: 'Distributed microservices architecture'
+
+      - value: 'custom'
+        description: 'Custom project structure'
+        business-context: 'Organization-specific architectural patterns'
+
+    examples:
+      - id: 'structure-selection'
+        description: 'Select project structure for generation'
+        code: |
+          import type { ProjectStructure } from '@vytches/ddd-cli';
+
+          const structure: ProjectStructure = 'clean-architecture';
+
+          // Use in CLI configuration
+          const config = {
+            projectStructure: structure,
+            outputDir: './src',
+            framework: 'nestjs' as const
+          };
+
+  FrameworkType:
+    description: 'Supported web frameworks for code generation'
+    business-context: 'Framework-specific code generation with proper imports and patterns'
+
+    union-values:
+      - value: 'nestjs'
+        description: 'NestJS framework with decorators and dependency injection'
+        business-context: 'Enterprise Node.js framework with Angular-inspired architecture'
+
+      - value: 'express'
+        description: 'Express.js with minimal structure'
+        business-context: 'Lightweight Node.js web framework'
+
+      - value: 'fastify'
+        description: 'Fastify framework with plugin system'
+        business-context: 'High-performance Node.js web framework'
+
+      - value: 'standalone'
+        description: 'Framework-agnostic pure TypeScript'
+        business-context: 'Pure domain logic without framework dependencies'
+
+    examples:
+      - id: 'framework-usage'
+        description: 'Configure CLI for specific framework'
+        code: |
+          import type { FrameworkType } from '@vytches/ddd-cli';
+
+          const framework: FrameworkType = 'nestjs';
+
+          // Framework-specific configuration
+          const generatorConfig = {
+            framework,
+            includeDecorators: framework === 'nestjs',
+            includeDI: framework !== 'standalone',
+            includeControllers: framework !== 'standalone'
+          };

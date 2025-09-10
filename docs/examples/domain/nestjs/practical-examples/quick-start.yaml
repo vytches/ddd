@@ -1,0 +1,296 @@
+# Quick Start Guide - NestJS Integration
+
+# === FILE METADATA ===
+file-name: 'quick-start-guide'
+title: 'NestJS Quick Start Guide'
+description: 'Complete quick start guide for integrating VytchesDDD with NestJS applications'
+business-context: 'Step-by-step guide for enterprise teams to rapidly adopt VytchesDDD in existing NestJS applications'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === PRACTICAL EXAMPLES ===
+examples:
+  step-1-installation:
+    title: 'Step 1: Installation and Dependencies'
+    description: 'Install VytchesDDD NestJS integration package'
+    business-context: 'Sets up all necessary dependencies for enterprise DDD patterns in NestJS'
+
+    code: |
+      # Install core packages
+      npm install @vytches/ddd-nestjs @vytches/ddd-core
+
+      # Install peer dependencies (if not already installed)
+      npm install @nestjs/common @nestjs/core reflect-metadata rxjs
+
+      # Optional: Install additional DDD packages as needed
+      npm install @vytches/ddd-cqrs @vytches/ddd-events @vytches/ddd-di
+
+  step-2-app-module:
+    title: 'Step 2: Configure App Module'
+    description: 'Set up VytchesDDD module in your main application module'
+    business-context: 'Establishes global DDD infrastructure available throughout the application'
+
+    code: |
+      // app.module.ts
+      import { Module } from '@nestjs/common';
+      import { VytchesDDDModule } from '@vytches/ddd-nestjs';
+      import { EnhancedCommandBus, EnhancedQueryBus } from '@vytches/ddd-cqrs';
+      import { UnifiedEventBus } from '@vytches/ddd-events';
+
+      @Module({
+        imports: [
+          // Configure VytchesDDD with custom implementations
+          VytchesDDDModule.forRoot({
+            providers: [
+              { provide: 'ICommandBus', useClass: EnhancedCommandBus },
+              { provide: 'IQueryBus', useClass: EnhancedQueryBus },
+              { provide: 'IEventBus', useClass: UnifiedEventBus },
+            ],
+          }),
+          
+          // Your existing modules
+          UserModule,
+          OrderModule,
+        ],
+      })
+      export class AppModule {}
+
+  step-3-domain-service:
+    title: 'Step 3: Create Domain Service'
+    description: 'Create a domain service using VytchesDDD patterns'
+    business-context: 'Implements core business logic using enterprise DDD patterns'
+
+    code: |
+      // user.service.ts
+      import { DomainService } from '@vytches/ddd-di';
+      import { Result } from '@vytches/ddd-utils';
+      import { UnifiedEventBus } from '@vytches/ddd-events';
+      import { User, CreateUserData, UserCreatedEvent } from './types';
+
+      @DomainService('userService', {
+        context: 'UserManagement',
+      })
+      export class UserService {
+        constructor(private readonly eventBus: UnifiedEventBus) {}
+
+        async createUser(userData: CreateUserData): Promise<Result<User, Error>> {
+          try {
+            // Domain logic
+            const user = User.create(userData);
+            
+            // Publish domain event
+            await this.eventBus.publish(
+              new UserCreatedEvent({
+                userId: user.id,
+                email: user.email,
+              })
+            );
+            
+            return Result.success(user);
+          } catch (error) {
+            return Result.failure(error);
+          }
+        }
+      }
+
+  step-4-controller:
+    title: 'Step 4: Create NestJS Controller (Bridge Pattern)'
+    description: 'Create controller that bridges NestJS HTTP layer with domain services'
+    business-context: 'Separates framework concerns from domain logic using the Bridge Pattern'
+
+    code: |
+      // user.controller.ts
+      import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
+      import { VytchesDDD } from '@vytches/ddd-di';
+      import { UserService } from './user.service';
+      import { CreateUserData, User } from './types';
+
+      @Controller('users')
+      export class UserController {
+        private readonly userService: UserService;
+
+        constructor() {
+          // Bridge Pattern: Get existing instance from VytchesDDD
+          this.userService = VytchesDDD.resolve<UserService>('userService');
+        }
+
+        @Post()
+        async createUser(@Body() userData: CreateUserData): Promise<User> {
+          const result = await this.userService.createUser(userData);
+
+          if (result.isFailure()) {
+            throw new BadRequestException(result.error.message);
+          }
+
+          return result.value;
+        }
+      }
+
+  step-5-cqrs-handlers:
+    title: 'Step 5: Add CQRS Handlers (Optional)'
+    description: 'Implement command and query handlers for advanced CQRS patterns'
+    business-context: 'Enables sophisticated command-query separation for complex business operations'
+
+    code: |
+      // create-user.handler.ts
+      import { CommandHandler } from '@vytches/ddd-cqrs';
+      import { VytchesDDD } from '@vytches/ddd-di';
+      import { CreateUserCommand } from './commands';
+      import { UserService } from './user.service';
+      import { Result } from '@vytches/ddd-utils';
+
+      @CommandHandler(CreateUserCommand, {
+        context: 'UserManagement',
+        timeout: 30000,
+      })
+      export class CreateUserHandler {
+        private readonly userService: UserService;
+        
+        constructor() {
+          this.userService = VytchesDDD.resolve<UserService>('userService');
+        }
+
+        async execute(command: CreateUserCommand): Promise<Result<User, Error>> {
+          return await this.userService.createUser(command.data);
+        }
+      }
+
+      // get-user.handler.ts
+      import { QueryHandler } from '@vytches/ddd-cqrs';
+      import { GetUserQuery } from './queries';
+
+      @QueryHandler(GetUserQuery)
+      export class GetUserHandler {
+        async execute(query: GetUserQuery): Promise<User> {
+          // Query implementation
+          return await this.findUser(query.userId);
+        }
+      }
+
+  step-6-module-setup:
+    title: 'Step 6: Feature Module Setup'
+    description: 'Create feature module with automatic handler discovery'
+    business-context: 'Organizes code by bounded context with automatic service registration'
+
+    code: |
+      // user.module.ts
+      import { Module } from '@nestjs/common';
+      import { UserController } from './user.controller';
+      import { UserService } from './user.service';
+      import { CreateUserHandler } from './create-user.handler';
+      import { GetUserHandler } from './get-user.handler';
+
+      @Module({
+        controllers: [UserController],
+        providers: [
+          // Domain services are auto-discovered via @DomainService
+          UserService,
+          
+          // Handlers are auto-discovered and registered
+          CreateUserHandler,
+          GetUserHandler,
+        ],
+      })
+      export class UserModule {
+        // No onModuleInit needed - auto-registration handles everything!
+      }
+
+  step-7-testing:
+    title: 'Step 7: Testing Setup'
+    description: 'Set up testing with VytchesDDD integration'
+    business-context: 'Enables comprehensive testing of domain logic and integration points'
+
+    code: |
+      // user.service.spec.ts
+      import { Test, TestingModule } from '@nestjs/testing';
+      import { VytchesDDDModule } from '@vytches/ddd-nestjs';
+      import { UserService } from './user.service';
+
+      describe('UserService', () => {
+        let service: UserService;
+        let module: TestingModule;
+
+        beforeEach(async () => {
+          module = await Test.createTestingModule({
+            imports: [
+              // Use forTesting() for pre-configured test setup
+              VytchesDDDModule.forTesting(),
+            ],
+            providers: [UserService],
+          }).compile();
+
+          service = module.get<UserService>(UserService);
+        });
+
+        afterEach(async () => {
+          await module.close();
+        });
+
+        it('should create user successfully', async () => {
+          const userData = { name: 'John Doe', email: 'john@example.com' };
+          const result = await service.createUser(userData);
+
+          expect(result.isSuccess()).toBe(true);
+          expect(result.value.name).toBe('John Doe');
+        });
+      });
+
+# === MIGRATION TIPS ===
+migration-tips:
+  from-vanilla-nestjs:
+    title: 'Migrating from Vanilla NestJS'
+    description: 'Tips for migrating existing NestJS applications to VytchesDDD'
+    business-context: 'Gradual migration path that minimizes disruption to existing codebase'
+
+    tips:
+      - title: 'Start with Domain Services'
+        description: 'Begin by converting business services to @DomainService pattern'
+
+      - title: 'Use Bridge Pattern'
+        description: 'Keep existing controllers, add bridge pattern gradually'
+
+      - title: 'Incremental Adoption'
+        description: 'Migrate one bounded context at a time'
+
+      - title: 'Event-Driven Migration'
+        description: 'Replace EventEmitter2 with UnifiedEventBus progressively'
+
+  best-practices:
+    title: 'Best Practices'
+    description: 'Recommended patterns for enterprise VytchesDDD usage'
+    business-context: 'Battle-tested patterns for production applications'
+
+    practices:
+      - title: 'Use Bridge Pattern in Controllers'
+        description: 'Always resolve domain services via VytchesDDD.resolve() to avoid double instances'
+
+      - title: 'Organize by Bounded Context'
+        description: 'Structure modules around business domains, not technical layers'
+
+      - title: 'Result Pattern for Error Handling'
+        description: 'Use Result<T, E> pattern for consistent error handling'
+
+      - title: 'Leverage Auto-Discovery'
+        description: 'Let the framework handle handler registration automatically'
+
+# === TROUBLESHOOTING ===
+troubleshooting:
+  common-issues:
+    title: 'Common Issues and Solutions'
+    description: 'Solutions to frequently encountered integration problems'
+
+    issues:
+      - problem: 'Service not found in container'
+        solution: 'Ensure @DomainService decorator is applied and service is in module providers'
+
+      - problem: 'Double instance issues'
+        solution: 'Use Bridge Pattern - resolve via VytchesDDD.resolve(), not NestJS DI'
+
+      - problem: 'Handlers not registering'
+        solution: 'Add handlers to module providers array and verify decorator metadata'
+
+      - problem: 'Circular dependencies'
+        solution: 'Use interfaces for dependencies and proper service boundaries'

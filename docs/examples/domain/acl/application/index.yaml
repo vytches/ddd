@@ -1,0 +1,73 @@
+# Application Layer Index - ACL Integration Points
+
+# === FILE METADATA ===
+file-name: 'application/index'
+title: 'Application Layer Exports'
+description: 'Application layer components with ACL integration'
+business-context: |
+  Exports application layer components that demonstrate proper integration
+  between domain logic and external systems through Anti-Corruption Layer
+  patterns, maintaining clean architecture boundaries.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS DOCUMENTATION ===
+exports:
+  - name: 'BaseApplicationService'
+    type: 'class'
+    category: 'application-service'
+    description: 'Foundation class for ACL-integrated application services'
+    business-context: 'Coordinates domain operations with external system integrations'
+
+  - name: 'IApplicationService'
+    type: 'interface'
+    category: 'contracts'
+    description: 'Contract for application service implementations'
+    business-context: 'Defines standard interface for application layer'
+
+  - name: 'ApplicationError'
+    type: 'class'
+    category: 'errors'
+    description: 'Application layer error with context and cause'
+    business-context: 'Represents application-level failures with rich context'
+
+# === INTEGRATION PATTERNS ===
+integration-patterns:
+  - name: 'Domain-ACL Coordination'
+    description: 'How application services coordinate domain logic with ACL'
+    example: |
+      // Application service orchestrates domain + external systems
+      1. Validate command and create domain model
+      2. Execute domain logic and business rules  
+      3. Persist domain changes to repository
+      4. Integrate with external systems via ACL adapters
+      5. Handle success/failure scenarios appropriately
+
+  - name: 'Transaction Boundaries'
+    description: 'Managing consistency across domain and external operations'
+    example: |
+      // Transaction spans domain and ACL operations
+      await withTransaction(async () => {
+        const order = Order.create(command);
+        await repository.save(order);
+        
+        const aclResult = await executeWithACL('shipping', 'schedule', order);
+        if (aclResult.isFailure()) {
+          throw new ApplicationError('Shipping schedule failed');
+        }
+      });
+
+  - name: 'Error Handling Strategy'
+    description: 'Consistent error handling across layers'
+    example: |
+      // Transform different error types to application errors
+      try {
+        const result = await executeWithACL(adapter, operation, model);
+      } catch (domainError) {
+        return Result.failure(new ApplicationError('Domain validation failed'));
+      } catch (aclError) {
+        return Result.failure(new ApplicationError('External integration failed'));
+      }

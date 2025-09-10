@@ -1,0 +1,443 @@
+# VytchesDDD Enterprise Framework - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'VytchesDDD Enterprise - Complete DDD Framework'
+description: 'Complete Domain-Driven Design framework entry point with all library features'
+business-context: 'Enterprise meta-package providing unified access to all VytchesDDD building blocks'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FRAMEWORK OVERVIEW ===
+framework:
+  name: 'VytchesDDD'
+  description: 'Complete Domain-Driven Design framework for enterprise applications'
+  version: '1.0.0'
+
+  layers:
+    foundation:
+      description: 'Core contracts and primitives'
+      packages:
+        - '@vytches/ddd-contracts'
+        - '@vytches/ddd-domain-primitives'
+        - '@vytches/ddd-value-objects'
+        - '@vytches/ddd-aggregates'
+        - '@vytches/ddd-repositories'
+
+    patterns:
+      description: 'Domain patterns and validation'
+      packages:
+        - '@vytches/ddd-domain-services'
+        - '@vytches/ddd-policies'
+        - '@vytches/ddd-validation'
+
+    architecture:
+      description: 'Event-driven architecture'
+      packages:
+        - '@vytches/ddd-events'
+        - '@vytches/ddd-cqrs'
+        - '@vytches/ddd-event-store'
+        - '@vytches/ddd-projections'
+        - '@vytches/ddd-process-managers'
+
+    integration:
+      description: 'Integration patterns'
+      packages:
+        - '@vytches/ddd-acl'
+        - '@vytches/ddd-messaging'
+
+    infrastructure:
+      description: 'Infrastructure concerns'
+      packages:
+        - '@vytches/ddd-di'
+        - '@vytches/ddd-event-scheduling'
+        - '@vytches/ddd-logging'
+        - '@vytches/ddd-resilience'
+
+    utilities:
+      description: 'Development utilities'
+      packages:
+        - '@vytches/ddd-utils'
+        - '@vytches/ddd-core'
+
+# === MODULE DOCUMENTATION ===
+modules:
+  VytchesDDDEnterprise:
+    class-doc:
+      description: 'Complete Domain-Driven Design framework for enterprise applications'
+      business-context: 'Single entry point providing unified access to all DDD patterns and enterprise features'
+
+      formats:
+        jsdoc:
+          description: 'Enterprise DDD framework with unified API'
+        cli:
+          description: |
+            ## VytchesDDD Enterprise Framework
+
+            Complete Domain-Driven Design implementation for enterprise applications.
+            Provides unified access to all DDD patterns, event sourcing, CQRS,
+            resilience patterns, and enterprise integration capabilities.
+
+            ### Key Features:
+            - **Foundation Layer**: Core DDD building blocks (Aggregates, Entities, Value Objects)
+            - **Architecture Layer**: Event sourcing, CQRS, projections, process managers
+            - **Integration Layer**: Anti-corruption layers, messaging patterns
+            - **Infrastructure Layer**: DI container, logging, resilience patterns
+
+            ### Quick Start:
+            ```typescript
+            import { AggregateRoot, EntityId, CommandBus } from '@vytches/ddd';
+            ```
+
+      custom-tags:
+        since: '1.0.0'
+        framework: 'Complete DDD framework'
+        enterprise: 'Enterprise-grade features'
+        meta-package: 'Aggregates all framework packages'
+
+# === KEY EXPORTS DOCUMENTATION ===
+exports:
+  # Foundation Layer
+  EntityId:
+    description: 'Enhanced entity identifier with validation and type safety'
+    business-context: 'Primary entity ID implementation with enterprise validation'
+    package-source: '@vytches/ddd-value-objects'
+
+    examples:
+      - id: 'basic-entity-id'
+        description: 'Create entity identifiers for domain objects'
+        code: |
+          import { EntityId } from '@vytches/ddd';
+
+          // Create from text
+          const userId = EntityId.fromText('user-123');
+
+          // Create with UUID
+          const orderId = EntityId.createWithRandomUUID();
+
+          // Type-safe entity IDs
+          const productId: EntityId<string> = EntityId.fromText('product-456');
+
+  BaseEntityId:
+    description: 'Foundation entity identifier interface'
+    business-context: 'Base EntityId from contracts for minimal dependencies'
+    package-source: '@vytches/ddd-contracts'
+
+    examples:
+      - id: 'base-entity-id'
+        description: 'Use base EntityId when minimal dependencies required'
+        code: |
+          import { BaseEntityId } from '@vytches/ddd';
+
+          // Foundation EntityId with core functionality
+          const id = BaseEntityId.fromText('simple-id');
+
+  AggregateRoot:
+    description: 'Base aggregate root implementation with capabilities'
+    business-context: 'Core DDD aggregate pattern with event sourcing support'
+    package-source: '@vytches/ddd-aggregates'
+
+    examples:
+      - id: 'aggregate-implementation'
+        description: 'Implement domain aggregates with business logic'
+        code: |
+          import { AggregateRoot, EntityId } from '@vytches/ddd';
+
+          class OrderAggregate extends AggregateRoot {
+            constructor(id: EntityId, customerId: EntityId) {
+              super({ id, version: 0 });
+              this.addDomainEvent('OrderCreated', { 
+                orderId: id.getValue(),
+                customerId: customerId.getValue()
+              });
+            }
+          }
+
+  CommandBus:
+    description: 'CQRS command bus for command execution'
+    business-context: 'Execute business commands with middleware pipeline'
+    package-source: '@vytches/ddd-cqrs'
+
+    examples:
+      - id: 'command-execution'
+        description: 'Execute business commands through CQRS pipeline'
+        code: |
+          import { CommandBus, ICommand } from '@vytches/ddd';
+
+          class CreateOrderCommand implements ICommand {
+            constructor(public customerId: string, public items: OrderItem[]) {}
+          }
+
+          const commandBus = new CommandBus();
+          await commandBus.execute(new CreateOrderCommand(customerId, items));
+
+  QueryBus:
+    description: 'CQRS query bus for read operations'
+    business-context: 'Execute read queries with performance optimizations'
+    package-source: '@vytches/ddd-cqrs'
+
+    examples:
+      - id: 'query-execution'
+        description: 'Execute read queries through CQRS pipeline'
+        code: |
+          import { QueryBus, IQuery } from '@vytches/ddd';
+
+          class GetOrderQuery implements IQuery<Order> {
+            constructor(public orderId: string) {}
+          }
+
+          const queryBus = new QueryBus();
+          const order = await queryBus.execute(new GetOrderQuery('order-123'));
+
+  UnifiedEventBus:
+    description: 'Unified event bus for all event types'
+    business-context: 'Single event bus handling domain, integration, and audit events'
+    package-source: '@vytches/ddd-events'
+
+    examples:
+      - id: 'event-publishing'
+        description: 'Publish domain and integration events'
+        code: |
+          import { UnifiedEventBus, DomainEvent } from '@vytches/ddd';
+
+          const eventBus = new UnifiedEventBus();
+
+          // Publish domain event
+          const event = new DomainEvent('OrderCreated', { orderId: 'order-123' });
+          await eventBus.publish(event);
+
+  VytchesDDD:
+    description: 'Global dependency injection container'
+    business-context: 'Enterprise service locator following MediatR pattern'
+    package-source: '@vytches/ddd-di'
+
+    examples:
+      - id: 'di-container'
+        description: 'Configure and use dependency injection container'
+        code: |
+          import { VytchesDDD, DomainService } from '@vytches/ddd';
+
+          @DomainService('orderService')
+          class OrderService {
+            async createOrder(data: CreateOrderData): Promise<Order> {
+              // Business logic
+            }
+          }
+
+          // Configure container
+          await VytchesDDD.configure();
+
+          // Resolve services
+          const orderService = VytchesDDD.resolve<OrderService>('orderService');
+
+  Logger:
+    description: 'Enterprise logging with DDD context detection'
+    business-context: 'Structured logging with automatic business context detection'
+    package-source: '@vytches/ddd-logging'
+
+    examples:
+      - id: 'enterprise-logging'
+        description: 'Use structured logging with business context'
+        code: |
+          import { Logger } from '@vytches/ddd';
+
+          class OrderService {
+            private logger = Logger.forContext(); // Auto-detects "OrderService"
+            
+            async processOrder(order: Order): Promise<void> {
+              this.logger.info('Processing order', { 
+                orderId: order.id.getValue(),
+                customerId: order.customerId.getValue()
+              });
+            }
+          }
+
+  PolicyBuilder:
+    description: 'Fluent policy builder for business rules'
+    business-context: 'Build complex business policies with enterprise validation'
+    package-source: '@vytches/ddd-policies'
+
+    examples:
+      - id: 'business-policies'
+        description: 'Create business validation policies'
+        code: |
+          import { PolicyBuilder } from '@vytches/ddd';
+
+          const orderPolicy = PolicyBuilder.create<Order>()
+            .withId('order-validation')
+            .withDomain('orders')
+            .must(order => order.items.length > 0)
+            .withCode('NO_ITEMS')
+            .withMessage('Order must contain at least one item')
+            .and()
+            .must(order => order.total > 0)
+            .withCode('INVALID_TOTAL')
+            .build();
+
+  Result:
+    description: 'Railway-oriented programming result type'
+    business-context: 'Type-safe error handling without exceptions'
+    package-source: '@vytches/ddd-utils'
+
+    examples:
+      - id: 'result-pattern'
+        description: 'Use Result pattern for error handling'
+        code: |
+          import { Result } from '@vytches/ddd';
+
+          function validateOrder(order: Order): Result<Order, ValidationError> {
+            if (order.items.length === 0) {
+              return Result.failure(new ValidationError('Order must have items'));
+            }
+            return Result.success(order);
+          }
+
+          const result = validateOrder(order);
+          if (result.isSuccess()) {
+            console.log('Valid order:', result.value);
+          } else {
+            console.error('Validation failed:', result.error.message);
+          }
+
+  safeRun:
+    description: 'Safe function execution with error capture'
+    business-context: 'Execute functions safely capturing errors for handling'
+    package-source: '@vytches/ddd-utils'
+
+    examples:
+      - id: 'safe-execution'
+        description: 'Execute operations safely with error capture'
+        code: |
+          import { safeRun } from '@vytches/ddd';
+
+          // Synchronous safe execution
+          const [error, result] = safeRun(() => riskyOperation());
+          if (error) {
+            console.error('Operation failed:', error.message);
+          }
+
+          // Asynchronous safe execution
+          const [asyncError, asyncResult] = await safeRun(
+            async () => await asyncOperation()
+          );
+
+# === CONFLICT RESOLUTION ===
+conflicts:
+  EntityId:
+    primary: 'EntityId (from @vytches/ddd-value-objects)'
+    alternative: 'BaseEntityId (from @vytches/ddd-contracts)'
+    recommendation: 'Use EntityId for full features, BaseEntityId for minimal deps'
+
+  ValidationError:
+    primary: 'ValidationError (from @vytches/ddd-domain-primitives)'
+    alternatives:
+      - 'CqrsValidationError (from @vytches/ddd-cqrs)'
+    recommendation: 'Use primary ValidationError for general validation'
+
+  ExecutionContext:
+    primary: 'ExecutionContext (from @vytches/ddd-cqrs)'
+    recommendation: 'CQRS execution context is most commonly used'
+
+  safeRun:
+    primary: 'safeRun (from @vytches/ddd-utils)'
+    note: 'Testing version excluded from main exports'
+    recommendation: 'Use utils version for production code'
+
+# === GETTING STARTED GUIDE ===
+getting-started:
+  description: 'Quick start guide for VytchesDDD enterprise framework'
+
+  steps:
+    installation:
+      description: 'Install the complete framework'
+      code: |
+        # Install complete framework
+        npm install @vytches/ddd
+
+        # Or install individual packages
+        npm install @vytches/ddd-core @vytches/ddd-cqrs @vytches/ddd-events
+
+    basic-setup:
+      description: 'Basic DDD implementation setup'
+      code: |
+        import { 
+          AggregateRoot, 
+          EntityId, 
+          CommandBus, 
+          VytchesDDD 
+        } from '@vytches/ddd';
+
+        // 1. Create domain aggregate
+        class UserAggregate extends AggregateRoot {
+          constructor(id: EntityId, email: string) {
+            super({ id, version: 0 });
+            this.addDomainEvent('UserCreated', { email });
+          }
+        }
+
+        // 2. Setup DI container
+        await VytchesDDD.configure();
+
+        // 3. Use CQRS
+        const commandBus = new CommandBus();
+
+    enterprise-features:
+      description: 'Enterprise features configuration'
+      code: |
+        import { 
+          Logger, 
+          PolicyBuilder, 
+          UnifiedEventBus,
+          CircuitBreakerStrategy 
+        } from '@vytches/ddd';
+
+        // Enterprise logging
+        const logger = Logger.forContext()
+          .withCorrelationId('req-123')
+          .withUserId('user-456');
+
+        // Business policies
+        const policy = PolicyBuilder.create<User>()
+          .must(user => user.email.includes('@'))
+          .withCode('INVALID_EMAIL')
+          .build();
+
+        // Resilience patterns
+        const circuitBreaker = new CircuitBreakerStrategy({
+          failureThreshold: 5,
+          resetTimeout: 60000
+        });
+
+# === PERFORMANCE OPTIMIZATIONS ===
+performance:
+  bundle-sizes:
+    description: 'Framework uses meta-package architecture for optimal tree-shaking'
+    details:
+      - 'Meta-package: 1.4KB (99.2% size reduction)'
+      - 'Core building blocks: Modular imports'
+      - 'Tree-shaking: 100% effective with explicit exports'
+
+  recommendations:
+    - 'Import only needed packages for smaller bundles'
+    - 'Use @vytches/ddd-core for basic DDD patterns'
+    - 'Import individual packages for specialized features'
+
+# === MIGRATION GUIDE ===
+migration:
+  from-individual-packages:
+    description: 'Migration from individual package imports'
+    before: |
+      import { AggregateRoot } from '@vytches/ddd-aggregates';
+      import { EntityId } from '@vytches/ddd-value-objects';
+      import { CommandBus } from '@vytches/ddd-cqrs';
+    after: |
+      import { AggregateRoot, EntityId, CommandBus } from '@vytches/ddd';
+
+  benefits:
+    - 'Unified import statements'
+    - 'Automatic conflict resolution'
+    - 'Consistent API versions'
+    - 'Simplified dependency management'

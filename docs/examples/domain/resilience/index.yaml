@@ -1,0 +1,185 @@
+# Resilience Package Exports - Enterprise Resilience Patterns
+
+# === FILE METADATA ===
+file-name: 'index'
+package: 'resilience'
+title: 'Resilience Package - Main Exports'
+description: 'Central export hub for enterprise resilience patterns'
+business-context: |
+  Provides comprehensive resilience patterns for building fault-tolerant
+  applications that gracefully handle failures in distributed systems,
+  external integrations, and microservice architectures.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === KEY CONCEPTS ===
+concepts:
+  - name: 'Circuit Breaker'
+    description: 'Prevents cascading failures by failing fast when error threshold reached'
+  - name: 'Retry Pattern'
+    description: 'Automatically retries failed operations with intelligent backoff'
+  - name: 'Bulkhead Pattern'
+    description: 'Isolates critical resources to prevent resource exhaustion'
+  - name: 'Timeout Strategy'
+    description: 'Prevents operations from hanging indefinitely'
+
+# === EXPORTS DOCUMENTATION ===
+exports:
+  # Core Patterns
+  - name: 'CircuitBreaker'
+    type: 'class'
+    category: 'patterns'
+    description: 'Three-state circuit breaker (CLOSED/OPEN/HALF_OPEN)'
+    business-context: 'Prevents system overload by failing fast during outages'
+
+  - name: 'RetryStrategy'
+    type: 'class'
+    category: 'patterns'
+    description: 'Configurable retry logic with exponential backoff'
+    business-context: 'Handles transient failures with intelligent retry logic'
+
+  - name: 'BulkheadStrategy'
+    type: 'class'
+    category: 'patterns'
+    description: 'Resource isolation to prevent resource exhaustion'
+    business-context: 'Protects critical resources from being overwhelmed'
+
+  - name: 'TimeoutStrategy'
+    type: 'class'
+    category: 'patterns'
+    description: 'Operation timeout with AbortSignal integration'
+    business-context: 'Prevents hanging operations in distributed systems'
+
+  # Strategy Composition
+  - name: 'CompositeResilienceStrategy'
+    type: 'class'
+    category: 'composition'
+    description: 'Combines multiple resilience patterns'
+    business-context: 'Enterprise-grade fault tolerance through pattern composition'
+
+  - name: 'ResiliencePolicyBuilder'
+    type: 'class'
+    category: 'builders'
+    description: 'Fluent builder for resilience policies'
+    business-context: 'Convenient configuration of complex resilience strategies'
+
+  # Context
+  - name: 'ResilienceContext'
+    type: 'class'
+    category: 'core'
+    description: 'Execution context with correlation tracking'
+    business-context: 'Provides observability and debugging capabilities'
+
+  # Decorators
+  - name: 'Resilience'
+    type: 'decorator'
+    category: 'decorators'
+    description: 'Method decorator for applying resilience patterns'
+    business-context: 'Simple annotation-based resilience configuration'
+
+  - name: 'CircuitBreaker'
+    type: 'decorator'
+    category: 'decorators'
+    description: 'Circuit breaker method decorator'
+    business-context: 'Declarative circuit breaker protection'
+
+  - name: 'Retry'
+    type: 'decorator'
+    category: 'decorators'
+    description: 'Retry method decorator'
+    business-context: 'Declarative retry configuration'
+
+  # Observability
+  - name: 'MetricRegistry'
+    type: 'class'
+    category: 'observability'
+    description: 'Central registry for resilience metrics'
+    business-context: 'Monitoring and alerting for resilience patterns'
+
+  - name: 'MetricCollector'
+    type: 'interface'
+    category: 'observability'
+    description: 'Interface for custom metric collectors'
+    business-context: 'Extensible metrics collection system'
+
+  - name: 'MetricExporter'
+    type: 'interface'
+    category: 'observability'
+    description: 'Interface for exporting metrics to monitoring systems'
+    business-context: 'Integration with Prometheus, DataDog, etc.'
+
+  # Interfaces
+  - name: 'IResilienceStrategy'
+    type: 'interface'
+    category: 'contracts'
+    description: 'Base contract for all resilience strategies'
+    business-context: 'Enables custom resilience pattern implementations'
+
+  - name: 'ICircuitBreakerConfig'
+    type: 'interface'
+    category: 'configuration'
+    description: 'Circuit breaker configuration options'
+    business-context: 'Flexible circuit breaker tuning for different scenarios'
+
+  - name: 'IRetryConfig'
+    type: 'interface'
+    category: 'configuration'
+    description: 'Retry strategy configuration options'
+    business-context: 'Configurable retry behavior for various failure types'
+
+  - name: 'IBulkheadConfig'
+    type: 'interface'
+    category: 'configuration'
+    description: 'Bulkhead pattern configuration options'
+    business-context: 'Resource isolation configuration'
+
+# === USAGE PATTERNS ===
+patterns:
+  - name: 'Basic Circuit Breaker'
+    description: 'Simple circuit breaker for external API calls'
+    example: |
+      const circuitBreaker = new CircuitBreaker({
+        failureThreshold: 5,
+        resetTimeout: 60000
+      });
+
+      const result = await circuitBreaker.execute(async () => {
+        return await externalAPI.getData();
+      });
+
+  - name: 'Retry with Backoff'
+    description: 'Exponential backoff retry for transient failures'
+    example: |
+      const retryStrategy = new RetryStrategy({
+        maxAttempts: 3,
+        baseDelay: 1000,
+        maxDelay: 10000,
+        backoff: 'exponential'
+      });
+
+  - name: 'Composite Strategy'
+    description: 'Combining multiple resilience patterns'
+    example: |
+      const policy = ResiliencePolicyBuilder
+        .create()
+        .withCircuitBreaker({ failureThreshold: 3 })
+        .withRetry({ maxAttempts: 3 })
+        .withTimeout(5000)
+        .build();
+
+  - name: 'Decorator Usage'
+    description: 'Declarative resilience with decorators'
+    example: |
+      class PaymentService {
+        @Resilience({
+          circuitBreaker: { failureThreshold: 5 },
+          retry: { maxAttempts: 3 },
+          timeout: 10000
+        })
+        async processPayment(payment: Payment): Promise<PaymentResult> {
+          return await this.paymentGateway.charge(payment);
+        }
+      }

@@ -1,0 +1,218 @@
+# Service Errors - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'service.errors'
+title: 'Domain Service Errors - Error Handling'
+description: 'Specialized error classes for domain service operations and lifecycle management'
+business-context: 'Provides domain-specific errors for service registration, lookup, and dependency management scenarios'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ServiceDuplicateError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when attempting to register a service with an ID that already exists in the registry'
+      business-context: 'Prevents service ID conflicts and ensures unique service registration in DI containers'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Service duplicate registration error for ID conflicts'
+        cli:
+          description: |
+            ## ServiceDuplicateError
+
+            Error for duplicate service registration scenarios.
+            Thrown when attempting to register a service with an existing ID.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Domain Error Pattern'
+        error-code: 'DuplicateEntry'
+        extends: 'IDomainError'
+
+    # Methods
+    methods:
+      withServiceId:
+        description: 'Creates a ServiceDuplicateError with service ID context'
+        business-context: 'Factory method for creating specific duplicate service errors with contextual information'
+
+        parameters:
+          - name: 'serviceId'
+            type: 'string'
+            description: 'The service ID that caused the duplication conflict'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context and metadata'
+            optional: true
+
+        returns:
+          type: 'ServiceDuplicateError'
+          description: 'Configured error instance with service ID context'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const error = ServiceDuplicateError.withServiceId(
+                'paymentService',
+                { context: 'ServiceRegistry', operation: 'register' }
+              );
+              console.log(error.message); // 'Service with id paymentService already exists'
+
+        custom-tags:
+          static: 'Static factory method'
+          factory: 'Creates configured error instance'
+
+  ServiceNotFoundError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when attempting to resolve or access a service that is not registered in the service registry'
+      business-context: 'Indicates missing service dependencies or incorrect service ID references in DI resolution'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Service not found error for missing service resolution'
+        cli:
+          description: |
+            ## ServiceNotFoundError
+
+            Error for missing service resolution scenarios.
+            Thrown when attempting to resolve a service that doesn't exist in the registry.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Domain Error Pattern'
+        error-code: 'NotFound'
+        extends: 'IDomainError'
+
+    # Methods
+    methods:
+      withServiceId:
+        description: 'Creates a ServiceNotFoundError with service ID context'
+        business-context: 'Factory method for creating specific service not found errors with identification details'
+
+        parameters:
+          - name: 'serviceId'
+            type: 'string'
+            description: 'The service ID that could not be found'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context and metadata'
+            optional: true
+
+        returns:
+          type: 'ServiceNotFoundError'
+          description: 'Configured error instance with service ID context'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const error = ServiceNotFoundError.withServiceId(
+                'unknownService',
+                { context: 'ServiceLocator', operation: 'resolve' }
+              );
+              console.log(error.message); // 'Service with id unknownService not found'
+
+          - id: 'dependency-resolution'
+            code: |
+              // When resolving service dependencies
+              try {
+                const service = container.resolve('missingService');
+              } catch (error) {
+                if (error instanceof ServiceNotFoundError) {
+                  console.error('Required service not registered:', error.message);
+                }
+              }
+
+        custom-tags:
+          static: 'Static factory method'
+          factory: 'Creates configured error instance'
+
+  ServiceCircularError:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Error thrown when circular dependencies are detected during service resolution or initialization'
+      business-context: 'Prevents infinite loops in service initialization and alerts to architectural issues in service dependencies'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Circular dependency error for service resolution loops'
+        cli:
+          description: |
+            ## ServiceCircularError
+
+            Error for circular dependency scenarios in service resolution.
+            Thrown when circular dependencies are detected during DI container operations.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Domain Error Pattern'
+        error-code: 'Default'
+        extends: 'IDomainError'
+        circular-dependency: 'Detects dependency loops'
+
+    # Methods
+    methods:
+      withServices:
+        description: 'Creates a ServiceCircularError with the services involved in the circular dependency'
+        business-context: 'Factory method for creating circular dependency errors with complete dependency chain information'
+
+        parameters:
+          - name: 'services'
+            type: 'string[]'
+            description: 'Array of service IDs involved in the circular dependency chain'
+          - name: 'data'
+            type: 'DomainErrorOptions'
+            description: 'Additional error context and metadata'
+            optional: true
+
+        returns:
+          type: 'ServiceNotFoundError'
+          description: 'Configured error instance with circular dependency context'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const error = ServiceCircularError.withServices(
+                ['serviceA', 'serviceB', 'serviceC'],
+                { context: 'DependencyResolver', operation: 'resolve' }
+              );
+              console.log(error.message); // 'Circular dependency detected: serviceA, serviceB, serviceC'
+
+          - id: 'dependency-analysis'
+            code: |
+              // During dependency resolution
+              const dependencyChain = ['orderService', 'paymentService', 'orderService'];
+              if (hasDuplicates(dependencyChain)) {
+                throw ServiceCircularError.withServices(dependencyChain, {
+                  context: 'ServiceResolution',
+                  details: { resolutionPath: dependencyChain }
+                });
+              }
+
+        custom-tags:
+          static: 'Static factory method'
+          factory: 'Creates configured error instance'
+          dependency-analysis: 'Analyzes dependency chains'

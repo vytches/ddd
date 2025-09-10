@@ -1,0 +1,57 @@
+# Specifications Index - Specification Pattern Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Specification Pattern Package Exports'
+description: 'Specification pattern validation exports'
+business-context: 'Provides unified access to specification pattern functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for specification pattern implementations'
+  business-context: 'Simplifies imports for specification-based validation and business rules'
+
+  formats:
+    jsdoc:
+      description: 'Specification pattern exports and operators'
+    cli:
+      description: |
+        ## Specification Pattern Exports
+
+        Complete specification system including:
+        - Composite specifications (sync and async)
+        - Specification operators (AND, OR, NOT)
+        - Specification validators and utilities
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'specification-pattern'
+    pattern: 'facade-pattern'
+
+# === EXPORTS DOCUMENTATION ===
+exports:
+  CompositeSpecification:
+    description: 'Composite specification for combining multiple specifications'
+    business-context: 'Enables complex business rule composition using specification pattern'
+    source: './composite-specification'
+
+  AsyncCompositeSpecification:
+    description: 'Asynchronous composite specification for async validation'
+    business-context: 'Supports async business rule validation with external data sources'
+    source: './async-composite-specification'
+
+  SpecificationOperators:
+    description: 'Logical operators for specification composition (AND, OR, NOT)'
+    business-context: 'Provides fluent API for building complex business rule expressions'
+    source: './specification-operators'
+
+  SpecificationValidator:
+    description: 'Validator that converts specifications to validation functions'
+    business-context: 'Bridges specification pattern with validation framework'
+    source: './specification-validator'

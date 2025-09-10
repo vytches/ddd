@@ -1,0 +1,39 @@
+# Domain Primitives Package Settings - Enhanced Metadata System V2
+
+# === PACKAGE IDENTITY ===
+package-name: 'domain-primitives'
+display-name: 'DDD Domain Primitives'
+description: 'Foundation classes, errors, and interfaces for domain-driven design'
+business-context: 'Core building blocks providing error handling and actor patterns for enterprise DDD applications'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'foundation'
+complexity: 'beginner'
+maturity: 'stable'
+framework-agnostic: true
+
+patterns:
+  - 'error-handling'
+  - 'actor-pattern'
+  - 'domain-primitives'
+  - 'foundation-patterns'
+
+# === JSDOC CONFIGURATION ===
+jsdoc:
+  placement-strategy: 'separate'
+  class-documentation: 'enabled'
+  constructor-documentation: 'enabled'
+  method-documentation: 'enabled'
+
+# === PACKAGE-LEVEL CUSTOM TAGS ===
+custom-tags:
+  since: '1.0.0'
+  stability: 'stable'
+  category: 'foundation'
+  enterprise: true
+  thread-safe: true

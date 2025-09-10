@@ -1,0 +1,214 @@
+# Config Manager - CLI Configuration Management System
+
+# === FILE METADATA ===
+file-name: 'config-manager'
+title: 'Config Manager - CLI Configuration Management'
+description: 'Centralized configuration management for CLI settings and project setup'
+business-context: 'Manages CLI configuration loading, validation, and persistence across different sources'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ConfigManager:
+    class-doc:
+      description: 'Static configuration management system for CLI operations'
+      business-context: 'Provides centralized configuration handling with file, environment, and default sources'
+
+    methods:
+      initialize:
+        description: 'Initialize configuration from multiple sources with priority order'
+        business-context: 'Loads configuration from files, environment variables, and defaults with proper precedence'
+
+        parameters:
+          - name: 'configPath'
+            type: 'string'
+            description: 'Optional path to configuration file'
+            optional: true
+
+        returns:
+          type: 'Promise<CLIConfig>'
+          description: 'Initialized configuration object'
+
+        custom-tags:
+          static: 'true'
+          async: 'true'
+          initialization: 'true'
+
+        examples:
+          - code: |
+              import { ConfigManager } from '@vytches/ddd-cli';
+
+              // Initialize with default discovery
+              const config = await ConfigManager.initialize();
+
+              // Initialize with specific file
+              const customConfig = await ConfigManager.initialize('./my-config.json');
+
+      getConfig:
+        description: 'Get the current active configuration'
+        business-context: 'Retrieves the currently loaded configuration for CLI operations'
+
+        returns:
+          type: 'CLIConfig'
+          description: 'Current configuration object'
+
+        custom-tags:
+          static: 'true'
+          accessor: 'true'
+
+        examples:
+          - code: |
+              const currentConfig = ConfigManager.getConfig();
+
+              console.log(`Framework: ${currentConfig.framework}`);
+              console.log(`Output Dir: ${currentConfig.outputDir}`);
+
+      updateConfig:
+        description: 'Update configuration with partial changes'
+        business-context: 'Allows runtime configuration updates for dynamic CLI behavior'
+
+        parameters:
+          - name: 'updates'
+            type: 'Partial<CLIConfig>'
+            description: 'Configuration updates to apply'
+
+        returns:
+          type: 'void'
+          description: 'Configuration updated successfully'
+
+        custom-tags:
+          static: 'true'
+          mutator: 'true'
+
+        examples:
+          - code: |
+              // Update framework preference
+              ConfigManager.updateConfig({
+                framework: 'nestjs',
+                debug: true
+              });
+
+              // Update output directory
+              ConfigManager.updateConfig({
+                outputDir: './src/generated'
+              });
+
+      getConfigPath:
+        description: 'Get path to the currently loaded configuration file'
+        business-context: 'Provides configuration file location for debugging and display'
+
+        returns:
+          type: 'string | null'
+          description: 'Path to config file or null if using defaults'
+
+        custom-tags:
+          static: 'true'
+          diagnostic: 'true'
+
+        examples:
+          - code: |
+              const configPath = ConfigManager.getConfigPath();
+
+              if (configPath) {
+                console.log(`Using config from: ${configPath}`);
+              } else {
+                console.log('Using default configuration');
+              }
+
+      saveConfiguration:
+        description: 'Save current configuration to file'
+        business-context: 'Persists configuration changes for future CLI sessions'
+
+        parameters:
+          - name: 'config'
+            type: 'CLIConfig'
+            description: 'Configuration to save'
+
+          - name: 'filePath'
+            type: 'string'
+            description: 'Target file path for saving'
+            optional: true
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Configuration saved successfully'
+
+        custom-tags:
+          static: 'true'
+          async: 'true'
+          persistence: 'true'
+
+        examples:
+          - code: |
+              const config = ConfigManager.getConfig();
+
+              // Save to default location
+              await ConfigManager.saveConfiguration(config);
+
+              // Save to specific file
+              await ConfigManager.saveConfiguration(config, './project-config.json');
+
+      reset:
+        description: 'Reset configuration to default values'
+        business-context: 'Restores configuration to factory defaults for troubleshooting'
+
+        returns:
+          type: 'void'
+          description: 'Configuration reset to defaults'
+
+        custom-tags:
+          static: 'true'
+          reset: 'true'
+
+        examples:
+          - code: |
+              // Reset to defaults
+              ConfigManager.reset();
+
+              // Verify reset
+              const defaultConfig = ConfigManager.getConfig();
+              console.log('Configuration reset to defaults');
+
+      loadConfiguration:
+        description: 'Load configuration from file with error handling'
+        business-context: 'Reads configuration file with validation and fallback mechanisms'
+
+        custom-tags:
+          private: 'true'
+          file-io: 'true'
+
+      findConfigFile:
+        description: 'Discover configuration file in current and parent directories'
+        business-context: 'Implements configuration file discovery strategy for project contexts'
+
+        custom-tags:
+          private: 'true'
+          discovery: 'true'
+
+      loadEnvironmentConfig:
+        description: 'Load configuration overrides from environment variables'
+        business-context: 'Enables environment-specific configuration for different deployment contexts'
+
+        custom-tags:
+          private: 'true'
+          environment: 'true'
+
+      mergeConfigurations:
+        description: 'Merge multiple configuration objects with priority order'
+        business-context: 'Implements configuration precedence logic for layered configuration sources'
+
+        custom-tags:
+          private: 'true'
+          merging: 'true'
+
+      validateConfiguration:
+        description: 'Validate configuration object against schema'
+        business-context: 'Ensures configuration integrity and prevents runtime errors'
+
+        custom-tags:
+          private: 'true'
+          validation: 'true'

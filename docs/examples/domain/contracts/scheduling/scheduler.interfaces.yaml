@@ -1,0 +1,37 @@
+# Scheduler Interfaces - Job Scheduling Engine Contracts
+
+# === FILE METADATA ===
+file-name: 'scheduler.interfaces'
+title: 'Scheduler Engine Interfaces'
+description: 'Core scheduler contracts for job management and orchestration'
+business-context: 'Foundation for implementing scheduling engines with job lifecycle management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Scheduler engine interfaces for job orchestration'
+  business-context: 'Contracts for implementing scheduling engines that manage job execution, retries, and lifecycle'
+
+  formats:
+    jsdoc:
+      description: 'Scheduler contracts for job orchestration and management'
+    cli:
+      description: |
+        ## Scheduler Engine Interfaces
+
+        Scheduling engine supporting:
+        - Job lifecycle management
+        - Retry strategies with backoff
+        - Priority-based execution
+        - Scheduler configuration
+        - Job filtering and queries
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'job-scheduling'
+    pattern: 'scheduler-engine'

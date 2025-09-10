@@ -1,0 +1,254 @@
+# DocumentationGenerator - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'documentation-generator'
+title: 'DocumentationGenerator - Package Documentation Generation'
+description: 'Comprehensive documentation generation with enhanced metadata support'
+business-context: 'Generates complete package documentation with examples and enhanced metadata resolution'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  GenerateDocumentationOptions:
+    description: 'Configuration options for documentation generation'
+    business-context: 'Comprehensive settings for customized documentation output'
+
+    properties:
+      - name: 'packageName'
+        type: 'string'
+        description: 'Name of package to generate documentation for'
+
+      - name: 'complexityLevels'
+        type: 'string[]'
+        optional: true
+        description: 'Complexity levels to include (beginner, intermediate, advanced)'
+
+      - name: 'framework'
+        type: 'string'
+        optional: true
+        description: 'Target framework for examples (nestjs, express, fastify)'
+
+      - name: 'sections'
+        type: 'string[]'
+        optional: true
+        description: 'Documentation sections to include'
+
+      - name: 'llmOptimized'
+        type: 'boolean'
+        optional: true
+        description: 'Optimize output for LLM consumption'
+
+      - name: 'showRelated'
+        type: 'boolean'
+        optional: true
+        description: 'Include related examples section'
+
+      - name: 'maxExamples'
+        type: 'number'
+        optional: true
+        description: 'Maximum number of examples to include'
+
+      - name: 'randomize'
+        type: 'boolean'
+        optional: true
+        description: 'Randomize example selection'
+
+      - name: 'seed'
+        type: 'string'
+        optional: true
+        description: 'Seed for reproducible randomization'
+
+      - name: 'diOnly'
+        type: 'boolean'
+        optional: true
+        description: 'Show only dependency injection examples'
+
+      - name: 'outputPath'
+        type: 'string'
+        optional: true
+        description: 'Custom output file path'
+
+      - name: 'enhancedMetadata'
+        type: 'boolean'
+        optional: true
+        description: 'Use enhanced metadata system for generation'
+
+  GenerateDocumentationResult:
+    description: 'Result of documentation generation process'
+    business-context: 'Comprehensive information about generated documentation'
+
+    properties:
+      - name: 'outputPath'
+        type: 'string'
+        description: 'Path where documentation was written'
+
+      - name: 'packageConfig'
+        type: 'PackageExampleConfig'
+        description: 'Package configuration used for generation'
+
+      - name: 'examplesUsed'
+        type: 'ExampleDefinition[]'
+        description: 'Examples included in generated documentation'
+
+      - name: 'randomizedExamples'
+        type: 'ExampleDefinition[]'
+        description: 'Examples after randomization (if applied)'
+
+      - name: 'sectionsIncluded'
+        type: 'string[]'
+        description: 'Documentation sections that were included'
+
+# === CLASSES ===
+classes:
+  DocumentationGenerator:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Comprehensive documentation generator with enhanced metadata support'
+      business-context: 'Generates complete package documentation with examples, enhanced metadata, and framework-specific content'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Advanced documentation generator with enhanced metadata integration'
+        cli:
+          description: |
+            ## DocumentationGenerator
+
+            Advanced documentation generation system that produces comprehensive package
+            documentation with enhanced metadata resolution, example management, and
+            framework-specific content generation.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Generator Pattern, Factory Pattern, Builder Pattern'
+        features: 'Documentation generation, enhanced metadata, example selection, framework targeting'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates documentation generator with required dependencies'
+        business-context: 'Initializes generator with template engine, tag finder, config loader, and metadata resolver'
+
+        examples:
+          - id: 'basic-constructor'
+            code: |
+              const generator = new DocumentationGenerator();
+              // Ready for documentation generation
+
+      generate:
+        description: 'Generate comprehensive documentation for package'
+        business-context: 'Main generation method that orchestrates complete documentation creation process'
+
+        parameters:
+          - name: 'options'
+            type: 'GenerateDocumentationOptions'
+            description: 'Generation configuration and options'
+
+        returns:
+          type: 'Promise<GenerateDocumentationResult>'
+          description: 'Complete generation result with paths and metadata'
+
+        examples:
+          - id: 'basic-generation'
+            code: |
+              const result = await generator.generate({
+                packageName: 'aggregates',
+                complexityLevels: ['intermediate', 'advanced'],
+                framework: 'nestjs',
+                enhancedMetadata: true
+              });
+
+              console.log(`Documentation written to: ${result.outputPath}`);
+              console.log(`Used ${result.examplesUsed.length} examples`);
+
+          - id: 'advanced-generation'
+            code: |
+              const result = await generator.generate({
+                packageName: 'policies',
+                complexityLevels: ['beginner'],
+                framework: 'nestjs',
+                llmOptimized: true,
+                maxExamples: 5,
+                randomize: true,
+                seed: 'test-seed',
+                showRelated: true,
+                outputPath: './generated-docs.md'
+              });
+
+        custom-tags:
+          async: 'true'
+          main-method: 'Primary generation interface'
+          orchestration: 'Coordinates entire generation process'
+
+      determineSections:
+        description: 'Determine documentation sections to include'
+        business-context: 'Internal logic for section selection based on options and package configuration'
+        visibility: 'private'
+
+      findExamples:
+        description: 'Find examples for package based on criteria'
+        business-context: 'Internal example discovery with filtering and complexity matching'
+        visibility: 'private'
+
+      filterExamplesByDI:
+        description: 'Filter examples to show only dependency injection examples'
+        business-context: 'Internal filtering for DI-focused documentation'
+        visibility: 'private'
+
+      selectExamples:
+        description: 'Select examples based on options and constraints'
+        business-context: 'Internal example selection with randomization and limits'
+        visibility: 'private'
+
+      findRelatedExamples:
+        description: 'Find related examples for cross-references'
+        business-context: 'Internal logic for related example discovery and linking'
+        visibility: 'private'
+
+      determineOutputPath:
+        description: 'Determine output file path for documentation'
+        business-context: 'Internal path resolution with custom and default options'
+        visibility: 'private'
+
+      writeOutput:
+        description: 'Write generated documentation to file'
+        business-context: 'Internal file writing with proper formatting and structure'
+        visibility: 'private'
+
+      extractExamples:
+        description: 'Extract examples from various formats into consistent structure'
+        business-context: 'Internal utility for normalizing examples from different sources'
+        visibility: 'private'
+
+        custom-tags:
+          normalization: 'Standardizes example format from multiple sources'
+
+      toPascalCase:
+        description: 'Converts kebab-case to PascalCase'
+        business-context: 'Internal utility for consistent naming convention conversion'
+        visibility: 'private'
+
+        examples:
+          - id: 'case-conversion'
+            code: |
+              // Examples:
+              // 'aggregate-root' -> 'AggregateRoot'
+              // 'domain-service' -> 'DomainService'
+              // 'event-store' -> 'EventStore'
+
+      loadYamlComponents:
+        description: 'Load YAML components for enhanced metadata'
+        business-context: 'Internal method for loading YAML metadata files for enhanced documentation'
+        visibility: 'private'
+
+        custom-tags:
+          enhanced-metadata: 'Loads YAML files for metadata enhancement'

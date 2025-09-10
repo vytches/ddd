@@ -1,0 +1,319 @@
+# ResilienceContext - Core Context Implementation
+
+# === FILE METADATA ===
+file-name: 'core/resilience-context'
+title: 'ResilienceContext - Core Context Implementation'
+description: 'Resilience context and error handling for operation tracking'
+business-context: |
+  Provides correlation tracking and metadata for resilience operations.
+  Includes context forking for nested operations and timeout management.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ResilienceContext:
+    description: 'Context interface for resilience operations'
+    business-context: 'Provides correlation tracking and metadata for resilience operations'
+
+    properties:
+      - name: 'signal'
+        type: 'AbortSignal'
+        description: 'Abort signal for operation cancellation'
+        readonly: true
+      - name: 'correlationId'
+        type: 'string'
+        description: 'Unique identifier for tracking operations'
+        readonly: true
+      - name: 'startTime'
+        type: 'Date'
+        description: 'When the operation started'
+        readonly: true
+      - name: 'attempt'
+        type: 'number'
+        description: 'Current attempt number'
+        readonly: true
+      - name: 'metadata'
+        type: 'ReadonlyMap<string, unknown>'
+        description: 'Additional context metadata'
+        readonly: true
+      - name: 'fork'
+        type: '(timeout?: number) => ResilienceContext'
+        description: 'Creates new context with optional timeout'
+      - name: 'withMetadata'
+        type: '(key: string, value: unknown) => ResilienceContext'
+        description: 'Creates new context with additional metadata'
+      - name: 'withTimeout'
+        type: '(timeoutMs: number) => ResilienceContext'
+        description: 'Creates new context with timeout'
+
+# === CLASSES ===
+classes:
+  DefaultResilienceContext:
+    class-doc:
+      description: 'Default implementation of ResilienceContext'
+      business-context: |
+        Concrete implementation providing correlation tracking, timeout management,
+        and metadata propagation for resilience operations.
+
+      formats:
+        jsdoc:
+          description: 'Default resilience context implementation'
+        cli:
+          description: |
+            ## DefaultResilienceContext
+            Default context implementation providing:
+            - Correlation ID tracking
+            - Timeout management with AbortController
+            - Metadata propagation
+            - Context forking for nested operations
+
+      custom-tags:
+        since: '1.0.0'
+        implements: 'ResilienceContext'
+
+    properties:
+      - name: 'correlationId'
+        type: 'string'
+        description: 'Unique correlation identifier for request tracking'
+        readonly: true
+
+      - name: 'startTime'
+        type: 'Date'
+        description: 'Timestamp when operation started'
+        readonly: true
+
+      - name: 'attempt'
+        type: 'number'
+        description: 'Current retry attempt number'
+        readonly: true
+
+      - name: 'signal'
+        type: 'AbortSignal'
+        description: 'Abort signal for cancellation handling'
+        readonly: true
+        getter: true
+
+      - name: 'metadata'
+        type: 'ReadonlyMap<string, unknown>'
+        description: 'Additional context metadata'
+        readonly: true
+        getter: true
+
+    methods:
+      constructor:
+        description: 'Creates new resilience context'
+        business-context: 'Initializes context with correlation tracking and metadata'
+
+        parameters:
+          - name: 'correlationId'
+            type: 'string'
+            description: 'Optional correlation ID'
+            optional: true
+          - name: 'startTime'
+            type: 'Date'
+            description: 'Optional start time'
+            optional: true
+          - name: 'attempt'
+            type: 'number'
+            description: 'Optional attempt number'
+            optional: true
+          - name: 'metadata'
+            type: 'Map<string, unknown>'
+            description: 'Optional metadata map'
+            optional: true
+          - name: 'abortController'
+            type: 'AbortController'
+            description: 'Optional abort controller'
+            optional: true
+
+        examples:
+          - id: 'basic-context'
+            code: |
+              const context = new DefaultResilienceContext();
+
+          - id: 'context-with-correlation'
+            code: |
+              const context = new DefaultResilienceContext('req-123', new Date(), 1);
+
+      create:
+        description: 'Creates new resilience context with options'
+        business-context: 'Factory method for creating context with common options'
+
+        parameters:
+          - name: 'options'
+            type: 'object'
+            description: 'Context creation options'
+            optional: true
+            properties:
+              - name: 'correlationId'
+                type: 'string'
+                description: 'Correlation ID'
+                optional: true
+              - name: 'metadata'
+                type: 'Record<string, unknown>'
+                description: 'Initial metadata'
+                optional: true
+              - name: 'timeout'
+                type: 'number'
+                description: 'Timeout in milliseconds'
+                optional: true
+
+        returns:
+          type: 'ResilienceContext'
+          description: 'New resilience context'
+
+        examples:
+          - id: 'create-context'
+            code: |
+              const context = DefaultResilienceContext.create({
+                correlationId: 'operation-123',
+                metadata: { userId: 'user-456' },
+                timeout: 30000
+              });
+
+      withAttempt:
+        description: 'Creates new context with attempt number'
+        business-context: 'Used by retry patterns to track attempt count'
+
+        parameters:
+          - name: 'context'
+            type: 'ResilienceContext'
+            description: 'Base context'
+          - name: 'attempt'
+            type: 'number'
+            description: 'Attempt number'
+
+        returns:
+          type: 'ResilienceContext'
+          description: 'Context with updated attempt number'
+
+        examples:
+          - id: 'increment-attempt'
+            code: |
+              const retryContext = DefaultResilienceContext.withAttempt(context, 2);
+
+      fork:
+        description: 'Creates child context with optional timeout'
+        business-context: 'Enables nested operations with independent timeouts'
+
+        parameters:
+          - name: 'timeout'
+            type: 'number'
+            description: 'Optional timeout for child context'
+            optional: true
+
+        returns:
+          type: 'ResilienceContext'
+          description: 'Child context with shared metadata'
+
+        examples:
+          - id: 'fork-context'
+            code: |
+              const childContext = context.fork(15000); // 15 second timeout
+
+      withMetadata:
+        description: 'Creates new context with additional metadata'
+        business-context: 'Enables metadata propagation through operation chains'
+
+        parameters:
+          - name: 'key'
+            type: 'string'
+            description: 'Metadata key'
+          - name: 'value'
+            type: 'unknown'
+            description: 'Metadata value'
+
+        returns:
+          type: 'ResilienceContext'
+          description: 'Context with additional metadata'
+
+        examples:
+          - id: 'add-metadata'
+            code: |
+              const enrichedContext = context
+                .withMetadata('traceId', 'trace-789')
+                .withMetadata('userId', 'user-123');
+
+      withTimeout:
+        description: 'Creates new context with timeout'
+        business-context: 'Enables timeout control for operations'
+
+        parameters:
+          - name: 'timeoutMs'
+            type: 'number'
+            description: 'Timeout in milliseconds'
+
+        returns:
+          type: 'ResilienceContext'
+          description: 'Context with timeout configured'
+
+        examples:
+          - id: 'set-timeout'
+            code: |
+              const timedContext = context.withTimeout(10000); // 10 seconds
+
+  TimeoutError:
+    class-doc:
+      description: 'Error thrown when operations exceed timeout'
+      business-context: |
+        Specific error type for timeout scenarios in resilience patterns.
+        Allows pattern implementations to distinguish timeout errors from
+        other operation failures.
+
+      formats:
+        jsdoc:
+          description: 'Timeout error for resilience operations'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'Error'
+
+    methods:
+      constructor:
+        description: 'Creates timeout error with message'
+        business-context: 'Used by timeout patterns to signal operation timeout'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+
+        examples:
+          - id: 'timeout-error'
+            code: |
+              throw new TimeoutError('Operation timed out after 5000ms');
+
+  OperationCancelledError:
+    class-doc:
+      description: 'Error thrown when operations are cancelled'
+      business-context: |
+        Specific error type for cancelled operations in resilience patterns.
+        Thrown when operations are cancelled via AbortSignal.
+
+      formats:
+        jsdoc:
+          description: 'Cancellation error for resilience operations'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'Error'
+
+    methods:
+      constructor:
+        description: 'Creates cancellation error with optional message'
+        business-context: 'Used when operations are cancelled via AbortSignal'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Optional error message'
+            optional: true
+
+        examples:
+          - id: 'cancellation-error'
+            code: |
+              throw new OperationCancelledError('Operation was cancelled');

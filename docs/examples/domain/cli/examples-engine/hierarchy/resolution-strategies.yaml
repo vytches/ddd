@@ -1,0 +1,197 @@
+# Metadata Resolution Strategies - Enhanced Metadata System V2 Core
+
+# === FILE METADATA ===
+file-name: 'resolution-strategies'
+title: 'MetadataResolutionStrategies - Hierarchical Resolution Engine'
+description: 'Core resolution strategies for Enhanced Metadata System with hierarchical metadata processing'
+business-context: 'Central component of Enhanced Metadata System V2 that processes hierarchical metadata through merge, replace, and append strategies for optimal inheritance patterns'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  MetadataResolutionStrategies:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Hierarchical metadata resolution strategies engine for Enhanced Metadata System V2'
+      business-context: 'Core engine that processes hierarchical metadata inheritance using configurable resolution strategies (merge, replace, append) to optimize documentation generation'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Metadata resolution strategies for Enhanced Metadata System V2'
+        cli:
+          description: |
+            ## MetadataResolutionStrategies
+            Advanced hierarchical resolution engine with multiple inheritance strategies for Enhanced Metadata System
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Strategy Pattern'
+        category: 'Enhanced Metadata System'
+        features: 'Hierarchical resolution, merge strategies, inheritance patterns, metadata optimization'
+        resolution-engine: 'Core Enhanced Metadata System V2 resolution component'
+
+    # Methods
+    methods:
+      applyHierarchy:
+        description: 'Apply hierarchical resolution with different strategies'
+        business-context: 'Main resolution method that processes hierarchical metadata sources using configurable strategies to create optimal inheritance patterns for documentation generation'
+
+        parameters:
+          - name: 'sources'
+            type: 'MetadataSource[]'
+            description: 'Array of hierarchical metadata sources to resolve (global, package, class, method levels)'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Fully resolved metadata with applied hierarchical strategies'
+
+        examples:
+          - id: 'hierarchical-resolution'
+            code: |
+              const sources = [globalSettings, packageSettings, classMetadata];
+              const resolved = MetadataResolutionStrategies.applyHierarchy(sources);
+              // Returns optimally resolved metadata with strategy-based inheritance
+          - id: 'multi-level-hierarchy'
+            code: |
+              // Process metadata from multiple levels:
+              // 1. Global settings (docs/global-settings.yaml)
+              // 2. Package settings (packages/*/md-settings.yaml)  
+              // 3. Class metadata (docs/examples/domain/*/class.yaml)
+              // 4. Method metadata (docs/examples/domain/*/method.yaml)
+              const resolved = MetadataResolutionStrategies.applyHierarchy([
+                globalMetadata,
+                packageMetadata, 
+                classMetadata,
+                methodMetadata
+              ]);
+
+        custom-tags:
+          main-method: 'Primary hierarchical resolution interface'
+          strategy-application: 'Applies configured resolution strategies'
+          hierarchy-processing: 'Processes multi-level metadata inheritance'
+          optimization: 'Optimizes metadata for target output format'
+
+      mergeStrategy:
+        description: 'Merge strategy - combines content from lower levels, higher levels override lower levels'
+        business-context: 'Combines metadata from hierarchical levels where higher-level metadata overrides lower-level metadata while preserving non-conflicting properties'
+
+        parameters:
+          - name: 'base'
+            type: 'ResolvedMetadata'
+            description: 'Base metadata from lower hierarchy level'
+          - name: 'override'
+            type: 'ResolvedMetadata'
+            description: 'Override metadata from higher hierarchy level'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Merged metadata with higher-level precedence'
+
+        examples:
+          - id: 'merge-resolution'
+            code: |
+              // Internal strategy - merges hierarchical levels
+              // Global: { description: "Base", author: "Team" }
+              // Class:  { description: "Specific", since: "1.0.0" }
+              // Result: { description: "Specific", author: "Team", since: "1.0.0" }
+          - id: 'property-preservation'
+            code: |
+              // Preserves non-conflicting properties from lower levels
+              // Overrides conflicting properties with higher-level values
+              // Maintains metadata completeness across hierarchy
+
+        custom-tags:
+          private: true
+          strategy-type: 'Merge with precedence'
+          hierarchy-behavior: 'Higher levels override, preserve non-conflicts'
+          default-strategy: 'Default resolution strategy for Enhanced Metadata System'
+
+      replaceStrategy:
+        description: 'Replace strategy - completely overrides content from lower levels'
+        business-context: 'Completely replaces lower-level metadata with higher-level metadata, discarding all properties from lower levels for complete customization'
+
+        parameters:
+          - name: 'base'
+            type: 'ResolvedMetadata'
+            description: 'Base metadata from lower hierarchy level (will be replaced)'
+          - name: 'override'
+            type: 'ResolvedMetadata'
+            description: 'Override metadata that completely replaces base metadata'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Completely replaced metadata from higher level'
+
+        examples:
+          - id: 'replace-resolution'
+            code: |
+              // Internal strategy - complete replacement
+              // Global: { description: "Base", author: "Team", since: "1.0.0" }
+              // Method: { description: "Custom", warning: "Important" }
+              // Result: { description: "Custom", warning: "Important" }
+          - id: 'complete-override'
+            code: |
+              // Use when method-specific metadata should completely
+              // override inherited metadata without any merging
+              // Provides full control for special cases
+
+        custom-tags:
+          private: true
+          strategy-type: 'Complete replacement'
+          hierarchy-behavior: 'Higher levels completely replace lower levels'
+          use-case: 'Special cases requiring complete metadata customization'
+
+      appendStrategy:
+        description: 'Append strategy - adds content to existing metadata'
+        business-context: 'Appends higher-level metadata to lower-level metadata, combining content additively without replacement for comprehensive documentation'
+
+        parameters:
+          - name: 'base'
+            type: 'ResolvedMetadata'
+            description: 'Base metadata from lower hierarchy level'
+          - name: 'addition'
+            type: 'ResolvedMetadata'
+            description: 'Additional metadata to append to base metadata'
+
+        returns:
+          type: 'ResolvedMetadata'
+          description: 'Combined metadata with appended content'
+
+        examples:
+          - id: 'append-resolution'
+            code: |
+              // Internal strategy - content appending
+              // Global: { description: "Base functionality" }
+              // Method: { description: "\n\nSpecial considerations" }
+              // Result: { description: "Base functionality\n\nSpecial considerations" }
+          - id: 'additive-enhancement'
+            code: |
+              // Preserves all content from lower levels
+              // Adds additional content from higher levels
+              // Creates comprehensive combined documentation
+
+        custom-tags:
+          private: true
+          strategy-type: 'Additive combination'
+          hierarchy-behavior: 'Combines content from all levels'
+          use-case: 'Building comprehensive documentation from multiple sources'
+
+# === IMPORTED TYPES ===
+imported:
+  MetadataSource:
+    description: 'Hierarchical metadata source with strategy configuration'
+    business-context: 'Represents metadata from specific hierarchy level (global, package, class, method) with resolution strategy'
+
+  ResolvedMetadata:
+    description: 'Fully processed metadata after hierarchical resolution'
+    business-context: 'Final metadata structure after applying resolution strategies across hierarchy levels'

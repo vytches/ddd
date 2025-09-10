@@ -1,0 +1,272 @@
+# Template Engine - Code Generation Template Processing
+
+# === FILE METADATA ===
+file-name: 'template-engine'
+title: 'Template Engine - Code Generation Processing'
+description: 'Handlebars-based template engine for dynamic code generation'
+business-context: 'Processes code generation templates with context substitution and helper functions'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  TemplateEngine:
+    class-doc:
+      description: 'Handlebars template processing engine for code generation'
+      business-context: 'Provides template processing with custom helpers and context enhancement'
+
+    methods:
+      constructor:
+        description: 'Creates template engine with Handlebars initialization'
+        business-context: 'Initializes engine with custom helpers and template registry'
+
+        examples:
+          - code: |
+              import { TemplateEngine } from '@vytches/ddd-cli';
+
+              const engine = new TemplateEngine();
+
+      create:
+        description: 'Factory method to create template engine instance'
+        business-context: 'Provides convenient engine creation with standard setup'
+
+        returns:
+          type: 'TemplateEngine'
+          description: 'Configured template engine instance'
+
+        custom-tags:
+          static: 'true'
+          factory-method: 'true'
+
+        examples:
+          - code: |
+              const engine = TemplateEngine.create();
+
+              // Engine ready for template processing
+              await engine.loadTemplatesFromDirectory('./templates');
+
+      registerTemplate:
+        description: 'Register template content with name identifier'
+        business-context: 'Adds template to registry for rendering operations'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Template identifier for future reference'
+
+          - name: 'content'
+            type: 'string'
+            description: 'Handlebars template content'
+
+        returns:
+          type: 'void'
+          description: 'Template registered successfully'
+
+        examples:
+          - code: |
+              const templateContent = `
+              export class {{className}} extends {{baseClass}} {
+                constructor({{#each properties}}{{name}}: {{type}}{{#unless @last}}, {{/unless}}{{/each}}) {
+                  super();
+                  {{#each properties}}
+                  this.{{name}} = {{name}};
+                  {{/each}}
+                }
+              }`;
+
+              engine.registerTemplate('entity-class', templateContent);
+
+      registerPartial:
+        description: 'Register partial template for reuse in other templates'
+        business-context: 'Enables template composition and code reuse'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Partial template identifier'
+
+          - name: 'content'
+            type: 'string'
+            description: 'Partial template content'
+
+        returns:
+          type: 'void'
+          description: 'Partial registered successfully'
+
+        examples:
+          - code: |
+              // Register property partial
+              const propertyPartial = `
+                private {{name}}: {{type}};
+              `;
+
+              engine.registerPartial('property', propertyPartial);
+
+              // Use in main template with {{>property}}
+
+      loadTemplate:
+        description: 'Load template from file system'
+        business-context: 'Reads template file and registers it for use'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Template identifier'
+
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to template file'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Template loaded and registered'
+
+        custom-tags:
+          async: 'true'
+          file-io: 'true'
+
+        examples:
+          - code: |
+              // Load entity template
+              await engine.loadTemplate('entity', './templates/entity.hbs');
+
+              // Load aggregate template
+              await engine.loadTemplate('aggregate', './templates/aggregate.hbs');
+
+      loadTemplatesFromDirectory:
+        description: 'Load all templates from directory recursively'
+        business-context: 'Batch template loading for template directory structures'
+
+        parameters:
+          - name: 'directory'
+            type: 'string'
+            description: 'Directory path containing template files'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'All templates loaded successfully'
+
+        custom-tags:
+          async: 'true'
+          batch-operation: 'true'
+
+        examples:
+          - code: |
+              // Load all templates from directory
+              await engine.loadTemplatesFromDirectory('./templates');
+
+              // Templates now available by filename (without .hbs extension)
+              const entityCode = engine.render('entity', context);
+
+      render:
+        description: 'Render registered template with context data'
+        business-context: 'Main template rendering operation for code generation'
+
+        parameters:
+          - name: 'templateName'
+            type: 'string'
+            description: 'Name of registered template'
+
+          - name: 'context'
+            type: 'TemplateContext'
+            description: 'Data context for template substitution'
+
+        returns:
+          type: 'string'
+          description: 'Rendered template output'
+
+        examples:
+          - code: |
+              const context = {
+                className: 'User',
+                baseClass: 'Entity',
+                properties: [
+                  { name: 'id', type: 'EntityId' },
+                  { name: 'email', type: 'string' },
+                  { name: 'name', type: 'string' }
+                ]
+              };
+
+              const code = engine.render('entity-class', context);
+
+      renderString:
+        description: 'Render template string directly without registration'
+        business-context: 'One-off template rendering for dynamic template content'
+
+        parameters:
+          - name: 'template'
+            type: 'string'
+            description: 'Handlebars template string'
+
+          - name: 'context'
+            type: 'TemplateContext'
+            description: 'Data context for rendering'
+
+        returns:
+          type: 'string'
+          description: 'Rendered template output'
+
+        examples:
+          - code: |
+              const templateString = 'Hello {{name}}! Framework: {{framework}}';
+              const context = { name: 'Developer', framework: 'NestJS' };
+
+              const output = engine.renderString(templateString, context);
+              // Output: "Hello Developer! Framework: NestJS"
+
+      getTemplateNames:
+        description: 'Get list of all registered template names'
+        business-context: 'Template discovery for validation and debugging'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of registered template names'
+
+        examples:
+          - code: |
+              const templates = engine.getTemplateNames();
+
+              console.log('Available templates:');
+              templates.forEach(name => {
+                console.log(`  - ${name}`);
+              });
+
+      hasTemplate:
+        description: 'Check if template is registered'
+        business-context: 'Template existence validation before rendering'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Template name to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if template exists'
+
+        examples:
+          - code: |
+              if (engine.hasTemplate('entity')) {
+                const code = engine.render('entity', context);
+              } else {
+                console.error('Entity template not found');
+              }
+
+      registerHelpers:
+        description: 'Register custom Handlebars helper functions'
+        business-context: 'Provides template helpers for code generation patterns'
+
+        custom-tags:
+          private: 'true'
+          helpers: 'true'
+
+      enhanceContext:
+        description: 'Enhance context with standard variables and utilities'
+        business-context: 'Adds common variables like timestamps, formatting helpers'
+
+        custom-tags:
+          private: 'true'
+          context-enhancement: 'true'

@@ -1,0 +1,428 @@
+# DI Types - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'di-types'
+title: 'Domain Service DI Types - Dependency Injection Integration'
+description: 'TypeScript types and interfaces for domain services dependency injection integration'
+business-context: 'Enables seamless integration between domain services and the VytchesDDD dependency injection system'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  ContextResolutionStrategy:
+    description: 'Strategy for resolving bounded context during service resolution'
+    business-context: 'Defines how DI container determines which bounded context to use for service resolution'
+
+    type: 'union'
+    values:
+      - name: 'auto'
+        description: 'Auto-detect context from call stack or class location'
+        business-context: 'Automatically determines context based on calling code location'
+      - name: 'explicit'
+        description: 'Use explicitly provided context parameter'
+        business-context: 'Uses context explicitly passed in resolution request'
+      - name: 'global'
+        description: 'Always use global container regardless of context'
+        business-context: 'Forces resolution from global container'
+      - name: 'inherit'
+        description: 'Inherit context from parent service in dependency chain'
+        business-context: 'Uses context from parent service during dependency resolution'
+
+    examples:
+      - id: 'basic'
+        code: |
+          const strategy: ContextResolutionStrategy = 'auto';
+          // Service will auto-detect bounded context during resolution
+
+      - id: 'explicit'
+        code: |
+          const strategy: ContextResolutionStrategy = 'explicit';
+          // Service requires explicit context parameter
+
+    custom-tags:
+      since: '1.0.0'
+      pattern: 'Strategy Pattern'
+      context-resolution: 'Controls context resolution behavior'
+
+# === INTERFACES ===
+interfaces:
+  DIDecoratorOptions:
+    # Interface Documentation
+    interface-doc:
+      description: 'Base configuration options for dependency injection decorator integration'
+      business-context: 'Defines the core configuration structure for DI system integration with domain services'
+
+      custom-tags:
+        since: '1.0.0'
+        di-integration: 'Core DI configuration interface'
+
+    # Properties
+    properties:
+      - name: 'lifetime'
+        type: 'ServiceLifetime'
+        description: 'Service lifetime in the DI container controlling instance creation and sharing'
+        optional: true
+        default: 'transient'
+        business-context: 'Controls service instance lifecycle - transient, singleton, or scoped'
+
+      - name: 'context'
+        type: 'string'
+        description: 'Bounded context for DI registration, enabling context-specific service isolation'
+        business-context: 'Enables bounded context isolation for domain services'
+
+      - name: 'autoRegister'
+        type: 'boolean'
+        description: 'Whether to automatically register this service with the DI container during discovery'
+        optional: true
+        default: true
+        business-context: 'Enables automatic service registration during container initialization'
+
+      - name: 'dependencies'
+        type: 'string[]'
+        description: 'Explicit dependencies for documentation and validation during container registration'
+        optional: true
+        business-context: 'Declares service dependencies for proper initialization order validation'
+
+      - name: 'tags'
+        type: 'string[]'
+        description: 'Service tags for organization, discovery, and applying cross-cutting concerns'
+        business-context: 'Enables service categorization and batch operations on related services'
+
+      - name: 'contextResolver'
+        type: 'ContextResolutionStrategy'
+        description: 'Strategy for determining bounded context during service resolution'
+        optional: true
+        default: 'auto'
+        business-context: 'Controls how bounded context is determined during service resolution'
+
+      - name: 'fallbackToGlobal'
+        type: 'boolean'
+        description: 'Whether to fallback to global container if service not found in specified context'
+        optional: true
+        default: true
+        business-context: 'Enables fallback resolution when services are not found in bounded context'
+
+  EnhancedDomainServiceOptions:
+    # Interface Documentation
+    interface-doc:
+      description: 'Enhanced configuration options combining domain service features with DI capabilities'
+      business-context: 'Complete configuration interface for domain services with full DI integration and service capabilities'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Enhanced domain service configuration with DI integration'
+        cli:
+          description: |
+            ## EnhancedDomainServiceOptions
+
+            Complete configuration interface for domain services.
+            Combines DI integration with domain service-specific capabilities.
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'DIDecoratorOptions'
+        enhanced: 'Full-featured domain service configuration'
+
+    # Properties
+    properties:
+      - name: 'serviceId'
+        type: 'string'
+        description: 'Unique identifier for the service used for registration and lookup'
+        business-context: 'Primary key for service registration in DI container'
+
+      - name: 'dependencies'
+        type: 'string[]'
+        description: 'Service dependencies by ID that will be injected during service creation'
+        business-context: 'Explicit dependency declaration for proper service initialization'
+
+      - name: 'transactional'
+        type: 'boolean'
+        description: 'Whether this service requires transactional consistency through Unit of Work integration'
+        business-context: 'Enables automatic Unit of Work configuration for transactional operations'
+
+      - name: 'async'
+        type: 'boolean'
+        description: 'Whether this service has asynchronous lifecycle requiring initialize() call after creation'
+        business-context: 'Enables async lifecycle management for services with external dependencies'
+
+      - name: 'publishesEvents'
+        type: 'boolean'
+        description: 'Whether this service publishes domain events and needs event bus configuration'
+        business-context: 'Enables automatic event bus injection for event-driven services'
+
+      - name: 'caching'
+        type: 'object'
+        description: 'Configuration for result caching to optimize expensive service operations'
+        business-context: 'Enables result caching for performance optimization'
+        properties:
+          - name: 'enabled'
+            type: 'boolean'
+            description: 'Whether caching is enabled for this service'
+          - name: 'ttl'
+            type: 'number'
+            description: 'Time-to-live in seconds for cached results'
+            optional: true
+
+  DIServiceMetadata:
+    # Interface Documentation
+    interface-doc:
+      description: 'Complete metadata structure for domain services with DI integration capabilities'
+      business-context: 'Internal metadata structure used by DI system for service registration, discovery, and lifecycle management'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Complete DI service metadata for auto-discovery and registration'
+        cli:
+          description: |
+            ## DIServiceMetadata
+
+            Complete metadata structure for DI-integrated domain services.
+            Used internally by the DI system for service management and auto-discovery.
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'EnhancedDomainServiceOptions'
+        internal: 'Used internally by DI system'
+        metadata: 'Service metadata structure'
+
+    # Properties
+    properties:
+      - name: 'serviceType'
+        type: 'new (...args: any[]) => any'
+        description: 'The domain service class constructor for instantiation'
+        business-context: 'Class constructor used by DI container to create service instances'
+
+      - name: 'serviceId'
+        type: 'string'
+        description: 'Service ID for registration and resolution'
+        business-context: 'Unique identifier for service registration in DI container'
+
+      - name: 'isRegistered'
+        type: 'boolean'
+        description: 'Whether this service has been registered with DI container'
+        optional: true
+        business-context: 'Tracks registration status during auto-discovery process'
+
+      - name: 'createdAt'
+        type: 'Date'
+        description: 'Timestamp when metadata was created for debugging and diagnostics'
+        business-context: 'Provides metadata creation time for debugging and system diagnostics'
+
+# === CLASSES ===
+classes:
+  DIDomainServiceMetadataRegistry:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Registry for managing domain service metadata during auto-discovery and DI integration'
+      business-context: 'Central registry for tracking and managing domain service metadata for DI system integration'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Metadata registry for DI-integrated domain services'
+        cli:
+          description: |
+            ## DIDomainServiceMetadataRegistry
+
+            Central registry for domain service metadata management.
+            Supports auto-discovery and DI container integration.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry Pattern'
+        singleton: 'Static registry implementation'
+        auto-discovery: 'Supports service auto-discovery'
+
+    # Methods
+    methods:
+      registerService:
+        description: 'Register domain service metadata for DI integration'
+        business-context: 'Adds service metadata to registry for later auto-discovery and DI container registration'
+
+        parameters:
+          - name: 'metadata'
+            type: 'DIServiceMetadata'
+            description: 'Complete service metadata including DI configuration'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const metadata: DIServiceMetadata = {
+                serviceType: PaymentService,
+                serviceId: 'paymentService',
+                lifetime: ServiceLifetime.Singleton,
+                context: 'PaymentManagement',
+                // ... other metadata
+              };
+              DIDomainServiceMetadataRegistry.registerService(metadata);
+
+        custom-tags:
+          static: 'Static method'
+          registration: 'Service metadata registration'
+
+      getService:
+        description: 'Get domain service metadata by service ID'
+        business-context: 'Retrieves service metadata for DI container registration or inspection'
+
+        parameters:
+          - name: 'serviceId'
+            type: 'string'
+            description: 'The service ID to look up'
+
+        returns:
+          type: 'DIServiceMetadata | undefined'
+          description: 'Service metadata if found, undefined otherwise'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const metadata = DIDomainServiceMetadataRegistry.getService('paymentService');
+              if (metadata) {
+                console.log('Found service:', metadata.serviceId);
+                console.log('Context:', metadata.context);
+              }
+
+        custom-tags:
+          static: 'Static method'
+          lookup: 'Service metadata lookup'
+
+      getAllServices:
+        description: 'Get all registered domain services with DI metadata'
+        business-context: 'Retrieves all service metadata for bulk operations like container initialization'
+
+        returns:
+          type: 'DIServiceMetadata[]'
+          description: 'Array of all registered service metadata'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const allServices = DIDomainServiceMetadataRegistry.getAllServices();
+              console.log(`Found ${allServices.length} registered services`);
+
+              // Bulk container registration
+              allServices.forEach(service => {
+                if (service.autoRegister) {
+                  container.register(service);
+                }
+              });
+
+        custom-tags:
+          static: 'Static method'
+          bulk-operations: 'Supports bulk service operations'
+
+      getServicesByContext:
+        description: 'Get services by bounded context'
+        business-context: 'Retrieves services for a specific bounded context for context-isolated container setup'
+
+        parameters:
+          - name: 'context'
+            type: 'string'
+            description: 'The bounded context to filter by'
+
+        returns:
+          type: 'DIServiceMetadata[]'
+          description: 'Array of services in the specified context'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const paymentServices = DIDomainServiceMetadataRegistry.getServicesByContext('PaymentManagement');
+
+              // Setup context-specific container
+              const paymentContainer = new ContextContainer('PaymentManagement');
+              paymentServices.forEach(service => paymentContainer.register(service));
+
+        custom-tags:
+          static: 'Static method'
+          context-filtering: 'Bounded context filtering'
+
+      getServicesByTag:
+        description: 'Get services by tag for cross-cutting concerns'
+        business-context: 'Retrieves services with specific tags for applying cross-cutting concerns like caching or monitoring'
+
+        parameters:
+          - name: 'tag'
+            type: 'string'
+            description: 'The tag to filter by'
+
+        returns:
+          type: 'DIServiceMetadata[]'
+          description: 'Array of services with the specified tag'
+
+        examples:
+          - id: 'basic'
+            code: |
+              // Get all services with 'cacheable' tag
+              const cacheableServices = DIDomainServiceMetadataRegistry.getServicesByTag('cacheable');
+
+              // Apply caching decorator to all cacheable services
+              cacheableServices.forEach(service => {
+                container.addDecorator(service.serviceId, new CachingDecorator());
+              });
+
+        custom-tags:
+          static: 'Static method'
+          tag-filtering: 'Service tag filtering'
+
+      hasService:
+        description: 'Check if a service is registered in the metadata registry'
+        business-context: 'Verifies service registration status for validation and debugging'
+
+        parameters:
+          - name: 'serviceId'
+            type: 'string'
+            description: 'The service ID to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if service is registered, false otherwise'
+
+        examples:
+          - id: 'basic'
+            code: |
+              if (DIDomainServiceMetadataRegistry.hasService('paymentService')) {
+                console.log('Payment service is registered');
+              } else {
+                console.warn('Payment service not found in registry');
+              }
+
+        custom-tags:
+          static: 'Static method'
+          validation: 'Service registration validation'
+
+      clear:
+        description: 'Clear all registered services from the metadata registry'
+        business-context: 'Cleanup method primarily used for testing and container reset scenarios'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        examples:
+          - id: 'testing'
+            code: |
+              // Test setup - clear registry
+              beforeEach(() => {
+                DIDomainServiceMetadataRegistry.clear();
+              });
+
+        custom-tags:
+          static: 'Static method'
+          testing: 'Used primarily for testing'
+          cleanup: 'Registry cleanup operation'

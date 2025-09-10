@@ -1,0 +1,178 @@
+# Domain Primitives Actor Interface - Actor Identification System
+# Enhanced Metadata System V2 - Actor tracking for audit and authorization
+
+# === FILE METADATA ===
+file-name: 'actor-interface'
+title: 'Domain Primitives Actor Interface - Actor Identification System'
+description: 'Core actor identification interface and default actor types for audit and authorization'
+business-context: 'Comprehensive actor tracking system enabling audit trails, authorization decisions, and action attribution across all DDD operations'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === ENUMS ===
+enums:
+  DefaultActorType:
+    description: 'Standard actor types for common domain scenarios'
+    business-context: 'Predefined actor classifications covering typical enterprise actors including users, systems, and organizational entities'
+
+    custom-tags:
+      since: '1.0.0'
+      stability: 'stable'
+      category: 'foundation'
+      extensible: 'Custom types can be used alongside defaults'
+
+    values:
+      - name: 'USER'
+        value: 'user'
+        description: 'Human user actor (customer, employee, end-user)'
+      - name: 'SYSTEM'
+        value: 'system'
+        description: 'Automated system actor (background processes, scheduled jobs)'
+      - name: 'ADMIN'
+        value: 'admin'
+        description: 'Administrative user with elevated privileges'
+      - name: 'GUEST'
+        value: 'guest'
+        description: 'Anonymous or unauthenticated user'
+      - name: 'ORGANIZATION'
+        value: 'organization'
+        description: 'Organizational entity actor (company, department)'
+      - name: 'TEAM'
+        value: 'team'
+        description: 'Team or group actor (project team, working group)'
+      - name: 'SERVICE'
+        value: 'service'
+        description: 'Microservice or external service actor'
+
+    examples:
+      - id: 'actor-type-usage'
+        code: |
+          // Using predefined actor types
+          const userActor: IActor = {
+            type: DefaultActorType.USER,
+            source: 'web-app',
+            id: 'user-123'
+          };
+
+          const systemActor: IActor = {
+            type: DefaultActorType.SYSTEM,
+            source: 'batch-processor',
+            metadata: { jobId: 'job-456' }
+          };
+
+          // Using custom actor type
+          const botActor: IActor = {
+            type: 'chatbot', // Custom type
+            source: 'ai-service',
+            id: 'bot-support'
+          };
+
+# === INTERFACES ===
+interfaces:
+  IActor:
+    description: 'Actor identification interface for audit and authorization'
+    business-context: 'Core interface tracking who initiated actions for comprehensive audit trails, authorization decisions, and debugging information'
+
+    custom-tags:
+      since: '1.0.0'
+      stability: 'stable'
+      category: 'foundation'
+      enterprise: 'true'
+      thread-safe: 'true'
+      required-in: 'audit-capability'
+
+    properties:
+      - name: 'type'
+        type: 'string | DefaultActorType'
+        description: 'Actor type classification (predefined or custom)'
+        required: true
+        examples:
+          - 'DefaultActorType.USER'
+          - 'DefaultActorType.SYSTEM'
+          - '"custom-bot-type"'
+
+      - name: 'source'
+        type: 'string'
+        description: 'Source system or application identifier'
+        required: true
+        examples:
+          - '"web-app"'
+          - '"mobile-app"'
+          - '"payment-service"'
+          - '"admin-panel"'
+
+      - name: 'id'
+        type: 'string'
+        description: 'Unique identifier for the actor within the source system'
+        required: false
+        examples:
+          - '"user-123"'
+          - '"svc-payment-01"'
+          - '"admin-456"'
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Additional contextual information about the actor'
+        required: false
+        examples:
+          - '{ ip: "192.168.1.1", sessionId: "sess-789" }'
+          - '{ version: "2.1.0", environment: "production" }'
+          - '{ department: "finance", role: "manager" }'
+
+    examples:
+      - id: 'user-actor'
+        code: |
+          const userActor: IActor = {
+            type: DefaultActorType.USER,
+            source: 'mobile-app',
+            id: 'user-456',
+            metadata: {
+              ip: '192.168.1.1',
+              device: 'iPhone',
+              sessionId: 'sess-789',
+              userAgent: 'MyApp/1.2.0'
+            }
+          };
+
+      - id: 'service-actor'
+        code: |
+          const serviceActor: IActor = {
+            type: DefaultActorType.SERVICE,
+            source: 'payment-service',
+            id: 'svc-payment-01',
+            metadata: {
+              version: '2.1.0',
+              environment: 'production',
+              region: 'us-east-1',
+              instanceId: 'i-1234567890abcdef0'
+            }
+          };
+
+      - id: 'system-actor'
+        code: |
+          const systemActor: IActor = {
+            type: DefaultActorType.SYSTEM,
+            source: 'cron-scheduler',
+            metadata: {
+              cronExpression: '0 0 * * *',
+              jobName: 'daily-report-generation',
+              triggeredAt: '2024-01-01T00:00:00Z'
+            }
+          };
+
+      - id: 'custom-actor'
+        code: |
+          // Using custom actor type for specialized scenarios
+          const apiActor: IActor = {
+            type: 'api-client', // Custom type
+            source: 'partner-integration',
+            id: 'client-partner-xyz',
+            metadata: {
+              apiKey: 'masked-for-security',
+              rateLimitTier: 'premium',
+              allowedOperations: ['read', 'write']
+            }
+          };
