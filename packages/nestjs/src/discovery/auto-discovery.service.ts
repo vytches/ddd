@@ -14,6 +14,33 @@ import {
 import type { AutoDiscoveryOptions } from '../types';
 
 /**
+ * Represents a class constructor with metadata
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ClassConstructor = new (...args: any[]) => any;
+
+/**
+ * Represents module metadata structure
+ */
+interface ModuleMetadata {
+  providers?: unknown[];
+  controllers?: unknown[];
+}
+
+/**
+ * Represents decorator metadata
+ */
+interface DecoratorMetadata {
+  serviceId?: string;
+  lifetime?: string;
+  context?: string;
+  tags?: string[];
+  commandType?: string;
+  queryType?: string;
+  eventTypes?: string[];
+}
+
+/**
  * Service for auto-discovering and registering DDD decorators
  */
 @Injectable()
@@ -52,7 +79,7 @@ export class AutoDiscoveryService {
   /**
    * Process a single module for decorated classes
    */
-  private async processModule(module: any): Promise<void> {
+  private async processModule(module: ModuleMetadata): Promise<void> {
     // Get module metadata
     const providers = Reflect.getMetadata('providers', module) || [];
     const controllers = Reflect.getMetadata('controllers', module) || [];
@@ -71,7 +98,7 @@ export class AutoDiscoveryService {
   /**
    * Process a single class for DDD decorators
    */
-  private async processClass(target: any): Promise<void> {
+  private async processClass(target: ClassConstructor): Promise<void> {
     if (!target || typeof target !== 'function') {
       return;
     }
@@ -110,7 +137,7 @@ export class AutoDiscoveryService {
   /**
    * Register a domain service
    */
-  private async registerDomainService(target: any, metadata: any): Promise<void> {
+  private async registerDomainService(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -129,7 +156,7 @@ export class AutoDiscoveryService {
   /**
    * Register a command handler
    */
-  private async registerCommandHandler(target: any, metadata: any): Promise<void> {
+  private async registerCommandHandler(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -139,7 +166,7 @@ export class AutoDiscoveryService {
     const commandBus = this.adapter.resolve<CommandBus>('commandBus');
     if (commandBus && 'register' in commandBus) {
       // Create handler instance
-      const handler = this.adapter.resolve<any>(target);
+      const handler = this.adapter.resolve<unknown>(target);
 
       // Register with command bus
       commandBus.register(metadata.commandType, handler);
@@ -155,7 +182,7 @@ export class AutoDiscoveryService {
   /**
    * Register a query handler
    */
-  private async registerQueryHandler(target: any, metadata: any): Promise<void> {
+  private async registerQueryHandler(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -165,7 +192,7 @@ export class AutoDiscoveryService {
     const queryBus = this.adapter.resolve<QueryBus>('queryBus');
     if (queryBus && 'register' in queryBus) {
       // Create handler instance
-      const handler = this.adapter.resolve<any>(target);
+      const handler = this.adapter.resolve<unknown>(target);
 
       // Register with query bus
       queryBus.register(metadata.queryType, handler);
@@ -181,7 +208,7 @@ export class AutoDiscoveryService {
   /**
    * Register an event handler
    */
-  private async registerEventHandler(target: any, metadata: any): Promise<void> {
+  private async registerEventHandler(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -191,7 +218,7 @@ export class AutoDiscoveryService {
     const eventBus = this.adapter.resolve<UnifiedEventBus>('eventBus');
     if (eventBus && 'subscribe' in eventBus) {
       // Create handler instance
-      const handler = this.adapter.resolve<any>(target);
+      const handler = this.adapter.resolve<unknown>(target);
 
       // Subscribe to events
       if (metadata.eventTypes && Array.isArray(metadata.eventTypes)) {
@@ -213,7 +240,7 @@ export class AutoDiscoveryService {
   /**
    * Register a saga
    */
-  private async registerSaga(target: any, metadata: any): Promise<void> {
+  private async registerSaga(target: ClassConstructor, metadata: DecoratorMetadata): Promise<void> {
     // Check if context matches filter
     if (!this.matchesContext(metadata.context)) {
       return;
@@ -249,7 +276,7 @@ export class AutoDiscoveryService {
    * This is a simplified version - actual implementation would need
    * to traverse the module tree from the root module
    */
-  private getAllModules(): any[] {
+  private getAllModules(): ModuleMetadata[] {
     // This would need to be implemented based on NestJS internals
     // For now, return empty array - modules will be processed
     // as they are loaded

@@ -23,20 +23,20 @@ export function createProviders(serviceIds: string[]) {
 /**
  * Helper to check if a value is a class constructor
  */
-export function isConstructor(value: any): boolean {
+export function isConstructor(value: unknown): boolean {
   return typeof value === 'function' && value.prototype;
 }
 
 /**
  * Helper to get metadata from a class
  */
-export function getMetadata(key: string | symbol, target: any): any {
+export function getMetadata(key: string | symbol, target: unknown): unknown {
   return Reflect.getMetadata(key, target);
 }
 
 /**
  * Helper to set metadata on a class
  */
-export function setMetadata(key: string | symbol, value: any, target: any): void {
+export function setMetadata(key: string | symbol, value: unknown, target: unknown): void {
   Reflect.defineMetadata(key, value, target);
 }

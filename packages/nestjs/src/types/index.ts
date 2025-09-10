@@ -94,12 +94,12 @@ export interface MiddlewareConfig {
   /**
    * Middleware class
    */
-  class: Type<any>;
+  class: Type<unknown>;
 
   /**
    * Middleware options
    */
-  options?: Record<string, any>;
+  options?: Record<string, unknown>;
 
   /**
    * Apply only to specific contexts
@@ -116,7 +116,7 @@ export interface EventOptions {
    */
   eventStore?: {
     type: 'memory' | 'postgresql' | 'mongodb';
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
   };
 
   /**
@@ -124,7 +124,7 @@ export interface EventOptions {
    */
   eventBus?: {
     type: 'unified' | 'domain' | 'integration';
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
   };
 
   /**
@@ -145,7 +145,7 @@ export interface MessagingOptions {
   /**
    * Provider configuration
    */
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 
   /**
    * Enable saga orchestration
@@ -170,7 +170,7 @@ export interface ContainerOptions {
   /**
    * Custom container factory
    */
-  factory?: () => any;
+  factory?: () => unknown;
 }
 
 /**
@@ -180,17 +180,17 @@ export interface VytchesDDDFeatureOptions {
   /**
    * Services to register
    */
-  services?: string[] | Type<any>[];
+  services?: string[] | Type<unknown>[];
 
   /**
    * Command/Query handlers to register
    */
-  handlers?: Type<any>[];
+  handlers?: Type<unknown>[];
 
   /**
    * Event handlers to register
    */
-  eventHandlers?: Type<any>[];
+  eventHandlers?: Type<unknown>[];
 
   /**
    * Bounded context for this feature
@@ -205,7 +205,7 @@ export interface VytchesDDDTestOptions {
   /**
    * Mock services
    */
-  mocks?: Record<string, any>;
+  mocks?: Record<string, unknown>;
 
   /**
    * Override configuration
@@ -225,12 +225,12 @@ export interface VytchesDDDAsyncOptions extends Pick<ModuleMetadata, 'imports'> 
   /**
    * Injection token for options
    */
-  inject?: any[];
+  inject?: unknown[];
 
   /**
    * Factory function to create options
    */
-  useFactory?: (...args: any[]) => Promise<VytchesDDDOptions> | VytchesDDDOptions;
+  useFactory?: (...args: unknown[]) => Promise<VytchesDDDOptions> | VytchesDDDOptions;
 
   /**
    * Use existing options provider

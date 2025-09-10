@@ -18,7 +18,7 @@ import type { ExtendedServiceRegistrationOptions } from '../types/extended';
 @Injectable()
 export class NestJSContainerAdapter implements IDependencyContainer {
   private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly instances = new Map<string, any>();
+  private readonly instances = new Map<string, unknown>();
   private moduleRef?: ModuleRef;
 
   constructor(moduleRef?: ModuleRef) {
@@ -57,7 +57,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     if (this.moduleRef) {
       try {
         // Try to get from NestJS DI
-        const nestInstance = this.moduleRef.get(token as any, { strict: false });
+        const nestInstance = this.moduleRef.get(token as ServiceToken<T>, { strict: false });
         if (nestInstance) {
           return nestInstance as T;
         }
@@ -178,7 +178,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     // Check NestJS container
     if (this.moduleRef) {
       try {
-        this.moduleRef.get(token as any, { strict: false });
+        this.moduleRef.get(token as ServiceToken<T>, { strict: false });
         return true;
       } catch {
         return false;
@@ -240,7 +240,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     const paramTypes = Reflect.getMetadata('design:paramtypes', constructor) || [];
 
     // Resolve dependencies
-    const dependencies = paramTypes.map((paramType: any) => {
+    const dependencies = paramTypes.map((paramType: Constructor<unknown>) => {
       try {
         return this.resolve(paramType);
       } catch {
@@ -258,8 +258,8 @@ export class NestJSContainerAdapter implements IDependencyContainer {
    * This is a simplified version - full implementation would need access to NestJS internals
    */
   private registerInNestJS(
-    _token: ServiceToken<any>,
-    _implementation: Constructor<any>,
+    _token: ServiceToken<unknown>,
+    _implementation: Constructor<unknown>,
     _options?: ExtendedServiceRegistrationOptions
   ): void {
     // This would require deeper integration with NestJS
