@@ -1,0 +1,481 @@
+# YamlMetadataEngine - Core YAML Metadata Loading System
+
+# === FILE METADATA ===
+file-name: 'yaml-metadata-engine'
+title: 'YamlMetadataEngine - Core Metadata Loading Engine'
+description: 'Core YAML metadata engine that handles ALL metadata loading and hierarchical resolution'
+business-context: 'Central engine for Enhanced Metadata System V2 with performance optimization and hierarchical resolution'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  MetadataConfig:
+    description: 'Configuration interface for metadata loading operations'
+    business-context: 'Defines target package, class, and optional method for metadata resolution'
+
+    properties:
+      - name: 'packageName'
+        type: 'string'
+        description: 'Target package name for metadata loading'
+
+      - name: 'className'
+        type: 'string'
+        description: 'Target class name for metadata resolution'
+
+      - name: 'methodName'
+        type: 'string | undefined'
+        description: 'Optional method name for method-specific metadata'
+
+    custom-tags:
+      since: '1.0.0'
+      usage: 'Metadata loading configuration'
+
+# === CLASSES ===
+classes:
+  YamlMetadataEngine:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Core YAML metadata engine handling ALL metadata loading and hierarchical resolution for Enhanced Metadata System V2'
+      business-context: 'Central performance-optimized engine with multi-level caching and hierarchical metadata resolution'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Core YAML metadata engine with hierarchical resolution'
+        cli:
+          description: |
+            ## YamlMetadataEngine
+
+            Core engine for the Enhanced Metadata System V2 that handles all metadata
+            loading, hierarchical resolution, and performance optimization through
+            multi-level caching and batch operations.
+
+      custom-tags:
+        since: '1.0.0'
+        capabilities: 'Hierarchical resolution, multi-level caching, batch loading'
+        patterns: 'Enhanced Metadata System V2 core engine'
+        performance: 'Optimized with file cache and batch operations'
+
+    # Constructor
+    constructor:
+      description: 'Creates metadata engine with configurable base directory and performance caching'
+      business-context: 'Initializes engine with metadata directory structure and performance optimization systems'
+
+      parameters:
+        - name: 'baseDir'
+          type: 'string | undefined'
+          description: 'Optional base directory for metadata files (defaults to docs/examples/domain/)'
+
+      examples:
+        - id: 'default-constructor'
+          code: |
+            const engine = new YamlMetadataEngine();
+            // Uses default docs/examples/domain/ directory
+
+        - id: 'custom-directory'
+          code: |
+            const engine = new YamlMetadataEngine('/custom/metadata/path');
+            // Uses custom metadata directory
+
+    # Methods
+    methods:
+      loadHierarchicalMetadata:
+        description: 'Loads complete hierarchical metadata for a method using Enhanced Metadata System V2'
+        business-context: 'Main entry point for metadata loading with full hierarchy resolution (global → package → class → method)'
+
+        parameters:
+          - name: 'config'
+            type: 'MetadataConfig'
+            description: 'Configuration specifying package, class, and optional method'
+
+        returns:
+          type: 'Promise<ResolvedMetadata | null>'
+          description: 'Hierarchically resolved metadata or null if not found'
+
+        custom-tags:
+          async: 'true'
+          main-entry-point: 'Primary metadata loading method'
+          hierarchical: 'Uses global → package → class → method resolution'
+          cached: 'Multi-level performance caching'
+
+        examples:
+          - id: 'method-metadata-loading'
+            code: |
+              const metadata = await engine.loadHierarchicalMetadata({
+                packageName: 'aggregates',
+                className: 'AggregateRoot',
+                methodName: 'commit'
+              });
+              // Returns: Complete hierarchical metadata for commit method
+
+          - id: 'class-metadata-loading'
+            code: |
+              const metadata = await engine.loadHierarchicalMetadata({
+                packageName: 'cqrs',
+                className: 'CommandBus'
+                // methodName omitted for class-level metadata
+              });
+              // Returns: Class-level hierarchical metadata
+
+      loadAllMethodsMetadata:
+        description: 'Batch loads metadata for all methods in a class for performance optimization'
+        business-context: 'Performance-optimized batch loading that processes all methods in single operation'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Target package name for batch loading'
+          - name: 'className'
+            type: 'string'
+            description: 'Target class name for batch method loading'
+
+        returns:
+          type: 'Promise<Record<string, ResolvedMetadata | null>>'
+          description: 'Record mapping method names to their resolved metadata'
+
+        custom-tags:
+          async: 'true'
+          batch-operation: 'Loads all methods in single operation'
+          performance-optimized: 'Reduces file I/O operations'
+          cached: 'Results cached for subsequent access'
+
+        examples:
+          - id: 'batch-method-loading'
+            code: |
+              const allMethods = await engine.loadAllMethodsMetadata(
+                'policies',
+                'PolicyBuilder'
+              );
+              // Returns: { create: ResolvedMetadata, build: ResolvedMetadata, ... }
+
+          - id: 'accessing-batch-results'
+            code: |
+              const methods = await engine.loadAllMethodsMetadata('events', 'EventDispatcher');
+              const publishMetadata = methods['publish'];
+              const subscribeMetadata = methods['subscribe'];
+              // Access individual method metadata from batch result
+
+      getCacheStats:
+        description: 'Gets comprehensive cache statistics for performance monitoring and optimization'
+        business-context: 'Provides detailed cache performance metrics for monitoring system efficiency'
+
+        returns:
+          type: 'object'
+          description: 'Cache statistics object with performance metrics'
+
+        properties:
+          - name: 'cacheSize'
+            type: 'number'
+            description: 'Total number of cached entries'
+
+          - name: 'hitRate'
+            type: 'number'
+            description: 'Cache hit rate percentage (0-1)'
+
+          - name: 'hits'
+            type: 'number'
+            description: 'Total cache hits'
+
+          - name: 'misses'
+            type: 'number'
+            description: 'Total cache misses'
+
+          - name: 'reads'
+            type: 'number'
+            description: 'Total file read operations'
+
+          - name: 'parses'
+            type: 'number'
+            description: 'Total YAML parse operations'
+
+        custom-tags:
+          performance-monitoring: 'Provides detailed cache metrics'
+          optimization: 'Helps identify caching effectiveness'
+
+        examples:
+          - id: 'cache-statistics'
+            code: |
+              const stats = engine.getCacheStats();
+              console.log(`Cache hit rate: ${(stats.hitRate * 100).toFixed(2)}%`);
+              console.log(`Cache size: ${stats.cacheSize} entries`);
+              console.log(`File reads: ${stats.reads}, Parses: ${stats.parses}`);
+
+      clearCache:
+        description: 'Clears cache for performance testing or specific file updates'
+        business-context: 'Provides cache invalidation for testing scenarios or when metadata files are updated'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string | undefined'
+            description: 'Optional specific file path to clear from cache (clears all if omitted)'
+
+        returns:
+          type: 'void'
+          description: 'Cache cleared successfully'
+
+        custom-tags:
+          cache-management: 'Cache invalidation for testing and updates'
+          performance-testing: 'Useful for measuring cold vs warm performance'
+
+        examples:
+          - id: 'clear-all-cache'
+            code: |
+              engine.clearCache();
+              // Clears all cached metadata for fresh loading
+
+          - id: 'clear-specific-file'
+            code: |
+              engine.clearCache('/path/to/specific/metadata.yaml');
+              // Clears cache for specific metadata file
+
+      collectMetadataSources:
+        description: 'Collects all metadata source files for hierarchical resolution'
+        business-context: 'Internal method that builds complete source hierarchy for metadata resolution'
+
+        parameters:
+          - name: 'config'
+            type: 'MetadataConfig'
+            description: 'Configuration for metadata source collection'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Array of metadata source file paths in resolution order'
+
+        custom-tags:
+          private: 'true'
+          hierarchical-collection: 'Builds source hierarchy for resolution'
+
+      collectBaseMetadataSources:
+        description: 'Collects base metadata sources (global and package level) for hierarchy'
+        business-context: 'Internal method that gathers foundational metadata sources for hierarchical resolution'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for base metadata collection'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of base metadata source paths'
+
+        custom-tags:
+          private: 'true'
+          base-hierarchy: 'Collects global and package-level sources'
+
+      loadGlobalMetadata:
+        description: 'Loads global metadata configuration from Enhanced Metadata System V2'
+        business-context: 'Loads top-level global settings that apply to all packages and classes'
+
+        returns:
+          type: 'Promise<any>'
+          description: 'Global metadata configuration'
+
+        custom-tags:
+          private: 'true'
+          global-configuration: 'Top-level metadata settings'
+          cached: 'Global metadata cached for performance'
+
+      loadPackageMetadata:
+        description: 'Loads package-specific metadata configuration'
+        business-context: 'Loads package-level metadata that applies to all classes in the package'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for metadata loading'
+
+        returns:
+          type: 'Promise<any>'
+          description: 'Package-specific metadata configuration'
+
+        custom-tags:
+          private: 'true'
+          package-configuration: 'Package-level metadata settings'
+          cached: 'Package metadata cached per package'
+
+      loadClassMetadata:
+        description: 'Loads class-specific metadata from YAML files'
+        business-context: 'Loads class-level metadata that applies to the class and its methods'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for class metadata context'
+          - name: 'className'
+            type: 'string'
+            description: 'Class name for metadata loading'
+
+        returns:
+          type: 'Promise<any>'
+          description: 'Class-specific metadata configuration'
+
+        custom-tags:
+          private: 'true'
+          class-configuration: 'Class-level metadata settings'
+          cached: 'Class metadata cached per class'
+
+      loadMethodMetadata:
+        description: 'Loads method-specific metadata from YAML files or class metadata'
+        business-context: 'Loads method-level metadata that is most specific in the hierarchy'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for method metadata context'
+          - name: 'className'
+            type: 'string'
+            description: 'Class name for method metadata context'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name for specific metadata loading'
+
+        returns:
+          type: 'Promise<any>'
+          description: 'Method-specific metadata configuration'
+
+        custom-tags:
+          private: 'true'
+          method-configuration: 'Method-level metadata settings'
+          cached: 'Method metadata cached per method'
+
+      loadAllMethodsFromClass:
+        description: 'Loads all methods metadata from a class YAML file for batch operations'
+        business-context: 'Performance optimization that extracts all method metadata in single file operation'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for class context'
+          - name: 'className'
+            type: 'string'
+            description: 'Class name for batch method loading'
+
+        returns:
+          type: 'Promise<Record<string, any>>'
+          description: 'Record of all method metadata from class file'
+
+        custom-tags:
+          private: 'true'
+          batch-optimization: 'Loads all methods from class file'
+          performance: 'Single file read for multiple methods'
+
+      parseMetadataFile:
+        description: 'Parses YAML metadata file with error handling and caching'
+        business-context: 'Core file parsing with comprehensive error handling and performance caching'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'Path to YAML metadata file'
+
+        returns:
+          type: 'Promise<any>'
+          description: 'Parsed YAML metadata content'
+
+        custom-tags:
+          private: 'true'
+          file-parsing: 'YAML file parsing with error handling'
+          cached: 'Parsed content cached by file path'
+
+      parseMetadata:
+        description: 'Parses YAML content string into metadata object'
+        business-context: 'Core YAML parsing with structured error handling'
+
+        parameters:
+          - name: 'content'
+            type: 'string'
+            description: 'YAML content string to parse'
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path for error context'
+
+        returns:
+          type: 'any'
+          description: 'Parsed YAML metadata object'
+
+        custom-tags:
+          private: 'true'
+          yaml-parsing: 'YAML string to object conversion'
+          error-handling: 'Structured error reporting'
+
+      parseMethodFromClassFile:
+        description: 'Extracts specific method metadata from parsed class YAML file'
+        business-context: 'Efficient method extraction from class metadata without full parsing'
+
+        parameters:
+          - name: 'classMetadata'
+            type: 'any'
+            description: 'Parsed class metadata object'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to extract'
+
+        returns:
+          type: 'any'
+          description: 'Specific method metadata or null if not found'
+
+        custom-tags:
+          private: 'true'
+          method-extraction: 'Extracts method from class metadata'
+          performance: 'Avoids re-parsing class file'
+
+      parseAllMethodsFromClassFile:
+        description: 'Extracts all method metadata from parsed class YAML file for batch operations'
+        business-context: 'Batch extraction of all methods from class metadata for performance optimization'
+
+        parameters:
+          - name: 'classMetadata'
+            type: 'any'
+            description: 'Parsed class metadata object'
+
+        returns:
+          type: 'Record<string, any>'
+          description: 'Record of all method metadata from class'
+
+        custom-tags:
+          private: 'true'
+          batch-extraction: 'Extracts all methods from class metadata'
+          performance-optimization: 'Single parse for multiple methods'
+
+      convertToCamelCase:
+        description: 'Converts method names to camelCase for metadata key lookup'
+        business-context: 'Normalizes method naming for consistent metadata key resolution'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to convert'
+
+        returns:
+          type: 'string'
+          description: 'CamelCase method name'
+
+        custom-tags:
+          private: 'true'
+          string-normalization: 'Method name normalization'
+
+      toCamelCase:
+        description: 'Utility method for converting strings to camelCase format'
+        business-context: 'General-purpose string conversion for metadata key consistency'
+
+        parameters:
+          - name: 'str'
+            type: 'string'
+            description: 'String to convert to camelCase'
+
+        returns:
+          type: 'string'
+          description: 'CamelCase string'
+
+        custom-tags:
+          private: 'true'
+          utility-method: 'General camelCase conversion'

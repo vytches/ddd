@@ -47,6 +47,31 @@ classes:
         backward-compatibility: 'Maintains compatibility across event schema versions'
         architecture: 'Supports microservices evolution patterns'
 
+    # Properties
+    properties:
+      type:
+        description: 'Capability type identifier for versioning capability'
+        business-context: 'Identifies this capability as versioning type for capability management'
+        type: "'versioning'"
+        readonly: true
+
+        formats:
+          jsdoc:
+            description: 'Versioning capability type identifier'
+
+    # Static Members
+    statics:
+      capabilityType:
+        description: 'Static getter that returns the capability type identifier'
+        business-context: 'Used for capability registration and discovery in the system'
+        returns:
+          type: 'string'
+          description: "Returns 'versioning' as the capability type"
+
+        formats:
+          jsdoc:
+            description: 'Returns versioning capability type'
+
     # Methods
     methods:
       constructor:

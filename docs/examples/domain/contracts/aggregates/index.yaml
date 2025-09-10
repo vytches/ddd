@@ -1,0 +1,41 @@
+# Aggregates Index - Aggregate Contracts Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Aggregate Contracts Package Exports'
+description: 'Aggregate-related interface exports'
+business-context: 'Provides unified access to aggregate contract definitions'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for aggregate contracts and interfaces'
+  business-context: 'Simplifies imports for aggregate-related contracts'
+
+  formats:
+    jsdoc:
+      description: 'Aggregate contracts exports'
+    cli:
+      description: |
+        ## Aggregate Contracts Exports
+
+        Aggregate interfaces including:
+        - Aggregates with event support
+        - Core aggregate contracts
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'aggregates'
+
+# === EXPORTS DOCUMENTATION ===
+exports:
+  IAggregateWithEvents:
+    description: 'Interface for aggregates that support domain events'
+    business-context: 'Contract for event-sourced aggregates with event handling capabilities'
+    source: './aggregate-interfaces'
+    type: 'type'

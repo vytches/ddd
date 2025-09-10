@@ -1,0 +1,230 @@
+# YamlContentResolver - Enhanced Content Resolution with YAML Metadata
+
+# === FILE METADATA ===
+file-name: 'yaml-content-resolver'
+title: 'YamlContentResolver - YAML-Aware Content Resolution'
+description: 'Enhanced content resolver that integrates with Enhanced Metadata System V2 for YAML-driven template content'
+business-context: 'Extends base content resolution with YAML metadata awareness and hierarchical resolution capabilities'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  YamlContentResolver:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Enhanced content resolver that integrates with Enhanced Metadata System V2 using HierarchicalMetadataResolver'
+      business-context: 'Provides YAML metadata-aware content resolution with same hierarchical system as JSDoc generation'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Enhanced content resolver with YAML metadata integration'
+        cli:
+          description: |
+            ## YamlContentResolver
+
+            Enhanced content resolver that extends ContentResolver with full integration
+            to the Enhanced Metadata System V2, providing YAML-driven template content
+            with hierarchical metadata resolution.
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'ContentResolver'
+        capabilities: 'YAML metadata integration with hierarchical resolution'
+        patterns: 'Enhanced Metadata System V2 integration'
+
+    # Constructor
+    constructor:
+      description: 'Creates YAML content resolver with HierarchicalMetadataResolver integration'
+      business-context: 'Initializes resolver with metadata system connection for YAML-aware content resolution'
+
+      examples:
+        - id: 'basic-constructor'
+          code: |
+            const resolver = new YamlContentResolver();
+            // Automatically connects to Enhanced Metadata System V2
+
+    # Methods
+    methods:
+      resolveContent:
+        description: 'Resolves content with YAML metadata awareness using HierarchicalMetadataResolver'
+        business-context: 'Enhanced content resolution that tries YAML metadata first, then falls back to standard resolution'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Target package name for content resolution'
+          - name: 'requestedPath'
+            type: 'string'
+            description: 'Requested content path with YAML metadata support'
+
+        returns:
+          type: 'string'
+          description: 'Resolved content from YAML metadata or standard fallbacks'
+
+        custom-tags:
+          static: 'true'
+          override: 'true'
+          enhanced-metadata: 'Uses HierarchicalMetadataResolver'
+          resolution-order: 'YAML → TypeScript config → Standard fallbacks'
+
+        examples:
+          - id: 'yaml-aware-resolution'
+            code: |
+              const content = YamlContentResolver.resolveContent(
+                'aggregates',
+                'aggregate-root/commit'
+              );
+              // Returns: YAML metadata-driven content with hierarchical resolution
+
+          - id: 'fallback-resolution'
+            code: |
+              const content = YamlContentResolver.resolveContent(
+                'messaging',
+                'saga-orchestrator'
+              );
+              // Returns: YAML content if available, otherwise standard resolution
+
+      tryYamlMetadata:
+        description: 'Attempts to load content from YAML metadata files using HierarchicalMetadataResolver'
+        business-context: 'Primary YAML resolution strategy leveraging Enhanced Metadata System V2 hierarchy'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for YAML metadata lookup'
+          - name: 'requestedPath'
+            type: 'string'
+            description: 'Content path for YAML metadata resolution'
+
+        returns:
+          type: 'string | null'
+          description: 'YAML-resolved content if found, null if not available'
+
+        custom-tags:
+          private: 'true'
+          metadata-system: 'Enhanced Metadata System V2'
+          hierarchical: 'Uses global → package → class → method resolution'
+
+      resolveYamlMetadata:
+        description: 'Public method to resolve YAML metadata for CLI or external use with format-specific output'
+        business-context: 'Exposed API for external consumers to access YAML metadata resolution capabilities'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for metadata resolution'
+          - name: 'requestedPath'
+            type: 'string'
+            description: 'Content path for metadata lookup'
+          - name: 'format'
+            type: "'cli' | 'jsdoc' | undefined"
+            description: 'Optional output format for format-specific metadata'
+
+        returns:
+          type: 'Promise<string | null>'
+          description: 'Resolved YAML metadata content or null if not found'
+
+        custom-tags:
+          async: 'true'
+          public: 'true'
+          format-specific: 'Supports CLI and JSDoc output formats'
+
+        examples:
+          - id: 'cli-format-resolution'
+            code: |
+              const resolver = new YamlContentResolver();
+              const cliContent = await resolver.resolveYamlMetadata(
+                'policies',
+                'policy-builder',
+                'cli'
+              );
+              // Returns: CLI-formatted YAML metadata
+
+          - id: 'jsdoc-format-resolution'
+            code: |
+              const resolver = new YamlContentResolver();
+              const jsdocContent = await resolver.resolveYamlMetadata(
+                'cqrs',
+                'command-bus',
+                'jsdoc'
+              );
+              // Returns: JSDoc-formatted YAML metadata
+
+      generateMarkdownFromMetadata:
+        description: 'Generates markdown content from resolved hierarchical metadata'
+        business-context: 'Converts structured YAML metadata into formatted markdown template content'
+
+        parameters:
+          - name: 'metadata'
+            type: 'ResolvedMetadata'
+            description: 'Hierarchically resolved metadata from Enhanced Metadata System V2'
+          - name: 'format'
+            type: "'cli' | 'jsdoc'"
+            description: 'Target output format for markdown generation'
+
+        returns:
+          type: 'string'
+          description: 'Generated markdown content from metadata'
+
+        custom-tags:
+          private: 'true'
+          markdown-generation: 'Converts metadata to template content'
+          format-aware: 'Generates format-specific content'
+
+      extractNamesFromPath:
+        description: 'Extracts class and method names from request path for metadata resolution'
+        business-context: 'Parses request paths to identify target class and method for hierarchical metadata lookup'
+
+        parameters:
+          - name: 'requestedPath'
+            type: 'string'
+            description: 'Request path containing class/method information'
+
+        returns:
+          type: '{ className: string, methodName?: string }'
+          description: 'Extracted class and optional method names'
+
+        custom-tags:
+          private: 'true'
+          path-parsing: 'Converts paths to metadata lookup keys'
+
+        examples:
+          - id: 'path-extraction'
+            code: |
+              // Internal usage
+              const names = this.extractNamesFromPath('aggregate-root/commit');
+              // Returns: { className: 'AggregateRoot', methodName: 'commit' }
+
+      toPascalCase:
+        description: 'Converts kebab-case strings to PascalCase for class name resolution'
+        business-context: 'Transforms file-based naming conventions to TypeScript class naming conventions'
+
+        parameters:
+          - name: 'str'
+            type: 'string'
+            description: 'Kebab-case string to convert'
+
+        returns:
+          type: 'string'
+          description: 'PascalCase string'
+
+        custom-tags:
+          private: 'true'
+          string-conversion: 'Kebab-case to PascalCase transformation'
+
+        examples:
+          - id: 'case-conversion'
+            code: |
+              // Internal usage
+              const className = this.toPascalCase('aggregate-root');
+              // Returns: 'AggregateRoot'

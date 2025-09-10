@@ -1,0 +1,48 @@
+# Actor Module Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Actor Module Exports'
+description: 'Central export point for actor-related functionality'
+business-context: 'Provides actor pattern components for tracking operation initiators'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-DOC ===
+file-doc:
+  description: 'Actor module export hub'
+  business-context: 'Centralizes actor pattern exports for audit and authorization'
+
+  formats:
+    jsdoc:
+      description: 'Actor module exports'
+    cli:
+      description: |
+        ## Actor Module
+        Components for tracking who performs actions in the domain
+
+  custom-tags:
+    since: '1.0.0'
+    module: 'actor'
+    category: 'foundation'
+
+# === EXPORTS ===
+exports:
+  - name: 'ActorError'
+    from: './actor.error'
+    description: 'Error class for actor-related issues'
+    business-context: 'Handles actor validation and processing errors'
+
+  - name: 'DefaultActorType'
+    from: './actor.interface'
+    description: 'Standard actor type enumeration'
+    business-context: 'Categorizes actors for authorization'
+
+  - name: 'IActor'
+    from: './actor.interface'
+    description: 'Actor identification interface'
+    business-context: 'Defines actor structure for audit trails'
+    type: 'interface'

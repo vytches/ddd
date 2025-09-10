@@ -1,0 +1,48 @@
+# Testing Index - Testing Utilities Contracts Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Testing Contracts Package Exports'
+description: 'Testing utilities and harness contracts exports'
+business-context: 'Provides unified access to testing contract definitions'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for testing utility contracts'
+  business-context: 'Foundation for test harnesses and testing utilities'
+
+  formats:
+    jsdoc:
+      description: 'Testing contracts and interfaces'
+    cli:
+      description: |
+        ## Testing Contracts Exports
+
+        Testing utilities including:
+        - Test harness interfaces
+        - Test data builder contracts
+        - Testing option configurations
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'testing'
+
+# === EXPORTS DOCUMENTATION ===
+exports:
+  testing-interfaces:
+    description: 'Core testing interfaces and contracts'
+    business-context: 'Contracts for test harnesses and testing utilities'
+    source: './testing.interfaces'
+    type: 'namespace'
+
+  testing-options-interfaces:
+    description: 'Testing configuration option interfaces'
+    business-context: 'Contracts for configuring test environments and behaviors'
+    source: './testing-options.interfaces'
+    type: 'namespace'

@@ -1,0 +1,81 @@
+# Domain Builder Command - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'domain-builder'
+title: 'CLI Domain Builder Command - Interactive Domain Modeling'
+description: 'CLI command for interactive domain-driven design modeling and generation'
+business-context: 'Guided domain modeling workflow with architecture planning and code generation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CONSTANTS ===
+constants:
+  domainBuilderCommand:
+    description: 'Domain builder command configuration implementing Command interface'
+    business-context: 'Interactive CLI command for guided domain-driven design modeling with multi-step workflow orchestration'
+
+    custom-tags:
+      since: '1.0.0'
+      command-type: 'CLI command'
+      capabilities: 'Interactive domain modeling, guided workflows, architecture planning'
+      interface: 'Command'
+      workflow-integration: 'DomainBuilderWorkflow'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Command name identifier for CLI registration'
+      - name: 'description'
+        type: 'string'
+        description: 'Command description displayed in CLI help'
+      - name: 'usage'
+        type: 'string'
+        description: 'Command usage syntax and parameter examples'
+      - name: 'options'
+        type: 'CommandOption[]'
+        description: 'Available command line options and flags'
+      - name: 'action'
+        type: '(args: string[], options: any) => Promise<void>'
+        description: 'Command execution handler that orchestrates domain building workflow'
+
+    examples:
+      - id: 'guided-domain-modeling'
+        code: |
+          // Start guided domain modeling workflow
+          await domainBuilderCommand.action(['OrderManagement'], {
+            framework: 'nestjs',
+            guided: true,
+            structure: 'modular-monolith',
+            monitoring: true
+          });
+
+      - id: 'automated-domain-generation'
+        code: |
+          // Generate domain with predefined configuration
+          await domainBuilderCommand.action(['InventoryManagement'], {
+            framework: 'express',
+            guided: false,
+            patterns: ['cqrs', 'event-sourcing', 'saga'],
+            boundedContexts: ['Inventory', 'Procurement', 'Warehousing'],
+            compliance: ['gdpr', 'sox'],
+            security: ['authentication', 'authorization', 'audit'],
+            dryRun: false
+          });
+
+      - id: 'enterprise-domain-setup'
+        code: |
+          // Enterprise domain setup with full features
+          await domainBuilderCommand.action(['CustomerRelationship'], {
+            framework: 'nestjs',
+            guided: true,
+            structure: 'microservices',
+            patterns: ['cqrs', 'event-sourcing', 'saga', 'outbox'],
+            boundedContexts: ['Customers', 'Accounts', 'Support', 'Analytics'],
+            compliance: ['gdpr', 'ccpa', 'hipaa'],
+            security: ['oauth2', 'jwt', 'rbac', 'audit'],
+            monitoring: true,
+            outputPath: './src/domains/crm'
+          });

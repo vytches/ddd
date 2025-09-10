@@ -1,0 +1,297 @@
+# VytchesExplorerService - Handler Discovery Service
+
+# === FILE METADATA ===
+file-name: 'vytches-explorer.service'
+title: 'VytchesExplorerService - Auto-Discovery Service'
+description: 'Explorer service for automatic handler discovery following @nestjs/cqrs patterns'
+business-context: 'Automatically discovers and registers command, query, and event handlers with their respective buses'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  VytchesExplorerService:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'VytchesExplorerService - Clean handler discovery following @nestjs/cqrs patterns'
+      business-context: 'Simple, synchronous discovery that happens during module initialization. No temporal coupling, no race conditions, no complex bridge patterns.'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Handler discovery service for VytchesDDD integration'
+        cli:
+          description: |
+            ## VytchesExplorerService
+
+            Automatic handler discovery service providing:
+            - **Command Handler Discovery**: Finds and registers @CommandHandler decorated classes
+            - **Query Handler Discovery**: Finds and registers @QueryHandler decorated classes  
+            - **Event Handler Discovery**: Finds and registers @EventHandler decorated classes
+            - **Synchronous Discovery**: Happens during module initialization
+            - **NestJS Integration**: Uses DiscoveryService and MetadataScanner from @nestjs/core
+            - **Metadata-Based**: Uses reflection metadata for handler identification
+
+      custom-tags:
+        since: '1.0.0'
+        stability: 'stable'
+        pattern: 'discovery-service'
+        framework: 'nestjs'
+        similar-to: '@nestjs/cqrs explorer'
+
+    # Constructor
+    methods:
+      constructor:
+        description: 'Creates new VytchesExplorerService instance'
+        business-context: 'Initializes discovery service with NestJS core services for handler discovery'
+
+        parameters:
+          - name: 'discoveryService'
+            type: 'DiscoveryService'
+            description: 'NestJS discovery service for finding providers'
+          - name: 'metadataScanner'
+            type: 'MetadataScanner'
+            description: 'NestJS metadata scanner for reading handler metadata'
+          - name: 'moduleRef'
+            type: 'ModuleRef'
+            description: 'NestJS module reference for accessing providers'
+
+        examples:
+          - id: 'injection'
+            title: 'Constructor Injection'
+            business-context: 'Standard NestJS dependency injection pattern'
+            code: |
+              @Injectable()
+              export class VytchesExplorerService implements OnModuleInit {
+                constructor(
+                  private readonly discoveryService: DiscoveryService,
+                  private readonly metadataScanner: MetadataScanner,
+                  private readonly moduleRef: ModuleRef
+                ) {}
+              }
+
+      onModuleInit:
+        description: 'Module initialization hook that triggers handler discovery'
+        business-context: 'Automatically called by NestJS during module initialization to discover and register handlers'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when all handlers are discovered and registered'
+
+        custom-tags:
+          lifecycle: 'OnModuleInit'
+          async: true
+
+        examples:
+          - id: 'initialization'
+            title: 'Module Initialization'
+            business-context: 'Automatic handler discovery during application startup'
+            code: |
+              async onModuleInit() {
+                await this.explore();
+              }
+
+      explore:
+        description: 'Main discovery method that finds and registers handlers'
+        business-context: 'Orchestrates the discovery process by finding command, query, and event handlers and registering them with appropriate buses'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when all handlers are discovered and registered with their buses'
+
+        custom-tags:
+          private: true
+          async: true
+
+        examples:
+          - id: 'discovery-process'
+            title: 'Handler Discovery Process'
+            business-context: 'Complete discovery workflow from finding providers to registering handlers'
+            code: |
+              private async explore() {
+                // Guard against undefined discovery service in tests
+                if (!this.discoveryService) {
+                  return;
+                }
+
+                // Get all providers from NestJS container
+                const providers = this.discoveryService.getProviders();
+
+                // Find handlers using metadata
+                const commandHandlers = this.findHandlers(providers, 'di:handler-type', 'command');
+                const queryHandlers = this.findHandlers(providers, 'di:handler-type', 'query');
+                const eventHandlers = this.findHandlers(providers, 'di:handler-type', 'event');
+
+                // Register with buses if available
+                await this.registerHandlers(commandHandlers, 'command');
+                await this.registerHandlers(queryHandlers, 'query');
+                await this.registerHandlers(eventHandlers, 'event');
+              }
+
+      findHandlers:
+        description: 'Finds handlers by metadata key and type'
+        business-context: 'Filters NestJS providers to find handlers with specific metadata signatures'
+
+        parameters:
+          - name: 'providers'
+            type: 'InstanceWrapper[]'
+            description: 'Array of NestJS provider wrappers to search through'
+          - name: 'metadataKey'
+            type: 'string'
+            description: 'Metadata key to search for, typically "di:handler-type"'
+          - name: 'expectedType'
+            type: 'string'
+            description: 'Expected handler type: "command", "query", or "event"'
+
+        returns:
+          type: 'InstanceWrapper[]'
+          description: 'Array of provider wrappers that match the handler criteria'
+
+        custom-tags:
+          private: true
+
+        examples:
+          - id: 'handler-filtering'
+            title: 'Handler Type Filtering'
+            business-context: 'Identifying specific handler types using reflection metadata'
+            code: |
+              private findHandlers(
+                providers: InstanceWrapper[],
+                metadataKey: string,
+                expectedType: string
+              ): InstanceWrapper[] {
+                return providers.filter(wrapper => {
+                  if (!wrapper.metatype || !wrapper.instance) return false;
+
+                  const handlerType = Reflect.getMetadata(metadataKey, wrapper.metatype);
+                  return handlerType === expectedType;
+                });
+              }
+
+      registerHandlers:
+        description: 'Registers discovered handlers with their appropriate buses'
+        business-context: 'Connects handlers to command, query, or event buses for automatic execution'
+
+        parameters:
+          - name: 'handlers'
+            type: 'InstanceWrapper[]'
+            description: 'Array of handler instances to register'
+          - name: 'busType'
+            type: '"command" | "query" | "event"'
+            description: 'Type of bus to register handlers with'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when all handlers are registered with their bus'
+
+        custom-tags:
+          private: true
+          async: true
+
+        examples:
+          - id: 'bus-registration'
+            title: 'Handler Bus Registration'
+            business-context: 'Automatic registration of handlers with appropriate message buses'
+            code: |
+              private async registerHandlers(
+                handlers: InstanceWrapper[],
+                busType: 'command' | 'query' | 'event'
+              ) {
+                if (handlers.length === 0) return;
+
+                try {
+                  const bus = this.getBus(busType);
+                  if (!bus) return;
+
+                  for (const handler of handlers) {
+                    const handlerMetadata = Reflect.getMetadata('di:handler-metadata', handler.metatype);
+                    if (handlerMetadata?.messageType) {
+                      // Register handler with appropriate bus method
+                      if (busType === 'command' && 'register' in bus) {
+                        (bus as any).register(handlerMetadata.messageType, handler.instance);
+                      }
+                      // Similar for query and event buses...
+                    }
+                  }
+                } catch {
+                  // Silent fail - buses might not be configured
+                }
+              }
+
+      getBus:
+        description: 'Retrieves the appropriate bus instance from the NestJS container'
+        business-context: 'Safely resolves bus instances using string tokens with graceful fallback'
+
+        parameters:
+          - name: 'type'
+            type: '"command" | "query" | "event"'
+            description: 'Type of bus to retrieve'
+
+        returns:
+          type: 'ICommandBus | IQueryBus | IEventBus | null'
+          description: 'Bus instance if found, null if not configured or error occurs'
+
+        custom-tags:
+          private: true
+
+        examples:
+          - id: 'bus-resolution'
+            title: 'Safe Bus Resolution'
+            business-context: 'Retrieving bus instances with error handling for optional configuration'
+            code: |
+              private getBus(type: 'command' | 'query' | 'event') {
+                try {
+                  switch (type) {
+                    case 'command':
+                      return this.moduleRef.get('ICommandBus', { strict: false });
+                    case 'query':
+                      return this.moduleRef.get('IQueryBus', { strict: false });
+                    case 'event':
+                      return this.moduleRef.get('IEventBus', { strict: false });
+                    default:
+                      return null;
+                  }
+                } catch {
+                  return null;
+                }
+              }
+
+# === DECORATORS ===
+decorators:
+  Injectable:
+    description: 'Marks class as injectable NestJS service'
+    business-context: 'Standard NestJS pattern for dependency injection'
+    from: '@nestjs/common'
+
+# === INTERFACES ===
+interfaces:
+  OnModuleInit:
+    description: 'NestJS lifecycle interface for module initialization'
+    business-context: 'Ensures discovery happens during application startup'
+    from: '@nestjs/common'
+
+# === IMPORTS ===
+imported-types:
+  DiscoveryService:
+    description: 'NestJS core service for provider discovery'
+    source: '@nestjs/core'
+
+  MetadataScanner:
+    description: 'NestJS core service for metadata scanning'
+    source: '@nestjs/core'
+
+  ModuleRef:
+    description: 'NestJS core service for accessing module providers'
+    source: '@nestjs/core'
+
+  InstanceWrapper:
+    description: 'NestJS internal provider wrapper type'
+    source: '@nestjs/core/injector/instance-wrapper'

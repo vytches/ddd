@@ -1,0 +1,283 @@
+# CircuitBreaker - Three-State Circuit Breaker Implementation
+
+# === FILE METADATA ===
+file-name: 'patterns/circuit-breaker'
+title: 'CircuitBreaker - Fault Tolerance Implementation'
+description: 'Three-state circuit breaker preventing cascading failures'
+business-context: |
+  Implements the Circuit Breaker pattern to prevent cascading failures
+  in distributed systems. Automatically fails fast when error thresholds
+  are reached, allowing downstream systems to recover while providing
+  graceful degradation for users.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  CircuitBreakerConfig:
+    interface-doc:
+      description: 'Configuration for circuit breaker pattern'
+      business-context: |
+        Defines thresholds and timeouts for circuit breaker behavior,
+        controlling when the circuit opens, how long it stays open, and
+        conditions for recovery.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Configuration'
+
+    properties:
+      - name: 'failureThreshold'
+        type: 'number'
+        description: 'Number of failures before circuit opens'
+
+      - name: 'recoveryTimeout'
+        type: 'number'
+        description: 'Time in milliseconds before testing recovery'
+
+      - name: 'successThreshold'
+        type: 'number'
+        description: 'Successes needed in half-open state to close circuit'
+        optional: true
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Operation timeout in milliseconds'
+        optional: true
+
+      - name: 'name'
+        type: 'string'
+        description: 'Circuit breaker name for identification'
+        optional: true
+
+  CircuitBreakerMetrics:
+    interface-doc:
+      description: 'Performance metrics for circuit breaker'
+      business-context: |
+        Provides operational metrics for monitoring circuit breaker
+        effectiveness, failure patterns, and recovery behavior.
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Monitoring'
+
+    properties:
+      - name: 'state'
+        type: 'CircuitBreakerState'
+        description: 'Current circuit state'
+
+      - name: 'failureCount'
+        type: 'number'
+        description: 'Number of consecutive failures'
+
+      - name: 'successCount'
+        type: 'number'
+        description: 'Number of consecutive successes'
+
+      - name: 'lastFailureTime'
+        type: 'Date | null'
+        description: 'Timestamp of last failure'
+
+      - name: 'lastSuccessTime'
+        type: 'Date | null'
+        description: 'Timestamp of last success'
+
+      - name: 'nextAttemptTime'
+        type: 'Date | null'
+        description: 'When circuit will test recovery'
+
+# === ENUMS ===
+enums:
+  CircuitBreakerState:
+    description: 'Circuit breaker states enumeration'
+    business-context: 'Defines the three possible states of a circuit breaker pattern'
+
+    values:
+      - name: 'CLOSED'
+        value: "'CLOSED'"
+        description: 'Circuit is closed - requests pass through normally'
+      - name: 'OPEN'
+        value: "'OPEN'"
+        description: 'Circuit is open - requests fail fast without calling operation'
+      - name: 'HALF_OPEN'
+        value: "'HALF_OPEN'"
+        description: 'Circuit is testing - limited requests allowed to test recovery'
+
+# === CLASSES ===
+classes:
+  CircuitBreaker:
+    class-doc:
+      description: 'Three-state circuit breaker implementation'
+      business-context: |
+        Monitors operation failures and transitions between CLOSED (normal),
+        OPEN (failing fast), and HALF_OPEN (testing recovery) states to
+        prevent system overload during outages and enable graceful recovery.
+
+      formats:
+        jsdoc:
+          description: 'Circuit breaker with automatic state transitions'
+        cli:
+          description: |
+            ## CircuitBreaker
+            Enterprise circuit breaker providing:
+            - Three-state operation (CLOSED/OPEN/HALF_OPEN)
+            - Configurable failure thresholds
+            - Automatic recovery testing
+            - Metrics collection
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Circuit Breaker'
+
+    methods:
+      constructor:
+        description: 'Initializes circuit breaker with configuration'
+        business-context: 'Sets up failure thresholds and recovery behavior'
+
+        parameters:
+          - name: 'config'
+            type: 'CircuitBreakerConfig'
+            description: 'Circuit breaker configuration'
+
+        examples:
+          - id: 'basic-setup'
+            code: |
+              const circuitBreaker = new CircuitBreaker({
+                failureThreshold: 5,      // Open after 5 failures
+                recoveryTimeout: 60000,   // Test recovery after 1 minute
+                successThreshold: 1,      // Success needed to close
+                timeout: 30000,           // Operation timeout
+                name: 'api-circuit'       // Optional circuit name
+              });
+
+      execute:
+        description: 'Executes operation through circuit breaker'
+        business-context: 'Protects operation with failure detection and fast failure'
+
+        parameters:
+          - name: 'operation'
+            type: '(context: ResilienceContext) => Promise<T>'
+            description: 'Async operation to protect'
+          - name: 'context'
+            type: 'ResilienceContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<T>'
+          description: 'Operation result'
+
+        examples:
+          - id: 'protected-operation'
+            code: |
+              const context = { correlationId: 'req-123' };
+              const result = await circuitBreaker.execute(async (ctx) => {
+                return await externalAPI.fetchUserData(userId);
+              }, context);
+
+              console.log('Data retrieved:', result);
+
+      getName:
+        description: 'Returns circuit breaker name'
+        business-context: 'Provides identification for logging and metrics'
+
+        returns:
+          type: 'string'
+          description: 'Circuit breaker name'
+
+        examples:
+          - id: 'name-identification'
+            code: |
+              const circuitName = circuitBreaker.getName();
+              console.log(`Circuit breaker: ${circuitName}`);
+
+      getMetrics:
+        description: 'Returns circuit breaker performance metrics'
+        business-context: 'Provides operational insights for monitoring'
+
+        returns:
+          type: 'CircuitBreakerMetrics'
+          description: 'Failure counts, success rates, state transitions'
+
+        examples:
+          - id: 'metrics-monitoring'
+            code: |
+              const metrics = circuitBreaker.getMetrics();
+              console.log({
+                failureRate: metrics.failureRate,
+                totalRequests: metrics.totalRequests,
+                stateTransitions: metrics.stateTransitions,
+                lastFailureTime: metrics.lastFailureTime
+              });
+
+  CircuitBreakerOpenError:
+    class-doc:
+      description: 'Error thrown when circuit breaker is open'
+      business-context: |
+        Specific error type thrown when operations are rejected due to
+        circuit breaker being in open state. Enables fail-fast behavior
+        and proper error handling in client code.
+
+      formats:
+        jsdoc:
+          description: 'Circuit breaker open state error'
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'Error'
+
+    methods:
+      constructor:
+        description: 'Creates circuit breaker open error'
+        business-context: 'Used when circuit rejects operations in open state'
+
+        parameters:
+          - name: 'message'
+            type: 'string'
+            description: 'Error message'
+
+        examples:
+          - id: 'open-error'
+            code: |
+              throw new CircuitBreakerOpenError('Circuit breaker is OPEN');
+
+# === USAGE PATTERNS ===
+patterns:
+  - name: 'API Circuit Breaker'
+    description: 'Protecting external API calls'
+    example: |
+      class UserService {
+        private circuitBreaker = new CircuitBreaker({
+          failureThreshold: 3,
+          resetTimeout: 30000
+        });
+        
+        async getUser(id: string): Promise<User | null> {
+          const result = await this.circuitBreaker.execute(async () => {
+            return await this.userAPI.fetchUser(id);
+          });
+          
+          return result.isSuccess() ? result.value : null;
+        }
+      }
+
+  - name: 'Database Circuit Breaker'
+    description: 'Protecting database operations'
+    example: |
+      const dbCircuitBreaker = new CircuitBreaker({
+        failureThreshold: 5,
+        resetTimeout: 60000,
+        shouldTreatAsFailure: (error) => 
+          error.code === 'CONNECTION_FAILED' || error.code === 'TIMEOUT'
+      });
+
+  - name: 'Monitoring Integration'
+    description: 'Integrating with monitoring systems'
+    example: |
+      setInterval(() => {
+        const metrics = circuitBreaker.getMetrics();
+        monitoringService.recordGauge('circuit_breaker.failure_rate', metrics.failureRate);
+        monitoringService.recordCounter('circuit_breaker.state_transitions', metrics.stateTransitions);
+      }, 30000);

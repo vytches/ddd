@@ -1,0 +1,296 @@
+# TestClock - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'test-clock'
+title: 'TestClock - Time Control for Testing'
+description: 'Advanced time manipulation utilities for deterministic testing'
+business-context: 'Enables predictable testing of time-based business logic and temporal scenarios'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  TestClockState:
+    description: 'Current state information for test clock'
+    business-context: 'Provides visibility into time manipulation and freeze status'
+
+    properties:
+      - name: 'currentTime'
+        type: 'Date'
+        description: 'Current simulated time'
+        business-context: 'The time that Date.now() and new Date() will return'
+
+      - name: 'isFrozen'
+        type: 'boolean'
+        description: 'Whether time progression is frozen'
+        business-context: 'Indicates if time is stopped for deterministic testing'
+
+      - name: 'startTime'
+        type: 'Date'
+        description: 'When the test clock was started'
+        business-context: 'Reference point for time manipulation calculations'
+
+      - name: 'totalAdvanced'
+        type: 'number'
+        description: 'Total milliseconds advanced since start'
+        business-context: 'Cumulative time advancement for debugging temporal logic'
+
+  TimeAdvanceOptions:
+    description: 'Options for advancing time in controlled increments'
+    business-context: 'Configure how time progression should be simulated'
+
+    properties:
+      - name: 'triggerTimers'
+        type: 'boolean'
+        description: 'Whether to trigger setTimeout/setInterval callbacks'
+        optional: true
+        business-context: 'Control timer execution during time advancement'
+
+      - name: 'stepSize'
+        type: 'number'
+        description: 'Milliseconds to advance in each step'
+        optional: true
+        business-context: 'Granular control over time progression rate'
+
+      - name: 'maxSteps'
+        type: 'number'
+        description: 'Maximum number of advancement steps'
+        optional: true
+        business-context: 'Prevent infinite loops in time-based scenarios'
+
+# === CLASSES ===
+classes:
+  TestClock:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Advanced time manipulation utility for deterministic testing of temporal business logic'
+      business-context: 'Essential for testing time-based domain scenarios like scheduling, expiration, and temporal workflows'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Time control utility for deterministic temporal testing'
+        cli:
+          description: |
+            ## TestClock
+
+            Advanced time manipulation for testing temporal business logic.
+            Supports time freezing, controlled advancement, and timer simulation.
+
+      custom-tags:
+        since: '1.0.0'
+        testing: 'Temporal testing utility'
+        deterministic: 'Predictable time behavior'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Create new test clock starting at specified time'
+        business-context: 'Initialize controlled time environment for temporal testing'
+
+        parameters:
+          - name: 'startTime'
+            type: 'Date'
+            description: 'Initial time for the test clock'
+            optional: true
+
+        examples:
+          - id: 'specific-start-time'
+            description: 'Create clock starting at specific business date'
+            code: |
+              // Start at beginning of business day
+              const testClock = new TestClock(new Date('2024-01-15T09:00:00Z'));
+
+              // Test time-sensitive business logic
+              const scheduler = new EventScheduler(testClock);
+
+      freeze:
+        description: 'Freeze time at current moment - time stops progressing'
+        business-context: 'Create deterministic testing environment where time-based logic is predictable'
+
+        returns:
+          type: 'this'
+          description: 'TestClock instance for method chaining'
+
+        examples:
+          - id: 'deterministic-testing'
+            description: 'Freeze time for consistent test results'
+            code: |
+              testClock.freeze();
+
+              const order1 = await orderService.createOrder(orderData);
+              const order2 = await orderService.createOrder(orderData);
+
+              // Both orders have identical timestamp
+              expect(order1.createdAt).toEqual(order2.createdAt);
+
+      unfreeze:
+        description: 'Resume normal time progression'
+        business-context: 'Return to normal time flow after controlled testing'
+
+        returns:
+          type: 'this'
+          description: 'TestClock instance for method chaining'
+
+      setTime:
+        description: 'Jump to specific time instantly'
+        business-context: 'Test business logic at specific temporal conditions'
+
+        parameters:
+          - name: 'time'
+            type: 'Date'
+            description: 'Target time to jump to'
+
+        returns:
+          type: 'this'
+          description: 'TestClock instance for method chaining'
+
+        examples:
+          - id: 'business-scenario-testing'
+            description: 'Test business logic at different temporal conditions'
+            code: |
+              // Test month-end processing
+              testClock.setTime(new Date('2024-01-31T23:59:59Z'));
+              await monthEndProcessor.execute();
+
+              // Test beginning of next month
+              testClock.setTime(new Date('2024-02-01T00:00:01Z'));
+              await monthStartProcessor.execute();
+
+      advance:
+        description: 'Advance time by specified duration with optional controlled progression'
+        business-context: 'Simulate time passage to test temporal business logic'
+
+        parameters:
+          - name: 'milliseconds'
+            type: 'number'
+            description: 'Amount of time to advance'
+          - name: 'options'
+            type: 'TimeAdvanceOptions'
+            description: 'Options controlling how time advancement behaves'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'TestClock instance for method chaining'
+
+        examples:
+          - id: 'scheduled-event-testing'
+            description: 'Test scheduled events with time advancement'
+            code: |
+              // Schedule event for 1 hour from now
+              const event = scheduler.scheduleEvent(eventData, { delay: '1h' });
+
+              // Advance time by 1 hour and trigger timers
+              testClock.advance(60 * 60 * 1000, { triggerTimers: true });
+
+              // Verify event was executed
+              expect(event.status).toBe('completed');
+
+      tick:
+        description: 'Advance time by small increment (default 1ms)'
+        business-context: 'Fine-grained time control for precise temporal testing'
+
+        parameters:
+          - name: 'milliseconds'
+            type: 'number'
+            description: 'Small amount to advance (default 1ms)'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'TestClock instance for method chaining'
+
+      now:
+        description: 'Get current simulated time'
+        business-context: 'Access controlled time for temporal assertions'
+
+        returns:
+          type: 'Date'
+          description: 'Current time according to test clock'
+
+        examples:
+          - id: 'temporal-assertions'
+            description: 'Assert business logic against controlled time'
+            code: |
+              testClock.setTime(new Date('2024-01-15T10:30:00Z'));
+
+              const currentTime = testClock.now();
+              const businessHour = currentTime.getHours();
+
+              expect(businessLogic.isDuringBusinessHours(currentTime)).toBe(true);
+
+      getState:
+        description: 'Get current state information for debugging'
+        business-context: 'Debug temporal test scenarios and time manipulation'
+
+        returns:
+          type: 'TestClockState'
+          description: 'Current state of the test clock'
+
+      reset:
+        description: 'Reset clock to original start time and unfreeze'
+        business-context: 'Clean temporal state between test cases'
+
+        returns:
+          type: 'this'
+          description: 'TestClock instance for method chaining'
+
+        examples:
+          - id: 'test-isolation'
+            description: 'Reset temporal state between tests'
+            code: |
+              beforeEach(() => {
+                testClock.reset();
+                // Each test starts with clean temporal state
+              });
+
+# === FUNCTIONS ===
+functions:
+  withTestClock:
+    description: 'Higher-order function for executing code with controlled time'
+    business-context: 'Convenient wrapper for temporal testing scenarios'
+
+    parameters:
+      - name: 'testFn'
+        type: '(clock: TestClock) => Promise<T> | T'
+        description: 'Test function that receives test clock instance'
+      - name: 'startTime'
+        type: 'Date'
+        description: 'Optional start time for the test clock'
+        optional: true
+
+    returns:
+      type: 'Promise<T>'
+      description: 'Result of test function execution'
+
+    examples:
+      - id: 'temporal-test-wrapper'
+        description: 'Execute temporal test with automatic clock management'
+        code: |
+          const result = await withTestClock(async (clock) => {
+            // Clock is automatically created and cleaned up
+            clock.setTime(new Date('2024-01-15T09:00:00Z'));
+            
+            const scheduler = new EventScheduler(clock);
+            const event = scheduler.scheduleDaily('business-report');
+            
+            // Advance to next day
+            clock.advance(24 * 60 * 60 * 1000, { triggerTimers: true });
+            
+            return event.status;
+          });
+
+          expect(result).toBe('completed');
+
+    custom-tags:
+      higher-order: 'Higher-order function'
+      wrapper: 'Test execution wrapper'

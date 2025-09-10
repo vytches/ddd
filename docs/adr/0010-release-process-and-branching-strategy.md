@@ -422,6 +422,9 @@ pnpm release:hotfix
 
 # Force specific version (bypass conventional commits)
 pnpm lerna version 1.2.1 --no-conventional-commits --no-push
+
+# If specific packet bump needed:
+pnpm lerna version patch --scope=@vytches/ddd-nestjs
 ```
 
 ## Package Installation for Users

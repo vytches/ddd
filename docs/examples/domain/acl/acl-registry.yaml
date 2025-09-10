@@ -1,0 +1,189 @@
+# ACLRegistry - Global Registry for ACL Adapters
+
+# === FILE METADATA ===
+file-name: 'acl-registry'
+title: 'ACLRegistry - Adapter Management System'
+description: 'Global registry for managing and discovering ACL adapters'
+business-context: |
+  Provides centralized management of ACL adapters across the application,
+  enabling dynamic adapter registration, discovery, and lifecycle management
+  for multiple external system integrations.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ImportOptions:
+    description: 'Configuration options for importing adapters from context registry'
+    business-context: 'Controls how adapters are imported from other registries'
+
+    properties:
+      - name: 'overwriteConflicts'
+        type: 'boolean'
+        description: 'Whether to overwrite existing adapters when conflicts occur'
+        optional: true
+      - name: 'validateAdapters'
+        type: 'boolean'
+        description: 'Whether to validate adapters during import'
+        optional: true
+
+  ImportResult:
+    description: 'Result of importing adapters from context registry'
+    business-context: 'Provides feedback on import operation success and failures'
+
+    properties:
+      - name: 'imported'
+        type: 'string[]'
+        description: 'Array of successfully imported context names'
+      - name: 'skipped'
+        type: 'string[]'
+        description: 'Array of skipped context names due to conflicts'
+      - name: 'conflicts'
+        type: 'Array<{ contextName: string; reason: string }>'
+        description: 'Array of conflicts encountered during import'
+
+# === CLASSES ===
+classes:
+  ACLRegistry:
+    class-doc:
+      description: 'Global registry for ACL adapters extending BaseACLRegistry'
+      business-context: |
+        Central hub for registering and resolving ACL adapters, supporting
+        dynamic adapter registration, discovery, and import/export capabilities
+        for enterprise integration scenarios.
+
+      formats:
+        jsdoc:
+          description: 'Global ACL adapter registry with import/export support'
+        cli:
+          description: |
+            ## ACLRegistry
+            Centralized adapter management providing:
+            - Adapter registration and discovery
+            - Context-based adapter resolution
+            - Import/export from other registries
+            - Direct and enhanced adapter registration
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Registry Pattern'
+        extends: 'BaseACLRegistry'
+
+    methods:
+      getRegistryName:
+        description: 'Returns the name of this registry'
+        business-context: 'Identifies this registry in logs and debugging'
+        visibility: 'protected'
+
+        returns:
+          type: 'string'
+          description: 'Registry name identifier'
+
+        examples:
+          - id: 'registry-name'
+            code: |
+              // Internal method - returns 'GlobalACLRegistry'
+              const name = this.getRegistryName();
+
+      importFromContext:
+        description: 'Imports adapters from a context-specific registry'
+        business-context: 'Enables bulk migration of adapters from context registries to global registry'
+
+        parameters:
+          - name: 'contextRegistry'
+            type: 'ContextACLRegistry'
+            description: 'Source context registry to import from'
+          - name: 'options'
+            type: 'ImportOptions'
+            description: 'Import configuration options'
+            default: '{}'
+
+        returns:
+          type: 'ImportResult'
+          description: 'Result containing imported, skipped, and conflicted adapters'
+
+        examples:
+          - id: 'import-from-context'
+            code: |
+              const contextRegistry = new ContextACLRegistry('OrderContext');
+              const result = globalRegistry.importFromContext(contextRegistry, {
+                overwriteConflicts: true,
+                validateAdapters: true
+              });
+
+              console.log(`Imported: ${result.imported.length} adapters`);
+              console.log(`Skipped: ${result.skipped.length} adapters`);
+              console.log(`Conflicts: ${result.conflicts.length}`);
+
+      registerDirect:
+        description: 'Registers a standard ACL adapter directly'
+        business-context: 'Simplified registration for basic ACL adapters without middleware'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name for the adapter'
+          - name: 'adapter'
+            type: 'IACLAdapter<TDomain, TExternal>'
+            description: 'ACL adapter instance to register'
+          - name: 'description'
+            type: 'string'
+            description: 'Optional description for the adapter'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'Registry instance for method chaining'
+
+        generic: 'TDomain, TExternal'
+
+        examples:
+          - id: 'register-direct'
+            code: |
+              const registry = new ACLRegistry();
+              registry.registerDirect(
+                'PaymentContext',
+                paymentAdapter,
+                'Payment processing adapter'
+              ).registerDirect(
+                'OrderContext',
+                orderAdapter,
+                'Order management adapter'
+              );
+
+      registerEnhanced:
+        description: 'Registers an enhanced ACL adapter with middleware support'
+        business-context: 'Registration for advanced ACL adapters with middleware pipeline capabilities'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name for the adapter'
+          - name: 'adapter'
+            type: 'IEnhancedACLAdapter<TDomain, TExternal>'
+            description: 'Enhanced ACL adapter instance to register'
+          - name: 'description'
+            type: 'string'
+            description: 'Optional description for the adapter'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'Registry instance for method chaining'
+
+        generic: 'TDomain, TExternal'
+
+        examples:
+          - id: 'register-enhanced'
+            code: |
+              const enhancedAdapter = new EnhancedACLAdapter(translator, api);
+              enhancedAdapter.use(new LoggingMiddleware());
+
+              registry.registerEnhanced(
+                'AdvancedPaymentContext',
+                enhancedAdapter,
+                'Enhanced payment adapter with middleware'
+              );

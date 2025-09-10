@@ -1,0 +1,202 @@
+# SmartTagFinder - Intelligent Example Discovery
+# Enhanced Metadata System V2 - Smart tag-based example search and selection
+
+# === FILE METADATA ===
+file-name: 'smart-tag-finder'
+title: 'SmartTagFinder - Intelligent Example Discovery System'
+description: 'Advanced tag-based example search with prioritization, randomization, and smart suggestions'
+business-context: 'Intelligent example discovery engine providing tag pattern matching, priority selection, and similarity suggestions for optimal CLI user experience'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  FindOptions:
+    description: 'Configuration options for example finding operations'
+    business-context: 'Flexible search parameters for customizing example discovery behavior'
+
+    properties:
+      - name: 'framework'
+        type: 'string'
+        description: 'Filter by specific framework (nestjs, express, fastify)'
+      - name: 'maxExamples'
+        type: 'number'
+        description: 'Limit number of returned examples'
+      - name: 'randomize'
+        type: 'boolean'
+        description: 'Enable randomized example selection'
+      - name: 'seed'
+        type: 'string'
+        description: 'Seed for reproducible randomization'
+      - name: 'priorityTags'
+        type: 'string[]'
+        description: 'Tags that get priority in selection'
+
+  SelectOptions:
+    description: 'Configuration options for example selection operations'
+    business-context: 'Parameters for intelligent example selection with prioritization and randomization'
+
+    properties:
+      - name: 'maxExamples'
+        type: 'number'
+        description: 'Maximum examples to select'
+      - name: 'randomize'
+        type: 'boolean'
+        description: 'Apply randomization to selection'
+      - name: 'seed'
+        type: 'string'
+        description: 'Optional seed for reproducible results'
+      - name: 'priorityTags'
+        type: 'string[]'
+        description: 'Tags that receive selection priority'
+
+# === CLASSES ===
+classes:
+  SmartTagFinder:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Intelligent tag-based example discovery and selection system'
+      business-context: 'Advanced example search engine providing smart tag pattern matching, priority-based selection, randomization, and similarity suggestions for optimal CLI user experience'
+
+      formats:
+        jsdoc:
+          description: 'Smart tag finder with prioritization and suggestions'
+        cli:
+          description: |
+            ## SmartTagFinder
+            Intelligent example discovery with tag pattern matching and smart suggestions
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Finder Pattern'
+        features: 'Tag matching, prioritization, randomization, caching'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Initialize smart tag finder with caching system'
+        business-context: 'Creates finder instance with example cache for performance optimization'
+
+        examples:
+          - id: 'basic'
+            code: |
+              const finder = new SmartTagFinder();
+              // Ready for intelligent example discovery
+
+      findExamplesByTag:
+        description: 'Find examples using smart tag pattern matching'
+        business-context: 'Primary search method with flexible tag patterns, complexity filtering, and advanced options'
+
+        parameters:
+          - name: 'tagPattern'
+            type: 'string'
+            description: 'Tag pattern to search for (supports wildcards and filters)'
+          - name: 'complexity'
+            type: 'string'
+            description: 'Optional complexity level filter (basic, intermediate, advanced)'
+          - name: 'options'
+            type: 'FindOptions'
+            description: 'Additional search configuration options'
+
+        returns:
+          type: 'Promise<ExampleDefinition[]>'
+          description: 'Array of matching example definitions'
+
+        custom-tags:
+          async: 'true'
+          search: 'Tag pattern matching with wildcards'
+
+        examples:
+          - id: 'basic-search'
+            code: |
+              const examples = await finder.findExamplesByTag('policies:*', 'intermediate');
+              // Finds all intermediate policy examples
+
+          - id: 'advanced-search'
+            code: |
+              const examples = await finder.findExamplesByTag(
+                'aggregates:event-sourcing', 
+                'advanced',
+                {
+                  framework: 'nestjs',
+                  maxExamples: 3,
+                  randomize: true,
+                  priorityTags: ['enterprise', 'production-ready']
+                }
+              );
+
+      selectExamples:
+        description: 'Intelligently select examples from a larger set using prioritization'
+        business-context: 'Advanced selection algorithm with priority tags, randomization, and reproducible results'
+
+        parameters:
+          - name: 'examples'
+            type: 'ExampleDefinition[]'
+            description: 'Source examples to select from'
+          - name: 'options'
+            type: 'SelectOptions'
+            description: 'Selection configuration with prioritization'
+
+        returns:
+          type: 'Promise<ExampleDefinition[]>'
+          description: 'Intelligently selected examples'
+
+        custom-tags:
+          async: 'true'
+          selection: 'Priority-based intelligent selection'
+
+        examples:
+          - id: 'priority-selection'
+            code: |
+              const selected = await finder.selectExamples(allExamples, {
+                maxExamples: 5,
+                randomize: true,
+                seed: 'consistent-results',
+                priorityTags: ['best-practice', 'enterprise']
+              });
+              // Returns top 5 examples with priority preference
+
+      suggestSimilarTags:
+        description: 'Generate smart suggestions for similar or related tags'
+        business-context: 'User assistance feature providing tag discovery and typo correction for improved search experience'
+
+        parameters:
+          - name: 'tagPattern'
+            type: 'string'
+            description: 'Input tag pattern for similarity matching'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Array of suggested similar tags'
+
+        custom-tags:
+          async: 'true'
+          suggestions: 'Similarity-based tag suggestions'
+
+        examples:
+          - id: 'tag-suggestions'
+            code: |
+              const suggestions = await finder.suggestSimilarTags('aggrgate'); // typo
+              // Returns: ['aggregate', 'aggregates', 'aggregate-root']
+
+      clearCache:
+        description: 'Clear internal example cache for fresh discovery'
+        business-context: 'Cache management for ensuring fresh results or memory optimization'
+
+        returns:
+          type: 'void'
+          description: 'Cache cleared successfully'
+
+        examples:
+          - id: 'cache-management'
+            code: |
+              finder.clearCache();
+              // Next search will reload all examples fresh

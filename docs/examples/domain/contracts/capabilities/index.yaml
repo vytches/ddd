@@ -1,0 +1,61 @@
+# Capabilities Index - Capability System Exports
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Capability System Package Exports'
+description: 'Capability system exports for extensible aggregates'
+business-context: 'Provides unified access to capability system functionality'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Central export hub for capability system components'
+  business-context: 'Simplifies imports for aggregate capability extensions'
+
+  formats:
+    jsdoc:
+      description: 'Capability system exports'
+    cli:
+      description: |
+        ## Capability System Exports
+
+        Complete capability system including:
+        - Base capability class
+        - Capability registry
+        - Capability type definitions
+        - Various capability interfaces
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'capabilities'
+    pattern: 'plugin-architecture'
+
+# === EXPORTS DOCUMENTATION ===
+exports:
+  Capability:
+    description: 'Base class for all aggregate capabilities'
+    business-context: 'Foundation for creating extensible aggregate behaviors'
+    source: './capability-base'
+
+  capability-base:
+    description: 'All exports from capability base module'
+    business-context: 'Base capability functionality and interfaces'
+    source: './capability-base'
+    type: 'namespace'
+
+  capability-registry:
+    description: 'Capability registry and management utilities'
+    business-context: 'Registration and discovery of aggregate capabilities'
+    source: './capability-registry'
+    type: 'namespace'
+
+  capability-types:
+    description: 'Type definitions for various capability implementations'
+    business-context: 'Interfaces for specific capability patterns (audit, versioning, etc.)'
+    source: './capability-types'
+    type: 'namespace'

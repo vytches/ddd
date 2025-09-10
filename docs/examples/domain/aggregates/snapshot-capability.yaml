@@ -41,6 +41,31 @@ classes:
         performance: 'Reduces event replay time for large aggregates'
         generic: 'TState and TMeta type parameters for type safety'
 
+    # Properties
+    properties:
+      type:
+        description: 'Capability type identifier for snapshot capability'
+        business-context: 'Identifies this capability as snapshot type for capability management'
+        type: "'snapshot'"
+        readonly: true
+
+        formats:
+          jsdoc:
+            description: 'Snapshot capability type identifier'
+
+    # Static Members
+    statics:
+      capabilityType:
+        description: 'Static getter that returns the capability type identifier'
+        business-context: 'Used for capability registration and discovery in the system'
+        returns:
+          type: 'string'
+          description: "Returns 'snapshot' as the capability type"
+
+        formats:
+          jsdoc:
+            description: 'Returns snapshot capability type'
+
     # Methods
     methods:
       constructor:
@@ -91,6 +116,7 @@ classes:
 
         custom-tags:
           cleanup: 'Clears snapshot data to prevent memory leaks'
+          optional: true
 
       createSnapshot:
         description: 'Creates snapshot of current aggregate state using provided serializer functions'

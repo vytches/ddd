@@ -41,6 +41,31 @@ classes:
         compliance: 'SOX, GDPR, HIPAA compatible'
         performance: 'Low-overhead event interception'
 
+    # Properties
+    properties:
+      type:
+        description: 'Capability type identifier for audit capability'
+        business-context: 'Identifies this capability as audit type for capability management'
+        type: "'audit'"
+        readonly: true
+
+        formats:
+          jsdoc:
+            description: 'Audit capability type identifier'
+
+    # Static Members
+    statics:
+      capabilityType:
+        description: 'Static getter that returns the capability type identifier'
+        business-context: 'Used for capability registration and discovery in the system'
+        returns:
+          type: 'string'
+          description: "Returns 'audit' as the capability type"
+
+        formats:
+          jsdoc:
+            description: 'Returns audit capability type'
+
     # Methods
     methods:
       constructor:
@@ -95,6 +120,7 @@ classes:
 
         custom-tags:
           cleanup: 'Always call detach() to prevent memory leaks'
+          optional: true
 
       getAuditLog:
         description: 'Returns copy of complete audit log with all tracked events'

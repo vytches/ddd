@@ -1,0 +1,62 @@
+# Event Store Errors Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Event Store Errors Module'
+description: 'Re-exports all event store error types and classes'
+business-context: 'Central export point for event store error handling components'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-DOC ===
+file-doc:
+  description: 'Event store errors module exports'
+  business-context: 'Provides centralized access to all event store error handling utilities'
+
+  formats:
+    jsdoc:
+      description: 'Event store error exports'
+    cli:
+      description: |
+        ## Event Store Errors Module
+        Central export point for all event store error handling components
+
+  custom-tags:
+    since: '1.0.0'
+    module: 'errors'
+
+# === EXPORTS ===
+exports:
+  - name: 'EventStoreErrorCode'
+    from: './event-store.errors'
+    description: 'Error code enumeration'
+  - name: 'EventStoreError'
+    from: './event-store.errors'
+    description: 'Base error class'
+  - name: 'EventStoreConcurrencyError'
+    from: './event-store.errors'
+    description: 'Concurrency conflict error'
+  - name: 'StreamNotFoundError'
+    from: './event-store.errors'
+    description: 'Stream not found error'
+  - name: 'StreamDeletedError'
+    from: './event-store.errors'
+    description: 'Stream deleted error'
+  - name: 'EventSerializationError'
+    from: './event-store.errors'
+    description: 'Serialization failure error'
+  - name: 'EventDeserializationError'
+    from: './event-store.errors'
+    description: 'Deserialization failure error'
+  - name: 'EventStoreConnectionError'
+    from: './event-store.errors'
+    description: 'Connection failure error'
+  - name: 'InvalidStreamVersionError'
+    from: './event-store.errors'
+    description: 'Invalid version error'
+  - name: 'EventStoreErrorOptions'
+    from: './event-store.errors'
+    description: 'Error options type'

@@ -1,0 +1,304 @@
+# HierarchicalMetadataResolver - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'hierarchical-metadata-resolver'
+title: 'HierarchicalMetadataResolver - Metadata Resolution Engine'
+description: 'Core hierarchical metadata resolution with batch optimization'
+business-context: 'Advanced metadata resolution system with performance optimization for large-scale JSDoc generation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  HierarchicalMetadataResolver:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Advanced hierarchical metadata resolution system with batch optimization'
+      business-context: 'Core engine that resolves metadata inheritance from global → package → class → method levels with intelligent caching'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Hierarchical metadata resolver with batch optimization and caching'
+        cli:
+          description: |
+            ## HierarchicalMetadataResolver
+
+            The core metadata resolution engine that implements the Enhanced Metadata System V2.
+
+            **Key Features:**
+            - Hierarchical inheritance: global → package → class → method
+            - Batch optimization for performance
+            - Intelligent file caching
+            - Format-specific resolution (JSDoc vs CLI)
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Strategy Pattern, Cache Pattern, Batch Processing'
+        features: 'Hierarchical resolution, batch optimization, performance caching'
+        performance: 'Optimizes N×operations to single-batch operations'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates hierarchical metadata resolver with base directory'
+        business-context: 'Initializes resolver with metadata sources and caching system'
+
+        parameters:
+          - name: 'baseDir'
+            type: 'string'
+            optional: true
+            description: 'Base directory for metadata files (defaults to current working directory)'
+
+        examples:
+          - id: 'basic-constructor'
+            code: |
+              const resolver = new HierarchicalMetadataResolver();
+              // Uses current working directory
+
+          - id: 'custom-base-dir'
+            code: |
+              const resolver = new HierarchicalMetadataResolver('/path/to/docs');
+              // Uses specific base directory
+
+      preWarmClassCache:
+        description: 'Pre-warm cache for class with multiple methods to optimize batch operations'
+        business-context: 'Performance optimization that loads all method metadata for a class in single operation'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for metadata resolution'
+
+          - name: 'className'
+            type: 'string'
+            description: 'Class name to pre-warm cache for'
+
+          - name: 'methodNames'
+            type: 'string[]'
+            description: 'Array of method names to cache'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Pre-warming completed'
+
+        examples:
+          - id: 'pre-warm-class'
+            code: |
+              await resolver.preWarmClassCache(
+                'aggregates',
+                'AggregateRoot',
+                ['commit', 'apply', 'loadFromHistory', 'getVersion']
+              );
+              // All methods now cached for fast resolution
+
+        custom-tags:
+          async: 'true'
+          batch-optimization: 'Loads multiple methods at once'
+          performance: 'Dramatically reduces file I/O operations'
+
+      getCacheStats:
+        description: 'Get cache statistics for performance monitoring'
+        business-context: 'Enables monitoring and optimization of cache performance'
+
+        returns:
+          type: 'CacheStats'
+          description: 'Comprehensive cache performance statistics'
+
+        examples:
+          - id: 'cache-monitoring'
+            code: |
+              const stats = resolver.getCacheStats();
+              console.log(`Cache hit rate: ${stats.hitRate}%`);
+              console.log(`Total operations: ${stats.reads + stats.parses}`);
+              console.log(`Memory efficiency: ${stats.cacheSize} items cached`);
+
+        custom-tags:
+          monitoring: 'Performance analysis and optimization'
+
+      clearCache:
+        description: 'Clear cache for specific file or entire cache'
+        business-context: 'Cache management for updated files or complete reset'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            optional: true
+            description: 'Optional specific file path to clear (clears entire cache if not provided)'
+
+        examples:
+          - id: 'clear-specific-file'
+            code: |
+              resolver.clearCache('/path/to/updated-file.yaml');
+              // Only clears specific file from cache
+
+          - id: 'clear-all-cache'
+            code: |
+              resolver.clearCache();
+              // Clears entire cache for fresh start
+
+      resolveAllMethodsForClass:
+        description: 'Resolve ALL methods for a class at once - BATCH OPTIMIZATION'
+        business-context: 'KEY PERFORMANCE OPTIMIZATION: Resolves all class methods in single operation instead of N separate operations'
+
+        parameters:
+          - name: 'config'
+            type: 'Omit<HierarchyConfig, "methodName">'
+            description: 'Hierarchy configuration without method name (resolves all methods)'
+
+        returns:
+          type: 'Promise<Record<string, ResolvedMetadata | null>>'
+          description: 'Object mapping method names to resolved metadata'
+
+        examples:
+          - id: 'batch-resolution'
+            code: |
+              const allMethods = await resolver.resolveAllMethodsForClass({
+                packageName: 'aggregates',
+                className: 'AggregateRoot',
+                format: 'jsdoc'
+              });
+
+              // Access individual method metadata
+              const commitMetadata = allMethods['commit'];
+              const applyMetadata = allMethods['apply'];
+
+        custom-tags:
+          async: 'true'
+          batch-optimization: 'KEY PERFORMANCE FEATURE'
+          performance: 'Replaces N operations with 1 operation'
+          complexity: 'O(1) instead of O(N) for file operations'
+
+      resolveForMethod:
+        description: 'Resolve metadata for specific method with hierarchy'
+        business-context: 'Single method resolution with full hierarchical inheritance'
+
+        parameters:
+          - name: 'config'
+            type: 'HierarchyConfig'
+            description: 'Complete hierarchy configuration including method name'
+
+        returns:
+          type: 'Promise<ResolvedMetadata | null>'
+          description: 'Resolved metadata with hierarchical inheritance applied'
+
+        examples:
+          - id: 'single-method'
+            code: |
+              const metadata = await resolver.resolveForMethod({
+                packageName: 'aggregates',
+                className: 'AggregateRoot',
+                methodName: 'commit',
+                format: 'jsdoc'
+              });
+
+              if (metadata) {
+                console.log(metadata.description);
+                console.log(metadata.businessContext);
+              }
+
+        custom-tags:
+          async: 'true'
+          hierarchical: 'Full inheritance chain applied'
+
+      collectMetadataSources:
+        description: 'Collect all metadata sources for resolution'
+        business-context: 'Internal method that gathers metadata from all hierarchy levels'
+        visibility: 'private'
+
+      collectBaseMetadataSources:
+        description: 'Collect base metadata sources (global, package, class) shared for all methods'
+        business-context: 'Optimization that collects shared metadata once for batch operations'
+        visibility: 'private'
+
+        custom-tags:
+          optimization: 'Shared metadata collection for batch processing'
+
+      loadAllMethodsMetadata:
+        description: 'Load ALL methods metadata from class file at once - KEY OPTIMIZATION'
+        business-context: 'Critical performance optimization: reads file once and parses all methods instead of N separate operations'
+        visibility: 'private'
+
+        custom-tags:
+          key-optimization: 'Core performance improvement'
+          file-operations: 'Reduces from N reads to 1 read'
+          batch-processing: 'Processes all methods in single operation'
+
+      loadGlobalSettings:
+        description: 'Load global settings from global configuration'
+        business-context: 'Loads base-level metadata that applies to all packages'
+        visibility: 'private'
+
+      loadPackageSettings:
+        description: 'Load package-specific settings'
+        business-context: 'Loads package-level metadata that applies to all classes in package'
+        visibility: 'private'
+
+      loadClassMetadata:
+        description: 'Load class-specific metadata'
+        business-context: 'Loads class-level metadata that applies to all methods in class'
+        visibility: 'private'
+
+      loadMethodMetadata:
+        description: 'Load method-specific metadata'
+        business-context: 'Loads method-specific metadata with highest priority in hierarchy'
+        visibility: 'private'
+
+      parseMetadataFile:
+        description: 'Parse metadata file with error handling'
+        business-context: 'Safe metadata file parsing with fallback mechanisms'
+        visibility: 'private'
+
+      parseMetadata:
+        description: 'Parse metadata content from string'
+        business-context: 'Core metadata parsing logic with format detection'
+        visibility: 'private'
+
+      convertToCamelCase:
+        description: 'Convert hyphenated keys to camelCase for consistency'
+        business-context: 'Ensures consistent property naming across metadata sources'
+        visibility: 'private'
+
+        examples:
+          - id: 'case-conversion'
+            code: |
+              // Examples:
+              // "business-context" -> "businessContext"
+              // "custom-tags" -> "customTags"
+              // "format-specific" -> "formatSpecific"
+
+      toCamelCase:
+        description: 'Convert single hyphenated string to camelCase'
+        business-context: 'Utility method for property name normalization'
+        visibility: 'private'
+
+      parseMarkdownSections:
+        description: 'Fallback parser for standard markdown sections (backward compatibility)'
+        business-context: 'Maintains compatibility with legacy metadata formats'
+        visibility: 'private'
+
+        custom-tags:
+          backward-compatibility: 'Supports legacy metadata formats'
+
+      parseMethodFromClassFile:
+        description: 'Parse method-specific metadata from class file'
+        business-context: 'Extracts single method metadata from class file'
+        visibility: 'private'
+
+      parseAllMethodsFromClassFile:
+        description: 'BATCH OPTIMIZATION: Parse ALL methods from class file at once'
+        business-context: 'KEY PERFORMANCE OPTIMIZATION: parses file once and extracts all methods instead of parsing N times'
+        visibility: 'private'
+
+        custom-tags:
+          key-optimization: 'Core performance improvement'
+          batch-processing: 'Single parse operation for all methods'
+          performance: 'Reduces parsing complexity from O(N) to O(1)'

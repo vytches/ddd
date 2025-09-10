@@ -36,6 +36,9 @@ run_check() {
     
     result=$(eval "$command" 2>/dev/null || echo "0")
     
+    # Ensure result is a single integer (handle multi-line output)
+    result=$(echo "$result" | tr -d '\n' | tr -d ' ')
+    
     if [ "$expected" = "0" ]; then
         if [ "$result" -eq 0 ]; then
             echo -e "${GREEN}✅ PASS${NC} (found: $result)"
@@ -87,7 +90,7 @@ run_check "No unprocessed @*-inject directives in .d.ts files" \
 
 # Check 2: Metadata injection in .d.ts files
 run_check "Adequate metadata injection in .d.ts files (>50 tags)" \
-    "find packages/aggregates/dist -name '*.d.ts' -exec cat {} + | grep -c '@business\|@description\|@example' 2>/dev/null || echo 0" \
+    "find packages/aggregates/dist -name '*.d.ts' -exec cat {} + 2>/dev/null | grep '@business\\|@description\\|@example' | wc -l" \
     "50" \
     "critical"
 
@@ -121,10 +124,10 @@ if [ -n "$unprocessed_dts_files" ]; then
 fi
 
 # Show metadata statistics for .d.ts files
-metadata_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + | grep -c '@business\|@description\|@example' 2>/dev/null || echo "0")
-business_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + | grep -c '@business' 2>/dev/null || echo "0")
-description_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + | grep -c '@description' 2>/dev/null || echo "0")
-example_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + | grep -c '@example' 2>/dev/null || echo "0")
+metadata_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + 2>/dev/null | grep '@business\|@description\|@example' | wc -l)
+business_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + 2>/dev/null | grep '@business' | wc -l)
+description_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + 2>/dev/null | grep '@description' | wc -l)
+example_count=$(find packages/aggregates/dist -name '*.d.ts' -exec cat {} + 2>/dev/null | grep '@example' | wc -l)
 dts_file_count=$(find packages/aggregates/dist -name '*.d.ts' | wc -l)
 
 echo "📈 Metadata Statistics (.d.ts files):"

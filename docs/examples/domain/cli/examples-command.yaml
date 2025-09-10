@@ -1,0 +1,121 @@
+# Examples Command - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'examples'
+title: 'CLI Examples Command - Example Management System'
+description: 'CLI command for managing and generating DDD library examples'
+business-context: 'Comprehensive example management system with Enhanced Metadata System V2 integration'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ExamplesOptions:
+    description: 'Configuration options for examples command with comprehensive feature set'
+    business-context: 'Flexible example generation and management with metadata support'
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Options pattern for CLI commands'
+      capabilities: 'Enhanced metadata, framework integration, LLM optimization'
+
+    properties:
+      - name: 'help'
+        type: 'boolean | undefined'
+        description: 'Show help information'
+      - name: 'complexity'
+        type: 'string | undefined'
+        description: 'Example complexity level (basic, intermediate, advanced)'
+      - name: 'framework'
+        type: 'string | undefined'
+        description: 'Target framework (nestjs, express, fastify)'
+      - name: 'sections'
+        type: 'string | undefined'
+        description: 'Specific sections to include'
+      - name: 'llmOptimized'
+        type: 'boolean | undefined'
+        description: 'Generate LLM-optimized content'
+      - name: 'llm'
+        type: 'boolean | undefined'
+        description: 'Enable LLM-specific features'
+      - name: 'showRelated'
+        type: 'boolean | undefined'
+        description: 'Include related examples in output'
+      - name: 'maxExamples'
+        type: 'number | undefined'
+        description: 'Maximum number of examples to generate'
+      - name: 'noRandomize'
+        type: 'boolean | undefined'
+        description: 'Disable example randomization'
+      - name: 'seed'
+        type: 'string | undefined'
+        description: 'Seed for reproducible randomization'
+      - name: 'diOnly'
+        type: 'boolean | undefined'
+        description: 'Show only dependency injection examples'
+      - name: 'output'
+        type: 'string | undefined'
+        description: 'Output file path'
+      - name: 'packages'
+        type: 'string | undefined'
+        description: 'Comma-separated list of packages'
+      - name: 'package'
+        type: 'string | undefined'
+        description: 'Single package name'
+      - name: 'fix'
+        type: 'boolean | undefined'
+        description: 'Auto-fix validation issues'
+      - name: 'verbose'
+        type: 'boolean | undefined'
+        description: 'Enable verbose output'
+      - name: 'enhancedMetadata'
+        type: 'boolean | undefined'
+        description: 'Use Enhanced Metadata System V2'
+
+# === CONSTANTS ===
+constants:
+  examplesCommand:
+    description: 'Examples command configuration with action handler'
+    business-context: 'Primary CLI command for example management and generation'
+
+    custom-tags:
+      since: '1.0.0'
+      command-type: 'CLI command'
+      capabilities: 'Example generation, validation, metadata management'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Command name identifier'
+      - name: 'description'
+        type: 'string'
+        description: 'Command description for help display'
+      - name: 'action'
+        type: '(args: string[], options: ExamplesOptions) => Promise<void>'
+        description: 'Command execution handler'
+
+    examples:
+      - id: 'basic-usage'
+        code: |
+          // Generate examples for aggregates package
+          await examplesCommand.action(['generate', 'aggregates'], {
+            complexity: 'intermediate',
+            framework: 'nestjs',
+            enhancedMetadata: true
+          });
+
+      - id: 'advanced-usage'
+        code: |
+          // Generate LLM-optimized examples with specific options
+          await examplesCommand.action(['generate', 'cqrs'], {
+            complexity: 'advanced',
+            framework: 'nestjs',
+            llmOptimized: true,
+            maxExamples: 5,
+            seed: 'stable-output',
+            enhancedMetadata: true,
+            verbose: true
+          });

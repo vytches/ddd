@@ -1,0 +1,273 @@
+# Versioned ACL Registry - Multi-version adapter management
+
+# === FILE METADATA ===
+file-name: 'versioned-acl-registry'
+title: 'VersionedACLRegistry - Multi-version Adapter System'
+description: 'Multi-version ACL adapter registry with version management and compatibility'
+business-context: |
+  Manages multiple versions of ACL adapters for external systems that evolve over time,
+  enabling seamless API version transitions and backward compatibility support
+  while maintaining clean domain boundaries.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ACLVersionMetadata:
+    description: 'Version-specific metadata for ACL adapters extending base registration metadata'
+    business-context: 'Tracks version information, deprecation status, and compatibility for adapter management'
+
+    properties:
+      - name: 'version'
+        type: 'string'
+        description: 'Semantic version string for the adapter'
+      - name: 'isLatest'
+        type: 'boolean'
+        description: 'Whether this is the latest version of the adapter'
+      - name: 'deprecated'
+        type: 'boolean'
+        description: 'Whether this adapter version is deprecated'
+      - name: 'deprecationReason'
+        type: 'string'
+        description: 'Optional reason for deprecation'
+        optional: true
+      - name: 'compatibleWith'
+        type: 'string[]'
+        description: 'Array of version strings this adapter is compatible with'
+        optional: true
+
+# === CLASSES ===
+classes:
+  VersionedACLRegistry:
+    class-doc:
+      description: 'Multi-version ACL adapter registry extending BaseACLRegistry'
+      business-context: |
+        Manages multiple versions of ACL adapters for external systems that evolve
+        their APIs over time. Enables smooth transitions between API versions while
+        maintaining backward compatibility and tracking deprecation cycles.
+
+      formats:
+        jsdoc:
+          description: 'Multi-version ACL adapter registry with version management'
+        cli:
+          description: |
+            ## VersionedACLRegistry
+            Advanced registry providing:
+            - Multiple adapter versions per context
+            - Automatic latest version tracking
+            - Deprecation and compatibility management
+            - Version resolution and discovery
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Versioning Pattern'
+        extends: 'BaseACLRegistry'
+
+    methods:
+      getRegistryName:
+        description: 'Returns the name of this versioned registry'
+        business-context: 'Identifies this as versioned registry in logs and debugging'
+        visibility: 'protected'
+
+        returns:
+          type: 'string'
+          description: 'Registry name identifier'
+
+        examples:
+          - id: 'registry-name'
+            code: |
+              // Internal method - returns 'VersionedACLRegistry'
+              const name = this.getRegistryName();
+
+      registerVersioned:
+        description: 'Registers a versioned ACL adapter with metadata'
+        business-context: 'Adds new adapter version with automatic latest version tracking and compatibility management'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name for the adapter'
+          - name: 'version'
+            type: 'string'
+            description: 'Semantic version string for the adapter'
+          - name: 'adapter'
+            type: 'IACLAdapter<TDomain, TExternal>'
+            description: 'ACL adapter instance to register'
+          - name: 'metadata'
+            type: 'Partial<ACLVersionMetadata>'
+            description: 'Optional version-specific metadata'
+            optional: true
+
+        returns:
+          type: 'this'
+          description: 'Registry instance for method chaining'
+
+        generic: 'TDomain, TExternal'
+
+        examples:
+          - id: 'register-versioned'
+            code: |
+              const registry = new VersionedACLRegistry();
+              registry.registerVersioned(
+                'PaymentContext',
+                '2.1.0',
+                paymentAdapterV21,
+                {
+                  deprecated: false,
+                  compatibleWith: ['2.0.0', '1.9.0'],
+                  isLatest: true
+                }
+              ).registerVersioned(
+                'PaymentContext',
+                '2.0.0',
+                paymentAdapterV20,
+                {
+                  deprecated: true,
+                  deprecationReason: 'Security improvements in v2.1',
+                  compatibleWith: ['1.9.0']
+                }
+              );
+
+      get:
+        description: 'Retrieves ACL adapter by context and version'
+        business-context: 'Resolves adapter by version or returns latest version if version not specified'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name for the adapter'
+          - name: 'version'
+            type: 'string'
+            description: 'Optional specific version to retrieve'
+            optional: true
+
+        returns:
+          type: 'IACLAdapter<TDomain, TExternal> | undefined'
+          description: 'Adapter instance or undefined if not found'
+
+        generic: 'TDomain, TExternal'
+
+        examples:
+          - id: 'get-versioned'
+            code: |
+              // Get specific version
+              const v20 = registry.get<Payment, StripePayment>('PaymentContext', '2.0.0');
+
+              // Get latest version
+              const latest = registry.get<Payment, StripePayment>('PaymentContext');
+
+      getLatestVersion:
+        description: 'Returns the latest version string for a context'
+        business-context: 'Discovers the most recent version available for version resolution'
+
+        parameters:
+          - name: 'contextName'
+            type: 'string'
+            description: 'Context name to get latest version for'
+
+        returns:
+          type: 'string | undefined'
+          description: 'Latest version string or undefined if no versions exist'
+
+        examples:
+          - id: 'get-latest-version'
+            code: |
+              const latest = registry.getLatestVersion('PaymentContext');
+              console.log(`Latest version: ${latest}`); // "2.1.0"
+
+  VersionedACLAdapter:
+    class-doc:
+      description: 'Multi-version ACL adapter implementation with automatic version resolution'
+      business-context: |
+        Provides transparent multi-version support for ACL operations, automatically
+        resolving to appropriate adapter version based on execution context or
+        configuration while maintaining consistent interface.
+
+      formats:
+        jsdoc:
+          description: 'Multi-version ACL adapter with automatic resolution'
+        cli:
+          description: |
+            ## VersionedACLAdapter
+            Advanced adapter providing:
+            - Automatic version resolution
+            - Transparent multi-version operations
+            - Version discovery and listing
+            - Consistent execution interface
+
+      custom-tags:
+        since: '1.0.0'
+        extends: 'BaseACLAdapter'
+
+    methods:
+      constructor:
+        description: 'Initializes versioned adapter with registry and default context'
+        business-context: 'Sets up multi-version support with registry-based adapter resolution'
+
+        parameters:
+          - name: 'registry'
+            type: 'VersionedACLRegistry'
+            description: 'Versioned registry containing adapter versions'
+          - name: 'defaultContextName'
+            type: 'string'
+            description: 'Default context name for adapter resolution'
+
+        examples:
+          - id: 'versioned-constructor'
+            code: |
+              const versionedRegistry = new VersionedACLRegistry();
+              versionedRegistry.registerVersioned('Payments', '2.1.0', paymentAdapter);
+
+              const adapter = new VersionedACLAdapter(versionedRegistry, 'Payments');
+
+      execute:
+        description: 'Executes operation through versioned adapter with automatic resolution'
+        business-context: 'Performs ACL operation using latest or specified version with transparent version handling'
+
+        parameters:
+          - name: 'operation'
+            type: 'string'
+            description: 'Operation name to execute'
+          - name: 'domainModel'
+            type: 'TDomain'
+            description: 'Domain model to process'
+          - name: 'options'
+            type: 'ExecuteOptions'
+            description: 'Optional execution options including version specification'
+            optional: true
+
+        returns:
+          type: 'Promise<Result<TResult, ACLError>>'
+          description: 'Result containing response or error'
+
+        generic: 'TDomain, TResult'
+
+        examples:
+          - id: 'execute-versioned'
+            code: |
+              // Execute with latest version
+              const result = await adapter.execute('create', orderData);
+
+              // Execute with specific version
+              const resultV20 = await adapter.execute(
+                'create',
+                orderData,
+                { version: '2.0.0' }
+              );
+
+      getAvailableVersions:
+        description: 'Returns all available versions for the default context'
+        business-context: 'Discovers all registered versions for version selection and compatibility checking'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of available version strings'
+
+        examples:
+          - id: 'available-versions'
+            code: |
+              const versions = adapter.getAvailableVersions();
+              console.log('Available versions:', versions); // ['2.1.0', '2.0.0', '1.9.0']

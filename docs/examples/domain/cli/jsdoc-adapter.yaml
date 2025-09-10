@@ -1,0 +1,359 @@
+# JSDocAdapter - CLI Advanced JSDoc Processing System
+
+# === FILE METADATA ===
+file-name: 'jsdoc-adapter'
+title: 'JSDocAdapter - Enterprise JSDoc Processing Engine'
+description: 'Advanced JSDoc adapter with Enhanced Metadata System integration'
+business-context: 'Enterprise JSDoc generation with hierarchical metadata resolution'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  JSDocAdapter:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'JSDoc adapter implementing infrastructure service for JSDoc operations'
+      business-context: 'Enterprise JSDoc processing with Enhanced Metadata System integration'
+
+      formats:
+        jsdoc:
+          description: 'Advanced JSDoc processing with metadata integration'
+        cli:
+          description: |
+            ## JSDocAdapter
+            Enterprise JSDoc processing engine with Enhanced Metadata System
+
+      custom-tags:
+        since: '1.0.0'
+        enhanced-metadata: 'Integrates with Enhanced Metadata System V2'
+        interfaces: 'Implements IJSDocAdapter interface'
+        hierarchical: 'Supports global settings hierarchy'
+        injection: 'Advanced directive processing and injection'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates JSDoc adapter with enhanced processing engines'
+        business-context: 'Initializes adapter with metadata engines and processing components'
+
+        examples:
+          - id: 'basic-adapter'
+            code: |
+              const adapter = new JSDocAdapter();
+
+              // Adapter ready for advanced JSDoc processing
+              const jsDoc = await adapter.getEnhancedMetadataForMethod(
+                'createUser',
+                'domain-services',
+                '/path/to/file.ts'
+              );
+
+      getDescriptionForMethod:
+        description: 'Get description for method from example files'
+        business-context: 'Extract method descriptions from Enhanced Metadata System'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to get description for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package context for method resolution'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Method description from metadata'
+
+        examples:
+          - id: 'get-description'
+            code: |
+              const description = await adapter.getDescriptionForMethod(
+                'createUser',
+                'domain-services'
+              );
+
+              console.log('Method description:', description);
+
+      getBusinessContextForMethod:
+        description: 'Get business context for method from example files'
+        business-context: 'Extract business context explaining method usage scenarios'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to get business context for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package context for method resolution'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Business context explanation'
+
+        examples:
+          - id: 'get-business-context'
+            code: |
+              const context = await adapter.getBusinessContextForMethod(
+                'processPayment',
+                'domain-services'
+              );
+
+              console.log('Business context:', context);
+
+      getEnhancedMetadataForMethod:
+        description: 'Get enhanced metadata for method using Enhanced Metadata System with global settings hierarchy'
+        business-context: 'Complete metadata resolution with hierarchical inheritance'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name for metadata resolution'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package context for hierarchy resolution'
+          - name: '_filePath'
+            type: 'string'
+            description: 'File path context (for future use)'
+
+        returns:
+          type: 'Promise<{[key: string]: string} | null>'
+          description: 'Complete metadata object or null if unavailable'
+
+        custom-tags:
+          enhanced-metadata: 'Uses Enhanced Metadata System V2'
+          hierarchical: 'Resolves through global → package → class → method hierarchy'
+          comprehensive: 'Returns all available metadata tags'
+
+        examples:
+          - id: 'enhanced-metadata'
+            code: |
+              const metadata = await adapter.getEnhancedMetadataForMethod(
+                'createOrder',
+                'domain-services',
+                '/path/to/order-service.ts'
+              );
+
+              if (metadata) {
+                console.log('Enhanced metadata:', {
+                  description: metadata.description,
+                  businessContext: metadata.businessContext,
+                  since: metadata.since,
+                  customTags: Object.keys(metadata).filter(k => !['description', 'businessContext'].includes(k))
+                });
+              }
+
+      getExampleForMethod:
+        description: 'Get best example for method at specific layer and complexity'
+        business-context: 'Context-aware example selection for different documentation scenarios'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to get example for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package context for example resolution'
+          - name: 'layer'
+            type: 'LayerType'
+            description: 'Optional layer type for example filtering'
+          - name: 'complexity'
+            type: 'ComplexityLevel'
+            description: 'Optional complexity level for example selection'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Best matching example code'
+
+        examples:
+          - id: 'get-example'
+            code: |
+              // Get basic domain example
+              const basicExample = await adapter.getExampleForMethod(
+                'createUser',
+                'domain-services',
+                'domain',
+                'basic'
+              );
+
+              // Get advanced integration example
+              const advancedExample = await adapter.getExampleForMethod(
+                'createUser',
+                'domain-services',
+                'integration',
+                'advanced'
+              );
+
+      injectIntoJSDoc:
+        description: 'Inject examples into JSDoc comments'
+        business-context: 'Automated JSDoc enhancement with metadata injection'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Source code containing JSDoc comments'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name for targeted injection'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package context for metadata resolution'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Enhanced code with injected JSDoc'
+
+        custom-tags:
+          injection: 'Automated JSDoc enhancement'
+          targeted: 'Method-specific injection processing'
+
+        examples:
+          - id: 'inject-jsdoc'
+            code: |
+              const sourceCode = `
+              /**
+               * Creates a new user
+               */
+              async createUser(userData: UserData): Promise<User> {
+                // Implementation
+              }
+              `;
+
+              const enhancedCode = await adapter.injectIntoJSDoc(
+                sourceCode,
+                'createUser',
+                'domain-services'
+              );
+
+              console.log('Enhanced with JSDoc:', enhancedCode);
+
+      processEnhancedBlocks:
+        description: 'Process enhanced JSDoc blocks with metadata support'
+        business-context: 'Advanced JSDoc block processing with Enhanced Metadata System'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path for metadata resolution context'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name for targeted processing'
+
+        returns:
+          type: 'Promise<string | null>'
+          description: 'Processed JSDoc block or null if unavailable'
+
+        custom-tags:
+          enhanced-blocks: 'Processes advanced JSDoc structures'
+          metadata-integration: 'Integrates with Enhanced Metadata System'
+
+        examples:
+          - id: 'process-enhanced-blocks'
+            code: |
+              const processedBlock = await adapter.processEnhancedBlocks(
+                '/path/to/user-service.ts',
+                'createUser'
+              );
+
+              if (processedBlock) {
+                console.log('Processed JSDoc block:', processedBlock);
+              }
+
+      processInjectionDirectives:
+        description: 'Process JSDoc directives in file using YAML metadata system'
+        business-context: 'Directive-based JSDoc processing with YAML metadata integration'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Source code containing injection directives'
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path for metadata resolution context'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Code with processed directives'
+
+        custom-tags:
+          directives: 'Processes JSDoc injection directives'
+          yaml-integration: 'Uses YAML metadata system'
+          automation: 'Automated directive processing'
+
+        examples:
+          - id: 'process-directives'
+            code: |
+              const codeWithDirectives = `
+              /**
+               * @inject:description
+               * @inject:businessContext  
+               * @inject:example
+               */
+              class UserService {
+                // Implementation
+              }
+              `;
+
+              const processedCode = await adapter.processInjectionDirectives(
+                codeWithDirectives,
+                '/path/to/user-service.ts'
+              );
+
+              console.log('Processed directives:', processedCode);
+
+      injectWithParameters:
+        description: 'Enhanced injection with parameter support'
+        business-context: 'Advanced injection with granular control over metadata selection'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Source code for injection'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name for targeted injection'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package context for metadata resolution'
+          - name: 'params'
+            type: 'object'
+            description: 'Optional injection parameters for fine-grained control'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Enhanced code with parameter-controlled injection'
+
+        custom-tags:
+          enhanced-injection: 'Parameter-controlled injection'
+          granular-control: 'Fine-grained metadata selection'
+          flexible: 'Configurable injection behavior'
+
+        examples:
+          - id: 'inject-with-parameters'
+            code: |
+              const enhancedCode = await adapter.injectWithParameters(
+                sourceCode,
+                'processOrder',
+                'domain-services',
+                {
+                  layer: 'domain',
+                  complexity: 'intermediate',
+                  examples: 2
+                }
+              );
+
+              console.log('Parameter-controlled injection:', enhancedCode);
+
+# === INTERFACES ===
+interfaces:
+  IJSDocAdapter:
+    description: 'JSDoc adapter interface contract'
+    business-context: 'Standardized JSDoc processing interface for enterprise systems'

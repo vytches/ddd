@@ -1,0 +1,70 @@
+# Generate Command - Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'generate'
+title: 'CLI Generate Command - Code Generation System'
+description: 'CLI command for generating DDD components and structures'
+business-context: 'Comprehensive code generation system for Domain-Driven Design components'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CONSTANTS ===
+constants:
+  generateCommand:
+    description: 'Generate command configuration implementing Command interface'
+    business-context: 'Primary CLI command for generating DDD components, aggregates, value objects, and complete domain structures'
+
+    custom-tags:
+      since: '1.0.0'
+      command-type: 'CLI command'
+      capabilities: 'Component generation, structure creation, framework integration'
+      interface: 'Command'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Command name identifier for CLI registration'
+      - name: 'description'
+        type: 'string'
+        description: 'Command description displayed in CLI help'
+      - name: 'usage'
+        type: 'string'
+        description: 'Command usage syntax and examples'
+      - name: 'options'
+        type: 'CommandOption[]'
+        description: 'Available command line options'
+      - name: 'action'
+        type: '(args: string[], options: any) => Promise<void>'
+        description: 'Command execution handler function'
+
+    examples:
+      - id: 'basic-component-generation'
+        code: |
+          // Generate aggregate with repository
+          await generateCommand.action(['aggregate', 'Order'], {
+            framework: 'nestjs',
+            patterns: ['cqrs', 'event-sourcing'],
+            outputPath: './src/domain/order'
+          });
+
+      - id: 'value-object-generation'
+        code: |
+          // Generate value object with validation
+          await generateCommand.action(['value-object', 'EmailAddress'], {
+            framework: 'standalone',
+            validation: true,
+            outputPath: './src/domain/shared'
+          });
+
+      - id: 'complete-domain-generation'
+        code: |
+          // Generate complete bounded context
+          await generateCommand.action(['domain', 'OrderManagement'], {
+            framework: 'nestjs',
+            patterns: ['cqrs', 'event-sourcing', 'sagas'],
+            boundedContexts: ['Orders', 'Payments', 'Shipping'],
+            outputPath: './src/domains/order-management'
+          });

@@ -1,0 +1,260 @@
+# YAML Package Config Loader - YAML-Based Configuration Management
+
+# === FILE METADATA ===
+file-name: 'yaml-package-config-loader'
+title: 'YamlPackageConfigLoader - YAML Configuration Management'
+description: 'Specialized package configuration loader for YAML-based configurations'
+business-context: 'YAML-focused configuration management with automatic TypeScript fallback'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  YamlPackageConfigLoader:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'YAML-based package configuration loader with TypeScript fallback'
+      business-context: 'Specialized loader for YAML configuration files with intelligent fallback mechanisms'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'YAML configuration loader with caching'
+        cli:
+          description: |
+            ## YAML Package Configuration Manager
+            Specialized loader for YAML-based package configurations with TypeScript fallback
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Loader Pattern'
+        category: 'YAML Configuration Management'
+        features: 'YAML parsing, TypeScript fallback, complexity generation'
+        caching: 'In-memory configuration cache'
+
+    # Methods
+    methods:
+      loadPackageConfig:
+        description: 'Load YAML-based configuration for a specific package'
+        business-context: 'Primary method for loading YAML configurations with automatic TypeScript fallback'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Name of the package to load YAML configuration for'
+
+        returns:
+          type: 'Promise<PackageExampleConfig>'
+          description: 'Promise resolving to parsed and validated package configuration'
+
+        examples:
+          - id: 'yaml-load'
+            code: |
+              const loader = new YamlPackageConfigLoader();
+              const config = await loader.loadPackageConfig('aggregates');
+              // Loads from YAML files with automatic complexity generation
+          - id: 'fallback-behavior'
+            code: |
+              // If YAML config missing, falls back to TypeScript configuration
+              const config = await loader.loadPackageConfig('legacy-package');
+              // Returns generated configuration from TypeScript files
+
+        custom-tags:
+          async: true
+          fallback: 'TypeScript configuration fallback'
+          yaml-parsing: 'Native YAML file processing'
+
+      loadYamlConfig:
+        description: 'Load configuration from YAML files'
+        business-context: 'Core YAML processing method with example discovery'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for YAML configuration lookup'
+
+        returns:
+          type: 'Promise<PackageExampleConfig>'
+          description: 'Promise resolving to YAML-based configuration'
+
+        examples:
+          - id: 'yaml-processing'
+            code: |
+              // Internal method - processes YAML configuration files
+              // Discovers examples and generates complexity levels
+
+        custom-tags:
+          private: true
+          yaml-processing: 'Core YAML file handling'
+
+      loadTypescriptConfig:
+        description: 'Load configuration from TypeScript files as fallback'
+        business-context: 'Fallback mechanism when YAML configuration is unavailable'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for TypeScript configuration generation'
+
+        returns:
+          type: 'Promise<PackageExampleConfig>'
+          description: 'Promise resolving to generated configuration from TypeScript'
+
+        examples:
+          - id: 'typescript-fallback'
+            code: |
+              // Internal method - generates configuration from TypeScript files
+              // Used when YAML configuration is not available
+
+        custom-tags:
+          private: true
+          fallback-mechanism: true
+          typescript-processing: 'TypeScript file analysis'
+
+      findYamlExamples:
+        description: 'Discover YAML example files for a package'
+        business-context: 'Example discovery mechanism for YAML-based configurations'
+
+        parameters:
+          - name: 'packagePath'
+            type: 'string'
+            description: 'Path to package directory for example discovery'
+
+        returns:
+          type: 'Promise<ExampleFile[]>'
+          description: 'Promise resolving to discovered YAML example files'
+
+        examples:
+          - id: 'example-discovery'
+            code: |
+              // Internal method - scans for YAML example files
+              // Returns structured example file information
+
+        custom-tags:
+          private: true
+          discovery: 'YAML example file discovery'
+
+      generateComplexityLevels:
+        description: 'Generate complexity levels for discovered examples'
+        business-context: 'Automatic complexity classification for better user experience'
+
+        parameters:
+          - name: 'examples'
+            type: 'ExampleFile[]'
+            description: 'Array of example files to analyze for complexity'
+
+        returns:
+          type: 'ComplexityLevel[]'
+          description: 'Array of complexity levels (beginner, intermediate, advanced)'
+
+        examples:
+          - id: 'complexity-analysis'
+            code: |
+              // Internal method - analyzes examples for complexity
+              // Generates beginner, intermediate, advanced levels
+
+        custom-tags:
+          private: true
+          complexity-analysis: 'Automatic complexity classification'
+
+      generateMinimalConfig:
+        description: 'Generate minimal configuration when no files found'
+        business-context: 'Fallback configuration generation for empty packages'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for minimal configuration generation'
+
+        returns:
+          type: 'PackageExampleConfig'
+          description: 'Minimal configuration object with basic structure'
+
+        examples:
+          - id: 'minimal-config'
+            code: |
+              // Internal method - creates basic configuration structure
+              // Used when no configuration files are found
+
+        custom-tags:
+          private: true
+          minimal-generation: 'Basic configuration creation'
+
+      formatDisplayName:
+        description: 'Format package name for display purposes'
+        business-context: 'Utility method for consistent package name formatting'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Raw package name to format'
+
+        returns:
+          type: 'string'
+          description: 'Formatted display name for the package'
+
+        examples:
+          - id: 'name-formatting'
+            code: |
+              // Internal method - formats package names consistently
+              // Converts 'value-objects' to 'Value Objects'
+
+        custom-tags:
+          private: true
+          formatting: 'Display name formatting utility'
+
+      getAvailablePackages:
+        description: 'Get list of packages with YAML configurations'
+        business-context: 'Discovery method for finding YAML-configured packages'
+
+        returns:
+          type: 'Promise<string[]>'
+          description: 'Promise resolving to array of available package names'
+
+        examples:
+          - id: 'yaml-packages'
+            code: |
+              const loader = new YamlPackageConfigLoader();
+              const packages = await loader.getAvailablePackages();
+              // Returns packages with YAML configuration files
+          - id: 'package-filtering'
+            code: |
+              // Only returns packages that have YAML configuration
+              const yamlPackages = await loader.getAvailablePackages();
+              const hasYamlConfig = yamlPackages.length > 0;
+
+        custom-tags:
+          async: true
+          yaml-discovery: 'YAML-specific package discovery'
+
+      clearCache:
+        description: 'Clear the internal YAML configuration cache'
+        business-context: 'Cache management for forcing fresh YAML configuration loads'
+
+        returns:
+          type: 'void'
+          description: 'No return value, cache is cleared'
+
+        examples:
+          - id: 'yaml-cache-clear'
+            code: |
+              const loader = new YamlPackageConfigLoader();
+              loader.clearCache();
+              // Next loadPackageConfig() calls will re-parse YAML files
+          - id: 'refresh-yaml'
+            code: |
+              // Clear cache and reload YAML configuration
+              loader.clearCache();
+              const freshConfig = await loader.loadPackageConfig('aggregates');
+
+        custom-tags:
+          cache-management: true
+          yaml-specific: 'YAML configuration cache clearing'

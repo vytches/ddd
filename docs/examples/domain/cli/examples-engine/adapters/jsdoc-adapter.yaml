@@ -1,0 +1,333 @@
+# JSDocAdapter - Enhanced Metadata System Core Component
+
+# === FILE METADATA ===
+file-name: 'jsdoc-adapter'
+title: 'JSDocAdapter - Enhanced Metadata System Integration'
+description: 'Core JSDoc processing adapter with Enhanced Metadata System V2 integration'
+business-context: |
+  Central JSDoc processing engine that bridges Enhanced Metadata System V2 with
+  TypeScript JSDoc generation, providing comprehensive metadata injection,
+  hierarchical resolution, and intelligent example processing for enterprise
+  documentation workflows.
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  JSDocAdapter:
+    description: 'Enterprise JSDoc processing adapter with Enhanced Metadata System integration'
+    business-context: |
+      Core adapter responsible for processing JSDoc comments with Enhanced Metadata
+      System V2 integration, providing intelligent metadata injection, hierarchical
+      resolution, and comprehensive example processing for enterprise documentation.
+
+    formats:
+      jsdoc:
+        description: 'JSDoc processing adapter with Enhanced Metadata System integration'
+      cli:
+        description: |
+          ## JSDocAdapter
+          Enterprise JSDoc processing providing:
+          - Enhanced Metadata System V2 integration
+          - Hierarchical metadata resolution
+          - Intelligent example processing
+          - Comprehensive JSDoc generation
+
+    custom-tags:
+      since: '1.0.0'
+      pattern: 'Adapter Pattern'
+      category: 'Enhanced Metadata System'
+      features: 'Metadata injection, hierarchical resolution, example processing, JSDoc generation'
+      integration: 'Core Enhanced Metadata System V2 component'
+
+    methods:
+      constructor:
+        description: 'Initializes JSDocAdapter with Enhanced Metadata System integration'
+        business-context: 'Sets up adapter with enhanced metadata processing, tag extraction, and example engine integration for comprehensive JSDoc generation'
+
+        examples:
+          - id: 'basic-initialization'
+            code: |
+              const adapter = new JSDocAdapter();
+              // Automatically configured with Enhanced Metadata System V2
+
+      getDescriptionForMethod:
+        description: 'Retrieves method description from Enhanced Metadata System'
+        business-context: 'Primary method for extracting method descriptions using hierarchical metadata resolution with Enhanced Metadata System V2'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to get description for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package containing the method'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Method description from metadata'
+
+        examples:
+          - id: 'get-description'
+            code: |
+              const description = await adapter.getDescriptionForMethod(
+                'execute', 
+                'aggregates'
+              );
+              console.log('Method description:', description);
+
+      getBusinessContextForMethod:
+        description: 'Retrieves method business context from Enhanced Metadata System'
+        business-context: 'Extracts business context explaining why and when to use specific methods in enterprise scenarios'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to get business context for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package containing the method'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Business context explaining method usage'
+
+        examples:
+          - id: 'get-business-context'
+            code: |
+              const context = await adapter.getBusinessContextForMethod(
+                'commit', 
+                'aggregates'
+              );
+              console.log('Business context:', context);
+
+      getEnhancedMetadataForMethod:
+        description: 'Retrieves complete enhanced metadata using hierarchical resolution'
+        business-context: 'Advanced method that processes global settings hierarchy and provides comprehensive metadata for JSDoc generation'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to get metadata for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package containing the method'
+          - name: '_filePath'
+            type: 'string'
+            description: 'File path for context-specific metadata'
+
+        returns:
+          type: 'Promise<{[key: string]: string} | null>'
+          description: 'Complete enhanced metadata or null if not found'
+
+        custom-tags:
+          enhanced-metadata: 'Uses Enhanced Metadata System V2 hierarchical resolution'
+
+        examples:
+          - id: 'enhanced-metadata'
+            code: |
+              const metadata = await adapter.getEnhancedMetadataForMethod(
+                'execute', 
+                'cqrs',
+                '/path/to/file.ts'
+              );
+              if (metadata) {
+                console.log('Enhanced metadata:', metadata);
+              }
+
+      getExampleForMethod:
+        description: 'Retrieves code examples with layer and complexity filtering'
+        business-context: 'Intelligent example selection based on complexity level and architectural layer for contextual documentation'
+
+        parameters:
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to get examples for'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package containing the method'
+          - name: 'layer'
+            type: 'LayerType'
+            description: 'Architectural layer filter'
+            optional: true
+          - name: 'complexity'
+            type: 'ComplexityLevel'
+            description: 'Complexity level filter'
+            optional: true
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Code example matching criteria'
+
+        examples:
+          - id: 'layer-specific-example'
+            code: |
+              const example = await adapter.getExampleForMethod(
+                'handle', 
+                'cqrs',
+                'application',
+                'intermediate'
+              );
+              console.log('Example:', example);
+
+      injectIntoJSDoc:
+        description: 'Injects Enhanced Metadata System content into JSDoc comments'
+        business-context: 'Main injection method that processes TypeScript code and enhances JSDoc comments with hierarchical metadata'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'TypeScript source code to process'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name for context'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for context'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Enhanced TypeScript code with JSDoc'
+
+        custom-tags:
+          core-functionality: 'Primary JSDoc injection method'
+
+        examples:
+          - id: 'inject-jsdoc'
+            code: |
+              const enhancedCode = await adapter.injectIntoJSDoc(
+                sourceCode,
+                'execute',
+                'aggregates'
+              );
+              console.log('Enhanced with JSDoc:', enhancedCode);
+
+      processEnhancedBlocks:
+        description: 'Processes enhanced JSDoc blocks with metadata support'
+        business-context: 'Advanced processing for enhanced JSDoc blocks that support Enhanced Metadata System V2 directives and hierarchical resolution'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path for context'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name to process'
+
+        returns:
+          type: 'Promise<string | null>'
+          description: 'Processed enhanced block or null'
+
+        examples:
+          - id: 'process-enhanced'
+            code: |
+              const processed = await adapter.processEnhancedBlocks(
+                '/path/to/file.ts',
+                'commit'
+              );
+              if (processed) {
+                console.log('Processed block:', processed);
+              }
+
+      processInjectionDirectives:
+        description: 'Processes JSDoc directives using YAML metadata system'
+        business-context: 'Core processing method that handles YAML-based metadata directives and applies Enhanced Metadata System V2 hierarchical resolution'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Source code with injection directives'
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path for context'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Code with processed directives'
+
+        custom-tags:
+          yaml-processing: 'Handles YAML metadata directives'
+
+        examples:
+          - id: 'process-directives'
+            code: |
+              const processedCode = await adapter.processInjectionDirectives(
+                codeWithDirectives,
+                '/path/to/file.ts'
+              );
+              console.log('Processed directives:', processedCode);
+
+      injectWithParameters:
+        description: 'Enhanced injection with parameter support for complex scenarios'
+        business-context: 'Advanced injection method supporting parameterized metadata injection with layer, complexity, and example filtering'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Source code to enhance'
+          - name: 'methodName'
+            type: 'string'
+            description: 'Method name for context'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name for context'
+          - name: 'params'
+            type: 'object'
+            description: 'Optional parameters for filtering'
+            optional: true
+            properties:
+              - name: 'layer'
+                type: 'LayerType'
+                description: 'Architectural layer filter'
+              - name: 'complexity'
+                type: 'ComplexityLevel'
+                description: 'Complexity level filter'
+              - name: 'examples'
+                type: 'number'
+                description: 'Number of examples to include'
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Enhanced code with parameterized injection'
+
+        examples:
+          - id: 'parameterized-injection'
+            code: |
+              const enhanced = await adapter.injectWithParameters(
+                sourceCode,
+                'execute',
+                'cqrs',
+                {
+                  layer: 'application',
+                  complexity: 'advanced',
+                  examples: 2
+                }
+              );
+              console.log('Enhanced with parameters:', enhanced);
+
+# === INTERFACES ===
+interfaces:
+  IJSDocAdapter:
+    description: 'Interface contract for JSDoc adapters'
+    business-context: 'Defines the contract for JSDoc processing adapters in the Enhanced Metadata System'
+
+    methods:
+      getDescriptionForMethod:
+        description: 'Contract for retrieving method descriptions'
+      getBusinessContextForMethod:
+        description: 'Contract for retrieving business context'
+      injectIntoJSDoc:
+        description: 'Contract for JSDoc injection'
+
+# === TYPES ===
+types:
+  LayerType:
+    description: 'Architectural layer enumeration'
+    business-context: 'Defines architectural layers for example filtering'
+
+  ComplexityLevel:
+    description: 'Complexity level enumeration'
+    business-context: 'Defines complexity levels for progressive examples'

@@ -1,0 +1,47 @@
+# Package Settings for CQRS - Enhanced Metadata System V2
+
+# === PACKAGE IDENTITY ===
+package-name: 'cqrs'
+display-name: 'DDD CQRS'
+description: 'Command Query Responsibility Segregation implementation with advanced middleware and decorator support'
+
+# === HIERARCHICAL STRATEGY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'package'
+
+# === PACKAGE METADATA ===
+domain: 'application-architecture'
+complexity: 'intermediate'
+patterns:
+  - 'command-pattern'
+  - 'query-pattern'
+  - 'middleware-pattern'
+  - 'decorator-pattern'
+  - 'handler-pattern'
+
+# === BUSINESS CONTEXT ===
+business-context: 'Implements CQRS pattern for separating read and write operations, enabling scalable and maintainable application architectures'
+
+# === PACKAGE-LEVEL FORMAT OVERRIDES ===
+formats:
+  jsdoc:
+    description: 'CQRS implementation with command/query separation and middleware pipeline'
+    business-context: 'Enables scalable architectures by separating read and write models'
+  cli:
+    description: |
+      ## CQRS Package
+      Complete Command Query Responsibility Segregation implementation with:
+      - Command and Query buses
+      - Decorator-based handler registration
+      - Advanced middleware pipeline
+      - Context propagation and logging integration
+    business-context: |
+      Essential for building scalable applications where read and write operations have different performance characteristics and requirements
+
+# === CUSTOM TAGS ===
+custom-tags:
+  author: 'VytchesDDD Team'
+  since: '1.0.0'
+  maturity: 'stable'
+  enterprise: 'true'

@@ -1,0 +1,313 @@
+# ExampleValidator - CLI Example Validation System
+
+# === FILE METADATA ===
+file-name: 'example-validator'
+title: 'ExampleValidator - Documentation Quality Assurance'
+description: 'Comprehensive validation system for documentation examples'
+business-context: 'Enterprise-grade documentation quality control and automated fixing'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  ExampleValidator:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Advanced example validation with automated fixing capabilities'
+      business-context: 'Quality assurance for enterprise documentation standards'
+
+      formats:
+        jsdoc:
+          description: 'Validates and fixes documentation examples'
+        cli:
+          description: |
+            ## ExampleValidator
+            Comprehensive validation system with automated quality fixes
+
+      custom-tags:
+        since: '1.0.0'
+        validation: 'Syntax, links, metadata, and configuration validation'
+        auto-fixing: 'Automated issue resolution with detailed reporting'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Creates validator with optional project root path'
+        business-context: 'Initializes validator for specific project structure'
+
+        parameters:
+          - name: 'projectRoot'
+            type: 'string'
+            description: 'Optional project root directory path'
+            default: 'process.cwd()'
+
+        examples:
+          - id: 'basic-validator'
+            code: |
+              const validator = new ExampleValidator();
+
+              // Custom project root
+              const customValidator = new ExampleValidator('/path/to/project');
+
+      validateExamples:
+        description: 'Validate examples (alias for validatePackage for backward compatibility)'
+        business-context: 'Legacy API support for existing validation workflows'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Name of package to validate'
+          - name: 'options'
+            type: 'ValidationOptions'
+            description: 'Optional validation configuration'
+
+        returns:
+          type: 'Promise<ValidationResult>'
+          description: 'Comprehensive validation results with errors and fixes'
+
+        examples:
+          - id: 'validate-examples'
+            code: |
+              const result = await validator.validateExamples('aggregates', {
+                fix: true,
+                verbose: true,
+                checkSyntax: true
+              });
+
+              console.log(`Validated ${result.examplesValidated} examples`);
+
+      validatePackage:
+        description: 'Validate all examples in a package'
+        business-context: 'Main package-level validation for enterprise quality control'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name to validate comprehensively'
+          - name: 'options'
+            type: 'ValidationOptions'
+            description: 'Optional detailed validation options'
+
+        returns:
+          type: 'Promise<ValidationResult>'
+          description: 'Detailed validation report with actionable insights'
+
+        custom-tags:
+          main-operation: 'Primary package validation method'
+          comprehensive: 'Full syntax, config, and metadata validation'
+
+        examples:
+          - id: 'comprehensive-validation'
+            code: |
+              const result = await validator.validatePackage('cqrs', {
+                fix: true,
+                autoFix: true,
+                checkSyntax: true,
+                checkLinks: true,
+                verbose: true
+              });
+
+              if (result.isValid) {
+                console.log('✅ All examples valid');
+              } else {
+                console.log(`❌ Found ${result.errors.length} errors`);
+                result.errors.forEach(error => {
+                  console.log(`  - ${error.message} (${error.type})`);
+                });
+              }
+
+      validateExample:
+        description: 'Validate a single example with detailed analysis'
+        business-context: 'Granular validation for specific example quality assurance'
+
+        parameters:
+          - name: 'example'
+            type: 'ExampleDefinition'
+            description: 'Example definition to validate'
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package context for validation'
+          - name: 'options'
+            type: 'ValidationOptions'
+            description: 'Optional validation configuration'
+
+        returns:
+          type: 'Promise<ValidationResult>'
+          description: 'Single example validation results'
+
+        examples:
+          - id: 'single-example-validation'
+            code: |
+              const example = registry.findById('aggregate-root-basic');
+              const result = await validator.validateExample(
+                example,
+                'aggregates',
+                { checkSyntax: true, checkLinks: true }
+              );
+
+              if (result.warnings.length > 0) {
+                console.log('Warnings:', result.warnings.map(w => w.message));
+              }
+
+      fixIssues:
+        description: 'Fix validation issues automatically'
+        business-context: 'Automated issue resolution for enterprise documentation maintenance'
+
+        parameters:
+          - name: 'packageName'
+            type: 'string'
+            description: 'Package name to fix issues for'
+          - name: 'options'
+            type: 'ValidationOptions'
+            description: 'Optional fixing configuration'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Issues fixed automatically'
+
+        custom-tags:
+          automation: 'Automated fixing with detailed reporting'
+          safety: 'Non-destructive fixes with backup options'
+
+        examples:
+          - id: 'automated-fixing'
+            code: |
+              // Fix all issues in package
+              await validator.fixIssues('domain-services', {
+                autoFix: true,
+                verbose: true
+              });
+
+              // Re-validate to confirm fixes
+              const result = await validator.validatePackage('domain-services');
+              console.log(`Fixed issues, validation: ${result.isValid ? 'PASS' : 'FAIL'}`);
+
+# === INTERFACES ===
+interfaces:
+  ValidationResult:
+    description: 'Comprehensive validation results with actionable insights'
+    business-context: 'Enterprise validation reporting with automated fix recommendations'
+
+    properties:
+      - name: 'isValid'
+        type: 'boolean'
+        description: 'Overall validation status'
+      - name: 'errors'
+        type: 'ValidationError[]'
+        description: 'Array of validation errors found'
+      - name: 'warnings'
+        type: 'ValidationWarning[]'
+        description: 'Array of validation warnings'
+      - name: 'suggestions'
+        type: 'string[]'
+        description: 'Improvement suggestions for documentation quality'
+      - name: 'fixed'
+        type: 'ValidationFix[]'
+        description: 'Optional array of automated fixes applied'
+      - name: 'packagesValidated'
+        type: 'number'
+        description: 'Optional count of packages validated'
+      - name: 'examplesValidated'
+        type: 'number'
+        description: 'Optional count of examples validated'
+
+  ValidationOptions:
+    description: 'Comprehensive validation configuration options'
+    business-context: 'Enterprise validation customization for different scenarios'
+
+    properties:
+      - name: 'packageName'
+        type: 'string | undefined'
+        description: 'Optional specific package name filter'
+      - name: 'fix'
+        type: 'boolean | undefined'
+        description: 'Enable automated fixing of validation issues'
+      - name: 'autoFix'
+        type: 'boolean | undefined'
+        description: 'Enable automatic non-interactive fixes'
+      - name: 'verbose'
+        type: 'boolean | undefined'
+        description: 'Enable detailed validation output'
+      - name: 'checkSyntax'
+        type: 'boolean | undefined'
+        description: 'Enable syntax validation for code examples'
+      - name: 'checkLinks'
+        type: 'boolean | undefined'
+        description: 'Enable link validation for references'
+
+  ValidationError:
+    description: 'Detailed validation error information'
+    business-context: 'Specific error reporting for targeted issue resolution'
+
+    properties:
+      - name: 'type'
+        type: "'file_not_found' | 'invalid_config' | 'syntax_error' | 'missing_metadata'"
+        description: 'Categorized error type for automated processing'
+      - name: 'message'
+        type: 'string'
+        description: 'Human-readable error description'
+      - name: 'exampleId'
+        type: 'string'
+        description: 'Optional example identifier'
+      - name: 'file'
+        type: 'string'
+        description: 'Optional file path where error occurred'
+      - name: 'line'
+        type: 'number'
+        description: 'Optional line number for syntax errors'
+      - name: 'package'
+        type: 'string'
+        description: 'Optional package context'
+      - name: 'example'
+        type: 'string'
+        description: 'Optional example name context'
+
+  ValidationWarning:
+    description: 'Non-critical validation warnings'
+    business-context: 'Quality improvement suggestions for documentation enhancement'
+
+    properties:
+      - name: 'type'
+        type: "'missing_tag' | 'low_priority' | 'outdated_example' | 'missing_description'"
+        description: 'Categorized warning type'
+      - name: 'message'
+        type: 'string'
+        description: 'Human-readable warning description'
+      - name: 'exampleId'
+        type: 'string'
+        description: 'Optional example identifier'
+      - name: 'file'
+        type: 'string'
+        description: 'Optional file path'
+      - name: 'package'
+        type: 'string'
+        description: 'Optional package context'
+      - name: 'example'
+        type: 'string'
+        description: 'Optional example context'
+
+  ValidationFix:
+    description: 'Automated fix information'
+    business-context: 'Tracking of automated improvements for audit purposes'
+
+    properties:
+      - name: 'package'
+        type: 'string'
+        description: 'Package where fix was applied'
+      - name: 'example'
+        type: 'string'
+        description: 'Example that was fixed'
+      - name: 'description'
+        type: 'string'
+        description: 'Description of fix applied'
+      - name: 'type'
+        type: "'created-file' | 'updated-config' | 'fixed-syntax'"
+        description: 'Type of automated fix performed'

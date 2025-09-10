@@ -1,0 +1,267 @@
+# Enhanced Tag Extractor - Advanced Metadata Extraction System
+
+# === FILE METADATA ===
+file-name: 'enhanced-tag-extractor'
+title: 'EnhancedTagExtractor - Hierarchical Metadata Extraction Engine'
+description: 'Advanced metadata extraction system with hierarchical configuration resolution for Enhanced Metadata System V2'
+business-context: 'Core extraction engine for processing @extract blocks with hierarchical metadata resolution and format-specific output'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  EnhancedTagExtractor:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Advanced metadata extraction system with hierarchical configuration resolution'
+      business-context: 'Core extraction engine for Enhanced Metadata System V2 enabling hierarchical metadata resolution, caching, and format-specific output generation'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Metadata extraction system with hierarchical resolution'
+        cli:
+          description: |
+            ## EnhancedTagExtractor
+            Advanced metadata extraction engine with hierarchical configuration and intelligent caching
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Extractor Pattern'
+        category: 'Metadata Processing'
+        features: 'Block extraction, hierarchical resolution, configuration caching, format-specific output'
+        performance: 'Optimized extraction with intelligent caching and pattern matching'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Create new EnhancedTagExtractor instance with initialized configuration'
+        business-context: 'Initialize extractor with metadata parser and configuration caching for optimal performance'
+
+        examples:
+          - id: 'basic-extractor'
+            code: |
+              const extractor = new EnhancedTagExtractor();
+              // Extractor ready with metadata parser and caching
+          - id: 'extraction-workflow'
+            code: |
+              const extractor = new EnhancedTagExtractor();
+              const blocks = await extractor.extractAllBlocks(content, filePath);
+
+        custom-tags:
+          initialization: 'Sets up metadata parser and configuration cache'
+          caching: 'Initializes configuration caching system'
+
+      extractAllBlocks:
+        description: 'Extract all tagged sections with resolved metadata'
+        business-context: 'Main extraction method that processes all @extract blocks in content with hierarchical metadata resolution'
+
+        parameters:
+          - name: 'content'
+            type: 'string'
+            description: 'Content to extract @extract blocks from'
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path for configuration hierarchy resolution'
+          - name: 'format'
+            type: "'jsdoc' | 'cli'"
+            description: 'Optional. Target output format for metadata resolution'
+
+        returns:
+          type: 'Promise<ExtractBlock[]>'
+          description: 'Promise resolving to array of extracted blocks with resolved metadata'
+
+        examples:
+          - id: 'extract-all'
+            code: |
+              const extractor = new EnhancedTagExtractor();
+              const blocks = await extractor.extractAllBlocks(
+                markdownContent,
+                '/path/to/file.md'
+              );
+          - id: 'format-specific'
+            code: |
+              const jsdocBlocks = await extractor.extractAllBlocks(
+                content,
+                filePath,
+                'jsdoc'
+              );
+              const cliBlocks = await extractor.extractAllBlocks(
+                content,
+                filePath,
+                'cli'
+              );
+
+        custom-tags:
+          async: true
+          main-method: 'Primary extraction interface'
+          hierarchical: 'Uses hierarchical metadata resolution'
+          format-aware: 'Supports format-specific processing'
+
+      extractSpecificBlock:
+        description: 'Extract specific block by tag components'
+        business-context: 'Targeted extraction method for finding specific @extract blocks by method name, context, and complexity level'
+
+        parameters:
+          - name: 'content'
+            type: 'string'
+            description: 'Content to search for specific @extract block'
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path for configuration hierarchy resolution'
+          - name: 'target'
+            type: 'string'
+            description: 'Target method or component name to find'
+          - name: 'context'
+            type: 'string'
+            description: 'Optional. Context filter (domain context)'
+          - name: 'level'
+            type: 'string'
+            description: 'Optional. Complexity level filter (basic, intermediate, advanced)'
+          - name: 'format'
+            type: "'jsdoc' | 'cli'"
+            description: 'Optional. Target output format for metadata resolution'
+
+        returns:
+          type: 'Promise<ExtractBlock | null>'
+          description: 'Promise resolving to specific extract block or null if not found'
+
+        examples:
+          - id: 'specific-method'
+            code: |
+              const block = await extractor.extractSpecificBlock(
+                content,
+                filePath,
+                'createUser'
+              );
+          - id: 'targeted-search'
+            code: |
+              const specificBlock = await extractor.extractSpecificBlock(
+                content,
+                filePath,
+                'createUser',
+                'domain',
+                'intermediate',
+                'jsdoc'
+              );
+
+        custom-tags:
+          async: true
+          targeted: 'Finds specific blocks by criteria'
+          filtering: 'Supports context and level filtering'
+          nullable: 'Returns null when block not found'
+
+      loadConfigHierarchy:
+        description: 'Load configuration hierarchy for a file'
+        business-context: 'Internal method for loading global, package, and local configuration levels for hierarchical metadata resolution'
+
+        parameters:
+          - name: 'filePath'
+            type: 'string'
+            description: 'File path to determine configuration hierarchy'
+
+        returns:
+          type: 'Promise<ConfigLevel[]>'
+          description: 'Promise resolving to array of configuration levels'
+
+        examples:
+          - id: 'hierarchy-loading'
+            code: |
+              // Internal method - loads configuration hierarchy
+              // Global → Package → Local configuration resolution
+
+        custom-tags:
+          private: true
+          async: true
+          hierarchical: 'Loads global, package, and local configs'
+          caching: 'Uses intelligent configuration caching'
+
+      finalizeBlock:
+        description: 'Finalize block with resolved metadata'
+        business-context: 'Internal method for applying hierarchical metadata resolution and format-specific transformations to extracted blocks'
+
+        parameters:
+          - name: 'block'
+            type: 'ExtractBlock'
+            description: 'Raw extracted block to finalize'
+          - name: 'configs'
+            type: 'ConfigLevel[]'
+            description: 'Configuration hierarchy levels'
+          - name: 'format'
+            type: "'jsdoc' | 'cli'"
+            description: 'Target output format'
+
+        returns:
+          type: 'ExtractBlock'
+          description: 'Finalized block with resolved metadata'
+
+        examples:
+          - id: 'block-finalization'
+            code: |
+              // Internal method - applies metadata resolution
+              // Combines hierarchy levels and format rules
+
+        custom-tags:
+          private: true
+          resolution: 'Applies hierarchical metadata resolution'
+          format-specific: 'Handles format-specific transformations'
+          finalization: 'Produces final processed block'
+
+      cleanCodeContent:
+        description: 'Clean code content by removing common indentation'
+        business-context: 'Internal utility for normalizing code block indentation for consistent formatting in extracted examples'
+
+        parameters:
+          - name: 'code'
+            type: 'string'
+            description: 'Raw code content to clean'
+
+        returns:
+          type: 'string'
+          description: 'Cleaned code content with normalized indentation'
+
+        examples:
+          - id: 'code-cleaning'
+            code: |
+              // Internal method - normalizes indentation
+              // Removes common leading whitespace
+
+        custom-tags:
+          private: true
+          synchronous: true
+          formatting: 'Normalizes code block indentation'
+          utility: 'Internal code formatting utility'
+
+      clearCache:
+        description: 'Clear configuration cache'
+        business-context: 'Cache management method for invalidating configuration cache during development and testing'
+
+        returns:
+          type: 'void'
+          description: 'No return value, configuration cache is cleared'
+
+        examples:
+          - id: 'cache-clear'
+            code: |
+              const extractor = new EnhancedTagExtractor();
+              extractor.clearCache();
+              // Configuration cache cleared for fresh loading
+          - id: 'development-workflow'
+            code: |
+              // During development, clear cache for fresh configs
+              extractor.clearCache();
+              const freshBlocks = await extractor.extractAllBlocks(content, path);
+
+        custom-tags:
+          synchronous: true
+          cache-management: 'Clears configuration cache'
+          development: 'Useful during development and testing'
+          invalidation: 'Forces fresh configuration loading'

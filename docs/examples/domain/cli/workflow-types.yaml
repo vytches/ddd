@@ -1,0 +1,335 @@
+# CLI Workflow Types - Workflow Type Definitions
+# Enhanced Metadata System V2 - Workflow and command type definitions
+
+# === FILE METADATA ===
+file-name: 'workflow-types'
+title: 'CLI Workflow Types - Workflow and Command Type System'
+description: 'Core type definitions for CLI workflows, commands, and configuration'
+business-context: 'Foundation type system enabling type-safe workflow orchestration and command execution with comprehensive configuration support'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === TYPES ===
+types:
+  WorkflowStep:
+    description: 'Individual step in a workflow process'
+    business-context: 'Defines executable workflow steps with conditional navigation and user interaction'
+
+    properties:
+      - name: 'id'
+        type: 'string'
+        description: 'Unique step identifier'
+      - name: 'title'
+        type: 'string'
+        description: 'Human-readable step title'
+      - name: 'type'
+        type: 'StepType'
+        description: 'Step execution type (prompt, action, decision, completion)'
+      - name: 'description'
+        type: 'string'
+        description: 'Optional step description'
+      - name: 'next'
+        type: 'string | ((context: WorkflowContext) => string)'
+        description: 'Next step ID or conditional function'
+      - name: 'condition'
+        type: '(context: WorkflowContext) => boolean'
+        description: 'Optional execution condition'
+      - name: 'prompt'
+        type: 'PromptConfig'
+        description: 'Prompt configuration for prompt-type steps'
+      - name: 'action'
+        type: '(context: WorkflowContext) => Promise<void>'
+        description: 'Action function for action-type steps'
+
+    examples:
+      - id: 'workflow-step-types'
+        code: |
+          const promptStep: WorkflowStep = {
+            id: 'select-framework',
+            title: 'Choose Framework',
+            type: 'prompt',
+            prompt: {
+              type: 'select',
+              message: 'Select framework:',
+              choices: ['nestjs', 'express', 'fastify']
+            },
+            next: 'generate-components'
+          };
+
+          const actionStep: WorkflowStep = {
+            id: 'generate-files',
+            title: 'Generate Component Files',
+            type: 'action',
+            action: async (context) => {
+              await generateComponent(context.componentName, context.framework);
+            },
+            next: 'completion'
+          };
+
+  StepType:
+    description: 'Workflow step execution types'
+    business-context: 'Categorizes step behavior for proper workflow execution handling'
+
+    values:
+      - name: 'prompt'
+        description: 'Interactive user input step'
+      - name: 'action'
+        description: 'Automated action execution step'
+      - name: 'decision'
+        description: 'Conditional branching step'
+      - name: 'completion'
+        description: 'Workflow completion step'
+
+    examples:
+      - id: 'step-types'
+        code: |
+          // Step types determine execution behavior
+          const stepTypes: StepType[] = ['prompt', 'action', 'decision', 'completion'];
+
+  PromptConfig:
+    description: 'Configuration for interactive prompts'
+    business-context: 'Defines user interaction parameters for collecting workflow inputs'
+
+    properties:
+      - name: 'type'
+        type: 'PromptType'
+        description: 'Prompt interaction type'
+      - name: 'message'
+        type: 'string'
+        description: 'Prompt message to display'
+      - name: 'choices'
+        type: 'string[] | ChoiceOption[]'
+        description: 'Available choices for select/checkbox prompts'
+      - name: 'default'
+        type: 'any'
+        description: 'Default value if user provides no input'
+      - name: 'validate'
+        type: '(input: any) => boolean | string'
+        description: 'Input validation function'
+      - name: 'when'
+        type: '(context: WorkflowContext) => boolean'
+        description: 'Conditional prompt display'
+
+    examples:
+      - id: 'prompt-configurations'
+        code: |
+          const selectPrompt: PromptConfig = {
+            type: 'select',
+            message: 'Choose component type:',
+            choices: ['entity', 'aggregate', 'value-object', 'service'],
+            default: 'entity'
+          };
+
+          const inputPrompt: PromptConfig = {
+            type: 'input',
+            message: 'Component name:',
+            validate: (input: string) => {
+              return input.length > 0 || 'Component name is required';
+            }
+          };
+
+  PromptType:
+    description: 'Available prompt interaction types'
+    business-context: 'Defines user input methods for workflow interactions'
+
+    values:
+      - name: 'input'
+        description: 'Text input prompt'
+      - name: 'select'
+        description: 'Single choice selection'
+      - name: 'checkbox'
+        description: 'Multiple choice selection'
+      - name: 'confirm'
+        description: 'Yes/no confirmation'
+      - name: 'password'
+        description: 'Hidden text input'
+
+    examples:
+      - id: 'prompt-types-usage'
+        code: |
+          // Different prompt types for various inputs
+          const prompts = {
+            name: { type: 'input' as PromptType },
+            framework: { type: 'select' as PromptType },
+            features: { type: 'checkbox' as PromptType },
+            proceed: { type: 'confirm' as PromptType }
+          };
+
+  CLIConfig:
+    description: 'CLI application configuration'
+    business-context: 'Central configuration for CLI behavior, paths, and feature flags'
+
+    properties:
+      - name: 'debug'
+        type: 'boolean'
+        description: 'Enable debug output'
+      - name: 'outputDir'
+        type: 'string'
+        description: 'Default output directory for generated files'
+      - name: 'templateDir'
+        type: 'string'
+        description: 'Template files directory'
+      - name: 'framework'
+        type: 'string'
+        description: 'Default framework selection'
+      - name: 'projectStructure'
+        type: 'string'
+        description: 'Target project architecture'
+      - name: 'enhancedMetadata'
+        type: 'boolean'
+        description: 'Enable Enhanced Metadata System V2'
+      - name: 'llmOptimized'
+        type: 'boolean'
+        description: 'Generate LLM-optimized output'
+
+    examples:
+      - id: 'cli-configuration'
+        code: |
+          const config: CLIConfig = {
+            debug: false,
+            outputDir: './src/domain',
+            templateDir: './templates',
+            framework: 'nestjs',
+            projectStructure: 'clean-architecture',
+            enhancedMetadata: true,
+            llmOptimized: false
+          };
+
+  Command:
+    description: 'CLI command definition interface'
+    business-context: 'Standard structure for extensible CLI commands with metadata and execution logic'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Command name for CLI invocation'
+      - name: 'description'
+        type: 'string'
+        description: 'Human-readable command description'
+      - name: 'aliases'
+        type: 'string[]'
+        description: 'Optional command aliases'
+      - name: 'options'
+        type: 'CommandOption[]'
+        description: 'Available command options'
+      - name: 'action'
+        type: '(args: string[], options: any) => Promise<void>'
+        description: 'Command execution function'
+      - name: 'examples'
+        type: 'string[]'
+        description: 'Usage examples for help system'
+      - name: 'category'
+        type: 'string'
+        description: 'Command category for organization'
+
+    examples:
+      - id: 'command-definition'
+        code: |
+          const generateCommand: Command = {
+            name: 'generate',
+            description: 'Generate DDD components',
+            aliases: ['gen', 'g'],
+            category: 'Generation',
+            options: [
+              {
+                name: 'framework',
+                alias: 'f',
+                description: 'Target framework',
+                required: false,
+                choices: ['nestjs', 'express', 'fastify']
+              }
+            ],
+            action: async (args, options) => {
+              const componentType = args[0];
+              const componentName = args[1];
+              await generateComponent(componentType, componentName, options);
+            },
+            examples: [
+              'generate entity User',
+              'generate aggregate Order --framework nestjs'
+            ]
+          };
+
+  CommandOption:
+    description: 'CLI command option definition'
+    business-context: 'Configurable command parameters with validation and help text'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Option name (without dashes)'
+      - name: 'alias'
+        type: 'string'
+        description: 'Short option alias'
+      - name: 'description'
+        type: 'string'
+        description: 'Option description for help'
+      - name: 'required'
+        type: 'boolean'
+        description: 'Whether option is required'
+      - name: 'type'
+        type: 'string'
+        description: 'Option value type'
+      - name: 'choices'
+        type: 'string[]'
+        description: 'Valid option values'
+      - name: 'defaultValue'
+        type: 'any'
+        description: 'Default value if not provided'
+
+    examples:
+      - id: 'command-options'
+        code: |
+          const frameworkOption: CommandOption = {
+            name: 'framework',
+            alias: 'f',
+            description: 'Target framework for generation',
+            required: false,
+            type: 'string',
+            choices: ['nestjs', 'express', 'fastify', 'standalone'],
+            defaultValue: 'standalone'
+          };
+
+# === INTERFACES ===
+interfaces:
+  WorkflowContext:
+    description: 'Workflow execution context and state'
+    business-context: 'Maintains workflow state and user inputs throughout execution'
+
+    properties:
+      - name: 'currentStep'
+        type: 'string'
+        description: 'Current workflow step ID'
+      - name: 'inputs'
+        type: 'Record<string, any>'
+        description: 'User inputs collected during workflow'
+      - name: 'metadata'
+        type: 'Record<string, any>'
+        description: 'Additional workflow metadata'
+      - name: 'completed'
+        type: 'string[]'
+        description: 'Array of completed step IDs'
+      - name: 'generatedFiles'
+        type: 'string[]'
+        description: 'List of generated file paths'
+
+  ChoiceOption:
+    description: 'Extended choice option with metadata'
+    business-context: 'Rich choice options with descriptions and conditional display'
+
+    properties:
+      - name: 'name'
+        type: 'string'
+        description: 'Choice display name'
+      - name: 'value'
+        type: 'any'
+        description: 'Choice value'
+      - name: 'description'
+        type: 'string'
+        description: 'Choice description'
+      - name: 'disabled'
+        type: 'boolean'
+        description: 'Whether choice is disabled'

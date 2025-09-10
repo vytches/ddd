@@ -1,0 +1,694 @@
+# Chat History - Local Conversation Persistence
+
+# === FILE METADATA ===
+file-name: 'chat-history'
+title: 'ChatHistory - Local Conversation Persistence'
+description: 'Stores AI conversation history locally for context and resumption'
+business-context: 'Local persistence for AI conversation continuity and context management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ChatMessage:
+    description: 'Single message in conversation history'
+    business-context: 'Represents individual AI or user message with metadata'
+
+    properties:
+      - name: 'id'
+        type: 'string'
+        description: 'Unique message identifier'
+      - name: 'role'
+        type: "'user' | 'assistant' | 'system'"
+        description: 'Message sender role'
+      - name: 'content'
+        type: 'string'
+        description: 'Message text content'
+      - name: 'timestamp'
+        type: 'Date'
+        description: 'When message was created'
+      - name: 'metadata'
+        type: 'object'
+        description: 'Optional message metadata (tokens, model, etc.)'
+        optional: true
+
+  ChatSession:
+    description: 'Complete conversation session with messages'
+    business-context: 'Groups related messages into logical conversation sessions'
+
+    properties:
+      - name: 'id'
+        type: 'string'
+        description: 'Unique session identifier'
+      - name: 'title'
+        type: 'string'
+        description: 'Human-readable session title'
+      - name: 'startedAt'
+        type: 'Date'
+        description: 'Session creation timestamp'
+      - name: 'lastActivity'
+        type: 'Date'
+        description: 'Last message timestamp'
+      - name: 'messages'
+        type: 'ChatMessage[]'
+        description: 'All messages in this session'
+      - name: 'context'
+        type: 'object'
+        description: 'Session context (project path, command, etc.)'
+        optional: true
+
+  ChatHistoryConfig:
+    description: 'Configuration options for chat history management'
+    business-context: 'Controls storage limits, cleanup, and persistence settings'
+
+    properties:
+      - name: 'enabled'
+        type: 'boolean'
+        description: 'Whether to store chat history'
+      - name: 'maxSessions'
+        type: 'number'
+        description: 'Maximum number of sessions to keep'
+      - name: 'maxMessagesPerSession'
+        type: 'number'
+        description: 'Maximum messages per session'
+      - name: 'maxHistoryDays'
+        type: 'number'
+        description: 'Days to keep old sessions'
+      - name: 'storageDir'
+        type: 'string'
+        description: 'Directory for storing session files'
+      - name: 'autoCleanup'
+        type: 'boolean'
+        description: 'Whether to automatically cleanup old sessions'
+
+# === CLASSES ===
+classes:
+  ChatHistory:
+    # JSDoc Configuration
+    jsdoc:
+      placement-strategy: 'separate'
+      class-documentation: 'enabled'
+
+    # Class Documentation
+    class-doc:
+      description: 'Local conversation persistence manager for AI interactions'
+      business-context: 'Provides conversation continuity and context management for CLI interactions'
+
+      # Format-specific
+      formats:
+        jsdoc:
+          description: 'Chat History Manager - Local conversation persistence'
+        cli:
+          description: |
+            ## ChatHistory
+            Stores AI conversation history locally for context and resumption
+
+      custom-tags:
+        since: '1.0.0'
+        pattern: 'Repository Pattern'
+        category: 'Data Persistence'
+        features: 'Session management, message storage, context tracking, cleanup'
+        storage: 'Local file-based storage'
+
+    # Methods
+    methods:
+      constructor:
+        description: 'Create new ChatHistory instance with optional configuration'
+        business-context: 'Initialize chat history manager with custom storage and cleanup settings'
+
+        parameters:
+          - name: 'config'
+            type: 'Partial<ChatHistoryConfig>'
+            description: 'Optional configuration overrides'
+            optional: true
+
+        examples:
+          - id: 'default'
+            code: |
+              const history = new ChatHistory();
+              // Uses default configuration
+          - id: 'custom-config'
+            code: |
+              const history = new ChatHistory({
+                maxSessions: 50,
+                maxHistoryDays: 30,
+                autoCleanup: true
+              });
+
+        custom-tags:
+          configuration: 'Supports partial config overrides'
+
+      initialize:
+        description: 'Initialize chat history storage system'
+        business-context: 'Sets up storage directory and loads existing sessions'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when initialization is complete'
+
+        examples:
+          - id: 'internal'
+            code: |
+              // Internal method - called automatically
+              // Sets up storage directory and session loading
+
+        custom-tags:
+          private: true
+          async: true
+          setup: 'Directory creation and session loading'
+
+      startSession:
+        description: 'Start a new chat session with optional title and context'
+        business-context: 'Begin new conversation thread for organizing related messages'
+
+        parameters:
+          - name: 'title'
+            type: 'string'
+            description: 'Optional human-readable session title'
+            optional: true
+          - name: 'context'
+            type: "ChatSession['context']"
+            description: 'Optional session context (project path, command)'
+            optional: true
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to unique session ID'
+
+        examples:
+          - id: 'basic-session'
+            code: |
+              const sessionId = await history.startSession('Generate User Entity');
+              // New session ready for messages
+          - id: 'with-context'
+            code: |
+              const sessionId = await history.startSession('Debug Issue', {
+                projectPath: '/project',
+                currentCommand: 'generate'
+              });
+
+        custom-tags:
+          async: true
+          session-management: 'Creates new conversation thread'
+          returns-id: 'Returns unique session identifier'
+
+      resumeSession:
+        description: 'Resume existing session by ID'
+        business-context: 'Continue previous conversation for context continuity'
+
+        parameters:
+          - name: 'sessionId'
+            type: 'string'
+            description: 'Unique session identifier to resume'
+
+        returns:
+          type: 'Promise<boolean>'
+          description: 'True if session was found and resumed, false otherwise'
+
+        examples:
+          - id: 'resume-existing'
+            code: |
+              const resumed = await history.resumeSession('session-123');
+              if (resumed) {
+                console.log('Session resumed successfully');
+              }
+
+        custom-tags:
+          async: true
+          session-management: 'Loads existing conversation'
+          boolean-result: 'Returns success status'
+
+      addMessage:
+        description: 'Add message to current active session'
+        business-context: 'Store user or AI message with metadata for conversation history'
+
+        parameters:
+          - name: 'role'
+            type: "ChatMessage['role']"
+            description: 'Message sender role (user, assistant, system)'
+          - name: 'content'
+            type: 'string'
+            description: 'Message text content'
+          - name: 'metadata'
+            type: "ChatMessage['metadata']"
+            description: 'Optional message metadata (tokens, model, duration)'
+            optional: true
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to unique message ID'
+
+        examples:
+          - id: 'user-message'
+            code: |
+              const msgId = await history.addMessage('user', 'Generate a User entity');
+              // User message stored with ID
+          - id: 'ai-response'
+            code: |
+              const msgId = await history.addMessage('assistant', 'Here is your User entity...', {
+                tokens: 150,
+                model: 'gpt-4',
+                duration: 2500
+              });
+
+        custom-tags:
+          async: true
+          message-storage: 'Persists individual messages'
+          metadata-support: 'Optional rich metadata tracking'
+
+      getCurrentSession:
+        description: 'Get currently active session'
+        business-context: 'Access current conversation state for context and continuation'
+
+        returns:
+          type: 'ChatSession | null'
+          description: 'Current session object or null if no active session'
+
+        examples:
+          - id: 'get-current'
+            code: |
+              const session = history.getCurrentSession();
+              if (session) {
+                console.log(`Active session: ${session.title}`);
+              }
+
+        custom-tags:
+          synchronous: 'Immediate access to current state'
+          nullable: 'Returns null when no active session'
+
+      getSessionHistory:
+        description: 'Get list of recent sessions with optional limit'
+        business-context: 'Browse conversation history for session selection or review'
+
+        parameters:
+          - name: 'limit'
+            type: 'number'
+            description: 'Optional maximum number of sessions to return'
+            optional: true
+
+        returns:
+          type: 'ChatSession[]'
+          description: 'Array of recent sessions, newest first'
+
+        examples:
+          - id: 'recent-sessions'
+            code: |
+              const recentSessions = history.getSessionHistory(10);
+              recentSessions.forEach(session => {
+                console.log(`${session.title} - ${session.messages.length} messages`);
+              });
+
+        custom-tags:
+          pagination: 'Supports optional result limiting'
+          chronological: 'Returns newest sessions first'
+
+      searchMessages:
+        description: 'Search messages across sessions by content'
+        business-context: 'Find previous conversations or information by keyword'
+
+        parameters:
+          - name: 'query'
+            type: 'string'
+            description: 'Search term to find in message content'
+          - name: 'sessionId'
+            type: 'string'
+            description: 'Optional session ID to limit search scope'
+            optional: true
+
+        returns:
+          type: 'ChatMessage[]'
+          description: 'Array of matching messages'
+
+        examples:
+          - id: 'search-all'
+            code: |
+              const matches = history.searchMessages('User entity');
+              // Find all mentions of "User entity"
+          - id: 'search-session'
+            code: |
+              const matches = history.searchMessages('error', 'session-123');
+              // Find errors in specific session
+
+        custom-tags:
+          search: 'Full-text search across message content'
+          scoping: 'Optional session-specific search'
+
+      exportSession:
+        description: 'Export session to file in specified format'
+        business-context: 'Create shareable or archival copy of conversation'
+
+        parameters:
+          - name: 'sessionId'
+            type: 'string'
+            description: 'Session ID to export'
+          - name: 'format'
+            type: "'json' | 'markdown'"
+            description: 'Export format (json or markdown)'
+            optional: true
+
+        returns:
+          type: 'Promise<string>'
+          description: 'Promise resolving to exported file path'
+
+        examples:
+          - id: 'export-json'
+            code: |
+              const filePath = await history.exportSession('session-123', 'json');
+              console.log(`Exported to: ${filePath}`);
+          - id: 'export-markdown'
+            code: |
+              const filePath = await history.exportSession('session-123', 'markdown');
+              // Human-readable format
+
+        custom-tags:
+          async: true
+          export: 'Multiple output formats supported'
+          file-output: 'Creates physical export file'
+
+      getConversationContext:
+        description: 'Get recent messages for AI context with optional limit'
+        business-context: 'Provide conversation history to AI for context awareness'
+
+        parameters:
+          - name: 'maxMessages'
+            type: 'number'
+            description: 'Maximum number of recent messages to return'
+            optional: true
+
+        returns:
+          type: 'ChatMessage[]'
+          description: 'Array of recent messages for context'
+
+        examples:
+          - id: 'ai-context'
+            code: |
+              const context = history.getConversationContext(20);
+              // Last 20 messages for AI context
+          - id: 'limited-context'
+            code: |
+              const context = history.getConversationContext(5);
+              // Short context for quick responses
+
+        custom-tags:
+          context: 'Optimized for AI conversation context'
+          recent: 'Returns most recent messages first'
+
+      updateSessionContext:
+        description: 'Update context metadata for current session'
+        business-context: 'Track changing context like project path or current command'
+
+        parameters:
+          - name: 'context'
+            type: "Partial<ChatSession['context']>"
+            description: 'Context updates to merge with existing context'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when context is updated'
+
+        examples:
+          - id: 'update-context'
+            code: |
+              await history.updateSessionContext({
+                currentCommand: 'validate',
+                workingDirectory: '/new/path'
+              });
+
+        custom-tags:
+          async: true
+          context-management: 'Tracks changing session context'
+          merge: 'Merges with existing context data'
+
+      deleteSession:
+        description: 'Delete session by ID'
+        business-context: 'Remove unwanted or sensitive conversations'
+
+        parameters:
+          - name: 'sessionId'
+            type: 'string'
+            description: 'Unique session identifier to delete'
+
+        returns:
+          type: 'Promise<boolean>'
+          description: 'True if session was found and deleted, false otherwise'
+
+        examples:
+          - id: 'delete-session'
+            code: |
+              const deleted = await history.deleteSession('session-123');
+              if (deleted) {
+                console.log('Session deleted successfully');
+              }
+
+        custom-tags:
+          async: true
+          deletion: 'Permanent session removal'
+          boolean-result: 'Returns operation success status'
+
+      cleanup:
+        description: 'Remove old sessions based on configuration limits'
+        business-context: 'Maintain storage efficiency by removing expired conversations'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when cleanup is complete'
+
+        examples:
+          - id: 'manual-cleanup'
+            code: |
+              await history.cleanup();
+              // Removes sessions older than maxHistoryDays
+
+        custom-tags:
+          async: true
+          maintenance: 'Automated storage management'
+          configuration: 'Uses maxHistoryDays setting'
+
+      getStats:
+        description: 'Get storage statistics and usage information'
+        business-context: 'Monitor storage usage and conversation activity'
+
+        returns:
+          type: 'object'
+          description: 'Statistics object with session counts, dates, and storage size'
+
+        examples:
+          - id: 'storage-stats'
+            code: |
+              const stats = history.getStats();
+              console.log(`${stats.totalSessions} sessions, ${stats.totalMessages} messages`);
+              console.log(`Storage: ${stats.storageSize}`);
+
+        custom-tags:
+          monitoring: 'Storage and usage monitoring'
+          synchronous: 'Immediate statistics access'
+
+      generateSessionId:
+        description: 'Generate unique session identifier'
+        business-context: 'Internal method for creating session IDs'
+
+        returns:
+          type: 'string'
+          description: 'Unique session identifier'
+
+        examples:
+          - id: 'internal-id'
+            code: |
+              // Internal method - generates UUIDs or timestamps
+              // Used automatically by startSession()
+
+        custom-tags:
+          private: true
+          id-generation: 'Creates unique session identifiers'
+
+      generateMessageId:
+        description: 'Generate unique message identifier'
+        business-context: 'Internal method for creating message IDs'
+
+        returns:
+          type: 'string'
+          description: 'Unique message identifier'
+
+        examples:
+          - id: 'internal-msg-id'
+            code: |
+              // Internal method - generates message IDs
+              // Used automatically by addMessage()
+
+        custom-tags:
+          private: true
+          id-generation: 'Creates unique message identifiers'
+
+      getSessionFilePath:
+        description: 'Get file system path for session storage'
+        business-context: 'Internal method for session file path resolution'
+
+        parameters:
+          - name: 'sessionId'
+            type: 'string'
+            description: 'Session ID to get file path for'
+
+        returns:
+          type: 'string'
+          description: 'File system path for session storage'
+
+        examples:
+          - id: 'internal-path'
+            code: |
+              // Internal method - constructs session file paths
+              // Used by storage operations
+
+        custom-tags:
+          private: true
+          path-resolution: 'File system path management'
+
+      loadSessions:
+        description: 'Load all sessions from storage directory'
+        business-context: 'Internal method for reading persisted sessions'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when sessions are loaded'
+
+        examples:
+          - id: 'internal-load'
+            code: |
+              // Internal method - loads sessions from disk
+              // Used during initialization
+
+        custom-tags:
+          private: true
+          async: true
+          storage: 'Disk-based session loading'
+
+      loadSession:
+        description: 'Load specific session from storage'
+        business-context: 'Internal method for reading individual session'
+
+        parameters:
+          - name: 'sessionId'
+            type: 'string'
+            description: 'Session ID to load'
+
+        returns:
+          type: 'Promise<ChatSession | null>'
+          description: 'Promise resolving to session or null if not found'
+
+        examples:
+          - id: 'internal-load-one'
+            code: |
+              // Internal method - loads single session from disk
+              // Used by resumeSession()
+
+        custom-tags:
+          private: true
+          async: true
+          storage: 'Individual session loading'
+
+      saveSession:
+        description: 'Save session to persistent storage'
+        business-context: 'Internal method for persisting session data'
+
+        parameters:
+          - name: 'session'
+            type: 'ChatSession'
+            description: 'Session object to persist'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Promise that resolves when session is saved'
+
+        examples:
+          - id: 'internal-save'
+            code: |
+              // Internal method - saves session to disk
+              // Used automatically after message additions
+
+        custom-tags:
+          private: true
+          async: true
+          persistence: 'Session data persistence'
+
+      sessionToMarkdown:
+        description: 'Convert session to markdown format'
+        business-context: 'Internal method for markdown export formatting'
+
+        parameters:
+          - name: 'session'
+            type: 'ChatSession'
+            description: 'Session to convert to markdown'
+
+        returns:
+          type: 'string'
+          description: 'Formatted markdown string'
+
+        examples:
+          - id: 'internal-markdown'
+            code: |
+              // Internal method - converts session to markdown
+              // Used by exportSession() with markdown format
+
+        custom-tags:
+          private: true
+          formatting: 'Markdown conversion for export'
+
+      getDirectorySize:
+        description: 'Calculate total size of storage directory'
+        business-context: 'Internal method for storage usage calculation'
+
+        parameters:
+          - name: 'dirPath'
+            type: 'string'
+            description: 'Directory path to calculate size for'
+
+        returns:
+          type: 'number'
+          description: 'Total directory size in bytes'
+
+        examples:
+          - id: 'internal-size'
+            code: |
+              // Internal method - calculates storage usage
+              // Used by getStats()
+
+        custom-tags:
+          private: true
+          filesystem: 'Directory size calculation'
+
+      formatBytes:
+        description: 'Format byte count as human-readable string'
+        business-context: 'Internal method for user-friendly size display'
+
+        parameters:
+          - name: 'bytes'
+            type: 'number'
+            description: 'Byte count to format'
+
+        returns:
+          type: 'string'
+          description: 'Human-readable size string (e.g., "1.2 MB")'
+
+        examples:
+          - id: 'internal-format'
+            code: |
+              // Internal method - formats bytes to human-readable
+              // Used by getStats() for storage display
+
+        custom-tags:
+          private: true
+          formatting: 'Human-readable size formatting'
+
+# === EXPORTS ===
+exports:
+  chatHistory:
+    description: 'Default ChatHistory instance'
+    business-context: 'Pre-configured singleton instance for immediate use'
+
+    examples:
+      - id: 'use-default'
+        code: |
+          import { chatHistory } from './chat-history';
+          await chatHistory.startSession('New Conversation');

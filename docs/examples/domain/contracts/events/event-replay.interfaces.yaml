@@ -1,0 +1,36 @@
+# Event Replay Interfaces - Event Reconstruction Contracts
+
+# === FILE METADATA ===
+file-name: 'event-replay.interfaces'
+title: 'Event Replay System Interfaces'
+description: 'Contracts for event replay and reconstruction functionality'
+business-context: 'Foundation for replaying events for aggregate reconstruction, projections, and debugging'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === FILE-LEVEL METADATA ===
+file-doc:
+  description: 'Comprehensive interfaces for event replay functionality'
+  business-context: 'Enables event sourcing patterns with replay capabilities for state reconstruction'
+
+  formats:
+    jsdoc:
+      description: 'Event replay system contracts'
+    cli:
+      description: |
+        ## Event Replay Interfaces
+
+        Event replay system supporting:
+        - Event stream replay
+        - Filtered replay operations
+        - Progress tracking
+        - Error handling during replay
+
+  custom-tags:
+    since: '1.0.0'
+    stability: 'stable'
+    category: 'event-replay'
+    pattern: 'event-sourcing'
