@@ -5,14 +5,15 @@
  * Enterprise-Grade Domain-Driven Design CLI
  */
 
-import { SimpleArgsParser } from './core/utils/simple-args';
+import { discoverCommand } from './commands/discover';
+import { domainBuilderCommand } from './commands/domain-builder';
+import { examplesCommand } from './commands/examples';
+import { generateCommand } from './commands/generate';
+import { quickStartCommand } from './commands/quick-start';
 import { ConfigManager } from './core/engines/config-manager';
 import { Colors } from './core/utils/colors';
 import { Performance } from './core/utils/performance';
-import { generateCommand } from './commands/generate';
-import { domainBuilderCommand } from './commands/domain-builder';
-import { examplesCommand } from './commands/examples';
-import { quickStartCommand } from './commands/quick-start';
+import { SimpleArgsParser } from './core/utils/simple-args';
 
 /**
  * Main CLI entry point
@@ -24,8 +25,13 @@ async function main(): Promise<void> {
     // Parse arguments
     const parsed = SimpleArgsParser.parse(process.argv);
 
-    // Show help if requested
+    // Show help if requested (but let discover command handle its own help)
     if (parsed.options.help || parsed.options.h) {
+      if (parsed.command === 'discover' || parsed.command === 'd') {
+        // Let discover command handle its own help
+        await discoverCommand.action(parsed.args, parsed.options);
+        return;
+      }
       SimpleArgsParser.showHelp(parsed.command);
       return;
     }
@@ -63,6 +69,11 @@ async function main(): Promise<void> {
         await quickStartCommand.action(parsed.args, parsed.options);
         break;
 
+      case 'discover':
+      case 'd':
+        await discoverCommand.action(parsed.args, parsed.options);
+        break;
+
       default:
         if (!parsed.command) {
           console.log(Colors.yellow('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder'));
@@ -71,6 +82,7 @@ async function main(): Promise<void> {
           console.log('  generate, g      Generate DDD components');
           console.log('  domain           Build complete domains');
           console.log('  examples         Manage and work with examples');
+          console.log('  discover, d      AI-powered pattern discovery');
           console.log('  quick-start, qs  Generate AI-powered quick start guide');
           console.log('');
           console.log('Use --help with any command for more information');

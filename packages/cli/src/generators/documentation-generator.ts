@@ -1,15 +1,14 @@
+import fs from 'fs/promises';
+import * as yaml from 'js-yaml';
+import path from 'path';
 import { HybridTemplateEngine } from '../core/hybrid-template-engine';
 import type { SelectOptions } from '../core/smart-tag-finder';
 import { SmartTagFinder } from '../core/smart-tag-finder';
-import { YamlPackageConfigLoader } from '../core/yaml-package-config-loader';
-import type { ExampleDefinition, PackageExampleConfig } from '../types/example-types';
 import { logger } from '../core/utils/logger';
+import { YamlPackageConfigLoader } from '../core/yaml-package-config-loader';
 import { HierarchicalMetadataResolver } from '../examples-engine/hierarchy/hierarchical-metadata-resolver';
-import type { ResolvedMetadata } from '../examples-engine/hierarchy/types';
+import type { ExampleDefinition, PackageExampleConfig } from '../types/example-types';
 import { RepomixIntegration } from '../utils/repomix-integration';
-import path from 'path';
-import fs from 'fs/promises';
-import * as yaml from 'js-yaml';
 
 export interface GenerateDocumentationOptions {
   packageName: string;
@@ -242,18 +241,22 @@ export class DocumentationGenerator {
     }
 
     // Validate against repomix
-    const validation = await RepomixIntegration.validateApis(packageName, apis);
+    const repomix = new RepomixIntegration();
+    const validation = await repomix.validateRecommendations(packageName, apis);
 
-    if (validation.valid) {
+    if (validation.isValid) {
       logger.success(`✅ All ${apis.length} APIs validated successfully`);
     } else {
-      logger.warn(`⚠️  Found ${validation.missingApis.length} potentially missing APIs:`);
-      validation.missingApis.forEach(api => {
-        logger.warn(`   - ${api}`);
+      logger.warn(`⚠️  Found ${validation.issues.length} validation issues:`);
+      validation.issues.forEach(issue => {
+        logger.warn(`   - ${issue.message}`);
+        if (issue.recommended) {
+          logger.info(`     💡 Try: ${issue.recommended}`);
+        }
       });
 
       if (validation.suggestions.length > 0) {
-        logger.info('💡 Suggestions:');
+        logger.info('💡 Additional suggestions:');
         validation.suggestions.forEach(suggestion => {
           logger.info(`   ${suggestion}`);
         });
@@ -266,7 +269,9 @@ export class DocumentationGenerator {
     options: GenerateDocumentationOptions
   ): Promise<GenerateDocumentationResult> {
     // Extract current APIs from repomix
-    const currentApis = await RepomixIntegration.extractPackageApis(options.packageName);
+    const repomix = new RepomixIntegration();
+    const analysis = await repomix.analyzePackage(options.packageName);
+    const currentApis = analysis.classes.map(c => c.name).concat(analysis.methods.map(m => m.name));
 
     logger.info(`📊 Found ${currentApis.length} APIs in current codebase`);
 
@@ -274,7 +279,7 @@ export class DocumentationGenerator {
     // more complex logic to update YAML files
     const exampleApis = this.extractApisFromExamples(result.examplesUsed);
     const missingInExamples = currentApis.filter(
-      api => !exampleApis.some(exampleApi => exampleApi.includes(api))
+      (api: string) => !exampleApis.some((exampleApi: string) => exampleApi.includes(api))
     );
 
     if (missingInExamples.length > 0) {
