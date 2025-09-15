@@ -12,4 +12,14 @@ export { VytchesDDDModule } from './vytches-ddd.module';
 export { VytchesExplorerService } from './services/vytches-explorer.service';
 
 // Types and interfaces
-export type { VytchesDDDModuleOptions } from './types';
+export type {
+  HandlerInfo,
+  PerformanceMetrics,
+  PerformanceMode,
+  PerformanceOptimizer,
+  VytchesDDDModuleOptions,
+  VytchesEnterpriseModuleOptions,
+  VytchesMonitoringOptions,
+  VytchesPerformanceOptions,
+  VytchesPerformanceProfileOptions,
+} from './types';

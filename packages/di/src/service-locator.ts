@@ -1,4 +1,4 @@
-// Removed logging dependency for Phase 1 simplification
+// VP-012: Enhanced DI Container with Performance Optimization
 import 'reflect-metadata';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';
 import type { HandlerInfo, IHandlerDiscoveryPlugin } from './discovery/handler-discovery.interface';
@@ -7,14 +7,30 @@ import {
   ContainerDisposedError,
   ServiceNotFoundError,
 } from './errors';
+import { PerformanceOptimizer } from './performance/performance-optimizer';
+import type {
+  EnterprisePerformanceConfig,
+  PerformanceConfigurationOptions,
+  PerformanceMetrics,
+} from './performance/performance-types';
 import type { IDependencyContainer, ServiceToken } from './types';
 
 export interface IServiceLocator {
   /**
-   * Configure the global container
-   * @param container - Container instance to use globally
+   * Configure the global container (legacy API for backward compatibility)
    */
   configure(container: IDependencyContainer): void;
+
+  /**
+   * Performance-optimized configuration (VP-012)
+   */
+  configureOptimized(options: PerformanceConfigurationOptions): Promise<void>;
+
+  /**
+   * Enterprise-grade configuration with performance optimization
+   * @param config - Enterprise performance configuration
+   */
+  configureForEnterprise(config: EnterprisePerformanceConfig): Promise<void>;
 
   /**
    * Configure a context-specific container
@@ -79,14 +95,20 @@ export interface IServiceLocator {
    * Dispose of all containers and clean up resources
    */
   dispose(): void;
+
+  /**
+   * Get current performance metrics (VP-012)
+   * @returns Performance metrics including startup time, handler count, optimization status
+   */
+  getPerformanceMetrics(): PerformanceMetrics;
 }
 
 export class ServiceLocator implements IServiceLocator {
   private static instance: ServiceLocator;
-  // Simple console logging for Phase 1
   private globalContainer?: IDependencyContainer | undefined;
   private readonly contextContainers = new Map<string, IDependencyContainer>();
   private readonly discoveryRegistry = new HandlerDiscoveryRegistry();
+  private readonly performanceOptimizer = new PerformanceOptimizer();
   private disposed = false;
 
   /**
@@ -107,11 +129,25 @@ export class ServiceLocator implements IServiceLocator {
   }
 
   /**
-   * Configure the global container
+   * Configure the global container (legacy API for backward compatibility)
    */
   configure(container: IDependencyContainer): void {
     this.ensureNotDisposed();
+    this.legacyConfigure(container);
+  }
 
+  /**
+   * Performance-optimized configuration (VP-012)
+   */
+  async configureOptimized(options: PerformanceConfigurationOptions): Promise<void> {
+    this.ensureNotDisposed();
+    await this.optimizedConfigure(options);
+  }
+
+  /**
+   * Legacy configuration method (backward compatibility)
+   */
+  private legacyConfigure(container: IDependencyContainer): void {
     if (!container) {
       throw new ContainerConfigurationError('Container cannot be null or undefined');
     }
@@ -120,6 +156,37 @@ export class ServiceLocator implements IServiceLocator {
 
     // Note: Auto-discovery is done separately via discoverAndRegisterHandlers()
     // This allows more control over when discovery happens
+  }
+
+  /**
+   * Performance-optimized configuration method (VP-012)
+   */
+  private async optimizedConfigure(options: PerformanceConfigurationOptions): Promise<void> {
+    if (!options) {
+      throw new ContainerConfigurationError('Performance configuration options cannot be null');
+    }
+
+    // Set container if provided
+    if (options.container) {
+      this.globalContainer = options.container;
+    }
+
+    // Ensure we have a container
+    if (!this.globalContainer) {
+      throw new ContainerConfigurationError(
+        'No container provided. Set options.container or call configure(container) first.'
+      );
+    }
+
+    // Execute performance optimization
+    const plugins = this.discoveryRegistry
+      .getRegisteredPlugins()
+      .map(name => this.discoveryRegistry.getPlugin(name))
+      .filter(Boolean) as IHandlerDiscoveryPlugin[];
+
+    await this.performanceOptimizer.optimizeConfiguration(options, this.globalContainer, plugins);
+
+    console.log('✅ VytchesDDD configured with performance optimization');
   }
 
   /**
@@ -425,7 +492,63 @@ export class ServiceLocator implements IServiceLocator {
   }
 
   /**
+   * Enterprise-grade configuration with maximum performance optimization (VP-012)
+   */
+  async configureForEnterprise(config: EnterprisePerformanceConfig): Promise<void> {
+    this.ensureNotDisposed();
+
+    // Validate enterprise configuration
+    if (!config.preCompiledRegistry) {
+      throw new ContainerConfigurationError(
+        'Enterprise configuration requires preCompiledRegistry for maximum performance'
+      );
+    }
+
+    if (config.performanceMode !== 'enterprise') {
+      throw new ContainerConfigurationError(
+        'Enterprise configuration requires performanceMode: "enterprise"'
+      );
+    }
+
+    // Set performance alerts for enterprise monitoring
+    const enterpriseConfig: PerformanceConfigurationOptions = {
+      ...config,
+      performanceAlerts: true,
+      performanceTarget: config.maxStartupTime || 100, // Enterprise target: <100ms
+      fallback: 'throw', // Enterprise mode doesn't allow fallbacks
+    };
+
+    await this.optimizedConfigure(enterpriseConfig);
+
+    // Verify enterprise performance targets
+    const metrics = this.getPerformanceMetrics();
+    const maxStartupTime = config.maxStartupTime || 100;
+
+    if (metrics.startupTime > maxStartupTime) {
+      console.warn(
+        `⚠️ Enterprise performance target not met: ${metrics.startupTime.toFixed(2)}ms > ${maxStartupTime}ms`
+      );
+
+      if (config.enterpriseMonitoring) {
+        console.log('📊 Enterprise monitoring enabled - performance will be tracked');
+      }
+    } else {
+      console.log(
+        `✅ Enterprise performance target achieved: ${metrics.startupTime.toFixed(2)}ms < ${maxStartupTime}ms`
+      );
+    }
+  }
+
+  /**
+   * Get current performance metrics (VP-012)
+   */
+  getPerformanceMetrics(): PerformanceMetrics {
+    return this.performanceOptimizer.getMetrics();
+  }
+
+  /**
    * Dispose of all containers and clean up resources
+   * ENHANCED for VP-012: Comprehensive memory cleanup
    */
   dispose(): void {
     if (this.disposed) {
@@ -434,7 +557,23 @@ export class ServiceLocator implements IServiceLocator {
 
     // Disposing service locator
 
-    // Dispose global container
+    // 1. Clear performance optimizer cache (CRITICAL for memory leaks)
+    try {
+      this.performanceOptimizer.reset(); // Complete reset including metrics
+      this.performanceOptimizer.cleanupCache();
+    } catch (error) {
+      console.warn('Error clearing performance optimizer cache:', error);
+    }
+
+    // 2. Clear discovery registry and plugins
+    try {
+      // HandlerDiscoveryRegistry has clear() method
+      this.discoveryRegistry.clear();
+    } catch (error) {
+      console.warn('Error clearing discovery registries:', error);
+    }
+
+    // 3. Dispose global container
     if (this.globalContainer && typeof this.globalContainer.dispose === 'function') {
       try {
         this.globalContainer.dispose();
@@ -444,7 +583,7 @@ export class ServiceLocator implements IServiceLocator {
       }
     }
 
-    // Dispose context containers
+    // 4. Dispose context containers with proper cleanup
     for (const [contextName, container] of this.contextContainers) {
       if (container && typeof container.dispose === 'function') {
         try {
@@ -456,8 +595,13 @@ export class ServiceLocator implements IServiceLocator {
       }
     }
 
+    // 5. Clear container references (CRITICAL: prevents memory leaks)
+    this.contextContainers.clear();
+    this.globalContainer = undefined;
+
+    // 6. Mark as disposed
     this.disposed = true;
-    // Service locator disposed
+    // Service locator disposed with comprehensive cleanup
   }
 
   /**
@@ -493,10 +637,24 @@ export class VytchesDDD {
   }
 
   /**
-   * Primary setup method (like MediatR's AddMediatR)
+   * Primary setup method (legacy API for backward compatibility)
    */
   static configure(container: IDependencyContainer): void {
-    return VytchesDDD.serviceLocator.configure(container);
+    VytchesDDD.serviceLocator.configure(container);
+  }
+
+  /**
+   * Performance-optimized configuration (VP-012)
+   */
+  static configureOptimized(options: PerformanceConfigurationOptions): Promise<void> {
+    return VytchesDDD.serviceLocator.configureOptimized(options);
+  }
+
+  /**
+   * Enterprise-grade configuration with maximum performance optimization (VP-012)
+   */
+  static configureForEnterprise(config: EnterprisePerformanceConfig): Promise<void> {
+    return VytchesDDD.serviceLocator.configureForEnterprise(config);
   }
 
   /**
@@ -560,6 +718,13 @@ export class VytchesDDD {
    */
   static reset(): void {
     VytchesDDD.serviceLocator.reset();
+  }
+
+  /**
+   * Get current performance metrics (VP-012)
+   */
+  static getPerformanceMetrics(): PerformanceMetrics {
+    return VytchesDDD.serviceLocator.getPerformanceMetrics();
   }
 
   /**

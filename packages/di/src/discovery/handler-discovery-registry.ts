@@ -47,6 +47,13 @@ export class HandlerDiscoveryRegistry implements IHandlerDiscoveryRegistry {
   }
 
   /**
+   * Get a specific plugin by name
+   */
+  getPlugin(name: string): IHandlerDiscoveryPlugin | undefined {
+    return this.plugins.get(name);
+  }
+
+  /**
    * Clear all registered plugins (useful for testing)
    */
   clear(): void {

@@ -1,15 +1,17 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  ServiceLifetime,
-  SimpleContainer,
-  ServiceNotFoundError,
   CircularDependencyError,
-  ServiceAlreadyRegisteredError,
   ContainerDisposedError,
+  ServiceAlreadyRegisteredError,
+  ServiceLifetime,
+  ServiceNotFoundError,
+  SimpleContainer,
 } from '../../src';
 
 describe('SimpleContainer', () => {
+  // Mock container helper for testing
+  const createMockContainer = () => new SimpleContainer();
   let container: SimpleContainer;
 
   beforeEach(() => {
