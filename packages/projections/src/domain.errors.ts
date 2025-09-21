@@ -1,5 +1,5 @@
-import type { DomainErrorOptions } from '@vytches/ddd-core';
-import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
+import type { DomainErrorOptions } from '@vytches/ddd-domain-primitives';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
 
 export class VersionError extends IDomainError {
   static withEntityIdAndVersions(

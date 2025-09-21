@@ -1,6 +1,6 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
 
@@ -30,6 +30,11 @@ vi.mock('@vytches/ddd-di', async () => ({
     register: vi.fn(),
     resolve: vi.fn(),
   })),
+  ServiceLifetime: {
+    Transient: 'transient',
+    Singleton: 'singleton',
+    Scoped: 'scoped',
+  },
   VytchesDDD: {
     configure: vi.fn(),
     resolve: vi.fn(),
@@ -229,7 +234,7 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
         try {
           module.get(`OrderProcessing_CommandHandlers`);
           return false; // Should not reach here
-        } catch (error) {
+        } catch (_error) {
           // Expected to throw because bridgeToNestJS: false
           return true;
         }

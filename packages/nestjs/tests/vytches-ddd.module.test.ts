@@ -30,6 +30,11 @@ vi.mock('@vytches/ddd-di', async () => ({
     register: vi.fn(),
     resolve: vi.fn(),
   })),
+  ServiceLifetime: {
+    Transient: 'transient',
+    Singleton: 'singleton',
+    Scoped: 'scoped',
+  },
   VytchesDDD: {
     configure: vi.fn(),
     resolve: vi.fn(),

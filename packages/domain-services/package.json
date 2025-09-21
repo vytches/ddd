@@ -43,7 +43,6 @@
   },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-repositories": "workspace:*",
     "@vytches/ddd-validation": "workspace:*"
   },

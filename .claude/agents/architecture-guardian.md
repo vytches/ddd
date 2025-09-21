@@ -45,9 +45,9 @@ frameworks:
 - Pattern layer: 3 packages (validation, policies, domain-services)
 - Architecture layer: 3 packages (events, cqrs, projections)
 - Integration layer: 3 packages (acl, messaging, domain-services)
-- Infrastructure layer: 5 packages (resilience, logging, di, event-store, utils)
+- Infrastructure layer: 4 packages (resilience, logging, di, utils)
 - Tooling layer: 3 packages (cli, testing, enterprise)
-- Total: 22 packages with perfect hierarchical organization
+- Total: 21 packages with perfect hierarchical organization
 
 📊 ARCHITECTURAL METRICS TO PROTECT
 

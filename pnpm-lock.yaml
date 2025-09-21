@@ -6,7 +6,7 @@ settings:
 
 overrides:
   esbuild: '>=0.25.0'
-  axios: '>=1.11.0'
+  axios: '>=1.12.0'
   form-data: '>=4.0.4'
   on-headers: '>=1.1.0'
   tmp: '>=0.2.4'
@@ -207,9 +207,6 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-validation':
         specifier: workspace:*
         version: link:../validation
@@ -266,9 +263,6 @@ importers:
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
@@ -281,16 +275,10 @@ importers:
       commander:
         specifier: ^11.0.0
         version: 11.1.0
-      handlebars:
-        specifier: ^4.7.8
-        version: 4.7.8
       js-yaml:
         specifier: ^4.1.0
         version: 4.1.0
     devDependencies:
-      '@types/handlebars':
-        specifier: ^4.1.0
-        version: 4.1.0
       '@types/yargs':
         specifier: ^17.0.33
         version: 17.0.33
@@ -335,42 +323,8 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
-  packages/core:
-    dependencies:
-      '@vytches/ddd-aggregates':
-        specifier: workspace:*
-        version: link:../aggregates
-      '@vytches/ddd-contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches/ddd-domain-primitives':
-        specifier: workspace:*
-        version: link:../domain-primitives
-      '@vytches/ddd-utils':
-        specifier: workspace:*
-        version: link:../utils
-      '@vytches/ddd-value-objects':
-        specifier: workspace:*
-        version: link:../value-objects
-    devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-      vite:
-        specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
-      vite-plugin-dts:
-        specifier: ^4.0.0
-        version: 4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@6.3.5)
-      vitest:
-        specifier: ^2.0.0
-        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
-
   packages/cqrs:
     dependencies:
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
@@ -446,9 +400,6 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-repositories':
         specifier: workspace:*
         version: link:../repositories
@@ -486,9 +437,6 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-cqrs':
         specifier: workspace:*
         version: link:../cqrs
@@ -501,12 +449,6 @@ importers:
       '@vytches/ddd-domain-services':
         specifier: workspace:*
         version: link:../domain-services
-      '@vytches/ddd-event-scheduling':
-        specifier: workspace:*
-        version: link:../event-scheduling
-      '@vytches/ddd-event-store':
-        specifier: workspace:*
-        version: link:../event-store
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
@@ -519,9 +461,6 @@ importers:
       '@vytches/ddd-policies':
         specifier: workspace:*
         version: link:../policies
-      '@vytches/ddd-process-managers':
-        specifier: workspace:*
-        version: link:../process-managers
       '@vytches/ddd-projections':
         specifier: workspace:*
         version: link:../projections
@@ -541,59 +480,6 @@ importers:
         specifier: workspace:*
         version: link:../value-objects
     devDependencies:
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-      vite:
-        specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
-      vite-plugin-dts:
-        specifier: ^4.0.0
-        version: 4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@6.3.5)
-      vitest:
-        specifier: ^2.0.0
-        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
-
-  packages/event-scheduling:
-    dependencies:
-      '@vytches/ddd-contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches/ddd-events':
-        specifier: workspace:*
-        version: link:../events
-    devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-      vite:
-        specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
-      vite-plugin-dts:
-        specifier: ^4.0.0
-        version: 4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@6.3.5)
-      vitest:
-        specifier: ^2.0.0
-        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
-
-  packages/event-store:
-    dependencies:
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches/ddd-logging':
-        specifier: workspace:*
-        version: link:../logging
-    devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -659,9 +545,6 @@ importers:
 
   packages/messaging:
     dependencies:
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
@@ -687,9 +570,6 @@ importers:
       '@vytches/ddd-acl':
         specifier: workspace:*
         version: link:../acl
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-cqrs':
         specifier: workspace:*
         version: link:../cqrs
@@ -713,7 +593,7 @@ importers:
         specifier: ^10.3.0
         version: 10.4.20(@nestjs/common@10.4.20)(@nestjs/platform-express@10.4.20)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/platform-express':
-        specifier: ^10.4.20
+        specifier: ^10.3.0
         version: 10.4.20(@nestjs/common@10.4.20)(@nestjs/core@10.4.20)
       '@nestjs/testing':
         specifier: ^10.3.0
@@ -721,9 +601,6 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.19.1
-      '@vytches/ddd-process-managers':
-        specifier: workspace:*
-        version: link:../process-managers
       '@vytches/ddd-testing':
         specifier: workspace:*
         version: link:../testing
@@ -751,9 +628,6 @@ importers:
 
   packages/policies:
     dependencies:
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
@@ -777,51 +651,8 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
 
-  packages/process-managers:
-    dependencies:
-      '@vytches/ddd-aggregates':
-        specifier: workspace:*
-        version: link:../aggregates
-      '@vytches/ddd-contracts':
-        specifier: workspace:*
-        version: link:../contracts
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
-      '@vytches/ddd-domain-primitives':
-        specifier: workspace:*
-        version: link:../domain-primitives
-      '@vytches/ddd-events':
-        specifier: workspace:*
-        version: link:../events
-      '@vytches/ddd-logging':
-        specifier: workspace:*
-        version: link:../logging
-      '@vytches/ddd-utils':
-        specifier: workspace:*
-        version: link:../utils
-    devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
-      vite:
-        specifier: ^6.0.0
-        version: 6.3.5(@types/node@20.19.1)(tsx@4.20.3)
-      vite-plugin-dts:
-        specifier: ^4.0.0
-        version: 4.5.4(@types/node@20.19.1)(rollup@4.46.2)(typescript@5.8.3)(vite@6.3.5)
-      vitest:
-        specifier: ^2.0.0
-        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@3.2.4)
-
   packages/projections:
     dependencies:
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
@@ -872,9 +703,6 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@vytches/ddd-core':
-        specifier: workspace:*
-        version: link:../core
       '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
@@ -6698,16 +6526,6 @@ packages:
       '@types/node': 20.19.1
     dev: true
 
-  /@types/handlebars@4.1.0:
-    resolution:
-      {
-        integrity: sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==,
-      }
-    deprecated: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
-    dependencies:
-      handlebars: 4.7.8
-    dev: true
-
   /@types/istanbul-lib-coverage@2.0.6:
     resolution:
       {
@@ -8291,10 +8109,10 @@ packages:
     engines: { node: '>=4' }
     dev: true
 
-  /axios@1.11.0:
+  /axios@1.12.2:
     resolution:
       {
-        integrity: sha512-1Lx3WLFQWm3ooKDYZD1eXmoGO9fxYQjrycfHFC8P0sCfQVXyROp0p9PFWBehewBOdCwHc+f/b8I0fMto5eSfwA==,
+        integrity: sha512-vMJzPewAlRyOgxV2dU0Cuz2O8zzzx9VYtbJOaBgXFeLc4IV/Eg50n4LowmehOOR61S8ZMpc2K5Sa7g6A4jfkUw==,
       }
     dependencies:
       follow-redirects: 1.15.9
@@ -12672,6 +12490,7 @@ packages:
       wordwrap: 1.0.0
     optionalDependencies:
       uglify-js: 3.19.3
+    dev: true
 
   /hard-rejection@2.1.0:
     resolution:
@@ -15911,6 +15730,7 @@ packages:
       {
         integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==,
       }
+    dev: true
 
   /minipass-collect@2.0.1:
     resolution:
@@ -16179,6 +15999,7 @@ packages:
       {
         integrity: sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==,
       }
+    dev: true
 
   /nerf-dart@1.0.0:
     resolution:
@@ -16549,7 +16370,7 @@ packages:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.0-rc.46
       '@zkochan/js-yaml': 0.0.6
-      axios: 1.11.0
+      axios: 1.12.2
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -16616,7 +16437,7 @@ packages:
       '@yarnpkg/lockfile': 1.1.0
       '@yarnpkg/parsers': 3.0.2
       '@zkochan/js-yaml': 0.0.7
-      axios: 1.11.0
+      axios: 1.12.2
       chalk: 4.1.2
       cli-cursor: 3.1.0
       cli-spinners: 2.6.1
@@ -19201,6 +19022,7 @@ packages:
         integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==,
       }
     engines: { node: '>=0.10.0' }
+    dev: true
 
   /source-map@0.7.4:
     resolution:
@@ -20562,6 +20384,7 @@ packages:
     engines: { node: '>=0.8.0' }
     hasBin: true
     requiresBuild: true
+    dev: true
     optional: true
 
   /uid@2.0.2:
@@ -21652,6 +21475,7 @@ packages:
       {
         integrity: sha512-gvVzJFlPycKc5dZN4yPkP8w7Dc37BtP1yczEneOb4uq34pXZcvrtRTmWV8W+Ume+XCxKgbjM+nevkyFPMybd4Q==,
       }
+    dev: true
 
   /wrap-ansi@6.2.0:
     resolution:

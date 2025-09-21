@@ -34,6 +34,11 @@ vi.mock('@vytches/ddd-di', async () => ({
     register: vi.fn(),
     resolve: vi.fn(),
   })),
+  ServiceLifetime: {
+    Transient: 'transient',
+    Singleton: 'singleton',
+    Scoped: 'scoped',
+  },
   VytchesDDD: {
     configure: vi.fn(),
     resolve: vi.fn(),
@@ -528,13 +533,13 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
       expect(modules).toHaveLength(5);
 
       // Initialize wszystkich modułów
-      const initPromises = modules!.map(mod => mod.init());
+      const initPromises = modules?.map(mod => mod.init()) ?? [];
       const [initError] = await safeRun(async () => Promise.all(initPromises));
 
       expect(initError).toBeUndefined();
 
       // Cleanup
-      await Promise.all(modules!.map(mod => mod.close()));
+      await Promise.all(modules?.map(mod => mod.close()) ?? []);
     });
   });
 });

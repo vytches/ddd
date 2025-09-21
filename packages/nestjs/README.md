@@ -44,15 +44,15 @@ npm install @nestjs/common @nestjs/core reflect-metadata rxjs
 
 ### Quick Dependencies Overview
 
-| Package                  | Purpose                           | Required           |
-| ------------------------ | --------------------------------- | ------------------ |
-| `@vytches/ddd-nestjs`    | NestJS integration                | ✅ Core            |
-| `@vytches/ddd-core`      | Meta-package with essentials      | ✅ Core            |
-| `@vytches/ddd-cqrs`      | Command/Query buses and handlers  | ✅ For CQRS        |
-| `@vytches/ddd-events`    | Event bus and event handling      | ✅ For Events      |
-| `@vytches/ddd-di`        | VP-012 Performance & DI container | ✅ For Performance |
-| `@vytches/ddd-policies`  | Business policies and validation  | ⚪ Optional        |
-| `@vytches/ddd-messaging` | Sagas and messaging patterns      | ⚪ Optional        |
+| Package                  | Purpose                                             | Required           |
+| ------------------------ | --------------------------------------------------- | ------------------ |
+| `@vytches/ddd-nestjs`    | NestJS integration                                  | ✅ Core            |
+| `@vytches/ddd-core`      | Meta-package with essentials                        | ✅ Core            |
+| `@vytches/ddd-cqrs`      | Command/Query buses and handlers                    | ✅ For CQRS        |
+| `@vytches/ddd-events`    | Event bus and event handling                        | ✅ For Events      |
+| `@vytches/ddd-di`        | Performance Performance & DI container DI container | ✅ For Performance |
+| `@vytches/ddd-policies`  | Business policies and validation                    | ⚪ Optional        |
+| `@vytches/ddd-messaging` | Sagas and messaging patterns                        | ⚪ Optional        |
 
 ## Quick Start
 
@@ -183,7 +183,7 @@ import { UserService } from '../services/user.service';
 
 @Injectable()
 @CommandHandler(CreateUserCommand, {
-  context: 'UserManagement', // VP-012: Context-based optimization
+  context: 'UserManagement', // Context-based optimization
   timeout: 15000, // Override global timeout
   middleware: ['ValidationMiddleware', 'LoggingMiddleware'],
 })
@@ -589,14 +589,14 @@ export class OrderProcessingSaga implements ISagaHandler {
 | **Query**          | `@QueryHandler(Query, options?)`     | `IQueryBus` → `EnhancedQueryBus`         | ✅ Automatic   |
 | **Event**          | `@EventHandler(Event, options?)`     | `IEventBus` → `UnifiedEventBus`          | ✅ Automatic   |
 | **Saga**           | `@SagaHandler(name, options?)`       | `ISagaOrchestrator` → `SagaOrchestrator` | ✅ Automatic   |
-| **Domain Service** | `@DomainService(id, options?)`       | VP-012 DI Container                      | ✅ Automatic   |
+| **Domain Service** | `@DomainService(id, options?)`       | DI Container                             | ✅ Automatic   |
 
-## VP-012 Performance Optimization
+## Performance Optimization
 
-The `@vytches/ddd-nestjs` package includes **VP-012 DI Container Enterprise
-Performance Optimization** for applications handling 200+ handlers. This
-optimization provides up to **94% performance improvement** and sub-100ms
-startup times for enterprise applications.
+The `@vytches/ddd-nestjs` package includes **DI Container Enterprise Performance
+Optimization** for applications handling 200+ handlers. This optimization
+provides up to **94% performance improvement** and sub-100ms startup times for
+enterprise applications.
 
 ### Performance Comparison
 
@@ -616,7 +616,7 @@ startup times for enterprise applications.
 @Module({
   imports: [
     VytchesDDDModule.forProduction({
-      // VP-012 Performance optimization for production
+      // Performance optimization for production
       performance: {
         contexts: ['UserManagement', 'OrderProcessing'], // Selective discovery
         performanceTarget: 150, // 150ms max startup
@@ -660,7 +660,7 @@ export class AppModule {}
 export class AppModule {}
 ```
 
-### Migration to VP-012 Performance
+### Migration to Performance
 
 #### Before: Standard Configuration
 
@@ -683,7 +683,7 @@ export class AppModule {}
 #### After: Production Optimized
 
 ```typescript
-// ✅ VP-012 optimized - 94% faster startup
+// ✅ optimized - 94% faster startup
 @Module({
   imports: [
     VytchesDDDModule.forProduction({
@@ -694,7 +694,7 @@ export class AppModule {}
         { provide: 'IEventBus', useClass: UnifiedEventBus },
       ],
 
-      // VP-012 Performance configuration
+      // Performance configuration
       performance: {
         performanceMode: 'production',
         contexts: ['UserManagement', 'OrderProcessing'], // Only scan relevant contexts
@@ -737,7 +737,7 @@ export class SystemController {
 
 ### Performance Optimization Strategies
 
-The VP-012 system automatically selects the best optimization strategy:
+The system automatically selects the best optimization strategy:
 
 1. **Pre-compiled Registry** (94% improvement) - Enterprise mode
 2. **Selective Discovery** (67% improvement) - Context filtering
@@ -760,7 +760,7 @@ const registry = await generateHandlerRegistry([
 ]);
 ```
 
-### VP-012 Enhanced Configuration Patterns
+### Enhanced Configuration Patterns
 
 #### Performance Profile Configuration
 
@@ -796,7 +796,7 @@ const registry = await generateHandlerRegistry([
           handlerCount: 500,
         },
         onPerformanceMetrics: metrics => {
-          console.log('🎯 VP-012 Metrics:', {
+          console.log('🎯 Metrics:', {
             startupTime: `${metrics.startupTime}ms`,
             handlersFound: metrics.handlersFound,
             optimized: metrics.optimized,
@@ -849,7 +849,7 @@ export class OrderManagementModule {}
 #### Enhanced Enterprise Configuration
 
 ```typescript
-// app.module.ts - Enterprise with VP-012 Enhanced
+// app.module.ts - Enterprise with Enhanced
 @Module({
   imports: [
     VytchesDDDModule.forEnterprise({
@@ -860,13 +860,13 @@ export class OrderManagementModule {}
       ],
       performance: {
         performanceMode: 'enterprise',
-        performanceProfile: 'enterprise-scale', // VP-012 Enhanced
+        performanceProfile: 'enterprise-scale', // Enhanced
         preCompiledRegistry: await loadHandlerRegistry(),
         skipDiscovery: true,
         maxStartupTime: 50,
         enterpriseMonitoring: true,
         performanceAlerts: true,
-        // VP-012 Enhanced features
+        // Enhanced features
         realTimeMonitoring: true,
         adaptiveOptimization: true,
         performanceStrategies: ['pre-compiled', 'cached', 'parallel'],
@@ -901,7 +901,7 @@ export class OrderManagementModule {}
 export class EnterpriseAppModule {}
 ```
 
-#### Development with VP-012 Enhanced Debugging
+#### Development with Enhanced Debugging
 
 ```typescript
 // app.module.ts - Development with Enhanced Debug
@@ -916,7 +916,7 @@ export class EnterpriseAppModule {}
       performance: {
         performanceMode: 'development',
         autoOptimize: false, // Disable for debugging
-        debugPerformance: true, // VP-012 Enhanced debugging
+        debugPerformance: true, // Enhanced debugging
         performanceTarget: 1000, // Relaxed for development
         fallback: 'discovery',
       },
@@ -1592,7 +1592,7 @@ export class UserService {
 
 ### Enhanced Error Messages and Debugging
 
-VP-012 provides enhanced error messages with actionable suggestions:
+provides enhanced error messages with actionable suggestions:
 
 ```typescript
 // Example error output with actionable guidance
@@ -1823,7 +1823,7 @@ describe('UserService', () => {
 
 ```typescript
 // performance.spec.ts
-describe('VP-012 Performance', () => {
+describe('Performance', () => {
   it('should meet startup performance targets', async () => {
     const startTime = Date.now();
 
@@ -1841,7 +1841,7 @@ describe('VP-012 Performance', () => {
     await module.init();
     const startupTime = Date.now() - startTime;
 
-    expect(startupTime).toBeLessThan(150); // VP-012 performance guarantee
+    expect(startupTime).toBeLessThan(150); // performance guarantee
   });
 });
 ```
@@ -1911,7 +1911,7 @@ export class GetUserQueryHandler {
 @Module({
   imports: [
     VytchesDDDModule.forContext('UserManagement', {
-      // VP-012 optimization - parallel handler discovery
+      // optimization - parallel handler discovery
       autoDiscovery: true,
       performance: {
         contexts: ['UserManagement'], // Selective context scanning
@@ -1938,7 +1938,7 @@ export class UserManagementModule {}
 
 **Benefits:**
 
-- **🔥 67-94% faster startup** - VP-012 parallel registration
+- **🔥 67-94% faster startup** - parallel registration
 - **📊 Performance monitoring** - automatic metrics and alerts
 - **🎯 Context isolation** - bounded context handler filtering
 - **⚡ Smart caching** - discovery results cached between restarts
@@ -2238,7 +2238,7 @@ export class SystemController {
 #### **Performance Testing Framework**
 
 ```typescript
-describe('VP-012 Performance Guarantees', () => {
+describe('Performance Guarantees', () => {
   it('should meet production startup targets', async () => {
     const startTime = Date.now();
 
@@ -2257,7 +2257,7 @@ describe('VP-012 Performance Guarantees', () => {
     await module.init();
     const startupTime = Date.now() - startTime;
 
-    expect(startupTime).toBeLessThan(150); // VP-012 production guarantee
+    expect(startupTime).toBeLessThan(150); // production guarantee
   });
 
   it('should meet enterprise startup targets', async () => {
@@ -2278,7 +2278,7 @@ describe('VP-012 Performance Guarantees', () => {
     await module.init();
     const startupTime = Date.now() - startTime;
 
-    expect(startupTime).toBeLessThan(50); // VP-012 enterprise guarantee
+    expect(startupTime).toBeLessThan(50); // enterprise guarantee
   });
 });
 ```
@@ -2353,7 +2353,7 @@ export class UserModule {}
 
 - [ ] **Context Filtering**: Use `contexts: ['SpecificContext']` instead of
       scanning all files
-- [ ] **Auto-Discovery**: Enable `autoDiscovery: true` for VP-012 optimization
+- [ ] **Auto-Discovery**: Enable `autoDiscovery: true` for optimization
 - [ ] **Performance Mode**: Use `forProduction()` or `forEnterprise()` in
       production
 - [ ] **Monitoring**: Enable performance monitoring with alerts

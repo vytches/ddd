@@ -897,7 +897,7 @@ cat docs/examples/domain/aggregates/aggregate-builder.yaml
 - ✅ **Documentation System**: Fully operational YAML-based configuration
 - ✅ **Build Integration**: TypeScript AST processing with YAML metadata
   injection
-- ✅ **Package Coverage**: 5/22 packages fully documented with YAML files
+- ✅ **Package Coverage**: 5/21 packages fully documented with YAML files
 - ✅ **File Structure**: All YAML files properly organized in
   `docs/examples/domain/`
 
@@ -3025,7 +3025,7 @@ pnpm playground
   moved to contracts package
   - Enterprise-grade architecture with contracts foundation layer
   - Circular dependency elimination between testing and value-objects packages
-  - TypeScript configuration standardization across all 22 packages
+  - TypeScript configuration standardization across all 21 packages
   - Two-layer EntityId pattern with enhanced validation
 - **🔥 COMPLETED**: **Saga Framework Implementation** - Enterprise-grade
   long-running business processes

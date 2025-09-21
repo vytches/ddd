@@ -47,7 +47,6 @@
   },
   "dependencies": {
     "@vytches/ddd-acl": "workspace:*",
-    "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-di": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
@@ -74,10 +73,8 @@
     "@nestjs/platform-express": "^10.3.0",
     "@nestjs/testing": "^10.3.0",
     "@types/node": "^20.10.4",
-    "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
-    "@vytches/ddd-process-managers": "workspace:*",
     "@vytches/ddd-testing": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
     "reflect-metadata": "^0.2.1",
