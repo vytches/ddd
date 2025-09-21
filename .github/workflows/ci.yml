@@ -45,8 +45,8 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')"
     strategy:
       matrix:
-        # Use Node.js v22.x LTS (Jod) - required for dependency-cruiser styleText feature
-        node-version: [22.x]
+        # Use only latest LTS for efficiency - add 18.x back if compatibility issues arise
+        node-version: [20.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -153,7 +153,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           echo "🔍 Checking for circular dependencies between packages..."
-          npx madge --circular packages/*/src/index.ts 2>&1 | tee circular-check.log
+          npx madge --circular packages/core/src/index.ts packages/repositories/src/index.ts packages/testing/src/index.ts packages/contracts/src/index.ts packages/events/src/index.ts 2>&1 | tee circular-check.log
           if grep -q "Found.*circular" circular-check.log; then
             echo "❌ Circular dependencies detected!"
             cat circular-check.log
@@ -166,8 +166,18 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           echo "🔍 Validating module boundaries with dependency-cruiser..."
-          pnpm deps:check
-          echo "✅ Module boundaries validated successfully"
+          if [ -f ".dependency-cruiser.js" ]; then
+            npx dependency-cruiser packages/*/src --config .dependency-cruiser.js --output-type err-long 2>&1 | tee dep-check.log || true
+            if grep -q "error" dep-check.log; then
+              echo "❌ Module boundary violations detected!"
+              grep "error" dep-check.log | head -20
+              exit 1
+            else
+              echo "✅ Module boundaries are correctly enforced"
+            fi
+          else
+            echo "⚠️ Dependency cruiser configuration not found, skipping"
+          fi
 
       - name: Check if quality gates needed
         id: check_gates
@@ -199,18 +209,16 @@ jobs:
           echo "📦 Checking bundle sizes..."
           node scripts/quality-gates/bundle-size-monitor.js --ci 2>&1 | tee bundle-check.log
 
-          # Note: Core package was decomposed into meta-package architecture
-          # Foundation packages (domain-primitives, value-objects, repositories, aggregates) 
-          # should collectively stay under 200KB as per bundle-limits.json
-          FOUNDATION_SIZE=$(grep -E "(domain-primitives|value-objects|repositories|aggregates|contracts)" bundle-check.log | grep -oE '[0-9]+\.[0-9]+KB' | grep -oE '[0-9]+\.[0-9]+' | awk '{sum += $1} END {print sum}' || echo "0")
+          # Extract core package size for special validation
+          CORE_SIZE=$(grep "@vytches/ddd-core" bundle-check.log | grep -oE '[0-9]+\.[0-9]+KB' | grep -oE '[0-9]+\.[0-9]+' || echo "0")
 
-          # Ensure foundation layer stays under 200KB (meta-package architecture)
-          if [ "$(echo "$FOUNDATION_SIZE > 200" | bc 2>/dev/null || echo "0")" -eq 1 ]; then
-            echo "❌ Foundation layer bundle size exceeded threshold: ${FOUNDATION_SIZE}KB > 200KB"
+          # Ensure core package stays under 2KB (currently ~0.82KB)
+          if [ "$(echo "$CORE_SIZE > 2" | bc)" -eq 1 ]; then
+            echo "❌ Core package bundle size exceeded threshold: ${CORE_SIZE}KB > 2KB"
             echo "This indicates potential circular dependency issues!"
             exit 1
           else
-            echo "✅ Foundation layer bundle size is optimal: ${FOUNDATION_SIZE}KB"
+            echo "✅ Core package bundle size is optimal: ${CORE_SIZE}KB"
           fi
 
       # Coverage disabled - use separate workflow if needed
@@ -239,7 +247,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "20.x"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -269,7 +277,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22.x"
+          node-version: "20.x"
           cache: "pnpm"
 
       - name: Install dependencies

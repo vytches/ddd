@@ -141,6 +141,33 @@ module.exports = {
       },
       to: {},
     },
+    {
+      name: 'no-deprecated',
+      severity: 'warn',
+      comment: 'Deprecated modules should not be used',
+      from: {},
+      to: {
+        dependencyTypes: ['deprecated'],
+      },
+    },
+    {
+      name: 'no-non-package-json',
+      severity: 'error',
+      comment: 'All dependencies should be declared in package.json',
+      from: {},
+      to: {
+        dependencyTypes: ['npm-no-pkg', 'npm-unknown'],
+      },
+    },
+    {
+      name: 'no-duplicate-dep-types',
+      severity: 'warn',
+      comment: 'Dependencies should not be both in dependencies and devDependencies',
+      from: {},
+      to: {
+        dependencyTypes: ['npm-duplicate'],
+      },
+    },
   ],
   options: {
     doNotFollow: {

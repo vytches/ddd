@@ -31,7 +31,7 @@
   ],
   "packageManager": "pnpm@8.15.0",
   "engines": {
-    "node": ">=22.19.0",
+    "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
   "scripts": {
@@ -107,7 +107,7 @@
     "quality:performance": "node scripts/quality-gates/performance-monitor.js",
     "quality:baseline": "node scripts/quality-gates/quality-gates.js --baseline --parallel",
     "quality:verbose": "node scripts/quality-gates/quality-gates.js --verbose",
-    "deps:check": "npx dependency-cruiser packages/*/src --config .dependency-cruiser.js --output-type err",
+    "deps:check": "npx dependency-cruiser packages/*/src --config .dependency-cruiser.js",
     "deps:circular": "npx madge --circular packages/*/src/index.ts",
     "deps:graph": "npx dependency-cruiser packages/*/src --config .dependency-cruiser.js --output-type dot | dot -T svg > dependency-graph.svg",
     "architecture:check": "node scripts/architecture-monitor.js",
@@ -242,7 +242,7 @@
   "pnpm": {
     "overrides": {
       "esbuild": ">=0.25.0",
-      "axios": ">=1.12.0",
+      "axios": ">=1.11.0",
       "form-data": ">=4.0.4",
       "on-headers": ">=1.1.0",
       "tmp": ">=0.2.4"

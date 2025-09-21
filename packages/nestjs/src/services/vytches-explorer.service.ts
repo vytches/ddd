@@ -2,220 +2,104 @@ import type { OnModuleInit } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import type { DiscoveryService, MetadataScanner, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
-import type { Constructor, IDependencyContainer } from '@vytches/ddd-di';
-import type { HandlerInfo, VytchesContextOptions } from '../types';
+// Note: Bus types are resolved dynamically through module refs
 
-interface HandlerMetadata {
-  type: 'command' | 'query' | 'event' | 'domain-service';
-  messageType: Constructor;
-}
-
+/**
+ * VytchesExplorerService - Clean handler discovery following @nestjs/cqrs patterns
+ *
+ * Simple, synchronous discovery that happens during module initialization.
+ * No temporal coupling, no race conditions, no complex bridge patterns.
+ */
 @Injectable()
 export class VytchesExplorerService implements OnModuleInit {
-  private container!: IDependencyContainer; // SimpleContainer - loaded dynamically
-  private contextOptions?: VytchesContextOptions;
-
   constructor(
-    private readonly moduleRef: ModuleRef,
-    private readonly discoveryService?: DiscoveryService,
-    private readonly metadataScanner?: MetadataScanner
-  ) {
-    // Container will be initialized in onModuleInit
+    private readonly discoveryService: DiscoveryService,
+    private readonly metadataScanner: MetadataScanner,
+    private readonly moduleRef: ModuleRef
+  ) {}
+
+  async onModuleInit() {
+    await this.explore();
   }
 
-  /**
-   * Initialize the explorer service
-   */
-  async onModuleInit(): Promise<void> {
-    console.log('🚀 VytchesExplorerService initializing...');
-
-    try {
-      // Initialize container with lazy-loading
-      const { SimpleContainer } = await import('@vytches/ddd-di');
-      this.container = new SimpleContainer();
-
-      // Auto-discover handlers
-      const handlers = await this.discoverHandlers();
-      console.log(`✅ Discovered ${handlers.length} handlers`);
-
-      // Register handlers in container
-      await this.registerHandlers(handlers);
-
-      console.log('✅ VytchesExplorerService initialized successfully');
-    } catch (error) {
-      console.error('❌ VytchesExplorerService initialization failed:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Configure context options
-   */
-  configureContext(options: VytchesContextOptions): void {
-    this.contextOptions = options;
-    console.log(`🔧 Context configured: ${options.name}`);
-  }
-
-  /**
-   * Get the container instance
-   */
-  getContainer(): IDependencyContainer {
-    return this.container;
-  }
-
-  /**
-   * Get discovered handlers
-   */
-  getHandlers(): HandlerInfo[] {
-    // Return discovered handlers
-    return [];
-  }
-
-  /**
-   * Auto-discover command and query handlers
-   */
-  private async discoverHandlers(): Promise<HandlerInfo[]> {
-    const handlers: HandlerInfo[] = [];
-
+  private async explore() {
+    // Guard against undefined discovery service in tests
     if (!this.discoveryService) {
-      console.warn('DiscoveryService not available, skipping auto-discovery');
-      return handlers;
+      return;
     }
 
-    try {
-      // Get all providers from the module
-      const providers = this.discoveryService.getProviders();
+    // Get all providers from NestJS container
+    const providers = this.discoveryService.getProviders();
 
-      for (const provider of providers) {
-        const handlerInfo = this.extractHandlerInfo(provider);
-        if (handlerInfo) {
-          handlers.push(handlerInfo);
+    // Find handlers using metadata
+    const commandHandlers = this.findHandlers(providers, 'di:handler-type', 'command');
+    const queryHandlers = this.findHandlers(providers, 'di:handler-type', 'query');
+    const eventHandlers = this.findHandlers(providers, 'di:handler-type', 'event');
+
+    // Register with buses if available
+    await this.registerHandlers(commandHandlers, 'command');
+    await this.registerHandlers(queryHandlers, 'query');
+    await this.registerHandlers(eventHandlers, 'event');
+  }
+
+  private findHandlers(
+    providers: InstanceWrapper[],
+    metadataKey: string,
+    expectedType: string
+  ): InstanceWrapper[] {
+    return providers.filter(wrapper => {
+      if (!wrapper.metatype || !wrapper.instance) return false;
+
+      const handlerType = Reflect.getMetadata(metadataKey, wrapper.metatype);
+      return handlerType === expectedType;
+    });
+  }
+
+  private async registerHandlers(
+    handlers: InstanceWrapper[],
+    busType: 'command' | 'query' | 'event'
+  ) {
+    if (handlers.length === 0) return;
+
+    try {
+      const bus = this.getBus(busType);
+      if (!bus) return;
+
+      for (const handler of handlers) {
+        const handlerMetadata = Reflect.getMetadata('di:handler-metadata', handler.metatype);
+        if (handlerMetadata?.messageType) {
+          // Register handler with appropriate bus method
+          if (busType === 'command' && 'register' in bus) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (bus as any).register(handlerMetadata.messageType, handler.instance);
+          } else if (busType === 'query' && 'register' in bus) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (bus as any).register(handlerMetadata.messageType, handler.instance);
+          } else if (busType === 'event' && 'registerHandler' in bus) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (bus as any).registerHandler(handlerMetadata.messageType, handler.instance);
+          }
         }
       }
-    } catch (error) {
-      console.warn('Error during handler discovery:', error);
+    } catch {
+      // Silent fail - buses might not be configured
     }
-
-    return handlers;
   }
 
-  /**
-   * Extract handler information from provider
-   */
-  private extractHandlerInfo(provider: InstanceWrapper): HandlerInfo | null {
+  private getBus(type: 'command' | 'query' | 'event') {
     try {
-      const { metatype } = provider;
-
-      if (!metatype || typeof metatype !== 'function') {
-        return null;
+      switch (type) {
+        case 'command':
+          return this.moduleRef.get('ICommandBus', { strict: false });
+        case 'query':
+          return this.moduleRef.get('IQueryBus', { strict: false });
+        case 'event':
+          return this.moduleRef.get('IEventBus', { strict: false });
+        default:
+          return null;
       }
-
-      // Check for handler decorators
-      const handlerMetadata = this.getHandlerMetadata(metatype as Constructor);
-
-      if (handlerMetadata) {
-        return {
-          type: handlerMetadata.type,
-          messageType: handlerMetadata.messageType,
-          handlerType: metatype as Constructor,
-          metadata: handlerMetadata,
-        };
-      }
-    } catch (error) {
-      console.warn(`Error extracting handler info from ${provider.name}:`, error);
+    } catch {
+      return null;
     }
-
-    return null;
-  }
-
-  /**
-   * Get handler metadata from class
-   */
-  private getHandlerMetadata(target: Constructor): HandlerMetadata | null {
-    try {
-      // Check for command handler metadata
-      const commandMetadata = Reflect.getMetadata('command-handler', target);
-      if (commandMetadata) {
-        return {
-          type: 'command',
-          messageType: commandMetadata.command,
-        };
-      }
-
-      // Check for query handler metadata
-      const queryMetadata = Reflect.getMetadata('query-handler', target);
-      if (queryMetadata) {
-        return {
-          type: 'query',
-          messageType: queryMetadata.query,
-        };
-      }
-
-      // Check for event handler metadata
-      const eventMetadata = Reflect.getMetadata('event-handler', target);
-      if (eventMetadata) {
-        return {
-          type: 'event',
-          messageType: eventMetadata.event,
-        };
-      }
-
-      // Check for domain service metadata
-      const serviceMetadata = Reflect.getMetadata('domain-service', target);
-      if (serviceMetadata) {
-        return {
-          type: 'domain-service',
-          messageType: target,
-        };
-      }
-    } catch (error) {
-      console.warn(`Error getting metadata from ${target.name}:`, error);
-    }
-
-    return null;
-  }
-
-  /**
-   * Register discovered handlers in the container
-   */
-  private async registerHandlers(handlers: HandlerInfo[]): Promise<void> {
-    const { ServiceLifetime } = await import('@vytches/ddd-di');
-
-    for (const handler of handlers) {
-      try {
-        // Register handler in container
-        this.container.register(handler.handlerType, handler.handlerType, {
-          lifetime: ServiceLifetime.Transient,
-        });
-
-        console.log(`✅ Registered ${handler.type} handler: ${handler.handlerType.name}`);
-      } catch (error) {
-        console.warn(`Failed to register handler ${handler.handlerType.name}:`, error);
-      }
-    }
-  }
-
-  /**
-   * Get context configuration (legacy VP-012 compatibility)
-   */
-  getContextConfiguration(): Record<string, unknown> | null {
-    return ((this as Record<string, unknown>).contextConfig as Record<string, unknown>) || null;
-  }
-
-  /**
-   * Discover handlers for specific context and type (legacy VP-012 compatibility)
-   */
-  async discoverContextHandlers(_context: string, _type: string): Promise<HandlerInfo[]> {
-    // For legacy compatibility, return empty array
-    // In real implementation, this would filter handlers by context and type
-    return [];
-  }
-
-  /**
-   * Discover all handlers in all contexts (legacy VP-012 compatibility)
-   */
-  async discoverAllContextHandlers(): Promise<HandlerInfo[]> {
-    // For legacy compatibility, return the discovered handlers
-    return await this.discoverHandlers();
   }
 }

@@ -3,7 +3,7 @@
 ## Executive Summary
 
 This document outlines the comprehensive rollout strategy for implementing the
-Enhanced Metadata System V2 across all 21 packages in the VytchesDDD library.
+Enhanced Metadata System V2 across all 22 packages in the VytchesDDD library.
 Based on the successful implementation in the aggregates package, this plan
 provides a structured approach for extending JSDoc documentation to the entire
 library.
@@ -318,7 +318,7 @@ JSDOC_PERFORMANCE=true pnpm build
 The Enhanced Metadata System V2 rollout will transform VytchesDDD into a
 comprehensively documented enterprise library. By following this structured
 approach and leveraging the successful aggregates implementation, we ensure
-consistent, high-quality documentation across all 21 packages.
+consistent, high-quality documentation across all 22 packages.
 
 **Key Success Factors:**
 

@@ -1,4 +1,4 @@
-import { IDomainError } from '@vytches/ddd-domain-primitives';
+import { IDomainError } from '@vytches/ddd-core';
 
 export class ACLError extends IDomainError {
   public metadata?: Record<string, unknown>;

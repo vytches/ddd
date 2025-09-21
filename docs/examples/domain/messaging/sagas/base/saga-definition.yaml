@@ -1,0 +1,334 @@
+# Saga Definition - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'saga-definition'
+title: 'SagaDefinition - Saga Type Configuration'
+description: 'Concrete implementation of saga definition with validation and instance creation'
+business-context: 'Defines saga templates for automatic orchestration and instance management'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  SagaDefinition:
+    class-doc:
+      description: 'Concrete saga definition implementation with validation and factory methods'
+      business-context: 'Template for creating and managing saga instances with business rules'
+
+      formats:
+        jsdoc:
+          description: 'Saga definition with validation and instance factory'
+        cli:
+          description: |
+            ## SagaDefinition
+
+            Saga definition providing:
+            - Saga type registration
+            - Instance creation factory
+            - Configuration validation
+            - Event mapping and routing
+            - Resource limit enforcement
+            - Step workflow definition
+
+    methods:
+      constructor:
+        description: 'Creates saga definition with configuration and factory function'
+        business-context: 'Establishes saga template for business process automation'
+
+        parameters:
+          - name: 'config'
+            type: 'SagaDefinitionConfig'
+            description: 'Saga configuration parameters'
+
+        examples:
+          - id: 'definition-creation'
+            code: |
+              const orderProcessingDefinition = new SagaDefinition({
+                sagaType: 'OrderProcessingSaga',
+                displayName: 'Order Processing Workflow',
+                description: 'Complete order processing with payment and fulfillment',
+                startEvents: ['OrderCreated'],
+                defaultTimeout: 3600000, // 1 hour
+                maxInstances: 1000,
+                steps: [
+                  new ProcessPaymentStep(),
+                  new ReserveInventoryStep(),
+                  new ShipOrderStep(),
+                  new SendConfirmationStep()
+                ],
+                createInstance: async (event, context) => {
+                  const initialState: ISagaState = {
+                    sagaId: LibUtils.getUUID(),
+                    sagaType: 'OrderProcessingSaga',
+                    status: SagaStatus.STARTED,
+                    currentStep: 'ProcessPayment',
+                    stepData: {},
+                    compensationData: {},
+                    correlationId: context.correlationId,
+                    metadata: { orderId: event.payload.orderId },
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    timeoutAt: new Date(Date.now() + 3600000),
+                    version: 1
+                  };
+                  
+                  return new OrderProcessingSaga(initialState);
+                },
+                getCorrelationData: (event) => ({
+                  orderId: event.payload.orderId,
+                  customerId: event.payload.customerId
+                })
+              });
+
+      createInstance:
+        description: 'Creates new saga instance from starting event'
+        business-context: 'Factory method for saga instantiation with proper initialization'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Starting domain event'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context with correlation data'
+
+        returns:
+          type: 'Promise<ISaga>'
+          description: 'New saga instance ready for execution'
+
+        examples:
+          - id: 'create-instance'
+            code: |
+              const orderCreatedEvent = new OrderCreatedEvent({
+                orderId: 'order-123',
+                customerId: 'customer-456',
+                totalAmount: 99.99,
+                items: [{ productId: 'prod-1', quantity: 2 }]
+              });
+
+              const context: ISagaExecutionContext = {
+                correlationId: 'req-789',
+                userId: 'user-123',
+                metadata: { source: 'order-service' },
+                timestamp: new Date()
+              };
+
+              const sagaInstance = await definition.createInstance(orderCreatedEvent, context);
+
+      getCorrelationData:
+        description: 'Extracts correlation data from starting event for routing'
+        business-context: 'Enables event correlation and saga instance discovery'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Starting event containing correlation data'
+
+        returns:
+          type: 'Record<string, unknown>'
+          description: 'Extracted correlation data'
+
+        examples:
+          - id: 'get-correlation'
+            code: |
+              const correlationData = definition.getCorrelationData(orderCreatedEvent);
+              // Returns: { orderId: 'order-123', customerId: 'customer-456' }
+
+              // Used by orchestrator for saga routing
+              const existingSagas = await repository.findByCorrelation(correlationData);
+
+      validate:
+        description: 'Validates saga definition configuration for deployment safety'
+        business-context: 'Prevents deployment of invalid saga configurations'
+
+        returns:
+          type: 'string[]'
+          description: 'Array of validation errors (empty if valid)'
+
+        examples:
+          - id: 'validate-definition'
+            code: |
+              const errors = definition.validate();
+
+              if (errors.length > 0) {
+                console.error('Saga definition validation failed:');
+                errors.forEach(error => console.error(`- ${error}`));
+                throw new SagaConfigurationError(
+                  definition.sagaType, 
+                  'Validation failed', 
+                  errors
+                );
+              }
+
+              console.log('Saga definition is valid');
+
+      canStartWith:
+        description: 'Checks if saga can be started with given event'
+        business-context: 'Event filtering for saga orchestration routing'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Type of event to check'
+
+        returns:
+          type: 'boolean'
+          description: 'True if saga can start with this event'
+
+        examples:
+          - id: 'can-start-check'
+            code: |
+              if (definition.canStartWith('OrderCreated')) {
+                const saga = await definition.createInstance(event, context);
+                await repository.save(saga);
+              }
+
+      getStepByName:
+        description: 'Retrieves step definition by name'
+        business-context: 'Provides access to step configuration for runtime operations'
+
+        parameters:
+          - name: 'stepName'
+            type: 'string'
+            description: 'Name of step to retrieve'
+
+        returns:
+          type: 'ISagaStep | undefined'
+          description: 'Step definition if found'
+
+        examples:
+          - id: 'get-step'
+            code: |
+              const paymentStep = definition.getStepByName('ProcessPayment');
+              if (paymentStep) {
+                console.log('Step timeout:', paymentStep.timeout);
+                console.log('Compensatable:', paymentStep.compensatable);
+              }
+
+      getStepsByTriggerEvent:
+        description: 'Gets steps that can be triggered by event type'
+        business-context: 'Event routing to appropriate saga steps'
+
+        parameters:
+          - name: 'eventType'
+            type: 'string'
+            description: 'Event type to match against'
+
+        returns:
+          type: 'ISagaStep[]'
+          description: 'Steps that can handle the event'
+
+        examples:
+          - id: 'get-steps-by-event'
+            code: |
+              const steps = definition.getStepsByTriggerEvent('PaymentProcessed');
+              steps.forEach(step => {
+                console.log(`Step ${step.name} can handle PaymentProcessed`);
+              });
+
+      clone:
+        description: 'Creates a copy of the saga definition'
+        business-context: 'Enables definition modification for different environments'
+
+        returns:
+          type: 'SagaDefinition'
+          description: 'Cloned saga definition'
+
+        examples:
+          - id: 'clone-definition'
+            code: |
+              const testDefinition = definition.clone();
+              testDefinition.maxInstances = 10; // Limit for testing
+              testDefinition.defaultTimeout = 60000; // Shorter timeout for tests
+
+# === TYPES ===
+types:
+  SagaDefinitionConfig:
+    description: 'Configuration parameters for saga definition'
+    business-context: 'Complete saga template configuration'
+
+    properties:
+      - name: 'sagaType'
+        type: 'string'
+        description: 'Unique saga type identifier'
+
+      - name: 'displayName'
+        type: 'string'
+        description: 'Human-readable name for monitoring'
+
+      - name: 'description'
+        type: 'string'
+        description: 'Saga purpose description'
+        required: false
+
+      - name: 'startEvents'
+        type: 'string[]'
+        description: 'Events that can start this saga'
+
+      - name: 'defaultTimeout'
+        type: 'number'
+        description: 'Default timeout in milliseconds'
+        required: false
+
+      - name: 'maxInstances'
+        type: 'number'
+        description: 'Maximum concurrent instances'
+        required: false
+
+      - name: 'steps'
+        type: 'ISagaStep[]'
+        description: 'Steps that comprise the saga'
+
+      - name: 'createInstance'
+        type: 'SagaInstanceFactory'
+        description: 'Factory function for creating instances'
+
+      - name: 'getCorrelationData'
+        type: 'CorrelationExtractor'
+        description: 'Function to extract correlation data'
+
+      - name: 'metadata'
+        type: 'Record<string, unknown>'
+        description: 'Additional saga metadata'
+        required: false
+
+  SagaInstanceFactory:
+    description: 'Function type for creating saga instances'
+    business-context: 'Enables custom saga instantiation logic'
+
+    type-definition: |
+      (event: IExtendedDomainEvent, context: ISagaExecutionContext) => Promise<ISaga>
+
+    examples:
+      - id: 'instance-factory'
+        code: |
+          const factory: SagaInstanceFactory = async (event, context) => {
+            const state: ISagaState = {
+              sagaId: LibUtils.getUUID(),
+              sagaType: 'OrderProcessingSaga',
+              status: SagaStatus.STARTED,
+              // ... other state properties
+            };
+            
+            return new OrderProcessingSaga(state);
+          };
+
+  CorrelationExtractor:
+    description: 'Function type for extracting correlation data'
+    business-context: 'Enables saga routing and instance correlation'
+
+    type-definition: |
+      (event: IExtendedDomainEvent) => Record<string, unknown>
+
+    examples:
+      - id: 'correlation-extractor'
+        code: |
+          const extractor: CorrelationExtractor = (event) => ({
+            orderId: event.payload.orderId,
+            customerId: event.payload.customerId,
+            tenantId: event.metadata?.tenantId
+          });

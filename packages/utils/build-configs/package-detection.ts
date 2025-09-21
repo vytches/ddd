@@ -1,9 +1,9 @@
 /**
  * Package type detection and classification
  */
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import type { BuildContext, PackageType } from './types';
+import { readFileSync } from 'fs';
+import type { PackageType, BuildContext } from './types';
 
 /**
  * Detect package type based on name and dependencies
@@ -111,7 +111,7 @@ export function getWorkspaceAliases(packagePath: string): Record<string, string>
     '@vytches/ddd-value-objects': resolve(packagePath, '../value-objects/src/index.ts'),
     '@vytches/ddd-repositories': resolve(packagePath, '../repositories/src/index.ts'),
     '@vytches/ddd-aggregates': resolve(packagePath, '../aggregates/src/index.ts'),
-    // NOTE: '@vytches/ddd-core' removed to prevent circular dependency
+    '@vytches/ddd-core': resolve(packagePath, '../core/src/index.ts'),
     '@vytches/ddd-logging': resolve(packagePath, '../logging/src/index.ts'),
     '@vytches/ddd-events': resolve(packagePath, '../events/src/index.ts'),
     '@vytches/ddd-cqrs': resolve(packagePath, '../cqrs/src/index.ts'),
@@ -124,6 +124,7 @@ export function getWorkspaceAliases(packagePath: string): Record<string, string>
     '@vytches/ddd-messaging': resolve(packagePath, '../messaging/src/index.ts'),
     '@vytches/ddd-resilience': resolve(packagePath, '../resilience/src/index.ts'),
     '@vytches/ddd-event-store': resolve(packagePath, '../event-store/src/index.ts'),
+    '@vytches/ddd-event-scheduling': resolve(packagePath, '../event-scheduling/src/index.ts'),
     '@vytches/ddd-testing': resolve(packagePath, '../testing/src/index.ts'),
     '@vytches/ddd-enterprise': resolve(packagePath, '../enterprise/src/index.ts'),
   };

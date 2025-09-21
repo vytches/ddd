@@ -1,5 +1,6 @@
-import type { DomainErrorOptions } from '@vytches/ddd-domain-primitives';
-import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
+
+import type { DomainErrorOptions } from '@vytches/ddd-core';
 
 export class ServiceDuplicateError extends IDomainError {
   static withServiceId(serviceId: string, data?: DomainErrorOptions): ServiceDuplicateError {

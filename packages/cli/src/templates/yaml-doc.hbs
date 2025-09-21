@@ -1,0 +1,52 @@
+# {{packageConfig.displayName}}{{#if framework}} - {{framework}} Integration{{/if}}
+
+{{#if (yamlContent packageConfig.packageName "package" "description.cli" "cli")}}
+{{yamlContent packageConfig.packageName "package" "description.cli" "cli"}}
+{{else if (yamlContent packageConfig.packageName "package" "description" "cli")}}
+{{yamlContent packageConfig.packageName "package" "description" "cli"}}
+{{/if}}
+
+**Version**: {{packageConfig.version}}  
+**Package**: @vytches/ddd-{{packageConfig.packageName}}  
+{{#if packageConfig.domain}}**Domain**: {{packageConfig.domain}}{{/if}}  
+{{#if packageConfig.patterns}}**Patterns**: {{#each packageConfig.patterns}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}  
+
+## Business Context
+
+{{#if (yamlContent packageConfig.packageName "package" "business-context.cli" "cli")}}
+{{yamlContent packageConfig.packageName "package" "business-context.cli" "cli"}}
+{{else if (yamlContent packageConfig.packageName "package" "business-context" "cli")}}
+{{yamlContent packageConfig.packageName "package" "business-context" "cli"}}
+{{/if}}
+
+## Implementation Examples
+
+{{#each examples}}
+### {{this.name}}
+
+{{#if this.description}}
+{{this.description}}
+{{/if}}
+
+```typescript
+{{#if this.file}}
+{{loadYamlMarkdown ../packageConfig.packageName this.file}}
+{{else}}
+// Example code for {{this.name}}
+{{/if}}
+```
+
+{{/each}}
+
+{{#if relatedExamples}}
+## Related Examples
+
+{{#each relatedExamples}}
+- [{{this.name}}]({{this.path}}) - {{this.description}}
+{{/each}}
+{{/if}}
+
+---
+
+*Generated with @vytches/ddd-cli on {{timestamp}}*  
+{{#if llmOptimized}}*Optimized for LLM code generation*{{/if}}

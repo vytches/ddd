@@ -1,4 +1,4 @@
-import { BaseError } from '@vytches/ddd-domain-primitives';
+import { BaseError } from '@vytches/ddd-core';
 
 export class CommandExecutionError extends BaseError {
   constructor(

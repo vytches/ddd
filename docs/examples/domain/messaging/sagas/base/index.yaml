@@ -1,0 +1,25 @@
+# Sagas Base Index - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'index'
+title: 'Sagas Base - Export Module'
+description: 'Re-exports base saga classes'
+business-context: 'Foundation classes for saga implementation'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === EXPORTS ===
+exports:
+  description: 'Base saga class exports'
+  items:
+    - from: './base-saga'
+      exports: ['BaseSaga']
+    - from: './concrete-saga-step'
+      exports: ['ConcreteSagaStep']
+    - from: './saga-definition'
+      exports: ['SagaDefinition']
+    - from: './saga-step'
+      exports: ['SagaStep']

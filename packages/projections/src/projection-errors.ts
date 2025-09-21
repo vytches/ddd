@@ -1,4 +1,4 @@
-import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
+import { DomainErrorCode, IDomainError } from '@vytches/ddd-core';
 
 export class ProjectionError extends IDomainError {
   static processingFailed(

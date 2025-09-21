@@ -1,7 +1,8 @@
 /// <reference types="vitest" />
-import { copyFileSync, mkdirSync, readdirSync, readFileSync } from 'fs';
-import { join, resolve } from 'path';
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
+import { readFileSync, copyFileSync, mkdirSync, readdirSync, statSync } from 'fs';
+import { dirname, join } from 'path';
 import dts from 'vite-plugin-dts';
 
 // Package type detection - determines build configuration
@@ -31,6 +32,7 @@ const commonTestAliases = {
   '@vytches/ddd-messaging': resolve(__dirname, '../messaging/src/index.ts'),
   '@vytches/ddd-resilience': resolve(__dirname, '../resilience/src/index.ts'),
   '@vytches/ddd-event-store': resolve(__dirname, '../event-store/src/index.ts'),
+  '@vytches/ddd-event-scheduling': resolve(__dirname, '../event-scheduling/src/index.ts'),
   '@vytches/ddd-testing': resolve(__dirname, '../testing/src/index.ts'),
   '@vytches/ddd-enterprise': resolve(__dirname, '../enterprise/src/index.ts'),
 };
@@ -59,6 +61,7 @@ function getPackageDependencies(): Record<string, string> {
 
   // Higher-level packages (need core + specific dependencies)
   return {
+    '@vytches/ddd-core': resolve(__dirname, '../core/src/index.ts'),
     '@vytches/ddd-contracts': commonTestAliases['@vytches/ddd-contracts'],
     '@vytches/ddd-logging': commonTestAliases['@vytches/ddd-logging'],
     '@vytches/ddd-utils': commonTestAliases['@vytches/ddd-utils'],
@@ -67,13 +70,20 @@ function getPackageDependencies(): Record<string, string> {
 
 const buildAliases = getPackageDependencies();
 
-// Custom plugin to copy templates to dist (removed - templates system removed)
+// Custom plugin to copy templates to dist
 function copyTemplatesPlugin() {
   return {
     name: 'copy-templates',
     generateBundle() {
-      // Templates system removed as part of CLI bloat reduction
-      console.log('📦 CLI: Templates system removed - skipping template copy');
+      // Copy templates directory to dist
+      const templatesDir = resolve(__dirname, 'templates');
+      const distTemplatesDir = resolve(__dirname, 'dist', 'templates');
+
+      // Create dist/templates directory
+      mkdirSync(distTemplatesDir, { recursive: true });
+
+      // Recursively copy template files
+      copyDirectory(templatesDir, distTemplatesDir);
     },
   };
 }
@@ -125,23 +135,9 @@ export default defineConfig({
     },
     rollupOptions: {
       external: id => {
-        // For CLI, bundle everything except Node.js built-ins
-        return (
-          id.startsWith('node:') ||
-          [
-            'fs',
-            'path',
-            'url',
-            'os',
-            'child_process',
-            'crypto',
-            'util',
-            'stream',
-            'events',
-            'buffer',
-            'process',
-          ].includes(id)
-        );
+        // For publication, bundle all @vytches/ddd-* dependencies
+        // Only externalize real npm packages (not internal ones)
+        return !id.startsWith('@vytches/ddd-') && !id.includes('src/');
       },
     },
     sourcemap: false, // Disable source maps for production builds

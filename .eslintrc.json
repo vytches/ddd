@@ -85,9 +85,11 @@
                 "sourceTag": "scope:core",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
-                  "scope:contracts",
+                  "scope:domain-primitives",
                   "scope:value-objects",
-                  "scope:aggregates"
+                  "scope:aggregates",
+                  "scope:contracts",
+                  "scope:utils"
                 ]
               },
               {
@@ -129,7 +131,6 @@
                 "sourceTag": "scope:cqrs",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
-                  "scope:domain-primitives",
                   "scope:events",
                   "scope:validation",
                   "scope:utils",
@@ -169,7 +170,6 @@
                 "sourceTag": "scope:projections",
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
-                  "scope:domain-primitives",
                   "scope:events",
                   "scope:contracts",
                   "scope:utils",
@@ -217,8 +217,6 @@
                 "onlyDependOnLibsWithTags": [
                   "scope:core",
                   "scope:domain-primitives",
-                  "scope:aggregates",
-                  "scope:value-objects",
                   "scope:utils",
                   "scope:contracts",
                   "scope:cli",
@@ -235,7 +233,6 @@
                   "scope:contracts",
                   "scope:core",
                   "scope:domain-primitives",
-                  "scope:aggregates",
                   "scope:repositories",
                   "scope:events",
                   "scope:validation",

@@ -9,9 +9,9 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { AggregateRoot } from '@vytches/ddd-aggregates';
 import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
 import { EntityId } from '@vytches/ddd-contracts';
+import { AggregateRoot } from '@vytches/ddd-core';
 import { UnifiedEventBus } from '@vytches/ddd-events';
 import type { IRepository, IUnitOfWork } from '@vytches/ddd-repositories';
 import { LibUtils, safeRun } from '@vytches/ddd-utils';

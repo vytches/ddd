@@ -177,7 +177,11 @@ export type {
   IQueryHandler,
 } from '@vytches/ddd-cqrs';
 
+export * from '@vytches/ddd-event-store';
 export * from '@vytches/ddd-projections';
+// Process Managers exports
+// Everything from process-managers is re-exported, including core module with ProcessSnapshot class
+export * from '@vytches/ddd-process-managers';
 
 // ===== INTEGRATION LAYER =====
 export * from '@vytches/ddd-acl';
@@ -206,6 +210,7 @@ export type {
   ServiceRegistrationOptions,
   ServiceToken,
 } from '@vytches/ddd-di';
+export * from '@vytches/ddd-event-scheduling';
 export * from '@vytches/ddd-logging';
 export * from '@vytches/ddd-resilience';
 
@@ -217,8 +222,7 @@ export { LibUtils, Result, safeRun } from '@vytches/ddd-utils';
 // Users should use production utilities from @vytches/ddd-utils
 
 // ===== META LAYER =====
-// Core package is now documentation-only meta-package
-// All exports are handled by individual packages above
+export * from '@vytches/ddd-core';
 
 // ===== NAMING CONFLICT RESOLUTION DOCUMENTATION =====
 /**

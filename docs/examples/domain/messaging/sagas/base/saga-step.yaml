@@ -1,0 +1,413 @@
+# Saga Step - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'saga-step'
+title: 'SagaStep - Abstract Step Implementation'
+description: 'Abstract base class for implementing saga steps with validation and execution logic'
+business-context: 'Foundation for individual saga operations with compensation support'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  SagaStep:
+    class-doc:
+      description: 'Abstract base class for saga steps with validation and timeout support'
+      business-context: 'Provides structured approach to implementing compensatable business operations'
+
+      formats:
+        jsdoc:
+          description: 'Abstract saga step with validation and compensation'
+        cli:
+          description: |
+            ## SagaStep
+
+            Abstract step foundation providing:
+            - Event-driven execution
+            - Pre-execution validation
+            - Timeout handling
+            - Compensation support
+            - Retry configuration
+            - Business operation structure
+
+    methods:
+      constructor:
+        description: 'Creates saga step with configuration and event mappings'
+        business-context: 'Initializes step with business operation parameters'
+
+        parameters:
+          - name: 'name'
+            type: 'string'
+            description: 'Unique name for the step'
+
+          - name: 'displayName'
+            type: 'string'
+            description: 'Display name for monitoring'
+
+          - name: 'triggerEvents'
+            type: 'string[]'
+            description: 'Events that can trigger this step'
+
+          - name: 'completionEvents'
+            type: 'string[]'
+            description: 'Events that can complete this step'
+            default: '[]'
+
+          - name: 'options'
+            type: 'SagaStepOptions'
+            description: 'Step configuration options'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'step-creation'
+            code: |
+              export class ProcessPaymentStep extends SagaStep {
+                constructor() {
+                  super(
+                    'ProcessPayment',
+                    'Process Order Payment',
+                    ['OrderCreated', 'PaymentRetryRequested'],
+                    ['PaymentProcessed', 'PaymentFailed'],
+                    {
+                      compensatable: true,
+                      timeout: 30000,
+                      maxRetries: 3,
+                      description: 'Processes payment for order'
+                    }
+                  );
+                }
+              }
+
+      execute:
+        description: 'Executes the step logic - must be implemented by concrete steps'
+        business-context: 'Core business operation implementation for the step'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Triggering domain event'
+
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context with correlation data'
+
+        returns:
+          type: 'Promise<ISagaActionResult>'
+          description: 'Result of step execution'
+
+        custom-tags:
+          abstract: 'true'
+
+        examples:
+          - id: 'step-execution'
+            code: |
+              async execute(
+                event: IExtendedDomainEvent,
+                state: ISagaState,
+                context: ISagaExecutionContext
+              ): Promise<ISagaActionResult> {
+                try {
+                  const orderData = event.payload as OrderCreatedPayload;
+                  
+                  // Validate business rules
+                  if (!this.validatePaymentData(orderData)) {
+                    return {
+                      success: false,
+                      error: {
+                        message: 'Invalid payment data',
+                        code: 'PAYMENT_VALIDATION_FAILED'
+                      }
+                    };
+                  }
+                  
+                  // Execute business operation
+                  const paymentResult = await paymentService.processPayment({
+                    orderId: orderData.orderId,
+                    amount: orderData.totalAmount,
+                    customerId: orderData.customerId
+                  });
+                  
+                  return {
+                    success: true,
+                    events: [new PaymentProcessedEvent(paymentResult)],
+                    compensationData: {
+                      paymentId: paymentResult.paymentId,
+                      amount: paymentResult.amount
+                    },
+                    nextStep: 'ReserveInventory'
+                  };
+                  
+                } catch (error) {
+                  return {
+                    success: false,
+                    error: {
+                      message: error.message,
+                      code: 'PAYMENT_PROCESSING_ERROR'
+                    },
+                    requiresCompensation: false
+                  };
+                }
+              }
+
+      compensate:
+        description: 'Executes compensation logic - override in concrete steps if compensatable'
+        business-context: 'Rollback operation for failed saga transactions'
+
+        parameters:
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state with compensation data'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<ISagaActionResult>'
+          description: 'Result of compensation execution'
+
+        custom-tags:
+          virtual: 'true'
+
+        examples:
+          - id: 'compensation-logic'
+            code: |
+              async compensate(
+                state: ISagaState,
+                context: ISagaExecutionContext
+              ): Promise<ISagaActionResult> {
+                const compensationData = state.compensationData['ProcessPayment'];
+                
+                if (!compensationData?.paymentId) {
+                  return {
+                    success: true // No compensation needed
+                  };
+                }
+                
+                try {
+                  await paymentService.refundPayment({
+                    paymentId: compensationData.paymentId as string,
+                    amount: compensationData.amount as number,
+                    reason: 'Saga compensation'
+                  });
+                  
+                  return {
+                    success: true,
+                    events: [new PaymentRefundedEvent({
+                      paymentId: compensationData.paymentId,
+                      amount: compensationData.amount
+                    })]
+                  };
+                  
+                } catch (error) {
+                  return {
+                    success: false,
+                    error: {
+                      message: `Refund failed: ${error.message}`,
+                      code: 'REFUND_ERROR'
+                    }
+                  };
+                }
+              }
+
+      canExecute:
+        description: 'Validates that step can be executed with current event and state'
+        business-context: 'Pre-execution validation and business rule checking'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Triggering event'
+
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state'
+
+        returns:
+          type: 'boolean'
+          description: 'True if step can execute'
+
+        examples:
+          - id: 'execution-validation'
+            code: |
+              canExecute(event: IExtendedDomainEvent, state: ISagaState): boolean {
+                // Check if event contains required data
+                if (!event.payload?.orderId) {
+                  return false;
+                }
+                
+                // Check saga state preconditions
+                if (state.status === SagaStatus.COMPENSATING) {
+                  return false;
+                }
+                
+                // Check step-specific conditions
+                const orderData = event.payload as OrderCreatedPayload;
+                if (orderData.totalAmount <= 0) {
+                  return false;
+                }
+                
+                return true;
+              }
+
+      validateInput:
+        description: 'Validates input data for step execution'
+        business-context: 'Business rule validation before operation execution'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event containing input data'
+
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state'
+
+        returns:
+          type: 'ValidationResult'
+          description: 'Validation result with errors if any'
+
+        custom-tags:
+          protected: 'true'
+
+        examples:
+          - id: 'input-validation'
+            code: |
+              protected validateInput(
+                event: IExtendedDomainEvent, 
+                state: ISagaState
+              ): ValidationResult {
+                const errors: string[] = [];
+                const orderData = event.payload as OrderCreatedPayload;
+                
+                if (!orderData.orderId) {
+                  errors.push('Order ID is required');
+                }
+                
+                if (!orderData.customerId) {
+                  errors.push('Customer ID is required');
+                }
+                
+                if (orderData.totalAmount <= 0) {
+                  errors.push('Total amount must be positive');
+                }
+                
+                return {
+                  isValid: errors.length === 0,
+                  errors
+                };
+              }
+
+      getStepData:
+        description: 'Extracts step-specific data from saga state'
+        business-context: 'Access step context data for processing'
+
+        parameters:
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state'
+
+        returns:
+          type: 'Record<string, unknown>'
+          description: 'Step-specific data'
+
+        custom-tags:
+          protected: 'true'
+
+        examples:
+          - id: 'get-step-data'
+            code: |
+              protected getStepData(state: ISagaState): Record<string, unknown> {
+                return state.stepData[this.name] || {};
+              }
+
+      setStepData:
+        description: 'Updates step-specific data in saga state'
+        business-context: 'Store step context for future operations'
+
+        parameters:
+          - name: 'state'
+            type: 'ISagaState'
+            description: 'Current saga state'
+
+          - name: 'data'
+            type: 'Record<string, unknown>'
+            description: 'Data to store'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        custom-tags:
+          protected: 'true'
+
+        examples:
+          - id: 'set-step-data'
+            code: |
+              protected setStepData(
+                state: ISagaState, 
+                data: Record<string, unknown>
+              ): void {
+                state.stepData[this.name] = {
+                  ...state.stepData[this.name],
+                  ...data
+                };
+              }
+
+# === TYPES ===
+types:
+  SagaStepOptions:
+    description: 'Configuration options for saga steps'
+    business-context: 'Customizes step behavior and capabilities'
+
+    properties:
+      - name: 'compensatable'
+        type: 'boolean'
+        description: 'Whether step can be compensated'
+        default: 'false'
+
+      - name: 'timeout'
+        type: 'number'
+        description: 'Step execution timeout in milliseconds'
+        required: false
+
+      - name: 'maxRetries'
+        type: 'number'
+        description: 'Maximum retry attempts'
+        required: false
+
+      - name: 'description'
+        type: 'string'
+        description: 'Step description for documentation'
+        required: false
+
+      - name: 'retryDelay'
+        type: 'number'
+        description: 'Delay between retries in milliseconds'
+        required: false
+
+      - name: 'idempotent'
+        type: 'boolean'
+        description: 'Whether step can be safely retried'
+        default: 'true'
+
+  ValidationResult:
+    description: 'Result of input validation'
+    business-context: 'Provides validation feedback for business rules'
+
+    properties:
+      - name: 'isValid'
+        type: 'boolean'
+        description: 'Whether validation passed'
+
+      - name: 'errors'
+        type: 'string[]'
+        description: 'List of validation error messages'

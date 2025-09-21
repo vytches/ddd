@@ -295,7 +295,7 @@ export class EnhancedQueryBus extends IQueryBus {
   /**
    * Enable or configure caching
    */
-  enableCache(enable = false, options?: CacheOptions): this {
+  enableCache(enable = true, options?: CacheOptions): this {
     this.cacheEnabled = enable;
 
     if (options?.ttl) {

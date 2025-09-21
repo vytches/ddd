@@ -1,0 +1,43 @@
+# Types - Event Scheduling Type Definitions
+
+# === FILE METADATA ===
+file-name: 'types/index'
+title: 'Event Scheduling Types'
+description: 'Core interfaces for event scheduling adapters and configurations'
+business-context: 'Type definitions for event scheduling system components'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === INTERFACES ===
+interfaces:
+  ISchedulerAdapter:
+    description: 'Interface for event scheduling adapters'
+    business-context: 'Defines the contract for implementing different scheduling backends'
+
+    properties:
+      - name: 'type'
+        type: 'string'
+        description: 'Type identifier for the scheduler adapter'
+        business-context: 'Used to identify the specific scheduler implementation'
+
+      - name: 'isRunning'
+        type: 'boolean'
+        description: 'Indicates whether the scheduler is currently running'
+        business-context: 'Runtime status check for scheduler lifecycle management'
+
+    examples:
+      - id: 'basic-usage'
+        description: 'Basic scheduler adapter implementation'
+        code: |
+          class CustomSchedulerAdapter implements ISchedulerAdapter {
+            readonly type = 'custom';
+            readonly isRunning = true;
+          }
+
+    custom-tags:
+      since: '1.0.0'
+      patterns: 'Adapter Pattern'
+      usage: 'Implement for custom scheduling backends'

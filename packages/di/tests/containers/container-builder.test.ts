@@ -1,10 +1,8 @@
+import { describe, it, expect, beforeEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
-import { beforeEach, describe, expect, it } from 'vitest';
-import { ContainerBuilder, ServiceLifetime, SimpleContainer } from '../../src';
+import { ContainerBuilder, ServiceLifetime } from '../../src';
 
 describe('ContainerBuilder', () => {
-  // Mock container helper for testing
-  const createMockContainer = () => new SimpleContainer();
   let builder: ContainerBuilder;
 
   beforeEach(() => {

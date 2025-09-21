@@ -1,0 +1,516 @@
+# Saga Orchestrator - Universal Enhanced Metadata System V2
+
+# === FILE METADATA ===
+file-name: 'saga-orchestrator'
+title: 'SagaOrchestrator - Enterprise Saga Management'
+description: 'Central orchestrator for managing saga lifecycles with enterprise features'
+business-context: 'Provides scalable saga coordination with monitoring, metrics, and fault tolerance'
+
+# === HIERARCHY ===
+hierarchy:
+  strategy: 'merge'
+  scope: 'file'
+
+# === CLASSES ===
+classes:
+  SagaOrchestrator:
+    class-doc:
+      description: 'Enterprise saga orchestrator with monitoring, metrics, and fault tolerance'
+      business-context: 'Central coordination engine for distributed business processes'
+
+      formats:
+        jsdoc:
+          description: 'Enterprise saga orchestrator with monitoring and fault tolerance'
+        cli:
+          description: |
+            ## SagaOrchestrator
+
+            Enterprise orchestrator providing:
+            - Saga lifecycle management
+            - Event routing and processing
+            - Instance limit enforcement
+            - Performance monitoring
+            - Automatic cleanup
+            - Dead letter queue handling
+            - Comprehensive statistics
+
+    methods:
+      constructor:
+        description: 'Creates orchestrator with repository and enterprise configuration'
+        business-context: 'Initializes orchestrator with production-ready defaults'
+
+        parameters:
+          - name: 'sagaRepository'
+            type: 'ISagaRepository'
+            description: 'Repository for saga persistence'
+
+          - name: 'config'
+            type: 'Partial<ISagaOrchestratorConfig>'
+            description: 'Orchestrator configuration options'
+            required: false
+            default: '{}'
+
+        examples:
+          - id: 'orchestrator-setup'
+            code: |
+              const repository = new InMemorySagaRepository();
+              const orchestrator = new SagaOrchestrator(repository, {
+                maxConcurrentExecutions: 200,
+                enableMetrics: true,
+                enableAuditing: true,
+                cleanup: {
+                  enableAutoCleanup: true,
+                  completedSagaRetentionDays: 30
+                }
+              });
+
+      startSaga:
+        description: 'Starts a new saga instance from triggering event'
+        business-context: 'Initiates long-running business process from domain events'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event that triggers saga start'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context with correlation data'
+
+        returns:
+          type: 'Promise<ISaga>'
+          description: 'Started saga instance'
+
+        throws:
+          - type: 'SagaDefinitionNotFoundError'
+            description: 'When no saga definition matches the event'
+          - type: 'SagaInstanceLimitExceededError'
+            description: 'When instance limit is reached'
+
+        examples:
+          - id: 'start-saga'
+            code: |
+              const orderCreatedEvent = new OrderCreatedEvent({
+                orderId: 'order-123',
+                customerId: 'customer-456',
+                totalAmount: 99.99
+              });
+
+              const context: ISagaExecutionContext = {
+                correlationId: 'req-789',
+                userId: 'user-123',
+                metadata: { source: 'order-service' },
+                timestamp: new Date()
+              };
+
+              const saga = await orchestrator.startSaga(orderCreatedEvent, context);
+              console.log('Started saga:', saga.sagaId);
+
+      processEvent:
+        description: 'Processes event for existing saga instances'
+        business-context: 'Routes events to appropriate saga instances for continued processing'
+
+        parameters:
+          - name: 'event'
+            type: 'IExtendedDomainEvent'
+            description: 'Event to process'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<ISagaProcessingResult[]>'
+          description: 'Results from all saga instances that processed the event'
+
+        examples:
+          - id: 'process-event'
+            code: |
+              const paymentProcessedEvent = new PaymentProcessedEvent({
+                orderId: 'order-123',
+                paymentId: 'payment-456',
+                amount: 99.99,
+                status: 'completed'
+              });
+
+              const results = await orchestrator.processEvent(
+                paymentProcessedEvent, 
+                context
+              );
+
+              results.forEach(result => {
+                console.log(`Saga ${result.sagaId}: ${result.success ? 'Success' : 'Failed'}`);
+              });
+
+      registerSagaDefinition:
+        description: 'Registers a saga definition with the orchestrator'
+        business-context: 'Configures business process templates for automatic saga creation'
+
+        parameters:
+          - name: 'definition'
+            type: 'ISagaDefinition'
+            description: 'Saga definition to register'
+
+        returns:
+          type: 'void'
+          description: 'No return value'
+
+        throws:
+          - type: 'SagaConfigurationError'
+            description: 'When definition validation fails'
+
+        examples:
+          - id: 'register-definition'
+            code: |
+              const orderProcessingDefinition: ISagaDefinition = {
+                sagaType: 'OrderProcessingSaga',
+                displayName: 'Order Processing Workflow',
+                description: 'Handles complete order processing with payment and shipping',
+                startEvents: ['OrderCreated'],
+                defaultTimeout: 3600000, // 1 hour
+                maxInstances: 1000,
+                steps: [
+                  new ProcessPaymentStep(),
+                  new ReserveInventoryStep(),
+                  new ShipOrderStep()
+                ],
+                // ... other properties
+              };
+
+              orchestrator.registerSagaDefinition(orderProcessingDefinition);
+
+      getSaga:
+        description: 'Retrieves saga instance by ID'
+        business-context: 'Provides access to saga for monitoring and debugging'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'Unique saga identifier'
+
+        returns:
+          type: 'Promise<ISaga | null>'
+          description: 'Saga instance if found, null otherwise'
+
+        examples:
+          - id: 'get-saga'
+            code: |
+              const saga = await orchestrator.getSaga('saga-123');
+              if (saga) {
+                console.log('Saga status:', saga.status);
+                console.log('Current step:', saga.state.currentStep);
+              }
+
+      compensateSaga:
+        description: 'Initiates compensation for a failed saga'
+        business-context: 'Triggers rollback operations for failed business processes'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to compensate'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context for compensation'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when compensation is initiated'
+
+        examples:
+          - id: 'compensate-saga'
+            code: |
+              // When a saga fails, initiate compensation
+              try {
+                await orchestrator.processEvent(failureEvent, context);
+              } catch (error) {
+                console.log('Saga failed, initiating compensation');
+                await orchestrator.compensateSaga(sagaId, context);
+              }
+
+      completeSaga:
+        description: 'Marks a saga as completed'
+        business-context: 'Finalizes successful business process execution'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to complete'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when saga is marked complete'
+
+        examples:
+          - id: 'complete-saga'
+            code: |
+              await orchestrator.completeSaga('saga-123', context);
+              console.log('Order processing saga completed successfully');
+
+      cancelSaga:
+        description: 'Cancels a running saga'
+        business-context: 'Allows manual cancellation of business processes'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to cancel'
+
+          - name: 'reason'
+            type: 'string'
+            description: 'Reason for cancellation'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when saga is cancelled'
+
+        examples:
+          - id: 'cancel-saga'
+            code: |
+              await orchestrator.cancelSaga(
+                'saga-123',
+                'Customer requested cancellation',
+                context
+              );
+
+      handleTimeout:
+        description: 'Handles timeout for a saga'
+        business-context: 'Manages sagas that exceed execution time limits'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of timed-out saga'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when timeout is handled'
+
+        examples:
+          - id: 'handle-timeout'
+            code: |
+              await orchestrator.handleTimeout('saga-123', context);
+
+      getSagaDefinitions:
+        description: 'Gets all registered saga definitions'
+        business-context: 'Provides visibility into available workflow types'
+
+        returns:
+          type: 'ISagaDefinition[]'
+          description: 'Array of all saga definitions'
+
+        examples:
+          - id: 'get-definitions'
+            code: |
+              const definitions = orchestrator.getSagaDefinitions();
+              definitions.forEach(def => {
+                console.log(`${def.sagaType}: ${def.description}`);
+              });
+
+      getSagaDefinition:
+        description: 'Gets a specific saga definition by type'
+        business-context: 'Retrieves workflow configuration for inspection'
+
+        parameters:
+          - name: 'sagaType'
+            type: 'string'
+            description: 'Type identifier of saga definition'
+
+        returns:
+          type: 'ISagaDefinition | null'
+          description: 'Saga definition if found, null otherwise'
+
+        examples:
+          - id: 'get-definition'
+            code: |
+              const definition = orchestrator.getSagaDefinition('OrderProcessingSaga');
+              if (definition) {
+                console.log('Start events:', definition.startEvents);
+                console.log('Max instances:', definition.maxInstances);
+              }
+
+      processTimedOutSagas:
+        description: 'Processes all sagas that have timed out'
+        business-context: 'Batch operation for handling stale workflows'
+
+        parameters:
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context for processing'
+
+        returns:
+          type: 'Promise<number>'
+          description: 'Number of timed-out sagas processed'
+
+        examples:
+          - id: 'process-timeouts'
+            code: |
+              const count = await orchestrator.processTimedOutSagas(context);
+              console.log(`Processed ${count} timed-out sagas`);
+
+      getStatistics:
+        description: 'Gets runtime statistics for monitoring'
+        business-context: 'Provides operational metrics for system health monitoring'
+
+        returns:
+          type: 'ISagaOrchestratorStatistics'
+          description: 'Current orchestrator statistics'
+
+        examples:
+          - id: 'get-statistics'
+            code: |
+              const stats = orchestrator.getStatistics();
+              console.log('Active sagas:', stats.activeSagas);
+              console.log('Completed sagas:', stats.completedSagas);
+              console.log('Failed sagas:', stats.failedSagas);
+              console.log('Average processing time:', stats.averageProcessingTime);
+              console.log('Error rate:', stats.errorRate);
+
+      cleanup:
+        description: 'Performs cleanup of old saga instances'
+        business-context: 'Maintenance operation to prevent database bloat'
+
+        parameters:
+          - name: 'options'
+            type: 'CleanupOptions'
+            description: 'Cleanup configuration'
+            required: false
+
+        returns:
+          type: 'Promise<CleanupResult>'
+          description: 'Results of cleanup operation'
+
+        examples:
+          - id: 'cleanup-sagas'
+            code: |
+              const result = await orchestrator.cleanup({
+                removeCompletedOlderThanDays: 30,
+                removeFailedOlderThanDays: 90,
+                dryRun: false
+              });
+
+              console.log(`Cleaned up ${result.removedCount} sagas`);
+
+      findSagasByCorrelation:
+        description: 'Finds saga instances by correlation data'
+        business-context: 'Enables saga discovery for event routing and monitoring'
+
+        parameters:
+          - name: 'correlationData'
+            type: 'Record<string, unknown>'
+            description: 'Correlation criteria'
+
+        returns:
+          type: 'Promise<ISaga[]>'
+          description: 'Matching saga instances'
+
+        examples:
+          - id: 'find-sagas'
+            code: |
+              const sagas = await orchestrator.findSagasByCorrelation({
+                orderId: 'order-123'
+              });
+
+              sagas.forEach(saga => {
+                console.log(`Found saga: ${saga.sagaId} (${saga.status})`);
+              });
+
+      pauseSaga:
+        description: 'Pauses saga execution temporarily'
+        business-context: 'Allows manual intervention in business processes'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to pause'
+
+          - name: 'reason'
+            type: 'string'
+            description: 'Reason for pausing'
+            required: false
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when saga is paused'
+
+        examples:
+          - id: 'pause-saga'
+            code: |
+              await orchestrator.pauseSaga(
+                'saga-123', 
+                'Manual review required'
+              );
+
+      resumeSaga:
+        description: 'Resumes paused saga execution'
+        business-context: 'Continues business process after manual intervention'
+
+        parameters:
+          - name: 'sagaId'
+            type: 'string'
+            description: 'ID of saga to resume'
+
+          - name: 'context'
+            type: 'ISagaExecutionContext'
+            description: 'Execution context for resumption'
+
+        returns:
+          type: 'Promise<void>'
+          description: 'Completes when saga is resumed'
+
+        examples:
+          - id: 'resume-saga'
+            code: |
+              await orchestrator.resumeSaga('saga-123', context);
+
+# === TYPES ===
+types:
+  CleanupOptions:
+    description: 'Options for saga cleanup operation'
+    business-context: 'Configures maintenance operations'
+
+    properties:
+      - name: 'removeCompletedOlderThanDays'
+        type: 'number'
+        description: 'Days to retain completed sagas'
+        default: '30'
+
+      - name: 'removeFailedOlderThanDays'
+        type: 'number'
+        description: 'Days to retain failed sagas'
+        default: '90'
+
+      - name: 'dryRun'
+        type: 'boolean'
+        description: 'Perform dry run without actual deletion'
+        default: 'false'
+
+  CleanupResult:
+    description: 'Result of cleanup operation'
+    business-context: 'Provides feedback on maintenance operations'
+
+    properties:
+      - name: 'removedCount'
+        type: 'number'
+        description: 'Number of sagas removed'
+
+      - name: 'scannedCount'
+        type: 'number'
+        description: 'Number of sagas examined'
+
+      - name: 'errors'
+        type: 'string[]'
+        description: 'Any errors encountered during cleanup'

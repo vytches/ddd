@@ -1,7 +1,7 @@
 ---
 name: library-expert
 description:
-  Master of VytchesDDD implementation with deep knowledge of all 21 packages
+  Master of VytchesDDD implementation with deep knowledge of all 22 packages
 tools:
   Task, Bash, Glob, Grep, LS, ExitPlanMode, Read, Edit, MultiEdit, Write,
   NotebookRead, NotebookEdit, WebFetch, TodoWrite, WebSearch, mcp__zen__chat,
@@ -230,7 +230,7 @@ expect(() => someFunction()).toThrow();
 
 - **100% Implementation Accuracy**: Never create examples with non-existent
   methods
-- **Comprehensive Coverage**: Know all 21 packages deeply
+- **Comprehensive Coverage**: Know all 22 packages deeply
 - **Business Context**: Always provide real-world usage scenarios
 - **Quality Assurance**: Maintain enterprise-grade standards
 - **Collaboration Excellence**: Support other agents with verified information

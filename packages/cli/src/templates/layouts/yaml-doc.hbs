@@ -1,0 +1,271 @@
+# {{packageConfig.displayName}}{{#if framework}} - {{framework}} Integration{{/if}}
+
+{{#if (yamlContent packageConfig.packageName "package" "description.cli" "cli")}}
+{{{yamlContent packageConfig.packageName "package" "description.cli" "cli"}}}
+{{else if (yamlContent packageConfig.packageName "package" "description" "cli")}}
+{{{yamlContent packageConfig.packageName "package" "description" "cli"}}}
+{{else}}
+## {{packageConfig.displayName}} Package
+
+{{{packageConfig.description}}}
+{{/if}}
+
+**Version**: {{packageConfig.version}}  
+**Package**: @vytches/ddd-{{packageConfig.packageName}}  
+{{#if packageConfig.domain}}**Domain**: {{packageConfig.domain}}{{/if}}  
+{{#if packageConfig.patterns}}**Patterns**: {{#each packageConfig.patterns}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}  
+
+## Business Context
+
+{{#if (yamlContent packageConfig.packageName "package" "business-context.cli" "cli")}}
+{{{yamlContent packageConfig.packageName "package" "business-context.cli" "cli"}}}
+{{else if (yamlContent packageConfig.packageName "package" "business-context" "cli")}}
+{{{yamlContent packageConfig.packageName "package" "business-context" "cli"}}}
+{{else}}
+{{{packageConfig.businessContext}}}
+{{/if}}
+
+## Core Components
+
+{{#each yamlComponents}}
+### {{this.name}}
+
+{{#if this.description}}
+{{{this.description}}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{{this.businessContext}}}
+{{/if}}
+
+{{#if this.examples}}
+{{#each this.examples}}
+{{#if this.id}}
+#### Example: {{this.id}}
+{{/if}}
+
+```typescript
+{{{this.code}}}
+```
+
+{{/each}}
+{{/if}}
+
+{{#if this.methods}}
+#### Methods
+
+{{#each this.methods}}
+##### {{@key}}
+
+{{#if this.description}}
+{{{this.description}}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{{this.businessContext}}}
+{{/if}}
+
+{{#if this.parameters}}
+**Parameters:**
+{{#each this.parameters}}
+- `{{this.name}}`: {{{this.type}}} - {{{this.description}}}{{#if this.optional}} (optional){{/if}}
+{{/each}}
+{{/if}}
+
+{{#if this.returns}}
+**Returns:** {{{this.returns.type}}} - {{{this.returns.description}}}
+{{/if}}
+
+{{#if this.examples}}
+{{#each this.examples}}
+{{#if this.id}}
+###### Example: {{this.id}}
+{{/if}}
+
+```typescript
+{{{this.code}}}
+```
+
+{{/each}}
+{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{#if this.interfaces}}
+#### Interfaces
+
+{{#each this.interfaces}}
+##### {{@key}}
+
+{{#if this.description}}
+{{{this.description}}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{{this.businessContext}}}
+{{/if}}
+
+{{#if this.genericParameters}}
+**Generic Parameters:**
+{{#each this.genericParameters}}
+- `{{this.name}}`: {{this.description}}{{#if this.default}} (default: {{this.default}}){{/if}}{{#if this.extends}} (extends: {{this.extends}}){{/if}}
+{{/each}}
+{{/if}}
+
+{{#if this.extends}}
+**Extends:** {{#each this.extends}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}
+{{/if}}
+
+{{#if this.properties}}
+**Properties:**
+{{#each this.properties}}
+- `{{this.name}}`: {{{this.type}}}{{#if this.required}} (required){{else}} (optional){{/if}}{{#if this.description}} - {{{this.description}}}{{/if}}
+{{/each}}
+{{/if}}
+
+{{#if this.methods}}
+**Methods:**
+{{#each this.methods}}
+###### {{@key}}
+
+{{#if this.description}}
+{{{this.description}}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{{this.businessContext}}}
+{{/if}}
+
+{{#if this.parameters}}
+**Parameters:**
+{{#each this.parameters}}
+- `{{this.name}}`: {{{this.type}}} - {{{this.description}}}{{#if this.optional}} (optional){{/if}}
+{{/each}}
+{{/if}}
+
+{{#if this.returns}}
+**Returns:** {{{this.returns.type}}} - {{{this.returns.description}}}
+{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{#if this.types}}
+#### Types
+
+{{#each this.types}}
+##### {{@key}}
+
+{{#if this.description}}
+{{{this.description}}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{{this.businessContext}}}
+{{/if}}
+
+{{#if this.typeDefinition}}
+**Type Definition:** `{{{this.typeDefinition}}}`
+{{/if}}
+
+{{#if this.genericParameters}}
+**Generic Parameters:**
+{{#each this.genericParameters}}
+- `{{this.name}}`: {{this.description}}{{#if this.default}} (default: {{this.default}}){{/if}}{{#if this.extends}} (extends: {{this.extends}}){{/if}}
+{{/each}}
+{{/if}}
+
+{{#if this.properties}}
+**Properties:**
+{{#each this.properties}}
+- `{{this.name}}`: {{{this.type}}}{{#if this.required}} (required){{else}} (optional){{/if}}{{#if this.description}} - {{{this.description}}}{{/if}}
+{{/each}}
+{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{#if this.enums}}
+#### Enums
+
+{{#each this.enums}}
+##### {{@key}}
+
+{{#if this.description}}
+{{{this.description}}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{{this.businessContext}}}
+{{/if}}
+
+**Values:**
+{{#each this.values}}
+- `{{this.name}}`{{#if this.value}} = {{this.value}}{{/if}}{{#if this.description}} - {{{this.description}}}{{/if}}
+{{/each}}
+
+{{/each}}
+{{/if}}
+
+{{#if this.constants}}
+#### Constants
+
+{{#each this.constants}}
+##### {{@key}}
+
+{{#if this.description}}
+{{{this.description}}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{{this.businessContext}}}
+{{/if}}
+
+**Type:** {{{this.type}}}
+
+{{#if this.properties}}
+**Properties:**
+{{#each this.properties}}
+- `{{this.name}}`{{#if this.value}} = {{this.value}}{{/if}}{{#if this.description}} - {{{this.description}}}{{/if}}
+{{/each}}
+{{/if}}
+
+{{/each}}
+{{/if}}
+
+{{/each}}
+
+{{#if framework}}
+## Framework Integration
+
+{{#if (eq framework "nestjs")}}
+### NestJS Service Implementation
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { {{#each yamlComponents}}{{this.className}}{{#unless @last}}, {{/unless}}{{/each}} } from '@vytches/ddd-{{packageConfig.packageName}}';
+import { VytchesDDD } from '@vytches/ddd-di';
+
+@Injectable()
+export class {{capitalize packageConfig.packageName}}Service {
+  private readonly aggregateRoot: AggregateRoot;
+
+  constructor() {
+    // Using @vytches/ddd-di for enterprise DI
+    this.aggregateRoot = VytchesDDD.resolve<AggregateRoot>('aggregateRoot');
+  }
+
+  // Service methods wrapping library functionality
+}
+```
+{{/if}}
+{{/if}}
+
+---
+
+*Generated with @vytches/ddd-cli on {{timestamp}}*  
+{{#if enhancedMetadata}}*Using Enhanced Metadata System V2*{{/if}}

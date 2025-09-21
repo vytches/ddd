@@ -123,63 +123,6 @@ npx @vytches/ddd-cli@1.0.0 generate
 
 ## Commands
 
-### 🔍 discover
-
-AI-powered pattern discovery and implementation guidance with live codebase
-validation.
-
-```bash
-# Interactive discovery with natural language
-vytches-ddd discover "how to create aggregates"
-vytches-ddd discover "nestjs integration with events"
-vytches-ddd discover "business rules validation"
-
-# With options for tailored guidance
-vytches-ddd discover "domain events" --complexity=beginner --format=quick
-vytches-ddd discover "cqrs patterns" --complexity=intermediate --format=guided --validate
-vytches-ddd discover "microservices architecture" --complexity=advanced --format=detailed
-
-# Short alias
-vytches-ddd d "event sourcing patterns"
-```
-
-**Options:**
-
-- `--complexity <level>` - Learning complexity level (beginner, intermediate,
-  advanced)
-- `--format <type>` - Response format:
-  - `quick` - Fast imports and package recommendations
-  - `guided` - Step-by-step implementation guide
-  - `detailed` - Complete learning path with concepts
-- `--validate` - Validate recommendations against current codebase
-- `--framework <framework>` - Target framework (nestjs, express, fastify)
-
-**AI-Powered Features:**
-
-1. **Intent Classification** - Understands query context (how-to, integration,
-   troubleshooting)
-2. **Pattern Recognition** - Identifies DDD patterns from natural language
-3. **Package Recommendations** - Suggests specific VytchesDDD packages
-4. **Live Validation** - Verifies recommendations against actual codebase
-5. **Smart Confidence Scoring** - Adjusts confidence based on validation results
-6. **Framework Awareness** - Tailors advice for specific frameworks
-
-**Examples:**
-
-```bash
-# Learning-focused queries
-vytches-ddd discover "how do I start with domain modeling?" --complexity=beginner --format=guided
-
-# Integration queries
-vytches-ddd discover "integrate aggregates with nestjs" --format=quick --framework=nestjs
-
-# Troubleshooting queries
-vytches-ddd discover "event publishing not working" --format=guided --validate
-
-# Pattern discovery
-vytches-ddd discover "what patterns for complex business rules?" --complexity=advanced --format=detailed
-```
-
 ### 🔧 generate (g)
 
 Generate individual DDD components with intelligent templates.
@@ -333,39 +276,6 @@ vytches-ddd suggest --context "I need to add payment processing"
 vytches-ddd suggest --after-generate aggregate
 ```
 
-### ⚡ performance
-
-Analyze and optimize VytchesDDD library performance in your application.
-
-```bash
-# Analyze startup performance
-vytches-ddd performance analyze
-
-# Profile DI container initialization
-vytches-ddd performance profile --focus=di
-
-# Generate performance optimization report
-vytches-ddd performance report --output=perf-report.md
-
-# Benchmark specific operations
-vytches-ddd performance benchmark --operation=handler-registration
-```
-
-**Options:**
-
-- `--focus <area>` - Focus area (di, handlers, events, startup, all)
-- `--output <file>` - Output report file
-- `--operation <op>` - Specific operation to benchmark
-- `--iterations <count>` - Number of benchmark iterations (default: 100)
-
-**Performance Areas:**
-
-1. **DI Container** - Handler discovery and registration optimization
-2. **Event Publishing** - Event bus and dispatcher performance
-3. **Handler Resolution** - Command/query handler lookup speed
-4. **Startup Time** - Application initialization bottlenecks
-5. **Memory Usage** - Container and handler memory consumption
-
 ### 🔄 workflow
 
 Create custom domain workflows for your team.
@@ -513,82 +423,6 @@ vytches-ddd domain \
 5. **Leverage Claude Code** - Use the generated CLAUDE.md for AI assistance
 
 ## Troubleshooting
-
-### Performance Issues
-
-1. **Slow DI Container Startup (CRITICAL at 200+ handlers)**
-
-   ```bash
-   # Analyze DI performance
-   vytches-ddd performance profile --focus=di
-
-   # 🚨 ENTERPRISE WARNING: Performance degrades exponentially
-   # • 47 handlers: ~230ms (noticeable)
-   # • 100 handlers: ~490ms (poor)
-   # • 200 handlers: ~980ms (unacceptable)
-   # • 300 handlers: ~1.47s (critical failure)
-
-   # Solutions by handler count:
-   vytches-ddd performance analyze --handlers=current
-   ```
-
-   **Optimization Strategies by Scale:**
-
-   ```typescript
-   // ❌ CRITICAL ISSUE: Reflection scanning (unviable at 200+ handlers)
-   await VytchesDDD.discoverAndRegisterHandlers(); // ~1.47s at 300 handlers
-
-   // ✅ 50-100 handlers: Selective registration (~490ms → ~150ms)
-   VytchesDDD.registerHandlers([
-     { id: 'createUser', handler: CreateUserHandler },
-     { id: 'getUser', handler: GetUserHandler },
-   ]);
-
-   // ✅ 100-200 handlers: Module-based registration (~980ms → ~200ms)
-   VytchesDDD.registerModule('UserManagement', USER_HANDLERS);
-   VytchesDDD.registerModule('OrderProcessing', ORDER_HANDLERS);
-
-   // ✅ 200+ handlers: Compile-time registry (1.47s → 83ms - 94% improvement)
-   VytchesDDD.configure({
-     handlers: GENERATED_HANDLER_REGISTRY, // Build-time generated
-     skipDiscovery: true, // Zero reflection overhead
-   });
-
-   // ✅ Enterprise: Context partitioning (scales infinitely)
-   VytchesDDD.configureContext('UserService', {
-     handlers: USER_CONTEXT_HANDLERS, // Only 45 handlers
-   });
-   ```
-
-2. **Event Publishing Bottlenecks**
-
-   ```bash
-   # Analyze event performance
-   vytches-ddd performance profile --focus=events
-
-   # Use batch publishing for multiple events
-   await eventBus.publishMany([event1, event2, event3]);
-
-   # Enable async processing for non-critical events
-   await eventBus.publish(event, { async: true });
-   ```
-
-3. **Handler Resolution Delays**
-
-   ```typescript
-   // ❌ Slow: Runtime resolution
-   const handler = VytchesDDD.resolve<CommandHandler>('CreateUserCommand');
-
-   // ✅ Fast: Pre-resolved handlers with caching
-   class MyService {
-     private readonly createUserHandler =
-       VytchesDDD.resolve<CreateUserHandler>('createUser');
-
-     async createUser(command: CreateUserCommand) {
-       return this.createUserHandler.handle(command);
-     }
-   }
-   ```
 
 ### Common Issues
 

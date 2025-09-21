@@ -4,6 +4,13 @@
     "action_on_exceed": "WARNING"
   },
   "meta_packages": {
+    "@vytches/ddd-core": {
+      "limit": "2KB",
+      "current": "1.4KB",
+      "critical": true,
+      "action": "BLOCK_MERGE",
+      "reason": "Meta-package must remain minimal for tree-shaking"
+    },
     "@vytches/ddd-enterprise": {
       "limit": "25KB",
       "current": "15KB",

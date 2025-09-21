@@ -1,4 +1,4 @@
-import { IDomainError } from '@vytches/ddd-domain-primitives';
+import { IDomainError } from '@vytches/ddd-core';
 import { Result } from '@vytches/ddd-utils';
 import type { BusinessRuleValidator } from '@vytches/ddd-validation';
 

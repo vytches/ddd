@@ -41,7 +41,6 @@ module.exports = {
         'deps',
         'release',
         'ci',
-        'di',
         'nestjs',
         'docs',
         'config',

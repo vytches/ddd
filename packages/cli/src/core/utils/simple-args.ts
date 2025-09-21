@@ -1,7 +1,7 @@
 export interface ParsedArgs {
   command?: string | undefined;
   args: string[];
-  options: Record<string, unknown>;
+  options: Record<string, any>;
 }
 
 export class SimpleArgsParser {
@@ -173,25 +173,7 @@ export class SimpleArgsParser {
     console.log('🎯 VytchesDDD CLI - Enterprise-Grade Domain Builder');
     console.log('');
 
-    if (!commandName) {
-      // Show main help with all commands
-      console.log('Available commands:');
-      console.log('  generate, g      Generate DDD components');
-      console.log('  domain           Build complete domains');
-      console.log('  examples         Manage and work with examples');
-      console.log('  discover, d      AI-powered pattern discovery');
-      console.log('  quick-start, qs  Generate AI-powered quick start guide');
-      console.log('');
-      console.log('Use --help with any command for more information');
-      console.log('');
-      console.log('Examples:');
-      console.log('  vytches-ddd generate --help');
-      console.log('  vytches-ddd discover "event-driven architecture"');
-      console.log('  vytches-ddd quick-start --framework nestjs');
-      return;
-    }
-
-    if (commandName === 'generate') {
+    if (!commandName || commandName === 'generate') {
       console.log('Usage: vytches-ddd generate [options]');
       console.log('');
       console.log('Options:');
@@ -212,7 +194,7 @@ export class SimpleArgsParser {
       console.log('  vytches-ddd generate --interactive');
     }
 
-    if (commandName === 'domain') {
+    if (!commandName || commandName === 'domain') {
       console.log('Usage: vytches-ddd domain [options]');
       console.log('');
       console.log('Options:');
@@ -220,7 +202,5 @@ export class SimpleArgsParser {
       console.log('  --guided                 Use guided mode');
       console.log('  --dry-run                Preview without creating files');
     }
-
-    // Note: discover command handles its own help, so we don't show help here
   }
 }

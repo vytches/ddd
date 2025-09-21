@@ -1,16 +1,14 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
-  ContainerConfigurationError,
-  ServiceLocator,
-  ServiceNotFoundError,
   SimpleContainer,
   VytchesDDD,
+  ServiceLocator,
+  ServiceNotFoundError,
+  ContainerConfigurationError,
 } from '../src';
 
 describe('ServiceLocator', () => {
-  // Mock container helper for testing
-  const createMockContainer = () => new SimpleContainer();
   let globalContainer: SimpleContainer;
   let contextContainer: SimpleContainer;
 

@@ -1,4 +1,4 @@
-import { BaseError } from '@vytches/ddd-domain-primitives';
+import { BaseError } from '@vytches/ddd-core';
 
 export class CqrsValidationError extends BaseError {
   constructor(

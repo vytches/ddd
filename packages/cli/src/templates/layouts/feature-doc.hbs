@@ -1,0 +1,111 @@
+# {{packageConfig.displayName}}{{#if framework}} - {{framework}} Integration{{/if}}
+
+{{#ifSection "hero"}}
+{{yamlContent packageConfig.packageName "package" "description" "cli"}}
+
+**Version**: {{packageConfig.version}}  
+**Package**: @vytches/ddd-{{packageConfig.packageName}}  
+{{#if packageConfig.domain}}**Domain**: {{packageConfig.domain}}{{/if}}  
+{{#if packageConfig.patterns}}**Patterns**: {{#each packageConfig.patterns}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}  
+{{#if packageConfig.tags.core}}**Tags**: {{#each packageConfig.tags.core}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}}
+{{/ifSection}}
+
+{{#ifSection "description"}}
+## What is {{packageConfig.displayName}}?
+
+{{yamlContent packageConfig.packageName "package" "business-context" "cli"}}
+{{/ifSection}}
+
+{{#ifSection "whenToUse"}}
+{{loadMarkdown packageConfig.packageName "shared/when-to-use.md"}}
+{{/ifSection}}
+
+{{#ifSection "whenNotToUse"}}
+{{loadMarkdown packageConfig.packageName "shared/when-not-to-use.md"}}
+{{/ifSection}}
+
+{{#ifSection "examples"}}
+## Implementation Examples
+
+{{#each examples}}
+### {{this.name}}
+
+{{#if this.description}}
+{{this.description}}
+{{/if}}
+
+{{#if this.businessContext}}
+**Business Context**: {{this.businessContext}}
+{{/if}}
+
+```typescript
+{{loadYamlMarkdown ../packageConfig.packageName this.file}}
+```
+
+{{/each}}
+
+{{#if relatedExamples}}
+### Related Examples
+
+{{#each relatedExamples}}
+- [{{this.name}}]({{this.path}}) - {{this.description}}
+{{/each}}
+{{/if}}
+{{/ifSection}}
+
+{{#ifSection "useCases"}}
+## Use Cases
+
+{{#if framework}}
+{{loadMarkdown packageConfig.packageName (concat "use-cases/" framework ".md")}}
+{{else}}
+{{loadMarkdown packageConfig.packageName "use-cases/default.md"}}
+{{/if}}
+{{/ifSection}}
+
+{{#ifSection "frameworkIntegration"}}
+{{#if framework}}
+## {{framework}} Integration
+
+{{#each complexityLevels}}
+### {{capitalize this}} Level Integration
+
+```typescript
+{{loadMarkdown ../packageConfig.packageName (concat "../frameworks/" ../framework "/" this ".md")}}
+```
+
+{{/each}}
+
+{{#if packageConfig.contentConfig.showImportStatements}}
+### Required Imports
+
+```typescript
+import { {{packageConfig.displayName}} } from '@vytches/ddd-{{packageConfig.packageName}}';
+{{#each packageConfig.dependencies}}
+import { ... } from '{{this}}';
+{{/each}}
+```
+{{/if}}
+{{/if}}
+{{/ifSection}}
+
+{{#ifSection "commonPitfalls"}}
+{{loadMarkdown packageConfig.packageName "shared/common-pitfalls.md"}}
+{{/ifSection}}
+
+{{#ifSection "troubleshooting"}}
+## Troubleshooting
+
+{{loadMarkdown packageConfig.packageName "shared/troubleshooting.md"}}
+{{/ifSection}}
+
+{{#ifSection "performance"}}
+## Performance Considerations
+
+{{loadMarkdown packageConfig.packageName "shared/performance.md"}}
+{{/ifSection}}
+
+---
+
+*Generated with @vytches/ddd-cli on {{timestamp}}*  
+{{#if llmOptimized}}*Optimized for LLM code generation*{{/if}}
