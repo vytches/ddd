@@ -1,5 +1,4 @@
-// Core CLI interfaces
-import type { WorkflowContext } from './workflows/types';
+// Core CLI interfaces - simplified for JSDoc v2 and Repomix integration
 
 export interface CLIConfig {
   debug: boolean;
@@ -102,35 +101,17 @@ export type ComponentType =
 
 // Workflow system
 
+// Simplified workflow types (legacy compatibility)
 export interface WorkflowStep {
   id: string;
   title: string;
   description?: string;
-  type: WorkflowStepType;
-  prompt?: PromptConfig;
-  action?: WorkflowAction;
-  next?: string | ((context: WorkflowContext) => string);
 }
 
-export type WorkflowStepType = 'prompt' | 'action' | 'decision' | 'completion';
-
-export interface PromptConfig {
-  type: 'input' | 'select' | 'multiselect' | 'confirm' | 'password';
-  message: string;
-  choices?: string[] | ChoiceOption[] | ((context: WorkflowContext) => string[] | ChoiceOption[]);
-  default?: unknown;
-  validate?: (input: unknown) => boolean | string;
+// WorkflowContext simplified
+export interface WorkflowContext {
+  [key: string]: unknown;
 }
-
-export interface ChoiceOption {
-  name: string;
-  value: unknown;
-  description?: string;
-}
-
-export type WorkflowAction = (context: WorkflowContext) => Promise<void>;
-
-// WorkflowContext moved to workflows/types.ts
 
 // Plugin system
 
@@ -234,7 +215,9 @@ export interface PromptSuggestion {
   reasoning?: string;
 }
 
-export interface ContextAwarePrompt extends PromptConfig {
+export interface ContextAwarePrompt {
+  type: string;
+  message: string;
   analyzer?: (context: any) => Promise<PromptSuggestion[]>;
   dynamicDefault?: (context: any) => Promise<unknown>;
   conditionalShow?: (context: any) => boolean;
@@ -243,7 +226,7 @@ export interface ContextAwarePrompt extends PromptConfig {
 export interface SmartPromptEngine {
   analyzeContext: (context: any) => Promise<ProjectAnalysis>;
   generateSuggestions: (prompt: ContextAwarePrompt, context: any) => Promise<PromptSuggestion[]>;
-  adaptPrompt: (prompt: ContextAwarePrompt, context: any) => Promise<PromptConfig>;
+  adaptPrompt: (prompt: ContextAwarePrompt, context: any) => Promise<ContextAwarePrompt>;
   displayAnalysis: (analysis: ProjectAnalysis) => void;
 }
 

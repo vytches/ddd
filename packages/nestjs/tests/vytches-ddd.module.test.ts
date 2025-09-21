@@ -1,8 +1,8 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { VytchesDDDModule } from '../src/vytches-ddd.module';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
+import { VytchesDDDModule } from '../src/vytches-ddd.module';
 
 // Mock the lazy-loaded modules to avoid static imports (module boundary violations)
 vi.mock('@vytches/ddd-cqrs', async () => {
@@ -30,10 +30,40 @@ vi.mock('@vytches/ddd-di', async () => ({
     register: vi.fn(),
     resolve: vi.fn(),
   })),
+  ServiceLifetime: {
+    Transient: 'transient',
+    Singleton: 'singleton',
+    Scoped: 'scoped',
+  },
   VytchesDDD: {
     configure: vi.fn(),
     resolve: vi.fn(),
   },
+  PerformanceOptimizer: vi.fn().mockImplementation(() => ({
+    optimizeConfiguration: vi.fn().mockResolvedValue({
+      handlersFound: 0,
+      startupTime: 50,
+      optimized: true,
+    }),
+    getMetrics: vi.fn().mockReturnValue({
+      handlersFound: 0,
+      startupTime: 50,
+      optimized: true,
+    }),
+    generateReport: vi.fn().mockReturnValue('Mock performance report'),
+  })),
+  PerformanceMonitor: vi.fn().mockImplementation(() => ({
+    startMeasurement: vi.fn(),
+    endMeasurement: vi.fn(),
+    updateHandlerCount: vi.fn(),
+    generateReport: vi.fn().mockReturnValue('Mock monitoring report'),
+    getMetrics: vi.fn().mockReturnValue({
+      handlersFound: 0,
+      startupTime: 50,
+      optimized: true,
+    }),
+    checkPerformanceTargets: vi.fn().mockReturnValue(true),
+  })),
 }));
 
 describe('VytchesDDDModule', () => {

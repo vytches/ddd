@@ -61,7 +61,6 @@
     "access": "restricted"
   },
   "dependencies": {
-    "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
     "@vytches/ddd-validation": "workspace:*"
   }

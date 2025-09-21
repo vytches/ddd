@@ -897,7 +897,7 @@ cat docs/examples/domain/aggregates/aggregate-builder.yaml
 - ✅ **Documentation System**: Fully operational YAML-based configuration
 - ✅ **Build Integration**: TypeScript AST processing with YAML metadata
   injection
-- ✅ **Package Coverage**: 5/22 packages fully documented with YAML files
+- ✅ **Package Coverage**: 5/21 packages fully documented with YAML files
 - ✅ **File Structure**: All YAML files properly organized in
   `docs/examples/domain/`
 
@@ -989,37 +989,45 @@ JSDOC_PERFORMANCE=true pnpm dev  # Performance monitoring and cache metrics
 documentation generation tasks.
 
 ```bash
-# Generate Package Documentation with Enhanced Metadata
-pnpm cli examples generate <package> --complexity <level> --enhanced-metadata
-pnpm cli examples generate domain-services --complexity intermediate --format cli
-pnpm cli examples generate policies --framework nestjs --llm-optimized --enhanced-metadata
+# Generate Package Documentation - Basic Usage
+pnpm cli examples generate <package> --complexity <level>
+pnpm cli examples generate policies --complexity intermediate
+pnpm cli examples generate domain-services --framework nestjs
 
-# Generate Multi-Package Bundles with Metadata Hierarchy
-pnpm cli examples bundle --packages <packages> --framework <framework> --enhanced-metadata
+# Hybrid Documentation System (Enhanced Metadata + Repomix Validation)
+pnpm cli examples generate <package> --hybrid --complexity <level>
+pnpm cli examples generate policies --validate-apis --complexity intermediate
+pnpm cli examples generate aggregates --repomix-sync --framework nestjs
+
+# Generate Multi-Package Bundles
+pnpm cli examples bundle --packages <packages> --framework <framework>
 pnpm cli examples bundle --packages policies,domain-services --framework nestjs --format cli
 
-# Find Examples by Tag (Enhanced Metadata Compatible)
-pnpm cli examples find-by-tag <tag> --complexity <level> --enhanced-metadata
+# Find Examples by Tag
+pnpm cli examples find-by-tag <tag> --complexity <level>
 pnpm cli examples find-by-tag "policies:core" --max-examples 3 --format jsdoc
 
-# Validate Examples with Enhanced Metadata
-pnpm cli examples validate --package <package> --fix --enhanced-metadata
-pnpm cli examples validate --package policies --fix --check-metadata
+# Validate Examples Against Live Codebase
+pnpm cli examples validate --package <package> --fix
+pnpm cli examples generate policies --validate-apis --complexity basic
 
-# Test Enhanced Metadata Workflow
-pnpm cli examples test-metadata --file <path-to-md> --format <jsdoc|cli>
-pnpm cli examples parse-metadata --file aggregate-root.md --debug
-
-# Available CLI Options
+# Available CLI Options - Core Functionality
 --complexity <level>     # basic, intermediate, advanced
 --framework <name>       # nestjs, express, fastify
+--format <type>         # jsdoc, cli - controls format-specific resolution
+--output <path>        # Output file path
+
+# Hybrid Documentation System Options
+--hybrid                # Use Enhanced Metadata + Repomix validation (recommended)
+--validate-apis         # Validate examples against live codebase APIs
+--repomix-sync         # Sync examples with current codebase via Repomix analysis
+
+# Advanced Options
 --llm-optimized         # Optimize for LLM consumption
 --enhanced-metadata     # Use enhanced metadata system (default: true)
---format <type>         # jsdoc, cli - controls format-specific resolution
 --max-examples <num>    # Limit number of examples
 --randomize            # Randomize example selection
 --seed <string>        # Seed for reproducible randomization
---output <path>        # Output file path
 --di-only              # Show only @vytches/ddd-di examples
 --fix                  # Auto-fix validation issues
 --check-metadata       # Validate enhanced metadata structure
@@ -3017,7 +3025,7 @@ pnpm playground
   moved to contracts package
   - Enterprise-grade architecture with contracts foundation layer
   - Circular dependency elimination between testing and value-objects packages
-  - TypeScript configuration standardization across all 22 packages
+  - TypeScript configuration standardization across all 21 packages
   - Two-layer EntityId pattern with enhanced validation
 - **🔥 COMPLETED**: **Saga Framework Implementation** - Enterprise-grade
   long-running business processes

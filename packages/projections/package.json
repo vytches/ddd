@@ -60,7 +60,6 @@
     "access": "restricted"
   },
   "dependencies": {
-    "@vytches/ddd-core": "workspace:*",
     "@vytches/ddd-events": "workspace:*"
   }
 }

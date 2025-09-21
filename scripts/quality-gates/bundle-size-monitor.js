@@ -25,7 +25,7 @@ const CONFIG = {
   // Size limits in KB (based on IMPROVE.md targets)
   sizeThresholds: {
     // Foundation packages (should be lightweight)
-    core: 5, // Meta-package: Target <5KB
+    // Note: core package was decomposed into meta-package architecture
     'domain-primitives': 50, // Foundation: <50KB
     'value-objects': 50,
     repositories: 50,

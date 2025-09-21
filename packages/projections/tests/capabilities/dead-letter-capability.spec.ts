@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { safeRun } from '@vytches/ddd-utils';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
-import { DomainErrorCode } from '@vytches/ddd-core';
+import { DomainErrorCode } from '@vytches/ddd-domain-primitives';
+import { safeRun } from '@vytches/ddd-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DeadLetterCapability } from '../../src';
 import { ProjectionError } from '../../src/projection-errors';
 import type {
   ICapabilityContext,
-  IDeadLetterStore,
   IDeadLetter,
+  IDeadLetterStore,
 } from '../../src/projection-interfaces';
 
 // Mock store implementation

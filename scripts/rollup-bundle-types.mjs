@@ -5,8 +5,8 @@
  * Uses rollup-plugin-dts to bundle all type definitions into single files
  */
 
-import dts from 'rollup-plugin-dts';
 import path from 'path';
+import dts from 'rollup-plugin-dts';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -31,25 +31,7 @@ const config = [
         }
       })
     ],
-  },
-  // Bundle @vytches/ddd-core 
-  {
-    input: path.join(rootDir, 'packages/core/src/index.ts'),
-    output: [{ 
-      file: path.join(rootDir, 'packages/core/dist/index.d.ts'), 
-      format: 'es' 
-    }],
-    plugins: [
-      dts({
-        respectExternal: false,
-        compilerOptions: {
-          paths: {
-            '@vytches/ddd-*': ['./packages/*/src/index.ts']
-          }
-        }
-      })
-    ],
-  },
+  }
 ];
 
 export default config;

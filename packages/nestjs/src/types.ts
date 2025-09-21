@@ -1,4 +1,7 @@
 import type { ModuleMetadata, Provider } from '@nestjs/common';
+import type { HandlerInfo } from '@vytches/ddd-di';
+
+export type { HandlerInfo };
 
 /**
  * Configuration options for VytchesDDD module
@@ -24,19 +27,200 @@ export interface VytchesDDDModuleOptions {
   providers?: Provider[];
 
   /**
-   * Additional imports for the module
+   * Additional module imports
    */
   imports?: ModuleMetadata['imports'];
 
   /**
-   * Additional exports beyond the default explorer service
+   * Additional module exports
    */
   exports?: ModuleMetadata['exports'];
+
+  /**
+   * Enable auto-discovery of command and query handlers
+   *
+   * @default true
+   * @example
+   * ```typescript
+   * {
+   *   autoDiscovery: {
+   *     enabled: true,
+   *   }
+   * }
+   * ```
+   */
+  autoDiscovery?: {
+    enabled?: boolean;
+  };
+
+  /**
+   * Context-specific configuration for DDD bounded contexts
+   *
+   * @example
+   * ```typescript
+   * {
+   *   context: {
+   *     name: 'Orders',
+   *     providers: [OrderService, OrderRepository]
+   *   }
+   * }
+   * ```
+   */
+  context?: VytchesContextOptions;
+
+  /**
+   * Global module configuration
+   *
+   * @default false
+   */
+  isGlobal?: boolean;
+
+  /**
+   * Bridge to NestJS DI container
+   * @deprecated Legacy option from VP-012, kept for test compatibility
+   */
+  bridgeToNestJS?: boolean;
+
+  /**
+   * Performance configuration
+   * @deprecated Legacy option from VP-012, kept for test compatibility
+   */
+  performance?: {
+    performanceTarget?: number;
+    [key: string]: any;
+  };
+
+  /**
+   * Handler configuration
+   * @deprecated Legacy option from VP-012, kept for test compatibility
+   */
+  handlers?: {
+    include?: string[];
+    exclude?: string[];
+    prefix?: string;
+    [key: string]: any;
+  };
+
+  /**
+   * Contexts configuration for multi-context scenarios
+   * @deprecated Legacy option from VP-012, kept for test compatibility
+   */
+  contexts?: string[] | Record<string, any>;
+
+  /**
+   * Monitoring configuration
+   * @deprecated Legacy option from VP-012, kept for test compatibility
+   */
+  monitoring?: {
+    enabled?: boolean;
+    [key: string]: any;
+  };
+
+  /**
+   * Global bridge to NestJS configuration (used in forContexts)
+   * @deprecated Legacy option from VP-012, kept for test compatibility
+   */
+  globalBridgeToNestJS?: boolean;
+
+  /**
+   * Enable contexts flag
+   * @deprecated Legacy option from VP-012, kept for test compatibility
+   */
+  enableContexts?: boolean;
 }
 
 /**
- * Extended module metadata with VytchesDDD-specific options
+ * Enterprise-specific VytchesDDD module options
+ * Extends base options with enterprise-grade requirements
  */
-export interface VytchesDDDDynamicModule extends ModuleMetadata {
-  module: typeof import('./vytches-ddd.module').VytchesDDDModule;
+export interface VytchesEnterpriseModuleOptions extends VytchesDDDModuleOptions {
+  /**
+   * Enterprise-grade auto-discovery configuration
+   */
+  autoDiscovery?: {
+    enabled?: boolean;
+    /**
+     * Enterprise performance targets
+     */
+    targets?: {
+      maxHandlers?: number;
+      discoveryTime?: number;
+    };
+  };
+}
+
+/**
+ * Context-specific configuration options
+ * Supports per-context handler registration and DI bridging
+ */
+export interface VytchesContextOptions {
+  /**
+   * Context name for bounded context isolation
+   */
+  name: string;
+
+  /**
+   * Context-specific providers
+   */
+  providers?: Provider[];
+
+  /**
+   * Context-specific module configuration
+   */
+  module?: {
+    /**
+     * Additional imports for this context
+     */
+    imports?: ModuleMetadata['imports'];
+
+    /**
+     * Context-specific exports
+     */
+    exports?: ModuleMetadata['exports'];
+  };
+}
+
+/**
+ * Handler registration configuration
+ */
+export interface VytchesHandlerOptions {
+  /**
+   * Handler class
+   */
+  handler: any;
+
+  /**
+   * Handler metadata
+   */
+  metadata?: any;
+
+  /**
+   * Context name for bounded context
+   */
+  context?: string;
+}
+
+/**
+ * Module metadata for VytchesDDD configuration
+ */
+export interface VytchesModuleMetadata {
+  /**
+   * Module providers
+   */
+  providers: Provider[];
+
+  /**
+   * Module imports
+   */
+  imports: ModuleMetadata['imports'];
+
+  /**
+   * Module exports
+   */
+  exports: ModuleMetadata['exports'];
+
+  /**
+   * Discovered handlers
+   */
+  handlers: HandlerInfo[];
 }
