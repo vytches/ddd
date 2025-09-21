@@ -3,6 +3,62 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 8.0.0 (2025-09-21)
+
+### Bug Fixes
+
+- **core:** resolve failing test suites for DI service locator and NestJS
+  performance benchmarks
+  ([28fb330](https://github.com/vytches/ddd/commit/28fb330b1380cab7ec72a1b4edfa554ab419adfd))
+- **nestjs:** implement configuration methods and reduce any type usage
+  ([#42](https://github.com/vytches/ddd/issues/42))
+  ([2ed336d](https://github.com/vytches/ddd/commit/2ed336d9c32b7f086fe951ab651b2c5cb9a8dcde))
+- **nestjs:** resolve all linter errors and finalize package for release
+  ([#46](https://github.com/vytches/ddd/issues/46))
+  ([625150a](https://github.com/vytches/ddd/commit/625150af1eef1e39c8a304ab3684d4702d366cc5))
+
+### Features
+
+- **di:** enterprise DI container with performance optimization system
+  ([179e36f](https://github.com/vytches/ddd/commit/179e36fc04cb2139c02060f33e770c61e70b3786))
+
+### BREAKING CHANGES
+
+- **nestjs:** None - all changes maintain backward compatibility
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.11.0
+* @vytches/ddd-aggregates@0.11.0
+* @vytches/ddd-cli@0.12.0
+* @vytches/ddd-contracts@0.13.0
+* @vytches/ddd-core@0.11.0
+* @vytches/ddd-cqrs@0.11.0
+* @vytches/ddd-di@0.11.0
+* @vytches/ddd-domain-primitives@0.11.0
+* @vytches/ddd-domain-services@0.11.0
+* @vytches/ddd@0.12.0
+* @vytches/ddd-event-scheduling@0.11.0
+* @vytches/ddd-event-store@0.11.0
+* @vytches/ddd-events@0.11.0
+* @vytches/ddd-logging@0.11.0
+* @vytches/ddd-messaging@0.11.0
+* @vytches/ddd-nestjs@2.0.0
+* @vytches/ddd-policies@0.12.0
+* @vytches/ddd-process-managers@0.9.0
+* @vytches/ddd-projections@0.11.0
+* @vytches/ddd-repositories@0.11.0
+* @vytches/ddd-resilience@0.11.0
+* @vytches/ddd-testing@0.11.0
+* @vytches/ddd-utils@0.11.0
+* @vytches/ddd-validation@0.12.0
+* @vytches/ddd-value-objects@0.11.0
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 7.0.0 (2025-09-10)
 
 ### Bug Fixes
