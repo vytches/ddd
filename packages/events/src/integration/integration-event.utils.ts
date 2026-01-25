@@ -4,12 +4,12 @@ import { LibUtils } from '@vytches/ddd-utils';
 import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration-event-interfaces';
 
 export function createIntegrationEvent<P = unknown>(
-  eventType: string,
+  eventName: string,
   payload: P,
   metadata?: Partial<IIntegrationEventMetadata>
 ): IIntegrationEvent<P> {
   return {
-    eventType,
+    eventName,
     payload,
     metadata: {
       eventId: LibUtils.getUUID(),
@@ -34,5 +34,5 @@ export function generateIdempotencyKey<P = unknown>(event: IIntegrationEvent<P>)
   }
 
   // If no key exists, generate one based on event ID and type
-  return `${event.metadata?.eventId || LibUtils.getUUID()}_${event.eventType}`;
+  return `${event.metadata?.eventId || LibUtils.getUUID()}_${event.eventName}`;
 }

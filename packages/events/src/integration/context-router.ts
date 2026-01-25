@@ -62,7 +62,7 @@ export class ContextRouter implements IContextRouter {
       if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
         this.routingRules.push({
           targetContexts: [key],
-          condition: event => (value as string[]).includes(event.eventType),
+          condition: event => (value as string[]).includes(event.eventName),
         });
       }
       // W przeciwnym razie traktujemy wartość jako condition
@@ -87,10 +87,10 @@ export class ContextRouter implements IContextRouter {
   }
 
   // Dodanie reguły dla konkretnego typu eventu
-  sendEventTypeTo(eventType: string, ...contexts: string[]): this {
+  sendEventTypeTo(eventName: string, ...contexts: string[]): this {
     this.routingRules.push({
       targetContexts: contexts,
-      condition: event => event.eventType === eventType,
+      condition: event => event.eventName === eventName,
     });
     return this;
   }
@@ -149,7 +149,7 @@ export class ContextRouter implements IContextRouter {
 
     // Jeśli to string, traktuj jako typ eventu
     if (typeof condition === 'string') {
-      return event => event.eventType === condition;
+      return event => event.eventName === condition;
     }
 
     // Domyślnie zawsze prawda

@@ -6,7 +6,7 @@ import type { IEventHandler } from '@vytches/ddd-contracts';
 
 // Test event and handler
 class TestEvent implements IDomainEvent {
-  eventType = 'TestEvent';
+  eventName = 'TestEvent';
   aggregateId = 'test-id';
   aggregateType = 'Test';
   eventVersion = 1;

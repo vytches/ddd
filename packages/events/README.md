@@ -87,13 +87,13 @@ interface IEvent {
 interface IDomainEvent extends IEvent {
   aggregateId: string;
   aggregateType: string;
-  eventType: string;
+  eventName: string;
   payload: any;
 }
 
 // Integration event for cross-context communication
 interface IIntegrationEvent extends IEvent {
-  eventType: string;
+  eventName: string;
   source: string;
   destination?: string;
   payload: any;
@@ -122,7 +122,7 @@ class UnifiedEventBus {
 
   // Context-aware subscription
   subscribe<T extends IEvent>(
-    eventType: string,
+    eventName: string,
     handler: IEventHandler<T>,
     options?: SubscriptionOptions
   ): void;
@@ -146,7 +146,7 @@ import {
   EventHandler,
 } from '@vytches/ddd-events';
 
-// Define domain event
+// Define domain event with default constructor.name
 class OrderCreatedEvent extends DomainEvent<{
   orderId: string;
   customerId: string;
@@ -159,7 +159,24 @@ class OrderCreatedEvent extends DomainEvent<{
     totalAmount: number;
     currency: string;
   }) {
-    super('OrderCreated', payload);
+    super(payload); // eventName defaults to 'OrderCreatedEvent'
+  }
+}
+
+// OR define with custom eventName
+class OrderCreatedEventCustom extends DomainEvent<{
+  orderId: string;
+  customerId: string;
+  totalAmount: number;
+  currency: string;
+}> {
+  constructor(payload: {
+    orderId: string;
+    customerId: string;
+    totalAmount: number;
+    currency: string;
+  }) {
+    super(payload, undefined, 'OrderCreated'); // Custom eventName
   }
 }
 
@@ -289,7 +306,7 @@ class UnifiedEventBus {
 
   // Event subscription
   subscribe<T extends IEvent>(
-    eventType: string,
+    eventName: string,
     handler: IEventHandler<T>,
     options?: SubscriptionOptions
   ): void;
@@ -332,26 +349,71 @@ interface EventBusConfig {
 
 ```typescript
 abstract class DomainEvent<T = any> implements IDomainEvent {
-  readonly id: string;
-  readonly occurredAt: Date;
-  readonly version: number;
-  readonly eventType: string;
-  readonly payload: T;
+  readonly eventId: string;
+  readonly occurredOn: Date;
+  readonly eventName: string;
+  readonly payload?: T;
+  readonly metadata?: IEventMetadata;
 
-  constructor(eventType: string, payload: T) {
-    this.id = EntityId.create().value;
-    this.occurredAt = new Date();
-    this.version = 1;
-    this.eventType = eventType;
+  /**
+   * @param payload - The event data
+   * @param metadata - Optional metadata for the event
+   * @param eventName - Optional custom event type (defaults to constructor.name)
+   */
+  constructor(payload?: T, metadata?: IEventMetadata, eventName?: string) {
+    this.eventId = DomainEvent.generateId();
+    this.occurredOn = new Date();
+    this.eventName = eventName ?? this.constructor.name;
     this.payload = payload;
+    this.metadata = {
+      timestamp: this.occurredOn,
+      ...(metadata || {}),
+    };
   }
 }
+```
+
+**Event Type Strategies:**
+
+```typescript
+// Strategy 1: Default constructor.name (recommended for most cases)
+class UserRegisteredEvent extends DomainEvent<UserData> {
+  constructor(payload: UserData) {
+    super(payload);
+    // eventName will be 'UserRegisteredEvent'
+  }
+}
+
+// Strategy 2: Custom eventName (useful for versioning, namespacing)
+class UserRegisteredEventV2 extends DomainEvent<UserData> {
+  constructor(payload: UserData) {
+    super(payload, undefined, 'user.registered.v2');
+    // eventName will be 'user.registered.v2'
+  }
+}
+
+// Strategy 3: Short names for brevity
+class OrderPlacedEvent extends DomainEvent<OrderData> {
+  constructor(payload: OrderData) {
+    super(payload, undefined, 'OrderPlaced');
+    // eventName will be 'OrderPlaced' instead of 'OrderPlacedEvent'
+  }
+}
+```
+
+**Handler Registration:**
+
+```typescript
+// Handlers can use either constructor or custom eventName
+eventBus.subscribe(UserRegisteredEvent, handler); // Using class
+eventBus.subscribe('user.registered.v2', handler); // Using custom string
+eventBus.subscribe('OrderPlaced', handler); // Using short name
 ```
 
 **Example Implementation:**
 
 ```typescript
-// Order domain events
+// Order domain events with custom eventName
 class OrderCreatedEvent extends DomainEvent<{
   orderId: string;
   customerId: string;
@@ -359,7 +421,7 @@ class OrderCreatedEvent extends DomainEvent<{
   currency: string;
 }> {
   constructor(payload: OrderCreatedData) {
-    super('OrderCreated', payload);
+    super(payload, undefined, 'OrderCreated');
   }
 }
 
@@ -369,17 +431,18 @@ class OrderConfirmedEvent extends DomainEvent<{
   estimatedDelivery: Date;
 }> {
   constructor(payload: OrderConfirmedData) {
-    super('OrderConfirmed', payload);
+    super(payload, undefined, 'OrderConfirmed');
   }
 }
 
+// Or use default constructor.name
 class OrderCancelledEvent extends DomainEvent<{
   orderId: string;
   reason: string;
   cancelledAt: Date;
 }> {
   constructor(payload: OrderCancelledData) {
-    super('OrderCancelled', payload);
+    super(payload); // eventName = 'OrderCancelledEvent'
   }
 }
 ```
@@ -393,13 +456,13 @@ class IntegrationEvent<T = any> implements IIntegrationEvent {
   readonly id: string;
   readonly occurredAt: Date;
   readonly version: number;
-  readonly eventType: string;
+  readonly eventName: string;
   readonly source: string;
   readonly destination?: string;
   readonly payload: T;
 
   constructor(
-    eventType: string,
+    eventName: string,
     source: string,
     payload: T,
     destination?: string
@@ -407,7 +470,7 @@ class IntegrationEvent<T = any> implements IIntegrationEvent {
     this.id = EntityId.create().value;
     this.occurredAt = new Date();
     this.version = 1;
-    this.eventType = eventType;
+    this.eventName = eventName;
     this.source = source;
     this.destination = destination;
     this.payload = payload;
@@ -534,7 +597,7 @@ class LoggingMiddleware implements EventMiddleware {
     context: EventContext,
     next: NextFunction
   ): Promise<void> {
-    console.log(`Processing event: ${event.eventType}`);
+    console.log(`Processing event: ${event.eventName}`);
 
     const startTime = Date.now();
     await next();
@@ -855,7 +918,7 @@ describe('OrderCreatedHandler', () => {
     // Assert
     expect(testHarness.publishedEvents).toEqual([
       expect.objectContaining({
-        eventType: 'OrderCreated',
+        eventName: 'OrderCreated',
         payload: expect.objectContaining({
           orderId: order.id.value,
         }),
@@ -898,7 +961,7 @@ describe('Order Processing Integration', () => {
 
     expect(testHarness.handledEvents).toContainEqual(
       expect.objectContaining({
-        eventType: 'OrderCreated',
+        eventName: 'OrderCreated',
       })
     );
   });

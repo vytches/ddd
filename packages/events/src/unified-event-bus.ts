@@ -102,10 +102,10 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    */
   private registerDiscoveredHandler(handlerInfo: DIHandlerInfo): void {
     try {
-      const eventType = Reflect.getMetadata('event:type', handlerInfo.handler);
+      const eventName = Reflect.getMetadata('event:type', handlerInfo.handler);
       const eventContext = Reflect.getMetadata('event:context', handlerInfo.handler);
 
-      if (!eventType) {
+      if (!eventName) {
         const logger = Logger.forContext('UnifiedEventBus');
         logger.warn('Handler without event type metadata', {
           handlerName: handlerInfo.handler.name,
@@ -145,11 +145,11 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       };
 
       // Register with context awareness
-      this.registerHandlerWithContext(eventType.name, handlerFactory, eventContext);
+      this.registerHandlerWithContext(eventName.name, handlerFactory, eventContext);
 
       const logger = Logger.forContext('UnifiedEventBus');
       logger.debug('Registered DI handler', {
-        eventType: eventType.name,
+        eventName: eventName.name,
         handlerName: handlerInfo.handler.name,
         context: eventContext,
       });
@@ -172,7 +172,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   override async publish(event: IDomainEvent | IIntegrationEvent | IAuditEvent): Promise<void> {
     const logger = Logger.forContext('UnifiedEventBus');
     logger.debug('Publishing event', {
-      eventType: event.eventType,
+      eventName: event.eventName,
       contextId: (event as EventWithMetadata).metadata?.contextId,
       hasPayload: !!(event as { payload?: unknown }).payload,
     });
@@ -216,27 +216,27 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   /**
    * Subscribe to events with flexible context filtering
    *
-   * @param eventType - Event constructor or string
+   * @param eventName - Event constructor or string
    * @param handlerOrContext - Handler function, context string, or context array
    * @param handler - Handler function (when second param is context)
    */
   override subscribe<T extends IDomainEvent | IIntegrationEvent | IAuditEvent>(
-    eventType: string | Constructor<T>,
+    eventName: string | Constructor<T>,
     handlerOrContext?: UnifiedEventHandler<T> | string | string[],
     handler?: UnifiedEventHandler<T>
   ): void {
-    const eventTypeName = typeof eventType === 'string' ? eventType : eventType.name;
+    const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
 
     // Determine handler and context from overloaded parameters
     let actualHandler: UnifiedEventHandler<T>;
     let contexts: string | string[] | undefined;
 
     if (typeof handlerOrContext === 'function') {
-      // subscribe(eventType, handler) - all contexts
+      // subscribe(eventName, handler) - all contexts
       actualHandler = handlerOrContext;
       contexts = undefined;
     } else {
-      // subscribe(eventType, context(s), handler)
+      // subscribe(eventName, context(s), handler)
       if (!handler) {
         throw new Error('Handler is required when context is specified');
       }
@@ -246,14 +246,14 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
 
     // Register handler with context filtering
     this.registerHandlerWithContext(
-      eventTypeName,
+      eventNameName,
       actualHandler as UnifiedEventHandler<BaseEvent>,
       contexts
     );
 
     const logger = Logger.forContext('UnifiedEventBus');
     logger.debug('Subscribed to event', {
-      eventType: eventTypeName,
+      eventName: eventNameName,
       contexts,
       handlerName: actualHandler.name || 'anonymous',
     });
@@ -264,19 +264,19 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    */
   subscribeToContext<T extends IDomainEvent | IIntegrationEvent | IAuditEvent>(
     contextId: string | string[] | undefined,
-    eventType: string | Constructor<T>,
+    eventName: string | Constructor<T>,
     handler: UnifiedEventHandler<T>
   ): void {
-    const eventTypeName = typeof eventType === 'string' ? eventType : eventType.name;
+    const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
     this.registerHandlerWithContext(
-      eventTypeName,
+      eventNameName,
       handler as UnifiedEventHandler<BaseEvent>,
       contextId
     );
 
     const logger = Logger.forContext('UnifiedEventBus');
     logger.debug('Subscribed with context filter', {
-      eventType: eventTypeName,
+      eventName: eventNameName,
       contexts: contextId,
       handlerName: handler.name || 'anonymous',
     });
@@ -286,17 +286,17 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * Register a class-based handler
    */
   override registerHandler<T extends IDomainEvent | IIntegrationEvent | IAuditEvent>(
-    eventType: string | Constructor<T>,
+    eventName: string | Constructor<T>,
     handler: { handle(event: T): Promise<void> | void }
   ): void {
-    const eventTypeName = typeof eventType === 'string' ? eventType : eventType.name;
+    const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
     const handlerFunction: UnifiedEventHandler<BaseEvent> = event => handler.handle(event as T);
 
-    this.registerHandlerWithContext(eventTypeName, handlerFunction, undefined);
+    this.registerHandlerWithContext(eventNameName, handlerFunction, undefined);
 
     const logger = Logger.forContext('UnifiedEventBus');
     logger.debug('Registered class-based handler', {
-      eventType: eventTypeName,
+      eventName: eventNameName,
       handlerClass: handler.constructor.name,
     });
   }
@@ -305,11 +305,11 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * Unsubscribe from events
    */
   override unsubscribe(
-    eventType: string | Constructor<BaseEvent>,
+    eventName: string | Constructor<BaseEvent>,
     handler: UnifiedEventHandler<BaseEvent> | { handle(event: BaseEvent): Promise<void> | void }
   ): void {
-    const eventTypeName = typeof eventType === 'string' ? eventType : eventType.name;
-    const handlers = this.handlerRegistry.get(eventTypeName);
+    const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
+    const handlers = this.handlerRegistry.get(eventNameName);
 
     if (!handlers) {
       return;
@@ -331,7 +331,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
         handlers.splice(index, 1);
         const logger = Logger.forContext('UnifiedEventBus');
         logger.debug('Unsubscribed class-based handler from event', {
-          eventType: eventTypeName,
+          eventName: eventNameName,
           remainingHandlers: handlers.length,
         });
       }
@@ -343,7 +343,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       handlers.splice(index, 1);
       const logger = Logger.forContext('UnifiedEventBus');
       logger.debug('Unsubscribed from event', {
-        eventType: eventTypeName,
+        eventName: eventNameName,
         remainingHandlers: handlers.length,
       });
     }
@@ -360,7 +360,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     const logger = Logger.forContext('UnifiedEventBus');
     logger.debug('Publishing multiple events', {
       eventCount: events.length,
-      eventTypes: events.map(e => e.eventType),
+      eventNames: events.map(e => e.eventName),
     });
 
     // Process all events concurrently for better performance
@@ -375,7 +375,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * Get handlers for a specific event with context filtering
    */
   protected getHandlersForEvent(event: BaseEvent): UnifiedEventHandler<BaseEvent>[] {
-    const handlers = this.handlerRegistry.get(event.eventType) || [];
+    const handlers = this.handlerRegistry.get(event.eventName) || [];
     const eventContext = (event as EventWithMetadata).metadata?.contextId;
 
     return handlers
@@ -387,13 +387,13 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * Register handler with context filtering
    */
   private registerHandlerWithContext(
-    eventType: string,
+    eventName: string,
     handler: UnifiedEventHandler<BaseEvent>,
     contexts?: string | string[]
   ): void {
-    const handlers = this.handlerRegistry.get(eventType) || [];
+    const handlers = this.handlerRegistry.get(eventName) || [];
     handlers.push({ handler, contexts });
-    this.handlerRegistry.set(eventType, handlers);
+    this.handlerRegistry.set(eventName, handlers);
   }
 
   /**
@@ -433,7 +433,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     if (handlers.length === 0) {
       const logger = Logger.forContext('UnifiedEventBus');
       logger.debug('No handlers found for event', {
-        eventType: event.eventType,
+        eventName: event.eventName,
         contextId: (event as EventWithMetadata).metadata?.contextId,
       });
       return;
@@ -441,7 +441,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
 
     const logger = Logger.forContext('UnifiedEventBus');
     logger.debug('Executing handlers', {
-      eventType: event.eventType,
+      eventName: event.eventName,
       handlerCount: handlers.length,
       contextId: (event as EventWithMetadata).metadata?.contextId,
     });
@@ -463,13 +463,13 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
 
         const logger = Logger.forContext('UnifiedEventBus');
         logger.error('Handler execution failed', errorObj, {
-          eventType: event.eventType,
+          eventName: event.eventName,
           handlerName: handler.name || 'anonymous',
         });
 
         // Call error handler if available
         if (this.options?.onError) {
-          this.options.onError(errorObj, event.eventType);
+          this.options.onError(errorObj, event.eventName);
         }
       }
     });

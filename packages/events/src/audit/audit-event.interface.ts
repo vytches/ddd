@@ -120,8 +120,8 @@ export interface IAuditEventMetadata {
  * @public
  */
 export interface IAuditEvent<P = unknown> {
-  /** Typ eventu */
-  eventType: string;
+  /** Nazwa eventu */
+  eventName: string;
 
   /** Dane eventu */
   payload?: P;

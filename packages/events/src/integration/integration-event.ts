@@ -15,9 +15,9 @@ export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent
   public readonly timestamp: Date;
 
   /**
-   * Type of the event, defaults to the class name
+   * Name of the event, defaults to the class name
    */
-  public readonly eventType: string;
+  public readonly eventName: string;
 
   /**
    * Payload of the event
@@ -38,7 +38,7 @@ export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent
   constructor(payload?: T, metadata?: IIntegrationEventMetadata) {
     this.eventId = IntegrationEvent.generateId();
     this.timestamp = new Date();
-    this.eventType = this.constructor.name;
+    this.eventName = this.constructor.name;
     this.payload = payload;
 
     this.metadata = {
@@ -81,7 +81,7 @@ export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent
    */
   public serialize(): string {
     return JSON.stringify({
-      eventType: this.eventType,
+      eventName: this.eventName,
       payload: this.payload,
       metadata: this.metadata,
     });

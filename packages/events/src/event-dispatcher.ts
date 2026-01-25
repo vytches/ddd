@@ -60,7 +60,7 @@ export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
       aggregateId,
       aggregateType: aggregate.constructor.name,
       eventCount: events.length,
-      eventTypes: events.map(e => e.eventType),
+      eventNames: events.map(e => e.eventName),
     });
 
     try {

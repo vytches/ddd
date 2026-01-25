@@ -160,57 +160,57 @@ export abstract class BaseEventBus<
    * Subscribe a function to handle events of a specific type
    */
   subscribe<T extends TEvent>(
-    eventType: string | (new (...args: unknown[]) => T),
+    eventName: string | (new (...args: unknown[]) => T),
     handler: (event: T) => Promise<void> | void
   ): void {
-    const eventName = this.getEventName(eventType);
+    const resolvedEventName = this.getEventName(eventName);
 
-    if (!this.handlers.has(eventName)) {
-      this.handlers.set(eventName, new Set());
+    if (!this.handlers.has(resolvedEventName)) {
+      this.handlers.set(resolvedEventName, new Set());
     }
 
-    this.handlers.get(eventName)!.add(handler as EventHandlerFn<TEvent>);
+    this.handlers.get(resolvedEventName)!.add(handler as EventHandlerFn<TEvent>);
 
-    this.logger.debug(`Subscribed function handler to ${eventName}`);
+    this.logger.debug(`Subscribed function handler to ${resolvedEventName}`);
   }
 
   /**
    * Register a class-based handler for events of a specific type
    */
   registerHandler<T extends TEvent>(
-    eventType: string | (new (...args: unknown[]) => T),
+    eventName: string | (new (...args: unknown[]) => T),
     handler: { handle(event: T): Promise<void> | void }
   ): void {
-    const eventName = this.getEventName(eventType);
+    const resolvedEventName = this.getEventName(eventName);
 
-    if (!this.handlers.has(eventName)) {
-      this.handlers.set(eventName, new Set());
+    if (!this.handlers.has(resolvedEventName)) {
+      this.handlers.set(resolvedEventName, new Set());
     }
 
-    this.handlers.get(eventName)!.add(handler as IEventHandler<TEvent>);
+    this.handlers.get(resolvedEventName)!.add(handler as IEventHandler<TEvent>);
 
-    this.logger.debug(`Registered class handler to ${eventName}`);
+    this.logger.debug(`Registered class handler to ${resolvedEventName}`);
   }
 
   /**
    * Unsubscribe a handler from events of a specific type
    */
   unsubscribe<T extends TEvent>(
-    eventType: string | (new (...args: unknown[]) => T),
+    eventName: string | (new (...args: unknown[]) => T),
     handler: ((event: T) => Promise<void> | void) | { handle(event: T): Promise<void> | void }
   ): void {
-    const eventName = this.getEventName(eventType);
-    const handlers = this.handlers.get(eventName);
+    const resolvedEventName = this.getEventName(eventName);
+    const handlers = this.handlers.get(resolvedEventName);
 
     if (handlers) {
       handlers.delete(handler as (event: TEvent) => Promise<void> | void);
 
       // Clean up empty sets
       if (handlers.size === 0) {
-        this.handlers.delete(eventName);
+        this.handlers.delete(resolvedEventName);
       }
 
-      this.logger.debug(`Unsubscribed handler from ${eventName}`);
+      this.logger.debug(`Unsubscribed handler from ${resolvedEventName}`);
     }
   }
 
@@ -226,11 +226,11 @@ export abstract class BaseEventBus<
   /**
    * Handles errors during event processing
    */
-  protected handleError(error: Error, eventType: string): void {
+  protected handleError(error: Error, eventName: string): void {
     if (this.options.onError) {
-      this.options.onError(error, eventType);
+      this.options.onError(error, eventName);
     } else {
-      this.logger.error(`Error processing ${eventType}`, error);
+      this.logger.error(`Error processing ${eventName}`, error);
       throw error; // Re-throw by default
     }
   }
@@ -239,29 +239,29 @@ export abstract class BaseEventBus<
    * Extracts the event name from a constructor or string
    */
   protected getEventName<T extends TEvent>(
-    eventType: string | (new (...args: unknown[]) => T)
+    eventName: string | (new (...args: unknown[]) => T)
   ): string {
-    if (typeof eventType === 'string') {
-      return eventType;
+    if (typeof eventName === 'string') {
+      return eventName;
     }
 
-    // Try to get eventType from prototype
-    const prototype = eventType.prototype;
-    if (prototype && 'eventType' in prototype) {
-      return prototype.eventType;
+    // Try to get eventName from prototype
+    const prototype = eventName.prototype;
+    if (prototype && 'eventName' in prototype) {
+      return prototype.eventName;
     }
 
     // Fall back to constructor name
-    return eventType.name;
+    return eventName.name;
   }
 
   /**
    * Extracts the event type name from an event object
    */
   protected getEventTypeName(event: TEvent): string {
-    // First check for eventType property
-    if ('eventType' in (event as { eventType?: string })) {
-      return (event as { eventType: string }).eventType;
+    // First check for eventName property
+    if ('eventName' in (event as { eventName?: string })) {
+      return (event as { eventName: string }).eventName;
     }
 
     // Fall back to constructor name
@@ -273,10 +273,10 @@ export abstract class BaseEventBus<
    * Useful for testing and debugging
    */
   getHandlers(
-    eventType: string | (new (...args: unknown[]) => TEvent)
+    eventName: string | (new (...args: unknown[]) => TEvent)
   ): Set<EventHandlerFn<TEvent> | IEventHandler<TEvent>> | undefined {
-    const eventName = this.getEventName(eventType);
-    return this.handlers.get(eventName);
+    const resolvedEventName = this.getEventName(eventName);
+    return this.handlers.get(resolvedEventName);
   }
 
   /**
@@ -320,13 +320,13 @@ export abstract class BaseEventBus<
    * Register a handler factory that uses DI resolution
    */
   registerHandlerFactory<T extends TEvent>(
-    eventType: string | (new (...args: unknown[]) => T),
+    eventName: string | (new (...args: unknown[]) => T),
     handlerClass: new (...args: unknown[]) => IEventHandler<T>
   ): void {
-    const eventName = this.getEventName(eventType);
+    const resolvedEventName = this.getEventName(eventName);
 
-    if (!this.handlers.has(eventName)) {
-      this.handlers.set(eventName, new Set());
+    if (!this.handlers.has(resolvedEventName)) {
+      this.handlers.set(resolvedEventName, new Set());
     }
 
     // Create a factory function that resolves the handler from DI
@@ -351,8 +351,8 @@ export abstract class BaseEventBus<
       },
     };
 
-    this.handlers.get(eventName)!.add(handlerFactory);
+    this.handlers.get(resolvedEventName)!.add(handlerFactory);
 
-    this.logger.debug(`Registered DI-enabled handler factory for ${eventName}`);
+    this.logger.debug(`Registered DI-enabled handler factory for ${resolvedEventName}`);
   }
 }

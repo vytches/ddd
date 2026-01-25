@@ -8,7 +8,7 @@ import { EventDiscoveryPlugin, EventHandler } from '../../src';
 
 // Test event for testing
 class TestEvent implements IDomainEvent {
-  public readonly eventType = 'TestEvent';
+  public readonly eventName = 'TestEvent';
 
   constructor(
     public readonly id: string,
@@ -43,7 +43,7 @@ describe('Event Handler DI Integration', () => {
 
       expect(diMetadata).toBeDefined();
       expect(diMetadata.type).toBe('event');
-      expect(diMetadata.eventType).toBe(TestEvent);
+      expect(diMetadata.eventName).toBe(TestEvent);
       expect(diMetadata.handlerType).toBe(TestEventHandlerWithDI);
       expect(diMetadata.options.lifetime).toBe('singleton');
       expect(diMetadata.options.context).toBe('TestContext');
@@ -64,7 +64,7 @@ describe('Event Handler DI Integration', () => {
 
       expect(diMetadata).toBeDefined();
       expect(diMetadata.type).toBe('event');
-      expect(diMetadata.eventType).toBe(TestEvent);
+      expect(diMetadata.eventName).toBe(TestEvent);
       expect(diMetadata.handlerType).toBe(SimpleEventHandler);
 
       // Should have default autoRegister behavior (true)
@@ -211,7 +211,7 @@ describe('Event Handler DI Integration', () => {
       expect(handlers).toHaveLength(1);
 
       const handler = handlers[0];
-      expect(handler?.metadata.eventType).toBe('TestEvent');
+      expect(handler?.metadata.eventName).toBe('TestEvent');
       expect(handler?.metadata.handlerType).toBe('CompleteMetadataHandler');
       expect(handler?.metadata.lifetime).toBe('scoped');
       expect(handler?.metadata.context).toBe('CompleteContext');

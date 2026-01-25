@@ -11,7 +11,7 @@ class TestDomainEvent extends DomainEvent {
 }
 
 class TestIntegrationEvent implements IIntegrationEvent {
-  readonly eventType = 'TestIntegrationEvent';
+  readonly eventName = 'TestIntegrationEvent';
   readonly metadata = {
     eventId: 'test-id',
     timestamp: new Date(),
