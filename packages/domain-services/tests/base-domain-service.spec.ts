@@ -89,7 +89,7 @@ class MockUnitOfWork implements IUnitOfWork {
 
 // Mock domain event
 interface TestEvent extends IDomainEvent {
-  readonly eventType: string;
+  readonly eventName: string;
   readonly data: string;
 }
 
@@ -116,9 +116,9 @@ describe('EventAwareDomainService', () => {
       super(serviceId);
     }
 
-    publishTestEvent(eventType: string, data: string): void {
+    publishTestEvent(eventName: string, data: string): void {
       const event: TestEvent = {
-        eventType,
+        eventName,
         data,
       };
 
@@ -149,7 +149,7 @@ describe('EventAwareDomainService', () => {
 
     // Assert
     expect(eventBus.publishedEvents).toHaveLength(1);
-    expect(eventBus?.publishedEvents?.[0]?.eventType).toBe('TestEvent');
+    expect(eventBus?.publishedEvents?.[0]?.eventName).toBe('TestEvent');
     expect((eventBus.publishedEvents[0] as TestEvent).data).toBe('test-data');
   });
 

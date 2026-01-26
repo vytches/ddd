@@ -74,7 +74,7 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     let totalTime = 0;
 
     this.auditLog.forEach((auditEvent, index) => {
-      eventsByType[auditEvent.eventType] = (eventsByType[auditEvent.eventType] || 0) + 1;
+      eventsByType[auditEvent.eventName] = (eventsByType[auditEvent.eventName] || 0) + 1;
 
       if (index > 0) {
         const prevEvent = this.auditLog[index - 1];
@@ -113,8 +113,8 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
    */
   recordEvent(event: IDomainEvent): void {
     const auditEvent: IAuditEvent = {
-      eventId: event.metadata?.eventId || `audit-${Date.now()}-${Math.random()}`,
-      eventType: event.eventType,
+      eventId: (event.metadata?.eventId as string) || `audit-${Date.now()}-${Math.random()}`,
+      eventName: event.eventName,
       aggregateId: this.aggregate.getId().toString(),
       aggregateType: this.aggregate.constructor.name,
       aggregateVersion: this.aggregate.getVersion(),
@@ -131,11 +131,11 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   }
 
   /**
-   * @param {string} eventType - Type of events to filter by
-   * @returns {IAuditEvent[]} Array of audit events matching the specified type
+   * @param {string} eventName - Name of events to filter by
+   * @returns {IAuditEvent[]} Array of audit events matching the specified name
    */
-  getEventsByType(eventType: string): IAuditEvent[] {
-    return this.auditLog.filter(event => event.eventType === eventType);
+  getEventsByName(eventName: string): IAuditEvent[] {
+    return this.auditLog.filter(event => event.eventName === eventName);
   }
 
   /**

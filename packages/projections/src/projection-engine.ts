@@ -51,7 +51,7 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
   }
 
   isInterestedIn(event: IDomainEvent): boolean {
-    return this.projection.handles(event.eventType);
+    return this.projection.handles(event.eventName);
   }
 
   async processEvent(event: IDomainEvent): Promise<void> {
@@ -95,7 +95,7 @@ export class ProjectionEngine<TReadModel> implements IProjectionEngine<TReadMode
       // Otherwise, wrap in ProjectionError
       const projectionError = ProjectionError.processingFailed(
         this.projection.name,
-        event.eventType,
+        event.eventName,
         error as Error
       );
 
@@ -296,7 +296,7 @@ export class EnhancedProjectionEngine<TReadModel> extends ProjectionEngine<TRead
             ? error
             : ProjectionError.processingFailed(
                 this.projection.name,
-                event.eventType,
+                event.eventName,
                 error as Error
               );
 
@@ -323,7 +323,7 @@ export class EnhancedProjectionEngine<TReadModel> extends ProjectionEngine<TRead
     const finalError =
       lastError instanceof ProjectionError
         ? lastError
-        : ProjectionError.processingFailed(this.projection.name, event.eventType, lastError);
+        : ProjectionError.processingFailed(this.projection.name, event.eventName, lastError);
 
     await this.executeHooks('onError', finalError, event);
     throw finalError;

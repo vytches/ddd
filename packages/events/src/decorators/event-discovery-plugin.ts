@@ -91,10 +91,10 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
         if (diMetadata && diMetadata.options.autoRegister !== false) {
           const handlerInfo: HandlerInfo = {
             type: 'event',
-            messageType: diMetadata.eventType,
+            messageType: diMetadata.eventName,
             handlerType: diMetadata.handlerType,
             metadata: {
-              eventType: diMetadata.eventType.name,
+              eventName: diMetadata.eventName.name,
               handlerType: diMetadata.handlerType.name,
               lifetime: diMetadata.options.lifetime || 'transient',
               context: diMetadata.options.context,

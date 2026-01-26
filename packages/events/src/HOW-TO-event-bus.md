@@ -55,17 +55,17 @@ abstract class IEventBus {
   abstract publish<T extends IDomainEvent>(event: T): Promise<void>;
 
   abstract subscribe<T extends IDomainEvent>(
-    eventType: new (...args: any[]) => T,
+    eventName: new (...args: any[]) => T,
     handler: EventHandlerFn<T>
   ): void;
 
   abstract registerHandler<T extends IDomainEvent>(
-    eventType: new (...args: any[]) => T,
+    eventName: new (...args: any[]) => T,
     handler: IEventHandler<T>
   ): void;
 
   abstract unsubscribe<T extends IDomainEvent>(
-    eventType: new (...args: any[]) => T,
+    eventName: new (...args: any[]) => T,
     handler: EventHandlerFn<T> | IEventHandler<T>
   ): void;
 }
@@ -180,11 +180,11 @@ export const EVENT_HANDLER_OPTIONS = Symbol('EVENT_HANDLER_OPTIONS');
 
 // Metadata structure
 interface EventHandlerMetadata {
-  eventType: new (...args: any[]) => IDomainEvent;
+  eventName: new (...args: any[]) => IDomainEvent;
 }
 
 // How decorator adds metadata
-Reflect.defineMetadata(EVENT_HANDLER_METADATA, { eventType }, target);
+Reflect.defineMetadata(EVENT_HANDLER_METADATA, { eventName }, target);
 Reflect.defineMetadata(EVENT_HANDLER_OPTIONS, options, target);
 
 // How to retrieve metadata
@@ -212,13 +212,13 @@ export class InMemoryEventBus implements IEventBus {
 
   // Extract event name from constructor
   private getEventName<T extends IDomainEvent>(
-    eventType: new (...args: any[]) => T
+    eventName: new (...args: any[]) => T
   ): string {
-    const prototype = eventType.prototype;
-    if (prototype && 'eventType' in prototype) {
-      return prototype.eventType;
+    const prototype = eventName.prototype;
+    if (prototype && 'eventName' in prototype) {
+      return prototype.eventName;
     }
-    return eventType.name;
+    return eventName.name;
   }
 
   // Dynamic middleware addition
@@ -234,7 +234,7 @@ export class InMemoryEventBus implements IEventBus {
   private buildPublishPipeline(): (event: IDomainEvent) => Promise<void> {
     // Base pipeline - actual event handling
     const basePipeline = async (event: IDomainEvent): Promise<void> => {
-      const eventName = (event as any).eventType || event.constructor.name;
+      const eventName = (event as any).eventName || event.constructor.name;
       const handlers = this.handlers.get(eventName);
 
       if (!handlers || handlers.size === 0) {
@@ -290,13 +290,13 @@ Fluent API for configuring event buses:
 const eventBus = EventBusBuilder.create()
   .withLogging()
   .withCorrelation()
-  .withErrorHandler((error, eventType) => {
-    console.error(`Error in ${eventType}:`, error);
+  .withErrorHandler((error, eventName) => {
+    console.error(`Error in ${eventName}:`, error);
   })
   .withCustomMiddleware(async (event, next) => {
-    console.log('Before:', event.eventType);
+    console.log('Before:', event.eventName);
     await next(event);
-    console.log('After:', event.eventType);
+    console.log('After:', event.eventName);
   })
   .build();
 ```
@@ -389,7 +389,7 @@ const performanceMiddleware: EventBusMiddleware = next => async event => {
   const start = performance.now();
   await next(event);
   const duration = performance.now() - start;
-  metrics.recordEventProcessingTime(event.eventType, duration);
+  metrics.recordEventProcessingTime(event.eventName, duration);
 };
 
 // Retry middleware
@@ -423,7 +423,7 @@ const eventBus = EventBusBuilder.create()
 // Debug middleware for tracing event flow
 const debugMiddleware: EventBusMiddleware = next => async event => {
   const eventId = (event as IDomainEvent).metadata?.eventId;
-  console.group(`Event: ${event.eventType} (${eventId})`);
+  console.group(`Event: ${event.eventName} (${eventId})`);
   console.log('Payload:', event.payload);
   console.log('Metadata:', (event as IDomainEvent).metadata);
   console.time('Processing');
@@ -446,15 +446,15 @@ const debugMiddleware: EventBusMiddleware = next => async event => {
 ```typescript
 // Extend InMemoryEventBus for debugging
 class DebuggableEventBus extends InMemoryEventBus {
-  getHandlerCount(eventType: new (...args: any[]) => IDomainEvent): number {
-    const eventName = this.getEventName(eventType);
+  getHandlerCount(eventName: new (...args: any[]) => IDomainEvent): number {
+    const eventName = this.getEventName(eventName);
     return this.handlers.get(eventName)?.size || 0;
   }
 
   listHandlers(): Map<string, number> {
     const result = new Map<string, number>();
-    this.handlers.forEach((handlers, eventType) => {
-      result.set(eventType, handlers.size);
+    this.handlers.forEach((handlers, eventName) => {
+      result.set(eventName, handlers.size);
     });
     return result;
   }
@@ -510,8 +510,8 @@ import { UnifiedEventBus } from '@vytches/ddd-events';
 const eventBus = new UnifiedEventBus({
   enableLogging: true,
   middlewares: [loggingMiddleware, validationMiddleware],
-  onError: (error, eventType) => {
-    console.error(`Error in ${eventType}:`, error);
+  onError: (error, eventName) => {
+    console.error(`Error in ${eventName}:`, error);
   },
 });
 ```
@@ -546,14 +546,14 @@ await eventBus.publish(new OrderCreatedEvent({ orderId: '123' }));
 
 // Handle integration events
 await eventBus.publish({
-  eventType: 'OrderCreatedIntegration',
+  eventName: 'OrderCreatedIntegration',
   payload: { orderId: '123', userId: '456' },
   metadata: { sourceContext: 'order', targetContext: 'user' },
 });
 
 // Handle audit events
 await eventBus.publish({
-  eventType: 'UserAccessEvent',
+  eventName: 'UserAccessEvent',
   payload: { userId: '456', action: 'LOGIN' },
   metadata: { actionType: 'ACCESS', status: 'SUCCESS' },
 });

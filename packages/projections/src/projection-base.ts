@@ -24,7 +24,7 @@ export abstract class BaseProjection<TReadModel> implements IProjection<TReadMod
     eventType: string,
     handler: (state: TReadModel, event: TEvent) => TReadModel
   ): TReadModel {
-    if (event.eventType === eventType) {
+    if (event.eventName === eventType) {
       return handler(readModel, event as TEvent);
     }
     return readModel;
@@ -39,7 +39,7 @@ export abstract class BaseProjection<TReadModel> implements IProjection<TReadMod
     eventTypes: string[],
     handler: (state: TReadModel, event: TEvent) => TReadModel
   ): TReadModel {
-    if (eventTypes.includes(event.eventType)) {
+    if (eventTypes.includes(event.eventName)) {
       return handler(readModel, event as TEvent);
     }
     return readModel;
@@ -54,7 +54,7 @@ export abstract class BaseProjection<TReadModel> implements IProjection<TReadMod
     condition: (event: TEvent) => boolean,
     handler: (state: TReadModel, event: TEvent) => TReadModel
   ): TReadModel {
-    if (this.handles(event.eventType) && condition(event as TEvent)) {
+    if (this.handles(event.eventName) && condition(event as TEvent)) {
       return handler(readModel, event as TEvent);
     }
     return readModel;

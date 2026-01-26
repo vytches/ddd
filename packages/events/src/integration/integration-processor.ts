@@ -14,7 +14,7 @@ export class IntegrationEventProcessor implements IEventProcessor {
     if (!eventBus) return;
 
     // Find transformer for this event type
-    const transformer = this.transformerRegistry.find(event.eventType);
+    const transformer = this.transformerRegistry.find(event.eventName);
     if (!transformer) return;
 
     // Transform to multiple integration events

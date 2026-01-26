@@ -66,7 +66,7 @@ export interface DIHandlerMetadata {
   type: 'event';
 
   /** Event type constructor */
-  eventType: new (...args: any[]) => any;
+  eventName: new (...args: any[]) => any;
 
   /** Handler constructor */
   handlerType: new (...args: any[]) => any;

@@ -179,7 +179,7 @@ class OrderCreatedEvent extends DomainEvent<{
   currency: string;
 }> {
   constructor(payload: OrderCreatedData) {
-    super('OrderCreated', payload);
+    super(payload, undefined, 'OrderCreated');
   }
 }
 
@@ -190,7 +190,7 @@ class OrderItemAddedEvent extends DomainEvent<{
   price: number;
 }> {
   constructor(payload: OrderItemAddedData) {
-    super('OrderItemAdded', payload);
+    super(payload, undefined, 'OrderItemAdded');
   }
 }
 

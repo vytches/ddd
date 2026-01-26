@@ -46,7 +46,7 @@ class OrderPlacedEvent extends DomainEvent<{
 
 ```typescript
 interface IDomainEvent<P = any> {
-  eventType: string; // What happened
+  eventName: string; // What happened
   payload?: P; // Event data
 }
 ```
@@ -84,7 +84,7 @@ Base implementation for typed domain events:
 abstract class DomainEvent<T = any> implements IDomainEvent<T> {
   readonly eventId: string; // Auto-generated UUID
   readonly occurredOn: Date; // Auto-set timestamp
-  readonly eventType: string; // Defaults to class name
+  readonly eventName: string; // Defaults to class name
   readonly payload?: T;
   readonly metadata?: IEventMetadata;
 
@@ -101,7 +101,7 @@ Factory function for creating events:
 
 ```typescript
 function createDomainEvent<P = any>(
-  eventType: string,
+  eventName: string,
   payload: P,
   metadata?: Partial<IEventMetadata>
 ): IDomainEvent<P>;

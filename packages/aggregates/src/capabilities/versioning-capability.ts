@@ -54,8 +54,8 @@ export class VersioningCapability
     let processedEvent = event;
 
     // Apply upcasters in sequence if needed
-    if (eventVersion < currentVersion && this.upcasters.has(event.eventType)) {
-      const eventUpcasters = this.upcasters.get(event.eventType)!;
+    if (eventVersion < currentVersion && this.upcasters.has(event.eventName)) {
+      const eventUpcasters = this.upcasters.get(event.eventName)!;
 
       for (let version = eventVersion; version < currentVersion; version++) {
         const upcaster = eventUpcasters.get(version);
@@ -74,7 +74,7 @@ export class VersioningCapability
     }
 
     // Call the appropriate handler
-    const handler = handlers.get(processedEvent.eventType);
+    const handler = handlers.get(processedEvent.eventName);
     if (handler) {
       handler(processedEvent.payload, processedEvent.metadata);
     }

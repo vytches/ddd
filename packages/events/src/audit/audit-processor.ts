@@ -66,7 +66,7 @@ export class AuditEventProcessor implements IEventProcessor {
     if (this.options.auditAll) return true;
 
     if (this.options.auditEventTypes && this.options.auditEventTypes.length > 0) {
-      return this.options.auditEventTypes.includes(event.eventType);
+      return this.options.auditEventTypes.includes(event.eventName);
     }
 
     return false;
@@ -78,9 +78,9 @@ export class AuditEventProcessor implements IEventProcessor {
   private createAuditEvent(domainEvent: IDomainEvent): IAuditEvent {
     // Determine action type from event name
     let actionType = AuditActionType.OTHER;
-    if (domainEvent.eventType.includes('Created')) actionType = AuditActionType.CREATE;
-    if (domainEvent.eventType.includes('Updated')) actionType = AuditActionType.UPDATE;
-    if (domainEvent.eventType.includes('Deleted')) actionType = AuditActionType.DELETE;
+    if (domainEvent.eventName.includes('Created')) actionType = AuditActionType.CREATE;
+    if (domainEvent.eventName.includes('Updated')) actionType = AuditActionType.UPDATE;
+    if (domainEvent.eventName.includes('Deleted')) actionType = AuditActionType.DELETE;
 
     const metadata: IAuditEventMetadata = {
       previousState: domainEvent?.metadata?._previousState,
@@ -98,7 +98,7 @@ export class AuditEventProcessor implements IEventProcessor {
     }
 
     return {
-      eventType: `AUDIT_${domainEvent.eventType}`,
+      eventName: `AUDIT_${domainEvent.eventName}`,
       payload: domainEvent.payload,
       metadata,
     };
@@ -114,7 +114,7 @@ export class AuditEventProcessor implements IEventProcessor {
     data?: any
   ): Promise<void> {
     const auditEvent: IAuditEvent = {
-      eventType: `AUDIT_${action}`,
+      eventName: `AUDIT_${action}`,
       payload: data,
       metadata: {
         timestamp: new Date(),

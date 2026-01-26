@@ -88,7 +88,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
             error instanceof Error ? error : new Error(String(error)),
             {
               ...context,
-              eventType: event.eventType,
+              eventType: event.eventName,
               eventId: (event as any).eventId || 'unknown',
             }
           );
@@ -161,7 +161,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
             error instanceof Error ? error : new Error(String(error)),
             {
               ...context,
-              eventType: event.eventType,
+              eventType: event.eventName,
               eventId: (event as any).eventId || 'unknown',
             }
           );

@@ -140,7 +140,7 @@ describe('OutboxService', () => {
   describe('saveDomainEvent', () => {
     it('should save domain event as outbox message', async () => {
       const domainEvent = {
-        eventType: 'OrderCreated',
+        eventName: 'OrderCreated',
         orderId: 'order-123',
         amount: 100,
         metadata: {

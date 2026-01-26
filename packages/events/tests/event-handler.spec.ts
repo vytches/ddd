@@ -8,12 +8,12 @@ import { EventHandler } from '../src/decorators/event-handler.decorator';
 
 // Przykładowe zdarzenia do testowania
 class TestEvent implements IDomainEvent {
-  eventType = 'TestEvent';
+  eventName = 'TestEvent';
   payload = {};
 }
 
 class AnotherTestEvent implements IDomainEvent {
-  eventType = 'AnotherTestEvent';
+  eventName = 'AnotherTestEvent';
   payload = {};
 }
 
@@ -36,7 +36,7 @@ describe('EventHandler Decorator', () => {
 
       // Assert
       expect(metadata).toBeDefined();
-      expect(metadata.eventType).toBe(TestEvent);
+      expect(metadata.eventName).toBe(TestEvent);
     });
 
     it('should apply options to a class', () => {
@@ -77,10 +77,10 @@ describe('EventHandler Decorator', () => {
       // Act
       const handler = new TestEventHandler();
       // @ts-expect-error Cannot be mocked as vitest mock is no type function
-      const eventType = handler['getEventType']();
+      const eventName = handler['getEventType']();
 
       // Assert
-      expect(eventType).toBe(TestEvent);
+      expect(eventName).toBe(TestEvent);
       // @ts-expect-error Cannot be mocked as vitest mock is no type function
       expect(typeof handler['getEventType']).toBe('function');
     });
@@ -130,8 +130,8 @@ describe('EventHandler Decorator', () => {
       const secondMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, SecondHandler);
 
       // Assert
-      expect(firstMetadata.eventType).toBe(TestEvent);
-      expect(secondMetadata.eventType).toBe(AnotherTestEvent);
+      expect(firstMetadata.eventName).toBe(TestEvent);
+      expect(secondMetadata.eventName).toBe(AnotherTestEvent);
     });
   });
 
@@ -153,7 +153,7 @@ describe('EventHandler Decorator', () => {
 
       // Assert
       expect(metadata).toBeDefined();
-      expect(metadata.eventType).toBe(TestEvent);
+      expect(metadata.eventName).toBe(TestEvent);
     });
 
     it('should apply options to a method', () => {
@@ -227,10 +227,10 @@ describe('EventHandler Decorator', () => {
       );
 
       // Assert
-      expect(firstMetadata.eventType).toBe(TestEvent);
+      expect(firstMetadata.eventName).toBe(TestEvent);
       expect(firstOptions.priority).toBe(10);
 
-      expect(secondMetadata.eventType).toBe(AnotherTestEvent);
+      expect(secondMetadata.eventName).toBe(AnotherTestEvent);
       expect(secondOptions.priority).toBe(5);
 
       expect(regularMetadata).toBeUndefined();
@@ -298,7 +298,7 @@ describe('EventHandler Decorator', () => {
       const derivedInstance = new DerivedHandler();
 
       // Assert
-      expect(baseMetadata.eventType).toBe(TestEvent);
+      expect(baseMetadata.eventName).toBe(TestEvent);
 
       // Verify that the helper method is inherited through prototype chain
       expect(baseInstance['getEventType']()).toBe(TestEvent);
@@ -382,7 +382,7 @@ describe('EventHandler Decorator', () => {
       const customMetadata = Reflect.getMetadata('custom:metadata', MultiDecoratorHandler);
 
       // Assert
-      expect(eventMetadata.eventType).toBe(TestEvent);
+      expect(eventMetadata.eventName).toBe(TestEvent);
       expect(customMetadata).toBe('test-value');
     });
   });

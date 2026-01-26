@@ -138,13 +138,13 @@ class TestAggregate implements IRepositoryAggregate {
   }
 
   // Metoda do dodawania testowych zdarzeń - dla backward compatibility
-  addTestEvent(eventType: string, payload: any): void {
-    this.addEvent(eventType, payload);
+  addTestEvent(eventName: string, payload: any): void {
+    this.addEvent(eventName, payload);
   }
 
-  private addEvent(eventType: string, payload: any): void {
+  private addEvent(eventName: string, payload: any): void {
     const event: IDomainEvent = {
-      eventType,
+      eventName,
       payload,
       metadata: {
         aggregateId: this._id.getValue(),
@@ -212,7 +212,7 @@ describe('IBaseRepository', () => {
 
       // Assert
       expect(persistenceHandler.handledEvents).toHaveLength(1);
-      expect(persistenceHandler?.handledEvents?.[0]?.eventType).toBe(eventNameChanged);
+      expect(persistenceHandler?.handledEvents?.[0]?.eventName).toBe(eventNameChanged);
       expect(eventDispatcher.dispatchedAggregates).toContain(aggregate);
     });
 
@@ -259,8 +259,8 @@ describe('IBaseRepository', () => {
 
       // Assert
       expect(persistenceHandler.handledEvents).toHaveLength(2);
-      expect(persistenceHandler?.handledEvents?.[0]?.eventType).toBe(eventNameChanged);
-      expect(persistenceHandler?.handledEvents?.[1]?.eventType).toBe('ItemAdded');
+      expect(persistenceHandler?.handledEvents?.[0]?.eventName).toBe(eventNameChanged);
+      expect(persistenceHandler?.handledEvents?.[1]?.eventName).toBe('ItemAdded');
       expect(eventDispatcher.dispatchedAggregates).toHaveLength(1);
       expect(eventDispatcher.dispatchedEvents).toHaveLength(2);
     });
@@ -401,8 +401,8 @@ describe('IBaseRepository', () => {
 
       // Assert
       expect(persistenceHandler.handledEvents).toHaveLength(2);
-      expect(persistenceHandler?.handledEvents?.[0]?.eventType).toBe('NameChanged');
-      expect(persistenceHandler?.handledEvents?.[1]?.eventType).toBe('ItemAdded');
+      expect(persistenceHandler?.handledEvents?.[0]?.eventName).toBe('NameChanged');
+      expect(persistenceHandler?.handledEvents?.[1]?.eventName).toBe('ItemAdded');
       expect(persistenceHandler.versions.get(aggregateId.getValue())).toBe(2);
     });
 

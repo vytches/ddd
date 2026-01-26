@@ -37,8 +37,8 @@ export interface IEventMetadata {
 }
 
 export interface IDomainEvent<P = unknown> {
-  /** Type of the event */
-  eventType: string;
+  /** Name of the event */
+  eventName: string;
 
   /** Payload (data) of the event */
   payload?: P | undefined;

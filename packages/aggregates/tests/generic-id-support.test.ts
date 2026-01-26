@@ -117,7 +117,7 @@ describe('Generic ID Support for Aggregates', () => {
 
       const events = aggregate.getDomainEvents();
       expect(events).toHaveLength(1);
-      expect(events[0]?.eventType).toBe('CustomerNameChanged');
+      expect(events[0]?.eventName).toBe('CustomerNameChanged');
     });
 
     it('should work with number ID type', () => {
@@ -130,7 +130,7 @@ describe('Generic ID Support for Aggregates', () => {
 
       const events = aggregate.getDomainEvents();
       expect(events).toHaveLength(1);
-      expect(events[0]?.eventType).toBe('ProductPriceChanged');
+      expect(events[0]?.eventName).toBe('ProductPriceChanged');
     });
 
     it('should work with bigint ID type', () => {

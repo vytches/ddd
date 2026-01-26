@@ -20,9 +20,9 @@ export abstract class DomainEvent<T = unknown> implements IDomainEvent<T> {
   public readonly occurredOn: Date;
 
   /**
-   * Type of the event, defaults to the class name
+   * Name of the event, defaults to the class name
    */
-  public readonly eventType: string;
+  public readonly eventName: string;
 
   /**
    * Event payload
@@ -39,11 +39,12 @@ export abstract class DomainEvent<T = unknown> implements IDomainEvent<T> {
    *
    * @param payload - The event data
    * @param metadata - Optional metadata for the event
+   * @param eventName - Optional custom event name (defaults to constructor.name)
    */
-  constructor(payload?: T, metadata?: IEventMetadata) {
+  constructor(payload?: T, metadata?: IEventMetadata, eventName?: string) {
     this.eventId = DomainEvent.generateId();
     this.occurredOn = new Date();
-    this.eventType = this.constructor.name;
+    this.eventName = eventName ?? this.constructor.name;
     this.payload = payload;
 
     this.metadata = {
@@ -69,12 +70,17 @@ export abstract class DomainEvent<T = unknown> implements IDomainEvent<T> {
   public withMetadata(metadata: Partial<IEventMetadata>): DomainEvent<T> {
     const EventClass = this.constructor as new (
       payload?: T,
-      metadata?: IEventMetadata
+      metadata?: IEventMetadata,
+      eventName?: string
     ) => DomainEvent<T>;
 
-    return new EventClass(this.payload, {
-      ...this.metadata,
-      ...metadata,
-    });
+    return new EventClass(
+      this.payload,
+      {
+        ...this.metadata,
+        ...metadata,
+      },
+      this.eventName
+    );
   }
 }

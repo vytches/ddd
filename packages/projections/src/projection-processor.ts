@@ -44,7 +44,7 @@ export class ProjectionProcessor implements IEventProcessor {
       await engine.processEvent(event);
     } catch (error) {
       this.logger.error(
-        `Error processing event ${event.eventType} in projection ${engine.getProjectionName()}`,
+        `Error processing event ${event.eventName} in projection ${engine.getProjectionName()}`,
         error as Error
       );
       // Could add configurable error handling strategy

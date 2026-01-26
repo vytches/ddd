@@ -11,14 +11,14 @@ export type { EventHandlerOptions };
  * Decorator for marking classes and methods as event handlers with DI support.
  * Enables declarative event handler registration and auto-discovery.
  *
- * @param eventType Constructor of the event type to handle
+ * @param eventName Constructor of the event type to handle
  * @param options Handler configuration options
  * @returns Decorator function for classes or methods
  * @since 1.0.0
  * @public
  */
 export function EventHandler<T extends IDomainEvent>(
-  eventType: new (...args: any[]) => T,
+  eventName: new (...args: any[]) => T,
   options: EventHandlerOptions = {}
 ) {
   return function (
@@ -26,7 +26,7 @@ export function EventHandler<T extends IDomainEvent>(
     propertyKey?: string | symbol,
     descriptor?: TypedPropertyDescriptor<any>
   ) {
-    const metadata = { eventType };
+    const metadata = { eventName };
 
     if (propertyKey !== undefined && descriptor !== undefined) {
       // Method decorator usage
@@ -43,7 +43,7 @@ export function EventHandler<T extends IDomainEvent>(
       const diOptions = options || {};
       const diMetadata: DIHandlerMetadata = {
         type: 'event',
-        eventType,
+        eventName,
         handlerType: target,
         options: diOptions,
         registeredAt: new Date(),
@@ -71,7 +71,7 @@ export function EventHandler<T extends IDomainEvent>(
       // Add helper method for adapter compatibility
       if (!target.prototype.getEventType) {
         target.prototype.getEventType = function () {
-          return eventType;
+          return eventName;
         };
       }
 

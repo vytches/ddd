@@ -89,7 +89,7 @@ describe('SnapshotProjectionCapability', () => {
   let context: MockContext;
 
   const createMockEvent = (position = 100): IDomainEvent => ({
-    eventType: 'TestEvent',
+    eventName: 'TestEvent',
     payload: { data: 'test' },
     metadata: {
       eventId: 'event-123',
@@ -204,7 +204,7 @@ describe('SnapshotProjectionCapability', () => {
       // Arrange
       const state = { id: 'test', version: 1 };
       const eventWithoutPosition: IDomainEvent = {
-        eventType: 'TestEvent',
+        eventName: 'TestEvent',
         payload: { data: 'test' },
         metadata: {
           eventId: 'event-123',

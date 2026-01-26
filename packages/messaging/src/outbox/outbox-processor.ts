@@ -245,13 +245,13 @@ export class EventBusOutboxHandler implements IOutboxMessageHandler {
   constructor(private readonly eventBus: IEventBus) {}
 
   async handle(message: IOutboxMessage): Promise<void> {
-    // Extract event type from message type (remove integration_event: prefix if present)
-    const eventType = message.messageType.startsWith('integration_event:')
+    // Extract event name from message type (remove integration_event: prefix if present)
+    const eventName = message.messageType.startsWith('integration_event:')
       ? message.messageType.replace('integration_event:', '')
       : message.messageType;
 
     const eventData = {
-      eventType,
+      eventName,
       eventId: message.id,
       occurredOn: message.createdAt,
       version: 1,

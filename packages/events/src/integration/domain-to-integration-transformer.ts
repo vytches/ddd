@@ -77,7 +77,7 @@ export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
     );
 
     // Create integration event with appropriate type (possibly mapped)
-    const integrationEventType = this.getIntegrationEventType(domainEvent.eventType);
+    const integrationEventType = this.getIntegrationEventType(domainEvent.eventName);
 
     return createIntegrationEvent<I>(integrationEventType, transformedPayload, integrationMetadata);
   }
@@ -153,7 +153,7 @@ export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
    */
   protected getRoutingKey(domainMetadata: IEventMetadata): string {
     return domainMetadata.aggregateType
-      ? `${domainMetadata.aggregateType}.${domainMetadata.eventType}`
-      : (domainMetadata.eventType as string) || '';
+      ? `${domainMetadata.aggregateType}.${domainMetadata.eventName}`
+      : (domainMetadata.eventName as string) || '';
   }
 }

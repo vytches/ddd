@@ -13,20 +13,20 @@ describe('createDomainEvent', () => {
 
   it('should create a domain event with the given type and payload', () => {
     // Arrange
-    const eventType = 'TestEvent';
+    const eventName = 'TestEvent';
     const payload = { data: 'test data' };
 
     // Act
-    const event = createDomainEvent(eventType, payload);
+    const event = createDomainEvent(eventName, payload);
 
     // Assert
-    expect(event.eventType).toBe(eventType);
+    expect(event.eventName).toBe(eventName);
     expect(event.payload).toEqual(payload);
   });
 
   it('should generate basic metadata with UUID and timestamp', () => {
     // Arrange
-    const eventType = 'TestEvent';
+    const eventName = 'TestEvent';
     const payload = { data: 'test data' };
     const mockDate = new Date('2023-01-01T00:00:00Z');
 
@@ -34,7 +34,7 @@ describe('createDomainEvent', () => {
     vi.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
 
     // Act
-    const event = createDomainEvent(eventType, payload);
+    const event = createDomainEvent(eventName, payload);
 
     // Assert
     expect(event.metadata).toBeDefined();
@@ -45,7 +45,7 @@ describe('createDomainEvent', () => {
   it('should merge provided metadata with default metadata', () => {
     // Arrange
     const correlationId = LibUtils.getUUID();
-    const eventType = 'TestEvent';
+    const eventName = 'TestEvent';
     const payload = { data: 'test data' };
     const customMetadata = {
       correlationId,
@@ -54,7 +54,7 @@ describe('createDomainEvent', () => {
     };
 
     // Act
-    const event = createDomainEvent(eventType, payload, customMetadata);
+    const event = createDomainEvent(eventName, payload, customMetadata);
 
     // Assert
     expect(event.metadata).toMatchObject({
@@ -67,14 +67,14 @@ describe('createDomainEvent', () => {
 
   it('should not override provided eventId if present in metadata', () => {
     // Arrange
-    const eventType = 'TestEvent';
+    const eventName = 'TestEvent';
     const payload = { data: 'test data' };
     const customMetadata = {
       eventId: 'custom-event-id',
     };
 
     // Act
-    const event = createDomainEvent(eventType, payload, customMetadata);
+    const event = createDomainEvent(eventName, payload, customMetadata);
 
     // Assert
     expect(event?.metadata?.eventId).toBe('custom-event-id');
@@ -82,14 +82,14 @@ describe('createDomainEvent', () => {
 
   it('should create a domain event with null payload', () => {
     // Arrange
-    const eventType = 'TestEvent';
+    const eventName = 'TestEvent';
     const payload = null;
 
     // Act
-    const event = createDomainEvent(eventType, payload);
+    const event = createDomainEvent(eventName, payload);
 
     // Assert
-    expect(event.eventType).toBe(eventType);
+    expect(event.eventName).toBe(eventName);
     expect(event.payload).toBeNull();
     expect(event.metadata).toBeDefined();
   });

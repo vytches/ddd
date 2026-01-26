@@ -133,7 +133,7 @@ export class OutboxService {
   async saveDomainEvent(event: IDomainEvent, options?: OutboxMessageOptions): Promise<string> {
     const message = OutboxMessageFactory.createFromIntegrationEvent(
       {
-        eventType: event.eventType,
+        eventName: event.eventName,
         payload: event,
         metadata: {
           eventId: event?.metadata?.eventId,
@@ -149,7 +149,7 @@ export class OutboxService {
     );
 
     const messageId = await this.repository.saveMessage(message);
-    this.logger.debug(`Saved domain event ${event.eventType} as message ${messageId}`);
+    this.logger.debug(`Saved domain event ${event.eventName} as message ${messageId}`);
     return messageId;
   }
 

@@ -11,21 +11,21 @@ export abstract class GenericEventPersistenceHandler implements IEventPersistenc
    * Register handler for specific event type
    */
   protected registerHandler<T = unknown>(
-    eventType: string,
+    eventName: string,
     handler: (payload: T) => Promise<number>
   ): void {
-    this.handlers.set(eventType, handler as (payload: unknown) => Promise<number>);
+    this.handlers.set(eventName, handler as (payload: unknown) => Promise<number>);
   }
 
   /**
    * Handle event persistence
    */
   async handleEvent(event: IDomainEvent): Promise<number> {
-    const handler = this.handlers.get(event.eventType);
+    const handler = this.handlers.get(event.eventName);
 
     if (!handler) {
       throw new Error(
-        `No handler registered for event type ${event.eventType} in ${this.constructor.name}`
+        `No handler registered for event type ${event.eventName} in ${this.constructor.name}`
       );
     }
 

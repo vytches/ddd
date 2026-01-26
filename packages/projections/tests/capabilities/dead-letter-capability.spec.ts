@@ -70,7 +70,7 @@ describe('DeadLetterCapability', () => {
   let context: MockContext;
 
   const createMockEvent = (): IDomainEvent => ({
-    eventType: 'TestEvent',
+    eventName: 'TestEvent',
     payload: { data: 'test' },
     metadata: {
       eventVersion: 1,

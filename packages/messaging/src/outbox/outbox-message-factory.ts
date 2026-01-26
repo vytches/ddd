@@ -82,7 +82,7 @@ export class OutboxMessageFactory {
    * @returns Outbox message containing the integration event
    */
   static createFromIntegrationEvent<T = unknown>(
-    event: { eventType: string; payload?: T; metadata?: Record<string, unknown> },
+    event: { eventName: string; payload?: T; metadata?: Record<string, unknown> },
     options?: OutboxMessageOptions
   ): IOutboxMessage<T> {
     const mergedOptions: OutboxMessageOptions = {
@@ -101,7 +101,7 @@ export class OutboxMessageFactory {
     }
 
     return OutboxMessageFactory.createMessage(
-      `integration_event:${event.eventType}`,
+      `integration_event:${event.eventName}`,
       event.payload as T,
       mergedOptions
     );
