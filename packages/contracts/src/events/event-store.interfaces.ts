@@ -14,7 +14,7 @@ export interface IAuditEvent {
   aggregateId: unknown;
   aggregateType: string;
   aggregateVersion: number;
-  eventType: string;
+  eventName: string;
   payload?: unknown;
   metadata?: IEventMetadata;
   actor?: unknown;

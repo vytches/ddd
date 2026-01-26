@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IActor } from '@vytches/ddd-domain-primitives';
+import type { IDomainEvent, IEventMetadata } from '@vytches/ddd-contracts';
 
 /**
  * Standard audit action types for compliance and monitoring.
@@ -52,23 +53,12 @@ export enum AuditStatus {
 /**
  * Comprehensive metadata interface for audit events.
  * Provides rich context including actors, resources, and operation details.
+ * Extends IEventMetadata with audit-specific fields.
  *
  * @since 1.0.0
  * @public
  */
-export interface IAuditEventMetadata {
-  /** Unikalny identyfikator eventu */
-  eventId?: string;
-
-  /** Kiedy event został utworzony */
-  timestamp?: Date;
-
-  /** ID korelacji dla powiązanych eventów */
-  correlationId?: string;
-
-  /** ID eventu, który spowodował ten event */
-  causationId?: string;
-
+export interface IAuditEventMetadata extends IEventMetadata {
   /** Typ akcji (np. CREATE, READ, UPDATE, DELETE) */
   actionType?: AuditActionType | string;
 
@@ -93,40 +83,23 @@ export interface IAuditEventMetadata {
   /** Czas trwania operacji (w milisekundach) */
   duration?: number;
 
-  /** Aktor, który wykonał operację */
-  actor?: IActor;
-
-  /** Właściciel zasobu, którego dotyczy operacja */
-  owner?: IActor;
-
   /** Identyfikator zasobu, którego dotyczy operacja */
   resourceId?: string;
 
   /** Typ zasobu, którego dotyczy operacja */
   resourceType?: string;
-
-  /** Previous state captured for audit purposes */
-  _previousState?: unknown;
-
-  /** Dodatkowe metadane specyficzne dla aplikacji */
-  [key: string]: unknown;
 }
 
 /**
  * Standard structure for all audit events in the system.
  * Provides consistent format for compliance and monitoring.
+ * Extends IDomainEvent with specialized audit metadata.
  *
  * @since 1.0.0
  * @public
  */
-export interface IAuditEvent<P = unknown> {
-  /** Nazwa eventu */
-  eventName: string;
-
-  /** Dane eventu */
-  payload?: P;
-
-  /** Metadane */
+export interface IAuditEvent<P = unknown> extends IDomainEvent<P> {
+  /** Metadane audytowe (rozszerzone) */
   metadata?: IAuditEventMetadata;
 }
 

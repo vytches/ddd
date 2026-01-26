@@ -13,8 +13,10 @@ type Constructor<T = object> = new (...args: any[]) => T;
 
 /**
  * Base event type for internal use
+ * Since both IAuditEvent and IIntegrationEvent extend IDomainEvent,
+ * we can use IDomainEvent as the base type
  */
-type BaseEvent = IDomainEvent | IIntegrationEvent | IAuditEvent;
+type BaseEvent = IDomainEvent;
 
 /**
  * Event with metadata (for events that might have contextId)
@@ -169,7 +171,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   /**
    * Publish an event with automatic routing to appropriate handlers
    */
-  override async publish(event: IDomainEvent | IIntegrationEvent | IAuditEvent): Promise<void> {
+  override async publish(event: BaseEvent): Promise<void> {
     const logger = Logger.forContext('UnifiedEventBus');
     logger.debug('Publishing event', {
       eventName: event.eventName,
@@ -220,7 +222,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * @param handlerOrContext - Handler function, context string, or context array
    * @param handler - Handler function (when second param is context)
    */
-  override subscribe<T extends IDomainEvent | IIntegrationEvent | IAuditEvent>(
+  override subscribe<T extends BaseEvent>(
     eventName: string | Constructor<T>,
     handlerOrContext?: UnifiedEventHandler<T> | string | string[],
     handler?: UnifiedEventHandler<T>
@@ -262,7 +264,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   /**
    * Subscribe to events for specific context(s)
    */
-  subscribeToContext<T extends IDomainEvent | IIntegrationEvent | IAuditEvent>(
+  subscribeToContext<T extends BaseEvent>(
     contextId: string | string[] | undefined,
     eventName: string | Constructor<T>,
     handler: UnifiedEventHandler<T>
@@ -285,7 +287,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   /**
    * Register a class-based handler
    */
-  override registerHandler<T extends IDomainEvent | IIntegrationEvent | IAuditEvent>(
+  override registerHandler<T extends BaseEvent>(
     eventName: string | Constructor<T>,
     handler: { handle(event: T): Promise<void> | void }
   ): void {
@@ -352,9 +354,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   /**
    * Publish multiple events
    */
-  override async publishMany(
-    events: Array<IDomainEvent | IIntegrationEvent | IAuditEvent>
-  ): Promise<void> {
+  override async publishMany(events: Array<BaseEvent>): Promise<void> {
     if (events.length === 0) return;
 
     const logger = Logger.forContext('UnifiedEventBus');

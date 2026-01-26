@@ -64,7 +64,7 @@ describe('CheckpointCapability', () => {
   let context: MockContext;
 
   const createMockEvent = (position = 100): IDomainEvent => ({
-    eventType: 'TestEvent',
+    eventName: 'TestEvent',
     payload: { data: 'test' },
     metadata: {
       aggregateId: 'test-123',
@@ -161,7 +161,7 @@ describe('CheckpointCapability', () => {
       // Arrange
       const state = { id: 'test', version: 1 };
       const eventWithoutPosition: IDomainEvent = {
-        eventType: 'TestEvent',
+        eventName: 'TestEvent',
         payload: { data: 'test' },
         metadata: {
           eventVersion: 1,

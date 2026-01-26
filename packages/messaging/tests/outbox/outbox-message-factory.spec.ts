@@ -73,7 +73,7 @@ describe('OutboxMessageFactory', () => {
   describe('createFromIntegrationEvent', () => {
     it('should create message from integration event', () => {
       const event = {
-        eventType: 'OrderCreated',
+        eventName: 'OrderCreated',
         payload: { orderId: '123', amount: 100 },
         metadata: { source: 'order-service' },
       };
@@ -87,7 +87,7 @@ describe('OutboxMessageFactory', () => {
 
     it('should merge metadata correctly', () => {
       const event = {
-        eventType: 'OrderCreated',
+        eventName: 'OrderCreated',
         payload: { orderId: '123' },
         metadata: { source: 'order-service' },
       };

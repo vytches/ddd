@@ -67,10 +67,10 @@ class MockUserProjection {
 
   async apply(readModel: UserReadModel, event: any): Promise<UserReadModel> {
     if (this.shouldThrow) {
-      throw new Error(`Failed to apply event ${event.eventType}`);
+      throw new Error(`Failed to apply event ${event.eventName}`);
     }
 
-    switch (event.eventType) {
+    switch (event.eventName) {
       case 'UserCreated':
         return {
           id: (event.metadata?.aggregateId as string) || '',
@@ -132,11 +132,11 @@ describe('ProjectionEngine', () => {
   let projection: MockUserProjection;
 
   const createMockEvent = (
-    eventType: string,
+    eventName: string,
     aggregateId = 'user-123',
     payload: any = {}
   ): any => ({
-    eventType,
+    eventName,
     payload,
     metadata: {
       aggregateType: 'User',
@@ -386,11 +386,11 @@ describe('EnhancedProjectionEngine', () => {
   let errorStrategy: ExponentialBackoffStrategy;
 
   const createMockEvent = (
-    eventType: string,
+    eventName: string,
     aggregateId = 'user-123',
     payload: any = {}
   ): any => ({
-    eventType,
+    eventName,
     payload,
     metadata: {
       aggregateId,
@@ -619,7 +619,7 @@ describe('EnhancedProjectionEngine', () => {
     it('should handle events with missing payload', async () => {
       // Arrange
       const event = {
-        eventType: 'UserCreated',
+        eventName: 'UserCreated',
         aggregateId: 'user-123',
         aggregateType: 'User',
         eventVersion: 1,

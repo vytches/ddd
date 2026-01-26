@@ -32,7 +32,7 @@ class DomainEventBase implements IDomainEvent {
   readonly eventId: string;
   readonly occurredOn: Date;
   readonly version: number;
-  readonly eventType!: string;
+  readonly eventName!: string;
 
   constructor() {
     this.eventId = LibUtils.getUUID();
@@ -42,7 +42,7 @@ class DomainEventBase implements IDomainEvent {
 }
 
 class ProductCreatedEvent extends DomainEventBase {
-  override readonly eventType = ProductCreatedEvent.name;
+  override readonly eventName = ProductCreatedEvent.name;
 
   constructor(
     public readonly productId: string,
@@ -54,7 +54,7 @@ class ProductCreatedEvent extends DomainEventBase {
 }
 
 class CustomerRegisteredEvent extends DomainEventBase {
-  override readonly eventType = CustomerRegisteredEvent.name;
+  override readonly eventName = CustomerRegisteredEvent.name;
 
   constructor(
     public readonly customerId: string,
@@ -65,7 +65,7 @@ class CustomerRegisteredEvent extends DomainEventBase {
 }
 
 class OrderCreatedEvent extends DomainEventBase {
-  override readonly eventType = OrderCreatedEvent.name;
+  override readonly eventName = OrderCreatedEvent.name;
 
   constructor(
     public readonly orderId: string,
@@ -77,7 +77,7 @@ class OrderCreatedEvent extends DomainEventBase {
 }
 
 class OrderConfirmedEvent extends DomainEventBase {
-  override readonly eventType = OrderConfirmedEvent.name;
+  override readonly eventName = OrderConfirmedEvent.name;
 
   constructor(
     public readonly orderId: string,
@@ -88,7 +88,7 @@ class OrderConfirmedEvent extends DomainEventBase {
 }
 
 class OrderShippedEvent extends DomainEventBase {
-  override readonly eventType = OrderShippedEvent.name;
+  override readonly eventName = OrderShippedEvent.name;
 
   constructor(
     public readonly orderId: string,
@@ -100,7 +100,7 @@ class OrderShippedEvent extends DomainEventBase {
 }
 
 class CustomerNotifiedEvent extends DomainEventBase {
-  override readonly eventType = CustomerNotifiedEvent.name;
+  override readonly eventName = CustomerNotifiedEvent.name;
 
   constructor(
     public readonly customerId: string,

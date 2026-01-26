@@ -111,22 +111,33 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     } else {
       event = eventTypeOrEvent;
       if (metadata) {
-        event = { ...event, metadata: { ...event.metadata, ...metadata } };
+        // Preserve prototype chain when merging additional metadata
+        event = Object.assign(Object.create(Object.getPrototypeOf(event)), event, {
+          metadata: { ...event.metadata, ...metadata },
+        });
       }
     }
 
     this._version++;
 
-    // Enrich with aggregate metadata - use toString() which both EntityId and IAggregateId have
-    const enrichedEvent: IDomainEvent<P> = {
-      ...event,
-      metadata: {
-        ...event.metadata,
-        aggregateId: this._id.toString(),
-        aggregateType: this.constructor.name,
-        aggregateVersion: this._version,
-      },
+    // Enrich with aggregate metadata
+    // CRITICAL: Use Object.assign + Object.create to PRESERVE prototype chain
+    // This allows event classes (e.g., OrderCreatedEvent) to retain their methods
+    // and instanceof checks to work correctly after enrichment
+    const enrichedMetadata: IEventMetadata = {
+      ...event.metadata,
+      aggregateId: this._id.toString(),
+      aggregateType: this.constructor.name,
+      aggregateVersion: this._version,
+      timestamp: event.metadata?.timestamp ?? new Date(),
     };
+
+    // Preserve prototype chain - essential for class-based events
+    const enrichedEvent: IDomainEvent<P> = Object.assign(
+      Object.create(Object.getPrototypeOf(event)),
+      event,
+      { metadata: enrichedMetadata }
+    );
 
     this._domainEvents.push(enrichedEvent);
     this.handleEvent(enrichedEvent);
@@ -139,7 +150,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
       versioningCapability.handleVersionedEvent(event, this._eventHandlers);
     } else {
       // Standard event handling
-      const handler = this._eventHandlers.get(event.eventType);
+      const handler = this._eventHandlers.get(event.eventName);
       if (handler) {
         handler(event.payload, event.metadata);
       }

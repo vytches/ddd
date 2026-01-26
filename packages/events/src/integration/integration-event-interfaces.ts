@@ -1,19 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { IDomainEvent, IEventMetadata } from '@vytches/ddd-contracts';
 import type { IActor } from '@vytches/ddd-domain-primitives';
 
-export interface IIntegrationEventMetadata {
-  /** Unique identifier for the event */
-  eventId?: string;
-
-  /** When the event was created */
-  timestamp?: Date;
-
-  /** Correlation ID for related events */
-  correlationId?: string;
-
-  /** ID of the event that caused this event */
-  causationId?: string;
-
+export interface IIntegrationEventMetadata extends IEventMetadata {
   /** Version of the event schema (used for contract versioning) */
   schemaVersion?: number;
 
@@ -36,13 +25,7 @@ export interface IIntegrationEventMetadata {
   [key: string]: unknown;
 }
 
-export interface IIntegrationEvent<P = unknown> {
-  /** Name of the event */
-  eventName: string;
-
-  /** Payload (data) of the event */
-  payload?: P | undefined;
-
+export interface IIntegrationEvent<P = unknown> extends IDomainEvent<P> {
   /** Metadata of the event */
   metadata?: IIntegrationEventMetadata;
 }

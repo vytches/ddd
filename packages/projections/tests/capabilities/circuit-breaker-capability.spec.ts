@@ -29,7 +29,7 @@ describe('CircuitBreakerCapability', () => {
   let config: ICircuitBreakerConfig;
 
   const createMockEvent = (): IDomainEvent => ({
-    eventType: 'TestEvent',
+    eventName: 'TestEvent',
     payload: { data: 'test' },
     metadata: {
       aggregateId: 'test-123',

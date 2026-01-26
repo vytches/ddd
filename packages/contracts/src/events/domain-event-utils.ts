@@ -2,12 +2,12 @@ import { LibUtils } from '@vytches/ddd-utils';
 import type { IEventMetadata, IDomainEvent } from './domain-event-interfaces';
 
 export function createDomainEvent<P = unknown>(
-  eventType: string,
+  eventName: string,
   payload: P,
   metadata?: Partial<IEventMetadata>
 ): IDomainEvent<P> {
   return {
-    eventType,
+    eventName,
     payload,
     metadata: {
       eventId: LibUtils.getUUID(),

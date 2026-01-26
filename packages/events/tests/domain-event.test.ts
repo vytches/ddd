@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
+import type { IEventMetadata } from '@vytches/ddd-contracts';
 import { DomainEvent } from '../src/domain/domain-event';
 
 // Test event classes
 class UserCreatedEvent extends DomainEvent<{ userId: string; email: string }> {
   constructor(
     payload: { userId: string; email: string },
-    metadata?: { contextId?: string },
+    metadata?: IEventMetadata,
     eventName?: string
   ) {
     super(payload, metadata, eventName);
