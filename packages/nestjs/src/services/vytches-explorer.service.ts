@@ -91,7 +91,7 @@ export class VytchesExplorerService implements OnModuleInit {
    * Get handlers by type
    */
   getHandlersByType(type: 'command' | 'query' | 'event' | 'domain-service'): HandlerInfo[] {
-    return this.discoveredHandlers.filter((h) => h.type === type);
+    return this.discoveredHandlers.filter(h => h.type === type);
   }
 
   /**
@@ -166,7 +166,8 @@ export class VytchesExplorerService implements OnModuleInit {
 
       // Query handler metadata
       const queryMetadata =
-        Reflect.getMetadata(DI_QUERY_HANDLER, target) || Reflect.getMetadata('query-handler', target);
+        Reflect.getMetadata(DI_QUERY_HANDLER, target) ||
+        Reflect.getMetadata('query-handler', target);
       if (queryMetadata?.messageType || queryMetadata?.query) {
         return {
           type: 'query',
@@ -176,7 +177,8 @@ export class VytchesExplorerService implements OnModuleInit {
 
       // Event handler metadata
       const eventMetadata =
-        Reflect.getMetadata(DI_EVENT_HANDLER, target) || Reflect.getMetadata('event-handler', target);
+        Reflect.getMetadata(DI_EVENT_HANDLER, target) ||
+        Reflect.getMetadata('event-handler', target);
       if (eventMetadata?.messageType || eventMetadata?.event || eventMetadata?.eventType) {
         return {
           type: 'event',
@@ -224,7 +226,10 @@ export class VytchesExplorerService implements OnModuleInit {
           }
         }
       } catch (error) {
-        console.warn(`[VytchesExplorerService] Failed to register ${handler.handlerType.name}:`, error);
+        console.warn(
+          `[VytchesExplorerService] Failed to register ${handler.handlerType.name}:`,
+          error
+        );
       }
     }
   }

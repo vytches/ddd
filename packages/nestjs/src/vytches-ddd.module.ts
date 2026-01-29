@@ -33,10 +33,7 @@ import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
 @Module({})
 export class VytchesDDDModule {
   static forRoot(options: VytchesDDDModuleOptions = {}): DynamicModule {
-    const providers: Provider[] = [
-      VytchesExplorerService,
-      ...(options.providers || []),
-    ];
+    const providers: Provider[] = [VytchesExplorerService, ...(options.providers || [])];
 
     return {
       module: VytchesDDDModule,
@@ -49,9 +46,7 @@ export class VytchesDDDModule {
 
   static forRootAsync(options: {
     imports?: ModuleMetadata['imports'];
-    useFactory?: (
-      ...args: unknown[]
-    ) => Promise<VytchesDDDModuleOptions> | VytchesDDDModuleOptions;
+    useFactory?: (...args: unknown[]) => Promise<VytchesDDDModuleOptions> | VytchesDDDModuleOptions;
     inject?: Array<string | symbol | unknown>;
   }): DynamicModule {
     return {
@@ -79,7 +74,10 @@ export class VytchesDDDModule {
         provide: contextServiceName,
         useFactory: (moduleRef: ModuleRef, discoveryService: DiscoveryService) => {
           const explorer = new VytchesExplorerService(moduleRef, discoveryService);
-          (explorer as unknown as { contextConfig: unknown }).contextConfig = { context, ...options };
+          (explorer as unknown as { contextConfig: unknown }).contextConfig = {
+            context,
+            ...options,
+          };
           return explorer;
         },
         inject: [ModuleRef, DiscoveryService],
@@ -152,16 +150,24 @@ export class VytchesDDDModule {
       {
         provide: ICommandBus,
         useValue: {
-          register: (): void => { /* noop */ },
-          registerFactory: (): void => { /* noop */ },
+          register: (): void => {
+            /* noop */
+          },
+          registerFactory: (): void => {
+            /* noop */
+          },
           execute: () => Promise.resolve({ success: true }),
         },
       },
       {
         provide: IQueryBus,
         useValue: {
-          register: (): void => { /* noop */ },
-          registerFactory: (): void => { /* noop */ },
+          register: (): void => {
+            /* noop */
+          },
+          registerFactory: (): void => {
+            /* noop */
+          },
           send: () => Promise.resolve({ success: true }),
         },
       },
