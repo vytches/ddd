@@ -8,6 +8,18 @@ export type { HandlerInfo };
  *
  * Simple interface supporting custom provider configuration
  * like IEventBus => UnifiedEventBus mapping
+ *
+ * @example
+ * ```typescript
+ * // VytchesExplorerService automatically injects ICommandBus and IQueryBus
+ * // if they are provided in the module:
+ * @Module({
+ *   providers: [
+ *     { provide: ICommandBus, useValue: new EnhancedCommandBus(container) },
+ *     { provide: IQueryBus, useValue: new EnhancedQueryBus(container) },
+ *   ]
+ * })
+ * ```
  */
 export interface VytchesDDDModuleOptions {
   /**

@@ -1,15 +1,10 @@
 /**
  * @vytches/ddd-nestjs
- * Simple, clean NestJS integration for VytchesDDD Enterprise Domain-Driven Design framework
- *
- * Following @nestjs/cqrs patterns for familiar, proven integration
+ * NestJS integration for VytchesDDD
  */
 
-// Main module
 export { VytchesDDDModule } from './vytches-ddd.module';
-
-// Explorer service for auto-discovery
 export { VytchesExplorerService } from './services/vytches-explorer.service';
-
-// Types and interfaces
+export { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+export { NestJSContainerAdapter } from './adapters';
 export type { HandlerInfo, VytchesDDDModuleOptions } from './types';
