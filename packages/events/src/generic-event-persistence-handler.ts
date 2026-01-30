@@ -1,9 +1,31 @@
 import type { IDomainEvent, IEventPersistenceHandler } from '@vytches/ddd-contracts';
 
-// TODO: dorobić testy
-// TODO: zaktualizować HOW-TO
-// TODO: zogbaczyć co można tutaj zrobić i czy jakoś się pozbyć tego mechanizmu
-
+/**
+ * Abstract base class for event persistence handlers.
+ *
+ * Provides a registry-based approach for handling event persistence,
+ * where specific handlers can be registered for each event type.
+ *
+ * @example
+ * ```typescript
+ * class OrderEventPersistenceHandler extends GenericEventPersistenceHandler {
+ *   constructor(private repository: OrderRepository) {
+ *     super();
+ *     this.registerHandler('OrderCreated', (payload) => this.handleOrderCreated(payload));
+ *     this.registerHandler('OrderUpdated', (payload) => this.handleOrderUpdated(payload));
+ *   }
+ *
+ *   private async handleOrderCreated(payload: OrderCreatedPayload): Promise<number> {
+ *     await this.repository.create(payload);
+ *     return 1;
+ *   }
+ *
+ *   async getCurrentVersion(aggregateId: string): Promise<number | undefined> {
+ *     return await this.repository.getVersion(aggregateId);
+ *   }
+ * }
+ * ```
+ */
 export abstract class GenericEventPersistenceHandler implements IEventPersistenceHandler {
   private handlers = new Map<string, (payload: unknown) => Promise<number>>();
 

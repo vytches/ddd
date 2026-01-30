@@ -260,9 +260,12 @@ class AndPolicyComposer<T> extends BaseCompositePolicy<T> implements IPolicyComp
     return this.success(request.entity);
   }
 
+  /**
+   * Groups policies for complex logical compositions.
+   * @throws {Error} Feature not yet implemented - use and()/or() for basic composition
+   */
   public group(): IGroupedPolicyComposer<T> {
-    // TODO: Implement grouping
-    throw new Error('Grouping not yet implemented');
+    throw new Error('Grouping not yet implemented. Use and()/or() methods for basic composition.');
   }
 }
 
@@ -294,9 +297,12 @@ class OrPolicyComposer<T> extends BaseCompositePolicy<T> implements IPolicyCompo
     return this.failure(violations[0]!);
   }
 
+  /**
+   * Groups policies for complex logical compositions.
+   * @throws {Error} Feature not yet implemented - use and()/or() for basic composition
+   */
   public group(): IGroupedPolicyComposer<T> {
-    // TODO: Implement grouping
-    throw new Error('Grouping not yet implemented');
+    throw new Error('Grouping not yet implemented. Use and()/or() methods for basic composition.');
   }
 }
 
@@ -328,13 +334,19 @@ class ConditionalPolicyBuilder<T> implements IPolicyConditionalBuilder<T> {
     private readonly condition: PolicyCondition<T>
   ) {}
 
+  /**
+   * Applies a policy when condition is met.
+   * @throws {Error} Feature not yet implemented - use PolicyBuilder.when().then() instead
+   */
   public then(policy: IBusinessPolicy<T>): IPolicyConditionalElse<T> {
-    // TODO: Implement conditional policy
-    throw new Error('Conditional policies not yet implemented');
+    throw new Error('Use PolicyBuilder.when().then() for conditional policies');
   }
 
+  /**
+   * Applies a specification when condition is met.
+   * @throws {Error} Feature not yet implemented - use PolicyBuilder.when().then() instead
+   */
   public thenMust(specification: unknown): IPolicyConditionalElse<T> {
-    // TODO: Implement conditional policy with specification
-    throw new Error('Conditional policies not yet implemented');
+    throw new Error('Use PolicyBuilder.when().then() for conditional policies');
   }
 }

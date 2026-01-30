@@ -325,9 +325,9 @@ class GroupCompositePolicy<T> extends BaseBusinessPolicy<T> {
           step.severity
         );
 
-      // TODO: Implement other step types
+      // Currently supports 'specification' and 'predicate' step types
       default:
-        throw new Error(`Unsupported step type in group composite policy: ${(step as any).type}`);
+        throw new Error(`Unsupported step type: ${(step as { type: string }).type}. Supported: specification, predicate`);
     }
   }
 }

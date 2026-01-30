@@ -492,8 +492,8 @@ class BuiltCompositePolicy<T> extends BaseBusinessPolicy<T> {
   }
 
   public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
-    // For now, implement simple AND logic for all steps
-    // TODO: Implement proper logic operators based on step configuration
+    // Currently implements AND logic - all required steps must pass
+    // For OR/complex logic, use PolicyGroup or compose policies manually
 
     for (const step of this.steps) {
       const stepPolicy = this.createPolicyFromStep(step);
@@ -532,10 +532,11 @@ class BuiltCompositePolicy<T> extends BaseBusinessPolicy<T> {
           step.severity
         );
 
-      // TODO: Implement other step types
+      // Currently supports 'specification' and 'predicate' step types
+      // Additional step types can be added as needed
       default:
         throw new Error(
-          `Unsupported step type in composite policy: ${(step as { type: string }).type}`
+          `Unsupported step type: ${(step as { type: string }).type}. Supported: specification, predicate`
         );
     }
   }
