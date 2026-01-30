@@ -5,6 +5,27 @@ import { safeRun } from '@vytches/ddd-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 
+// Create mock abstract classes for DI token compatibility using vi.hoisted()
+const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
+  abstract class MockICommandBus {
+    abstract register(commandType: any, handler: any): void;
+    abstract registerFactory(commandType: any, factory: any): void;
+    abstract use(middleware: any): this;
+    abstract discoverHandlers(): void;
+    abstract execute(command: any): Promise<any>;
+  }
+
+  abstract class MockIQueryBus {
+    abstract register(queryType: any, handler: any): void;
+    abstract registerFactory(queryType: any, factory: any): void;
+    abstract use(middleware: any): this;
+    abstract discoverHandlers(): void;
+    abstract execute(query: any): Promise<any>;
+  }
+
+  return { MockICommandBus, MockIQueryBus };
+});
+
 const createPerformanceMock = (baseDelay = 10, isOptimized = false) => ({
   optimizeConfiguration: vi.fn().mockImplementation(async () => {
     const delay = isOptimized ? baseDelay * 0.3 : baseDelay;
@@ -46,13 +67,14 @@ const createMonitorMock = (targetTime = 100) => ({
 });
 
 // Mock CQRS z metrics
-vi.mock('@vytches/ddd-cqrs', async () => {
+vi.mock('@vytches/ddd-cqrs', () => {
   let executionCount = 0;
   const mockBus = vi.fn().mockImplementation(() => ({
     register: vi.fn().mockImplementation(async () => {
       await new Promise(resolve => setTimeout(resolve, 1 + Math.random() * 3));
       return { registered: true, executionTime: 1 + Math.random() * 3 };
     }),
+    registerFactory: vi.fn(),
     execute: vi.fn().mockImplementation(async () => {
       executionCount++;
       const executionTime = 5 + Math.random() * 10;
@@ -71,6 +93,8 @@ vi.mock('@vytches/ddd-cqrs', async () => {
     })),
   }));
   return {
+    ICommandBus: MockICommandBus,
+    IQueryBus: MockIQueryBus,
     CommandBus: mockBus,
     QueryBus: mockBus,
     EnhancedCommandBus: mockBus,

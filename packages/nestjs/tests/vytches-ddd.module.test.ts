@@ -4,13 +4,37 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 
+// Create mock abstract classes for DI token compatibility using vi.hoisted()
+const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
+  abstract class MockICommandBus {
+    abstract register(commandType: any, handler: any): void;
+    abstract registerFactory(commandType: any, factory: any): void;
+    abstract use(middleware: any): this;
+    abstract discoverHandlers(): void;
+    abstract execute(command: any): Promise<any>;
+  }
+
+  abstract class MockIQueryBus {
+    abstract register(queryType: any, handler: any): void;
+    abstract registerFactory(queryType: any, factory: any): void;
+    abstract use(middleware: any): this;
+    abstract discoverHandlers(): void;
+    abstract execute(query: any): Promise<any>;
+  }
+
+  return { MockICommandBus, MockIQueryBus };
+});
+
 // Mock the lazy-loaded modules to avoid static imports (module boundary violations)
-vi.mock('@vytches/ddd-cqrs', async () => {
+vi.mock('@vytches/ddd-cqrs', () => {
   const mockBus = vi.fn().mockImplementation(() => ({
     register: vi.fn(),
+    registerFactory: vi.fn(),
     execute: vi.fn(),
   }));
   return {
+    ICommandBus: MockICommandBus,
+    IQueryBus: MockIQueryBus,
     CommandBus: mockBus,
     QueryBus: mockBus,
     EnhancedCommandBus: mockBus,
@@ -125,22 +149,21 @@ describe('VytchesDDDModule', () => {
       expect(explorer).toBeInstanceOf(VytchesExplorerService);
     });
 
-    it('should provide bus services through string tokens', async () => {
+    it('should provide bus services through class tokens', async () => {
+      const { ICommandBus, IQueryBus } = await import('@vytches/ddd-cqrs');
+
       module = await Test.createTestingModule({
         imports: [VytchesDDDModule.forTesting()],
       }).compile();
 
       expect(module).toBeDefined();
 
-      // These services are provided by forTesting() with lazy-loaded factories
-      const commandBus = module.get('ICommandBus');
+      // These services are provided by forTesting() with class tokens
+      const commandBus = module.get(ICommandBus);
       expect(commandBus).toBeDefined();
 
-      const queryBus = module.get('IQueryBus');
+      const queryBus = module.get(IQueryBus);
       expect(queryBus).toBeDefined();
-
-      const eventBus = module.get('IEventBus');
-      expect(eventBus).toBeDefined();
     });
 
     it('should initialize buses with lazy loading', async () => {

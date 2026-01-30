@@ -11,8 +11,29 @@ let globalExecutionCount = 0;
 let globalHandlerRegistrations = 0;
 let globalContextSwitches = 0;
 
+// Create mock abstract classes for DI token compatibility using vi.hoisted()
+const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
+  abstract class MockICommandBus {
+    abstract register(commandType: any, handler: any): void;
+    abstract registerFactory(commandType: any, factory: any): void;
+    abstract use(middleware: any): this;
+    abstract discoverHandlers(): void;
+    abstract execute(command: any): Promise<any>;
+  }
+
+  abstract class MockIQueryBus {
+    abstract register(queryType: any, handler: any): void;
+    abstract registerFactory(queryType: any, factory: any): void;
+    abstract use(middleware: any): this;
+    abstract discoverHandlers(): void;
+    abstract execute(query: any): Promise<any>;
+  }
+
+  return { MockICommandBus, MockIQueryBus };
+});
+
 // Mock wszystkich dependencies z realistycznymi metrykami
-vi.mock('@vytches/ddd-cqrs', async () => {
+vi.mock('@vytches/ddd-cqrs', () => {
   // Define the mock factory inline to avoid hoisting issues
   const createCQRSMock = () => {
     const handlers = new Map<string, any>();
@@ -29,6 +50,7 @@ vi.mock('@vytches/ddd-cqrs', async () => {
           registrationTime: Math.random() * 5 + 1,
         };
       }),
+      registerFactory: vi.fn(),
       execute: vi.fn().mockImplementation(async (command: any) => {
         globalExecutionCount++;
         const executionTime = Math.random() * 20 + 5;
@@ -63,6 +85,8 @@ vi.mock('@vytches/ddd-cqrs', async () => {
   };
 
   return {
+    ICommandBus: MockICommandBus,
+    IQueryBus: MockIQueryBus,
     CommandBus: createCQRSMock(),
     QueryBus: createCQRSMock(),
     EnhancedCommandBus: createCQRSMock(),

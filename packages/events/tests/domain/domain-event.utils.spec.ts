@@ -30,11 +30,15 @@ describe('createDomainEvent', () => {
     const payload = { data: 'test data' };
     const mockDate = new Date('2023-01-01T00:00:00Z');
 
-    // Mock Date constructor to return a fixed date
-    vi.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+    // Use fake timers to control Date
+    vi.useFakeTimers();
+    vi.setSystemTime(mockDate);
 
     // Act
     const event = createDomainEvent(eventName, payload);
+
+    // Restore real timers
+    vi.useRealTimers();
 
     // Assert
     expect(event.metadata).toBeDefined();
