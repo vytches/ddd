@@ -54,7 +54,10 @@ export class MiddlewarePipelineExecutor<TContext, TResult> {
    * @param handler - The final handler that processes the request
    * @returns Promise resolving to the result
    */
-  async execute(context: TContext, handler: MiddlewareHandler<TContext, TResult>): Promise<TResult> {
+  async execute(
+    context: TContext,
+    handler: MiddlewareHandler<TContext, TResult>
+  ): Promise<TResult> {
     if (this.middlewares.length === 0) {
       return handler(context);
     }
@@ -105,7 +108,9 @@ export class MiddlewarePipelineExecutor<TContext, TResult> {
    * @param middleware - Middleware to append
    * @returns New executor with combined middleware
    */
-  append(...middleware: IMiddleware<TContext, TResult>[]): MiddlewarePipelineExecutor<TContext, TResult> {
+  append(
+    ...middleware: IMiddleware<TContext, TResult>[]
+  ): MiddlewarePipelineExecutor<TContext, TResult> {
     return new MiddlewarePipelineExecutor([...this.middlewares, ...middleware]);
   }
 
@@ -115,7 +120,9 @@ export class MiddlewarePipelineExecutor<TContext, TResult> {
    * @param middleware - Middleware to prepend
    * @returns New executor with combined middleware
    */
-  prepend(...middleware: IMiddleware<TContext, TResult>[]): MiddlewarePipelineExecutor<TContext, TResult> {
+  prepend(
+    ...middleware: IMiddleware<TContext, TResult>[]
+  ): MiddlewarePipelineExecutor<TContext, TResult> {
     return new MiddlewarePipelineExecutor([...middleware, ...this.middlewares]);
   }
 

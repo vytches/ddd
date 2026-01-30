@@ -106,7 +106,9 @@ export class QueryBus extends IQueryBus {
     context: CQRSExecutionContext,
     handlerExecution: () => Promise<T>
   ): Promise<T> {
-    const pipeline = new MiddlewarePipelineExecutor<CQRSExecutionContext, unknown>(this.middlewares);
+    const pipeline = new MiddlewarePipelineExecutor<CQRSExecutionContext, unknown>(
+      this.middlewares
+    );
     return pipeline.executeSimple(context, handlerExecution) as Promise<T>;
   }
 
