@@ -1,4 +1,5 @@
 import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
 import { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
@@ -27,6 +28,11 @@ export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {
    * Descriptive name for this policy
    */
   public readonly name: string;
+
+  /**
+   * Logger instance for policy evaluation tracking
+   */
+  protected readonly logger = Logger.forContext(this.constructor.name);
 
   constructor(id: string, domain: string, name: string) {
     this.id = id;
