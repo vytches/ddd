@@ -3,6 +3,7 @@ import { Inject, Injectable, Optional } from '@nestjs/common';
 import type { DiscoveryService, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import type { Constructor } from '@vytches/ddd-di';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
 
@@ -105,8 +106,12 @@ export class VytchesExplorerService implements OnModuleInit {
 
   async discoverHandlers(): Promise<HandlerInfo[]> {
     const handlers: HandlerInfo[] = [];
-    const providers = this.discoveryService.getProviders();
 
+    if (!this.discoveryService) {
+      return handlers;
+    }
+
+    const providers = this.discoveryService.getProviders();
     for (const provider of providers) {
       const handlerInfo = this.extractHandlerInfo(provider);
       if (handlerInfo) {
@@ -237,6 +242,20 @@ export class VytchesExplorerService implements OnModuleInit {
   // Legacy compatibility
   getContextConfiguration(): Record<string, unknown> | null {
     return ((this as Record<string, unknown>).contextConfig as Record<string, unknown>) || null;
+  }
+
+  /**
+   * Check if command bus was injected (useful for testing DI configuration)
+   */
+  hasCommandBus(): boolean {
+    return this.commandBus !== undefined;
+  }
+
+  /**
+   * Check if query bus was injected (useful for testing DI configuration)
+   */
+  hasQueryBus(): boolean {
+    return this.queryBus !== undefined;
   }
 
   async discoverContextHandlers(_context: string, _type: string): Promise<HandlerInfo[]> {

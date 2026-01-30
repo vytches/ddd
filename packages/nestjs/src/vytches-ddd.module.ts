@@ -1,6 +1,7 @@
 import type { DynamicModule, ModuleMetadata, Provider } from '@nestjs/common';
 import { Global, Module } from '@nestjs/common';
 import { DiscoveryModule, DiscoveryService, ModuleRef } from '@nestjs/core';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens in forTesting()
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import { VytchesExplorerService } from './services/vytches-explorer.service';
 import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';

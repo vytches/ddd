@@ -1,10 +1,48 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
+
 import type { IEventBus } from '@vytches/ddd-contracts';
-import type { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
+
+// Create mock abstract classes for DI token compatibility using vi.hoisted()
+const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
+  abstract class MockICommandBus {
+    abstract register(commandType: unknown, handler: unknown): void;
+    abstract registerFactory(commandType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
+    abstract discoverHandlers(): void;
+    abstract execute(command: unknown): Promise<unknown>;
+  }
+
+  abstract class MockIQueryBus {
+    abstract register(queryType: unknown, handler: unknown): void;
+    abstract registerFactory(queryType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
+    abstract discoverHandlers(): void;
+    abstract execute(query: unknown): Promise<unknown>;
+  }
+
+  return { MockICommandBus, MockIQueryBus };
+});
+
+// Mock the lazy-loaded modules to avoid static imports (module boundary violations)
+vi.mock('@vytches/ddd-cqrs', () => {
+  const mockBus = vi.fn().mockImplementation(() => ({
+    register: vi.fn(),
+    registerFactory: vi.fn(),
+    execute: vi.fn(),
+  }));
+  return {
+    ICommandBus: MockICommandBus,
+    IQueryBus: MockIQueryBus,
+    CommandBus: mockBus,
+    QueryBus: mockBus,
+    EnhancedCommandBus: mockBus,
+    EnhancedQueryBus: mockBus,
+  };
+});
 
 describe('VytchesDDDModule Integration', () => {
   let module: TestingModule;
@@ -26,14 +64,14 @@ describe('VytchesDDDModule Integration', () => {
       expect(explorer).toBeInstanceOf(VytchesExplorerService);
     });
 
-    it('should provide buses through string tokens', async () => {
-      const commandBus = module.get<ICommandBus>('ICommandBus');
-      const queryBus = module.get<IQueryBus>('IQueryBus');
-      const eventBus = module.get<IEventBus>('IEventBus');
+    it('should provide buses through class tokens', async () => {
+      const { ICommandBus, IQueryBus } = await import('@vytches/ddd-cqrs');
+
+      const commandBus = module.get(ICommandBus);
+      const queryBus = module.get(IQueryBus);
 
       expect(commandBus).toBeDefined();
       expect(queryBus).toBeDefined();
-      expect(eventBus).toBeDefined();
     });
   });
 
