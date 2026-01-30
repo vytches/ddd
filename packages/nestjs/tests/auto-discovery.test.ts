@@ -15,8 +15,9 @@ class TestCommand implements ICommand {
 }
 
 // Test-specific decorator that applies the same metadata as CommandHandler
-function TestCommandDecorator(messageType: any) {
-  return (target: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Decorator requires any for class constructor type
+function TestCommandDecorator(messageType: new (...args: any[]) => any) {
+  return <T extends new (...args: any[]) => any>(target: T): T => {
     Reflect.defineMetadata('di:handler-type', 'command', target);
     Reflect.defineMetadata(
       'di:handler-metadata',

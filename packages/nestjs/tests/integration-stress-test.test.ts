@@ -14,19 +14,19 @@ let globalContextSwitches = 0;
 // Create mock abstract classes for DI token compatibility using vi.hoisted()
 const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
   abstract class MockICommandBus {
-    abstract register(commandType: any, handler: any): void;
-    abstract registerFactory(commandType: any, factory: any): void;
-    abstract use(middleware: any): this;
+    abstract register(commandType: unknown, handler: unknown): void;
+    abstract registerFactory(commandType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
     abstract discoverHandlers(): void;
-    abstract execute(command: any): Promise<any>;
+    abstract execute(command: unknown): Promise<unknown>;
   }
 
   abstract class MockIQueryBus {
-    abstract register(queryType: any, handler: any): void;
-    abstract registerFactory(queryType: any, factory: any): void;
-    abstract use(middleware: any): this;
+    abstract register(queryType: unknown, handler: unknown): void;
+    abstract registerFactory(queryType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
     abstract discoverHandlers(): void;
-    abstract execute(query: any): Promise<any>;
+    abstract execute(query: unknown): Promise<unknown>;
   }
 
   return { MockICommandBus, MockIQueryBus };
@@ -36,10 +36,10 @@ const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
 vi.mock('@vytches/ddd-cqrs', () => {
   // Define the mock factory inline to avoid hoisting issues
   const createCQRSMock = () => {
-    const handlers = new Map<string, any>();
+    const handlers = new Map<string, unknown>();
 
     return vi.fn().mockImplementation(() => ({
-      register: vi.fn().mockImplementation(async (handlerClass: any) => {
+      register: vi.fn().mockImplementation(async (handlerClass: { name?: string }) => {
         globalHandlerRegistrations++;
         const handlerName = handlerClass.name || `Handler${globalHandlerRegistrations}`;
         handlers.set(handlerName, handlerClass);
@@ -51,7 +51,7 @@ vi.mock('@vytches/ddd-cqrs', () => {
         };
       }),
       registerFactory: vi.fn(),
-      execute: vi.fn().mockImplementation(async (command: any) => {
+      execute: vi.fn().mockImplementation(async (command: { type?: string }) => {
         globalExecutionCount++;
         const executionTime = Math.random() * 20 + 5;
         await new Promise(resolve => setTimeout(resolve, executionTime));
@@ -63,7 +63,7 @@ vi.mock('@vytches/ddd-cqrs', () => {
           result: `Command executed: ${command?.type || 'unknown'}`,
         };
       }),
-      send: vi.fn().mockImplementation(async (query: any) => {
+      send: vi.fn().mockImplementation(async (query: { type?: string }) => {
         globalExecutionCount++;
         const executionTime = Math.random() * 15 + 2;
         await new Promise(resolve => setTimeout(resolve, executionTime));
@@ -98,10 +98,10 @@ vi.mock('@vytches/ddd-events', async () => {
   // Define the mock factory inline
   const createEventBusMock = () => {
     let eventCount = 0;
-    const subscribers = new Map<string, any[]>();
+    const subscribers = new Map<string, Array<() => void>>();
 
     return vi.fn().mockImplementation(() => ({
-      publish: vi.fn().mockImplementation(async (event: any) => {
+      publish: vi.fn().mockImplementation(async (event: { eventType?: string; type?: string }) => {
         eventCount++;
         const publishTime = Math.random() * 8 + 2;
         await new Promise(resolve => setTimeout(resolve, publishTime));
@@ -115,7 +115,7 @@ vi.mock('@vytches/ddd-events', async () => {
           eventType,
         };
       }),
-      subscribe: vi.fn().mockImplementation((eventType: string, handler: any) => {
+      subscribe: vi.fn().mockImplementation((eventType: string, handler: () => void) => {
         if (!subscribers.has(eventType)) {
           subscribers.set(eventType, []);
         }
@@ -140,8 +140,8 @@ vi.mock('@vytches/ddd-events', async () => {
 
 vi.mock('@vytches/ddd-di', async () => {
   // Define the mock factory inline
-  const services = new Map<string, any>();
-  const contexts = new Map<string, Map<string, any>>();
+  const services = new Map<string, unknown>();
+  const contexts = new Map<string, Map<string, unknown>>();
 
   return {
     ServiceLifetime: {
@@ -150,7 +150,7 @@ vi.mock('@vytches/ddd-di', async () => {
       Scoped: 'scoped',
     },
     SimpleContainer: vi.fn().mockImplementation(() => ({
-      register: vi.fn().mockImplementation(async (serviceId: string, implementation: any) => {
+      register: vi.fn().mockImplementation(async (serviceId: string, implementation: unknown) => {
         const registrationTime = Math.random() * 2 + 0.5;
         await new Promise(resolve => setTimeout(resolve, registrationTime));
         services.set(serviceId, implementation);
@@ -219,7 +219,7 @@ vi.mock('@vytches/ddd-di', async () => {
     },
 
     PerformanceOptimizer: vi.fn().mockImplementation(() => ({
-      optimizeConfiguration: vi.fn().mockImplementation(async (_config: any) => {
+      optimizeConfiguration: vi.fn().mockImplementation(async (_config: unknown) => {
         const optimizationTime = Math.random() * 15 + 5;
         await new Promise(resolve => setTimeout(resolve, optimizationTime));
         return {
@@ -365,9 +365,20 @@ class UserDomainService {
   }
 }
 
+interface OrderData {
+  items?: string[];
+  userId?: string;
+}
+
+interface OrderResult {
+  id: string;
+  items: string[];
+  total: number;
+}
+
 @Injectable()
 class OrderDomainService {
-  async createOrder(orderData: any): Promise<any> {
+  async createOrder(orderData: OrderData): Promise<OrderResult> {
     await new Promise(resolve => setTimeout(resolve, Math.random() * 40 + 15));
 
     return {
@@ -621,8 +632,8 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
       console.log(`Average time per operation: ${(totalTime / concurrentOperations).toFixed(2)}ms`);
       console.log(`Total internal executions: ${operationsExecuted}`);
 
-      const successfulResults = results.filter(r => r && !r.error);
-      const errorResults = results.filter(r => r && r.error);
+      const successfulResults = results.filter(r => r && !('error' in r));
+      const errorResults = results.filter(r => r && 'error' in r);
 
       console.log(
         `Success rate: ${((successfulResults.length / concurrentOperations) * 100).toFixed(1)}%`
@@ -792,7 +803,9 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
       class UnreliableHandler {
         private callCount = 0;
 
-        async execute(data: any): Promise<any> {
+        async execute(data: {
+          attempt: number;
+        }): Promise<{ success: boolean; callCount: number; data: { attempt: number } }> {
           this.callCount++;
 
           // 30% failure rate

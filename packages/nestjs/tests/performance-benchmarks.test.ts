@@ -8,19 +8,19 @@ import { VytchesDDDModule } from '../src/vytches-ddd.module';
 // Create mock abstract classes for DI token compatibility using vi.hoisted()
 const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
   abstract class MockICommandBus {
-    abstract register(commandType: any, handler: any): void;
-    abstract registerFactory(commandType: any, factory: any): void;
-    abstract use(middleware: any): this;
+    abstract register(commandType: unknown, handler: unknown): void;
+    abstract registerFactory(commandType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
     abstract discoverHandlers(): void;
-    abstract execute(command: any): Promise<any>;
+    abstract execute(command: unknown): Promise<unknown>;
   }
 
   abstract class MockIQueryBus {
-    abstract register(queryType: any, handler: any): void;
-    abstract registerFactory(queryType: any, factory: any): void;
-    abstract use(middleware: any): this;
+    abstract register(queryType: unknown, handler: unknown): void;
+    abstract registerFactory(queryType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
     abstract discoverHandlers(): void;
-    abstract execute(query: any): Promise<any>;
+    abstract execute(query: unknown): Promise<unknown>;
   }
 
   return { MockICommandBus, MockIQueryBus };
@@ -113,7 +113,7 @@ vi.mock('@vytches/ddd-events', async () => ({
         return { success: true, publishTime, eventNumber: publishCount };
       }),
       subscribe: vi.fn(),
-      publishMany: vi.fn().mockImplementation(async (events: any[]) => {
+      publishMany: vi.fn().mockImplementation(async (events: unknown[]) => {
         const batchTime = events.length * (1 + Math.random() * 2);
         await new Promise(resolve => setTimeout(resolve, batchTime));
         return { success: true, batchTime, eventsPublished: events.length };
@@ -156,9 +156,14 @@ vi.mock('@vytches/ddd-di', async () => ({
 }));
 
 // Test handlers z różną kompleksnością
+interface HandlerResult {
+  result: string;
+  executionTime: number;
+}
+
 @Injectable()
 class FastCommandHandler {
-  async execute(_command: any): Promise<any> {
+  async execute(_command: unknown): Promise<HandlerResult> {
     // Symulacja szybkiej operacji
     await new Promise(resolve => setTimeout(resolve, 1 + Math.random() * 2));
     return { result: 'fast', executionTime: 1 + Math.random() * 2 };
@@ -167,7 +172,7 @@ class FastCommandHandler {
 
 @Injectable()
 class SlowCommandHandler {
-  async execute(_command: any): Promise<any> {
+  async execute(_command: unknown): Promise<HandlerResult> {
     // Symulacja wolnej operacji
     await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 100));
     return { result: 'slow', executionTime: 50 + Math.random() * 100 };
@@ -176,7 +181,7 @@ class SlowCommandHandler {
 
 @Injectable()
 class MediumComplexityHandler {
-  async execute(_command: any): Promise<any> {
+  async execute(_command: unknown): Promise<HandlerResult> {
     // Symulacja średnio złożonej operacji
     await new Promise(resolve => setTimeout(resolve, 10 + Math.random() * 20));
     return { result: 'medium', executionTime: 10 + Math.random() * 20 };

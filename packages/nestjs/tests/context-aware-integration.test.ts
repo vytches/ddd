@@ -7,19 +7,19 @@ import { VytchesExplorerService } from '../src/services/vytches-explorer.service
 // Create mock abstract classes for DI token compatibility using vi.hoisted()
 const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
   abstract class MockICommandBus {
-    abstract register(commandType: any, handler: any): void;
-    abstract registerFactory(commandType: any, factory: any): void;
-    abstract use(middleware: any): this;
+    abstract register(commandType: unknown, handler: unknown): void;
+    abstract registerFactory(commandType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
     abstract discoverHandlers(): void;
-    abstract execute(command: any): Promise<any>;
+    abstract execute(command: unknown): Promise<unknown>;
   }
 
   abstract class MockIQueryBus {
-    abstract register(queryType: any, handler: any): void;
-    abstract registerFactory(queryType: any, factory: any): void;
-    abstract use(middleware: any): this;
+    abstract register(queryType: unknown, handler: unknown): void;
+    abstract registerFactory(queryType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
     abstract discoverHandlers(): void;
-    abstract execute(query: any): Promise<any>;
+    abstract execute(query: unknown): Promise<unknown>;
   }
 
   return { MockICommandBus, MockIQueryBus };
