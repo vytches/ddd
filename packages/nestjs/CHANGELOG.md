@@ -3,6 +3,61 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 11.0.0 (2026-01-30)
+
+### Bug Fixes
+
+- format issue fix
+  ([70c8f0a](https://github.com/vytches/ddd/commit/70c8f0af821878733a4542b3b03173de06e28d3e))
+- **nestjs:** fix handler registration by using class tokens instead of strings
+  ([69c2237](https://github.com/vytches/ddd/commit/69c22379f6adb2dce587839a3961d607891bc855))
+- **nestjs:** implement configuration methods and reduce any type usage
+  ([#42](https://github.com/vytches/ddd/issues/42))
+  ([2ed336d](https://github.com/vytches/ddd/commit/2ed336d9c32b7f086fe951ab651b2c5cb9a8dcde))
+- **nestjs:** resolve all linter errors and finalize package for release
+  ([#46](https://github.com/vytches/ddd/issues/46))
+  ([625150a](https://github.com/vytches/ddd/commit/625150af1eef1e39c8a304ab3684d4702d366cc5))
+- **security:** resolve all dependency vulnerabilities and fix lazy-loaded
+  imports
+  ([35d8c86](https://github.com/vytches/ddd/commit/35d8c86e98e7dd4c2c6a5677786642881cad9a4e))
+
+### BREAKING CHANGES
+
+- **nestjs:** None - all changes maintain backward compatibility
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.11.0
+* @vytches/ddd-aggregates@0.11.0
+* @vytches/ddd-cli@0.12.0
+* @vytches/ddd-contracts@0.13.0
+* @vytches/ddd-core@0.11.0
+* @vytches/ddd-cqrs@0.11.0
+* @vytches/ddd-di@0.11.0
+* @vytches/ddd-domain-primitives@0.11.0
+* @vytches/ddd-domain-services@0.11.0
+* @vytches/ddd@0.12.0
+* @vytches/ddd-event-scheduling@0.11.0
+* @vytches/ddd-event-store@0.11.0
+* @vytches/ddd-events@0.11.0
+* @vytches/ddd-logging@0.11.0
+* @vytches/ddd-messaging@0.11.0
+* @vytches/ddd-nestjs@2.0.0
+* @vytches/ddd-policies@0.12.0
+* @vytches/ddd-process-managers@0.9.0
+* @vytches/ddd-projections@0.11.0
+* @vytches/ddd-repositories@0.11.0
+* @vytches/ddd-resilience@0.11.0
+* @vytches/ddd-testing@0.11.0
+* @vytches/ddd-utils@0.11.0
+* @vytches/ddd-validation@0.12.0
+* @vytches/ddd-value-objects@0.11.0
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 10.0.0 (2026-01-26)
 
 ### Bug Fixes
