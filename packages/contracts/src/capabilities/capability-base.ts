@@ -63,7 +63,7 @@ export interface IProjectionCapability<T extends string = string, TReadModel = u
 export type CapabilityType<T extends Capability> = T extends Capability<infer U> ? U : never;
 
 export type CapabilityConstructor<T extends Capability = Capability> = (new (
-  ...args: any[]
+  ...args: unknown[]
 ) => T) & {
   capabilityType: string;
 };

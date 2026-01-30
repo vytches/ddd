@@ -62,7 +62,7 @@ export interface IServiceLocator {
    * Auto-discover and register handlers
    * @param assemblies - Optional assemblies to scan for handlers
    */
-  discoverAndRegisterHandlers(assemblies?: any[]): Promise<void>;
+  discoverAndRegisterHandlers(assemblies?: unknown[]): Promise<void>;
 
   /**
    * Register a handler discovery plugin
@@ -210,7 +210,7 @@ export class ServiceLocator implements IServiceLocator {
   /**
    * Auto-discover and register handlers
    */
-  async discoverAndRegisterHandlers(assemblies?: any[]): Promise<void> {
+  async discoverAndRegisterHandlers(assemblies?: unknown[]): Promise<void> {
     this.ensureNotDisposed();
 
     if (!this.globalContainer) {
@@ -394,7 +394,7 @@ export class VytchesDDD {
   /**
    * Auto-discover and register handlers
    */
-  static discoverAndRegisterHandlers(assemblies?: any[]): Promise<void> {
+  static discoverAndRegisterHandlers(assemblies?: unknown[]): Promise<void> {
     return VytchesDDD.serviceLocator.discoverAndRegisterHandlers(assemblies);
   }
 
