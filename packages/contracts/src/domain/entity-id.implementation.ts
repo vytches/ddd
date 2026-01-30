@@ -72,36 +72,15 @@ export class EntityId<T = string> implements IEntityId<T> {
   }
 
   /**
-   * Static factory methods for common EntityId types
-   */
-  static createText<T = string>(value: T): EntityId<T> {
-    return new EntityId(value, 'text');
-  }
-
-  static createUuid(value: string): EntityId<string> {
-    return new EntityId(value, 'uuid');
-  }
-
-  static createInteger(value: number): EntityId<string> {
-    return new EntityId(value.toString(), 'integer');
-  }
-
-  static createBigInt(value: string | bigint): EntityId<string> {
-    const stringValue = typeof value === 'bigint' ? value.toString() : value;
-    return new EntityId(stringValue, 'bigint');
-  }
-
-  // Compatibility methods for existing code
-  /**
-   * Creates a new EntityId with a randomly generated UUID
+   * Primary factory method - creates a new EntityId with a randomly generated UUID
    * @returns New EntityId with random UUID
    * @example
    * ```typescript
-   * const id = EntityId.createWithRandomUUID();
+   * const id = EntityId.create();
    * console.log(id.getValue()); // Returns: '550e8400-e29b-41d4-a716-446655440000'
    * ```
    */
-  static createWithRandomUUID(): EntityId<string> {
+  static create(): EntityId<string> {
     // Simple UUID generation without external dependencies
     const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
       const r = (Math.random() * 16) | 0;
@@ -109,6 +88,44 @@ export class EntityId<T = string> implements IEntityId<T> {
       return v.toString(16);
     });
     return new EntityId(uuid, 'uuid');
+  }
+
+  /**
+   * @deprecated Use `fromText()` instead. Will be removed in next major version.
+   */
+  static createText<T = string>(value: T): EntityId<T> {
+    return new EntityId(value, 'text');
+  }
+
+  /**
+   * @deprecated Use `fromUUID()` instead. Will be removed in next major version.
+   */
+  static createUuid(value: string): EntityId<string> {
+    return new EntityId(value, 'uuid');
+  }
+
+  /**
+   * @deprecated Use `fromInteger()` instead. Will be removed in next major version.
+   */
+  static createInteger(value: number): EntityId<string> {
+    return new EntityId(value.toString(), 'integer');
+  }
+
+  /**
+   * @deprecated Use `fromBigInt()` instead. Will be removed in next major version.
+   */
+  static createBigInt(value: string | bigint): EntityId<string> {
+    const stringValue = typeof value === 'bigint' ? value.toString() : value;
+    return new EntityId(stringValue, 'bigint');
+  }
+
+  /**
+   * @deprecated Use `create()` instead. Will be removed in next major version.
+   * Creates a new EntityId with a randomly generated UUID
+   * @returns New EntityId with random UUID
+   */
+  static createWithRandomUUID(): EntityId<string> {
+    return EntityId.create();
   }
 
   /**

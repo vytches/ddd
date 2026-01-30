@@ -26,8 +26,24 @@ export class EntityId<T = string> extends BaseEntityId<T> {
     }
   }
 
-  static override createWithRandomUUID(): EntityId<string> {
+  /**
+   * Primary factory method - creates a new EntityId with a randomly generated UUID
+   * @returns New EntityId with random UUID
+   * @example
+   * ```typescript
+   * const id = EntityId.create();
+   * console.log(id.getValue()); // Returns: '550e8400-e29b-41d4-a716-446655440000'
+   * ```
+   */
+  static override create(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
+  }
+
+  /**
+   * @deprecated Use `create()` instead. Will be removed in next major version.
+   */
+  static override createWithRandomUUID(): EntityId<string> {
+    return EntityId.create();
   }
 
   /**
@@ -86,15 +102,15 @@ export class EntityId<T = string> extends BaseEntityId<T> {
  * const id = EntityIdFactory.createWithRandomUUID();
  *
  * // After (recommended):
- * const id = EntityId.createWithRandomUUID();
+ * const id = EntityId.create();
  * ```
  */
 export class EntityIdFactory implements IEntityIdFactory {
   /**
-   * @deprecated Use EntityId.createWithRandomUUID() instead
+   * @deprecated Use EntityId.create() instead
    */
   static createWithRandomUUID(): EntityId<string> {
-    return new EntityId(LibUtils.getUUID(), 'uuid');
+    return EntityId.create();
   }
 
   /**
@@ -157,9 +173,9 @@ export class EntityIdFactory implements IEntityIdFactory {
     return new EntityId(value, 'text');
   }
 
-  /** @deprecated Use EntityId.createWithRandomUUID() instead */
+  /** @deprecated Use EntityId.create() instead */
   createWithRandomUUID(): EntityId<string> {
-    return EntityIdFactory.createWithRandomUUID();
+    return EntityId.create();
   }
 
   /** @deprecated Use EntityId.fromUUID() instead */
