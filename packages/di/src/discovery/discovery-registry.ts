@@ -6,6 +6,7 @@
  * bounded context isolation and DDD principles.
  */
 
+import { Logger } from '@vytches/ddd-logging';
 import type { IDependencyContainer } from '../types';
 
 // Type alias for backward compatibility
@@ -115,6 +116,7 @@ export interface DiscoveryRegistryConfig {
  * Central registry for coordinating discovery across packages
  */
 export class DiscoveryRegistry {
+  private readonly logger = Logger.forContext('DiscoveryRegistry');
   private readonly plugins = new Map<string, IDiscoveryPlugin>();
   private readonly contextPlugins = new Map<string, Set<IDiscoveryPlugin>>();
   private readonly discoveryResults = new Map<string, DiscoveryResult[]>();
@@ -127,7 +129,7 @@ export class DiscoveryRegistry {
   registerPlugin(plugin: IDiscoveryPlugin): void {
     if (!plugin.isAvailable()) {
       if (this.config.debug) {
-        console.log(`Plugin ${plugin.name} not available (package not installed)`);
+        this.logger.debug('Plugin not available (package not installed)', { pluginName: plugin.name });
       }
       return;
     }
@@ -135,7 +137,7 @@ export class DiscoveryRegistry {
     this.plugins.set(plugin.name, plugin);
 
     if (this.config.debug) {
-      console.log(`Registered discovery plugin: ${plugin.name}`);
+      this.logger.debug('Registered discovery plugin', { pluginName: plugin.name });
     }
   }
 
@@ -174,7 +176,7 @@ export class DiscoveryRegistry {
         if (result.status === 'fulfilled') {
           results.push(result.value);
         } else if (this.config.debug) {
-          console.error(`Discovery failed for plugin:`, result.reason);
+          this.logger.error('Discovery failed for plugin', { reason: String(result.reason) });
         }
       }
     } else {
@@ -185,7 +187,7 @@ export class DiscoveryRegistry {
           results.push(result);
         } catch (error) {
           if (this.config.debug) {
-            console.error(`Discovery failed for ${plugin.name}:`, error);
+            this.logger.error('Discovery failed for plugin', { pluginName: plugin.name, error: String(error) });
           }
         }
       }
@@ -281,10 +283,11 @@ export class DiscoveryRegistry {
       const validation = this.plugins.get(result.pluginName)?.validate(result);
 
       if (validation && !validation.valid) {
-        console.warn(
-          `Validation failed for ${result.pluginName} in ${contextName}:`,
-          validation.errors
-        );
+        this.logger.warn('Validation failed for plugin', {
+          pluginName: result.pluginName,
+          contextName,
+          errors: validation.errors,
+        });
       }
 
       // Check for cross-context references
@@ -297,9 +300,10 @@ export class DiscoveryRegistry {
           for (const dep of deps) {
             const depContext = this.extractContextFromDependency(dep);
             if (depContext && !allowedContexts.includes(depContext)) {
-              console.warn(
-                `Context ${contextName} references ${depContext} which is not in access matrix`
-              );
+              this.logger.warn('Context references another context not in access matrix', {
+                contextName,
+                referencedContext: depContext,
+              });
             }
           }
         }

@@ -1,3 +1,4 @@
+import { Logger } from '@vytches/ddd-logging';
 import type { PolicyEvent } from './policy-evaluation-event';
 
 export type PolicyEventHandler<T extends PolicyEvent = PolicyEvent> = (
@@ -34,6 +35,7 @@ export interface PolicyEventBusMetrics {
 }
 
 export class PolicyEventBus {
+  private readonly logger = Logger.forContext('PolicyEventBus');
   private readonly subscriptions = new Map<string, PolicyEventSubscription>();
   private readonly config: Required<PolicyEventBusConfig>;
   private readonly metrics: PolicyEventBusMetrics;
@@ -259,7 +261,7 @@ export class PolicyEventBus {
           // Do nothing
           break;
         case 'log':
-          console.error(errorMessage, error);
+          this.logger.error(errorMessage, { error: error instanceof Error ? error.message : String(error) });
           break;
         case 'throw':
           throw new Error(errorMessage);

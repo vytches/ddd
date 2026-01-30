@@ -1,3 +1,4 @@
+import { Logger } from '@vytches/ddd-logging';
 import 'reflect-metadata';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';
 import type { HandlerInfo, IHandlerDiscoveryPlugin } from './discovery/handler-discovery.interface';
@@ -82,6 +83,7 @@ export interface IServiceLocator {
 
 export class ServiceLocator implements IServiceLocator {
   private static instance: ServiceLocator;
+  private readonly logger = Logger.forContext('ServiceLocator');
   private globalContainer?: IDependencyContainer | undefined;
   private readonly contextContainers = new Map<string, IDependencyContainer>();
   private readonly discoveryRegistry = new HandlerDiscoveryRegistry();
@@ -225,7 +227,7 @@ export class ServiceLocator implements IServiceLocator {
       this.registerHandlerInContainer(handler, this.globalContainer);
     }
 
-    console.log(`✅ Discovered and registered ${handlers.length} handlers`);
+    this.logger.info('Discovered and registered handlers', { count: handlers.length });
   }
 
   /**
@@ -246,7 +248,10 @@ export class ServiceLocator implements IServiceLocator {
         lifetime: ServiceLifetime.Transient,
       });
     } catch (error) {
-      console.warn(`Failed to register handler ${handler.handlerType.name}:`, error);
+      this.logger.warn('Failed to register handler', {
+        handlerName: handler.handlerType.name,
+        error: String(error),
+      });
     }
   }
 
@@ -267,9 +272,9 @@ export class ServiceLocator implements IServiceLocator {
       // Reset disposed flag
       this.disposed = false;
 
-      console.log('✅ ServiceLocator reset completed');
+      this.logger.info('ServiceLocator reset completed');
     } catch (error) {
-      console.warn('Error during ServiceLocator reset:', error);
+      this.logger.warn('Error during ServiceLocator reset', { error: String(error) });
     }
   }
 
@@ -292,7 +297,7 @@ export class ServiceLocator implements IServiceLocator {
             container.dispose();
           }
         } catch (error) {
-          console.warn(`Error disposing context container ${contextName}:`, error);
+          this.logger.warn('Error disposing context container', { contextName, error: String(error) });
         }
       }
       this.contextContainers.clear();
@@ -304,9 +309,9 @@ export class ServiceLocator implements IServiceLocator {
       this.globalContainer = undefined;
 
       this.disposed = true;
-      console.log('✅ ServiceLocator disposed');
+      this.logger.info('ServiceLocator disposed');
     } catch (error) {
-      console.warn('Error during ServiceLocator disposal:', error);
+      this.logger.warn('Error during ServiceLocator disposal', { error: String(error) });
       this.disposed = true;
     }
   }

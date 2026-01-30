@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 import { MiddlewarePipelineExecutor } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 
@@ -11,6 +12,7 @@ import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 
 export class CommandBus extends ICommandBus {
+  private readonly logger = Logger.forContext('CommandBus');
   private middlewares: ICQRSMiddleware[] = [];
   private handlers: Map<
     string,
@@ -53,7 +55,7 @@ export class CommandBus extends ICommandBus {
     // This method is kept for backward compatibility but does nothing
     // Suppress deprecation warnings in CI to avoid stderr confusion
     if (!process.env.CI) {
-      console.warn(
+      this.logger.warn(
         'CommandBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
       );
     }

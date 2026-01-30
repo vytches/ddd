@@ -1,9 +1,11 @@
 import type { IDependencyContainer } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 import type { ICommandBus, IQueryBus } from '../abstracts';
 import { CommandBus, EnhancedCommandBus, EnhancedQueryBus, QueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';
 
 export class CQRSConfiguration {
+  private readonly logger = Logger.forContext('CQRSConfiguration');
   public readonly commandBus: ICommandBus;
   public readonly queryBus: IQueryBus;
 
@@ -32,7 +34,7 @@ export class CQRSConfiguration {
     if (autoDiscovery) {
       // Suppress deprecation warnings in CI to avoid stderr confusion
       if (!process.env.CI) {
-        console.warn(
+        this.logger.warn(
           'autoDiscovery option is deprecated. Use DI container auto-discovery instead.'
         );
       }

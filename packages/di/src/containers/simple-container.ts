@@ -1,4 +1,4 @@
-// Removed logging dependency for Phase 1 simplification
+import { Logger } from '@vytches/ddd-logging';
 import {
   CircularDependencyError,
   ContainerDisposedError,
@@ -17,9 +17,10 @@ import type {
 import { ServiceLifetime } from '../types';
 
 export class SimpleContainer implements IDependencyContainer {
+  private readonly logger = Logger.forContext('SimpleContainer');
   private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly singletonInstances = new Map<string, any>();
-  private readonly scopedInstances = new Map<string, any>();
+  private readonly singletonInstances = new Map<string, unknown>();
+  private readonly scopedInstances = new Map<string, unknown>();
   private readonly resolutionChain: ServiceToken[] = [];
   private disposed = false;
 
@@ -196,7 +197,7 @@ export class SimpleContainer implements IDependencyContainer {
         try {
           instance.dispose();
         } catch (error) {
-          console.warn('Error disposing singleton instance:', error);
+          this.logger.warn('Error disposing singleton instance', { error: String(error) });
         }
       }
     }

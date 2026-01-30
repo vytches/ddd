@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
 import { DefaultResilienceContext, ResiliencePolicyBuilder } from '@vytches/ddd-resilience';
 import 'reflect-metadata';
@@ -154,6 +155,9 @@ export class EnhancedQueryBus extends IQueryBus {
   // Resilience strategy
   private resilienceStrategy?: ResilienceStrategy;
 
+  // Logger instance
+  private readonly logger = Logger.forContext('EnhancedQueryBus');
+
   // Current options for dynamic reconfiguration
   private options: EnhancedQueryBusOptions;
 
@@ -245,7 +249,7 @@ export class EnhancedQueryBus extends IQueryBus {
       this.resilienceStrategy = builder.build();
       this.resilienceEnabled = true;
     } catch (error) {
-      console.warn('Failed to setup resilience patterns:', error);
+      this.logger.warn('Failed to setup resilience patterns', { error: String(error) });
       this.resilienceEnabled = false;
     }
   }
