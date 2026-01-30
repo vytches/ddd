@@ -2,18 +2,20 @@ import type { ModuleRef } from '@nestjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NestJSContainerAdapter } from '../src/adapters/nestjs-container.adapter';
 import { safeRun } from '@vytches/ddd-utils';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Required for testing
+import { ServiceLifetime } from '@vytches/ddd-di';
 
 describe('NestJSContainerAdapter', () => {
   let adapter: NestJSContainerAdapter;
-  let mockModuleRef: ModuleRef;
+  let mockModuleRef: { get: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
     // Create mock ModuleRef
     mockModuleRef = {
       get: vi.fn(),
-    } as any;
+    } as { get: ReturnType<typeof vi.fn> };
 
-    adapter = new NestJSContainerAdapter(mockModuleRef);
+    adapter = new NestJSContainerAdapter(mockModuleRef as unknown as ModuleRef);
   });
 
   describe('constructor', () => {
@@ -30,11 +32,11 @@ describe('NestJSContainerAdapter', () => {
   describe('setModuleRef', () => {
     it('should update ModuleRef', () => {
       const newAdapter = new NestJSContainerAdapter();
-      const newModuleRef = { get: vi.fn() } as any;
+      const newModuleRef = { get: vi.fn() };
 
-      newAdapter.setModuleRef(newModuleRef);
+      newAdapter.setModuleRef(newModuleRef as unknown as ModuleRef);
       // Test that it doesn't throw
-      expect(() => newAdapter.setModuleRef(newModuleRef)).not.toThrow();
+      expect(() => newAdapter.setModuleRef(newModuleRef as unknown as ModuleRef)).not.toThrow();
     });
   });
 
@@ -51,7 +53,7 @@ describe('NestJSContainerAdapter', () => {
       class TestService {}
 
       adapter.register('testService', TestService, {
-        lifetime: 'singleton' as any,
+        lifetime: ServiceLifetime.Singleton,
       });
 
       expect(adapter.isRegistered('testService')).toBe(true);
@@ -83,7 +85,7 @@ describe('NestJSContainerAdapter', () => {
       const factory = () => ({ value: 'test' });
 
       adapter.registerFactory('testFactory', factory, {
-        lifetime: 'singleton' as any,
+        lifetime: ServiceLifetime.Singleton,
         tags: ['factory'],
       });
 
@@ -117,7 +119,7 @@ describe('NestJSContainerAdapter', () => {
   describe('resolve', () => {
     it('should resolve from NestJS container first', () => {
       const nestService = { value: 'from-nest' };
-      (mockModuleRef.get as any).mockReturnValue(nestService);
+      mockModuleRef.get.mockReturnValue(nestService);
 
       const result = adapter.resolve('nestService');
 
@@ -126,7 +128,7 @@ describe('NestJSContainerAdapter', () => {
     });
 
     it('should resolve from internal container if not in NestJS', () => {
-      (mockModuleRef.get as any).mockImplementation(() => {
+      mockModuleRef.get.mockImplementation(() => {
         throw new Error('Not found');
       });
 
@@ -146,7 +148,7 @@ describe('NestJSContainerAdapter', () => {
       };
 
       adapter.registerFactory('singletonService', factory, {
-        lifetime: 'singleton' as any,
+        lifetime: ServiceLifetime.Singleton,
       });
 
       const first = adapter.resolve('singletonService');
@@ -164,7 +166,7 @@ describe('NestJSContainerAdapter', () => {
       };
 
       adapter.registerFactory('transientService', factory, {
-        lifetime: 'transient' as any,
+        lifetime: ServiceLifetime.Transient,
       });
 
       const first = adapter.resolve('transientService');
@@ -175,7 +177,7 @@ describe('NestJSContainerAdapter', () => {
     });
 
     it('should throw error for unregistered service', () => {
-      (mockModuleRef.get as any).mockImplementation(() => {
+      mockModuleRef.get.mockImplementation(() => {
         throw new Error('Not found');
       });
 
@@ -224,7 +226,7 @@ describe('NestJSContainerAdapter', () => {
     });
 
     it('should return false for unregistered service', () => {
-      (mockModuleRef.get as any).mockImplementation(() => {
+      mockModuleRef.get.mockImplementation(() => {
         throw new Error('Not found');
       });
 
@@ -232,7 +234,7 @@ describe('NestJSContainerAdapter', () => {
     });
 
     it('should check NestJS container', () => {
-      (mockModuleRef.get as any).mockReturnValue({});
+      mockModuleRef.get.mockReturnValue({});
 
       expect(adapter.isRegistered('nestService')).toBe(true);
     });
@@ -281,7 +283,7 @@ describe('NestJSContainerAdapter', () => {
         'singleton',
         { value: 'singleton' },
         {
-          lifetime: 'singleton' as any,
+          lifetime: ServiceLifetime.Singleton,
         }
       );
 
@@ -304,7 +306,7 @@ describe('NestJSContainerAdapter', () => {
 
   describe('dispose', () => {
     it('should clear all services and instances', () => {
-      (mockModuleRef.get as any).mockImplementation(() => {
+      mockModuleRef.get.mockImplementation(() => {
         throw new Error('Not found');
       });
 

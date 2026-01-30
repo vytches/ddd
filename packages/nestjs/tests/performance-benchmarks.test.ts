@@ -5,6 +5,27 @@ import { safeRun } from '@vytches/ddd-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 
+// Create mock abstract classes for DI token compatibility using vi.hoisted()
+const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
+  abstract class MockICommandBus {
+    abstract register(commandType: unknown, handler: unknown): void;
+    abstract registerFactory(commandType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
+    abstract discoverHandlers(): void;
+    abstract execute(command: unknown): Promise<unknown>;
+  }
+
+  abstract class MockIQueryBus {
+    abstract register(queryType: unknown, handler: unknown): void;
+    abstract registerFactory(queryType: unknown, factory: unknown): void;
+    abstract use(middleware: unknown): this;
+    abstract discoverHandlers(): void;
+    abstract execute(query: unknown): Promise<unknown>;
+  }
+
+  return { MockICommandBus, MockIQueryBus };
+});
+
 const createPerformanceMock = (baseDelay = 10, isOptimized = false) => ({
   optimizeConfiguration: vi.fn().mockImplementation(async () => {
     const delay = isOptimized ? baseDelay * 0.3 : baseDelay;
@@ -46,13 +67,14 @@ const createMonitorMock = (targetTime = 100) => ({
 });
 
 // Mock CQRS z metrics
-vi.mock('@vytches/ddd-cqrs', async () => {
+vi.mock('@vytches/ddd-cqrs', () => {
   let executionCount = 0;
   const mockBus = vi.fn().mockImplementation(() => ({
     register: vi.fn().mockImplementation(async () => {
       await new Promise(resolve => setTimeout(resolve, 1 + Math.random() * 3));
       return { registered: true, executionTime: 1 + Math.random() * 3 };
     }),
+    registerFactory: vi.fn(),
     execute: vi.fn().mockImplementation(async () => {
       executionCount++;
       const executionTime = 5 + Math.random() * 10;
@@ -71,6 +93,8 @@ vi.mock('@vytches/ddd-cqrs', async () => {
     })),
   }));
   return {
+    ICommandBus: MockICommandBus,
+    IQueryBus: MockIQueryBus,
     CommandBus: mockBus,
     QueryBus: mockBus,
     EnhancedCommandBus: mockBus,
@@ -89,7 +113,7 @@ vi.mock('@vytches/ddd-events', async () => ({
         return { success: true, publishTime, eventNumber: publishCount };
       }),
       subscribe: vi.fn(),
-      publishMany: vi.fn().mockImplementation(async (events: any[]) => {
+      publishMany: vi.fn().mockImplementation(async (events: unknown[]) => {
         const batchTime = events.length * (1 + Math.random() * 2);
         await new Promise(resolve => setTimeout(resolve, batchTime));
         return { success: true, batchTime, eventsPublished: events.length };
@@ -132,9 +156,14 @@ vi.mock('@vytches/ddd-di', async () => ({
 }));
 
 // Test handlers z różną kompleksnością
+interface HandlerResult {
+  result: string;
+  executionTime: number;
+}
+
 @Injectable()
 class FastCommandHandler {
-  async execute(_command: any): Promise<any> {
+  async execute(_command: unknown): Promise<HandlerResult> {
     // Symulacja szybkiej operacji
     await new Promise(resolve => setTimeout(resolve, 1 + Math.random() * 2));
     return { result: 'fast', executionTime: 1 + Math.random() * 2 };
@@ -143,7 +172,7 @@ class FastCommandHandler {
 
 @Injectable()
 class SlowCommandHandler {
-  async execute(_command: any): Promise<any> {
+  async execute(_command: unknown): Promise<HandlerResult> {
     // Symulacja wolnej operacji
     await new Promise(resolve => setTimeout(resolve, 50 + Math.random() * 100));
     return { result: 'slow', executionTime: 50 + Math.random() * 100 };
@@ -152,7 +181,7 @@ class SlowCommandHandler {
 
 @Injectable()
 class MediumComplexityHandler {
-  async execute(_command: any): Promise<any> {
+  async execute(_command: unknown): Promise<HandlerResult> {
     // Symulacja średnio złożonej operacji
     await new Promise(resolve => setTimeout(resolve, 10 + Math.random() * 20));
     return { result: 'medium', executionTime: 10 + Math.random() * 20 };

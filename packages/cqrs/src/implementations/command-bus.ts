@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
+import { MiddlewarePipelineExecutor } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 
 import { ICommandBus } from '../abstracts';
@@ -108,22 +109,10 @@ export class CommandBus extends ICommandBus {
     context: CQRSExecutionContext,
     handlerExecution: () => Promise<T>
   ): Promise<T> {
-    if (this.middlewares.length === 0) {
-      return handlerExecution();
-    }
-
-    let index = 0;
-
-    const next = async (): Promise<T> => {
-      if (index < this.middlewares.length) {
-        const middleware = this.middlewares[index++];
-        return middleware?.handle(context, next) as Promise<T>;
-      } else {
-        return handlerExecution();
-      }
-    };
-
-    return next();
+    const pipeline = new MiddlewarePipelineExecutor<CQRSExecutionContext, unknown>(
+      this.middlewares
+    );
+    return pipeline.executeSimple(context, handlerExecution) as Promise<T>;
   }
 
   private isValidatable(obj: unknown): obj is ICqrsValidatable {

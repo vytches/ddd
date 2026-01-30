@@ -357,6 +357,10 @@ describe('Validation', () => {
       });
     });
 
+    afterEach(() => {
+      consoleWarnSpy.mockRestore();
+    });
+
     it('should pass for valid port number', () => {
       const [error] = safeRun(() => Validation.port(3000));
       expect(error).toBeUndefined();
