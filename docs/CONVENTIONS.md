@@ -214,34 +214,153 @@ class AggregateBuilder<TId = string> {
 
 ## Error Handling
 
+### Overview
+
+VytchesDDD uses a dual error handling approach:
+- **Result pattern** for expected failures (validation, business rules)
+- **Exceptions** for unexpected/programming errors
+
 ### Result Pattern
 
-All fallible operations should return `Result<T, Error>`:
+All fallible domain operations should return `Result<T, Error>`:
 
 ```typescript
-// Good - returns Result
+import { Result } from '@vytches/ddd-utils';
+
+// Good - returns Result for expected failures
 static create(data: CreateOrderData): Result<Order, ValidationError> {
   if (!data.customerId) {
     return Result.fail(new ValidationError('Customer ID required'));
   }
+  if (data.items.length === 0) {
+    return Result.fail(new ValidationError('Order must have items'));
+  }
   return Result.ok(new Order(data));
 }
 
-// Avoid - throws exceptions
-static create(data: CreateOrderData): Order {
-  if (!data.customerId) {
-    throw new ValidationError('Customer ID required');  // Avoid this
-  }
-  return new Order(data);
+// Consuming Result
+const result = Order.create(data);
+if (result.isSuccess) {
+  const order = result.value;
+  // Use order
+} else {
+  const error = result.error;
+  // Handle validation error
 }
 ```
+
+### When to Use Result vs Exceptions
+
+| Scenario | Use Result | Use Exception |
+|----------|------------|---------------|
+| Validation failures | ✅ | ❌ |
+| Business rule violations | ✅ | ❌ |
+| Expected not-found cases | ✅ | ❌ |
+| Invalid input from users | ✅ | ❌ |
+| Programming errors | ❌ | ✅ |
+| Null/undefined where required | ❌ | ✅ |
+| Infrastructure failures | ❌ | ✅ |
+| Framework requirements | ❌ | ✅ |
 
 ### Exception Guidelines
 
 Use exceptions only for:
-- Programming errors (null checks on required params)
-- Unrecoverable infrastructure failures
-- Framework integration requirements
+
+```typescript
+// Programming errors - required parameter is null
+function process(order: Order): void {
+  if (!order) {
+    throw new Error('Order parameter is required'); // Developer mistake
+  }
+}
+
+// Invalid state - should never happen if code is correct
+class EntityId {
+  validate(value: T): boolean {
+    switch (this.getType()) {
+      case 'uuid': return LibUtils.isValidUUID(value);
+      // ...
+      default:
+        throw new Error(`Unsupported IdType: ${this.getType()}`); // Bug
+    }
+  }
+}
+```
+
+### Test Patterns with safeRun
+
+Always use `safeRun` from `@vytches/ddd-utils` for error testing:
+
+```typescript
+import { safeRun } from '@vytches/ddd-utils';
+import { describe, it, expect } from 'vitest';
+
+describe('Order', () => {
+  it('should return error for invalid data', () => {
+    // Test error cases with safeRun
+    const result = Order.create({ customerId: '', items: [] });
+    expect(result.isFailure).toBe(true);
+    expect(result.error).toBeInstanceOf(ValidationError);
+  });
+
+  it('should not throw for valid operations', () => {
+    // Test that something doesn't throw
+    const [error] = safeRun(() => order.addItem(item));
+    expect(error).toBeUndefined();
+  });
+
+  it('should throw for programming errors', () => {
+    // Test that programming errors throw
+    const [error] = safeRun(() => new EntityId(null as any, 'text'));
+    expect(error).toBeInstanceOf(Error);
+    expect(error?.message).toContain('required');
+  });
+
+  it('should handle async operations', async () => {
+    // Async safeRun
+    const [error, result] = await safeRun(async () => {
+      return await orderService.process(order);
+    });
+    expect(error).toBeUndefined();
+    expect(result?.status).toBe('processed');
+  });
+});
+```
+
+### Forbidden Test Patterns
+
+```typescript
+// ❌ AVOID - Don't use these patterns
+expect(() => someFunction()).toThrow(ErrorClass);
+expect(() => someFunction()).toThrow('error message');
+expect(() => someFunction()).not.toThrow();
+await expect(async () => someFunction()).rejects.toThrow(ErrorClass);
+
+// ✅ USE - safeRun pattern instead
+const [error] = safeRun(() => someFunction());
+expect(error).toBeInstanceOf(ErrorClass);
+```
+
+### Error Hierarchy
+
+VytchesDDD provides base error classes in `@vytches/ddd-domain-primitives`:
+
+```typescript
+import {
+  IDomainError,
+  InvalidParameterError,
+  MissingValueError,
+  ValidationError,
+} from '@vytches/ddd-domain-primitives';
+
+// Domain-specific errors extend base classes
+class InsufficientFundsError extends IDomainError {
+  constructor(available: number, required: number) {
+    super(`Insufficient funds: ${available} < ${required}`);
+    this.name = 'InsufficientFundsError';
+  }
+}
+```
 
 ## Logging
 
