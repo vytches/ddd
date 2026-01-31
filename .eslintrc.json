@@ -50,6 +50,7 @@
                   "scope:value-objects",
                   "scope:contracts",
                   "scope:testing",
+                  "scope:logging",
                   "scope:repositories"
                 ]
               },
@@ -67,7 +68,8 @@
                   "scope:policies",
                   "scope:messaging",
                   "scope:validation",
-                  "scope:contracts"
+                  "scope:contracts",
+                  "scope:logging"
                 ]
               },
               {
@@ -109,6 +111,7 @@
                   "scope:contracts",
                   "scope:validation",
                   "scope:utils",
+                  "scope:logging",
                   "scope:policies"
                 ]
               },
@@ -136,6 +139,7 @@
                   "scope:contracts",
                   "scope:resilience",
                   "scope:di",
+                  "scope:logging",
                   "scope:cqrs"
                 ]
               },
@@ -241,6 +245,7 @@
                   "scope:validation",
                   "scope:utils",
                   "scope:di",
+                  "scope:logging",
                   "scope:domain-services"
                 ]
               },
@@ -260,6 +265,7 @@
                   "scope:domain-primitives",
                   "scope:utils",
                   "scope:contracts",
+                  "scope:logging",
                   "scope:di"
                 ]
               },
@@ -334,7 +340,8 @@
       },
       "rules": {
         "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/explicit-function-return-type": "off"
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-non-null-assertion": "off"
       }
     }
   ]

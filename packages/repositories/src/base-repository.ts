@@ -41,9 +41,7 @@ export abstract class IBaseRepository {
    * @param aggregate The aggregate to save
    * @throws VersionError if version conflict occurs
    */
-  async save(
-    aggregate: IRepositoryAggregate
-  ): Promise<void | Result<void, VersionError | unknown> | unknown> {
+  async save(aggregate: IRepositoryAggregate): Promise<void> {
     const aggregateId = aggregate.getId().getValue() as string | number;
     const events = aggregate.getDomainEvents();
 

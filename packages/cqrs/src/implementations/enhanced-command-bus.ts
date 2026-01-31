@@ -451,7 +451,7 @@ export class EnhancedCommandBus extends ICommandBus {
 
     // Resolve from DI container
     try {
-      const handlerToken = this.getHandlerToken(commandClass);
+      const handlerToken = this.getHandlerToken(commandClass) as ServiceToken<ICommandHandler<T, TResult>>;
       const handler = this.container.resolve<ICommandHandler<T, TResult>>(handlerToken);
 
       // Cache the resolved handler

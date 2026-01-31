@@ -129,7 +129,9 @@ export class DiscoveryRegistry {
   registerPlugin(plugin: IDiscoveryPlugin): void {
     if (!plugin.isAvailable()) {
       if (this.config.debug) {
-        this.logger.debug('Plugin not available (package not installed)', { pluginName: plugin.name });
+        this.logger.debug('Plugin not available (package not installed)', {
+          pluginName: plugin.name,
+        });
       }
       return;
     }
@@ -176,7 +178,7 @@ export class DiscoveryRegistry {
         if (result.status === 'fulfilled') {
           results.push(result.value);
         } else if (this.config.debug) {
-          this.logger.error('Discovery failed for plugin', { reason: String(result.reason) });
+          this.logger.error('Discovery failed for plugin', undefined, { error: String(result.reason) });
         }
       }
     } else {
@@ -187,7 +189,11 @@ export class DiscoveryRegistry {
           results.push(result);
         } catch (error) {
           if (this.config.debug) {
-            this.logger.error('Discovery failed for plugin', { pluginName: plugin.name, error: String(error) });
+            this.logger.error(
+              `Discovery failed for plugin ${plugin.name}`,
+              error instanceof Error ? error : undefined,
+              { error: String(error) }
+            );
           }
         }
       }

@@ -1,4 +1,4 @@
-import type { IDependencyContainer } from '@vytches/ddd-di';
+import type { IDependencyContainer, ServiceDescriptor, ServiceToken } from '@vytches/ddd-di';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { EnhancedCommandBus } from '../src/implementations/enhanced-command-bus';
 import { EnhancedQueryBus } from '../src/implementations/enhanced-query-bus';
@@ -6,42 +6,42 @@ import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../src/in
 
 // Mock container
 class MockContainer implements IDependencyContainer {
-  private services = new Map<string, any>();
+  private services = new Map<string, unknown>();
 
-  resolve<T>(token: string | symbol): T {
-    const service = this.services.get(token as string);
+  resolve<T>(token: ServiceToken<T>): T {
+    const service = this.services.get(String(token));
     if (!service) {
       throw new Error(`Service ${String(token)} not found`);
     }
     return service as T;
   }
 
-  register(token: string, service: any): void {
-    this.services.set(token, service);
+  register<T>(token: ServiceToken<T>, service: unknown): void {
+    this.services.set(String(token), service);
   }
 
-  registerFactory<T>(token: string, factory: any): void {
-    this.services.set(token, factory);
+  registerFactory<T>(token: ServiceToken<T>, factory: unknown): void {
+    this.services.set(String(token), factory);
   }
 
-  registerInstance(token: string, instance: any): void {
-    this.services.set(token, instance);
+  registerInstance<T>(token: ServiceToken<T>, instance: T): void {
+    this.services.set(String(token), instance);
   }
 
-  isRegistered<T>(token: string | symbol): boolean {
-    return this.services.has(token as string);
+  isRegistered<T>(token: ServiceToken<T>): boolean {
+    return this.services.has(String(token));
   }
 
-  getServices(): any[] {
-    return Array.from(this.services.values());
+  getServices(): ServiceDescriptor[] {
+    return [];
   }
 
-  getServicesByTag(tag: string): any[] {
+  getServicesByTag(_tag: string): ServiceDescriptor[] {
     return [];
   }
 
   has(token: string | symbol): boolean {
-    return this.services.has(token as string);
+    return this.services.has(String(token));
   }
 }
 

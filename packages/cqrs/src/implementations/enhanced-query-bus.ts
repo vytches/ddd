@@ -515,7 +515,7 @@ export class EnhancedQueryBus extends IQueryBus {
 
     // Resolve from DI container
     try {
-      const handlerToken = this.getHandlerToken(queryClass);
+      const handlerToken = this.getHandlerToken(queryClass) as ServiceToken<IQueryHandler<T, R>>;
       const handler = this.container.resolve<IQueryHandler<T, R>>(handlerToken);
 
       // Cache the resolved handler

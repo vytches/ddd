@@ -32,9 +32,15 @@ export class HandlerDiscoveryRegistry implements IHandlerDiscoveryRegistry {
         this.logger.debug('Discovering handlers with plugin', { pluginName: name });
         const handlers = await plugin.discoverHandlers(assemblies);
         allHandlers.push(...handlers);
-        this.logger.debug('Plugin discovered handlers', { pluginName: name, handlerCount: handlers.length });
+        this.logger.debug('Plugin discovered handlers', {
+          pluginName: name,
+          handlerCount: handlers.length,
+        });
       } catch (error) {
-        this.logger.warn('Plugin failed to discover handlers', { pluginName: name, error: String(error) });
+        this.logger.warn('Plugin failed to discover handlers', {
+          pluginName: name,
+          error: String(error),
+        });
       }
     }
 

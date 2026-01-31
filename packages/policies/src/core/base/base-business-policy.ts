@@ -344,7 +344,7 @@ class ConditionalPolicyBuilder<T> implements IPolicyConditionalBuilder<T> {
    * Applies a policy when condition is met.
    * @throws {Error} Feature not yet implemented - use PolicyBuilder.when().then() instead
    */
-  public then(policy: IBusinessPolicy<T>): IPolicyConditionalElse<T> {
+  public then(_policy: IBusinessPolicy<T>): IPolicyConditionalElse<T> {
     throw new Error('Use PolicyBuilder.when().then() for conditional policies');
   }
 
@@ -352,7 +352,7 @@ class ConditionalPolicyBuilder<T> implements IPolicyConditionalBuilder<T> {
    * Applies a specification when condition is met.
    * @throws {Error} Feature not yet implemented - use PolicyBuilder.when().then() instead
    */
-  public thenMust(specification: unknown): IPolicyConditionalElse<T> {
+  public thenMust(_specification: unknown): IPolicyConditionalElse<T> {
     throw new Error('Use PolicyBuilder.when().then() for conditional policies');
   }
 }

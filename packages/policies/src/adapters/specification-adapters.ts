@@ -29,7 +29,7 @@ export class BusinessRuleValidatorAdapter<T> implements ISpecification<T> {
     try {
       const result = this.validator.validate(candidate);
       return result.isSuccess;
-    } catch (error) {
+    } catch (_error) {
       // If validation throws, treat as failure
       return false;
     }

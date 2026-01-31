@@ -197,7 +197,7 @@ describe('NestJSContainerAdapter', () => {
       }
 
       adapter.register('dependency', DependencyService);
-      adapter.register('main', MainService);
+      adapter.register('main', MainService as new (...args: unknown[]) => MainService);
 
       // Mock Reflect.getMetadata to return constructor parameters
       const originalGetMetadata = Reflect.getMetadata;

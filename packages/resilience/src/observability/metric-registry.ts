@@ -122,7 +122,9 @@ export class DefaultObservabilityEventBus implements ObservabilityEventBus {
     try {
       await listener(event);
     } catch (error) {
-      this.logger.warn('Event listener error', { error: error instanceof Error ? error.message : String(error) });
+      this.logger.warn('Event listener error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 

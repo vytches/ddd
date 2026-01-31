@@ -22,32 +22,36 @@ describe('createDomainEvent', () => {
     const event = createDomainEvent('TestEvent', {});
 
     expect(event.metadata).toBeDefined();
-    expect(event.metadata.eventId).toBeDefined();
-    expect(typeof event.metadata.eventId).toBe('string');
-    expect(event.metadata.eventId.length).toBeGreaterThan(0);
+    expect(event.metadata!.eventId).toBeDefined();
+    expect(typeof event.metadata!.eventId).toBe('string');
+    expect(event.metadata!.eventId!.length).toBeGreaterThan(0);
   });
 
   it('should set timestamp in metadata to current time', () => {
     const event = createDomainEvent('TestEvent', {});
 
-    expect(event.metadata.timestamp).toEqual(new Date('2024-01-15T10:30:00.000Z'));
+    expect(event.metadata!.timestamp).toEqual(new Date('2024-01-15T10:30:00.000Z'));
   });
 
   it('should include custom metadata when provided', () => {
-    const event = createDomainEvent('TestEvent', {}, {
-      correlationId: 'corr-123',
-      causationId: 'cause-456',
-    });
+    const event = createDomainEvent(
+      'TestEvent',
+      {},
+      {
+        correlationId: 'corr-123',
+        causationId: 'cause-456',
+      }
+    );
 
-    expect(event.metadata.correlationId).toBe('corr-123');
-    expect(event.metadata.causationId).toBe('cause-456');
+    expect(event.metadata!.correlationId).toBe('corr-123');
+    expect(event.metadata!.causationId).toBe('cause-456');
   });
 
   it('should create unique eventIds for multiple events', () => {
     const event1 = createDomainEvent('TestEvent', {});
     const event2 = createDomainEvent('TestEvent', {});
 
-    expect(event1.metadata.eventId).not.toBe(event2.metadata.eventId);
+    expect(event1.metadata!.eventId).not.toBe(event2.metadata!.eventId);
   });
 
   it('should handle complex payload objects', () => {
@@ -97,6 +101,6 @@ describe('createDomainEvent', () => {
     const customEventId = 'custom-event-id';
     const event = createDomainEvent('TestEvent', {}, { eventId: customEventId });
 
-    expect(event.metadata.eventId).toBe(customEventId);
+    expect(event.metadata!.eventId).toBe(customEventId);
   });
 });

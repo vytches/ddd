@@ -261,7 +261,11 @@ export class PolicyEventBus {
           // Do nothing
           break;
         case 'log':
-          this.logger.error(errorMessage, { error: error instanceof Error ? error.message : String(error) });
+          this.logger.error(
+            errorMessage,
+            error instanceof Error ? error : undefined,
+            { error: error instanceof Error ? error.message : String(error) }
+          );
           break;
         case 'throw':
           throw new Error(errorMessage);

@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
 import { safeRun } from '@vytches/ddd-utils';
 import type { IDependencyContainer } from '@vytches/ddd-di';
-import { QueryBus, HandlerNotFoundError, CQRSConfigurationError } from '../../src';
+import { QueryBus, HandlerNotFoundError } from '../../src';
 import type { ICQRSMiddleware, IQuery, IQueryHandler, CQRSExecutionContext } from '../../src';
 
 // Test query implementation

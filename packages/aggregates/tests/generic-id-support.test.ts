@@ -4,7 +4,11 @@ import { AggregateBuilder, AggregateRoot } from '../src';
 
 // Example custom ID implementations extending EntityId
 class CustomerId extends EntityId<string> {
-  static create(value: string): CustomerId {
+  static override create(): CustomerId {
+    return new CustomerId(`customer_${Date.now()}`, 'text');
+  }
+
+  static fromValue(value: string): CustomerId {
     return new CustomerId(value, 'text');
   }
 }
@@ -87,7 +91,7 @@ describe('Generic ID Support for Aggregates', () => {
 
   describe('Extended EntityId Classes', () => {
     it('should work with CustomerId extending EntityId', () => {
-      const customerId = CustomerId.create('customer-123');
+      const customerId = CustomerId.fromValue('customer-123');
       const aggregate = new CustomerAggregate({ id: customerId });
 
       expect(aggregate.getId()).toBe(customerId);

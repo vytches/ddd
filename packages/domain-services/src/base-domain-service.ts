@@ -145,10 +145,14 @@ export abstract class UnitOfWorkAwareDomainService
       this.logger.info('Transaction committed successfully', { serviceId: this.serviceId });
       return result;
     } catch (error) {
-      this.logger.error('Transaction failed, rolling back', {
-        serviceId: this.serviceId,
-        error: error instanceof Error ? error.message : String(error),
-      });
+      this.logger.error(
+        'Transaction failed, rolling back',
+        error instanceof Error ? error : undefined,
+        {
+          serviceId: this.serviceId,
+          error: error instanceof Error ? error.message : String(error),
+        }
+      );
       await this.unitOfWork.rollback();
       throw error;
     }

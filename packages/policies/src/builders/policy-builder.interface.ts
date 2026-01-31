@@ -259,6 +259,7 @@ export interface IConditionalPolicyElseStepBuilder<T> {
   build(): IBusinessPolicy<T>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- T is a phantom type for type safety at usage sites
 export interface PolicyBuilderConfig<T> {
   /**
    * Default domain for policies created by this builder

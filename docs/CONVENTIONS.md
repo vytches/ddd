@@ -1,22 +1,24 @@
 # VytchesDDD Conventions Guide
 
-This document defines the coding conventions and patterns used throughout the VytchesDDD library.
+This document defines the coding conventions and patterns used throughout the
+VytchesDDD library.
 
 ## Factory Method Naming Convention
 
 ### Overview
 
-Factory methods must follow a consistent naming convention across all packages for API predictability.
+Factory methods must follow a consistent naming convention across all packages
+for API predictability.
 
 ### Conventions
 
-| Pattern | Purpose | Example |
-|---------|---------|---------|
-| `create()` | Primary factory for new instances with generated values | `EntityId.create()` - creates with random UUID |
-| `from*(source)` | Conversion/reconstitution from external data | `EntityId.fromUUID(uuid)`, `fromText(text)` |
-| `of(value)` | Simple wrapping of a primitive value | `Money.of(100)` |
-| `empty()` | Creates a null/empty instance | `Optional.empty()` |
-| `reconstitute(props)` | Rebuild from stored state (no validation) | `Order.reconstitute(dbRecord)` |
+| Pattern               | Purpose                                                 | Example                                        |
+| --------------------- | ------------------------------------------------------- | ---------------------------------------------- |
+| `create()`            | Primary factory for new instances with generated values | `EntityId.create()` - creates with random UUID |
+| `from*(source)`       | Conversion/reconstitution from external data            | `EntityId.fromUUID(uuid)`, `fromText(text)`    |
+| `of(value)`           | Simple wrapping of a primitive value                    | `Money.of(100)`                                |
+| `empty()`             | Creates a null/empty instance                           | `Optional.empty()`                             |
+| `reconstitute(props)` | Rebuild from stored state (no validation)               | `Order.reconstitute(dbRecord)`                 |
 
 ### EntityId Factory Methods
 
@@ -33,38 +35,44 @@ const bigId = EntityId.fromBigInt('9007199254740993');
 
 ### Deprecated Methods
 
-The following methods are deprecated and will be removed in the next major version:
+The following methods are deprecated and will be removed in the next major
+version:
 
-| Deprecated | Use Instead |
-|------------|-------------|
-| `createWithRandomUUID()` | `create()` |
-| `createUuid(value)` | `fromUUID(value)` |
-| `createText(value)` | `fromText(value)` |
-| `createInteger(value)` | `fromInteger(value)` |
-| `createBigInt(value)` | `fromBigInt(value)` |
+| Deprecated               | Use Instead          |
+| ------------------------ | -------------------- |
+| `createWithRandomUUID()` | `create()`           |
+| `createUuid(value)`      | `fromUUID(value)`    |
+| `createText(value)`      | `fromText(value)`    |
+| `createInteger(value)`   | `fromInteger(value)` |
+| `createBigInt(value)`    | `fromBigInt(value)`  |
 
 ### Best Practices
 
-1. **Use `create()` for new entities** - When creating a new domain object, use the primary `create()` method
-2. **Use `from*()` for external data** - When loading from APIs, databases, or user input
-3. **Use `reconstitute()` for event sourcing** - When rebuilding aggregates from event history
-4. **Avoid direct constructor access** - Prefer factory methods for consistency and validation
+1. **Use `create()` for new entities** - When creating a new domain object, use
+   the primary `create()` method
+2. **Use `from*()` for external data** - When loading from APIs, databases, or
+   user input
+3. **Use `reconstitute()` for event sourcing** - When rebuilding aggregates from
+   event history
+4. **Avoid direct constructor access** - Prefer factory methods for consistency
+   and validation
 
 ## Constructor Patterns
 
 ### Overview
 
-Different classes require different constructor patterns based on their role in the architecture.
+Different classes require different constructor patterns based on their role in
+the architecture.
 
 ### Pattern Matrix
 
-| Class Type | Constructor | Factory Methods | Example |
-|------------|-------------|-----------------|---------|
-| **Abstract base classes** | `public` or `protected` | None (subclasses provide) | `AggregateRoot`, `BaseValueObject` |
-| **Concrete aggregates/entities** | `private` | `create()`, `reconstitute()` | `Order`, `User` |
-| **Value objects** | `private` or `protected` | `create()`, `from*()` | `EntityId`, `Money` |
-| **Builders** | `private` | `create()` | `AggregateBuilder`, `PolicyBuilder` |
-| **Services/utilities** | `public` | Optional | `Logger`, `DataMasker` |
+| Class Type                       | Constructor              | Factory Methods              | Example                             |
+| -------------------------------- | ------------------------ | ---------------------------- | ----------------------------------- |
+| **Abstract base classes**        | `public` or `protected`  | None (subclasses provide)    | `AggregateRoot`, `BaseValueObject`  |
+| **Concrete aggregates/entities** | `private`                | `create()`, `reconstitute()` | `Order`, `User`                     |
+| **Value objects**                | `private` or `protected` | `create()`, `from*()`        | `EntityId`, `Money`                 |
+| **Builders**                     | `private`                | `create()`                   | `AggregateBuilder`, `PolicyBuilder` |
+| **Services/utilities**           | `public`                 | Optional                     | `Logger`, `DataMasker`              |
 
 ### Base Classes (Library-Provided)
 
@@ -93,7 +101,8 @@ export abstract class BaseValueObject<T> {
 
 ### Concrete Domain Objects (User-Implemented)
 
-User-implemented aggregates and entities should use private constructors with factory methods:
+User-implemented aggregates and entities should use private constructors with
+factory methods:
 
 ```typescript
 class Order extends AggregateRoot {
@@ -149,7 +158,10 @@ class Money extends BaseValueObject<number> {
   }
 
   // Primary factory
-  static create(amount: number, currency: string): Result<Money, ValidationError> {
+  static create(
+    amount: number,
+    currency: string
+  ): Result<Money, ValidationError> {
     if (amount < 0) {
       return Result.fail(new ValidationError('Amount cannot be negative'));
     }
@@ -195,11 +207,17 @@ class AggregateBuilder<TId = string> {
   }
 
   // Fluent methods
-  withSnapshots(): this { /* ... */ }
-  withVersioning(): this { /* ... */ }
+  withSnapshots(): this {
+    /* ... */
+  }
+  withVersioning(): this {
+    /* ... */
+  }
 
   // Terminal method
-  build(): AggregateRoot<TId> { /* ... */ }
+  build(): AggregateRoot<TId> {
+    /* ... */
+  }
 }
 ```
 
@@ -209,7 +227,8 @@ class AggregateBuilder<TId = string> {
 2. **Concrete objects control creation** - Use private constructor + factory
 3. **`create()` validates** - The `create()` factory performs all validation
 4. **`reconstitute()` trusts data** - Used only for known-good data from storage
-5. **Return Result for fallible operations** - Factory methods that can fail return `Result<T, Error>`
+5. **Return Result for fallible operations** - Factory methods that can fail
+   return `Result<T, Error>`
 6. **Builders are always private** - Expose only `create()` entry point
 
 ## Error Handling
@@ -217,6 +236,7 @@ class AggregateBuilder<TId = string> {
 ### Overview
 
 VytchesDDD uses a dual error handling approach:
+
 - **Result pattern** for expected failures (validation, business rules)
 - **Exceptions** for unexpected/programming errors
 
@@ -251,16 +271,16 @@ if (result.isSuccess) {
 
 ### When to Use Result vs Exceptions
 
-| Scenario | Use Result | Use Exception |
-|----------|------------|---------------|
-| Validation failures | ✅ | ❌ |
-| Business rule violations | ✅ | ❌ |
-| Expected not-found cases | ✅ | ❌ |
-| Invalid input from users | ✅ | ❌ |
-| Programming errors | ❌ | ✅ |
-| Null/undefined where required | ❌ | ✅ |
-| Infrastructure failures | ❌ | ✅ |
-| Framework requirements | ❌ | ✅ |
+| Scenario                      | Use Result | Use Exception |
+| ----------------------------- | ---------- | ------------- |
+| Validation failures           | ✅         | ❌            |
+| Business rule violations      | ✅         | ❌            |
+| Expected not-found cases      | ✅         | ❌            |
+| Invalid input from users      | ✅         | ❌            |
+| Programming errors            | ❌         | ✅            |
+| Null/undefined where required | ❌         | ✅            |
+| Infrastructure failures       | ❌         | ✅            |
+| Framework requirements        | ❌         | ✅            |
 
 ### Exception Guidelines
 
@@ -278,7 +298,8 @@ function process(order: Order): void {
 class EntityId {
   validate(value: T): boolean {
     switch (this.getType()) {
-      case 'uuid': return LibUtils.isValidUUID(value);
+      case 'uuid':
+        return LibUtils.isValidUUID(value);
       // ...
       default:
         throw new Error(`Unsupported IdType: ${this.getType()}`); // Bug
@@ -391,4 +412,4 @@ class OrderService {
 
 ---
 
-*Last updated: 2026-01-30*
+_Last updated: 2026-01-30_

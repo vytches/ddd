@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import 'reflect-metadata';
 import { safeRun } from '@vytches/ddd-utils';
 import type { IDependencyContainer } from '@vytches/ddd-di';
-import { CommandBus, HandlerNotFoundError, CQRSConfigurationError } from '../../src';
+import { CommandBus, HandlerNotFoundError } from '../../src';
 import type { CQRSExecutionContext, ICQRSMiddleware, ICommand, ICommandHandler } from '../../src/';
 
 // Test command implementation

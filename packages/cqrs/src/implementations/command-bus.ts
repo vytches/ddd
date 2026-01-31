@@ -79,7 +79,7 @@ export class CommandBus extends ICommandBus {
     } else {
       // Fall back to DI container resolution
       try {
-        const handlerToken = this.getHandlerToken(command.constructor);
+        const handlerToken = this.getHandlerToken(command.constructor) as ServiceToken<ICommandHandler<T, TResult>>;
         handler = this.container.resolve<ICommandHandler<T, TResult>>(handlerToken);
       } catch (_error) {
         throw new HandlerNotFoundError(command.constructor.name, 'command');

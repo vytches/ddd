@@ -297,7 +297,10 @@ export class ServiceLocator implements IServiceLocator {
             container.dispose();
           }
         } catch (error) {
-          this.logger.warn('Error disposing context container', { contextName, error: String(error) });
+          this.logger.warn('Error disposing context container', {
+            contextName,
+            error: String(error),
+          });
         }
       }
       this.contextContainers.clear();

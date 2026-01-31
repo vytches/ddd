@@ -74,7 +74,7 @@ export class QueryBus extends IQueryBus {
     } else {
       // Fall back to DI container resolution
       try {
-        const handlerToken = this.getHandlerToken(query.constructor);
+        const handlerToken = this.getHandlerToken(query.constructor) as ServiceToken<IQueryHandler<T, R>>;
         handler = this.container.resolve<IQueryHandler<T, R>>(handlerToken);
       } catch (_error) {
         throw new HandlerNotFoundError(query.constructor.name, 'query');
