@@ -70,15 +70,11 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
 
       return Result.ok(domainModel);
     } catch (error) {
-      this.logger.error(
-        'Fetch failed',
-        error instanceof Error ? error : undefined,
-        {
-          identifier,
-          context: this.contextInfo.contextName,
-          error: error instanceof Error ? error.message : String(error),
-        }
-      );
+      this.logger.error('Fetch failed', error instanceof Error ? error : undefined, {
+        identifier,
+        context: this.contextInfo.contextName,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return Result.fail(this.createContextualError('FETCH', error as Error, {}));
     }
   }
@@ -126,16 +122,12 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
 
       return Result.ok(result);
     } catch (error) {
-      this.logger.error(
-        'ACL operation failed',
-        error instanceof Error ? error : undefined,
-        {
-          operation,
-          context: this.contextInfo.contextName,
-          error: error instanceof Error ? error.message : String(error),
-          correlationId: options.correlationId,
-        }
-      );
+      this.logger.error('ACL operation failed', error instanceof Error ? error : undefined, {
+        operation,
+        context: this.contextInfo.contextName,
+        error: error instanceof Error ? error.message : String(error),
+        correlationId: options.correlationId,
+      });
       return Result.fail(this.createContextualError(operation, error as Error, options));
     }
   }

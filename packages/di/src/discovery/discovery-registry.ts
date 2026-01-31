@@ -178,7 +178,9 @@ export class DiscoveryRegistry {
         if (result.status === 'fulfilled') {
           results.push(result.value);
         } else if (this.config.debug) {
-          this.logger.error('Discovery failed for plugin', undefined, { error: String(result.reason) });
+          this.logger.error('Discovery failed for plugin', undefined, {
+            error: String(result.reason),
+          });
         }
       }
     } else {

@@ -74,11 +74,9 @@ export class VytchesExplorerService implements OnModuleInit {
       await this.registerHandlersWithBuses(handlers);
       this.initialized = true;
     } catch (error) {
-      this.logger.error(
-        'Initialization failed',
-        error instanceof Error ? error : undefined,
-        { error: error instanceof Error ? error.message : String(error) }
-      );
+      this.logger.error('Initialization failed', error instanceof Error ? error : undefined, {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
