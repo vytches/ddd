@@ -39,8 +39,6 @@ const CONFIG = {
       policies: 6, // Pattern package - business policies complexity, CI needs more (was 35)
       'domain-services': 5, // Pattern package - domain service patterns, CI (was 30)
       projections: 5, // Architecture package, CI needs more time (was 40)
-      'event-store': 5, // Architecture package - complex event handling, CI (was 40)
-      'event-scheduling': 5, // Architecture package - scheduling logic, CI (was 40)
       acl: 5, // Integration package - anti-corruption layer complexity, CI (was 40)
       messaging: 6, // Integration package - messaging patterns, CI needs more (was 35)
       resilience: 5, // Infrastructure package with resilience patterns, CI (was 40)

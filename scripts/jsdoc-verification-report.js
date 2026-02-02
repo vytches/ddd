@@ -40,12 +40,10 @@ const packageInfo = {
   messaging: { priority: 'LOW', complexity: 'HIGH', status: 'TODO' },
   resilience: { priority: 'LOW', complexity: 'HIGH', status: 'TODO' },
   projections: { priority: 'LOW', complexity: 'HIGH', status: 'TODO' },
-  'event-store': { priority: 'MEDIUM', complexity: 'HIGH', status: 'IN_PROGRESS' },
-  'event-scheduling': { priority: 'LOW', complexity: 'MEDIUM', status: 'TODO' },
   testing: { priority: 'LOW', complexity: 'LOW', status: 'TODO' },
   nestjs: { priority: 'MEDIUM', complexity: 'HIGH', status: 'IN_PROGRESS' },
-  'process-managers': { priority: 'LOW', complexity: 'HIGH', status: 'TODO' },
   utils: { priority: 'LOW', complexity: 'LOW', status: 'TODO' },
+  enterprise: { priority: 'LOW', complexity: 'HIGH', status: 'TODO' },
 };
 
 // Helper functions
