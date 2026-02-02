@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-policies",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "Business policies and policy builder patterns",
   "type": "module",
   "main": "./dist/index.cjs",
