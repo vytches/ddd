@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [12.0.1](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.0...@vytches/ddd-nestjs@12.0.1) (2026-02-02)
+
+### Bug Fixes
+
+- **release:** prevent changelog regeneration and add publish-only mode
+  ([#59](https://github.com/vytches/ddd/issues/59))
+  ([9b82753](https://github.com/vytches/ddd/commit/9b82753d3be0e225d722d9896845aeb874ad770c))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 12.0.0 (2026-02-02)
 
 ### Bug Fixes
