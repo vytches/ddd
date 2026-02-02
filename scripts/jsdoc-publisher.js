@@ -307,12 +307,14 @@ class JSDocPublisher {
       validation: 'Pattern',
       'domain-services': 'Pattern',
       projections: 'Architecture',
+      'event-store': 'Architecture',
       testing: 'Infrastructure',
       utils: 'Infrastructure',
       cli: 'Infrastructure',
       enterprise: 'Infrastructure',
+      'event-scheduling': 'Architecture',
       di: 'Infrastructure',
-      nestjs: 'Integration',
+      core: 'Core',
     };
 
     const domain = packageDomains[pkg.name] || 'Unknown';
@@ -667,12 +669,14 @@ class JSDocPublisher {
       validation: 'Pattern',
       'domain-services': 'Pattern',
       projections: 'Architecture',
+      'event-store': 'Architecture',
       testing: 'Infrastructure',
       utils: 'Infrastructure',
       cli: 'Infrastructure',
       enterprise: 'Infrastructure',
+      'event-scheduling': 'Architecture',
       di: 'Infrastructure',
-      nestjs: 'Integration',
+      core: 'Core',
     };
 
     const packageDescriptions = {
@@ -691,12 +695,14 @@ class JSDocPublisher {
       validation: 'Domain validation and specifications',
       'domain-services': 'Domain service implementations',
       projections: 'Event sourcing projections',
+      'event-store': 'Event storage and replay capabilities',
       testing: 'Testing utilities for DDD applications',
       utils: 'Common utilities and helper functions',
       cli: 'Command-line interface for code generation',
       enterprise: 'Enterprise-grade features and bundles',
+      'event-scheduling': 'Event scheduling and delayed processing',
       di: 'Dependency injection and service location',
-      nestjs: 'NestJS framework integration',
+      core: 'Meta-package providing stable API',
     };
 
     return this.packages

@@ -51,10 +51,12 @@ const CONFIG = {
     // Infrastructure packages
     resilience: 140, // Full resilience patterns with comprehensive observability
     enterprise: 50, // Should be lightweight coordination
+    'event-store': 150, // Event sourcing with complex features
 
     // Tooling packages (more flexible)
     cli: 750, // CLI framework with comprehensive examples and documentation generation engine
     testing: 150, // Test utilities with comprehensive seeder framework
+    'process-managers': 400, // Process managers with guards, invariants, and workflow capabilities
   },
 
   // Global thresholds

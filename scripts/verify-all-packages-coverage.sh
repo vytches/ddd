@@ -11,7 +11,7 @@ echo "==========================================================================
 echo ""
 
 # List of all packages
-PACKAGES="acl aggregates cli contracts cqrs di domain-primitives domain-services enterprise events logging messaging nestjs policies projections repositories resilience testing utils validation value-objects"
+PACKAGES="acl aggregates cli contracts core cqrs di domain-primitives domain-services event-scheduling event-store events logging messaging nestjs policies process-managers projections repositories resilience testing utils validation value-objects"
 
 # Variables for totals
 TOTAL_COVERED=0

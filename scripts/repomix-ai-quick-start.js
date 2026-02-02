@@ -336,8 +336,8 @@ await commandBus.execute(new CreateOrderCommand(customerId, amount));
 - [Fastify Integration Guide](./frameworks/fastify.md)
 
 **Advanced Patterns**:
-- Events with \`@vytches/ddd-events\`
-- Sagas with \`@vytches/ddd-messaging\`
+- Event Sourcing with \`@vytches/ddd-event-store\`
+- Sagas with \`@vytches/ddd-messaging\`  
 - Resilience Patterns with \`@vytches/ddd-resilience\`
 
 ## Troubleshooting

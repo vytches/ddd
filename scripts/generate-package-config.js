@@ -33,6 +33,8 @@ const PACKAGE_LAYERS = {
   // Infrastructure Layer
   resilience: 'infrastructure',
   enterprise: 'infrastructure',
+  'event-store': 'infrastructure',
+  'event-scheduling': 'infrastructure',
 
   // Tooling Layer
   testing: 'tooling',
@@ -81,6 +83,8 @@ const LAYER_DEPENDENCIES = {
   infrastructure: {
     resilience: ['@vytches/ddd-core'],
     enterprise: ['@vytches/ddd-core'],
+    'event-store': ['@vytches/ddd-core', '@vytches/ddd-logging'],
+    'event-scheduling': ['@vytches/ddd-core', '@vytches/ddd-events'],
   },
   tooling: {
     testing: ['@vytches/ddd-utils'],
@@ -109,8 +113,9 @@ const PACKAGE_DESCRIPTIONS = {
   messaging: 'Outbox pattern and reliable message delivery',
   resilience: 'Circuit breakers and resilience patterns',
   enterprise: 'Health checks and enterprise monitoring',
+  'event-store': 'Enterprise-grade Event Store with Event Sourcing support',
+  'event-scheduling': 'Event scheduling and delayed processing',
   testing: 'Test utilities and DDD-specific testing helpers',
-  nestjs: 'NestJS framework integration for DDD patterns',
   cli: 'Code generation tools and CLI framework',
 };
 
@@ -213,8 +218,8 @@ Options:
   --all        Generate configs for all known packages
 
 Examples:
-  node scripts/generate-package-config.js nestjs
-  node scripts/generate-package-config.js events --dry-run
+  node scripts/generate-package-config.js event-store
+  node scripts/generate-package-config.js core --dry-run
   node scripts/generate-package-config.js --all
 
 Available packages:

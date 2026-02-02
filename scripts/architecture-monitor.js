@@ -52,7 +52,7 @@ class ArchitectureMonitor {
     this.header('Checking Circular Dependencies');
 
     const criticalPackages = [
-      'enterprise',
+      'core',
       'repositories',
       'testing',
       'contracts',
@@ -172,9 +172,9 @@ class ArchitectureMonitor {
     this.header('Checking Bundle Sizes');
 
     const criticalPackages = {
-      '@vytches/ddd-enterprise': { maxSize: 5, currentSize: 0 },
+      '@vytches/ddd-core': { maxSize: 2, currentSize: 0 },
       '@vytches/ddd-utils': { maxSize: 10, currentSize: 0 },
-      '@vytches/ddd-contracts': { maxSize: 60, currentSize: 0 },
+      '@vytches/ddd-contracts': { maxSize: 15, currentSize: 0 },
       '@vytches/ddd-domain-primitives': { maxSize: 50, currentSize: 0 },
     };
 
@@ -204,12 +204,12 @@ class ArchitectureMonitor {
         }
       }
 
-      // Special check for enterprise package (meta-package)
-      const enterpriseSize = criticalPackages['@vytches/ddd-enterprise']?.currentSize || 0;
-      if (enterpriseSize > 5) {
+      // Special check for core package
+      const coreSize = criticalPackages['@vytches/ddd-core'].currentSize;
+      if (coreSize > 2) {
         this.log('', 'reset');
         this.log(
-          '  ⚠️  WARNING: Enterprise package size indicates potential circular dependencies!',
+          '  ⚠️  WARNING: Core package size indicates potential circular dependencies!',
           'yellow'
         );
       }
@@ -241,7 +241,7 @@ class ArchitectureMonitor {
       foundation: ['contracts', 'utils', 'domain-primitives'],
       core: ['value-objects', 'testing', 'logging', 'validation'],
       domain: ['aggregates', 'repositories', 'events', 'domain-services'],
-      application: ['cqrs', 'policies', 'messaging', 'projections'],
+      application: ['cqrs', 'policies', 'messaging', 'projections', 'process-managers'],
     };
 
     const violations = [];

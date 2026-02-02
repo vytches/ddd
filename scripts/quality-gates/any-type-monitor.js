@@ -46,11 +46,15 @@ const CONFIG = {
     utils: 15,
     contracts: 50, // Higher limit for contracts due to interfaces
     'domain-services': 14,
+    'event-scheduling': 25,
+    'process-managers': 60, // Process managers with complex workflow patterns
     nestjs: 105, // NestJS integration requires some flexibility for framework interop
+    'event-store': 15,
   },
 
   // Higher thresholds specifically for test files
   testFileThresholds: {
+    core: 5,
     'domain-primitives': 15,
     'value-objects': 15,
     repositories: 15,
@@ -70,7 +74,10 @@ const CONFIG = {
     utils: 20,
     contracts: 50,
     'domain-services': 25,
+    'event-scheduling': 20,
+    'process-managers': 90, // Process managers test files with mocks and complex scenarios
     nestjs: 100, // NestJS integration tests
+    'event-store': 25,
   },
 
   // Patterns that are justified for using `any`

@@ -28,6 +28,7 @@ console.log('🔧 Fixing import paths for distribution...');
 
 const packagesDir = path.join(__dirname, '..', 'packages');
 const packages = [
+  'core',
   'acl',
   'aggregates',
   'cli',
@@ -36,16 +37,15 @@ const packages = [
   'di',
   'domain-primitives',
   'domain-services',
-  'enterprise',
+  'event-scheduling',
+  'event-store',
   'events',
   'logging',
   'messaging',
-  'nestjs',
   'policies',
   'projections',
   'repositories',
   'resilience',
-  'testing',
   'utils',
   'validation',
   'value-objects',

@@ -11,19 +11,21 @@ const path = require('path');
 
 // List of all packages to process
 const PACKAGES = [
-  'acl',
   'aggregates',
+  'acl',
   'cli',
   'contracts',
+  'core',
   'cqrs',
   'di',
   'domain-primitives',
   'domain-services',
   'enterprise',
+  'event-scheduling',
+  'event-store',
   'events',
   'logging',
   'messaging',
-  'nestjs',
   'policies',
   'projections',
   'repositories',
