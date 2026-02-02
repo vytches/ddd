@@ -1,4 +1,5 @@
 import type { IDomainEvent, IEventBus } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
 import type { IUnitOfWork } from '@vytches/ddd-repositories';
 import type {
   IAsyncDomainService,
@@ -8,6 +9,11 @@ import type {
 } from './domain-service.interface';
 
 export abstract class IBaseDomainService implements IDomainService {
+  /**
+   * Logger instance for service operations
+   */
+  protected readonly logger = Logger.forContext(this.constructor.name);
+
   /**
    * Creates a new instance of a domain service.
    *
@@ -130,13 +136,23 @@ export abstract class UnitOfWorkAwareDomainService
       throw new Error(`Unit of Work not set for service: ${this.serviceId}`);
     }
 
+    this.logger.debug('Beginning transaction', { serviceId: this.serviceId });
     await this.unitOfWork.begin();
 
     try {
       const result = await operation();
       await this.unitOfWork.commit();
+      this.logger.info('Transaction committed successfully', { serviceId: this.serviceId });
       return result;
     } catch (error) {
+      this.logger.error(
+        'Transaction failed, rolling back',
+        error instanceof Error ? error : undefined,
+        {
+          serviceId: this.serviceId,
+          error: error instanceof Error ? error.message : String(error),
+        }
+      );
       await this.unitOfWork.rollback();
       throw error;
     }

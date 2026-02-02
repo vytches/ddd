@@ -26,8 +26,24 @@ export class EntityId<T = string> extends BaseEntityId<T> {
     }
   }
 
-  static override createWithRandomUUID(): EntityId<string> {
+  /**
+   * Primary factory method - creates a new EntityId with a randomly generated UUID
+   * @returns New EntityId with random UUID
+   * @example
+   * ```typescript
+   * const id = EntityId.create();
+   * console.log(id.getValue()); // Returns: '550e8400-e29b-41d4-a716-446655440000'
+   * ```
+   */
+  static override create(): EntityId<string> {
     return new EntityId(LibUtils.getUUID(), 'uuid');
+  }
+
+  /**
+   * @deprecated Use `create()` instead. Will be removed in next major version.
+   */
+  static override createWithRandomUUID(): EntityId<string> {
+    return EntityId.create();
   }
 
   /**
@@ -78,12 +94,27 @@ export class EntityId<T = string> extends BaseEntityId<T> {
   }
 }
 
+/**
+ * @deprecated Use EntityId static methods directly instead. This class will be removed in the next major version.
+ * @example
+ * ```typescript
+ * // Before (deprecated):
+ * const id = EntityIdFactory.createWithRandomUUID();
+ *
+ * // After (recommended):
+ * const id = EntityId.create();
+ * ```
+ */
 export class EntityIdFactory implements IEntityIdFactory {
+  /**
+   * @deprecated Use EntityId.create() instead
+   */
   static createWithRandomUUID(): EntityId<string> {
-    return new EntityId(LibUtils.getUUID(), 'uuid');
+    return EntityId.create();
   }
 
   /**
+   * @deprecated Use EntityId.fromUUID() instead
    * @throws {MissingValueError} if value is empty
    * @throws {InvalidParameterError} if value is empty
    */
@@ -100,6 +131,7 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
+   * @deprecated Use EntityId.fromInteger() instead
    * @throws {InvalidParameterError} if value is empty
    */
   static fromInteger(value: number): EntityId<string> {
@@ -111,6 +143,7 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
+   * @deprecated Use EntityId.fromBigInt() instead
    * @throws {InvalidParameterError} if value is empty
    */
   static fromBigInt(value: string | bigint): EntityId<string> {
@@ -124,6 +157,7 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
+   * @deprecated Use EntityId.fromText() instead
    * @throws {MissingValueError} if value is empty
    * @throws {InvalidParameterError} if value is empty
    */
@@ -139,22 +173,27 @@ export class EntityIdFactory implements IEntityIdFactory {
     return new EntityId(value, 'text');
   }
 
+  /** @deprecated Use EntityId.create() instead */
   createWithRandomUUID(): EntityId<string> {
-    return EntityIdFactory.createWithRandomUUID();
+    return EntityId.create();
   }
 
+  /** @deprecated Use EntityId.fromUUID() instead */
   fromUUID(value: string): EntityId<string> {
     return EntityIdFactory.fromUUID(value);
   }
 
+  /** @deprecated Use EntityId.fromInteger() instead */
   fromInteger(value: number): EntityId<string> {
     return EntityIdFactory.fromInteger(value);
   }
 
+  /** @deprecated Use EntityId.fromBigInt() instead */
   fromBigInt(value: string | bigint): EntityId<string> {
     return EntityIdFactory.fromBigInt(value);
   }
 
+  /** @deprecated Use EntityId.fromText() instead */
   fromText(value: string): EntityId<string> {
     return EntityIdFactory.fromText(value);
   }

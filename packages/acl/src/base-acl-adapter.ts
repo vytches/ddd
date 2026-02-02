@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Logger } from '@vytches/ddd-logging';
 import { Result } from '@vytches/ddd-utils';
 
 import { ACLError } from './acl-errors';
@@ -17,6 +18,7 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
 {
   private readonly supportedOps = new Set<string>();
   protected middlewares: ACLMiddleware[] = [];
+  protected readonly logger = Logger.forContext(this.constructor.name);
 
   constructor(
     protected readonly contextInfo: ACLContextInfo,
@@ -36,6 +38,13 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
     domainModel: TDomainModel,
     options: ExecuteOptions = {}
   ): Promise<Result<TResult, ACLError>> {
+    this.logger.debug('Executing ACL operation', {
+      operation,
+      context: this.contextInfo.contextName,
+      externalSystem: this.contextInfo.externalSystemName,
+      correlationId: options.correlationId,
+    });
+
     if (this.middlewares.length === 0) {
       return this.executeCore(operation, domainModel, options);
     }
@@ -44,11 +53,28 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
   }
 
   async fetch(identifier: string): Promise<Result<TDomainModel, ACLError>> {
+    this.logger.debug('Fetching from external system', {
+      identifier,
+      context: this.contextInfo.contextName,
+      externalSystem: this.contextInfo.externalSystemName,
+    });
+
     try {
       const externalModel = await this.externalAPI.fetch(identifier);
       const domainModel = this.translator.fromExternal(externalModel);
+
+      this.logger.info('Fetch completed successfully', {
+        identifier,
+        context: this.contextInfo.contextName,
+      });
+
       return Result.ok(domainModel);
     } catch (error) {
+      this.logger.error('Fetch failed', error instanceof Error ? error : undefined, {
+        identifier,
+        context: this.contextInfo.contextName,
+        error: error instanceof Error ? error.message : String(error),
+      });
       return Result.fail(this.createContextualError('FETCH', error as Error, {}));
     }
   }
@@ -74,6 +100,11 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
   ): Promise<Result<TResult, ACLError>> {
     try {
       if (!this.supportsOperation(operation)) {
+        this.logger.warn('Unsupported operation attempted', {
+          operation,
+          context: this.contextInfo.contextName,
+          supportedOperations: Array.from(this.supportedOps),
+        });
         return Result.fail(ACLError.unsupportedOperation(this.contextInfo.contextName, operation));
       }
 
@@ -83,8 +114,20 @@ export abstract class BaseACLAdapter<TDomainModel, TExternalModel, TResult = any
         ? await this.executeWithTimeout(operation, externalModel, options.timeout)
         : await this.externalAPI.execute(operation, externalModel);
 
+      this.logger.info('ACL operation completed successfully', {
+        operation,
+        context: this.contextInfo.contextName,
+        correlationId: options.correlationId,
+      });
+
       return Result.ok(result);
     } catch (error) {
+      this.logger.error('ACL operation failed', error instanceof Error ? error : undefined, {
+        operation,
+        context: this.contextInfo.contextName,
+        error: error instanceof Error ? error.message : String(error),
+        correlationId: options.correlationId,
+      });
       return Result.fail(this.createContextualError(operation, error as Error, options));
     }
   }

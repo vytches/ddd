@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-validation",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "description": "Business rules and specifications for domain validation",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -62,6 +62,7 @@
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-logging": "workspace:*",
     "@vytches/ddd-utils": "workspace:*"
   }
 }

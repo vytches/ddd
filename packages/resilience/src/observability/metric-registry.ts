@@ -71,6 +71,7 @@ export class DefaultMetricRegistry implements MetricRegistry {
 }
 
 export class DefaultObservabilityEventBus implements ObservabilityEventBus {
+  private readonly logger = Logger.forContext('DefaultObservabilityEventBus');
   private listeners = new Map<string, Set<ObservabilityEventListener>>();
   private globalListeners = new Set<ObservabilityEventListener>();
 
@@ -121,7 +122,9 @@ export class DefaultObservabilityEventBus implements ObservabilityEventBus {
     try {
       await listener(event);
     } catch (error) {
-      console.warn('Event listener error:', error);
+      this.logger.warn('Event listener error', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 

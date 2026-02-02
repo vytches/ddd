@@ -5,6 +5,7 @@ import type {
   IEventPersistenceHandler,
 } from '@vytches/ddd-contracts';
 import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
+import { Logger } from '@vytches/ddd-logging';
 import type { Result } from '@vytches/ddd-utils';
 
 export class VersionError extends IDomainError {
@@ -28,6 +29,8 @@ export interface IRepositoryAggregate extends IAggregateWithEvents {
 }
 
 export abstract class IBaseRepository {
+  protected readonly logger = Logger.forContext(this.constructor.name);
+
   constructor(
     protected readonly eventDispatcher: IEnhancedEventDispatcher,
     protected readonly eventPersistenceHandler: IEventPersistenceHandler
@@ -38,23 +41,32 @@ export abstract class IBaseRepository {
    * @param aggregate The aggregate to save
    * @throws VersionError if version conflict occurs
    */
-  async save(
-    aggregate: IRepositoryAggregate
-  ): Promise<void | Result<void, VersionError | any> | any> {
+  async save(aggregate: IRepositoryAggregate): Promise<void> {
+    const aggregateId = aggregate.getId().getValue() as string | number;
     const events = aggregate.getDomainEvents();
 
-    if (events.length === 0) return;
+    if (events.length === 0) {
+      this.logger.debug('No events to persist', { aggregateId });
+      return;
+    }
+
+    this.logger.debug('Saving aggregate', {
+      aggregateId,
+      eventCount: events.length,
+      initialVersion: aggregate.getInitialVersion(),
+    });
 
     const currentVersion =
       (await this.eventPersistenceHandler.getCurrentVersion(aggregate.getId())) ?? 0;
     const initialVersion = aggregate.getInitialVersion();
 
     if (initialVersion !== currentVersion) {
-      throw VersionError.withEntityIdAndVersions(
-        aggregate.getId().getValue() as string | number,
-        currentVersion,
-        initialVersion
-      );
+      this.logger.warn('Version conflict detected', {
+        aggregateId,
+        expectedVersion: currentVersion,
+        actualVersion: initialVersion,
+      });
+      throw VersionError.withEntityIdAndVersions(aggregateId, currentVersion, initialVersion);
     }
 
     for (const event of events) {
@@ -63,6 +75,12 @@ export abstract class IBaseRepository {
 
     // Publish events
     await this.eventDispatcher.dispatchEventsForAggregate(aggregate);
+
+    this.logger.info('Aggregate saved successfully', {
+      aggregateId,
+      eventCount: events.length,
+      newVersion: initialVersion + events.length,
+    });
   }
 
   /**

@@ -18,11 +18,11 @@ class AgeSpecification implements ISpecification<{ age: number }> {
     return candidate.age >= this.minAge;
   }
 
-  and(other: ISpecification<{ age: number }>): ISpecification<{ age: number }> {
+  and(_other: ISpecification<{ age: number }>): ISpecification<{ age: number }> {
     throw new Error('Not implemented for test');
   }
 
-  or(other: ISpecification<{ age: number }>): ISpecification<{ age: number }> {
+  or(_other: ISpecification<{ age: number }>): ISpecification<{ age: number }> {
     throw new Error('Not implemented for test');
   }
 

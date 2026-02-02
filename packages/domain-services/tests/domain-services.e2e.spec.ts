@@ -613,11 +613,11 @@ class NotificationService extends EventAwareDomainService implements IAsyncDomai
       throw new Error('Event bus not set');
     }
 
-    this.eventBus.subscribe<OrderConfirmedEvent>(OrderConfirmedEvent, event =>
+    this.eventBus.subscribe<OrderConfirmedEvent>('OrderConfirmedEvent', event =>
       this.handleOrderConfirmedEvent(event)
     );
 
-    this.eventBus.subscribe<OrderShippedEvent>(OrderShippedEvent, event =>
+    this.eventBus.subscribe<OrderShippedEvent>('OrderShippedEvent', event =>
       this.handleOrderShippedEvent(event)
     );
   }

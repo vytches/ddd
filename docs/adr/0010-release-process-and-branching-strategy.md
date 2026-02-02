@@ -111,18 +111,25 @@ pnpm release:preview
 ### **🚀 Release Commands**
 
 ```bash
-# Automatic version detection (RECOMMENDED)
+# Automatic version detection (analyzes conventional commits)
 pnpm release:version
 
-# Specific version types
+# Specific version types (BYPASSES conventional-commits analysis)
 pnpm release:major      # Breaking changes (1.0.0 → 2.0.0)
-pnpm release:minor      # New features (1.0.0 → 1.1.0)
+pnpm release:minor      # New features (1.0.0 → 1.1.0) ← USE THIS if auto-detection fails
 pnpm release:patch      # Bug fixes (1.0.0 → 1.0.1)
 
 # Pre-release versions
 pnpm release:prerelease # Alpha versions (1.0.0 → 1.1.0-alpha.0)
 pnpm release:graduate   # Graduate from pre-release to stable
 ```
+
+**When to use `pnpm release:minor` instead of `pnpm release:version`:**
+
+- When conventional-commits incorrectly detects BREAKING CHANGE from old commits
+- When you want to force a specific version bump type across all packages
+- When git history contains problematic `BREAKING CHANGE:` markers that can't be
+  removed
 
 ### **⚡ Quick Release Commands**
 
@@ -263,6 +270,32 @@ BREAKING CHANGE:
 - Removed deprecated EntityId.fromString() method
 - Changed return type of EntityId.validate() to Result<EntityId, ValidationError>
 ```
+
+### **⚠️ CRITICAL: Never Use "BREAKING CHANGE: None"**
+
+**DO NOT** write `BREAKING CHANGE: None` or similar in commit messages!
+
+```bash
+# ❌ WRONG - Parser sees "BREAKING CHANGE:" prefix and triggers MAJOR bump!
+fix(nestjs): fix handler registration
+
+BREAKING CHANGE: None - all changes maintain backward compatibility
+
+# ✅ CORRECT - Simply omit the BREAKING CHANGE section if there are none
+fix(nestjs): fix handler registration
+
+Fixed handler registration by using class tokens instead of strings.
+```
+
+**Why this matters:**
+
+- Conventional-commits parser detects `BREAKING CHANGE:` as a trigger for major
+  version bump
+- The parser does NOT understand "None" or "No breaking changes" after the colon
+- This caused `@vytches/ddd-nestjs` to jump from 1.1.x to 11.0.0 due to repeated
+  false BREAKING CHANGE markers
+- Once in git history, these markers affect ALL future releases until manually
+  fixed
 
 ### **Examples of Good Commit Messages**
 
@@ -427,6 +460,44 @@ pnpm lerna version 1.2.1 --no-conventional-commits --no-push
 pnpm lerna version patch --scope=@vytches/ddd-nestjs
 ```
 
+### **🔧 Troubleshooting: Package Getting Unexpected Major Bump**
+
+**Symptom:** A package (e.g., `@vytches/ddd-nestjs`) keeps getting major version
+bumps (11.0.0 → 12.0.0) when only minor/patch changes were made.
+
+**Cause:** Old commits in git history contain `BREAKING CHANGE: None` or similar
+patterns. The conventional-commits parser sees `BREAKING CHANGE:` prefix and
+triggers major bump, ignoring the "None" part.
+
+**Diagnosis:**
+
+```bash
+# Check what conventional-changelog sees for the package
+cd packages/nestjs && npx conventional-changelog --preset angular --release-count 1
+
+# Look for BREAKING CHANGES section in the output
+```
+
+**Solution:**
+
+```bash
+# Option 1: Force minor bump for ALL packages (RECOMMENDED)
+NX_DAEMON=false pnpm lerna version minor --no-push --no-git-tag-version
+
+# Option 2: Force specific version for single package
+pnpm lerna version --force-publish=@vytches/ddd-nestjs --no-push
+
+# Option 3: Manually set version before release
+# Edit packages/nestjs/package.json to desired version
+# Then run: pnpm lerna version --no-push --conventional-commits --force-publish
+```
+
+**Prevention:**
+
+- NEVER write `BREAKING CHANGE: None` in commit messages
+- If no breaking changes, simply omit the BREAKING CHANGE section entirely
+- Review commit messages in PRs for accidental BREAKING CHANGE markers
+
 ## Package Installation for Users
 
 ### **One-time Setup**
@@ -514,8 +585,7 @@ npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd
 
 ---
 
-**Implementation Status:** ✅ **Fully Implemented**  
-**Last Updated:** 2025-07-12  
+**Implementation Status:** ✅ **Fully Implemented** **Last Updated:** 2026-02-02
 **Next Review:** When library reaches 1.0.0 stable
 
 **References:**

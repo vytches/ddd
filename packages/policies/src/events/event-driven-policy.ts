@@ -1,3 +1,4 @@
+import { Logger } from '@vytches/ddd-logging';
 import type { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
@@ -23,6 +24,7 @@ export interface EventDrivenPolicyConfig {
 }
 
 export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
+  private readonly logger = Logger.forContext('EventDrivenPolicy');
   private readonly config: {
     eventBus: PolicyEventBus;
     emitStartEvents: boolean;
@@ -112,7 +114,9 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
         await this.config.eventBus.publish(startEvent);
       } catch (error) {
         // Don't fail policy evaluation due to event emission errors
-        console.warn('Failed to emit policy evaluation started event:', error);
+        this.logger.warn('Failed to emit policy evaluation started event', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
 
@@ -144,7 +148,9 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
           await this.config.eventBus.publish(completionEvent);
         } catch (error) {
           // Don't fail policy evaluation due to event emission errors
-          console.warn('Failed to emit policy evaluation completed event:', error);
+          this.logger.warn('Failed to emit policy evaluation completed event', {
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
 
@@ -165,7 +171,9 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
           await this.config.eventBus.publish(errorEvent);
         } catch (eventError) {
           // Don't fail policy evaluation due to event emission errors
-          console.warn('Failed to emit policy evaluation error event:', eventError);
+          this.logger.warn('Failed to emit policy evaluation error event', {
+            error: eventError instanceof Error ? eventError.message : String(eventError),
+          });
         }
       }
 

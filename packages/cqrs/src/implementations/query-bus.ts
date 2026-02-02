@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 import { MiddlewarePipelineExecutor } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 
@@ -11,6 +12,7 @@ import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 
 export class QueryBus extends IQueryBus {
+  private readonly logger = Logger.forContext('QueryBus');
   private middlewares: ICQRSMiddleware[] = [];
   private handlers: Map<
     string,
@@ -48,7 +50,7 @@ export class QueryBus extends IQueryBus {
     // This method is kept for backward compatibility but does nothing
     // Suppress deprecation warnings in CI to avoid stderr confusion
     if (!process.env.CI) {
-      console.warn(
+      this.logger.warn(
         'QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
       );
     }
@@ -72,7 +74,9 @@ export class QueryBus extends IQueryBus {
     } else {
       // Fall back to DI container resolution
       try {
-        const handlerToken = this.getHandlerToken(query.constructor);
+        const handlerToken = this.getHandlerToken(query.constructor) as ServiceToken<
+          IQueryHandler<T, R>
+        >;
         handler = this.container.resolve<IQueryHandler<T, R>>(handlerToken);
       } catch (_error) {
         throw new HandlerNotFoundError(query.constructor.name, 'query');

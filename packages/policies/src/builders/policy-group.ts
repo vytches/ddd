@@ -145,7 +145,7 @@ export class PolicyGroup<T> implements IPolicyGroup<T> {
         );
 
       default:
-        throw new Error(`Unsupported step type in group: ${(step as any).type}`);
+        throw new Error(`Unsupported step type in group: ${(step as { type?: string }).type}`);
     }
   }
 }
@@ -242,7 +242,7 @@ class GroupPredicatePolicy<T> extends BaseBusinessPolicy<T> {
     id: string,
     domain: string,
     name: string,
-    private readonly predicate: (entity: T, context?: any) => boolean,
+    private readonly predicate: (entity: T, context?: unknown) => boolean,
     private readonly errorCode: string,
     private readonly errorMessage: string,
     private readonly severity: PolicyViolationSeverity
@@ -325,9 +325,11 @@ class GroupCompositePolicy<T> extends BaseBusinessPolicy<T> {
           step.severity
         );
 
-      // TODO: Implement other step types
+      // Currently supports 'specification' and 'predicate' step types
       default:
-        throw new Error(`Unsupported step type in group composite policy: ${(step as any).type}`);
+        throw new Error(
+          `Unsupported step type: ${(step as { type: string }).type}. Supported: specification, predicate`
+        );
     }
   }
 }

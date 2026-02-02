@@ -1,4 +1,5 @@
 import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
+import { Logger } from '@vytches/ddd-logging';
 import { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
@@ -27,6 +28,11 @@ export abstract class BaseBusinessPolicy<T> implements IBusinessPolicy<T> {
    * Descriptive name for this policy
    */
   public readonly name: string;
+
+  /**
+   * Logger instance for policy evaluation tracking
+   */
+  protected readonly logger = Logger.forContext(this.constructor.name);
 
   constructor(id: string, domain: string, name: string) {
     this.id = id;
@@ -260,9 +266,12 @@ class AndPolicyComposer<T> extends BaseCompositePolicy<T> implements IPolicyComp
     return this.success(request.entity);
   }
 
+  /**
+   * Groups policies for complex logical compositions.
+   * @throws {Error} Feature not yet implemented - use and()/or() for basic composition
+   */
   public group(): IGroupedPolicyComposer<T> {
-    // TODO: Implement grouping
-    throw new Error('Grouping not yet implemented');
+    throw new Error('Grouping not yet implemented. Use and()/or() methods for basic composition.');
   }
 }
 
@@ -294,9 +303,12 @@ class OrPolicyComposer<T> extends BaseCompositePolicy<T> implements IPolicyCompo
     return this.failure(violations[0]!);
   }
 
+  /**
+   * Groups policies for complex logical compositions.
+   * @throws {Error} Feature not yet implemented - use and()/or() for basic composition
+   */
   public group(): IGroupedPolicyComposer<T> {
-    // TODO: Implement grouping
-    throw new Error('Grouping not yet implemented');
+    throw new Error('Grouping not yet implemented. Use and()/or() methods for basic composition.');
   }
 }
 
@@ -328,13 +340,19 @@ class ConditionalPolicyBuilder<T> implements IPolicyConditionalBuilder<T> {
     private readonly condition: PolicyCondition<T>
   ) {}
 
-  public then(policy: IBusinessPolicy<T>): IPolicyConditionalElse<T> {
-    // TODO: Implement conditional policy
-    throw new Error('Conditional policies not yet implemented');
+  /**
+   * Applies a policy when condition is met.
+   * @throws {Error} Feature not yet implemented - use PolicyBuilder.when().then() instead
+   */
+  public then(_policy: IBusinessPolicy<T>): IPolicyConditionalElse<T> {
+    throw new Error('Use PolicyBuilder.when().then() for conditional policies');
   }
 
-  public thenMust(specification: unknown): IPolicyConditionalElse<T> {
-    // TODO: Implement conditional policy with specification
-    throw new Error('Conditional policies not yet implemented');
+  /**
+   * Applies a specification when condition is met.
+   * @throws {Error} Feature not yet implemented - use PolicyBuilder.when().then() instead
+   */
+  public thenMust(_specification: unknown): IPolicyConditionalElse<T> {
+    throw new Error('Use PolicyBuilder.when().then() for conditional policies');
   }
 }

@@ -1,4 +1,4 @@
-// Removed logging dependency for Phase 1 simplification
+import { Logger } from '@vytches/ddd-logging';
 import {
   CircularDependencyError,
   ContainerDisposedError,
@@ -17,9 +17,10 @@ import type {
 import { ServiceLifetime } from '../types';
 
 export class SimpleContainer implements IDependencyContainer {
+  private readonly logger = Logger.forContext('SimpleContainer');
   private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly singletonInstances = new Map<string, any>();
-  private readonly scopedInstances = new Map<string, any>();
+  private readonly singletonInstances = new Map<string, unknown>();
+  private readonly scopedInstances = new Map<string, unknown>();
   private readonly resolutionChain: ServiceToken[] = [];
   private disposed = false;
 
@@ -192,11 +193,16 @@ export class SimpleContainer implements IDependencyContainer {
 
     // Dispose singleton instances if they implement dispose
     for (const [, instance] of this.singletonInstances) {
-      if (instance && typeof instance.dispose === 'function') {
+      if (
+        instance &&
+        typeof instance === 'object' &&
+        'dispose' in instance &&
+        typeof (instance as { dispose: unknown }).dispose === 'function'
+      ) {
         try {
-          instance.dispose();
+          (instance as { dispose: () => void }).dispose();
         } catch (error) {
-          console.warn('Error disposing singleton instance:', error);
+          this.logger.warn('Error disposing singleton instance', { error: String(error) });
         }
       }
     }
@@ -227,16 +233,16 @@ export class SimpleContainer implements IDependencyContainer {
     // Check singleton cache
     if (descriptor.lifetime === ServiceLifetime.Singleton) {
       const cachedInstance = this.singletonInstances.get(tokenKey);
-      if (cachedInstance) {
-        return cachedInstance;
+      if (cachedInstance !== undefined) {
+        return cachedInstance as T;
       }
     }
 
     // Check scoped cache
     if (descriptor.lifetime === ServiceLifetime.Scoped) {
       const cachedInstance = this.scopedInstances.get(tokenKey);
-      if (cachedInstance) {
-        return cachedInstance;
+      if (cachedInstance !== undefined) {
+        return cachedInstance as T;
       }
     }
 
@@ -244,11 +250,11 @@ export class SimpleContainer implements IDependencyContainer {
     let instance: T;
 
     if (descriptor.instance !== undefined) {
-      instance = descriptor.instance;
+      instance = descriptor.instance as T;
     } else if (descriptor.factory) {
-      instance = descriptor.factory(this);
+      instance = descriptor.factory(this) as T;
     } else if (descriptor.implementation) {
-      instance = new descriptor.implementation();
+      instance = new descriptor.implementation() as T;
     } else {
       throw new InvalidRegistrationError(token, 'No implementation, factory, or instance provided');
     }

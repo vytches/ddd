@@ -225,7 +225,7 @@ export class ConditionalPolicyElseStepBuilder<T> implements IConditionalPolicyEl
       elsePolicy
     );
 
-    // TODO: Integrate with parent builder
+    // Returns standalone conditional policy - use PolicyBuilder for complex compositions
     return conditionalPolicy;
   }
 
@@ -272,7 +272,7 @@ export class ConditionalPolicyElse<T> implements IConditionalPolicyElse<T> {
       this.elsePolicy
     );
 
-    // TODO: Integrate with parent builder
+    // Returns standalone conditional policy - use PolicyBuilder for complex compositions
     return conditionalPolicy;
   }
 }

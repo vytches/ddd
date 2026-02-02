@@ -7,11 +7,11 @@ export enum ServiceLifetime {
   Scoped = 'scoped',
 }
 
-export type ServiceToken<T = any> = string | symbol | Constructor<T>;
+export type ServiceToken<T = unknown> = string | symbol | Constructor<T>;
 
-export type Constructor<T = any> = new (...args: any[]) => T;
+export type Constructor<T = unknown> = new (...args: unknown[]) => T;
 
-export type ServiceFactory<T = any> = (container: IDependencyContainer) => T;
+export type ServiceFactory<T = unknown> = (container: IDependencyContainer) => T;
 
 export interface ServiceRegistrationOptions {
   /** Service lifetime management */
@@ -22,7 +22,7 @@ export interface ServiceRegistrationOptions {
   tags?: string[] | undefined;
 }
 
-export interface ServiceDescriptor<T = any> {
+export interface ServiceDescriptor<T = unknown> {
   token: ServiceToken<T>;
   implementation?: Constructor<T>;
   factory?: ServiceFactory<T>;

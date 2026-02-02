@@ -1,3 +1,4 @@
+import { Logger } from '@vytches/ddd-logging';
 import { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
@@ -97,6 +98,7 @@ export interface TemporalPolicyConfig {
 }
 
 export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
+  private readonly logger = Logger.forContext('PolicyTemporalBehavior');
   public readonly id: string;
   public readonly domain: string;
   public readonly name: string;
@@ -179,7 +181,10 @@ export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
           }
         } catch (error) {
           // Log error but continue to next condition
-          console.warn(`Temporal condition '${name}' failed:`, error);
+          this.logger.warn('Temporal condition failed', {
+            conditionName: name,
+            error: error instanceof Error ? error.message : String(error),
+          });
         }
       }
     }

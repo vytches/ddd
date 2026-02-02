@@ -5,6 +5,7 @@ import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import type { Constructor } from '@vytches/ddd-di';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import { Logger } from '@vytches/ddd-logging';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
 
 // Metadata keys used by VytchesDDD decorators
@@ -50,6 +51,7 @@ interface BusWithRegistration {
 
 @Injectable()
 export class VytchesExplorerService implements OnModuleInit {
+  private readonly logger = Logger.forContext('VytchesExplorerService');
   private _contextOptions?: VytchesContextOptions;
   private discoveredHandlers: HandlerInfo[] = [];
   private initialized = false;
@@ -72,7 +74,9 @@ export class VytchesExplorerService implements OnModuleInit {
       await this.registerHandlersWithBuses(handlers);
       this.initialized = true;
     } catch (error) {
-      console.error('[VytchesExplorerService] Initialization failed:', error);
+      this.logger.error('Initialization failed', error instanceof Error ? error : undefined, {
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw error;
     }
   }
@@ -231,10 +235,10 @@ export class VytchesExplorerService implements OnModuleInit {
           }
         }
       } catch (error) {
-        console.warn(
-          `[VytchesExplorerService] Failed to register ${handler.handlerType.name}:`,
-          error
-        );
+        this.logger.warn('Failed to register handler', {
+          handlerName: handler.handlerType.name,
+          error: error instanceof Error ? error.message : String(error),
+        });
       }
     }
   }

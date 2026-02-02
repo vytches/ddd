@@ -86,11 +86,8 @@ export class PolicyEventBuilder<T> {
       type: 'POLICY_EVALUATION_STARTED',
       ...this.baseData,
       timestamp: new Date(),
+      ...(metadata !== undefined && { metadata }),
     };
-
-    if (metadata !== undefined) {
-      (event as any).metadata = metadata;
-    }
 
     return event;
   }
@@ -113,17 +110,10 @@ export class PolicyEventBuilder<T> {
       result,
       duration,
       timestamp: new Date(),
+      ...(options.version !== undefined && { version: options.version }),
+      ...(options.tags !== undefined && { tags: options.tags }),
+      ...(options.metadata !== undefined && { metadata: options.metadata }),
     };
-
-    if (options.version !== undefined) {
-      (event as any).version = options.version;
-    }
-    if (options.tags !== undefined) {
-      (event as any).tags = options.tags;
-    }
-    if (options.metadata !== undefined) {
-      (event as any).metadata = options.metadata;
-    }
 
     return event;
   }
@@ -142,11 +132,8 @@ export class PolicyEventBuilder<T> {
       error,
       duration,
       timestamp: new Date(),
+      ...(metadata !== undefined && { metadata }),
     };
-
-    if (metadata !== undefined) {
-      (event as any).metadata = metadata;
-    }
 
     return event;
   }

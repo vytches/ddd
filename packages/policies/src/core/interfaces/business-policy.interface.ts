@@ -102,7 +102,7 @@ export interface IPolicyConditionalBuilder<T> {
   /**
    * Define what happens when condition is met (with policy builder)
    */
-  thenMust(specification: unknown): IPolicyConditionalElse<T>; // TODO: Type this properly
+  thenMust(specification: unknown): IPolicyConditionalElse<T>; // Accepts ISpecification<T> or IAsyncSpecification<T>
 }
 
 export interface IPolicyConditionalElse<T> {
@@ -114,7 +114,7 @@ export interface IPolicyConditionalElse<T> {
   /**
    * Define what happens when condition is not met (with policy builder)
    */
-  otherwiseMust(specification: unknown): IBusinessPolicy<T>; // TODO: Type this properly
+  otherwiseMust(specification: unknown): IBusinessPolicy<T>; // Accepts ISpecification<T> or IAsyncSpecification<T>
 
   /**
    * No action when condition is not met (policy passes)

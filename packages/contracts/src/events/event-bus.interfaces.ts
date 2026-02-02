@@ -1,6 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDomainEvent } from './domain-event-interfaces';
+
+/** Constructor type for event classes */
+type EventConstructor<T> = new (...args: unknown[]) => T;
 
 export abstract class IEventBus<TEvent = IDomainEvent> {
   /**
@@ -12,7 +14,7 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
    * Subscribe a function to handle events of a specific type
    */
   abstract subscribe<T extends TEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | EventConstructor<T>,
     handler: (event: T) => Promise<void> | void
   ): void;
 
@@ -20,7 +22,7 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
    * Register a class-based handler for events of a specific type
    */
   abstract registerHandler<T extends TEvent>(
-    eventType: string | (new (...args: any[]) => T),
+    eventType: string | EventConstructor<T>,
     handler: {
       handle(event: T): Promise<void> | void;
     }
@@ -30,7 +32,7 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
    * Unsubscribe from an event type
    */
   abstract unsubscribe(
-    eventType: string | (new (...args: any[]) => TEvent),
+    eventType: string | EventConstructor<TEvent>,
     handler:
       | ((event: TEvent) => Promise<void> | void)
       | { handle(event: TEvent): Promise<void> | void }

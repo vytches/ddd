@@ -220,6 +220,9 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vytches/ddd-validation':
         specifier: workspace:*
         version: link:../validation
@@ -251,6 +254,9 @@ importers:
       '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vytches/ddd-value-objects':
         specifier: workspace:*
         version: link:../value-objects
@@ -341,6 +347,9 @@ importers:
       '@vytches/ddd-events':
         specifier: workspace:*
         version: link:../events
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vytches/ddd-resilience':
         specifier: workspace:*
         version: link:../resilience
@@ -413,6 +422,9 @@ importers:
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vytches/ddd-repositories':
         specifier: workspace:*
         version: link:../repositories
@@ -641,6 +653,12 @@ importers:
 
   packages/policies:
     dependencies:
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
@@ -694,6 +712,9 @@ importers:
       '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
     devDependencies:
       '@vytches/ddd-testing':
         specifier: workspace:*
@@ -806,6 +827,9 @@ importers:
       '@vytches/ddd-domain-primitives':
         specifier: workspace:*
         version: link:../domain-primitives
+      '@vytches/ddd-logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
