@@ -43,9 +43,9 @@
   },
   "dependencies": {
     "@faker-js/faker": "^8.0.0",
-    "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-domain-primitives": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*"
+    "@vytches/ddd-contracts": "0.24.0",
+    "@vytches/ddd-domain-primitives": "0.22.0",
+    "@vytches/ddd-utils": "0.22.0"
   },
   "peerDependencies": {
     "@anthropic-ai/sdk": ">=0.24.0",
@@ -75,5 +75,6 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
-  }
+  },
+  "gitHead": "0fe40bf9b21af2582cc0768e08274edf5d93aba5"
 }

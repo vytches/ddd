@@ -59,22 +59,23 @@
     "access": "restricted"
   },
   "dependencies": {
-    "@vytches/ddd-acl": "workspace:*",
-    "@vytches/ddd-aggregates": "workspace:*",
-    "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-cqrs": "workspace:*",
-    "@vytches/ddd-di": "workspace:*",
-    "@vytches/ddd-domain-primitives": "workspace:*",
-    "@vytches/ddd-domain-services": "workspace:*",
-    "@vytches/ddd-events": "workspace:*",
-    "@vytches/ddd-logging": "workspace:*",
-    "@vytches/ddd-messaging": "workspace:*",
-    "@vytches/ddd-policies": "workspace:*",
-    "@vytches/ddd-projections": "workspace:*",
-    "@vytches/ddd-repositories": "workspace:*",
-    "@vytches/ddd-resilience": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
-    "@vytches/ddd-validation": "workspace:*",
-    "@vytches/ddd-value-objects": "workspace:*"
-  }
+    "@vytches/ddd-acl": "0.22.0",
+    "@vytches/ddd-aggregates": "0.22.0",
+    "@vytches/ddd-contracts": "0.24.0",
+    "@vytches/ddd-cqrs": "0.22.0",
+    "@vytches/ddd-di": "0.22.0",
+    "@vytches/ddd-domain-primitives": "0.22.0",
+    "@vytches/ddd-domain-services": "0.22.0",
+    "@vytches/ddd-events": "0.22.0",
+    "@vytches/ddd-logging": "0.22.0",
+    "@vytches/ddd-messaging": "0.22.0",
+    "@vytches/ddd-policies": "0.23.0",
+    "@vytches/ddd-projections": "0.22.0",
+    "@vytches/ddd-repositories": "0.22.0",
+    "@vytches/ddd-resilience": "0.22.0",
+    "@vytches/ddd-utils": "0.22.0",
+    "@vytches/ddd-validation": "0.23.0",
+    "@vytches/ddd-value-objects": "0.22.0"
+  },
+  "gitHead": "0fe40bf9b21af2582cc0768e08274edf5d93aba5"
 }

@@ -43,8 +43,8 @@
   },
   "devDependencies": {
     "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-testing": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-testing": "0.22.0",
+    "@vytches/ddd-utils": "0.22.0",
     "@vytches/ddd-validation": "workspace:*",
     "typescript": "^5.0.0",
     "vite": "^6.0.0",
@@ -63,8 +63,9 @@
     "access": "restricted"
   },
   "dependencies": {
-    "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-logging": "workspace:*",
-    "@vytches/ddd-validation": "workspace:*"
-  }
+    "@vytches/ddd-contracts": "0.24.0",
+    "@vytches/ddd-logging": "0.22.0",
+    "@vytches/ddd-validation": "0.23.0"
+  },
+  "gitHead": "0fe40bf9b21af2582cc0768e08274edf5d93aba5"
 }

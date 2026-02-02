@@ -62,5 +62,6 @@
     "@types/js-yaml": "^4.0.9",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0"
-  }
+  },
+  "gitHead": "0fe40bf9b21af2582cc0768e08274edf5d93aba5"
 }

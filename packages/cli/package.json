@@ -47,15 +47,15 @@
   },
   "dependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@vytches/ddd-logging": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-logging": "0.22.0",
+    "@vytches/ddd-utils": "0.22.0",
     "chalk": "^5.3.0",
     "commander": "^11.0.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.33",
-    "@vytches/ddd-testing": "workspace:*",
+    "@vytches/ddd-testing": "0.22.0",
     "eslint-plugin-jsdoc": "^51.3.4",
     "tsx": "^4.20.3",
     "typescript": "^5.0.0",
@@ -73,5 +73,6 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
     "access": "restricted"
-  }
+  },
+  "gitHead": "0fe40bf9b21af2582cc0768e08274edf5d93aba5"
 }
