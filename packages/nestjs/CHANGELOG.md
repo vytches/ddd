@@ -16,7 +16,8 @@ All notable changes to this project will be documented in this file. See
 
 ## Previous Versions
 
-- 11.1.0, 11.0.0, 10.0.0, 9.0.0, 8.0.0 - Version bumps due to historical commit issue
+- 11.1.0, 11.0.0, 10.0.0, 9.0.0, 8.0.0 - Version bumps due to historical commit
+  issue
 - 1.1.2 (2025-08-20) - Version bump only
 - 1.1.1 (2025-08-19) - Fixed NestJS import issues
 - 1.1.0 (2025-08-19) - Initial NestJS adapter for VytchesDDD integration
