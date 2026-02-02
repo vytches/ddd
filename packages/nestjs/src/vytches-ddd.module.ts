@@ -100,6 +100,7 @@ export class VytchesDDDModule {
       return VytchesDDDModule.forRoot(options);
     }
 
+    // expected depreciated
     const contextNames = Array.isArray(options.contexts)
       ? options.contexts
       : Object.keys(options.contexts);
