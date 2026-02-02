@@ -13,12 +13,18 @@
     },
     "version": {
       "conventionalCommits": true,
-      "changelogPreset": "angular",
+      "changelogPreset": {
+        "name": "angular",
+        "releaseCount": 1
+      },
       "createRelease": false,
       "exact": true,
-      "allowBranch": ["main", "master", "release/*"]
+      "allowBranch": ["main", "master", "release/*", "hotfix/*"]
     }
   },
-  "changelogPreset": "angular",
+  "changelogPreset": {
+    "name": "angular",
+    "releaseCount": 1
+  },
   "ignoreChanges": ["**/__tests__/**", "**/*.md"]
 }
