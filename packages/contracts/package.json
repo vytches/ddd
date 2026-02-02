@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-contracts",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "description": "Enterprise-grade contracts & fundamental types for Domain-Driven Design",
   "type": "module",
   "main": "./dist/index.cjs",
