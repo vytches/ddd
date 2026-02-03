@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [12.0.4](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.2...@vytches/ddd-nestjs@12.0.4) (2026-02-03)
+
+### Bug Fixes
+
+- rename variable ([#63](https://github.com/vytches/ddd/issues/63))
+  ([161bda3](https://github.com/vytches/ddd/commit/161bda317346ed8ae02a4823c4b88b45950fa1dd))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [12.0.3](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.2...@vytches/ddd-nestjs@12.0.3) (2026-02-02)
 
 ### Bug Fixes
