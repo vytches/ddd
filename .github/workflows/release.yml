@@ -207,13 +207,13 @@ jobs:
         if: needs.context-detection.outputs.is_publish_only == 'true' || steps.changes.outputs.has_changes == 'true'
         run: |
           if [[ "${{ needs.context-detection.outputs.is_publish_only }}" == "true" ]]; then
-            echo "📦 PUBLISH-ONLY MODE: Using direct npm publish (bypassing lerna)..."
+            echo "📦 PUBLISH-ONLY MODE: Using pnpm publish (converts workspace:* to versions)..."
             for pkg in packages/*/; do
               if [ -f "$pkg/package.json" ] && [ -d "$pkg/dist" ]; then
                 name=$(grep '"name"' "$pkg/package.json" | head -1 | sed 's/.*": "//;s/".*//')
                 version=$(grep '"version"' "$pkg/package.json" | head -1 | sed 's/.*": "//;s/".*//')
                 echo "📦 Publishing $name@$version..."
-                (cd "$pkg" && npm publish --registry=https://npm.pkg.github.com) || echo "⚠️ Skipped: $name (already exists or error)"
+                (cd "$pkg" && pnpm publish --registry=https://npm.pkg.github.com --no-git-checks) || echo "⚠️ Skipped: $name (already exists or error)"
               fi
             done
             echo "✅ Direct publish complete!"
