@@ -204,13 +204,20 @@ jobs:
         if: needs.context-detection.outputs.is_publish_only == 'true' || steps.changes.outputs.has_changes == 'true'
         run: |
           if [[ "${{ needs.context-detection.outputs.is_publish_only }}" == "true" ]]; then
-            echo "📦 PUBLISH-ONLY MODE: Publishing existing package.json versions..."
-            echo "⚠️  Skipping lerna changed check - publishing directly from package.json"
+            echo "📦 PUBLISH-ONLY MODE: Using direct npm publish (bypassing lerna)..."
+            for pkg in packages/*/; do
+              if [ -f "$pkg/package.json" ] && [ -d "$pkg/dist" ]; then
+                name=$(grep '"name"' "$pkg/package.json" | head -1 | sed 's/.*": "//;s/".*//')
+                version=$(grep '"version"' "$pkg/package.json" | head -1 | sed 's/.*": "//;s/".*//')
+                echo "📦 Publishing $name@$version..."
+                (cd "$pkg" && npm publish --registry=https://npm.pkg.github.com) || echo "⚠️ Skipped: $name (already exists or error)"
+              fi
+            done
+            echo "✅ Direct publish complete!"
           else
-            echo "📦 Publishing packages to GitHub Packages..."
+            echo "📦 Publishing packages via lerna..."
+            pnpm lerna publish from-package --yes
           fi
-          echo "🚀 Publishing from package.json versions..."
-          pnpm lerna publish from-package --yes
         env:
           NODE_AUTH_TOKEN: ${{ steps.generate_token.outputs.token || secrets.PAT_TOKEN || secrets.GITHUB_TOKEN }}
 
