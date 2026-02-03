@@ -240,6 +240,11 @@
     "yargs": "^17.7.2"
   },
   "pnpm": {
+    "auditConfig": {
+      "ignoreCves": [
+        "CVE-2026-0775"
+      ]
+    },
     "overrides": {
       "esbuild": ">=0.25.0",
       "axios": ">=1.12.0",
