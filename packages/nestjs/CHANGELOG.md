@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [12.0.5](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.0.5) (2026-02-04)
+
+**Note:** Version bump only for package @vytches/ddd-nestjs
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [12.0.4](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.2...@vytches/ddd-nestjs@12.0.4) (2026-02-03)
 
 ### Bug Fixes
