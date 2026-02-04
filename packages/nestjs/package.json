@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-nestjs",
-  "version": "12.0.6",
+  "version": "12.1.0",
   "description": "NestJS adapter for VytchesDDD - Enterprise Domain-Driven Design framework integration",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@vytches/ddd-acl": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-di": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
@@ -72,6 +73,7 @@
     "@nestjs/core": "^10.3.0",
     "@nestjs/platform-express": "^10.3.0",
     "@nestjs/testing": "^10.3.0",
+    "@swc/core": "~1.5.7",
     "@types/node": "^20.10.4",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
@@ -80,6 +82,7 @@
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
     "typescript": "^5.3.3",
+    "unplugin-swc": "^1.5.9",
     "vite": "^5.0.10",
     "vite-plugin-dts": "^4.0.0",
     "vitest": "^1.1.0"

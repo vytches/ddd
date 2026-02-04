@@ -3,6 +3,7 @@ import { Global, Module } from '@nestjs/common';
 import { DiscoveryModule, DiscoveryService, ModuleRef } from '@nestjs/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens in forTesting()
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import { IEventBus } from '@vytches/ddd-contracts';
 import { VytchesExplorerService } from './services/vytches-explorer.service';
 import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
 
@@ -172,6 +173,22 @@ export class VytchesDDDModule {
           send: () => Promise.resolve({ success: true }),
         },
       },
+      {
+        provide: IEventBus,
+        useValue: {
+          subscribe: (): void => {
+            /* noop */
+          },
+          registerHandler: (): void => {
+            /* noop */
+          },
+          publish: () => Promise.resolve(),
+          publishMany: () => Promise.resolve(),
+          unsubscribe: (): void => {
+            /* noop */
+          },
+        },
+      },
       ...(options.providers || []),
     ];
 
@@ -179,7 +196,7 @@ export class VytchesDDDModule {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
       providers,
-      exports: [VytchesExplorerService, ICommandBus, IQueryBus],
+      exports: [VytchesExplorerService, ICommandBus, IQueryBus, IEventBus],
       global: false,
     };
   }

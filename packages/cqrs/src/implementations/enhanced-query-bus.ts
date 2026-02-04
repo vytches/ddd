@@ -186,7 +186,7 @@ export class EnhancedQueryBus extends IQueryBus {
     // Initialize configuration
     this.timeout = options.defaultTimeout ?? 10000; // 10 seconds for queries
     this.maxRetries = options.defaultRetries ?? 2; // Fewer retries for queries
-    this.cacheEnabled = options.enableCache ?? true;
+    this.cacheEnabled = options.enableCache ?? false;
     this.cacheTTL = options.cacheOptions?.ttl ?? 300000; // 5 minutes default
     this.batchingEnabled = options.enableBatching ?? false;
     this.maxBatchSize = options.maxBatchSize ?? 20;

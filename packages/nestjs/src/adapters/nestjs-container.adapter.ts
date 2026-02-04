@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import type { ModuleRef } from '@nestjs/core';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import type {
   Constructor,
   IDependencyContainer,
@@ -21,7 +21,7 @@ export class NestJSContainerAdapter implements IDependencyContainer {
   private readonly instances = new Map<string, unknown>();
   private moduleRef?: ModuleRef;
 
-  constructor(moduleRef?: ModuleRef) {
+  constructor(@Optional() @Inject(ModuleRef) moduleRef?: ModuleRef) {
     if (moduleRef) {
       this.moduleRef = moduleRef;
     }

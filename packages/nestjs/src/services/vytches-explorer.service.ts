@@ -1,10 +1,11 @@
 import type { OnModuleInit } from '@nestjs/common';
 import { Inject, Injectable, Optional } from '@nestjs/common';
-import type { DiscoveryService, ModuleRef } from '@nestjs/core';
+import { DiscoveryService, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import type { Constructor } from '@vytches/ddd-di';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import { IEventBus, EVENT_HANDLER_METADATA } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
 
@@ -47,6 +48,8 @@ interface HandlerMetadata {
 interface BusWithRegistration {
   register?(messageType: unknown, handler: unknown): void;
   registerFactory?(messageType: unknown, factory: () => unknown): void;
+  subscribe?(eventType: unknown, handler: unknown): void;
+  registerHandler?(eventType: unknown, handler: unknown): void;
 }
 
 @Injectable()
@@ -57,10 +60,11 @@ export class VytchesExplorerService implements OnModuleInit {
   private initialized = false;
 
   constructor(
-    private readonly moduleRef: ModuleRef,
-    private readonly discoveryService: DiscoveryService,
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
+    @Inject(DiscoveryService) private readonly discoveryService: DiscoveryService,
     @Optional() @Inject(ICommandBus) private readonly commandBus?: ICommandBus,
-    @Optional() @Inject(IQueryBus) private readonly queryBus?: IQueryBus
+    @Optional() @Inject(IQueryBus) private readonly queryBus?: IQueryBus,
+    @Optional() @Inject(IEventBus) private readonly eventBus?: IEventBus
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -117,10 +121,15 @@ export class VytchesExplorerService implements OnModuleInit {
 
     const providers = this.discoveryService.getProviders();
     for (const provider of providers) {
+      // Class-level handler discovery (command, query, event, domain-service)
       const handlerInfo = this.extractHandlerInfo(provider);
       if (handlerInfo) {
         handlers.push(handlerInfo);
       }
+
+      // Method-level event handler discovery
+      const methodHandlers = this.extractMethodLevelEventHandlers(provider);
+      handlers.push(...methodHandlers);
     }
 
     return handlers;
@@ -148,6 +157,45 @@ export class VytchesExplorerService implements OnModuleInit {
     }
 
     return null;
+  }
+
+  private extractMethodLevelEventHandlers(provider: InstanceWrapper): HandlerInfo[] {
+    const handlers: HandlerInfo[] = [];
+
+    try {
+      const { metatype, instance } = provider;
+
+      if (!metatype || typeof metatype !== 'function' || !instance) {
+        return handlers;
+      }
+
+      const prototype = metatype.prototype as Record<string, unknown> | undefined;
+      if (!prototype) {
+        return handlers;
+      }
+
+      const methodNames = Object.getOwnPropertyNames(prototype);
+      for (const methodName of methodNames) {
+        if (methodName === 'constructor') continue;
+
+        const method = prototype[methodName];
+        if (typeof method !== 'function') continue;
+
+        const metadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, method);
+        if (metadata?.eventName) {
+          handlers.push({
+            type: 'event',
+            messageType: metadata.eventName as Constructor,
+            handlerType: metatype as Constructor,
+            metadata: { ...metadata, methodName },
+          });
+        }
+      }
+    } catch {
+      // Skip problematic providers
+    }
+
+    return handlers;
   }
 
   private getHandlerMetadata(target: Constructor): HandlerMetadata | null {
@@ -188,10 +236,19 @@ export class VytchesExplorerService implements OnModuleInit {
       const eventMetadata =
         Reflect.getMetadata(DI_EVENT_HANDLER, target) ||
         Reflect.getMetadata('event-handler', target);
-      if (eventMetadata?.messageType || eventMetadata?.event || eventMetadata?.eventType) {
+      if (
+        eventMetadata?.messageType ||
+        eventMetadata?.event ||
+        eventMetadata?.eventType ||
+        eventMetadata?.eventName
+      ) {
         return {
           type: 'event',
-          messageType: eventMetadata.messageType || eventMetadata.event || eventMetadata.eventType,
+          messageType:
+            eventMetadata.messageType ||
+            eventMetadata.event ||
+            eventMetadata.eventType ||
+            eventMetadata.eventName,
         };
       }
 
@@ -233,6 +290,27 @@ export class VytchesExplorerService implements OnModuleInit {
           } else if (typeof bus.register === 'function') {
             bus.register(messageType, handlerFactory());
           }
+        } else if (handler.type === 'event' && this.eventBus) {
+          const bus = this.eventBus as unknown as BusWithRegistration;
+          const eventTypeName =
+            typeof messageType === 'function' ? messageType.name : String(messageType);
+
+          const handlerMeta = handler.metadata as Record<string, unknown> | undefined;
+          if (handlerMeta?.methodName) {
+            // Method-level event handler - subscribe with bound method
+            const methodName = handlerMeta.methodName as string;
+            const instance = handlerFactory() as Record<string, unknown>;
+            const method = instance[methodName];
+            if (typeof method === 'function' && typeof bus.subscribe === 'function') {
+              bus.subscribe(eventTypeName, method.bind(instance));
+            }
+          } else {
+            // Class-level event handler with handle() method
+            const handlerInstance = handlerFactory();
+            if (typeof bus.registerHandler === 'function') {
+              bus.registerHandler(eventTypeName, handlerInstance);
+            }
+          }
         }
       } catch (error) {
         this.logger.warn('Failed to register handler', {
@@ -260,6 +338,13 @@ export class VytchesExplorerService implements OnModuleInit {
    */
   hasQueryBus(): boolean {
     return this.queryBus !== undefined;
+  }
+
+  /**
+   * Check if event bus was injected (useful for testing DI configuration)
+   */
+  hasEventBus(): boolean {
+    return this.eventBus !== undefined;
   }
 
   async discoverContextHandlers(_context: string, _type: string): Promise<HandlerInfo[]> {
