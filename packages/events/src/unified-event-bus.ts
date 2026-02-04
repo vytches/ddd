@@ -375,10 +375,26 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * Get handlers for a specific event with context filtering
    */
   protected getHandlersForEvent(event: BaseEvent): UnifiedEventHandler<BaseEvent>[] {
-    const handlers = this.handlerRegistry.get(event.eventName) || [];
     const eventContext = (event as EventWithMetadata).metadata?.contextId;
 
-    return handlers
+    // Look up handlers by domain event name (e.g., "user.registered")
+    const handlersByName = this.handlerRegistry.get(event.eventName) || [];
+
+    // Also look up by class name (e.g., "UserRegisteredEvent") for backward compatibility
+    // registerHandler(EventClass, handler) stores under Constructor.name
+    const className = event.constructor?.name;
+    const handlersByClass =
+      className && className !== event.eventName ? this.handlerRegistry.get(className) || [] : [];
+
+    // Combine entries, avoiding duplicates
+    const allEntries = [...handlersByName];
+    for (const entry of handlersByClass) {
+      if (!allEntries.includes(entry)) {
+        allEntries.push(entry);
+      }
+    }
+
+    return allEntries
       .filter(entry => this.shouldHandleEvent(entry, eventContext))
       .map(entry => entry.handler);
   }

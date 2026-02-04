@@ -596,6 +596,9 @@ importers:
       '@vytches/ddd-acl':
         specifier: workspace:*
         version: link:../acl
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@vytches/ddd-cqrs':
         specifier: workspace:*
         version: link:../cqrs
@@ -624,6 +627,9 @@ importers:
       '@nestjs/testing':
         specifier: ^10.3.0
         version: 10.4.20(@nestjs/common@10.4.20)(@nestjs/core@10.4.20)(@nestjs/platform-express@10.4.20)
+      '@swc/core':
+        specifier: ~1.5.7
+        version: 1.5.29(@swc/helpers@0.5.17)
       '@types/node':
         specifier: ^20.10.4
         version: 20.19.1
@@ -642,6 +648,9 @@ importers:
       typescript:
         specifier: ^5.3.3
         version: 5.8.3
+      unplugin-swc:
+        specifier: ^1.5.9
+        version: 1.5.9(@swc/core@1.5.29)(rollup@4.46.2)
       vite:
         specifier: '>=5.4.21'
         version: 7.3.1(@types/node@20.19.1)(tsx@4.20.3)
@@ -3799,6 +3808,16 @@ packages:
       '@jridgewell/trace-mapping': 0.3.25
     dev: true
 
+  /@jridgewell/remapping@2.3.5:
+    resolution:
+      {
+        integrity: sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==,
+      }
+    dependencies:
+      '@jridgewell/gen-mapping': 0.3.8
+      '@jridgewell/trace-mapping': 0.3.31
+    dev: true
+
   /@jridgewell/resolve-uri@3.1.2:
     resolution:
       {
@@ -5235,6 +5254,24 @@ packages:
       rollup: 4.46.2
     dev: true
 
+  /@rollup/pluginutils@5.3.0(rollup@4.46.2):
+    resolution:
+      {
+        integrity: sha512-5EdhGZtnu3V88ces7s53hhfK5KSASnJZv8Lulpc04cWO3REESroJXg73DFsOmgbU2BhwV0E20bu2IDZb3VKW4Q==,
+      }
+    engines: { node: '>=14.0.0' }
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+    dependencies:
+      '@types/estree': 1.0.8
+      estree-walker: 2.0.2
+      picomatch: 4.0.3
+      rollup: 4.46.2
+    dev: true
+
   /@rollup/rollup-android-arm-eabi@4.46.2:
     resolution:
       {
@@ -5986,7 +6023,7 @@ packages:
     dependencies:
       '@swc/counter': 0.1.3
       '@swc/helpers': 0.5.17
-      '@swc/types': 0.1.23
+      '@swc/types': 0.1.25
     optionalDependencies:
       '@swc/core-darwin-arm64': 1.5.29
       '@swc/core-darwin-x64': 1.5.29
@@ -6014,15 +6051,6 @@ packages:
       }
     dependencies:
       tslib: 2.8.1
-    dev: true
-
-  /@swc/types@0.1.23:
-    resolution:
-      {
-        integrity: sha512-u1iIVZV9Q0jxY+yM2vw/hZGDNudsN85bBpTqzAQ9rzkxW9D+e3aEM4Han+ow518gSewkXgjmEK0BD79ZcNVgPw==,
-      }
-    dependencies:
-      '@swc/counter': 0.1.3
     dev: true
 
   /@swc/types@0.1.25:
@@ -14522,6 +14550,14 @@ packages:
       type-fest: 0.6.0
     dev: true
 
+  /load-tsconfig@0.2.5:
+    resolution:
+      {
+        integrity: sha512-IXO6OCs9yg8tMKzfPZ1YmheJbZCiEsnBdcB03l0OcfK9prKnJb96siuHCr5Fl37/yo9DnKU+TLpxzTUspw9shg==,
+      }
+    engines: { node: ^12.20.0 || ^14.13.1 || >=16.0.0 }
+    dev: true
+
   /local-pkg@0.5.1:
     resolution:
       {
@@ -20181,6 +20217,35 @@ packages:
     engines: { node: '>= 0.8' }
     dev: true
 
+  /unplugin-swc@1.5.9(@swc/core@1.5.29)(rollup@4.46.2):
+    resolution:
+      {
+        integrity: sha512-RKwK3yf0M+MN17xZfF14bdKqfx0zMXYdtOdxLiE6jHAoidupKq3jGdJYANyIM1X/VmABhh1WpdO+/f4+Ol89+g==,
+      }
+    peerDependencies:
+      '@swc/core': ^1.2.108
+    dependencies:
+      '@rollup/pluginutils': 5.3.0(rollup@4.46.2)
+      '@swc/core': 1.5.29(@swc/helpers@0.5.17)
+      load-tsconfig: 0.2.5
+      unplugin: 2.3.11
+    transitivePeerDependencies:
+      - rollup
+    dev: true
+
+  /unplugin@2.3.11:
+    resolution:
+      {
+        integrity: sha512-5uKD0nqiYVzlmCRs01Fhs2BdkEgBS3SAVP6ndrBsuK42iC2+JHyxM05Rm9G8+5mkmRtzMZGY8Ct5+mliZxU/Ww==,
+      }
+    engines: { node: '>=18.12.0' }
+    dependencies:
+      '@jridgewell/remapping': 2.3.5
+      acorn: 8.15.0
+      picomatch: 4.0.3
+      webpack-virtual-modules: 0.6.2
+    dev: true
+
   /upath@2.0.1:
     resolution:
       {
@@ -20803,6 +20868,13 @@ packages:
     resolution:
       {
         integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==,
+      }
+    dev: true
+
+  /webpack-virtual-modules@0.6.2:
+    resolution:
+      {
+        integrity: sha512-66/V2i5hQanC51vBQKPH4aI8NMAcBW59FVBs+rC7eGHupMyfn34q7rZIE+ETlJ+XTevqfUhVVBgSUNSW2flEUQ==,
       }
     dev: true
 
