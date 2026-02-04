@@ -42,14 +42,17 @@ git push origin release/YYYY-MM-DD
 # 4. Release: version + build + publish (single command)
 pnpm release
 #    Internally runs:
-#    - lerna version --conventional-commits --yes  (bump versions, create commit + tags)
-#    - pnpm build                                  (build all packages)
-#    - pnpm publish:packages                       (pnpm publish per package)
+#    - lerna version --conventional-commits --yes
+#        → bumps versions in package.json
+#        → creates git commit + tags
+#        → pushes commit + tags to remote automatically
+#    - pnpm build (builds all packages)
+#    - pnpm publish:packages (pnpm publish per package)
+#
+#    NOTE: No separate "git push --tags" needed.
+#    lerna version pushes commit and tags automatically.
 
-# 5. Push version commit and tags
-git push origin release/YYYY-MM-DD --tags
-
-# 6. Create PR to main and merge
+# 5. Create PR to main and merge
 gh pr create --title "Release YYYY-MM-DD" --body "Release"
 # After review → merge PR
 ```
@@ -68,13 +71,10 @@ git commit -m "fix(package): description of fix"
 # 3. Push branch to remote
 git push origin hotfix/description
 
-# 4. Hotfix release (forces patch bump)
+# 4. Hotfix release (forces patch bump, pushes tags automatically)
 pnpm release:hotfix
 
-# 5. Push version commit and tags
-git push origin hotfix/description --tags
-
-# 6. Create urgent PR to main
+# 5. Create urgent PR to main
 gh pr create --title "HOTFIX: description"
 ```
 
@@ -87,11 +87,8 @@ git checkout -b release/YYYY-MM-DD-alpha
 # 2. Push to remote
 git push origin release/YYYY-MM-DD-alpha
 
-# 3. Create alpha versions
+# 3. Create alpha versions (pushes tags automatically)
 pnpm release:alpha    # or pnpm release:beta
-
-# 4. Push
-git push origin release/YYYY-MM-DD-alpha --tags
 ```
 
 ## Available Commands
@@ -275,7 +272,8 @@ pnpm release
   |     ├── Determines version bump per package (patch/minor/major)
   |     ├── Updates package.json versions
   |     ├── Creates git commit "chore: publish releases"
-  |     └── Creates git tags (@vytches/ddd-core@1.2.0, etc.)
+  |     ├── Creates git tags (@vytches/ddd-core@1.2.0, etc.)
+  |     └── Pushes commit + tags to remote automatically
   |
   ├── pnpm build
   |     └── Builds all packages (dist/ directories)
