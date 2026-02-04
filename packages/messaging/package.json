@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-messaging",
-  "version": "0.22.2",
+  "version": "0.22.3",
   "description": "Outbox pattern and reliable message delivery",
   "type": "module",
   "main": "./dist/index.cjs",

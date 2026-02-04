@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [12.1.0](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.1.0) (2026-02-04)
+
+### Features
+
+- **nestjs:** add event handler auto-discovery and fix DI type errors
+  ([7f9ec11](https://github.com/vytches/ddd/commit/7f9ec11816da1c49b5e30d34520f0de58c9f528b))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [12.0.6](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.0.6) (2026-02-04)
 
 **Note:** Version bump only for package @vytches/ddd-nestjs

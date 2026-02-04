@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.23.0](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.22.0...@vytches/ddd-cqrs@0.23.0) (2026-02-04)
+
+### Features
+
+- **nestjs:** add event handler auto-discovery and fix DI type errors
+  ([7f9ec11](https://github.com/vytches/ddd/commit/7f9ec11816da1c49b5e30d34520f0de58c9f528b))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.22.2](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.22.0...@vytches/ddd-cqrs@0.22.2) (2026-02-04)
 
 **Note:** Version bump only for package @vytches/ddd-cqrs
