@@ -1,26 +1,140 @@
 # ADR-0010: Release Process and Branching Strategy
 
-**Date:** 2025-07-12  
-**Status:** Accepted  
-**Context:** Final release process for VytchesDDD library with GitHub Packages
-and Independent Versioning
+**Date:** 2025-07-12 **Status:** Accepted (Updated 2026-02-04) **Context:**
+Release process for VytchesDDD library with GitHub Packages and Independent
+Versioning
 
 ## Context
 
-VytchesDDD is an enterprise-grade TypeScript library with 23 packages requiring
-consistent, reliable release process. After evaluation, we've chosen
-**Independent Versioning with Semantic Versioning** as the optimal strategy for
-our DDD library architecture.
+VytchesDDD is an enterprise-grade TypeScript library with 21 packages requiring
+consistent, reliable release process. We use **Independent Versioning with
+Semantic Versioning** combined with a release-branch workflow.
+
+### Technical Background: workspace:\* Protocol
+
+Packages in this monorepo use pnpm's `workspace:*` protocol for internal
+dependencies. This protocol must be converted to actual version numbers during
+publish. **Only `pnpm publish` handles this conversion** - `lerna publish` and
+`npm publish` do not. For this reason, we use `lerna version` for versioning and
+`pnpm publish` (via `pnpm publish:packages`) for publishing.
 
 ## Decision
 
 We adopt **Independent Versioning** where each package maintains its own
-semantic version, combined with Git Flow inspired branching strategy and
-automated GitHub integration.
+semantic version. Versioning is handled by `lerna version` (conventional
+commits). Publishing is handled by `pnpm publish` (converts `workspace:*`).
 
-## Release Strategy
+## Release Process - Step by Step
 
-### **📦 Independent Package Versioning**
+### Standard Release (A to Z)
+
+```bash
+# 1. Start from main
+git checkout main
+git pull origin main
+
+# 2. Create release branch
+git checkout -b release/YYYY-MM-DD
+
+# 3. Push branch to remote (required by lerna version)
+git push origin release/YYYY-MM-DD
+
+# 4. Release: version + build + publish (single command)
+pnpm release
+#    Internally runs:
+#    - lerna version --conventional-commits --yes  (bump versions, create commit + tags)
+#    - pnpm build                                  (build all packages)
+#    - pnpm publish:packages                       (pnpm publish per package)
+
+# 5. Push version commit and tags
+git push origin release/YYYY-MM-DD --tags
+
+# 6. Create PR to main and merge
+gh pr create --title "Release YYYY-MM-DD" --body "Release"
+# After review → merge PR
+```
+
+### Hotfix Release
+
+```bash
+# 1. Branch from main
+git checkout main
+git pull origin main
+git checkout -b hotfix/description
+
+# 2. Make fixes, commit with conventional commits
+git commit -m "fix(package): description of fix"
+
+# 3. Push branch to remote
+git push origin hotfix/description
+
+# 4. Hotfix release (forces patch bump)
+pnpm release:hotfix
+
+# 5. Push version commit and tags
+git push origin hotfix/description --tags
+
+# 6. Create urgent PR to main
+gh pr create --title "HOTFIX: description"
+```
+
+### Pre-release (Alpha/Beta)
+
+```bash
+# 1. Create release branch
+git checkout -b release/YYYY-MM-DD-alpha
+
+# 2. Push to remote
+git push origin release/YYYY-MM-DD-alpha
+
+# 3. Create alpha versions
+pnpm release:alpha    # or pnpm release:beta
+
+# 4. Push
+git push origin release/YYYY-MM-DD-alpha --tags
+```
+
+## Available Commands
+
+### Investigation
+
+```bash
+pnpm release:changed       # See what packages changed since last release
+pnpm release:collect       # See all feat/fix commits since last tag
+pnpm release:preview       # Preview what will be released
+```
+
+### Release
+
+```bash
+pnpm release               # Full release: version (auto) + build + publish
+pnpm release:hotfix        # Hotfix: patch version + build + publish
+pnpm release:alpha         # Alpha pre-release + build + publish
+pnpm release:beta          # Beta pre-release + build + publish
+```
+
+### Manual Steps (if needed separately)
+
+```bash
+pnpm release:version                 # Only bump versions (lerna version)
+pnpm release:version patch --yes     # Force patch bump
+pnpm build                           # Only build packages
+pnpm publish:packages                # Only publish (requires prior build)
+pnpm release:publish                 # Build + publish (without versioning)
+```
+
+### Force Publish (when lerna sees no changes)
+
+Lerna only detects changes inside `packages/*/`. If changes are in root files
+only (scripts, CI config), lerna won't bump. Use `--force-publish`:
+
+```bash
+pnpm release:version patch --force-publish --yes
+pnpm build
+pnpm publish:packages
+```
+
+## Independent Package Versioning
 
 Each package evolves independently following semantic versioning:
 
@@ -31,203 +145,49 @@ Each package evolves independently following semantic versioning:
 @vytches/ddd-cqrs@2.0.1         # Major version with patch
 ```
 
-**Why Independent Versioning for DDD:**
+**Why Independent Versioning:**
 
-- ✅ **Modularity**: DDD patterns are naturally modular
-- ✅ **Selective Usage**: Users install only needed packages
-- ✅ **Non-blocking Evolution**: Breaking changes in one package don't affect
-  others
-- ✅ **Clear Dependencies**: Explicit version management per domain
+- Modularity: DDD patterns are naturally modular
+- Selective Usage: Users install only needed packages
+- Non-blocking Evolution: Breaking changes in one package don't affect others
+- Clear Dependencies: Explicit version management per domain
 
 ## Branch Strategy
 
-### **Production Branches:**
+### Production Branches
 
-- `main` - Stable production releases only
-- `release/YYYY-MM-DD` - Date-based release preparation branches
-- `hotfix/description` - Critical production fixes
+- `main` - Stable production releases only. Never publish directly from main.
+- `release/YYYY-MM-DD` - Release preparation. Publish happens here.
+- `hotfix/description` - Critical production fixes. Publish happens here.
 
-### **Development Branches:**
+### Development Branches
 
-- `develop` - Integration branch for features (optional)
-- `feature/description` - Individual feature development
+- `feature/description` - Individual feature development. No versioning.
 
-### **Branch Permissions in Lerna:**
+### Branch Permissions (lerna.json)
 
 ```json
 {
-  "allowBranch": ["main", "release/*", "develop"]
+  "version": {
+    "allowBranch": ["main", "master", "release/*", "hotfix/*"]
+  }
 }
 ```
 
-**Important:** Feature branches (`feature/*`) are intentionally excluded to
-enforce proper release workflow where versioning only happens in release
-branches.
+Feature branches are intentionally excluded to enforce proper release workflow.
 
-### **Release Branch Naming Convention:**
-
-**Date-based (RECOMMENDED):**
+### Release Branch Naming
 
 ```bash
-release/2025-07-12     # Standard release
-release/2025-07-15     # Another release same month
-release/2025-07-12-alpha  # Pre-release version
+release/2026-02-04         # Standard release
+release/2026-02-04-1       # Second release same day
+release/2026-02-04-alpha   # Pre-release
+hotfix/security-patch      # Hotfix
 ```
 
-**Benefits of date-based naming:**
+## Conventional Commits
 
-- ✅ **Unique names** - no conflicts between releases
-- ✅ **No cleanup needed** - each release has permanent branch for history
-- ✅ **Clear timeline** - easy to see when releases happened
-- ✅ **Independent versioning** - branch name doesn't need to match package
-  versions
-
-**Alternative naming patterns:**
-
-```bash
-release/sprint-42           # Sprint-based
-release/milestone-2.1       # Milestone-based
-release/security-updates    # Feature collection-based
-```
-
-## Release Commands Reference
-
-### **🔍 Investigation & Preview Commands**
-
-```bash
-# See what changed since last release
-pnpm release:changed
-
-# See detailed diff of changes
-pnpm release:diff
-
-# Preview versions without committing
-pnpm release:dry
-
-# Complete preview with recommendations
-pnpm release:preview
-```
-
-### **🚀 Release Commands**
-
-```bash
-# Automatic version detection (analyzes conventional commits)
-pnpm release:version
-
-# Specific version types (BYPASSES conventional-commits analysis)
-pnpm release:major      # Breaking changes (1.0.0 → 2.0.0)
-pnpm release:minor      # New features (1.0.0 → 1.1.0) ← USE THIS if auto-detection fails
-pnpm release:patch      # Bug fixes (1.0.0 → 1.0.1)
-
-# Pre-release versions
-pnpm release:prerelease # Alpha versions (1.0.0 → 1.1.0-alpha.0)
-pnpm release:graduate   # Graduate from pre-release to stable
-```
-
-**When to use `pnpm release:minor` instead of `pnpm release:version`:**
-
-- When conventional-commits incorrectly detects BREAKING CHANGE from old commits
-- When you want to force a specific version bump type across all packages
-- When git history contains problematic `BREAKING CHANGE:` markers that can't be
-  removed
-
-### **⚡ Quick Release Commands**
-
-```bash
-# Full production release
-pnpm release           # Full validation + version + publish
-
-# Hotfix release (faster)
-pnpm release:hotfix    # Skip full audit, patch version
-
-# Development release
-pnpm release:quick     # Basic validation + version only
-```
-
-## Complete Release Workflows
-
-### **🎯 Standard Release Process**
-
-```bash
-# 1. Complete feature development (NO VERSIONING in features!)
-git checkout -b feature/add-retry-mechanism
-git commit -m "feat(events): add retry mechanism for failed events"
-git commit -m "test(events): add comprehensive retry tests"
-git push origin feature/add-retry-mechanism
-# Create PR: feature → main (or develop)
-
-# 2. When ready for release, create date-based release branch
-git checkout -b release/$(date +%Y-%m-%d)
-
-# 3. Merge all completed features (if using develop branch)
-git merge develop  # Contains all merged features
-
-# 4. Preview what will be released (ALL commits since last release)
-pnpm release:preview
-pnpm release:collect  # See all feat/fix commits
-
-# 5. Run automatic versioning (analyzes ALL merged commits)
-pnpm release:version
-# ↳ Lerna analyzes ALL conventional commits since last release
-# ↳ Suggests versions for each changed package based on ALL changes
-# ↳ Creates version commits and git tags for affected packages
-
-# 6. Review generated changes
-git log --oneline -5
-git show HEAD  # Review version commit
-
-# 7. Push release branch with tags (CRITICAL: --tags sends git tags to GitHub)
-git push origin release/$(date +%Y-%m-%d) --tags
-
-# 8. Create Pull Request to main
-gh pr create --title "Release $(date +%Y.%m.%d)" --body "Automated release"
-
-# 9. After PR merge: GitHub Actions automatically:
-#    - Publishes packages to GitHub Packages
-#    - Creates GitHub Release with notes
-#    - Attaches build artifacts
-```
-
-### **🚨 Hotfix Process**
-
-```bash
-# 1. Branch from main (not develop!)
-git checkout main
-git pull origin main
-git checkout -b hotfix/security-patch
-
-# 2. Make critical fixes
-# Edit code, add tests, commit with conventional commits
-
-# 3. Quick release
-pnpm release:hotfix
-# ↳ Skips full audit, creates patch version
-
-# 4. Push and create urgent PR
-git push origin hotfix/security-patch --tags
-gh pr create --title "HOTFIX: Critical security patch" --urgency=high
-```
-
-### **🧪 Pre-release Process**
-
-```bash
-# 1. Create pre-release versions with date-based branch
-git checkout -b release/$(date +%Y-%m-%d)-alpha
-pnpm release:prerelease
-# ↳ Creates versions like 1.1.0-alpha.0
-
-# 2. Test alpha versions
-pnpm publish # to alpha tag
-
-# 3. Graduate to stable when ready
-git checkout -b release/$(date +%Y-%m-%d)
-pnpm release:graduate
-# ↳ 1.1.0-alpha.0 → 1.1.0
-```
-
-## Conventional Commits for Automatic Versioning
-
-### **Commit Message Format**
+### Commit Message Format
 
 ```bash
 <type>[optional scope]: <description>
@@ -237,110 +197,112 @@ pnpm release:graduate
 [optional footer(s)]
 ```
 
-### **Version Bump Rules**
+### Version Bump Rules
 
 ```bash
-# PATCH version (1.0.0 → 1.0.1)
+# PATCH (1.0.0 -> 1.0.1)
 fix(core): resolve circular dependency
 docs: update README examples
-style: fix linting issues
-test: add comprehensive test coverage
+test: add test coverage
 
-# MINOR version (1.0.0 → 1.1.0)
+# MINOR (1.0.0 -> 1.1.0)
 feat(events): add retry mechanism
-feat(logging): implement structured logging
-perf(core): optimize EntityId validation (non-breaking)
+perf(core): optimize EntityId validation
 
-# MAJOR version (1.0.0 → 2.0.0) - Breaking changes
-feat!(core): redesign EntityId API                    # Exclamation mark
-fix!(events): change event handler signature          # Exclamation mark
-refactor!(logging): restructure Logger interface      # Exclamation mark
-
-# OR using BREAKING CHANGE footer:
-feat(core): add enhanced EntityId validation
-
-BREAKING CHANGE: EntityId.create() now requires explicit type parameter.
-The old EntityId.create(value) is replaced with EntityId.create(value, type).
-
-# OR combining both for maximum clarity:
+# MAJOR (1.0.0 -> 2.0.0)
 feat!(core): redesign EntityId API
+# or with footer:
+feat(core): redesign EntityId API
 
-BREAKING CHANGE:
-- EntityId.create() now requires type parameter
-- Removed deprecated EntityId.fromString() method
-- Changed return type of EntityId.validate() to Result<EntityId, ValidationError>
+BREAKING CHANGE: EntityId.create() now requires type parameter.
 ```
 
-### **⚠️ CRITICAL: Never Use "BREAKING CHANGE: None"**
-
-**DO NOT** write `BREAKING CHANGE: None` or similar in commit messages!
+### CRITICAL: Never Use "BREAKING CHANGE: None"
 
 ```bash
-# ❌ WRONG - Parser sees "BREAKING CHANGE:" prefix and triggers MAJOR bump!
+# WRONG - triggers MAJOR bump!
 fix(nestjs): fix handler registration
 
-BREAKING CHANGE: None - all changes maintain backward compatibility
+BREAKING CHANGE: None
 
-# ✅ CORRECT - Simply omit the BREAKING CHANGE section if there are none
+# CORRECT - omit BREAKING CHANGE section entirely
 fix(nestjs): fix handler registration
-
-Fixed handler registration by using class tokens instead of strings.
 ```
 
-**Why this matters:**
+## Authentication
 
-- Conventional-commits parser detects `BREAKING CHANGE:` as a trigger for major
-  version bump
-- The parser does NOT understand "None" or "No breaking changes" after the colon
-- This caused `@vytches/ddd-nestjs` to jump from 1.1.x to 11.0.0 due to repeated
-  false BREAKING CHANGE markers
-- Once in git history, these markers affect ALL future releases until manually
-  fixed
+### Local Development (terminal publishing)
 
-### **Examples of Good Commit Messages**
+Add to `~/.npmrc`:
 
-```bash
-feat(cqrs): add command validation middleware
-fix(events): handle race condition in event publishing
-docs(readme): add installation instructions for GitHub Packages
-perf(logging): optimize structured log formatting
-test(utils): add comprehensive safeRun test coverage
-chore(deps): update development dependencies
+```
+@vytches:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
+```
+
+Token needs `packages:write` scope.
+
+### CI (GitHub Actions)
+
+Token is set automatically via workflow:
+
+```yaml
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+## Technical Architecture
+
+### Why pnpm publish instead of lerna publish
+
+`lerna publish` internally uses `npm publish` which does NOT convert pnpm's
+`workspace:*` protocol to actual version numbers. This caused published packages
+to contain literal `"@vytches/ddd-acl": "workspace:*"` in dependencies, breaking
+installation for consumers.
+
+`pnpm publish` automatically converts `workspace:*` to the resolved version
+(e.g., `"@vytches/ddd-acl": "0.22.0"`). The `publish:packages` script
+(`scripts/publish-packages.sh`) iterates over all packages and runs
+`pnpm publish` for each one.
+
+### How pnpm release works internally
+
+```
+pnpm release
+  |
+  ├── lerna version --conventional-commits --yes
+  |     ├── Analyzes conventional commits since last tag
+  |     ├── Determines version bump per package (patch/minor/major)
+  |     ├── Updates package.json versions
+  |     ├── Creates git commit "chore: publish releases"
+  |     └── Creates git tags (@vytches/ddd-core@1.2.0, etc.)
+  |
+  ├── pnpm build
+  |     └── Builds all packages (dist/ directories)
+  |
+  └── pnpm publish:packages (scripts/publish-packages.sh)
+        └── For each package with dist/:
+              └── pnpm publish --registry=https://npm.pkg.github.com
+                    └── Converts workspace:* to actual versions
+                    └── Publishes to GitHub Packages
 ```
 
 ## GitHub Integration
 
-### **🏷️ Git Tags Created**
+### Git Tags
+
+Lerna creates package-specific tags:
 
 ```bash
-# Package-specific tags (created by Lerna)
 @vytches/ddd-core@1.0.0
 @vytches/ddd-events@1.2.3
-@vytches/ddd-logging@0.9.0
-
-# Simplified version tags
-v1.0.0  # for @vytches/ddd-core@1.0.0
-v1.2.3  # for @vytches/ddd-events@1.2.3
 ```
 
-**CRITICAL: Always use `--tags` flag when pushing release branches:**
+Always push with `--tags` after release.
 
-```bash
-# ✅ CORRECT: Sends git tags to GitHub (required for GitHub Releases)
-git push origin release/2025-07-12 --tags
+### GitHub Packages
 
-# ❌ WRONG: Tags remain local only, GitHub Releases won't work
-git push origin release/2025-07-12
-```
-
-**Why `--tags` is essential:**
-
-- 🏷️ GitHub Releases require git tags on remote repository
-- 📦 GitHub Packages publishing triggered by tag push
-- 🔄 CI/CD workflows depend on tag availability
-- 📋 Automatic changelog generation needs tag history
-
-### **📦 GitHub Packages Publishing**
+All packages publish to `https://npm.pkg.github.com` with restricted access.
 
 ```json
 {
@@ -351,242 +313,85 @@ git push origin release/2025-07-12
 }
 ```
 
-### **🎯 GitHub Releases**
+### CI Workflow (`.github/workflows/release.yml`)
 
-Each package version creates a GitHub Release with:
+The CI workflow supports manual dispatch with options:
 
-- **Automated release notes** from conventional commits
-- **Package version matrix** showing all current versions
-- **Build artifacts** (.tar.gz, .zip) for offline usage
-- **Installation instructions** for GitHub Packages
+- **auto** - Standard release with conventional commits
+- **patch/minor/major** - Force specific bump type
+- **hotfix** - Quick validation + patch bump
+- **publish-only** - Skip versioning, only publish existing versions
 
-### **📋 Release Content Example**
-
-````markdown
-## 📦 VytchesDDD v1.2.0
-
-### 📋 Package Versions in this Release:
-
-- @vytches/ddd-core@1.2.0 (updated)
-- @vytches/ddd-events@1.1.0 (unchanged)
-- @vytches/ddd-logging@0.9.1 (updated)
-
-### ✨ Features
-
-- feat(core): add enhanced EntityId validation
-- feat(logging): implement correlation tracking
-
-### 🐛 Bug Fixes
-
-- fix(events): resolve memory leak in event handlers
-
-### 🚀 Installation
-
-```bash
-npm install @vytches/ddd-core@^1.2.0 --registry=https://npm.pkg.github.com
-```
-````
-
-````
+CI uses the same `pnpm publish` approach (via `scripts/publish-packages.sh`).
 
 ## Quality Gates
 
 Every release must pass:
-- ✅ **Format Check**: Prettier validation
-- ✅ **Linting**: ESLint validation across all packages
-- ✅ **Type Checking**: TypeScript compilation
-- ✅ **Testing**: 1460+ unit tests
-- ✅ **Building**: All packages build successfully
-- ✅ **Quality Gates**: Bundle size, API surface, performance
-- ✅ **Security Audit**: Dependency vulnerability scan
 
-## Automation Workflows
-
-### **Release Workflow (`.github/workflows/release.yml`)**
-**Triggers:**
-- Push to `main` branch
-- Manual workflow dispatch
-- Git tags (`v*`)
-
-**Actions:**
-1. Install dependencies and build packages
-2. Run comprehensive test suite
-3. Validate quality gates
-4. Publish packages to GitHub Packages
-5. Update package versions in repository
-
-### **GitHub Release Workflow (`.github/workflows/github-release.yml`)**
-**Triggers:**
-- Git tags (`v*`)
-
-**Actions:**
-1. Build and test all packages
-2. Create release artifacts
-3. Generate package version matrix
-4. Create GitHub Release with automated notes
-5. Attach downloadable assets
+- Format Check (Prettier)
+- Linting (ESLint)
+- Type Checking (TypeScript)
+- Testing (1460+ unit tests)
+- Building (all packages)
+- Quality Gates (bundle size, API surface)
 
 ## Error Recovery
 
-### **Failed Release Recovery**
-```bash
-# If release fails mid-process
-git reset --hard HEAD~1  # Undo version commit
-git tag -d v1.2.0        # Delete created tag
-pnpm release:dry         # Check what would happen
-pnpm release:version     # Retry release
-````
+### Failed Release Recovery
 
-### **Rollback Published Package**
+```bash
+# If release fails mid-process (after lerna version, before publish)
+git reset --hard HEAD~1          # Undo version commit
+git tag -d @vytches/ddd-core@x.y.z  # Delete created tags
+pnpm release                     # Retry
+```
+
+### Version Already Exists on Registry
+
+```bash
+# If publish fails with 409 Conflict, bump to new version
+pnpm release:version patch --force-publish --yes
+pnpm build
+pnpm publish:packages
+```
+
+### Rollback Published Package
 
 ```bash
 # Deprecate problematic version
-npm deprecate @vytches/ddd-core@1.2.0 "Critical bug - use v1.2.1+" --registry=https://npm.pkg.github.com
+npm deprecate @vytches/ddd-core@1.2.0 "Critical bug - use v1.2.1+" \
+  --registry=https://npm.pkg.github.com
 
 # Release immediate patch
 pnpm release:hotfix
 ```
 
-### **Emergency Procedures**
-
-```bash
-# Skip full validation for critical security fixes
-pnpm release:hotfix
-
-# Force specific version (bypass conventional commits)
-pnpm lerna version 1.2.1 --no-conventional-commits --no-push
-
-# If specific packet bump needed:
-pnpm lerna version patch --scope=@vytches/ddd-nestjs
-```
-
-### **🔧 Troubleshooting: Package Getting Unexpected Major Bump**
-
-**Symptom:** A package (e.g., `@vytches/ddd-nestjs`) keeps getting major version
-bumps (11.0.0 → 12.0.0) when only minor/patch changes were made.
-
-**Cause:** Old commits in git history contain `BREAKING CHANGE: None` or similar
-patterns. The conventional-commits parser sees `BREAKING CHANGE:` prefix and
-triggers major bump, ignoring the "None" part.
-
-**Diagnosis:**
-
-```bash
-# Check what conventional-changelog sees for the package
-cd packages/nestjs && npx conventional-changelog --preset angular --release-count 1
-
-# Look for BREAKING CHANGES section in the output
-```
-
-**Solution:**
-
-```bash
-# Option 1: Force minor bump for ALL packages (RECOMMENDED)
-NX_DAEMON=false pnpm lerna version minor --no-push --no-git-tag-version
-
-# Option 2: Force specific version for single package
-pnpm lerna version --force-publish=@vytches/ddd-nestjs --no-push
-
-# Option 3: Manually set version before release
-# Edit packages/nestjs/package.json to desired version
-# Then run: pnpm lerna version --no-push --conventional-commits --force-publish
-```
-
-**Prevention:**
-
-- NEVER write `BREAKING CHANGE: None` in commit messages
-- If no breaking changes, simply omit the BREAKING CHANGE section entirely
-- Review commit messages in PRs for accidental BREAKING CHANGE markers
-
 ## Package Installation for Users
 
-### **One-time Setup**
+### One-time Setup
 
 ```bash
-# Configure npm for GitHub Packages
-echo "@vytches/ddd-core:registry=https://npm.pkg.github.com" >> ~/.npmrc
+echo "@vytches:registry=https://npm.pkg.github.com" >> ~/.npmrc
 echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN" >> ~/.npmrc
 ```
 
-### **Installing Packages**
+### Installing Packages
 
 ```bash
-# Core packages for basic DDD
-npm install @vytches/ddd-core
+# Core packages
+pnpm add @vytches/ddd-core
 
 # Event-driven architecture
-npm install @vytches/ddd-events @vytches/ddd-cqrs
+pnpm add @vytches/ddd-events @vytches/ddd-cqrs
 
 # Full enterprise suite
-npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd-logging @vytches/ddd-messaging
+pnpm add @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd-logging
 ```
-
-## Benefits of This Approach
-
-### **📈 For Development Team**
-
-- **🔄 Automated Process**: Minimal manual intervention
-- **📋 Consistent Versioning**: Semantic versioning enforced automatically
-- **🔍 Full Traceability**: Every release tracked with commits, tags, and PRs
-- **🚀 Fast Hotfixes**: Emergency releases within minutes
-- **📝 Auto Documentation**: Release notes generated from conventional commits
-
-### **👥 For Library Users**
-
-- **🎯 Selective Installation**: Install only needed packages
-- **📚 Clear Versioning**: Semantic versions are meaningful
-- **🔒 Stable Dependencies**: Non-breaking updates are safe
-- **📋 Migration Guides**: Breaking changes clearly documented
-- **🔍 Version Transparency**: Know exactly what you're getting
-
-### **🏢 For Enterprise**
-
-- **🛡️ Quality Assured**: Multiple validation layers prevent bad releases
-- **📊 Audit Trail**: Complete history of all changes
-- **🔐 Security**: Regular security audits and rapid patching
-- **📈 Scalability**: Process scales with library growth
-- **🤝 Integration**: Seamless GitHub ecosystem integration
-
-## Comparison with Alternatives
-
-### **✅ Why Independent over Fixed Versioning**
-
-```bash
-# Independent (chosen)
-@vytches/ddd-core@1.0.0      # Stable
-@vytches/ddd-events@2.3.1    # Evolving rapidly
-@vytches/ddd-logging@0.9.0   # Pre-release
-
-# Fixed versioning (not chosen)
-@vytches/ddd-core@1.0.0      # Forced sync
-@vytches/ddd-events@1.0.0    # Held back
-@vytches/ddd-logging@1.0.0   # Premature stable
-```
-
-### **✅ Why Semantic over Date-based Versioning**
-
-```bash
-# Semantic (chosen)
-@vytches/ddd-core@1.2.0      # Clear breaking change policy
-
-# Date-based (not chosen)
-@vytches/ddd-core@2025.07.12 # What changed? Breaking changes?
-```
-
-## Compliance & Standards
-
-- **📏 Semantic Versioning**: Strict adherence to SemVer 2.0
-- **📝 Conventional Commits**: Required for automatic versioning
-- **🔍 Quality Gates**: All releases pass comprehensive testing
-- **📚 Documentation**: Every release includes generated changelog
-- **🔐 Security**: Automated security audits before publishing
-- **🏷️ Git Flow**: Standardized branching strategy
-- **📦 GitHub Integration**: Native GitHub Packages and Releases
 
 ---
 
-**Implementation Status:** ✅ **Fully Implemented** **Last Updated:** 2026-02-02
-**Next Review:** When library reaches 1.0.0 stable
+**Implementation Status:** Fully Implemented **Last Updated:** 2026-02-04 **Next
+Review:** When library reaches 1.0.0 stable
 
 **References:**
 
@@ -594,4 +399,3 @@ npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs @vytches/ddd
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [Lerna Independent Mode](https://lerna.js.org/docs/features/version-and-publish#independent-mode)
 - [GitHub Packages Documentation](https://docs.github.com/en/packages)
-- [Enterprise Monorepo Best Practices](https://nx.dev/concepts/more-concepts/monorepo-tag-and-release)
