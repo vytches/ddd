@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.2](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.24.0...@vytches/ddd-contracts@0.24.2) (2026-02-04)
+
+### Bug Fixes
+
+- fixing unknown type i EventConstructor
+  ([6d85ef0](https://github.com/vytches/ddd/commit/6d85ef0e1abf8f92064b61e211ec074f95fcd96b))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.24.1](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.24.0...@vytches/ddd-contracts@0.24.1) (2026-02-04)
 
 **Note:** Version bump only for package @vytches/ddd-contracts

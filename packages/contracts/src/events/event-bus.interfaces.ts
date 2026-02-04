@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDomainEvent } from './domain-event-interfaces';
 
-/** Constructor type for event classes */
-type EventConstructor<T> = new (...args: unknown[]) => T;
+/** Constructor type for event classes - uses `any[]` to allow typed constructor signatures (same pattern as TypeScript's built-in InstanceType) */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EventConstructor<T> = new (...args: any[]) => T;
 
 export abstract class IEventBus<TEvent = IDomainEvent> {
   /**
