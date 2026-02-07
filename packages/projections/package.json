@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-projections",
-  "version": "0.22.3",
+  "version": "0.22.4",
   "description": "Event projections and read model capabilities",
   "type": "module",
   "main": "./dist/index.cjs",
