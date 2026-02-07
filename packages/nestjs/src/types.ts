@@ -99,6 +99,7 @@ export interface VytchesDDDModuleOptions {
    */
   performance?: {
     performanceTarget?: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
 
@@ -110,6 +111,7 @@ export interface VytchesDDDModuleOptions {
     include?: string[];
     exclude?: string[];
     prefix?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
 
@@ -117,6 +119,7 @@ export interface VytchesDDDModuleOptions {
    * Contexts configuration for multi-context scenarios
    * @deprecated Legacy option from VP-012, kept for test compatibility
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contexts?: string[] | Record<string, any>;
 
   /**
@@ -125,6 +128,7 @@ export interface VytchesDDDModuleOptions {
    */
   monitoring?: {
     enabled?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
 
@@ -199,12 +203,14 @@ export interface VytchesHandlerOptions {
   /**
    * Handler class
    */
-  handler: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handler: new (...args: any[]) => any;
 
   /**
    * Handler metadata
    */
-  metadata?: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata?: Record<string, any>;
 
   /**
    * Context name for bounded context

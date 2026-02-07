@@ -46,14 +46,56 @@ export interface IProjectionRebuilder<TReadModel> {
   clearProjectionState(): Promise<void>;
 }
 
+interface IEventReplay {
+  replayAll(
+    handler: (event: IDomainEvent) => Promise<void>,
+    filter?: IReplayFilter,
+    config?: IProjectionRebuildConfig
+  ): Promise<IReplayResult>;
+  replayFromStream(
+    streamId: string,
+    handler: (event: IDomainEvent) => Promise<void>,
+    filter?: IReplayFilter,
+    config?: IProjectionRebuildConfig
+  ): Promise<IReplayResult>;
+}
+
 export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TReadModel> {
   private logger = Logger.forContext(this.constructor.name);
+  private cachedReplaySupport: boolean | undefined;
 
   constructor(
     private readonly eventStore: IEventStore,
     private readonly projectionEngine: IProjectionEngine<TReadModel>,
     private readonly projectionStore: IProjectionStore<TReadModel>
   ) {}
+
+  private getReplay(): IEventReplay {
+    if (this.cachedReplaySupport === false) {
+      throw new ProjectionError('Event store does not support event replay');
+    }
+
+    const store = this.eventStore as unknown as Record<string, unknown>;
+    const replay =
+      (typeof store['createEventReplay'] === 'function'
+        ? (store['createEventReplay'] as () => unknown)()
+        : null) ||
+      (typeof store['getReplayFactory'] === 'function'
+        ? (
+            (store['getReplayFactory'] as () => Record<string, unknown>)()?.[
+              'createBasicReplay'
+            ] as (() => unknown) | undefined
+          )?.()
+        : null);
+
+    if (!replay) {
+      this.cachedReplaySupport = false;
+      throw new ProjectionError('Event store does not support event replay');
+    }
+
+    this.cachedReplaySupport = true;
+    return replay as IEventReplay;
+  }
 
   async rebuild(filter?: IReplayFilter, config?: IProjectionRebuildConfig): Promise<IReplayResult> {
     const context = {
@@ -69,14 +111,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         await this.clearProjectionState();
       }
 
-      // Get event replay from event store
-      const replay =
-        (this.eventStore as any).createEventReplay?.() ||
-        (this.eventStore as any).getReplayFactory?.()?.createBasicReplay();
-
-      if (!replay) {
-        throw new ProjectionError('Event store does not support event replay');
-      }
+      const replay = this.getReplay();
 
       // Create event handler for projection
       const handler = async (event: IDomainEvent) => {
@@ -89,7 +124,8 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
             {
               ...context,
               eventType: event.eventName,
-              eventId: (event as any).eventId || 'unknown',
+              eventId:
+                ((event as unknown as Record<string, unknown>).eventId as string) || 'unknown',
             }
           );
 
@@ -110,7 +146,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
 
       this.logger.info('Projection rebuild completed', {
         ...context,
-        eventsProcessed: result.eventsProcessed,
+        eventsReplayed: result.eventsReplayed,
         eventsFailed: result.eventsFailed,
         duration: result.duration,
       });
@@ -144,13 +180,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
     this.logger.info('Starting projection rebuild from stream', context);
 
     try {
-      const replay =
-        (this.eventStore as any).createEventReplay?.() ||
-        (this.eventStore as any).getReplayFactory?.()?.createBasicReplay();
-
-      if (!replay) {
-        throw new ProjectionError('Event store does not support event replay');
-      }
+      const replay = this.getReplay();
 
       const handler = async (event: IDomainEvent) => {
         try {
@@ -162,7 +192,8 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
             {
               ...context,
               eventType: event.eventName,
-              eventId: (event as any).eventId || 'unknown',
+              eventId:
+                ((event as unknown as Record<string, unknown>).eventId as string) || 'unknown',
             }
           );
 
@@ -176,7 +207,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
 
       this.logger.info('Projection rebuild from stream completed', {
         ...context,
-        eventsProcessed: result.eventsProcessed,
+        eventsReplayed: result.eventsReplayed,
         eventsFailed: result.eventsFailed,
         duration: result.duration,
       });

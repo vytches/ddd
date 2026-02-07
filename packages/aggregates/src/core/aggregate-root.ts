@@ -111,9 +111,13 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     } else {
       event = eventTypeOrEvent;
       if (metadata) {
+        const sanitizedMetadata = AggregateRoot.sanitizeMetadata({
+          ...event.metadata,
+          ...metadata,
+        });
         // Preserve prototype chain when merging additional metadata
         event = Object.assign(Object.create(Object.getPrototypeOf(event)), event, {
-          metadata: { ...event.metadata, ...metadata },
+          metadata: sanitizedMetadata,
         });
       }
     }
@@ -124,13 +128,13 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     // CRITICAL: Use Object.assign + Object.create to PRESERVE prototype chain
     // This allows event classes (e.g., OrderCreatedEvent) to retain their methods
     // and instanceof checks to work correctly after enrichment
-    const enrichedMetadata: IEventMetadata = {
+    const enrichedMetadata: IEventMetadata = AggregateRoot.sanitizeMetadata({
       ...event.metadata,
       aggregateId: this._id.toString(),
       aggregateType: this.constructor.name,
       aggregateVersion: this._version,
       timestamp: event.metadata?.timestamp ?? new Date(),
-    };
+    });
 
     // Preserve prototype chain - essential for class-based events
     const enrichedEvent: IDomainEvent<P> = Object.assign(
@@ -237,6 +241,19 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
    */
   getCapabilityTypes(): string[] {
     return this._capabilities.getTypes();
+  }
+
+  // ==========================================
+  // SECURITY UTILITIES
+  // ==========================================
+
+  private static sanitizeMetadata<T extends Record<string, unknown>>(metadata: T): T {
+    const clean = {} as Record<string, unknown>;
+    for (const key of Object.keys(metadata)) {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+      clean[key] = metadata[key];
+    }
+    return clean as T;
   }
 
   // ==========================================

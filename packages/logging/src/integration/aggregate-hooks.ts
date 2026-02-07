@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Logger } from '../core/index';
 import { DefaultLogger } from '../logger';
 
@@ -8,11 +7,27 @@ export interface StateChangeLoggingOptions {
   maskSensitiveFields?: boolean;
 }
 
+interface AggregateInstance {
+  id?: unknown;
+  _logger?: Logger;
+  captureState?: () => Record<string, unknown>;
+  getUncommittedEvents?: () => unknown[];
+  hasStateChanged?: (before: Record<string, unknown>, after: Record<string, unknown>) => boolean;
+  logStateChangeSuccess: (
+    logger: Logger,
+    methodName: string,
+    stateBefore: Record<string, unknown> | undefined,
+    options: StateChangeLoggingOptions
+  ) => void;
+  logStateChangeError: (logger: Logger, methodName: string, error: unknown) => void;
+  constructor: { name: string };
+}
+
 export function LogStateChanges(options: StateChangeLoggingOptions = {}): MethodDecorator {
-  return function (_target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+  return function (_target: object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = function (this: any, ...args: any[]) {
+    descriptor.value = function (this: AggregateInstance, ...args: unknown[]) {
       const logger = getOrCreateAggregateLogger(this);
       const methodName = String(propertyKey);
       const logLevel = options.logLevel || 'debug';
@@ -33,11 +48,11 @@ export function LogStateChanges(options: StateChangeLoggingOptions = {}): Method
         // Handle both sync and async results
         if (result instanceof Promise) {
           return result
-            .then(asyncResult => {
+            .then((asyncResult: unknown) => {
               this.logStateChangeSuccess(logger, methodName, stateBefore, options);
               return asyncResult;
             })
-            .catch(error => {
+            .catch((error: unknown) => {
               this.logStateChangeError(logger, methodName, error);
               throw error;
             });
@@ -54,10 +69,10 @@ export function LogStateChanges(options: StateChangeLoggingOptions = {}): Method
 }
 
 export function LogDomainEvents(): MethodDecorator {
-  return function (_target: any, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
+  return function (_target: object, propertyKey: string | symbol, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = function (this: any, ...args: any[]) {
+    descriptor.value = function (this: AggregateInstance, ...args: unknown[]) {
       const logger = getOrCreateAggregateLogger(this);
 
       // Capture events before execution
@@ -76,7 +91,9 @@ export function LogDomainEvents(): MethodDecorator {
           aggregateType: this.constructor.name,
           method: String(propertyKey),
           eventsCount: newEvents.length,
-          eventTypes: newEvents.map((e: any) => e.constructor.name),
+          eventTypes: newEvents.map(
+            (e: unknown) => (e as { constructor: { name: string } }).constructor.name
+          ),
         });
       }
 
@@ -85,7 +102,7 @@ export function LogDomainEvents(): MethodDecorator {
   };
 }
 
-function getOrCreateAggregateLogger(instance: any): Logger {
+function getOrCreateAggregateLogger(instance: AggregateInstance): Logger {
   if (!instance._logger) {
     const contextName = `${instance.constructor.name}Aggregate`;
     instance._logger = DefaultLogger.forContext(contextName);
@@ -95,10 +112,10 @@ function getOrCreateAggregateLogger(instance: any): Logger {
 
 export const AggregateLoggingMixin = {
   logStateChangeSuccess(
-    this: any,
+    this: AggregateInstance,
     logger: Logger,
     methodName: string,
-    stateBefore: any,
+    stateBefore: Record<string, unknown> | undefined,
     options: StateChangeLoggingOptions
   ): void {
     const logLevel = options.logLevel || 'debug';
@@ -117,12 +134,21 @@ export const AggregateLoggingMixin = {
     });
   },
 
-  logStateChangeError(this: any, logger: Logger, methodName: string, error: any): void {
-    logger.error(`[Aggregate] ${methodName} failed`, error, {
-      aggregateId: this.id,
-      aggregateType: this.constructor.name,
-      method: methodName,
-      success: false,
-    });
+  logStateChangeError(
+    this: AggregateInstance,
+    logger: Logger,
+    methodName: string,
+    error: unknown
+  ): void {
+    logger.error(
+      `[Aggregate] ${methodName} failed`,
+      error instanceof Error ? error : new Error(String(error)),
+      {
+        aggregateId: this.id,
+        aggregateType: this.constructor.name,
+        method: methodName,
+        success: false,
+      }
+    );
   },
 };

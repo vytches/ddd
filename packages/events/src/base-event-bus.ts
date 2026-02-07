@@ -27,6 +27,8 @@ export const CUSTOM_MIDDLEWARE_SYMBOL = Symbol('CUSTOM_MIDDLEWARE');
 export abstract class BaseEventBus<
   TEvent extends IDomainEvent = IDomainEvent,
 > extends IEventBus<TEvent> {
+  static readonly MAX_HANDLERS_PER_EVENT = 100;
+
   /**
    * Map of event types to their handlers
    */
@@ -169,7 +171,14 @@ export abstract class BaseEventBus<
       this.handlers.set(resolvedEventName, new Set());
     }
 
-    this.handlers.get(resolvedEventName)!.add(handler as EventHandlerFn<TEvent>);
+    const handlers = this.handlers.get(resolvedEventName)!;
+    if (handlers.size >= BaseEventBus.MAX_HANDLERS_PER_EVENT) {
+      throw new Error(
+        `Maximum handlers (${BaseEventBus.MAX_HANDLERS_PER_EVENT}) exceeded for event "${resolvedEventName}"`
+      );
+    }
+
+    handlers.add(handler as EventHandlerFn<TEvent>);
 
     this.logger.debug(`Subscribed function handler to ${resolvedEventName}`);
   }
@@ -187,7 +196,14 @@ export abstract class BaseEventBus<
       this.handlers.set(resolvedEventName, new Set());
     }
 
-    this.handlers.get(resolvedEventName)!.add(handler as IEventHandler<TEvent>);
+    const handlers = this.handlers.get(resolvedEventName)!;
+    if (handlers.size >= BaseEventBus.MAX_HANDLERS_PER_EVENT) {
+      throw new Error(
+        `Maximum handlers (${BaseEventBus.MAX_HANDLERS_PER_EVENT}) exceeded for event "${resolvedEventName}"`
+      );
+    }
+
+    handlers.add(handler as IEventHandler<TEvent>);
 
     this.logger.debug(`Registered class handler to ${resolvedEventName}`);
   }
@@ -327,6 +343,13 @@ export abstract class BaseEventBus<
 
     if (!this.handlers.has(resolvedEventName)) {
       this.handlers.set(resolvedEventName, new Set());
+    }
+
+    const handlers = this.handlers.get(resolvedEventName)!;
+    if (handlers.size >= BaseEventBus.MAX_HANDLERS_PER_EVENT) {
+      throw new Error(
+        `Maximum handlers (${BaseEventBus.MAX_HANDLERS_PER_EVENT}) exceeded for event "${resolvedEventName}"`
+      );
     }
 
     // Create a factory function that resolves the handler from DI

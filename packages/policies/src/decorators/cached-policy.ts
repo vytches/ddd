@@ -47,6 +47,7 @@ export interface PolicyCacheConfig {
 interface CacheEntry<T> {
   result: Result<T, PolicyViolation>;
   timestamp: Date;
+  lastAccess: number;
   ttl: number;
 }
 
@@ -75,8 +76,8 @@ class PolicyCache {
     }
 
     // Check TTL
-    const now = new Date();
-    const age = now.getTime() - entry.timestamp.getTime();
+    const now = Date.now();
+    const age = now - entry.timestamp.getTime();
 
     if (age > entry.ttl) {
       this.cache.delete(key);
@@ -85,6 +86,9 @@ class PolicyCache {
       this.metrics.misses++;
       return null;
     }
+
+    // Update last access for LRU tracking
+    entry.lastAccess = now;
 
     this.metrics.hits++;
     return entry.result;
@@ -99,19 +103,28 @@ class PolicyCache {
     ttl: number,
     maxSize?: number
   ): void {
-    // Enforce max size by removing oldest entries
+    // Enforce max size by removing least recently used entry
     if (maxSize && this.cache.size >= maxSize) {
-      const oldestKey = this.cache.keys().next().value;
-      if (oldestKey) {
-        this.cache.delete(oldestKey);
+      let lruKey: string | undefined;
+      let lruAccess = Infinity;
+      for (const [k, v] of this.cache.entries()) {
+        if (v.lastAccess < lruAccess) {
+          lruAccess = v.lastAccess;
+          lruKey = k;
+        }
+      }
+      if (lruKey) {
+        this.cache.delete(lruKey);
         this.metrics.evictions++;
         this.metrics.entries--;
       }
     }
 
+    const now = Date.now();
     this.cache.set(key, {
       result,
       timestamp: new Date(),
+      lastAccess: now,
       ttl,
     });
     this.metrics.entries++;

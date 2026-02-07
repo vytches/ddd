@@ -93,11 +93,28 @@ export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent
    * @param jsonString JSON string to deserialize
    * @returns Instance of the event class
    */
+  private static readonly MAX_DESERIALIZE_SIZE = 1_048_576; // 1MB
+
+  private static sanitizeObject<T>(obj: T): T {
+    if (obj === null || typeof obj !== 'object') return obj;
+    const clean = (Array.isArray(obj) ? [] : {}) as Record<string, unknown>;
+    for (const key of Object.keys(obj as Record<string, unknown>)) {
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+      clean[key] = IntegrationEvent.sanitizeObject((obj as Record<string, unknown>)[key]);
+    }
+    return clean as T;
+  }
+
   public static deserialize<E, P>(
     EventClass: new (payload?: P, metadata?: IIntegrationEventMetadata) => E,
     jsonString: string
   ): E {
-    const data = JSON.parse(jsonString);
+    if (jsonString.length > IntegrationEvent.MAX_DESERIALIZE_SIZE) {
+      throw new Error(
+        `Event payload exceeds maximum size of ${IntegrationEvent.MAX_DESERIALIZE_SIZE} bytes`
+      );
+    }
+    const data = IntegrationEvent.sanitizeObject(JSON.parse(jsonString));
     return new EventClass(data.payload, data.metadata);
   }
 }
