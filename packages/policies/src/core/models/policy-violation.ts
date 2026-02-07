@@ -249,9 +249,17 @@ export interface PolicyViolationData {
 
 export class PolicyViolationCollection {
   private readonly violations: PolicyViolation[] = [];
+  private readonly severityCounts: Map<PolicyViolationSeverity, number> = new Map([
+    ['ERROR', 0],
+    ['WARNING', 0],
+    ['INFO', 0],
+  ]);
 
   constructor(violations: PolicyViolation[] = []) {
-    this.violations = [...violations];
+    for (const v of violations) {
+      this.violations.push(v);
+      this.severityCounts.set(v.severity, (this.severityCounts.get(v.severity) ?? 0) + 1);
+    }
   }
 
   /**
@@ -259,13 +267,17 @@ export class PolicyViolationCollection {
    */
   public add(violation: PolicyViolation): void {
     this.violations.push(violation);
+    this.severityCounts.set(
+      violation.severity,
+      (this.severityCounts.get(violation.severity) ?? 0) + 1
+    );
   }
 
   /**
    * Get all violations
    */
   public getAll(): readonly PolicyViolation[] {
-    return [...this.violations];
+    return this.violations;
   }
 
   /**
@@ -304,17 +316,17 @@ export class PolicyViolationCollection {
   }
 
   /**
-   * Check if collection has any error violations
+   * Check if collection has any error violations - O(1)
    */
   public hasErrors(): boolean {
-    return this.getErrors().length > 0;
+    return (this.severityCounts.get('ERROR') ?? 0) > 0;
   }
 
   /**
-   * Check if collection has any warning violations
+   * Check if collection has any warning violations - O(1)
    */
   public hasWarnings(): boolean {
-    return this.getWarnings().length > 0;
+    return (this.severityCounts.get('WARNING') ?? 0) > 0;
   }
 
   /**
@@ -325,10 +337,20 @@ export class PolicyViolationCollection {
   }
 
   /**
+   * Get count by severity - O(1)
+   */
+  public countBySeverity(severity: PolicyViolationSeverity): number {
+    return this.severityCounts.get(severity) ?? 0;
+  }
+
+  /**
    * Clear all violations
    */
   public clear(): void {
     this.violations.length = 0;
+    this.severityCounts.set('ERROR', 0);
+    this.severityCounts.set('WARNING', 0);
+    this.severityCounts.set('INFO', 0);
   }
 
   /**

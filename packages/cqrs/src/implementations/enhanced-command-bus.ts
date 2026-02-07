@@ -86,6 +86,7 @@ export class EnhancedCommandBus extends ICommandBus {
   // Performance optimization: Handler cache
   private handlerCache = new Map<string, CachedHandler>();
   private readonly CACHE_TTL = 60000; // 1 minute cache
+  private readonly MAX_CACHE_SIZE = 500;
   private cacheCleanupInterval?: NodeJS.Timeout | undefined;
 
   // Configuration
@@ -607,6 +608,17 @@ export class EnhancedCommandBus extends ICommandBus {
     const now = Date.now();
     for (const [key, entry] of this.handlerCache.entries()) {
       if (now - entry.resolvedAt > this.CACHE_TTL) {
+        this.handlerCache.delete(key);
+      }
+    }
+
+    // Enforce max size by removing oldest entries
+    if (this.handlerCache.size > this.MAX_CACHE_SIZE) {
+      const entries = [...this.handlerCache.entries()].sort(
+        (a, b) => a[1].resolvedAt - b[1].resolvedAt
+      );
+      const toRemove = entries.slice(0, this.handlerCache.size - this.MAX_CACHE_SIZE);
+      for (const [key] of toRemove) {
         this.handlerCache.delete(key);
       }
     }

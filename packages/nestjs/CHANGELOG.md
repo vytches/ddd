@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [12.1.1](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.1.1) (2026-02-07)
+
+### Bug Fixes
+
+- security, performance & type safety hardening across 9 packages
+  ([68a481d](https://github.com/vytches/ddd/commit/68a481d82e1698dcc31040547ba3c38f614b0ae8))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [12.1.0](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.1.0) (2026-02-04)
 
 ### Features

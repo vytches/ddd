@@ -87,10 +87,14 @@ export class RetryPolicy {
     return new Promise((resolve, reject) => {
       const timeoutId = setTimeout(resolve, ms);
 
-      context.signal.addEventListener('abort', () => {
-        clearTimeout(timeoutId);
-        reject(context.signal.reason);
-      });
+      context.signal.addEventListener(
+        'abort',
+        () => {
+          clearTimeout(timeoutId);
+          reject(context.signal.reason);
+        },
+        { once: true }
+      );
     });
   }
 

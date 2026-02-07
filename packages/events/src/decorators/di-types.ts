@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * Service lifetime options for dependency injection.
  * Controls how long service instances live in the container.
@@ -51,6 +49,7 @@ export interface EventHandlerOptions extends DIDecoratorOptions {
   eventContext?: string | string[];
 
   /** Additional metadata */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
@@ -66,9 +65,11 @@ export interface DIHandlerMetadata {
   type: 'event';
 
   /** Event type constructor */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   eventName: new (...args: any[]) => any;
 
   /** Handler constructor */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handlerType: new (...args: any[]) => any;
 
   /** DI options from decorator */

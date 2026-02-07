@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-acl",
-  "version": "0.22.3",
+  "version": "0.22.4",
   "description": "Anti-Corruption Layer for external system integration",
   "type": "module",
   "main": "./dist/index.cjs",

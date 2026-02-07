@@ -3,6 +3,9 @@ import 'reflect-metadata';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { CommandHandlerOptions, DIHandlerMetadata } from './di-types';
 
+// Note: `any` is required in decorator signatures for TypeScript constructor compatibility.
+// TypeScript decorators need `new (...args: any[]) => T` to match arbitrary class constructors.
+
 export function CommandHandler<TCommand extends ICommand>(
   commandType: new (...args: any[]) => TCommand,
   options?: CommandHandlerOptions

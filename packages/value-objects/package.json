@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-value-objects",
-  "version": "0.22.3",
+  "version": "0.22.4",
   "description": "Enhanced value objects and EntityId implementations",
   "type": "module",
   "main": "./dist/index.cjs",

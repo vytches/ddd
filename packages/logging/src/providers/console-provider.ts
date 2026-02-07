@@ -36,7 +36,11 @@ export class ConsoleProvider implements LogProvider {
       case 'error':
       case 'fatal':
         console.error(formatted);
-        if (event.error && this.options.includeStackTrace) {
+        if (
+          event.error &&
+          this.options.includeStackTrace &&
+          process.env.NODE_ENV !== 'production'
+        ) {
           console.error(event.error.stack);
         }
         break;
@@ -73,7 +77,8 @@ export class ConsoleProvider implements LogProvider {
         error: {
           name: event.error.name,
           message: event.error.message,
-          ...(this.options.includeStackTrace && { stack: event.error.stack }),
+          ...(this.options.includeStackTrace &&
+            process.env.NODE_ENV !== 'production' && { stack: event.error.stack }),
         },
       }),
       ...(event.tags && event.tags.length > 0 && { tags: event.tags }),

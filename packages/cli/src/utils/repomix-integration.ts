@@ -588,27 +588,20 @@ export class RepomixIntegration {
       isAbstract: content.includes(`abstract class ${className}`),
     };
 
-    // Extract methods (simplified regex-based extraction)
-    const methodMatches = content.matchAll(
-      new RegExp(
-        `class\\s+${className}[\\s\\S]*?(?:public|private|protected)?\\s+(\\w+)\\s*\\([^)]*\\)`,
-        'g'
-      )
-    );
+    // Extract methods - find class body first to avoid catastrophic backtracking
+    const classBodyRegex = new RegExp(`class\\s+${className}[^{]*\\{`, 'g');
+    const classStart = classBodyRegex.exec(content);
+    const classBody = classStart ? content.slice(classStart.index + classStart[0].length) : '';
+
+    const methodMatches = classBody.matchAll(/(?:public|private|protected)\s+(\w+)\s*\([^)]*\)/g);
     for (const match of methodMatches) {
       if (match[1] && match[1] !== className) {
-        // Exclude constructor
         classInfo.methods.push(match[1]);
       }
     }
 
-    // Extract properties
-    const propertyMatches = content.matchAll(
-      new RegExp(
-        `class\\s+${className}[\\s\\S]*?(?:public|private|protected)?\\s+(\\w+):\\s*\\w+`,
-        'g'
-      )
-    );
+    // Extract properties from class body
+    const propertyMatches = classBody.matchAll(/(?:public|private|protected)\s+(\w+):\s*\w+/g);
     for (const match of propertyMatches) {
       if (match[1]) {
         classInfo.properties.push(match[1]);
@@ -628,10 +621,12 @@ export class RepomixIntegration {
       properties: [],
     };
 
-    // Extract interface members (simplified)
-    const memberMatches = content.matchAll(
-      new RegExp(`interface\\s+${interfaceName}[\\s\\S]*?(\\w+)\\s*[(:][^}]*`, 'g')
-    );
+    // Extract interface members - find interface body first to avoid backtracking
+    const ifaceBodyRegex = new RegExp(`interface\\s+${interfaceName}[^{]*\\{`, 'g');
+    const ifaceStart = ifaceBodyRegex.exec(content);
+    const ifaceBody = ifaceStart ? content.slice(ifaceStart.index + ifaceStart[0].length) : '';
+
+    const memberMatches = ifaceBody.matchAll(/(\w+)\s*[(:]/g);
     for (const match of memberMatches) {
       if (match[1] && match[1] !== interfaceName) {
         interfaceInfo.methods.push(match[1]);
@@ -655,7 +650,7 @@ export class RepomixIntegration {
     className: string,
     content: string
   ): MethodAnalysis | null {
-    // Simplified method signature extraction
+    // Simplified method signature extraction - anchored to avoid backtracking
     const methodRegex = new RegExp(
       `(public|private|protected)?\\s*(async\\s+)?(static\\s+)?${methodName}\\s*\\(([^)]*)\\)\\s*:\\s*([^{;]+)`,
       'g'

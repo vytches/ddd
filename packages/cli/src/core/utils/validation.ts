@@ -217,6 +217,10 @@ export class Validation {
   static version(version: string): void {
     this.required(version, 'Version');
 
+    if (version.length > 256) {
+      throw new ValidationError('Version string exceeds maximum length of 256 characters');
+    }
+
     const semverPattern =
       /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
     this.pattern(
