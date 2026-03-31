@@ -2,6 +2,7 @@
  * JSDoc-specific adapter for example injection
  */
 
+import { resolve } from 'path';
 import type { LayerType, ComplexityLevel } from '../types';
 import type { IJSDocAdapter } from '../interfaces';
 import { ExampleEngine } from '../engine';
@@ -1103,7 +1104,14 @@ export class JSDocAdapter implements IJSDocAdapter {
       );
 
       // Try to find the class documentation file directly
-      const docsPath = `/home/node/projects/vytches-ddd/docs/examples/domain/${packageName}/${classFileName}.md`;
+      const docsPath = resolve(
+        process.cwd(),
+        'docs',
+        'examples',
+        'domain',
+        packageName,
+        `${classFileName}.md`
+      );
       console.log(`[jsdoc-adapter] Checking direct path: ${docsPath}`);
 
       let classFile;
