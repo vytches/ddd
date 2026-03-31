@@ -33,6 +33,11 @@ export class Order extends AggregateRoot<string> {
   constructor(id?: EntityId<string>) {
     super({ id: id ?? EntityId.create(), version: 0 });
 
+    // Event handlers rebuild aggregate state from history.
+    // Alternative: in a NestJS app, you can handle events externally via
+    // @EventHandler decorator + EventBus for cross-aggregate side effects
+    // (e.g., sending emails, updating read models). Internal state mutation
+    // stays here; external reactions go to separate handler classes.
     this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
       this.customerId = payload.customerId;
     });
