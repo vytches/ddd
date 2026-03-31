@@ -89,21 +89,6 @@ export type { IdType, IEntityId, IEntityIdConstructorParams, IEntityIdFactory } 
 
 export { EntityId } from './domain';
 
-// Scheduling
-export type {
-  IEventScheduler,
-  IJobFilter,
-  IJobQueryResult,
-  IRecurringPattern,
-  IScheduledEvent,
-  IScheduledJob,
-  IScheduleOptions,
-  ISchedulerConfig,
-  ISchedulerLifecycle,
-} from './scheduling';
-
-export { BackoffStrategy, JobStatus, SchedulePriority } from './scheduling';
-
 // Testing
 export type {
   ISafeRunResult,
