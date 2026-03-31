@@ -7,7 +7,9 @@ tools:
   Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__thinkdeep,
   mcp__zen__planner, mcp__zen__consensus, mcp__zen__analyze
 model: sonnet
-color: magenta
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 You are the Strategic Vision Agent for VytchesDDD - the architect of long-term

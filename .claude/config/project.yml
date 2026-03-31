@@ -1,0 +1,29 @@
+# @vytches/ddd - Project Configuration
+# NOTE: This is a LIBRARY, not an application project.
+# Patterns/rules apply to library development, not DDD application patterns.
+
+project:
+  name: "@vytches/ddd"
+  description: "Enterprise-grade TypeScript DDD library — 21 packages in Nx monorepo"
+  stack_profile: typescript-library
+  language: typescript
+  stack: "TypeScript 5.8, Nx, Vitest, pnpm"
+  testing: "Vitest"
+
+skills:
+  - testing
+  - quality
+  - architecture
+  - typescript-library
+  - meta
+
+rules:
+  - "This is a LIBRARY - no application-level DDD patterns (no controllers, no modules)."
+  - "All public API changes must maintain backward compatibility."
+  - "Every exported class/function must have corresponding unit tests."
+  - "Verify method signatures before documenting - never assume methods exist."
+
+cost:
+  opus: "<20%"
+  sonnet: "~60%"
+  haiku: ">20%"

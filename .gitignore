@@ -126,3 +126,14 @@ packages/*/examples/metadata.cjs
 **/session-*.json
 repomix-output.md
 docs/api/
+.claude/knowledge/patterns
+.claude/knowledge/patterns-local
+.claude/knowledge/skills/
+.claude/rules/
+.claude/settings.local.json
+.claude/analytics/
+.claude/audit.log
+.claude/memory/
+.claude/roles/
+.mcp.json
+.worktreeinclude

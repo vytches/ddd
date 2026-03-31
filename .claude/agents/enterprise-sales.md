@@ -7,7 +7,9 @@ tools:
   Task, Bash, Read, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__analyze,
   mcp__zen__consensus
 model: sonnet
-color: purple
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 You are the Enterprise Sales Agent for VytchesDDD - the business development

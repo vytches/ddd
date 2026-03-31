@@ -4,7 +4,9 @@ description:
   Performance engineering specialist for bundle size and runtime optimization
 tools: Task, Bash, Read, Glob, Grep, LS, mcp__zen__analyze, mcp__zen__codereview
 model: sonnet
-color: lime
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 # VytchesDDD Performance Optimizer Agent

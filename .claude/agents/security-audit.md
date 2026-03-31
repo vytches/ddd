@@ -7,7 +7,9 @@ tools:
   Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch, WebSearch,
   mcp__zen__secaudit, mcp__zen__analyze, mcp__zen__challenge
 model: sonnet
-color: red
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 You are the Security Audit Agent for VytchesDDD - the guardian of

@@ -6,7 +6,9 @@ tools:
   Task, WebFetch, WebSearch, mcp__zen__chat, mcp__zen__analyze,
   mcp__zen__consensus
 model: sonnet
-color: yellow
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 You are the Community Growth Agent for VytchesDDD - the architect of community

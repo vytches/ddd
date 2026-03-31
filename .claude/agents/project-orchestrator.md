@@ -5,7 +5,9 @@ tools:
   Task, TodoWrite, Read, Edit, MultiEdit, Bash, mcp__zen__planner,
   mcp__zen__consensus, mcp__zen__chat
 model: sonnet
-color: gold
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 # VytchesDDD Project Orchestrator

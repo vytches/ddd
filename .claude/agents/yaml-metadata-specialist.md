@@ -7,7 +7,9 @@ tools:
   Task, Read, Edit, MultiEdit, Write, Glob, Grep, LS, mcp__zen__chat,
   mcp__zen__analyze, mcp__zen__docgen
 model: sonnet
-color: purple
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 - All required tags present for element type
