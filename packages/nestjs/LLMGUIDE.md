@@ -39,11 +39,13 @@ Handlers are auto-discovered and registered with buses on module init. No manual
 
 ## Key API
 
-| Export                   | Kind  | Purpose                                                        |
-| ------------------------ | ----- | -------------------------------------------------------------- |
-| `VytchesDDDModule`       | class | Static module with `forRoot()`, `forContext()`, `forTesting()` |
-| `VytchesExplorerService` | class | Auto-discovers decorated handlers on module init               |
-| `NestJSContainerAdapter` | class | Bridge between NestJS DI and VytchesDDD container              |
+| Export                   | Kind      | Purpose                                                        |
+| ------------------------ | --------- | -------------------------------------------------------------- |
+| `VytchesDDDModule`       | class     | Static module with `forRoot()`, `forContext()`, `forTesting()` |
+| `VytchesExplorerService` | class     | Auto-discovers decorated handlers on module init               |
+| `NestJSContainerAdapter` | class     | Bridge between NestJS DI and VytchesDDD container              |
+| `ACLAdapterFor`          | decorator | Marks ACL adapter for auto-discovery (since 0.24.0)            |
+| `ACL_REGISTRY`           | token     | Injection token for ACLRegistry                                |
 
 ## Module Configuration Methods
 
@@ -92,6 +94,33 @@ export class OrderModule {}
 export class PaymentsModule {}
 
 // Only handlers in this module are registered for 'payments' context
+```
+
+### ACL Adapter Auto-Discovery (since 0.24.0)
+
+```typescript
+import { ACLAdapterFor, ACL_REGISTRY } from '@vytches/ddd-nestjs';
+import { ACLRegistry } from '@vytches/ddd-acl';
+
+@ACLAdapterFor('payments', { description: 'Stripe integration' })
+@Injectable()
+class PaymentACLAdapter extends BaseACLAdapter<
+  Order,
+  StripeCharge,
+  ChargeResult
+> {
+  // adapter implementation
+}
+
+@Module({
+  imports: [VytchesDDDModule.forRoot()],
+  providers: [
+    PaymentACLAdapter,
+    { provide: ACL_REGISTRY, useValue: new ACLRegistry() },
+  ],
+})
+export class PaymentsModule {}
+// PaymentACLAdapter auto-registered in ACLRegistry as 'payments'
 ```
 
 ### Testing with Mock Buses
