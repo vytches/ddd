@@ -9,6 +9,11 @@ import type {
 } from './integration-event-interfaces';
 import { createIntegrationEvent } from './integration-event.utils';
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
   implements IDomainToIntegrationEventTransformer<IDomainEvent<D>, I>
 {

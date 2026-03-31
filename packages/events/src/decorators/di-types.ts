@@ -2,8 +2,9 @@
  * Service lifetime options for dependency injection.
  * Controls how long service instances live in the container.
  *
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export type ServiceLifetime = 'transient' | 'singleton' | 'scoped';
 
@@ -11,8 +12,9 @@ export type ServiceLifetime = 'transient' | 'singleton' | 'scoped';
  * Base configuration options for dependency injection decorators.
  * Provides common DI settings for all decorator types.
  *
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export interface DIDecoratorOptions {
   /** Service lifetime for DI registration */
@@ -32,8 +34,9 @@ export interface DIDecoratorOptions {
  * Configuration options for event handler decorators.
  * Extends base DI options with handler-specific settings.
  *
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export interface EventHandlerOptions extends DIDecoratorOptions {
   /** Whether handler is active */
@@ -57,8 +60,9 @@ export interface EventHandlerOptions extends DIDecoratorOptions {
  * Internal metadata for DI handler registration and management.
  * Used by the DI system for auto-discovery and lifecycle tracking.
  *
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export interface DIHandlerMetadata {
   /** Handler type identifier */

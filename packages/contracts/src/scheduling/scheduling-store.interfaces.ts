@@ -5,6 +5,12 @@ import type {
   JobStatus,
 } from './scheduled-event.interfaces';
 
+/**
+ * Persistence layer interface for storing and querying scheduled jobs.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IScheduledEventStore {
   /**
    * Save a scheduled job
@@ -61,6 +67,12 @@ export interface IScheduledEventStore {
   clear(): Promise<void>;
 }
 
+/**
+ * Scheduled event store with transactional support.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface ITransactionalScheduledEventStore extends IScheduledEventStore {
   /**
    * Begin a transaction
@@ -83,6 +95,12 @@ export interface ITransactionalScheduledEventStore extends IScheduledEventStore 
   withTransaction<T>(operation: () => Promise<T>): Promise<T>;
 }
 
+/**
+ * Metrics interface for monitoring scheduler performance and job health.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface ISchedulerMetrics {
   /**
    * Get total number of jobs by status

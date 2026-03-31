@@ -10,6 +10,11 @@ import { IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from './unified-event-bus';
 import { Logger } from '@vytches/ddd-logging';
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
   private middlewares: EventMiddleware[] = [];
   private processors: IEventProcessor[] = [];

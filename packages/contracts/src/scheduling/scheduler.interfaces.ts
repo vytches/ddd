@@ -6,6 +6,12 @@ import type {
   IScheduleOptions,
 } from './scheduled-event.interfaces';
 
+/**
+ * Core interface for scheduling, cancelling, and querying deferred domain events.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventScheduler {
   /**
    * Schedule an event for future processing
@@ -60,6 +66,12 @@ export interface IEventScheduler {
   isRunning(): boolean;
 }
 
+/**
+ * Extended scheduler with bulk scheduling and cancellation operations.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IBulkEventScheduler extends IEventScheduler {
   /**
    * Schedule multiple events at once
@@ -76,6 +88,12 @@ export interface IBulkEventScheduler extends IEventScheduler {
   cancelBulk(jobIds: string[]): Promise<number>;
 }
 
+/**
+ * Lifecycle hooks for observing scheduler and job processing events.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface ISchedulerLifecycle {
   /**
    * Called when scheduler is starting
@@ -103,6 +121,12 @@ export interface ISchedulerLifecycle {
   onError?(job: IScheduledJob, error: Error): Promise<void>;
 }
 
+/**
+ * Configuration for scheduler instances.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface ISchedulerConfig {
   /**
    * Maximum number of concurrent jobs to process
@@ -135,6 +159,12 @@ export interface ISchedulerConfig {
   lifecycle?: ISchedulerLifecycle;
 }
 
+/**
+ * Factory for creating configured scheduler instances.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface ISchedulerFactory {
   /**
    * Create a scheduler instance with the given configuration

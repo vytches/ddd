@@ -1,5 +1,11 @@
 import type { IStoredEvent } from './event-store-advanced.interfaces';
 
+/**
+ * Filter criteria for selecting events to replay.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IReplayFilter {
   /** Start from specific timestamp */
   fromTimestamp?: Date;
@@ -38,6 +44,12 @@ export interface IReplayFilter {
   direction?: 'forward' | 'backward';
 }
 
+/**
+ * Configuration options for event replay execution.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IReplayConfig {
   /** Batch size for processing events */
   batchSize?: number;
@@ -64,6 +76,12 @@ export interface IReplayConfig {
   progressInterval?: number;
 }
 
+/**
+ * Progress snapshot for an ongoing event replay operation.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IReplayProgress {
   /** Total events to replay */
   totalEvents: number;
@@ -96,6 +114,12 @@ export interface IReplayProgress {
   lastUpdate: Date;
 }
 
+/**
+ * Result returned after an event replay operation completes.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IReplayResult {
   /** Number of events replayed */
   eventsReplayed: number;
@@ -122,12 +146,33 @@ export interface IReplayResult {
   success: boolean;
 }
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export type ReplayEventHandler = (event: IStoredEvent) => Promise<void>;
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export type ReplayProgressHandler = (progress: IReplayProgress) => void;
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export type ReplayErrorHandler = (error: Error, event: IStoredEvent) => Promise<boolean>; // return true to continue
 
+/**
+ * Interface for replaying stored events through handler functions.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventReplay {
   /**
    * Replay events from a specific stream
@@ -173,6 +218,12 @@ export interface IEventReplay {
   estimateReplayDuration(filter?: IReplayFilter, config?: IReplayConfig): Promise<number>;
 }
 
+/**
+ * Extended event replay with session-based control (pause, resume, cancel).
+ * @public
+ * @experimental
+ * @since 0.22.0
+ */
 export interface IAdvancedEventReplay extends IEventReplay {
   /**
    * Start a replay session that can be controlled
@@ -184,6 +235,12 @@ export interface IAdvancedEventReplay extends IEventReplay {
   ): Promise<IReplaySession>;
 }
 
+/**
+ * Represents a controllable replay session returned by {@link IAdvancedEventReplay}.
+ * @public
+ * @experimental
+ * @since 0.22.0
+ */
 export interface IReplaySession {
   /** Session ID */
   readonly sessionId: string;
@@ -213,6 +270,12 @@ export interface IReplaySession {
   onError(handler: ReplayErrorHandler): () => void;
 }
 
+/**
+ * Factory for creating event replay instances with different strategies.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventReplayFactory {
   /**
    * Create a basic event replay

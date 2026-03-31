@@ -25,8 +25,9 @@ import type { DIHandlerMetadata } from './di-types';
  * Plugin for automatic discovery and registration of event handlers.
  * Integrates with VytchesDDD DI system to auto-register @EventHandler classes.
  *
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
   readonly name = 'Event';
@@ -162,7 +163,8 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
  * Pre-configured event discovery plugin instance.
  * Ready for immediate use with DI systems.
  *
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export const eventDiscoveryPlugin = new EventDiscoveryPlugin();

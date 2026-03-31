@@ -1,3 +1,9 @@
+/**
+ * Metadata attached to domain events for tracing, correlation, and auditing.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventMetadata {
   /** Unique identifier for the event */
   eventId?: string;
@@ -36,6 +42,12 @@ export interface IEventMetadata {
   [key: string]: unknown;
 }
 
+/**
+ * Base interface for all domain events in the system.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IDomainEvent<P = unknown> {
   /** Name of the event */
   eventName: string;

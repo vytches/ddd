@@ -36,6 +36,11 @@ interface DIHandlerInfo {
   [key: string]: unknown;
 }
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export type UnifiedEventHandler<T extends BaseEvent = BaseEvent> = (
   event: T
 ) => Promise<void> | void;
@@ -48,6 +53,11 @@ interface HandlerEntry {
   contexts?: string | string[] | undefined;
 }
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBus<BaseEvent> {
   private readonly handlerRegistry = new Map<string, HandlerEntry[]>();
 

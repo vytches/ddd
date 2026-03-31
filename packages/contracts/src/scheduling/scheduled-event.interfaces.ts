@@ -1,5 +1,11 @@
 import type { IDomainEvent } from '../events/domain-event-interfaces';
 
+/**
+ * Priority levels for scheduled events.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export enum SchedulePriority {
   LOW = 0,
   NORMAL = 1,
@@ -7,12 +13,24 @@ export enum SchedulePriority {
   CRITICAL = 3,
 }
 
+/**
+ * Backoff strategies for retry behaviour on job failure.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export enum BackoffStrategy {
   FIXED = 'fixed',
   LINEAR = 'linear',
   EXPONENTIAL = 'exponential',
 }
 
+/**
+ * Pattern for configuring recurring scheduled events.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IRecurringPattern {
   /**
    * Cron expression for recurring schedule
@@ -35,6 +53,12 @@ export interface IRecurringPattern {
   endDate?: Date;
 }
 
+/**
+ * Options controlling how an event is scheduled and retried.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IScheduleOptions {
   /**
    * Priority level for the scheduled event
@@ -77,6 +101,12 @@ export interface IScheduleOptions {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * A domain event enriched with scheduling metadata for deferred processing.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IScheduledEvent extends IDomainEvent {
   /**
    * When the event should be processed
@@ -104,6 +134,12 @@ export interface IScheduledEvent extends IDomainEvent {
   occurredOn: Date;
 }
 
+/**
+ * Lifecycle status values for a scheduled job.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export enum JobStatus {
   PENDING = 'pending',
   SCHEDULED = 'scheduled',
@@ -114,6 +150,12 @@ export enum JobStatus {
   EXPIRED = 'expired',
 }
 
+/**
+ * Represents a persisted scheduled job including its event, status, and execution history.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IScheduledJob {
   /**
    * Unique identifier for the job
@@ -171,6 +213,12 @@ export interface IScheduledJob {
   nextRetryAt?: Date | undefined;
 }
 
+/**
+ * Filter criteria for querying scheduled jobs.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IJobFilter {
   /**
    * Filter by job status
@@ -215,6 +263,12 @@ export interface IJobFilter {
   sortDirection?: 'asc' | 'desc' | undefined;
 }
 
+/**
+ * Paginated result from a scheduled job query.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IJobQueryResult {
   /**
    * List of jobs matching the filter
