@@ -1,0 +1,213 @@
+import { describe, it, expect } from 'vitest';
+import { AggregateRoot } from '@vytches/ddd-aggregates';
+import { DomainEvent } from '@vytches/ddd-events';
+import { EntityId } from '@vytches/ddd-contracts';
+import { Test, GWTAssertionError, matching } from '../../src/gwt';
+
+// --- Test fixtures ---
+
+interface OrderCreatedPayload {
+  customerId: string;
+}
+
+interface ItemAddedPayload {
+  sku: string;
+  qty: number;
+}
+
+interface OrderPlacedPayload {
+  itemCount: number;
+}
+
+class OrderCreated extends DomainEvent<OrderCreatedPayload> {
+  constructor(payload: OrderCreatedPayload) {
+    super(payload);
+  }
+}
+
+class ItemAdded extends DomainEvent<ItemAddedPayload> {
+  constructor(payload: ItemAddedPayload) {
+    super(payload);
+  }
+}
+
+class OrderPlaced extends DomainEvent<OrderPlacedPayload> {
+  constructor(payload: OrderPlacedPayload) {
+    super(payload);
+  }
+}
+
+class TestOrder extends AggregateRoot<string> {
+  private customerId = '';
+  private items: Array<{ sku: string; qty: number }> = [];
+  private placed = false;
+
+  constructor() {
+    super({ id: EntityId.create(), version: 0 });
+    this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
+      this.customerId = payload.customerId;
+    });
+    this.registerEventHandler<ItemAddedPayload>('ItemAdded', payload => {
+      this.items = [...this.items, { sku: payload.sku, qty: payload.qty }];
+    });
+    this.registerEventHandler<OrderPlacedPayload>('OrderPlaced', () => {
+      this.placed = true;
+    });
+  }
+
+  create(customerId: string): void {
+    this.apply(new OrderCreated({ customerId }));
+  }
+
+  addItem(sku: string, qty: number): void {
+    this.apply(new ItemAdded({ sku, qty }));
+  }
+
+  place(): void {
+    if (this.placed) {
+      throw new Error('ORDER_ALREADY_PLACED');
+    }
+    if (this.items.length === 0) {
+      throw new Error('ORDER_EMPTY');
+    }
+    this.apply(new OrderPlaced({ itemCount: this.items.length }));
+  }
+}
+
+// --- Tests ---
+
+describe('GWT Aggregate Testing', () => {
+  const createOrder = () => new TestOrder();
+
+  describe('givenNothing().when().then()', () => {
+    it('should verify events from a fresh aggregate', () => {
+      Test(createOrder)
+        .givenNothing()
+        .when(order => order.create('c1'))
+        .then(new OrderCreated({ customerId: 'c1' }));
+    });
+  });
+
+  describe('given().when().then()', () => {
+    it('should load history and verify new events', () => {
+      Test(createOrder)
+        .given(new OrderCreated({ customerId: 'c1' }))
+        .when(order => order.addItem('SKU-1', 2))
+        .then(new ItemAdded({ sku: 'SKU-1', qty: 2 }));
+    });
+
+    it('should handle multiple history events', () => {
+      Test(createOrder)
+        .given(new OrderCreated({ customerId: 'c1' }), new ItemAdded({ sku: 'A', qty: 1 }))
+        .when(order => order.place())
+        .then(new OrderPlaced({ itemCount: 1 }));
+    });
+
+    it('should verify multiple produced events', () => {
+      Test(createOrder)
+        .given(new OrderCreated({ customerId: 'c1' }))
+        .when(order => {
+          order.addItem('A', 1);
+          order.addItem('B', 2);
+        })
+        .then(new ItemAdded({ sku: 'A', qty: 1 }), new ItemAdded({ sku: 'B', qty: 2 }));
+    });
+  });
+
+  describe('thenError()', () => {
+    it('should catch expected domain errors', () => {
+      Test(createOrder)
+        .given(new OrderCreated({ customerId: 'c1' }))
+        .when(order => order.place())
+        .thenError('ORDER_EMPTY');
+    });
+
+    it('should catch already-placed error', () => {
+      Test(createOrder)
+        .given(
+          new OrderCreated({ customerId: 'c1' }),
+          new ItemAdded({ sku: 'A', qty: 1 }),
+          new OrderPlaced({ itemCount: 1 })
+        )
+        .when(order => order.place())
+        .thenError('ORDER_ALREADY_PLACED');
+    });
+  });
+
+  describe('thenNothing()', () => {
+    it('should pass when no events produced', () => {
+      Test(createOrder)
+        .given(new OrderCreated({ customerId: 'c1' }))
+        .when(() => {
+          // no-op action
+        })
+        .thenNothing();
+    });
+  });
+
+  describe('partial matching', () => {
+    it('should match subset of payload fields', () => {
+      Test(createOrder)
+        .given(new OrderCreated({ customerId: 'c1' }))
+        .when(order => order.addItem('SKU-1', 5))
+        .then(matching(ItemAdded, { sku: 'SKU-1' }));
+    });
+  });
+
+  describe('async support', () => {
+    it('should handle async when actions', async () => {
+      await Test(createOrder)
+        .givenNothing()
+        .whenAsync(async order => {
+          await Promise.resolve();
+          order.create('c1');
+        })
+        .then(new OrderCreated({ customerId: 'c1' }));
+    });
+  });
+
+  describe('error cases', () => {
+    it('should throw GWTAssertionError when events dont match', () => {
+      expect(() => {
+        Test(createOrder)
+          .givenNothing()
+          .when(order => order.create('c1'))
+          .then(new OrderCreated({ customerId: 'WRONG' }));
+      }).toThrow(GWTAssertionError);
+    });
+
+    it('should throw GWTAssertionError when expecting error but none thrown', () => {
+      expect(() => {
+        Test(createOrder)
+          .givenNothing()
+          .when(order => order.create('c1'))
+          .thenError('SOME_ERROR');
+      }).toThrow(GWTAssertionError);
+    });
+
+    it('should throw GWTAssertionError when expecting nothing but events produced', () => {
+      expect(() => {
+        Test(createOrder)
+          .givenNothing()
+          .when(order => order.create('c1'))
+          .thenNothing();
+      }).toThrow(GWTAssertionError);
+    });
+
+    it('should include formatted GWT context in error message', () => {
+      try {
+        Test(createOrder)
+          .givenNothing()
+          .when(order => order.create('c1'))
+          .then(new OrderCreated({ customerId: 'WRONG' }));
+      } catch (err) {
+        expect(err).toBeInstanceOf(GWTAssertionError);
+        const gwtErr = err as GWTAssertionError;
+        expect(gwtErr.message).toContain('GWT Assertion Failed');
+        expect(gwtErr.message).toContain('Given:');
+        expect(gwtErr.message).toContain('Expected events:');
+        expect(gwtErr.message).toContain('Actual events:');
+      }
+    });
+  });
+});
