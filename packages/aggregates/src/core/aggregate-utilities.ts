@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Logger } from '@vytches/ddd-logging';
+import { Result } from '@vytches/ddd-utils';
 import type {
   CapabilityConstructor,
   Capability,
@@ -127,6 +128,25 @@ export function asSnapshotAggregate<TId>(
 }
 
 /**
+ * Returns the aggregate cast to snapshot-capable type, or a failed Result if the capability
+ * is not registered. Use this variant when missing capability is an expected condition.
+ *
+ * @param aggregate - Aggregate to cast
+ * @returns `Result.ok` with the cast aggregate, or `Result.fail` with an {@link AggregateError}
+ * @public
+ * @stable
+ * @since 0.24.0
+ */
+export function tryAsSnapshotAggregate<TId>(
+  aggregate: AggregateRoot<TId>
+): Result<AggregateWithSnapshotCapability<TId>, AggregateError> {
+  if (!hasSnapshotCapability(aggregate)) {
+    return Result.fail(AggregateError.featureNotEnabled('snapshot'));
+  }
+  return Result.ok(aggregate);
+}
+
+/**
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithVersioningCapability<TId>} Returns AggregateWithVersioningCapability<TId>
  * @throws {Error} When validation fails
@@ -138,6 +158,25 @@ export function asVersioningAggregate<TId>(
     throw AggregateError.featureNotEnabled('versioning');
   }
   return aggregate;
+}
+
+/**
+ * Returns the aggregate cast to versioning-capable type, or a failed Result if the capability
+ * is not registered. Use this variant when missing capability is an expected condition.
+ *
+ * @param aggregate - Aggregate to cast
+ * @returns `Result.ok` with the cast aggregate, or `Result.fail` with an {@link AggregateError}
+ * @public
+ * @stable
+ * @since 0.24.0
+ */
+export function tryAsVersioningAggregate<TId>(
+  aggregate: AggregateRoot<TId>
+): Result<AggregateWithVersioningCapability<TId>, AggregateError> {
+  if (!hasVersioningCapability(aggregate)) {
+    return Result.fail(AggregateError.featureNotEnabled('versioning'));
+  }
+  return Result.ok(aggregate);
 }
 
 /**
@@ -155,6 +194,25 @@ export function asAuditAggregate<TId>(
 }
 
 /**
+ * Returns the aggregate cast to audit-capable type, or a failed Result if the capability
+ * is not registered. Use this variant when missing capability is an expected condition.
+ *
+ * @param aggregate - Aggregate to cast
+ * @returns `Result.ok` with the cast aggregate, or `Result.fail` with an {@link AggregateError}
+ * @public
+ * @stable
+ * @since 0.24.0
+ */
+export function tryAsAuditAggregate<TId>(
+  aggregate: AggregateRoot<TId>
+): Result<AggregateWithAuditCapability<TId>, AggregateError> {
+  if (!hasAuditCapability(aggregate)) {
+    return Result.fail(AggregateError.featureNotEnabled('audit'));
+  }
+  return Result.ok(aggregate);
+}
+
+/**
  * @param {AggregateRoot<TId>} aggregate - aggregate parameter
  * @returns {AggregateWithEventSourcingCapability<TId>} Returns AggregateWithEventSourcingCapability<TId>
  * @throws {Error} When validation fails
@@ -166,6 +224,25 @@ export function asEventSourcingAggregate<TId>(
     throw AggregateError.featureNotEnabled('eventSourcing');
   }
   return aggregate;
+}
+
+/**
+ * Returns the aggregate cast to event-sourcing-capable type, or a failed Result if the
+ * capability is not registered. Use this variant when missing capability is an expected condition.
+ *
+ * @param aggregate - Aggregate to cast
+ * @returns `Result.ok` with the cast aggregate, or `Result.fail` with an {@link AggregateError}
+ * @public
+ * @stable
+ * @since 0.24.0
+ */
+export function tryAsEventSourcingAggregate<TId>(
+  aggregate: AggregateRoot<TId>
+): Result<AggregateWithEventSourcingCapability<TId>, AggregateError> {
+  if (!hasEventSourcingCapability(aggregate)) {
+    return Result.fail(AggregateError.featureNotEnabled('eventSourcing'));
+  }
+  return Result.ok(aggregate);
 }
 
 // ==========================================

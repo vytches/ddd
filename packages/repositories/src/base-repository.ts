@@ -6,7 +6,7 @@ import type {
 } from '@vytches/ddd-contracts';
 import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
 import { Logger } from '@vytches/ddd-logging';
-import type { Result } from '@vytches/ddd-utils';
+import { Result } from '@vytches/ddd-utils';
 
 export class VersionError extends IDomainError {
   static withEntityIdAndVersions(
@@ -81,6 +81,18 @@ export abstract class IBaseRepository {
       eventCount: events.length,
       newVersion: initialVersion + events.length,
     });
+  }
+
+  /**
+   * Save aggregate, returning Result instead of throwing on version conflict.
+   * @public
+   * @stable
+   * @since 0.24.0
+   */
+  async trySave(aggregate: IAggregateWithEvents): Promise<Result<void, VersionError>> {
+    return Result.tryAsync(async () => {
+      await this.save(aggregate);
+    }) as Promise<Result<void, VersionError>>;
   }
 
   /**

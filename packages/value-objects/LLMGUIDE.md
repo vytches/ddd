@@ -35,19 +35,23 @@ const textId = EntityId.fromText('order-slug');
 
 ## Key API
 
-| Export                    | Kind             | Description                                                                 |
-| ------------------------- | ---------------- | --------------------------------------------------------------------------- |
-| `BaseValueObject<T>`      | abstract class   | Immutable value holder; provides `equals`, `getValue`, `toString`, `toJSON` |
-| `EntityId<T>`             | class            | Validated aggregate identifier; extends contracts `EntityId`                |
-| `EntityId.create()`       | static method    | Creates a new random-UUID `EntityId<string>`                                |
-| `EntityId.fromUUID(v)`    | static method    | Parses and validates a UUID string                                          |
-| `EntityId.fromInteger(v)` | static method    | Validates non-negative integer, stores as string                            |
-| `EntityId.fromBigInt(v)`  | static method    | Validates bigint string/bigint, stores as string                            |
-| `EntityId.fromText(v)`    | static method    | Validates non-empty text with safe characters                               |
-| `EntityIdFactory`         | class            | **Deprecated.** Use `EntityId` static methods instead                       |
-| `IEntityId<T>`            | re-exported type | From `@vytches/ddd-contracts` — the interface                               |
-| `IEntityIdFactory`        | re-exported type | From `@vytches/ddd-contracts` — the factory interface                       |
-| `IdType`                  | re-exported type | `'uuid' \| 'integer' \| 'text' \| 'bigint'`                                 |
+| Export                       | Kind             | Description                                                                 |
+| ---------------------------- | ---------------- | --------------------------------------------------------------------------- |
+| `BaseValueObject<T>`         | abstract class   | Immutable value holder; provides `equals`, `getValue`, `toString`, `toJSON` |
+| `EntityId<T>`                | class            | Validated aggregate identifier; extends contracts `EntityId`                |
+| `EntityId.create()`          | static method    | Creates a new random-UUID `EntityId<string>`                                |
+| `EntityId.fromUUID(v)`       | static method    | Parses and validates a UUID string                                          |
+| `EntityId.fromInteger(v)`    | static method    | Validates non-negative integer, stores as string                            |
+| `EntityId.fromBigInt(v)`     | static method    | Validates bigint string/bigint, stores as string                            |
+| `EntityId.fromText(v)`       | static method    | Validates non-empty text with safe characters                               |
+| `EntityId.tryFromUUID(v)`    | static method    | Like `fromUUID` but returns `Result<EntityId, Error>` instead of throwing   |
+| `EntityId.tryFromInteger(v)` | static method    | Like `fromInteger` but returns `Result<EntityId, Error>`                    |
+| `EntityId.tryFromBigInt(v)`  | static method    | Like `fromBigInt` but returns `Result<EntityId, Error>`                     |
+| `EntityId.tryFromText(v)`    | static method    | Like `fromText` but returns `Result<EntityId, Error>`                       |
+| `EntityIdFactory`            | class            | **Deprecated.** Use `EntityId` static methods instead                       |
+| `IEntityId<T>`               | re-exported type | From `@vytches/ddd-contracts` — the interface                               |
+| `IEntityIdFactory`           | re-exported type | From `@vytches/ddd-contracts` — the factory interface                       |
+| `IdType`                     | re-exported type | `'uuid' \| 'integer' \| 'text' \| 'bigint'`                                 |
 
 ### `BaseValueObject<T>` method reference
 
@@ -163,6 +167,31 @@ the value itself — if you assign a value object to a JSON payload, call
 The `validate()` method on `BaseValueObject` receives `unknown` (not `T`) —
 implement defensive type checks even though TypeScript narrows the parameter in
 practice.
+
+## Result-Returning Factories (since 0.24.0)
+
+Prefer `tryFromX()` over `fromX()` — returns `Result<EntityId, Error>` instead
+of throwing, enabling functional error handling.
+
+```typescript
+import { EntityId } from '@vytches/ddd-value-objects';
+
+// Returns Result — never throws
+const result = EntityId.tryFromUUID(userInput);
+
+if (result.isFailure) {
+  console.log('Invalid ID:', result.error.message);
+  return;
+}
+
+const id = result.value; // EntityId<string>
+
+// Chain with Result.map/flatMap
+const idString = EntityId.tryFromUUID(userInput).map(id => id.value);
+```
+
+Available: `tryFromUUID`, `tryFromInteger`, `tryFromBigInt`, `tryFromText`. The
+`fromX()` throwing variants still work for backward compatibility.
 
 ## Branded ID Types (since 0.24.0)
 

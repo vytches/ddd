@@ -26,9 +26,13 @@ export type {
 } from './core/aggregate-utilities';
 export {
   asSnapshotAggregate,
+  tryAsSnapshotAggregate,
   asVersioningAggregate,
+  tryAsVersioningAggregate,
   asAuditAggregate,
+  tryAsAuditAggregate,
   asEventSourcingAggregate,
+  tryAsEventSourcingAggregate,
   getAggregateCapabilities,
   hasAllCapabilities,
 } from './core/aggregate-utilities';

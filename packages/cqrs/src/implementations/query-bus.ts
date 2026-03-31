@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import { Logger } from '@vytches/ddd-logging';
-import { MiddlewarePipelineExecutor } from '@vytches/ddd-utils';
+import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 
 import { IQueryBus } from '../abstracts';
@@ -91,6 +91,18 @@ export class QueryBus extends IQueryBus {
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(query, handler, 'query');
     return this.executeWithMiddleware(context, () => handler.execute(query));
+  }
+
+  /**
+   * Execute a query, returning Result instead of throwing.
+   * @public
+   * @stable
+   * @since 0.24.0
+   */
+  async tryExecute<T extends IQuery<R>, R>(query: T): Promise<Result<R, Error>> {
+    return Result.tryAsync(async () => {
+      return await this.execute<T, R>(query);
+    });
   }
 
   private getHandlerToken(queryClass: Function): ServiceToken {

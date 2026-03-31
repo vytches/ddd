@@ -4,7 +4,7 @@ import {
   type IdType,
 } from '@vytches/ddd-contracts';
 import { InvalidParameterError, MissingValueError } from '@vytches/ddd-domain-primitives';
-import { LibUtils } from '@vytches/ddd-utils';
+import { LibUtils, Result } from '@vytches/ddd-utils';
 
 export class EntityId<T = string> extends BaseEntityId<T> {
   constructor(value: T, type: IdType) {
@@ -91,6 +91,73 @@ export class EntityId<T = string> extends BaseEntityId<T> {
     }
 
     return new EntityId(value, 'text');
+  }
+
+  // --- Result-returning factory methods (non-throwing) ---
+
+  /**
+   * Create EntityId from UUID string, returning Result instead of throwing.
+   * @public
+   * @stable
+   * @since 0.24.0
+   */
+  static tryFromUUID(value: string): Result<EntityId<string>, Error> {
+    if (!LibUtils.hasValue(value)) {
+      return Result.fail(MissingValueError.withValue('entity identifier'));
+    }
+    if (!LibUtils.isValidUUID(value)) {
+      return Result.fail(InvalidParameterError.withParameter('entity identifier'));
+    }
+    return Result.ok(new EntityId(value, 'uuid'));
+  }
+
+  /**
+   * Create EntityId from integer, returning Result instead of throwing.
+   * @public
+   * @stable
+   * @since 0.24.0
+   */
+  static tryFromInteger(value: number): Result<EntityId<string>, Error> {
+    if (!LibUtils.isValidInteger(value)) {
+      return Result.fail(
+        InvalidParameterError.withParameter('entity identifier must be a non-negative integer')
+      );
+    }
+    return Result.ok(new EntityId(value.toString(), 'integer'));
+  }
+
+  /**
+   * Create EntityId from bigint, returning Result instead of throwing.
+   * @public
+   * @stable
+   * @since 0.24.0
+   */
+  static tryFromBigInt(value: string | bigint): Result<EntityId<string>, Error> {
+    const stringValue = LibUtils.normalizeIdToString(value);
+    if (!LibUtils.isValidBigInt(stringValue)) {
+      return Result.fail(
+        InvalidParameterError.withParameter('entity identifier must be a valid bigint')
+      );
+    }
+    return Result.ok(new EntityId(stringValue, 'bigint'));
+  }
+
+  /**
+   * Create EntityId from text, returning Result instead of throwing.
+   * @public
+   * @stable
+   * @since 0.24.0
+   */
+  static tryFromText(value: string): Result<EntityId<string>, Error> {
+    if (!LibUtils.hasValue(value)) {
+      return Result.fail(MissingValueError.withValue('entity identifier'));
+    }
+    if (!LibUtils.isValidTextId(value)) {
+      return Result.fail(
+        InvalidParameterError.withParameter('entity identifier contains invalid characters')
+      );
+    }
+    return Result.ok(new EntityId(value, 'text'));
   }
 }
 
