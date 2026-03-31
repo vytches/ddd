@@ -164,6 +164,37 @@ The `validate()` method on `BaseValueObject` receives `unknown` (not `T`) —
 implement defensive type checks even though TypeScript narrows the parameter in
 practice.
 
+## Branded ID Types (since 0.24.0)
+
+Prevent accidentally passing an OrderId where a CustomerId is expected. Zero
+runtime overhead — branding exists only in the type system.
+
+```typescript
+import {
+  type BrandedId,
+  newBrandedId,
+  brandedIdFromUUID,
+} from '@vytches/ddd-value-objects';
+
+// Define domain-specific ID types
+type OrderId = BrandedId<'Order'>;
+type CustomerId = BrandedId<'Customer'>;
+
+// Create branded IDs
+const orderId: OrderId = newBrandedId<'Order'>();
+const customerId: CustomerId = brandedIdFromUUID<'Customer'>('550e8400-...');
+
+// Type-safe function — compile error if wrong ID type passed
+function cancelOrder(id: OrderId): void {
+  /* ... */
+}
+cancelOrder(orderId); // OK
+// cancelOrder(customerId); // Compile error!
+```
+
+Available factories: `createBrandedId<Tag>(entityId)`, `newBrandedId<Tag>()`,
+`brandedIdFromUUID<Tag>(uuid)`, `brandedIdFromText<Tag>(text)`.
+
 ## Package Dependencies
 
 **Depends on:** `@vytches/ddd-contracts`, `@vytches/ddd-domain-primitives`,

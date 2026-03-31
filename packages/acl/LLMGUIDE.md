@@ -215,6 +215,31 @@ version-tagged adapters and resolve them by version at runtime.
 Returning early without calling `next` short-circuits the chain, which is useful
 for caching or stubbing in tests.
 
+## Declarative Registration (since 0.24.0)
+
+Replace manual `register()` calls with declarative adapter definitions:
+
+```typescript
+import { ACLRegistry, defineACLAdapter } from '@vytches/ddd-acl';
+
+const paymentAdapter = defineACLAdapter({
+  context: 'payments',
+  adapter: new PaymentACLAdapter(translator, api),
+  description: 'Stripe integration',
+});
+
+const shippingAdapter = defineACLAdapter({
+  context: 'shipping',
+  adapter: new ShippingACLAdapter(translator, api),
+});
+
+// One-liner registry creation instead of manual register() calls
+const registry = ACLRegistry.fromDefinitions([paymentAdapter, shippingAdapter]);
+```
+
+Definitions are frozen (immutable) and can be exported from modules for
+centralized registration.
+
 ## Package Dependencies
 
 `@vytches/ddd-acl` depends on:
