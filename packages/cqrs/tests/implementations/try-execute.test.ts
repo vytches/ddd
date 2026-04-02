@@ -5,7 +5,7 @@ import { CommandBus, QueryBus } from '../../src';
 import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../../src';
 
 class TestCommand implements ICommand {
-  constructor(public readonly value: string = 'ok') {}
+  constructor(public readonly value = 'ok') {}
 }
 
 class TestCommandHandler implements ICommandHandler<TestCommand, string> {
@@ -15,7 +15,7 @@ class TestCommandHandler implements ICommandHandler<TestCommand, string> {
 }
 
 class TestQuery implements IQuery<string> {
-  constructor(public readonly value: string = 'result') {}
+  constructor(public readonly value = 'result') {}
 }
 
 class TestQueryHandler implements IQueryHandler<TestQuery, string> {
