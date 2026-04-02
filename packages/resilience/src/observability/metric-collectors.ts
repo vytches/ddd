@@ -246,10 +246,14 @@ export class CircuitBreakerMetricCollector extends BaseMetricCollector {
 
   private createExecutionTimeHistogram(): HistogramBucket[] {
     const buckets = [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000, Infinity];
-    return buckets.map(upperBound => ({
-      upperBound,
-      count: this.executionTimes.filter(time => time <= upperBound).length,
-    }));
+    const sorted = [...this.executionTimes].sort((a, b) => a - b);
+    let timeIdx = 0;
+    return buckets.map(upperBound => {
+      while (timeIdx < sorted.length && sorted[timeIdx] <= upperBound) {
+        timeIdx++;
+      }
+      return { upperBound, count: timeIdx };
+    });
   }
 
   override reset(): void {
@@ -386,10 +390,14 @@ export class RetryMetricCollector extends BaseMetricCollector {
 
   private createRetryAttemptsHistogram(): HistogramBucket[] {
     const buckets = [0, 1, 2, 3, 5, 10, 15, 20, Infinity];
-    return buckets.map(upperBound => ({
-      upperBound,
-      count: this.retryAttempts.filter(count => count <= upperBound).length,
-    }));
+    const sorted = [...this.retryAttempts].sort((a, b) => a - b);
+    let idx = 0;
+    return buckets.map(upperBound => {
+      while (idx < sorted.length && sorted[idx] <= upperBound) {
+        idx++;
+      }
+      return { upperBound, count: idx };
+    });
   }
 
   override reset(): void {

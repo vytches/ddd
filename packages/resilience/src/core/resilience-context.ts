@@ -46,7 +46,7 @@ export class DefaultResilienceContext implements ResilienceContext {
     } else {
       this.signal.addEventListener('abort', () => {
         newController.abort(this.signal.reason);
-      });
+      }, { once: true });
     }
 
     // Set timeout if specified

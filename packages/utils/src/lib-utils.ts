@@ -230,8 +230,10 @@ export class LibUtils {
       return false;
     }
 
+    const keys2Set = new Set(keys2);
+
     for (const key of keys1) {
-      if (!keys2.includes(key)) {
+      if (!keys2Set.has(key)) {
         return false;
       }
 

@@ -116,7 +116,7 @@ export class Bulkhead {
           this.queue.splice(index, 1);
           reject(context.signal.reason);
         }
-      });
+      }, { once: true });
     });
   }
 
