@@ -6,8 +6,8 @@ import { ACL_ADAPTER_METADATA } from '../constants';
  */
 export interface ACLAdapterMetadata {
   contextName: string;
-  description?: string;
-  version?: string;
+  description: string | undefined;
+  version: string | undefined;
 }
 
 /**

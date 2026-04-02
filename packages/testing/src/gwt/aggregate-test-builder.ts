@@ -1,13 +1,21 @@
 import type { IDomainEvent } from '@vytches/ddd-contracts';
-import type { IAggregateRoot } from '@vytches/ddd-contracts';
 import { eventsMatch, isPartialMatch, partialEventMatches } from './event-matcher';
 import { GWTAssertionError } from './gwt-error';
+
+/**
+ * Minimal interface for aggregates usable with GWT testing.
+ * Avoids circular dependency on @vytches/ddd-aggregates.
+ */
+interface GWTAggregate {
+  getDomainEvents(): ReadonlyArray<IDomainEvent>;
+  commit(): void;
+}
 
 /**
  * Internal type for accessing protected aggregate methods in tests.
  * TypeScript's `protected` is compile-time only — at runtime these methods exist.
  */
-interface TestableAggregate extends IAggregateRoot {
+interface TestableAggregate extends GWTAggregate {
   loadFromHistory(events: IDomainEvent[]): void;
 }
 
@@ -18,7 +26,7 @@ interface TestableAggregate extends IAggregateRoot {
  * @stable
  * @since 0.24.0
  */
-export interface GivenStep<T extends IAggregateRoot> {
+export interface GivenStep<T extends GWTAggregate> {
   given(...events: IDomainEvent[]): WhenStep<T>;
   givenNothing(): WhenStep<T>;
 }
@@ -28,7 +36,7 @@ export interface GivenStep<T extends IAggregateRoot> {
  * @stable
  * @since 0.24.0
  */
-export interface WhenStep<T extends IAggregateRoot> {
+export interface WhenStep<T extends GWTAggregate> {
   when(action: (aggregate: T) => void): ThenStep;
   whenAsync(action: (aggregate: T) => Promise<void>): AsyncThenStep;
 }
@@ -70,7 +78,7 @@ export interface AsyncThenStep {
  *   .then(new OrderPlaced({ items: [{ sku: 'ABC', qty: 2 }] }));
  * ```
  */
-class AggregateTestBuilder<T extends IAggregateRoot> implements GivenStep<T> {
+class AggregateTestBuilder<T extends GWTAggregate> implements GivenStep<T> {
   private readonly createAggregate: () => T;
   private historyEvents: IDomainEvent[] = [];
 
@@ -95,7 +103,7 @@ class AggregateTestBuilder<T extends IAggregateRoot> implements GivenStep<T> {
   }
 }
 
-class WhenStepImpl<T extends IAggregateRoot> implements WhenStep<T> {
+class WhenStepImpl<T extends GWTAggregate> implements WhenStep<T> {
   constructor(
     private readonly createAggregate: () => T,
     private readonly historyEvents: IDomainEvent[]
@@ -123,7 +131,7 @@ class WhenStepImpl<T extends IAggregateRoot> implements WhenStep<T> {
     const historyEvents = this.historyEvents;
     const createAggregate = this.createAggregate;
 
-    return new AsyncThenStepImpl(async () => {
+    return new AsyncThenStepImpl(async (): Promise<ExecutionResult> => {
       const aggregate = createAggregate();
 
       if (historyEvents.length > 0) {
@@ -150,7 +158,7 @@ class WhenStepImpl<T extends IAggregateRoot> implements WhenStep<T> {
 interface ExecutionResult {
   givenEvents: IDomainEvent[];
   producedEvents: ReadonlyArray<IDomainEvent>;
-  caughtError?: Error;
+  caughtError: Error | undefined;
 }
 
 class ThenStepImpl implements ThenStep {
@@ -177,6 +185,7 @@ class ThenStepImpl implements ThenStep {
 
     const allMatch = expectedEvents.every((expected, i) => {
       const actual = this.producedEvents[i];
+      if (!actual) return false;
       if (isPartialMatch(expected)) {
         return partialEventMatches(expected, actual);
       }
@@ -267,6 +276,6 @@ class AsyncThenStepImpl implements AsyncThenStep {
  *   .then(new OrderPlaced({ items }));
  * ```
  */
-export function Test<T extends IAggregateRoot>(aggregateFactory: () => T): GivenStep<T> {
+export function Test<T extends GWTAggregate>(aggregateFactory: () => T): GivenStep<T> {
   return new AggregateTestBuilder(aggregateFactory);
 }

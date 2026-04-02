@@ -31,7 +31,10 @@ export function eventArraysMatch(
     return false;
   }
 
-  return expected.every((exp, i) => eventsMatch(exp, actual[i]));
+  return expected.every((exp, i) => {
+    const act = actual[i];
+    return act !== undefined && eventsMatch(exp, act);
+  });
 }
 
 /**
@@ -49,10 +52,10 @@ export function eventArraysMatch(
  *   .then(matching(OrderPlaced, { itemCount: 2 }));
  * ```
  */
-export function matching<T>(
-  eventClass: new (...args: unknown[]) => IDomainEvent<T>,
-  partialPayload: Partial<T>
-): IDomainEvent<Partial<T>> {
+export function matching(
+  eventClass: new (...args: never[]) => IDomainEvent,
+  partialPayload: Record<string, unknown>
+): IDomainEvent {
   const eventName = eventClass.name;
   return {
     eventName,

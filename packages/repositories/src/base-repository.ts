@@ -89,7 +89,7 @@ export abstract class IBaseRepository {
    * @stable
    * @since 0.24.0
    */
-  async trySave(aggregate: IAggregateWithEvents): Promise<Result<void, VersionError>> {
+  async trySave(aggregate: IRepositoryAggregate): Promise<Result<void, VersionError>> {
     return Result.tryAsync(async () => {
       await this.save(aggregate);
     }) as Promise<Result<void, VersionError>>;

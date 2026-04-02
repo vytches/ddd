@@ -24,7 +24,7 @@ export abstract class BaseApplicationService implements IApplicationService {
       return Result.fail(errorArray);
     }
 
-    return Result.ok();
+    return Result.empty();
   }
 
   protected handleDomainError(error: unknown): ApplicationError {

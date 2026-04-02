@@ -13,7 +13,11 @@ export class LibUtils {
   }
 
   private static _isSpecialCaseFalse(input: unknown): boolean {
-    if (input === Object.create(null) || typeof input === 'function' || typeof input === 'symbol') {
+    if (
+      typeof input === 'function' ||
+      typeof input === 'symbol' ||
+      (input !== null && input !== undefined && Object.getPrototypeOf(input) === null)
+    ) {
       return true;
     }
 
@@ -121,6 +125,7 @@ export class LibUtils {
     return this._isTruthy(input);
   }
 
+  /** @deprecated Use hasValue() instead — identical behavior */
   static isNotEmpty(input: unknown): boolean {
     if (this._isExtremeLargeNumber(input)) {
       return true;
@@ -137,6 +142,7 @@ export class LibUtils {
     return this._isTruthy(input);
   }
 
+  /** @deprecated Use hasValue() instead — identical behavior */
   static isTruthy(input: unknown): boolean {
     if (this._isExtremeLargeNumber(input)) {
       return true;
@@ -153,6 +159,7 @@ export class LibUtils {
     return this._isTruthy(input);
   }
 
+  /** @deprecated Use isEmpty() instead — identical behavior */
   static isFalsy(input: unknown): boolean {
     if (this._isExtremeLargeNumber(input)) {
       return false;
@@ -222,6 +229,41 @@ export class LibUtils {
     }
 
     visitedPairs.set(obj1 as object, obj2);
+
+    // Handle built-in types with value semantics
+    if (obj1 instanceof Date && obj2 instanceof Date) {
+      return obj1.getTime() === obj2.getTime();
+    }
+    if (obj1 instanceof RegExp && obj2 instanceof RegExp) {
+      return obj1.toString() === obj2.toString();
+    }
+    if (obj1 instanceof Map && obj2 instanceof Map) {
+      if (obj1.size !== obj2.size) return false;
+      for (const [key, val] of obj1) {
+        if (!obj2.has(key) || !this.deepEqual(val, obj2.get(key), visitedPairs)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (obj1 instanceof Set && obj2 instanceof Set) {
+      if (obj1.size !== obj2.size) return false;
+      for (const val of obj1) {
+        if (!obj2.has(val)) return false;
+      }
+      return true;
+    }
+
+    // One is a built-in type, other is not
+    if (
+      (obj1 instanceof Date ||
+        obj1 instanceof RegExp ||
+        obj1 instanceof Map ||
+        obj1 instanceof Set) !==
+      (obj2 instanceof Date || obj2 instanceof RegExp || obj2 instanceof Map || obj2 instanceof Set)
+    ) {
+      return false;
+    }
 
     const keys1 = Object.keys(obj1 as object);
     const keys2 = Object.keys(obj2 as object);

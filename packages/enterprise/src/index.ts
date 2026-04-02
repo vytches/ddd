@@ -72,7 +72,6 @@ export type {
 } from '@vytches/ddd-contracts';
 
 export {
-  BackoffStrategy,
   Capability,
   CapabilityRegistry,
   createCapabilityRegistry,

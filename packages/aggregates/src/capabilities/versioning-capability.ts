@@ -1,6 +1,7 @@
 import { Capability } from '@vytches/ddd-contracts';
 import type { IVersioningCapability, IDomainEvent, IEventUpcaster } from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
+import { Logger } from '@vytches/ddd-logging';
 
 export class VersioningCapability
   extends Capability<'versioning'>
@@ -57,19 +58,29 @@ export class VersioningCapability
     if (eventVersion < currentVersion && this.upcasters.has(event.eventName)) {
       const eventUpcasters = this.upcasters.get(event.eventName)!;
 
+      const logger = Logger.forContext('VersioningCapability');
       for (let version = eventVersion; version < currentVersion; version++) {
         const upcaster = eventUpcasters.get(version);
-        if (upcaster) {
-          const upcastedPayload = upcaster.upcast(processedEvent.payload, processedEvent.metadata);
-          processedEvent = {
-            ...processedEvent,
-            payload: upcastedPayload,
-            metadata: {
-              ...processedEvent.metadata,
-              version: version + 1,
-            },
-          };
+        if (!upcaster) {
+          logger.warn(
+            'Missing upcaster for event version — event will be processed without upcast',
+            {
+              eventName: event.eventName,
+              fromVersion: version,
+              toVersion: version + 1,
+            }
+          );
+          continue;
         }
+        const upcastedPayload = upcaster.upcast(processedEvent.payload, processedEvent.metadata);
+        processedEvent = {
+          ...processedEvent,
+          payload: upcastedPayload,
+          metadata: {
+            ...processedEvent.metadata,
+            version: version + 1,
+          },
+        };
       }
     }
 

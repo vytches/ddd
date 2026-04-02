@@ -85,10 +85,14 @@ export class Bulkhead {
 
     const timeoutContext = context.withTimeout(this.config.timeout);
 
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
     return Promise.race([
-      operation(timeoutContext),
+      operation(timeoutContext).finally(() => {
+        if (timeoutId !== undefined) clearTimeout(timeoutId);
+      }),
       new Promise<never>((_, reject) => {
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           reject(new Error(`Bulkhead operation timed out after ${this.config.timeout}ms`));
         }, this.config.timeout);
       }),
@@ -110,13 +114,17 @@ export class Bulkhead {
 
       this.queue.push(task);
 
-      context.signal.addEventListener('abort', () => {
-        const index = this.queue.indexOf(task);
-        if (index !== -1) {
-          this.queue.splice(index, 1);
-          reject(context.signal.reason);
-        }
-      }, { once: true });
+      context.signal.addEventListener(
+        'abort',
+        () => {
+          const index = this.queue.indexOf(task);
+          if (index !== -1) {
+            this.queue.splice(index, 1);
+            reject(context.signal.reason);
+          }
+        },
+        { once: true }
+      );
     });
   }
 
