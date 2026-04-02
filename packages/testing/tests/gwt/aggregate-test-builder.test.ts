@@ -4,16 +4,20 @@ import { Test, GWTAssertionError, matching } from '../../src/gwt';
 
 // --- Inline test fixtures (avoid circular deps with aggregates/events) ---
 
-class MockDomainEvent<T = unknown> implements IDomainEvent<T> {
+// Mock event — use event() helper to cast for GWT chain which expects IDomainEvent
+class MockDomainEvent<T = unknown> {
   readonly eventName: string;
-  readonly payload?: T;
-  readonly metadata?: IEventMetadata;
+  readonly payload: T | undefined;
 
-  constructor(payload?: T, metadata?: IEventMetadata) {
+  constructor(payload?: T) {
     this.eventName = this.constructor.name;
     this.payload = payload;
-    this.metadata = metadata;
   }
+}
+
+/** Cast mock event to IDomainEvent for GWT test chain */
+function event<T>(e: MockDomainEvent<T>): IDomainEvent<T> {
+  return e as unknown as IDomainEvent<T>;
 }
 
 class MockAggregate {
@@ -132,40 +136,46 @@ describe('GWT Aggregate Testing', () => {
       Test(createOrder)
         .givenNothing()
         .when(order => order.create('c1'))
-        .then(new OrderCreated({ customerId: 'c1' }));
+        .then(event(new OrderCreated({ customerId: 'c1' })));
     });
   });
 
   describe('given().when().then()', () => {
     it('should load history and verify new events', () => {
       Test(createOrder)
-        .given(new OrderCreated({ customerId: 'c1' }))
+        .given(event(new OrderCreated({ customerId: 'c1' })))
         .when(order => order.addItem('SKU-1', 2))
-        .then(new ItemAdded({ sku: 'SKU-1', qty: 2 }));
+        .then(event(new ItemAdded({ sku: 'SKU-1', qty: 2 })));
     });
 
     it('should handle multiple history events', () => {
       Test(createOrder)
-        .given(new OrderCreated({ customerId: 'c1' }), new ItemAdded({ sku: 'A', qty: 1 }))
+        .given(
+          event(new OrderCreated({ customerId: 'c1' })),
+          event(new ItemAdded({ sku: 'A', qty: 1 }))
+        )
         .when(order => order.place())
-        .then(new OrderPlaced({ itemCount: 1 }));
+        .then(event(new OrderPlaced({ itemCount: 1 })));
     });
 
     it('should verify multiple produced events', () => {
       Test(createOrder)
-        .given(new OrderCreated({ customerId: 'c1' }))
+        .given(event(new OrderCreated({ customerId: 'c1' })))
         .when(order => {
           order.addItem('A', 1);
           order.addItem('B', 2);
         })
-        .then(new ItemAdded({ sku: 'A', qty: 1 }), new ItemAdded({ sku: 'B', qty: 2 }));
+        .then(
+          event(new ItemAdded({ sku: 'A', qty: 1 })),
+          event(new ItemAdded({ sku: 'B', qty: 2 }))
+        );
     });
   });
 
   describe('thenError()', () => {
     it('should catch expected domain errors', () => {
       Test(createOrder)
-        .given(new OrderCreated({ customerId: 'c1' }))
+        .given(event(new OrderCreated({ customerId: 'c1' })))
         .when(order => order.place())
         .thenError('ORDER_EMPTY');
     });
@@ -173,9 +183,9 @@ describe('GWT Aggregate Testing', () => {
     it('should catch already-placed error', () => {
       Test(createOrder)
         .given(
-          new OrderCreated({ customerId: 'c1' }),
-          new ItemAdded({ sku: 'A', qty: 1 }),
-          new OrderPlaced({ itemCount: 1 })
+          event(new OrderCreated({ customerId: 'c1' })),
+          event(new ItemAdded({ sku: 'A', qty: 1 })),
+          event(new OrderPlaced({ itemCount: 1 }))
         )
         .when(order => order.place())
         .thenError('ORDER_ALREADY_PLACED');
@@ -185,7 +195,7 @@ describe('GWT Aggregate Testing', () => {
   describe('thenNothing()', () => {
     it('should pass when no events produced', () => {
       Test(createOrder)
-        .given(new OrderCreated({ customerId: 'c1' }))
+        .given(event(new OrderCreated({ customerId: 'c1' })))
         .when(() => {
           // no-op action
         })
@@ -196,7 +206,7 @@ describe('GWT Aggregate Testing', () => {
   describe('partial matching', () => {
     it('should match subset of payload fields', () => {
       Test(createOrder)
-        .given(new OrderCreated({ customerId: 'c1' }))
+        .given(event(new OrderCreated({ customerId: 'c1' })))
         .when(order => order.addItem('SKU-1', 5))
         .then(matching(ItemAdded, { sku: 'SKU-1' }));
     });
@@ -210,7 +220,7 @@ describe('GWT Aggregate Testing', () => {
           await Promise.resolve();
           order.create('c1');
         })
-        .then(new OrderCreated({ customerId: 'c1' }));
+        .then(event(new OrderCreated({ customerId: 'c1' })));
     });
   });
 
@@ -220,7 +230,7 @@ describe('GWT Aggregate Testing', () => {
         Test(createOrder)
           .givenNothing()
           .when(order => order.create('c1'))
-          .then(new OrderCreated({ customerId: 'WRONG' }));
+          .then(event(new OrderCreated({ customerId: 'WRONG' })));
       }).toThrow(GWTAssertionError);
     });
 
@@ -247,7 +257,7 @@ describe('GWT Aggregate Testing', () => {
         Test(createOrder)
           .givenNothing()
           .when(order => order.create('c1'))
-          .then(new OrderCreated({ customerId: 'WRONG' }));
+          .then(event(new OrderCreated({ customerId: 'WRONG' })));
       } catch (err) {
         expect(err).toBeInstanceOf(GWTAssertionError);
         const gwtErr = err as GWTAssertionError;
