@@ -24,8 +24,12 @@ class MockEventDispatcher extends IEnhancedEventDispatcher {
   async dispatchEventsForAggregate(aggregate: IAggregateWithEvents): Promise<void> {
     aggregate.commit();
   }
-  async dispatchEvent(_event: IDomainEvent): Promise<void> {}
-  async dispatchEvents(..._events: IDomainEvent[]): Promise<void> {}
+  async dispatchEvent(_event: IDomainEvent): Promise<void> {
+    // no-op mock
+  }
+  async dispatchEvents(..._events: IDomainEvent[]): Promise<void> {
+    // no-op mock
+  }
   use(_middleware: any): this {
     return this;
   }
