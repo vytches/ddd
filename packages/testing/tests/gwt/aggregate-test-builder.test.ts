@@ -1,8 +1,54 @@
 import { describe, it, expect } from 'vitest';
-import { AggregateRoot } from '@vytches/ddd-aggregates';
-import { DomainEvent } from '@vytches/ddd-events';
-import { EntityId } from '@vytches/ddd-contracts';
+import type { IDomainEvent, IEventMetadata } from '@vytches/ddd-contracts';
 import { Test, GWTAssertionError, matching } from '../../src/gwt';
+
+// --- Inline test fixtures (avoid circular deps with aggregates/events) ---
+
+class MockDomainEvent<T = unknown> implements IDomainEvent<T> {
+  readonly eventName: string;
+  readonly payload?: T;
+  readonly metadata?: IEventMetadata;
+
+  constructor(payload?: T, metadata?: IEventMetadata) {
+    this.eventName = this.constructor.name;
+    this.payload = payload;
+    this.metadata = metadata;
+  }
+}
+
+class MockAggregate {
+  private events: IDomainEvent[] = [];
+  private handlers = new Map<string, (payload: unknown) => void>();
+
+  getDomainEvents(): ReadonlyArray<IDomainEvent> {
+    return [...this.events];
+  }
+
+  commit(): void {
+    this.events = [];
+  }
+
+  protected apply(event: IDomainEvent): void {
+    this.events.push(event);
+    const handler = this.handlers.get(event.eventName);
+    if (handler) {
+      handler(event.payload);
+    }
+  }
+
+  protected registerHandler(eventName: string, handler: (payload: unknown) => void): void {
+    this.handlers.set(eventName, handler);
+  }
+
+  loadFromHistory(events: IDomainEvent[]): void {
+    for (const event of events) {
+      const handler = this.handlers.get(event.eventName);
+      if (handler) {
+        handler(event.payload);
+      }
+    }
+  }
+}
 
 // --- Test fixtures ---
 
@@ -19,38 +65,40 @@ interface OrderPlacedPayload {
   itemCount: number;
 }
 
-class OrderCreated extends DomainEvent<OrderCreatedPayload> {
+class OrderCreated extends MockDomainEvent<OrderCreatedPayload> {
   constructor(payload: OrderCreatedPayload) {
     super(payload);
   }
 }
 
-class ItemAdded extends DomainEvent<ItemAddedPayload> {
+class ItemAdded extends MockDomainEvent<ItemAddedPayload> {
   constructor(payload: ItemAddedPayload) {
     super(payload);
   }
 }
 
-class OrderPlaced extends DomainEvent<OrderPlacedPayload> {
+class OrderPlaced extends MockDomainEvent<OrderPlacedPayload> {
   constructor(payload: OrderPlacedPayload) {
     super(payload);
   }
 }
 
-class TestOrder extends AggregateRoot<string> {
+class TestOrder extends MockAggregate {
   private customerId = '';
   private items: Array<{ sku: string; qty: number }> = [];
   private placed = false;
 
   constructor() {
-    super({ id: EntityId.create(), version: 0 });
-    this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
-      this.customerId = payload.customerId;
+    super();
+    this.registerHandler('OrderCreated', payload => {
+      const p = payload as OrderCreatedPayload;
+      this.customerId = p.customerId;
     });
-    this.registerEventHandler<ItemAddedPayload>('ItemAdded', payload => {
-      this.items = [...this.items, { sku: payload.sku, qty: payload.qty }];
+    this.registerHandler('ItemAdded', payload => {
+      const p = payload as ItemAddedPayload;
+      this.items = [...this.items, { sku: p.sku, qty: p.qty }];
     });
-    this.registerEventHandler<OrderPlacedPayload>('OrderPlaced', () => {
+    this.registerHandler('OrderPlaced', () => {
       this.placed = true;
     });
   }
