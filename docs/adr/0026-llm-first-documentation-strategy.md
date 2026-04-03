@@ -1,8 +1,9 @@
 # ADR-0026: LLM-First Documentation Strategy
 
-**Status**: Proposed **Date**: 2026-03-31 **Supersedes**: Partially supersedes
-ADR-0024 CLI reduction decision **Context**: Developer experience strategy —
-AI-assisted development over CLI scaffolding **Implementation**: VF-014
+**Status**: Accepted **Date**: 2026-03-31 **Accepted**: 2026-04-03
+**Supersedes**: Partially supersedes ADR-0024 CLI reduction decision
+**Context**: Developer experience strategy — AI-assisted development over CLI
+scaffolding **Implementation**: VF-014
 
 ## Problem Statement
 

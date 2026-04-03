@@ -11,11 +11,18 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./llm-context": "./llm-context.md",
+    "./llm-context.md": "./llm-context.md"
   },
   "sideEffects": false,
+  "bin": {
+    "vytches-ddd": "./bin/init-context.mjs"
+  },
   "files": [
     "dist",
+    "bin",
+    "llm-context.md",
     "README.md"
   ],
   "keywords": [
@@ -32,6 +39,7 @@
     "directory": "packages/enterprise"
   },
   "scripts": {
+    "prebuild": "cp ../../docs/llm-context.md ./llm-context.md",
     "build": "vite build",
     "dev": "vite build --watch",
     "clean": "rm -rf dist .tsbuildinfo",

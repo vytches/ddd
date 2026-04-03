@@ -1,8 +1,11 @@
 # @vytches/ddd - LLM Context
 
 > This file provides complete context for AI code assistants to generate correct
-> DDD code with @vytches/ddd. Copy to your project's `.claude/` directory or
-> reference in your AI assistant's context.
+> DDD code with @vytches/ddd.
+>
+> **Setup:** Run `npx @vytches/ddd init-context` to copy this file and
+> per-package guides into your project's `.claude/vytches-ddd/` directory, then
+> reference `@.claude/vytches-ddd/llm-context.md` in your CLAUDE.md.
 
 ## Installation
 

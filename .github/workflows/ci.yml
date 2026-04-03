@@ -183,6 +183,12 @@ jobs:
           pnpm deps:check
           echo "✅ Module boundaries validated successfully"
 
+      - name: Verify LLM context documentation
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Verifying LLM context matches exports..."
+          node scripts/verify-llm-context.mjs
+
       - name: Check if quality gates needed
         id: check_gates
         run: |
