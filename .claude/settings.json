@@ -48,6 +48,16 @@
           }
         ],
         "description": "TypeScript check after editing .ts files"
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/pm-task-check.js\""
+          }
+        ],
+        "description": "PM health check when task files change"
       }
     ]
   }

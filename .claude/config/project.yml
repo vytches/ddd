@@ -9,6 +9,7 @@ project:
   language: typescript
   stack: "TypeScript 5.8, Nx, Vitest, pnpm"
   testing: "Vitest"
+  pm_system: true
 
 skills:
   - testing
