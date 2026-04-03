@@ -1,240 +1,190 @@
-# VytchesDDD - Quick Start Guide
+# Quick Start — @vytches/ddd
 
-This guide will help you get started with VytchesDDD library quickly.
+Build your first DDD aggregate in under 5 minutes.
 
-## 🚀 Prerequisites
-
-Before starting, ensure you have:
-
-- **Node.js** >= 18.0.0 ([Download here](https://nodejs.org/))
-- **pnpm** >= 8.0.0 (Install: `npm install -g pnpm`)
-- **Git** installed and configured
-
-## 📋 Getting Started
-
-### Option 1: Clone and Use (Recommended)
+## Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/vytches/ddd.git
-cd ddd
-
-# Install dependencies
-pnpm install
-
-# Setup git hooks
-pnpm prepare
-
-# Verify installation
-pnpm build
-pnpm test
+npm install @vytches/ddd    # meta-package, re-exports everything
 ```
 
-### Option 2: Install Individual Packages
+Or install only what you need:
 
 ```bash
-# Install specific packages you need
-npm install @vytches/ddd-core @vytches/ddd-events @vytches/ddd-cqrs
-
-# Or install the complete suite
-npm install @vytches/ddd-core
+npm install @vytches/ddd-aggregates @vytches/ddd-events @vytches/ddd-validation
 ```
 
-## 🔧 Verify Installation
-
-```bash
-# Development commands (if you cloned the repo)
-pnpm build    # Build all packages
-pnpm test     # Run tests
-pnpm lint     # Check linting
-pnpm dev      # Development mode
-
-# Individual package usage
-npm test      # Test your application using VytchesDDD
-```
-
-## 🏗️ Basic Usage Example
+## 1. Define Domain Events
 
 ```typescript
-// app.ts
-import { AggregateRoot, EntityId, DomainEvent } from '@vytches/ddd-core';
-import { CommandBus, QueryBus } from '@vytches/ddd-cqrs';
-import { EventBus } from '@vytches/ddd-events';
+import { DomainEvent } from '@vytches/ddd';
 
-// Create a simple aggregate
-class User extends AggregateRoot {
-  constructor(
-    id: EntityId<string>,
-    private email: string,
-    private name: string
-  ) {
-    super(id);
-  }
+interface OrderCreatedPayload {
+  readonly customerId: string;
+}
 
-  static create(email: string, name: string): User {
-    const id = EntityId.createWithRandomUUID();
-    const user = new User(id, email, name);
+interface ItemAddedPayload {
+  readonly sku: string;
+  readonly name: string;
+  readonly price: number;
+  readonly qty: number;
+}
 
-    // Add domain event
-    user.addDomainEvent(new UserCreatedEvent(id.getValue(), email, name));
-
-    return user;
+class OrderCreated extends DomainEvent<OrderCreatedPayload> {
+  constructor(payload: OrderCreatedPayload) {
+    super(payload);
   }
 }
 
-// Usage in your application
-const user = User.create('john@example.com', 'John Doe');
-console.log('User created:', user.getId().getValue());
+class ItemAdded extends DomainEvent<ItemAddedPayload> {
+  constructor(payload: ItemAddedPayload) {
+    super(payload);
+  }
+}
 ```
 
-## 📦 Available Packages
-
-| Package                      | Description                              | Installation                             |
-| ---------------------------- | ---------------------------------------- | ---------------------------------------- |
-| `@vytches/ddd-core`          | Meta-package with all essentials         | `npm install @vytches/ddd-core`          |
-| `@vytches/ddd-events`        | Event-driven architecture                | `npm install @vytches/ddd-events`        |
-| `@vytches/ddd-cqrs`          | Command Query Responsibility Segregation | `npm install @vytches/ddd-cqrs`          |
-| `@vytches/ddd-aggregates`    | Aggregate root patterns                  | `npm install @vytches/ddd-aggregates`    |
-| `@vytches/ddd-repositories`  | Repository patterns                      | `npm install @vytches/ddd-repositories`  |
-| `@vytches/ddd-value-objects` | Value object implementations             | `npm install @vytches/ddd-value-objects` |
-| `@vytches/ddd-policies`      | Business policy patterns                 | `npm install @vytches/ddd-policies`      |
-| `@vytches/ddd-resilience`    | Resilience patterns                      | `npm install @vytches/ddd-resilience`    |
-
-## 📋 Project Structure (if cloned)
-
-```
-ddd/
-├── packages/                   # All DDD packages
-│   ├── core/                  # Meta-package
-│   ├── aggregates/            # Aggregate patterns
-│   ├── events/                # Event system
-│   ├── cqrs/                  # CQRS implementation
-│   └── ...                    # 21 total packages
-├── examples/                  # Usage examples
-│   ├── simple/               # Basic examples
-│   └── playground/           # Interactive examples
-├── docs/                     # Documentation
-└── scripts/                  # Build tools
-```
-
-## 🎯 Next Steps
-
-### For Library Users
-
-1. **Explore Examples**: Check individual package READMEs for usage examples
-2. **Read Documentation**: Visit package documentation for detailed API
-   reference
-3. **Join Community**: Get help and share experiences with other users
-
-### For Contributors (if you cloned the repo)
-
-1. **Development Mode**: Use `pnpm dev` for active development
-2. **Testing**: Run `pnpm test` before committing changes
-3. **Documentation**: Update docs when adding new features
-
-## 📚 Learn More
-
-- **📖 Documentation**: Comprehensive guides in each package README
-- **💡 Examples**: 365+ practical examples across all packages
-- **🏗️ Architecture**: See `docs/` folder for design decisions
-- **🤝 Contributing**: Read `CONTRIBUTING.md` for contribution guidelines
-
-## 🤖 AI-Powered Quick Start
-
-VytchesDDD provides intelligent example generation for your application:
-
-### Generate Examples for Your Project
-
-```bash
-# Global installation (recommended)
-npm install -g @vytches/ddd-cli
-
-# Generate quick start examples
-vytches-ddd examples generate core --complexity basic --output quick-start-examples.md
-
-# Generate framework-specific examples (NestJS)
-vytches-ddd examples generate aggregates --framework nestjs --complexity intermediate
-
-# Generate with API validation (hybrid mode)
-vytches-ddd examples generate policies --hybrid --complexity basic
-
-# Bundle multiple packages
-vytches-ddd examples bundle --packages core,events,cqrs --framework nestjs
-```
-
-### Available CLI Options
-
-```bash
-# Basic usage
-vytches-ddd examples generate <package> --complexity <level>
-
-# With validation and framework
-vytches-ddd examples generate <package> --validate-apis --framework <framework>
-
-# Advanced options
---hybrid              # Enhanced Metadata + Repomix validation (recommended)
---validate-apis       # Validate examples against live codebase
---complexity <level>  # basic, intermediate, advanced
---framework <name>    # nestjs, express, fastify
---output <path>       # Custom output file
-```
-
-### Quick Start Command
-
-For immediate results in your application directory:
-
-```bash
-# Generate comprehensive quick start guide
-vytches-ddd examples generate core --complexity basic --output ./VYTCHES_QUICK_START.md
-
-# Generate specific pattern examples
-vytches-ddd examples generate aggregates --complexity intermediate --framework nestjs --output ./aggregates-guide.md
-```
-
-## 🚨 Troubleshooting
-
-### Common Issues
-
-**Installation Problems:**
-
-```bash
-# Clear npm/pnpm cache
-npm cache clean --force
-# or
-pnpm store prune
-```
-
-**Build Issues:**
-
-```bash
-# Clean and rebuild
-pnpm clean && pnpm build
-# or for individual packages
-npm run build
-```
-
-**TypeScript Errors:**
-
-- Check your TypeScript version (should be >= 5.0)
-- Ensure proper imports from `@vytches/ddd-*` packages
-
-### Getting Help
-
-- 📖 Check package READMEs for detailed documentation
-- 🐛 Open issues on GitHub for bugs
-- 💬 Join discussions for questions and feature requests
-
-## ✅ Quick Verification
-
-After setup, test basic functionality:
+## 2. Create a Value Object
 
 ```typescript
-// test.ts
-import { EntityId } from '@vytches/ddd-core';
+import { BaseValueObject } from '@vytches/ddd';
 
-const id = EntityId.createWithRandomUUID();
-console.log('VytchesDDD is working!', id.getValue());
+interface MoneyProps {
+  readonly amount: number;
+  readonly currency: string;
+}
+
+class Money extends BaseValueObject<MoneyProps> {
+  static create(amount: number, currency: string): Money {
+    const vo = new Money({ amount, currency });
+    if (!vo.validate({ amount, currency })) {
+      throw new Error(`Invalid money: amount=${amount}, currency=${currency}`);
+    }
+    return vo;
+  }
+
+  validate(value: unknown): boolean {
+    const props = value as MoneyProps;
+    return typeof props.amount === 'number' && props.amount >= 0;
+  }
+
+  add(other: Money): Money {
+    return Money.create(
+      this.getValue().amount + other.getValue().amount,
+      this.getValue().currency
+    );
+  }
+}
 ```
 
-**You're ready to build enterprise-grade Domain-Driven Design applications with
-VytchesDDD!** 🚀
+## 3. Write Inline Specifications
+
+Prefer `Specification.create()` over class-based specs for one-off rules.
+
+```typescript
+import { Specification } from '@vytches/ddd';
+
+interface OrderState {
+  items: ReadonlyArray<{ sku: string; qty: number; price: number }>;
+  placed: boolean;
+}
+
+const hasItems = Specification.create<OrderState>(o => o.items.length > 0);
+const isNotPlaced = Specification.create<OrderState>(o => !o.placed);
+const canBePlaced = hasItems.and(isNotPlaced);
+```
+
+## 4. Build the Aggregate
+
+```typescript
+import { AggregateRoot, EntityId } from '@vytches/ddd';
+
+class Order extends AggregateRoot<string> {
+  private customerId = '';
+  private items: { sku: string; name: string; price: number; qty: number }[] =
+    [];
+  private placed = false;
+
+  constructor() {
+    super({ id: EntityId.create(), version: 0 });
+
+    // Register event handlers — these rebuild state from history
+    this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
+      this.customerId = payload.customerId;
+    });
+
+    this.registerEventHandler<ItemAddedPayload>('ItemAdded', payload => {
+      this.items = [...this.items, payload];
+    });
+  }
+
+  // Commands emit events — never mutate state directly
+  create(customerId: string): void {
+    this.apply(new OrderCreated({ customerId }));
+  }
+
+  addItem(sku: string, name: string, price: number, qty: number): void {
+    Money.create(price, 'USD'); // validates
+    this.apply(new ItemAdded({ sku, name, price, qty }));
+  }
+
+  place(): void {
+    if (
+      !canBePlaced.isSatisfiedBy({ items: this.items, placed: this.placed })
+    ) {
+      throw new Error('Cannot place order');
+    }
+    // emit OrderPlaced event...
+  }
+}
+```
+
+## 5. Use It
+
+```typescript
+const order = new Order();
+order.create('customer-1');
+order.addItem('SKU-001', 'Widget', 29.99, 2);
+order.place();
+
+// Retrieve uncommitted events for persistence
+const events = order.getDomainEvents();
+order.commit(); // clear after saving
+```
+
+## AI Assistant Integration
+
+Set up LLM-optimized docs for your coding assistant (Claude Code, Cursor,
+Copilot):
+
+```bash
+npx @vytches/ddd init-context
+```
+
+This copies architecture overview, full API reference, and anti-patterns to
+`.claude/vytches-ddd/`. Then add to your `CLAUDE.md`:
+
+```
+@.claude/vytches-ddd/llm-context.md
+```
+
+## Full Working Example
+
+See [`examples/quickstart/`](./examples/quickstart/) for a complete e-commerce
+Order domain with:
+
+- Event-sourced aggregate with 4 commands
+- Value object with validation
+- Inline specifications
+- Command and query handlers
+- In-memory repository
+- 16 passing tests (GWT pattern)
+
+```bash
+cd examples/quickstart && pnpm test
+```
+
+## Next Steps
+
+- [Full API Reference](./docs/llm-context.md) — every export, every package
+- [Package Ecosystem](./README.md#-package-ecosystem) — 21 packages overview
+- Per-package guides in `node_modules/@vytches/ddd-*/LLMGUIDE.md`
