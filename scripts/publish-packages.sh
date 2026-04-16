@@ -41,12 +41,22 @@ for pkg in packages/*/; do
   name=$(node -e "const p = require('./$pkg/package.json'); console.log(p.name)")
   version=$(node -e "const p = require('./$pkg/package.json'); console.log(p.version)")
 
+  # Detect pre-release dist-tag from version string
+  DIST_TAG=""
+  if [[ "$version" == *"-alpha."* ]]; then
+    DIST_TAG="--tag alpha"
+  elif [[ "$version" == *"-beta."* ]]; then
+    DIST_TAG="--tag beta"
+  elif [[ "$version" == *"-rc."* ]]; then
+    DIST_TAG="--tag rc"
+  fi
+
   if [ "$DRY_RUN" = "true" ]; then
-    echo "🔍 Would publish: $name@$version"
+    echo "🔍 Would publish: $name@$version${DIST_TAG:+ (dist-tag: ${DIST_TAG#--tag })}"
     PUBLISHED=$((PUBLISHED + 1))
   else
-    echo "📦 Publishing $name@$version..."
-    if (cd "$pkg" && pnpm publish --registry="$REGISTRY" --no-git-checks 2>&1); then
+    echo "📦 Publishing $name@$version${DIST_TAG:+ (dist-tag: ${DIST_TAG#--tag })}..."
+    if (cd "$pkg" && pnpm publish --registry="$REGISTRY" --no-git-checks $DIST_TAG 2>&1); then
       echo "   ✅ $name@$version published"
       PUBLISHED=$((PUBLISHED + 1))
     else
