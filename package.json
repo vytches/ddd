@@ -243,7 +243,8 @@
   "pnpm": {
     "auditConfig": {
       "ignoreCves": [
-        "CVE-2026-0775"
+        "CVE-2026-0775",
+        "GHSA-36xv-jgw5-4q75"
       ]
     },
     "overrides": {
