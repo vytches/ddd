@@ -1,14 +1,13 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-04-03 by @pulse_ _Updated by `/pulse`. Read-only for humans —
-agents write here._
+*Last sync: 2026-04-03 by @pulse*
+*Updated by `/pulse`. Read-only for humans — agents write here.*
 
 ---
 
 ## 🎯 Sprint Focus
 
-Publish v0.1.0-beta to npm. Backlog empty — all effort goes to publication
-readiness.
+Publish v0.1.0-beta to npm by 2026-04-25. Backlog empty — create 3 task files for publish blockers, then execute.
 
 ---
 
@@ -16,15 +15,9 @@ readiness.
 
 <!-- @tech-lead updates this section on /pulse -->
 
-1. **publishConfig targets GitHub Packages** — all 20 packages have
-   `registry: npm.pkg.github.com` + `access: restricted`. Must change to
-   `registry.npmjs.org` + `access: public`.
-2. **Version skew across packages** — 4 different versions (0.22.4, 0.23.1,
-   0.23.4, 0.24.4) + nestjs at 12.1.1. Need alignment or explicit strategy
-   before publish.
-3. **No consumer-facing README** — current README is project-internal. Need a
-   10-line example above the fold, "why this exists", "how it differs from
-   @node-ts/ddd".
+1. **Publish blockers have no task files** — 3 critical path items exist only as prose in TEAM-STATE.md. No tracking, no assignee, no due_date. Create PUBLISH-001/002/003 before starting work.
+2. **publishConfig targets GitHub Packages** — all 20 `package.json` have `registry: npm.pkg.github.com` + `access: restricted`. Must change to `registry.npmjs.org` + `access: public`.
+3. **VF-020 falsely marked complete** — Quickstart Example is in completed-tasks with 0% progress, no activity log, no `examples/` directory. Either reopen or accept DX debt.
 
 ---
 
@@ -35,67 +28,64 @@ _N/A — this is a library project, no mobile UI._
 ---
 
 ## ⚙️ Technical Pulse
-
 <!-- Updated by @tech-lead on 2026-04-03 -->
 
-**Active tasks**: 0 (backlog clear) **Build health**: ✅ PASS — all 20 packages
-build clean, ESM + CJS + `.d.ts` present **Test health**: ✅ PASS — 1,636 tests
-pass, 0 failures (19 skipped in domain-services e2e) **Debt**: 🟢 LOW | No
-blocking debt **Publish readiness**: BLOCKED — registry config + version skew
+**Active tasks**: 0 | **Build**: PASS (20 pkgs, ESM+CJS+.d.ts) | **Tests**: PASS (1,636 pass, 0 fail, 19 skipped)
+**Debt**: 🟢 LOW | Major: 0 | Minor: 3
+**Blocked chains**: 0 | Stale (>14d): none | Overdue: none
 
-### Publish Blockers
+### Publish Blockers (untracked — no task files)
 
-1. **publishConfig** in all 20 `package.json` files points to GitHub Packages,
-   not npmjs.com. Need `registry: https://registry.npmjs.org` +
-   `access: public`.
-2. **Version skew**: 0.22.4 (13 pkgs), 0.23.1 (cqrs, events), 0.23.4
-   (enterprise, policies, validation), 0.24.4 (contracts), 12.1.1 (nestjs). No
-   pending changesets.
-3. **Cold-install test needed**: `npm install @vytches/ddd` → import
-   AggregateRoot → must work in a fresh project.
+1. `publishConfig` in all 20 `package.json` → `npm.pkg.github.com` + `restricted`. Must change to `registry.npmjs.org` + `public`
+2. Version skew: 0.22.4 (13), 0.23.1 (2), 0.23.4 (3), 0.24.4 (1), 12.1.1 (nestjs) — no changesets, no ADR
+3. Consumer README missing — current README is project-internal
+4. Cold-install test needed — `npm install @vytches/ddd-enterprise` → import AggregateRoot
 
-### Low Priority
+### Structural Gap
 
-- Vitest `poolOptions` deprecation warning (1-line fix in vitest.config.mts)
-- 19 skipped e2e tests in domain-services (missing container classes)
+Critical path has no task files. Create: PUBLISH-001 (publishConfig), PUBLISH-002 (version strategy), PUBLISH-003 (README + cold-install).
+
+### Minor Debt
+
+- Vitest `poolOptions` deprecation (1-line fix)
+- 19 skipped e2e tests in domain-services
 - nestjs exclusion from enterprise barrel undocumented
 
 ### Velocity
 
-- 26 tasks completed, 0 active
-- 22 commits in last 33 days
-- Build + tests green
+- 26 completed, 0 active | Last commit: 2026-04-02 | Build+tests green
 
 ---
 
 ## 💼 Business Pulse
-
 <!-- Updated by @product-owner on 2026-04-03 -->
 
-**Next milestone**: v0.1.0-beta on npm — est. 3-4 weeks (target: 2026-04-25)
-**Backlog**: Empty — planning needed, but publishing IS the next feature
-**Publishing readiness**: Technically ready for beta, blocked by registry config
-**Market window**: Narrowing — competitors stagnant but new entrants positioning
+**Next milestone**: v0.1.0-beta on npmjs.com — est. 3 weeks (hard deadline: 2026-04-25)
+**Backlog**: Empty — 3 publication blockers must become tasks this week
+**Publishing readiness**: BLOCKED on registry config, version strategy, cold-install test
+**Unvalidated features**: IMPROVEMENT_ROADMAP perf items (VP-002, VP-003) — no adoption baseline
+**Segment gaps**: @node-ts/ddd migrators (0% coverage) — highest-leverage pre-launch win
 
-### Publication Sprint (weeks 1-4)
+### Publication Blockers — Must Become Tasks
 
-**Week 1**: Fix publishConfig, write consumer-facing README, cold-install test
-**Week 2**: Extract real bounded context example from juz-ide-api **Week 3**:
-Publish v0.1.0-beta, write dev.to article ("237 aggregates" hook) **Week 4**:
-Respond to feedback, iterate
+1. Fix publishConfig in all 20 package.json (registry + access) — ~3h
+2. Decide and execute version alignment strategy — ~2h decision + ~4h execution
+3. Cold-install test: fresh repo, `npm install @vytches/ddd-enterprise`, import AggregateRoot — ~2h
+4. Consumer-facing README: "what this is", "why not @node-ts/ddd", 10-line example — ~4h
 
-### Key Insight
+### False Completion Flagged
 
-The library has been in dev mode too long. juz-ide-api with 237 aggregates and
-16K tests IS the proof it works. The library needs to catch up to its own
-evidence.
+VF-020 (Quickstart Example) is in completed-tasks but never built — 0% progress, no `examples/` directory. Either reopen or accept DX debt pre-beta.
 
-### What NOT to Do
+### Do Not Start Before Beta Ships
 
-- Don't wait for perfect JSDoc — beta means beta
-- Don't build a docs site before npm publish — sequence matters
-- Don't add new features in the next 4 weeks — publishing IS the feature
-- Don't create a roadmap promising 2026 features when no v0.1 exists on npm
+- VP-002 (repo query perf), VP-003 (outbox optimization) — assumed demand, no users yet
+- Docs site, comprehensive API docs, GitHub Actions release automation
+- Any new packages or patterns
+
+### Validate This Week
+
+30-min Mom Test with one external TypeScript developer: show README, watch what they do. Confirms whether barrier is onboarding friction (→ build VF-020) or positioning (→ fix README first).
 
 ---
 
@@ -103,9 +93,11 @@ evidence.
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
 
-[2026-04-03] @product-owner: Set hard deadline: v0.1.0-beta on npm by
-2026-04-25. Everything else is subordinate. [2026-04-03] @tech-lead: Build
-GREEN, tests GREEN (1636 pass). Only real blockers: publishConfig + version
-skew. [2026-04-03] @tech-lead: Backlog empty after deep audit — VF-009 was
-already done, VF-010 was mostly busywork. [2026-04-03] @tech-lead: VF-009 CLOSED
-— already implemented. VF-010 CANCELLED — remaining items not worth doing.
+[2026-04-03] @product-owner: VF-020 falsely marked complete — examples/ directory does not exist. Reopen or accept debt.
+[2026-04-03] @product-owner: @node-ts/ddd migration segment has zero content — add one paragraph to README pre-launch.
+[2026-04-03] @product-owner: IMPROVEMENT_ROADMAP perf targets are internally authored with no user signal — freeze until post-beta.
+[2026-04-03] @tech-lead: Critical path has no task files — publish blockers exist only as prose. Create PUBLISH-001/002/003.
+[2026-04-03] @tech-lead: TASK-TEMPLATE.md uses custom schema, not PM framework schema. Fix if using /task-health regularly.
+[2026-04-03] @product-owner: Hard deadline: v0.1.0-beta on npm by 2026-04-25.
+[2026-04-03] @tech-lead: Build GREEN, tests GREEN (1636 pass). Only blockers: publishConfig + version skew.
+[2026-04-03] @tech-lead: VF-009 CLOSED (already implemented). VF-010 CANCELLED (remaining items not worth doing).

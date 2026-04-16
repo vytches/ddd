@@ -78,4 +78,12 @@ regenerated on each pulse._
 
 ---
 
-_Backlog empty. Run `/pulse` or create new tasks to populate._
+## ⚠️ Untracked Work (needs task files)
+
+| Item | Est. | Blocking |
+|------|------|----------|
+| PUBLISH-001: Fix publishConfig (20 packages) | ~3h | npm publish |
+| PUBLISH-002: Version alignment strategy + execution | ~6h | npm publish |
+| PUBLISH-003: Consumer README + cold-install test | ~6h | npm publish |
+
+_Create task files for these before starting work._
