@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.5-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd@0.23.0...@vytches/ddd@0.23.5-alpha.0) (2026-04-16)
+
+### Bug Fixes
+
+- critical quality and foundation fixes from comprehensive audit (VF-021,
+  VF-022)
+  ([5f00816](https://github.com/vytches/ddd/commit/5f00816e82502e080ab008cdeec92ee6fdc12e2f))
+
+### Features
+
+- **enterprise:** add LLM context distribution and verification system
+  ([713ab80](https://github.com/vytches/ddd/commit/713ab80c91367b32b2c2c08ead82cc8e91b18fb5))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.23.4](https://github.com/vytches/ddd/compare/@vytches/ddd@0.23.0...@vytches/ddd@0.23.4) (2026-02-07)
 
 **Note:** Version bump only for package @vytches/ddd

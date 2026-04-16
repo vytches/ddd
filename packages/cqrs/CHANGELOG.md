@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.2-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.22.0...@vytches/ddd-cqrs@0.23.2-alpha.0) (2026-04-16)
+
+### Bug Fixes
+
+- **cqrs:** remove trivially inferred type annotations in test
+  ([6b3f68a](https://github.com/vytches/ddd/commit/6b3f68a9baf3deb8851ea8b59ffdc00d3d044b39))
+
+### Features
+
+- add Result-returning alternatives to throwing public APIs (VF-017)
+  ([c96a5be](https://github.com/vytches/ddd/commit/c96a5bebb2adcd0979a914b68486d951120e4d8e))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.23.1](https://github.com/vytches/ddd/compare/@vytches/ddd-cqrs@0.22.0...@vytches/ddd-cqrs@0.23.1) (2026-02-07)
 
 ### Bug Fixes

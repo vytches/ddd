@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.23.2-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-events@0.22.0...@vytches/ddd-events@0.23.2-alpha.0) (2026-04-16)
+
+### Features
+
+- add API stability tags and API Extractor monitoring (VF-018)
+  ([23a3522](https://github.com/vytches/ddd/commit/23a35228a82b4e4f549a98d87a803607f10f351e))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.23.1](https://github.com/vytches/ddd/compare/@vytches/ddd-events@0.22.0...@vytches/ddd-events@0.23.1) (2026-02-07)
 
 ### Bug Fixes

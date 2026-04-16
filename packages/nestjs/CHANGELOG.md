@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [12.1.2-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.1.2-alpha.0) (2026-04-16)
+
+### Bug Fixes
+
+- critical quality and foundation fixes from comprehensive audit (VF-021,
+  VF-022)
+  ([5f00816](https://github.com/vytches/ddd/commit/5f00816e82502e080ab008cdeec92ee6fdc12e2f))
+- stabilize flaky perf test, replace hardcoded paths, fix lint-staged
+  ([d615d41](https://github.com/vytches/ddd/commit/d615d41fffd8c0dd0b0d6724110be3d8f417cb45))
+
+### Features
+
+- **enterprise:** add LLM context distribution and verification system
+  ([713ab80](https://github.com/vytches/ddd/commit/713ab80c91367b32b2c2c08ead82cc8e91b18fb5))
+- **nestjs:** add @ACLAdapterFor decorator for ACL auto-discovery
+  ([63d06bd](https://github.com/vytches/ddd/commit/63d06bd82db7ed9df6fddbb9cfe012f38a38fd6d))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [12.1.1](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.1.1) (2026-02-07)
 
 ### Bug Fixes

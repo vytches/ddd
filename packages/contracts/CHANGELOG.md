@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.5-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.24.0...@vytches/ddd-contracts@0.24.5-alpha.0) (2026-04-16)
+
+### Features
+
+- add API stability tags and API Extractor monitoring (VF-018)
+  ([23a3522](https://github.com/vytches/ddd/commit/23a35228a82b4e4f549a98d87a803607f10f351e))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.24.4](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.24.0...@vytches/ddd-contracts@0.24.4) (2026-02-07)
 
 **Note:** Version bump only for package @vytches/ddd-contracts

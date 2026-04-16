@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.22.5-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-resilience@0.22.0...@vytches/ddd-resilience@0.22.5-alpha.0) (2026-04-16)
+
+### Bug Fixes
+
+- critical quality and foundation fixes from comprehensive audit (VF-021,
+  VF-022)
+  ([5f00816](https://github.com/vytches/ddd/commit/5f00816e82502e080ab008cdeec92ee6fdc12e2f))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.22.4](https://github.com/vytches/ddd/compare/@vytches/ddd-resilience@0.22.0...@vytches/ddd-resilience@0.22.4) (2026-02-07)
 
 ### Bug Fixes
