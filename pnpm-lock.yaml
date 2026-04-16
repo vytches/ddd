@@ -21,12 +21,12 @@ overrides:
   jws: '>=3.2.3'
   lodash: '>=4.18.0'
   lodash-es: '>=4.18.0'
-  minimatch@>=3.0.0 <3.1.4: '>=3.1.4'
-  minimatch@>=7.0.0 <7.4.8: '>=7.4.8'
-  minimatch@>=9.0.0 <9.0.7: '>=9.0.7'
+  minimatch@>=3.0.0 <3.1.4: '>=3.1.4 <4.0.0'
+  minimatch@>=7.0.0 <7.4.8: '>=7.4.8 <8.0.0'
+  minimatch@>=9.0.0 <9.0.7: '>=9.0.7 <10.0.0'
   minimatch@>=10.0.0 <10.2.3: '>=10.2.3'
-  brace-expansion@>=2.0.0 <2.0.3: '>=2.0.3'
-  multer: '>=2.0.3'
+  brace-expansion@>=2.0.0 <2.0.3: '>=2.0.3 <3.0.0'
+  multer: '>=2.0.3 <3.0.0'
   on-headers: '>=1.1.0'
   path-to-regexp@<0.1.13: '>=0.1.13'
   picomatch: '>=4.0.4'
@@ -3316,7 +3316,7 @@ packages:
     dependencies:
       '@eslint/object-schema': 2.1.7
       debug: 4.4.3
-      minimatch: 10.2.3
+      minimatch: 3.1.5
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -3355,7 +3355,7 @@ packages:
       ignore: 5.3.2
       import-fresh: 3.3.1
       js-yaml: 4.1.1
-      minimatch: 10.2.3
+      minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
       - supports-color
@@ -3887,7 +3887,7 @@ packages:
       libnpmpublish: 9.0.9
       load-json-file: 6.2.0
       make-dir: 4.0.0
-      minimatch: 10.2.3
+      minimatch: 3.1.5
       multimatch: 5.0.0
       node-fetch: 2.6.7
       npm-package-arg: 11.0.2
@@ -4184,7 +4184,7 @@ packages:
       json-parse-even-better-errors: 3.0.2
       json-stringify-nice: 1.1.4
       lru-cache: 10.4.3
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       nopt: 7.2.1
       npm-install-checks: 6.3.0
       npm-package-arg: 11.0.2
@@ -4257,7 +4257,7 @@ packages:
     dependencies:
       '@npmcli/name-from-folder': 2.0.0
       glob: 11.1.0
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       read-package-json-fast: 3.0.2
     dev: true
 
@@ -4380,7 +4380,7 @@ packages:
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.2
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       nx: 20.8.4(@swc-node/register@1.9.2)(@swc/core@1.5.29)
       semver: 7.7.3
       tmp: 0.2.5
@@ -4399,7 +4399,7 @@ packages:
       ejs: 3.1.10
       enquirer: 2.3.6
       ignore: 5.3.2
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       nx: 21.2.3(@swc-node/register@1.9.2)(@swc/core@1.5.29)
       semver: 7.7.3
       tmp: 0.2.5
@@ -4487,7 +4487,7 @@ packages:
       jest-config: 29.7.0(@types/node@20.19.1)(ts-node@10.9.2)
       jest-resolve: 29.7.0
       jest-util: 29.7.0
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       picocolors: 1.1.1
       resolve.exports: 2.0.3
       semver: 7.7.2
@@ -6179,7 +6179,7 @@ packages:
     engines: { node: ^16.14.0 || >=18.0.0 }
     dependencies:
       '@tufjs/canonical-json': 2.0.0
-      minimatch: 10.2.3
+      minimatch: 9.0.9
     dev: true
 
   /@tybys/wasm-util@0.9.0:
@@ -6520,7 +6520,7 @@ packages:
       debug: 4.4.1
       fast-glob: 3.3.3
       is-glob: 4.0.3
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       semver: 7.7.3
       ts-api-utils: 2.1.0(typescript@5.8.3)
       typescript: 5.8.3
@@ -6599,7 +6599,7 @@ packages:
       debug: 4.4.1
       js-yaml: 4.1.1
       lodash: 4.18.1
-      minimatch: 10.2.3
+      minimatch: 7.4.9
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -6814,7 +6814,7 @@ packages:
     dependencies:
       '@verdaccio/core': 8.0.0-next-8.19
       lodash: 4.18.1
-      minimatch: 10.2.3
+      minimatch: 7.4.9
     dev: true
 
   /@vitest/coverage-v8@4.0.18(vitest@4.0.18):
@@ -7099,7 +7099,7 @@ packages:
       '@vue/compiler-vue2': 2.7.16
       '@vue/shared': 3.5.17
       alien-signals: 0.4.14
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       muggle-string: 0.4.1
       path-browserify: 1.0.1
       typescript: 5.8.3
@@ -8136,6 +8136,15 @@ packages:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
+    dev: true
+
+  /brace-expansion@2.1.0:
+    resolution:
+      {
+        integrity: sha512-TN1kCZAgdgweJhWWpgKYrQaMNHcDULHkWwQIspdtjV4Y5aurRdZpjAqn6yX3FPqTA9ngHCc4hJxMAMgGfve85w==,
+      }
+    dependencies:
+      balanced-match: 1.0.2
     dev: true
 
   /brace-expansion@5.0.5:
@@ -10709,7 +10718,7 @@ packages:
       is-glob: 4.0.3
       json-stable-stringify-without-jsonify: 1.0.1
       lodash.merge: 4.6.2
-      minimatch: 10.2.3
+      minimatch: 3.1.5
       natural-compare: 1.4.0
       optionator: 0.9.4
     transitivePeerDependencies:
@@ -12005,7 +12014,7 @@ packages:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 10.2.3
+      minimatch: 3.1.5
       once: 1.4.0
       path-is-absolute: 1.0.1
     dev: true
@@ -12538,7 +12547,7 @@ packages:
       }
     engines: { node: ^14.17.0 || ^16.13.0 || >=18.0.0 }
     dependencies:
-      minimatch: 10.2.3
+      minimatch: 9.0.9
     dev: true
 
   /ignore@5.3.2:
@@ -14410,7 +14419,7 @@ packages:
       libnpmpublish: 9.0.9
       load-json-file: 6.2.0
       make-dir: 4.0.0
-      minimatch: 10.2.3
+      minimatch: 3.1.5
       multimatch: 5.0.0
       node-fetch: 2.6.7
       npm-package-arg: 11.0.2
@@ -15358,7 +15367,17 @@ packages:
       }
     engines: { node: '>=10' }
     dependencies:
-      brace-expansion: 5.0.5
+      brace-expansion: 2.1.0
+    dev: true
+
+  /minimatch@7.4.9:
+    resolution:
+      {
+        integrity: sha512-Brg/fp/iAVDOQoHxkuN5bEYhyQlZhxddI78yWsCbeEwTHXQjlNLtiJDUsp1GIptVqMI7/gkJMz4vVAc01mpoBw==,
+      }
+    engines: { node: '>=10' }
+    dependencies:
+      brace-expansion: 2.1.0
     dev: true
 
   /minimatch@8.0.7:
@@ -15368,7 +15387,17 @@ packages:
       }
     engines: { node: '>=16 || 14 >=14.17' }
     dependencies:
-      brace-expansion: 5.0.5
+      brace-expansion: 2.1.0
+    dev: true
+
+  /minimatch@9.0.9:
+    resolution:
+      {
+        integrity: sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg==,
+      }
+    engines: { node: '>=16 || 14 >=14.17' }
+    dependencies:
+      brace-expansion: 2.1.0
     dev: true
 
   /minimist-options@4.1.0:
@@ -15587,7 +15616,7 @@ packages:
       array-differ: 3.0.0
       array-union: 2.1.0
       arrify: 2.0.1
-      minimatch: 10.2.3
+      minimatch: 3.1.5
     dev: true
 
   /mute-stream@0.0.8:
@@ -16056,7 +16085,7 @@ packages:
       jest-diff: 29.7.0
       jsonc-parser: 3.2.0
       lines-and-columns: 2.0.3
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       node-machine-id: 1.1.12
       npm-run-path: 4.0.1
       open: 8.4.2
@@ -16123,7 +16152,7 @@ packages:
       jest-diff: 29.7.0
       jsonc-parser: 3.2.0
       lines-and-columns: 2.0.3
-      minimatch: 10.2.3
+      minimatch: 9.0.9
       node-machine-id: 1.1.12
       npm-run-path: 4.0.1
       open: 8.4.2
