@@ -1,6 +1,7 @@
 import type { IACLAdapter, IEnhancedACLAdapter } from './acl.interfaces';
 import { BaseACLRegistry, type ACLRegistrationMetadata } from './base-acl-registry';
 import type { ContextACLRegistry } from './context-acl-registry';
+import type { AdapterDefinition } from './adapter-definition';
 
 export interface ImportOptions {
   overwriteConflicts?: boolean;
@@ -16,6 +17,37 @@ export interface ImportResult {
 export class ACLRegistry extends BaseACLRegistry {
   protected getRegistryName(): string {
     return 'GlobalACLRegistry';
+  }
+
+  /**
+   * Create a registry pre-populated from an array of adapter definitions.
+   * Replaces manual register() calls with declarative configuration.
+   *
+   * @public
+   * @stable
+   * @since 0.24.0
+   *
+   * @example
+   * ```typescript
+   * const registry = ACLRegistry.fromDefinitions([
+   *   defineACLAdapter({ context: 'payments', adapter: paymentAdapter }),
+   *   defineACLAdapter({ context: 'shipping', adapter: shippingAdapter }),
+   * ]);
+   * ```
+   */
+  static fromDefinitions(definitions: ReadonlyArray<AdapterDefinition>): ACLRegistry {
+    const registry = new ACLRegistry();
+    for (const def of definitions) {
+      const metadata: Partial<ACLRegistrationMetadata> = {
+        source: 'direct' as const,
+        version: def.version ?? '1.0.0',
+      };
+      if (def.description !== undefined) {
+        metadata.description = def.description;
+      }
+      registry.register(def.context, def.adapter, metadata);
+    }
+    return registry;
   }
 
   importFromContext(

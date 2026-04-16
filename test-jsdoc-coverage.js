@@ -68,7 +68,7 @@ function checkJSDocCoverage(dir) {
 }
 
 // Check resilience package
-const distDir = '/home/node/projects/vytches-ddd/packages/resilience/dist';
+const distDir = path.resolve(process.cwd(), 'packages/resilience/dist');
 const results = checkJSDocCoverage(distDir);
 
 console.log('=== JSDoc Coverage Report for Resilience Package ===');

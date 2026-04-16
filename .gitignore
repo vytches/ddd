@@ -128,7 +128,14 @@ repomix-output.md
 docs/api/
 
 # Claude Code local config (symlinks, MCP, worktrees)
-.claude/knowledge/
+.claude/knowledge/patterns
+.claude/knowledge/patterns-local
+.claude/knowledge/skills/
 .claude/rules/
+.claude/settings.local.json
+.claude/analytics/
+.claude/audit.log
+.claude/memory/
+.claude/roles/
 .mcp.json
 .worktreeinclude

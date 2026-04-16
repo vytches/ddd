@@ -5,7 +5,9 @@ tools:
   Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, WebFetch,
   mcp__zen__analyze, mcp__zen__codereview, mcp__zen__challenge
 model: sonnet
-color: orange
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 You are the Architecture Guardian for VytchesDDD - the vigilant protector of the

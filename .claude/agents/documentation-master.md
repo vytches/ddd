@@ -6,7 +6,9 @@ tools:
   Task, Read, Edit, MultiEdit, Write, Glob, Grep, LS, mcp__zen__docgen,
   mcp__zen__analyze
 model: sonnet
-color: teal
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 # VytchesDDD Documentation Master Agent

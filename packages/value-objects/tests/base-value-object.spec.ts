@@ -33,11 +33,11 @@ class NumberValueObject extends BaseValueObject<number> {
   }
 
   // Override toJSON for specific formatting
-  override toJSON(): string {
-    return JSON.stringify({
+  override toJSON(): { value: number; formatted: string } {
+    return {
       value: this.value,
       formatted: `$${this.value.toFixed(2)}`,
-    });
+    };
   }
 }
 
@@ -130,8 +130,8 @@ describe('BaseValueObject', () => {
       // Act
       const result = vo.toJSON();
 
-      // Assert
-      expect(result).toBe(JSON.stringify(stringValue));
+      // Assert — toJSON returns raw value, not JSON string
+      expect(result).toBe(stringValue);
     });
 
     it('should handle equality with null/undefined', () => {
@@ -197,11 +197,10 @@ describe('BaseValueObject', () => {
 
       // Act
       const result = vo.toJSON();
-      const parsed = JSON.parse(result);
 
-      // Assert
-      expect(parsed.value).toBe(numberValue);
-      expect(parsed.formatted).toBe('$42.50');
+      // Assert — toJSON now returns object directly
+      expect(result.value).toBe(numberValue);
+      expect(result.formatted).toBe('$42.50');
     });
   });
 
@@ -248,8 +247,8 @@ describe('BaseValueObject', () => {
       const vo2 = new PersonValueObject(person2);
       const vo3 = new PersonValueObject(person3);
 
-      // Act & Assert
-      expect(vo1.equals(vo2)).toBe(false); // Objects are different instances
+      // Act & Assert — value objects compare by VALUE, not reference
+      expect(vo1.equals(vo2)).toBe(true); // Same values = equal
       expect(vo1.equals(vo3)).toBe(false);
     });
 
@@ -272,10 +271,9 @@ describe('BaseValueObject', () => {
 
       // Act
       const result = vo.toJSON();
-      const parsed = JSON.parse(result);
 
-      // Assert
-      expect(parsed).toEqual(person);
+      // Assert — toJSON now returns value directly (not string)
+      expect(result).toEqual(person);
     });
   });
 

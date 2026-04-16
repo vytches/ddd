@@ -1,11 +1,23 @@
 import type { IAggregateWithEvents } from '../aggregates';
 import type { IDomainEvent } from './domain-event-interfaces';
 
+/**
+ * Middleware function for intercepting and transforming events in the dispatcher pipeline.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export type EventMiddleware = (
   event: IDomainEvent,
   next: (event: IDomainEvent) => Promise<void>
 ) => Promise<void>;
 
+/**
+ * Interface for event processors that handle specific event types.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventProcessor {
   /**
    * Process an event
@@ -18,6 +30,12 @@ export interface IEventProcessor {
   canProcess(event: IDomainEvent): boolean;
 }
 
+/**
+ * Abstract base class for event dispatchers.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export abstract class IEventDispatcher {
   /**
    * Dispatch all events from an aggregate and clear them
@@ -35,6 +53,12 @@ export abstract class IEventDispatcher {
   abstract dispatchEvents(...events: IDomainEvent[]): Promise<void>;
 }
 
+/**
+ * Extended event dispatcher with middleware and processor support.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export abstract class IEnhancedEventDispatcher extends IEventDispatcher {
   /**
    * Add middleware to the event pipeline

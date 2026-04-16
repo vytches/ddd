@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { IEventMetadata, IDomainEvent } from './domain-event-interfaces';
 
+/**
+ * Transforms an event payload from one schema version to another for forward compatibility.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventUpcaster<TInput = unknown, TOutput = unknown> {
   /**
    * Transforms an event payload from one version to another
@@ -8,6 +14,12 @@ export interface IEventUpcaster<TInput = unknown, TOutput = unknown> {
   upcast(payload: TInput, metadata?: IEventMetadata): TOutput;
 }
 
+/**
+ * Represents an auditable event record capturing state change history.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IAuditEvent {
   eventId: string;
   timestamp: Date;
@@ -21,6 +33,12 @@ export interface IAuditEvent {
   previousState?: unknown;
 }
 
+/**
+ * Core event store interface for persisting and retrieving domain events by aggregate.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventStore {
   /**
    * Gets all events for an aggregate

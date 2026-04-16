@@ -59,7 +59,7 @@
     "docs:find": "pnpm cli examples find-by-tag",
     "docs:validate": "pnpm cli examples validate",
     "// === ENTERPRISE TESTING WORKFLOWS ===": "",
-    "test": "vitest run --passWithNoTests",
+    "test": "nx run-many --target=test --all",
     "test:watch": "vitest --passWithNoTests",
     "test:ui": "vitest --ui --passWithNoTests",
     "test:coverage": "vitest --coverage --passWithNoTests",
@@ -87,7 +87,7 @@
     "build:clean:full": "pnpm clean && pnpm install && pnpm build",
     "build:enterprise": "nx build enterprise",
     "validate": "pnpm validate:exports && pnpm validate:bundles && pnpm validate:types",
-    "validate:api": "api-extractor run --local",
+    "validate:api": "api-extractor run --local --config packages/events/api-extractor.json && api-extractor run --local --config packages/contracts/api-extractor.json",
     "validate:exports": "node scripts/validate-exports.js",
     "validate:bundles": "node scripts/quality-gates/bundle-size-monitor.js",
     "validate:types": "tsc --noEmit",
@@ -181,6 +181,7 @@
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
     "@golevelup/ts-vitest": "^0.5.2",
+    "@microsoft/api-extractor": "^7.57.8",
     "@nx/eslint": "21.2.3",
     "@nx/eslint-plugin": "21.2.3",
     "@nx/jest": "21.2.3",
@@ -247,11 +248,13 @@
     },
     "overrides": {
       "@isaacs/brace-expansion": ">=5.0.1",
-      "axios": ">=1.12.0",
+      "axios": ">=1.13.5",
       "brace-expansion@>=2.0.0 <2.0.3": ">=2.0.3 <3.0.0",
       "diff": ">=4.0.4",
       "esbuild": ">=0.25.0",
       "eslint": ">=9.26.0",
+      "file-type": ">=21.3.2",
+      "flatted": ">=3.4.2",
       "form-data": ">=4.0.4",
       "glob@>=10.2.0 <10.5.0": ">=10.5.0",
       "glob@>=11.0.0 <11.1.0": ">=11.1.0",
@@ -274,7 +277,8 @@
       "undici": ">=7.24.0",
       "validator": ">=13.15.22",
       "vite@>=5.2.6 <5.4.21": ">=5.4.21",
-      "vite@>=6.0.0 <6.4.1": ">=6.4.1"
+      "vite@>=6.0.0 <6.4.1": ">=6.4.1",
+      "yaml": ">=2.8.3"
     }
   },
   "config": {
@@ -285,9 +289,6 @@
   "lint-staged": {
     "*.{ts,js,json,md}": [
       "prettier --write"
-    ],
-    "*.{ts,js}": [
-      "eslint --fix"
     ]
   },
   "dependencies": {

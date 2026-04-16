@@ -40,7 +40,24 @@ for building robust, scalable applications.
 - [Best Practices](#best-practices)
 - [Contributing](#contributing)
 
-## 🚀 Installation
+## 🤖 AI Assistant Integration
+
+This package includes LLM-optimized documentation for AI coding assistants.
+
+```bash
+# Copy context files to your project (Claude Code, Cursor, Copilot, etc.)
+npx @vytches/ddd init-context
+
+# Verify your local copy is up-to-date after upgrades
+npx @vytches/ddd init-context --verify
+```
+
+The context includes architecture overview, full API reference with correct
+import paths, per-package quick start guides, and anti-patterns that prevent
+common AI mistakes. See the
+[LLM Integration Guide](../../README.md#-llm-integration-guide) for details.
+
+## Installation
 
 ### Complete Enterprise Installation
 

@@ -162,12 +162,32 @@ jobs:
             echo "✅ No circular dependencies between packages"
           fi
 
+      - name: Check API surface stability
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Checking API surface for breaking changes..."
+          pnpm nx build @vytches/ddd-contracts @vytches/ddd-events
+          api-extractor run --local --config packages/contracts/api-extractor.json 2>&1 || true
+          api-extractor run --local --config packages/events/api-extractor.json 2>&1 || true
+          if git diff --name-only | grep -q "api-report"; then
+            echo "⚠️ API surface changed! Review api-report/*.api.md diff carefully."
+            git diff packages/*/api-report/
+          else
+            echo "✅ API surface unchanged"
+          fi
+
       - name: Validate module boundaries
         if: github.event_name == 'pull_request'
         run: |
           echo "🔍 Validating module boundaries with dependency-cruiser..."
           pnpm deps:check
           echo "✅ Module boundaries validated successfully"
+
+      - name: Verify LLM context documentation
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Verifying LLM context matches exports..."
+          node scripts/verify-llm-context.mjs
 
       - name: Check if quality gates needed
         id: check_gates

@@ -7,7 +7,9 @@ tools:
   Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, mcp__zen__testgen,
   mcp__zen__codereview, mcp__zen__analyze
 model: sonnet
-color: green
+permissionMode: dontAsk
+effort: medium
+maxTurns: 20
 ---
 
 - SafeRun pattern for all error testing

@@ -1,0 +1,28 @@
+{
+  "name": "@vytches/quickstart-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Quickstart example for @vytches/ddd — Order domain with CQRS and Event Sourcing",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vytches/ddd": "workspace:*",
+    "@vytches/ddd-aggregates": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-logging": "workspace:*",
+    "@vytches/ddd-testing": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*",
+    "@vytches/ddd-value-objects": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.0"
+  }
+}

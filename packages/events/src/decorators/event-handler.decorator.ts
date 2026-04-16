@@ -14,8 +14,9 @@ export type { EventHandlerOptions };
  * @param eventName Constructor of the event type to handle
  * @param options Handler configuration options
  * @returns Decorator function for classes or methods
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export function EventHandler<T extends IDomainEvent>(
   eventName: new (...args: any[]) => T,

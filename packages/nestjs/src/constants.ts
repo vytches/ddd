@@ -38,6 +38,16 @@ export const EVENT_HANDLER_METADATA = 'vytches:event-handler';
 export const SAGA_METADATA = 'vytches:saga';
 
 /**
+ * Metadata key for ACL adapter decorator
+ */
+export const ACL_ADAPTER_METADATA = 'vytches:acl-adapter';
+
+/**
+ * Injection token for ACLRegistry — provide in module to enable ACL auto-discovery
+ */
+export const ACL_REGISTRY = Symbol('ACL_REGISTRY');
+
+/**
  * Default auto-discovery patterns
  */
 export const DEFAULT_DISCOVERY_PATTERNS = [

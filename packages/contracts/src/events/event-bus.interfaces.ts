@@ -5,6 +5,12 @@ import type { IDomainEvent } from './domain-event-interfaces';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type EventConstructor<T> = new (...args: any[]) => T;
 
+/**
+ * Abstract base class for event bus implementations.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export abstract class IEventBus<TEvent = IDomainEvent> {
   /**
    * Publish an event to all subscribed handlers
@@ -45,6 +51,12 @@ export abstract class IEventBus<TEvent = IDomainEvent> {
   abstract publishMany(events: TEvent[]): Promise<void>;
 }
 
+/**
+ * Base configuration options for event bus implementations.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface BaseEventBusOptions {
   /**
    * Enable or disable event processing logging
@@ -67,6 +79,12 @@ export interface BaseEventBusOptions {
   logger?: (message: string) => void;
 }
 
+/**
+ * Middleware function for intercepting and transforming events in the event bus pipeline.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export type EventBusMiddleware = (
   next: (event: unknown) => Promise<void>
 ) => (event: unknown) => Promise<void>;

@@ -25,6 +25,9 @@ import type { IDomainEvent, IEventPersistenceHandler } from '@vytches/ddd-contra
  *   }
  * }
  * ```
+ * @public
+ * @stable
+ * @since 0.22.0
  */
 export abstract class GenericEventPersistenceHandler implements IEventPersistenceHandler {
   private handlers = new Map<string, (payload: unknown) => Promise<number>>();

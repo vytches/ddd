@@ -40,7 +40,6 @@ export type {
   IEventProcessor,
   IEventReplay,
   IEventReplayFactory,
-  IEventScheduler,
   IEventSerializer,
   IEventSourcingCapability,
   IEventStore,
@@ -49,22 +48,14 @@ export type {
   IEventStream,
   IEventUpcaster,
   IGlobalEventStream,
-  IJobFilter,
-  IJobQueryResult,
   IProjectionCapability,
   IReadAllOptions,
   IReadStreamOptions,
-  IRecurringPattern,
   IReplayConfig,
   IReplayFilter,
   IReplayProgress,
   IReplayResult,
   IReplaySession,
-  IScheduledEvent,
-  IScheduledJob,
-  IScheduleOptions,
-  ISchedulerConfig,
-  ISchedulerLifecycle,
   ISnapshotCapability,
   ISpecification,
   IStoredDomainEvent,
@@ -81,7 +72,6 @@ export type {
 } from '@vytches/ddd-contracts';
 
 export {
-  BackoffStrategy,
   Capability,
   CapabilityRegistry,
   createCapabilityRegistry,
@@ -93,8 +83,6 @@ export {
   IEventDispatcher,
   IEventPersistenceHandler,
   isEventHandler,
-  JobStatus,
-  SchedulePriority,
 } from '@vytches/ddd-contracts';
 
 // Export contracts EntityId as base type

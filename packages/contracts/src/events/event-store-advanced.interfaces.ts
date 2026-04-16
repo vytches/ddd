@@ -1,6 +1,12 @@
 import type { IAggregateSnapshot } from '../shared';
 import type { IDomainEvent } from './domain-event-interfaces';
 
+/**
+ * A domain event that has been persisted to the event store, enriched with storage metadata.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IStoredDomainEvent<P = unknown> extends IDomainEvent<P> {
   /** Unique identifier for the event */
   eventId: string;
@@ -18,6 +24,12 @@ export interface IStoredDomainEvent<P = unknown> extends IDomainEvent<P> {
   timestamp: Date;
 }
 
+/**
+ * Result returned after successfully appending events to a stream.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IAppendResult {
   streamId: string;
   fromVersion: number;
@@ -26,6 +38,12 @@ export interface IAppendResult {
   position: bigint;
 }
 
+/**
+ * A stored domain event with stream position and global ordering information.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IStoredEvent<T = unknown> extends IStoredDomainEvent<T> {
   position: bigint;
   streamId: string;
@@ -34,6 +52,12 @@ export interface IStoredEvent<T = unknown> extends IStoredDomainEvent<T> {
   checksum?: string;
 }
 
+/**
+ * Options for reading events from a specific stream.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IReadStreamOptions {
   fromVersion?: number;
   maxCount?: number;
@@ -41,6 +65,12 @@ export interface IReadStreamOptions {
   resolveLinkTos?: boolean;
 }
 
+/**
+ * Options for reading events from the global event log.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IReadAllOptions {
   fromPosition?: bigint;
   maxCount?: number;
@@ -49,6 +79,12 @@ export interface IReadAllOptions {
   filterByStreamPrefix?: string;
 }
 
+/**
+ * A page of events read from a specific stream.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventStream<T = unknown> {
   streamId: string;
   events: IStoredEvent<T>[];
@@ -58,6 +94,12 @@ export interface IEventStream<T = unknown> {
   nextVersion: number;
 }
 
+/**
+ * A page of events read from the global event log across all streams.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IGlobalEventStream<T = unknown> {
   events: IStoredEvent<T>[];
   fromPosition: bigint;
@@ -65,6 +107,12 @@ export interface IGlobalEventStream<T = unknown> {
   isEndOfStream: boolean;
 }
 
+/**
+ * Metadata describing a stream's properties and state.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IStreamMetadata {
   streamId: string;
   created: Date;
@@ -77,12 +125,24 @@ export interface IStreamMetadata {
   customMetadata?: Record<string, unknown>;
 }
 
+/**
+ * Handles serialization and deserialization of stored domain events.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventSerializer {
   serialize(event: IStoredDomainEvent): string;
   deserialize<T = unknown>(data: string): IStoredDomainEvent<T>;
   getContentType(): string;
 }
 
+/**
+ * Full-featured event store with stream management, snapshots, and optional subscriptions.
+ * @public
+ * @experimental
+ * @since 0.22.0
+ */
 export interface IAdvancedEventStore {
   // Stream operations
   appendToStream(
@@ -122,6 +182,12 @@ export interface IAdvancedEventStore {
   streamExists(streamId: string): Promise<boolean>;
 }
 
+/**
+ * Configuration options for advanced event store implementations.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventStoreConfig {
   serializer?: IEventSerializer;
   enableSnapshots?: boolean;
@@ -132,6 +198,12 @@ export interface IEventStoreConfig {
   eventRetentionDays?: number;
 }
 
+/**
+ * Lifecycle adapter for managing event store connection state.
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export interface IEventStoreAdapter {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
