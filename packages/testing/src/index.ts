@@ -27,3 +27,7 @@ export {
 
 // Phase 2: DDD Seeder Framework - Domain-aware test data generation
 export * from './seeder';
+
+// Phase 3: GWT Aggregate Testing - Given-When-Then fluent API
+export { Test, GWTAssertionError, matching, eventsMatch, eventArraysMatch } from './gwt';
+export type { GivenStep, WhenStep, ThenStep, AsyncThenStep } from './gwt';

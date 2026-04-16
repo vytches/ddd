@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd",
-  "version": "0.23.4",
+  "version": "0.23.5-alpha.0",
   "description": "Complete Domain-Driven Design framework for TypeScript",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -11,11 +11,18 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./llm-context": "./llm-context.md",
+    "./llm-context.md": "./llm-context.md"
   },
   "sideEffects": false,
+  "bin": {
+    "vytches-ddd": "./bin/init-context.mjs"
+  },
   "files": [
     "dist",
+    "bin",
+    "llm-context.md",
     "README.md"
   ],
   "keywords": [
@@ -32,6 +39,8 @@
     "directory": "packages/enterprise"
   },
   "scripts": {
+    "prebuild": "cp ../../docs/llm-context.md ./llm-context.md",
+    "prepack": "cp ../../docs/llm-context.md ./llm-context.md",
     "build": "vite build",
     "dev": "vite build --watch",
     "clean": "rm -rf dist .tsbuildinfo",
@@ -43,7 +52,7 @@
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "vite": "^6.0.0",
+    "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
     "vitest": "^2.0.0"
   },

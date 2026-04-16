@@ -3,6 +3,11 @@ import { LibUtils } from '@vytches/ddd-utils';
 
 import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration-event-interfaces';
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent<T> {
   /**
    * Unique identifier for the event

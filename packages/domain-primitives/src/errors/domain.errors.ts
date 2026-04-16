@@ -77,7 +77,7 @@ export class InvalidParameterError extends IDomainError {
   ): InvalidParameterError {
     const message = msg ?? `Invalid ${parameter}`;
     const options: DomainErrorOptions = {
-      code: DomainErrorCode.MissingValue,
+      code: DomainErrorCode.InvalidParameter,
       data,
     };
 

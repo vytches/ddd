@@ -6,7 +6,9 @@ tools:
   Task, Bash, Read, Edit, MultiEdit, Glob, Grep, LS, mcp__zen__analyze,
   mcp__zen__codereview
 model: sonnet
-color: indigo
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 # VytchesDDD Patterns Expert Agent

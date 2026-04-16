@@ -3,6 +3,11 @@ import type { IEventProcessor } from '../event-processor';
 import type { UnifiedEventBus } from '../unified-event-bus';
 import type { IntegrationEventTransformerRegistry } from './integration-event-transformer-registry';
 
+/**
+ * @public
+ * @experimental
+ * @since 0.23.0
+ */
 export class IntegrationEventProcessor implements IEventProcessor {
   constructor(private readonly transformerRegistry: IntegrationEventTransformerRegistry) {}
 

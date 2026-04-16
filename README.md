@@ -1092,89 +1092,74 @@ if (eligibleForDiscount.isSatisfiedBy(customer)) {
 
 ## 🤖 LLM Integration Guide
 
-This library is designed to be AI-friendly for code generation and assistance.
-Here's how to effectively use it with LLMs:
+This library ships with LLM-optimized documentation that helps AI coding
+assistants (Claude Code, Copilot, Cursor, etc.) generate correct DDD code.
 
-### Structured Prompts for Code Generation
+### Quick Setup (recommended)
 
-```markdown
-## Context
-
-- Framework: @vytches/ddd-core
-- Domain: E-commerce
-- Bounded Context: Order Management
-
-## Requirements
-
-Create an Order aggregate that:
-
-1. Supports multiple order items
-2. Calculates total with tax
-3. Has status workflow (pending -> confirmed -> shipped -> delivered)
-4. Emits domain events for each state change
-5. Validates business rules (min order amount, max items)
-
-## Technical Constraints
-
-- Use Result pattern for error handling
-- Implement event sourcing
-- Add specifications for validation
-- Include unit tests
-
-## Output Format
-
-Provide complete TypeScript implementation with:
-
-- Value objects for OrderStatus, OrderItem
-- Order aggregate with all business logic
-- Domain events for each transition
-- Repository interface
-- Example usage
+```bash
+# After installing @vytches/ddd:
+npx @vytches/ddd init-context
 ```
 
-### Code Analysis Prompt Template
+This copies context files into `.claude/vytches-ddd/` in your project:
+
+| File             | Contents                                           |
+| ---------------- | -------------------------------------------------- |
+| `llm-context.md` | Architecture, full API reference, anti-patterns    |
+| `<package>.md`   | Per-package quick start, patterns, common mistakes |
+| `.manifest.json` | Version manifest for freshness verification        |
+
+Then reference it in your AI assistant:
 
 ```markdown
-## Task: Analyze Domain Model
+# In your project's CLAUDE.md:
 
-Analyze the following code using @vytches/ddd-core patterns: [paste code here]
-
-Identify:
-
-1. Which DDD patterns are used correctly
-2. Potential improvements
-3. Missing patterns that could benefit the design
-4. Anti-patterns to fix
-
-Provide refactored code following @vytches/ddd-core best practices.
+@.claude/vytches-ddd/llm-context.md
 ```
+
+For Cursor, add to `.cursorrules`. For Copilot, add to
+`.github/copilot-instructions.md`.
+
+### Verify Freshness
+
+After updating `@vytches/ddd`, check if your local context is still current:
+
+```bash
+npx @vytches/ddd init-context --verify
+```
+
+If outdated, re-run `npx @vytches/ddd init-context` to update.
+
+### Manual Access
+
+The context file is also available directly in `node_modules`:
+
+```
+node_modules/@vytches/ddd/llm-context.md
+```
+
+Each sub-package includes its own guide at
+`node_modules/@vytches/ddd-*/LLMGUIDE.md`.
 
 ### Best Practices for AI Assistance
 
-1. **Always specify the package context**:
+1. **Use the context file** — it contains verified API signatures, correct
+   import paths, and anti-patterns that prevent common AI mistakes.
 
-   ```typescript
-   // Use specific imports for clarity
-   import { AggregateRoot, EntityId } from '@vytches/ddd-core';
-   import { Money } from '@vytches/ddd-value-objects';
-   ```
-
-2. **Include domain context in prompts**:
-
-   - Bounded context name
-   - Business rules and invariants
-   - Integration points
+2. **Include domain context in prompts** — bounded context name, business rules,
+   integration points.
 
 3. **Request specific patterns**:
 
-   - "Implement using Saga pattern from @vytches/ddd-messaging"
-   - "Add resilience using @vytches/ddd-resilience patterns"
-   - "Create ACL adapter using @vytches/ddd-acl"
+   - "Implement using PolicyBuilder from @vytches/ddd"
+   - "Add resilience using CircuitBreaker from @vytches/ddd"
+   - "Create ACL adapter using SimpleACLAdapter from @vytches/ddd"
 
 4. **Use library conventions**:
    - Result pattern for error handling
-   - Domain events for state changes
-   - Specifications for complex validation
+   - Domain events for state changes via `apply()`
+   - Inline specifications (`Specification.create()`) for one-off rules
 
 ## 🏗️ Development
 

@@ -39,7 +39,7 @@ describe('IDomainError Flexibility', () => {
       expect(missingError.code).toBe(DomainErrorCode.MissingValue);
 
       const invalidError = InvalidParameterError.withParameter('email');
-      expect(invalidError.code).toBe(DomainErrorCode.MissingValue);
+      expect(invalidError.code).toBe(DomainErrorCode.InvalidParameter);
 
       const duplicateError = DuplicateError.withEntityId('123');
       expect(duplicateError.code).toBe(DomainErrorCode.DuplicateEntry);

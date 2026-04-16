@@ -271,7 +271,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }): void {
     this._version = state.version;
     this._initialVersion = state.initialVersion;
-    this._domainEvents = state.domainEvents;
+    this._domainEvents = [...state.domainEvents];
   }
 }
 

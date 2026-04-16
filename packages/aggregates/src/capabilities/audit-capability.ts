@@ -18,10 +18,14 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
   attach(aggregate: unknown): void {
     this.aggregate = aggregate as IAggregateRoot;
 
+    // Runtime check: verify aggregate has apply method before intercepting
+    const aggWithApply = this.aggregate as unknown as { apply?: (...args: unknown[]) => void };
+    if (typeof aggWithApply.apply !== 'function') {
+      return; // Cannot intercept — aggregate does not have apply method
+    }
+
     // Store original apply method for restoration
-    this.originalApply = (
-      this.aggregate as unknown as { apply: (...args: unknown[]) => void }
-    ).apply;
+    this.originalApply = aggWithApply.apply;
 
     // Intercept the apply method to capture events as they're added
     if (this.originalApply) {

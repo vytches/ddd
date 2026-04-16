@@ -47,10 +47,17 @@ export class Result<TValue, TError = Error> {
 
   /**
    * Create a successful result
-   * @param value - The success value
+   * @param value - The success value (required — use Result.empty() for void operations)
    */
-  static ok<TValue, TError = Error>(value?: TValue): Result<TValue, TError> {
+  static ok<TValue, TError = Error>(value: TValue): Result<TValue, TError> {
     return new Result<TValue, TError>(true, value);
+  }
+
+  /**
+   * Create a successful void result (no value).
+   */
+  static empty<TError = Error>(): Result<void, TError> {
+    return new Result<void, TError>(true, undefined);
   }
 
   /**
@@ -134,6 +141,17 @@ export class Result<TValue, TError = Error> {
   }
 
   /**
+   * Transform the error value if the result is a failure
+   * @param fn - The error transformation function
+   */
+  mapError<TNewError>(fn: (error: TError) => TNewError): Result<TValue, TNewError> {
+    if (this.isSuccess) {
+      return Result.ok<TValue, TNewError>(this.value);
+    }
+    return Result.fail<TValue, TNewError>(fn(this.error));
+  }
+
+  /**
    * Try to execute an async function and wrap the result
    * @param fn - The async function to try
    * @returns A Promise of a Result containing the function result or error
@@ -161,7 +179,8 @@ export class Result<TValue, TError = Error> {
       const newValue = await fn(this.value);
       return Result.ok<TNewValue, TError>(newValue);
     } catch (error) {
-      return Result.fail<TNewValue, TError>(error as TError);
+      const wrappedError = error instanceof Error ? error : new Error(String(error));
+      return Result.fail<TNewValue, TError>(wrappedError as unknown as TError);
     }
   }
 

@@ -5,8 +5,9 @@ import { LibUtils } from '@vytches/ddd-utils';
  * Abstract base class for all domain events with common functionality.
  * Provides consistent event structure with auto-generated IDs and timestamps.
  *
- * @since 1.0.0
  * @public
+ * @stable
+ * @since 0.22.0
  */
 export abstract class DomainEvent<T = unknown> implements IDomainEvent<T> {
   /**

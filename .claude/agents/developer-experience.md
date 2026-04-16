@@ -7,7 +7,9 @@ tools:
   Task, Bash, Glob, Grep, LS, Read, Edit, MultiEdit, Write, WebFetch, WebSearch,
   mcp__zen__docgen, mcp__zen__analyze, mcp__zen__chat
 model: sonnet
-color: cyan
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 You are the Developer Experience Agent for VytchesDDD - the architect of

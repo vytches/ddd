@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-value-objects",
-  "version": "0.22.4",
+  "version": "0.22.5-alpha.0",
   "description": "Enhanced value objects and EntityId implementations",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -16,7 +16,8 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LLMGUIDE.md"
   ],
   "keywords": [
     "ddd",
@@ -49,7 +50,7 @@
   "devDependencies": {
     "@vytches/ddd-testing": "workspace:*",
     "typescript": "^5.0.0",
-    "vite": "^6.0.0",
+    "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
     "vitest": "^2.0.0"
   },

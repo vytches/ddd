@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import { Logger } from '@vytches/ddd-logging';
-import { MiddlewarePipelineExecutor } from '@vytches/ddd-utils';
+import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 
 import { ICommandBus } from '../abstracts';
@@ -96,6 +96,20 @@ export class CommandBus extends ICommandBus {
     // Execute with middleware pipeline
     const context = new CQRSExecutionContext(command, handler, 'command');
     return await this.executeWithMiddleware(context, () => handler.execute(command));
+  }
+
+  /**
+   * Execute a command, returning Result instead of throwing.
+   * @public
+   * @stable
+   * @since 0.24.0
+   */
+  async tryExecute<T extends ICommand, TResult = void>(
+    command: T
+  ): Promise<Result<TResult, Error>> {
+    return Result.tryAsync(async () => {
+      return await this.execute<T, TResult>(command);
+    });
   }
 
   private getHandlerToken(commandClass: Function): ServiceToken {

@@ -8,6 +8,16 @@ import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import { IEventBus, EVENT_HANDLER_METADATA } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
+import { ACL_ADAPTER_METADATA, ACL_REGISTRY } from '../constants';
+import type { ACLAdapterMetadata } from '../decorators/acl-adapter.decorator';
+
+/**
+ * Minimal interface for ACL registry — avoids hard dependency on @vytches/ddd-acl
+ */
+interface IACLRegistryLike {
+  register(contextName: string, adapter: unknown, metadata?: unknown): unknown;
+  hasContext(contextName: string): boolean;
+}
 
 // Metadata keys used by VytchesDDD decorators
 const DI_HANDLER_TYPE = 'di:handler-type';
@@ -64,7 +74,8 @@ export class VytchesExplorerService implements OnModuleInit {
     @Inject(DiscoveryService) private readonly discoveryService: DiscoveryService,
     @Optional() @Inject(ICommandBus) private readonly commandBus?: ICommandBus,
     @Optional() @Inject(IQueryBus) private readonly queryBus?: IQueryBus,
-    @Optional() @Inject(IEventBus) private readonly eventBus?: IEventBus
+    @Optional() @Inject(IEventBus) private readonly eventBus?: IEventBus,
+    @Optional() @Inject(ACL_REGISTRY) private readonly aclRegistry?: IACLRegistryLike
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -76,6 +87,7 @@ export class VytchesExplorerService implements OnModuleInit {
       const handlers = await this.discoverHandlers();
       this.discoveredHandlers = handlers;
       await this.registerHandlersWithBuses(handlers);
+      await this.discoverAndRegisterACLAdapters();
       this.initialized = true;
     } catch (error) {
       this.logger.error('Initialization failed', error instanceof Error ? error : undefined, {
@@ -353,5 +365,70 @@ export class VytchesExplorerService implements OnModuleInit {
 
   async discoverAllContextHandlers(): Promise<HandlerInfo[]> {
     return this.discoveredHandlers;
+  }
+
+  /**
+   * Check if ACL registry was injected
+   */
+  hasACLRegistry(): boolean {
+    return this.aclRegistry !== undefined;
+  }
+
+  /**
+   * Discover @ACLAdapterFor decorated providers and register them in ACLRegistry.
+   */
+  private async discoverAndRegisterACLAdapters(): Promise<void> {
+    if (!this.aclRegistry || !this.discoveryService) {
+      return;
+    }
+
+    const providers = this.discoveryService.getProviders();
+    let registered = 0;
+
+    for (const provider of providers) {
+      try {
+        const { metatype, instance } = provider;
+        if (!metatype || typeof metatype !== 'function' || !instance) {
+          continue;
+        }
+
+        const aclMetadata: ACLAdapterMetadata | undefined = Reflect.getMetadata(
+          ACL_ADAPTER_METADATA,
+          metatype
+        );
+
+        if (!aclMetadata) {
+          continue;
+        }
+
+        const { contextName, description, version } = aclMetadata;
+
+        if (this.aclRegistry.hasContext(contextName)) {
+          this.logger.warn('ACL adapter already registered, skipping', {
+            contextName,
+            adapterClass: metatype.name,
+          });
+          continue;
+        }
+
+        this.aclRegistry.register(contextName, instance, {
+          source: 'auto-discovered',
+          version: version ?? '1.0.0',
+          description,
+        });
+
+        registered++;
+        this.logger.info('ACL adapter auto-registered', {
+          contextName,
+          adapterClass: metatype.name,
+        });
+      } catch {
+        // Skip problematic providers
+      }
+    }
+
+    if (registered > 0) {
+      this.logger.info(`Auto-discovered ${registered} ACL adapter(s)`);
+    }
   }
 }

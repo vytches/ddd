@@ -5,6 +5,7 @@ export { ACLError, AdapterNotFoundError, TranslationError } from './acl-errors';
 export { BaseACLMiddleware } from './acl-middleware';
 
 export { ACLRegistry, type ImportOptions } from './acl-registry';
+export { defineACLAdapter, type AdapterDefinition } from './adapter-definition';
 
 export type {
   ACLContextInfo,

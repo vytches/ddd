@@ -6,8 +6,9 @@ tools:
   mcp__zen__planner, mcp__zen__consensus, mcp__zen__analyze,
   mcp__zen__codereview, mcp__zen__challenge, Read, Grep, Glob, LS
 model: sonnet
-color: green
-priority: high
+permissionMode: plan
+effort: high
+maxTurns: 25
 ---
 
 - Maintain Evans/Vernon strategic design principles

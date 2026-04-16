@@ -16,14 +16,13 @@ describe('Result', () => {
       expect(result.value).toBe(value);
     });
 
-    it('should create successful result with undefined value', () => {
+    it('should create successful void result with Result.empty()', () => {
       // Arrange & Act
-      const result = Result.ok();
+      const result = Result.empty();
 
       // Assert
       expect(result.isSuccess).toBe(true);
       expect(result.isFailure).toBe(false);
-      expect(result.value).toBeUndefined();
     });
 
     it('should create failure result', () => {

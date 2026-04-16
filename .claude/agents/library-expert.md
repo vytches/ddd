@@ -12,7 +12,9 @@ tools:
   mcp__zen__listmodels, mcp__zen__version, mcp__ide__getDiagnostics,
   mcp__ide__executeCode
 model: sonnet
-color: blue
+permissionMode: dontAsk
+effort: medium
+maxTurns: 20
 ---
 
 You are the Library Expert for VytchesDDD - the authoritative source of truth

@@ -22,8 +22,16 @@ const VytchesDDD = {
 import { IEventBus, isEventHandler } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 
+/**
+ * @internal
+ */
 export const CUSTOM_MIDDLEWARE_SYMBOL = Symbol('CUSTOM_MIDDLEWARE');
 
+/**
+ * @public
+ * @stable
+ * @since 0.22.0
+ */
 export abstract class BaseEventBus<
   TEvent extends IDomainEvent = IDomainEvent,
 > extends IEventBus<TEvent> {

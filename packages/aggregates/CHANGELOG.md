@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.22.5-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-aggregates@0.22.0...@vytches/ddd-aggregates@0.22.5-alpha.0) (2026-04-16)
+
+### Bug Fixes
+
+- critical quality and foundation fixes from comprehensive audit (VF-021,
+  VF-022)
+  ([5f00816](https://github.com/vytches/ddd/commit/5f00816e82502e080ab008cdeec92ee6fdc12e2f))
+
+### Features
+
+- add Result-returning alternatives to throwing public APIs (VF-017)
+  ([c96a5be](https://github.com/vytches/ddd/commit/c96a5bebb2adcd0979a914b68486d951120e4d8e))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.22.4](https://github.com/vytches/ddd/compare/@vytches/ddd-aggregates@0.22.0...@vytches/ddd-aggregates@0.22.4) (2026-02-07)
 
 ### Bug Fixes

@@ -103,9 +103,6 @@
       }
     }
   },
-  "implicitDependencies": {
-    "examples/*": []
-  },
   "plugins": [
     {
       "plugin": "@nx/eslint/plugin",

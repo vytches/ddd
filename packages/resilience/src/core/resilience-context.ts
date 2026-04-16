@@ -44,9 +44,13 @@ export class DefaultResilienceContext implements ResilienceContext {
     if (this.signal.aborted) {
       newController.abort(this.signal.reason);
     } else {
-      this.signal.addEventListener('abort', () => {
-        newController.abort(this.signal.reason);
-      });
+      this.signal.addEventListener(
+        'abort',
+        () => {
+          newController.abort(this.signal.reason);
+        },
+        { once: true }
+      );
     }
 
     // Set timeout if specified
@@ -98,13 +102,27 @@ export class DefaultResilienceContext implements ResilienceContext {
   }
 
   static withAttempt(context: ResilienceContext, attempt: number): ResilienceContext {
+    const newController = new AbortController();
+
+    // Propagate abort from parent context to child attempt
+    if (context.signal.aborted) {
+      newController.abort(context.signal.reason);
+    } else {
+      context.signal.addEventListener(
+        'abort',
+        () => {
+          newController.abort(context.signal.reason);
+        },
+        { once: true }
+      );
+    }
+
     return new DefaultResilienceContext(
       context.correlationId,
       context.startTime,
       attempt,
       new Map(context.metadata),
-      // Create new controller to avoid sharing abort state between attempts
-      new AbortController()
+      newController
     );
   }
 }
