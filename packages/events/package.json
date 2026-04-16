@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-events",
-  "version": "0.23.2-alpha.0",
+  "version": "0.23.2-alpha.1",
   "description": "Unified event system with context-aware routing",
   "type": "module",
   "main": "./dist/index.cjs",

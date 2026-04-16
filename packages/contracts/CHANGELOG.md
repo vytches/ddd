@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.24.5-alpha.1](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.24.5-alpha.0...@vytches/ddd-contracts@0.24.5-alpha.1) (2026-04-16)
+
+### Bug Fixes
+
+- fialing build
+  ([c5eb1fd](https://github.com/vytches/ddd/commit/c5eb1fd366360f584412e3d41cc2929cf8697e71))
+- fixing format issues
+  ([0f427b9](https://github.com/vytches/ddd/commit/0f427b907c3ed4354eb719f0b56be84546082629))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.24.5-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-contracts@0.24.0...@vytches/ddd-contracts@0.24.5-alpha.0) (2026-04-16)
 
 ### Features

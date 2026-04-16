@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [12.1.2-alpha.1](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.1.2-alpha.0...@vytches/ddd-nestjs@12.1.2-alpha.1) (2026-04-16)
+
+### Bug Fixes
+
+- fialing build
+  ([c5eb1fd](https://github.com/vytches/ddd/commit/c5eb1fd366360f584412e3d41cc2929cf8697e71))
+- fixing audit
+  ([68d74df](https://github.com/vytches/ddd/commit/68d74dfe5c63a07cd811b78d473d6c1b13eebb6b))
+- fixing format issues
+  ([0f427b9](https://github.com/vytches/ddd/commit/0f427b907c3ed4354eb719f0b56be84546082629))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [12.1.2-alpha.0](https://github.com/vytches/ddd/compare/@vytches/ddd-nestjs@12.0.4...@vytches/ddd-nestjs@12.1.2-alpha.0) (2026-04-16)
 
 ### Bug Fixes
