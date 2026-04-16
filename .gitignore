@@ -126,3 +126,9 @@ packages/*/examples/metadata.cjs
 **/session-*.json
 repomix-output.md
 docs/api/
+
+# Claude Code local config (symlinks, MCP, worktrees)
+.claude/knowledge/
+.claude/rules/
+.mcp.json
+.worktreeinclude
