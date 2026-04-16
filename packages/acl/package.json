@@ -48,7 +48,7 @@
     "@vytches/ddd-utils": "workspace:*",
     "@vytches/ddd-validation": "workspace:*",
     "typescript": "^5.0.0",
-    "vite": "^8.0.8",
+    "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
     "vitest": "^2.0.0"
   },
