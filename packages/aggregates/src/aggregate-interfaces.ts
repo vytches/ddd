@@ -98,6 +98,19 @@ export interface IAggregateConstructorParams<TId = string> {
   id: EntityId<TId>;
   /** Initial version number, defaults to 0 */
   version?: number;
+  /**
+   * Optional advisory limit on uncommitted domain events. If `apply()` is
+   * called when `_domainEvents.length >= maxEvents`, an error is thrown.
+   *
+   * Use to guard against runaway loops or replays of corrupted/malicious
+   * event streams that could allocate unbounded memory. A typical value is
+   * 10_000 — high enough that legitimate aggregates never hit it, low
+   * enough that a bug allocates seconds of memory, not gigabytes.
+   *
+   * REL-007 (2026-05-08): added as a defensive default-off safeguard.
+   * Leave undefined for "no limit" (preserves backward compatibility).
+   */
+  maxEvents?: number;
 }
 
 // ==========================================
