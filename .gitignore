@@ -137,3 +137,6 @@ docs/api/
 .claude/roles/
 .mcp.json
 .worktreeinclude
+
+# REL-002: prevent Nx graph pollution from agent worktrees
+.claude/worktrees/

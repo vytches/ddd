@@ -90,7 +90,7 @@
     "validate:api": "api-extractor run --local --config packages/events/api-extractor.json && api-extractor run --local --config packages/contracts/api-extractor.json",
     "validate:exports": "node scripts/validate-exports.js",
     "validate:bundles": "node scripts/quality-gates/bundle-size-monitor.js",
-    "validate:types": "tsc --noEmit",
+    "validate:types": "nx run-many --target=type-check --all --parallel=3",
     "// === QUALITY & LINTING ===": "",
     "lint": "nx run-many --target=lint --all --parallel=3",
     "lint:affected": "nx affected --target=lint --parallel=3",
