@@ -2,6 +2,7 @@ import type {
   Capability,
   CapabilityConstructor,
   EntityId,
+  IAggregateSnapshot,
   IAuditEvent,
   IDomainEvent,
   IEventMetadata,
@@ -283,32 +284,16 @@ export type EventAggregateMiddleware<T = unknown> = (
   next: (event: IDomainEvent<T>) => void
 ) => void;
 
-/**
- * Represents a point-in-time snapshot of aggregate state.
- * Used for performance optimization and audit purposes.
- */
-export interface IAggregateSnapshot<TState = unknown, TMeta = unknown> {
-  /** Aggregate identifier */
-  id: unknown;
-
-  /** Aggregate version */
-  version: number;
-
-  /** Aggregate type */
-  aggregateType: string;
-
-  /** Aggregate state */
-  state: TState;
-
-  /** When the snapshot was created */
-  timestamp: Date;
-
-  /** Snapshot metadata (optional) */
-  metadata?: TMeta | undefined;
-
-  /** ID of the last event included in the snapshot (optional) */
-  lastEventId?: string | undefined;
-}
+// REL-009 (2026-05-08): removed dead duplicate `IAggregateSnapshot` interface.
+// The canonical definition lives in
+// `@vytches/ddd-contracts/src/shared/snapshot-types.ts` and is what
+// `SnapshotCapability` actually imports. The duplicate here had a divergent
+// shape (used `id: unknown` instead of `aggregateId: string`) but was never
+// imported by any code — pure dead code. Removing it eliminates confusion
+// for maintainers comparing the two definitions.
+//
+// If you need IAggregateSnapshot, import from `@vytches/ddd-contracts`:
+//   import type { IAggregateSnapshot } from '@vytches/ddd-contracts';
 
 // ==========================================
 // TYPE GUARDS

@@ -5,7 +5,7 @@ import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 
 import { ICommandBus } from '../abstracts';
-import { HandlerNotFoundError } from '../errors';
+import { CQRSConfigurationError, HandlerNotFoundError } from '../errors';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
@@ -116,8 +116,17 @@ export class CommandBus extends ICommandBus {
     // Get handler metadata from command class
     const handlerMetadata = Reflect.getMetadata('di:command-handler', commandClass);
     if (!handlerMetadata) {
-      // For manual registration, we don't have metadata, so throw to trigger fallback
-      throw new Error(`No metadata for ${commandClass.name}`);
+      // REL-009 (2026-05-08): align with QueryBus.getHandlerToken — throw a
+      // typed CQRSConfigurationError with a decorator hint instead of a
+      // generic Error. The outer execute() still catches and re-throws as
+      // HandlerNotFoundError for the "no manual registration AND no
+      // decorator" case, but if this method is called directly (e.g. from
+      // diagnostics), consumers now see the same actionable message in both
+      // buses.
+      throw new CQRSConfigurationError(
+        `No handler registered for command ${commandClass.name}. Did you forget @CommandHandler decorator?`,
+        'CommandBus'
+      );
     }
 
     return handlerMetadata.serviceId || handlerMetadata.handlerType.name;
