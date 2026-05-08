@@ -1,12 +1,24 @@
-# VI-001: CLI Scaffolding Enhancement
+# VI-001: CLI Scaffolding Enhancement — **CANCELLED 2026-05-08**
 
-**Priority**: 83/100  
-**Category**: Developer Experience  
-**Pillar**: Developer Experience  
-**Estimated Time**: 16 hours  
+> **Status**: CANCELLED — superseded by REL-001 (LLM-first generation approach).
+> User decision (2026-05-08): library does not ship a CLI. Developer onboarding
+> flows through AI assistants (Claude Code, Cursor, Copilot) reading
+> LLM-optimized context bundles instead. See:
+> - `project-orchestration/tasks/REL-001-cli-deprecation-llm-first.md`
+> - `project-orchestration/tasks/REL-010-llm-bundle-pipeline.md`
+>
+> This file is kept as a record of the strategic pivot. **Do not implement.**
+
+---
+
+**Original Priority**: 83/100
+**Category**: Developer Experience
+**Pillar**: Developer Experience
+**Estimated Time**: 16 hours
 **Dependencies**: VD-002 (Policies Examples), VD-003 (Domain Services
-Examples)  
-**Status**: Ready for Implementation
+Examples)
+**Status (historical)**: Ready for Implementation
+**Status (actual)**: CANCELLED
 
 ## 📋 Context
 
