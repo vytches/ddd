@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-aggregates public API surface > exports the documented set of symbols 1`] = `
+[
+  "AggregateBuilder",
+  "AggregateError",
+  "AggregateRoot",
+  "AuditCapability",
+  "EventSourcingCapability",
+  "SnapshotCapability",
+  "VersioningCapability",
+  "aggregateBuilder",
+  "asAuditAggregate",
+  "asEventSourcingAggregate",
+  "asSnapshotAggregate",
+  "asVersioningAggregate",
+  "getAggregateCapabilities",
+  "hasAllCapabilities",
+  "tryAsAuditAggregate",
+  "tryAsEventSourcingAggregate",
+  "tryAsSnapshotAggregate",
+  "tryAsVersioningAggregate",
+]
+`;
