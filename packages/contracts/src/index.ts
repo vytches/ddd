@@ -116,3 +116,8 @@ export type {
 
 // Shared types (to avoid circular dependencies)
 export type { IAggregateSnapshot } from './shared';
+
+// Result<T,E> primitive — moved from @vytches/ddd-utils in REL-008
+// to keep contracts as the dependency-free foundation layer.
+// utils re-exports this Result via shim for backwards compatibility.
+export { Result } from './shared';
