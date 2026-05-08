@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { Result } from '@vytches/ddd-utils';
+import type { Result } from '../shared/result';
 
 export interface IValidationError {
   property: string;

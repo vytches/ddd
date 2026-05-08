@@ -41,6 +41,9 @@
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
+  "dependencies": {
+    "@vytches/ddd-contracts": "workspace:*"
+  },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "gray-matter": "^4.0.3",

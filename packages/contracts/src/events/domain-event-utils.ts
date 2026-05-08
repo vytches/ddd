@@ -1,5 +1,20 @@
-import { LibUtils } from '@vytches/ddd-utils';
 import type { IEventMetadata, IDomainEvent } from './domain-event-interfaces';
+
+/**
+ * Generate a UUID v4 using the platform crypto API.
+ *
+ * `globalThis.crypto.randomUUID()` is available in:
+ *   - Node.js >= 19 (standard, no import required)
+ *   - All modern browsers (Web Crypto)
+ *   - Cloudflare Workers / Deno / Bun
+ *
+ * The library's `engines.node >= 22.19.0` ensures availability.
+ * Using globalThis avoids importing `node:crypto`, which Vite externalizes
+ * for browser-compat builds and breaks the contracts foundation bundle.
+ */
+function generateEventId(): string {
+  return globalThis.crypto.randomUUID();
+}
 
 /**
  * Factory function for creating domain events with auto-generated metadata.
@@ -16,7 +31,7 @@ export function createDomainEvent<P = unknown>(
     eventName,
     payload,
     metadata: {
-      eventId: LibUtils.getUUID(),
+      eventId: generateEventId(),
       timestamp: new Date(),
       ...metadata,
     },
