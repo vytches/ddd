@@ -15,8 +15,9 @@
   },
   "sideEffects": false,
   "files": [
-    "dist",
-    "README.md"
+    "LLMGUIDE.md",
+    "README.md",
+    "dist"
   ],
   "keywords": [
     "ddd",
