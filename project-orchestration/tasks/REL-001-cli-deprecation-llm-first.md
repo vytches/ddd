@@ -9,10 +9,12 @@ type: refactor
 priority: critical
 complexity: simple
 estimated_time: 4h
+actual_time: 1.5h
 created_by: human
 created_at: 2026-05-08 14:00
 revised_at: 2026-05-08 (critical-reviewer: VF-013 already removed CLI package; scope reduced)
-status: planned
+completed_at: 2026-05-08
+status: completed
 release_target: v0.25.0-beta.1 (end of May 2026)
 supersedes:
   - VI-001-cli-enhancement (work-items, CANCELLED)
@@ -21,6 +23,31 @@ builds_on:
   - VF-014-llm-optimized-documentation (LLM docs infra exists)
   - DX-002-repomix-ai-quick-start (repomix.config.json done)
 ```
+
+## ✅ Resolved (2026-05-08)
+
+Scope shrunk dramatically after critical-reviewer fact-check:
+
+- `packages/cli/` already removed (REL-002 cleanup)
+- 11 of 21 packages already had LLMGUIDE.md
+- Only 9 packages needed new LLMGUIDE.md (`cli` was the 10th but is already
+  gone)
+
+Done in this task:
+
+- Removed dead scripts from root `package.json`: `playground*`, `cli`,
+  `cli:generate`, `cli:domain`, `docs`, `docs:generate`, `docs:bundle`,
+  `docs:find`, `docs:validate` (9 dead scripts + 4 comment dividers)
+- Wrote LLMGUIDE.md for: `utils`, `logging`, `di`, `domain-primitives`,
+  `resilience`, `messaging`, `projections`, `domain-services`, `enterprise`
+- Added `LLMGUIDE.md` to `files` array in 9 `package.json` files
+- README + QUICK_START.md cleanup deferred to **REL-006** (its own task)
+
+Verification:
+
+- pnpm type-check → 20 projects clean
+- pnpm test:ci → 21 projects, all passing
+- LLMGUIDE.md present in 21/21 packages
 
 ## ✅ Already Done (do NOT repeat)
 
@@ -41,10 +68,9 @@ builds_on:
 - Remove dead scripts from root `package.json`: `cli`, `cli:generate`,
   `cli:domain`, `docs:generate`, `docs:bundle`, `docs:find`, `docs:validate`,
   `playground`, `playground:fresh`, `playground:new` (all CLI-dependent)
-- Generate `LLMGUIDE.md` for the 10 missing packages: `di`,
-  `domain-primitives`, `domain-services`, `enterprise`, `logging`,
-  `messaging`, `projections`, `resilience`, `utils` (use
-  `scripts/jsdoc-generator.js`)
+- Generate `LLMGUIDE.md` for the 10 missing packages: `di`, `domain-primitives`,
+  `domain-services`, `enterprise`, `logging`, `messaging`, `projections`,
+  `resilience`, `utils` (use `scripts/jsdoc-generator.js`)
 - Remove all references to `npx @vytches/ddd init-context` from README +
   QUICK_START.md (coupled with REL-006)
 
@@ -61,9 +87,9 @@ patterns:
 
 ## Why This Task Exists
 
-User decision (2026-05-08): library does **not** ship a CLI. Developer onboarding
-relies on AI-assisted code generation (Claude Code, Cursor, Copilot) reading
-LLM-optimized context files instead of running scaffold commands.
+User decision (2026-05-08): library does **not** ship a CLI. Developer
+onboarding relies on AI-assisted code generation (Claude Code, Cursor, Copilot)
+reading LLM-optimized context files instead of running scaffold commands.
 
 We already have the infrastructure:
 
@@ -74,8 +100,8 @@ We already have the infrastructure:
   `enterprise/src/index.ts`
 - 9 packages already ship `LLMGUIDE.md`
 
-What is missing: explicit removal of CLI surface, single `pnpm llm:bundle`
-entry point, and consistency across all 21 packages.
+What is missing: explicit removal of CLI surface, single `pnpm llm:bundle` entry
+point, and consistency across all 21 packages.
 
 ## Current State
 
@@ -92,8 +118,8 @@ entry point, and consistency across all 21 packages.
   `llm:bundle`, `llm:context`, `llm:verify` added
 - `LLMGUIDE.md` present in all 21 packages (auto-generated from JSDoc)
 - README + QUICK_START purged of any `npx @vytches/ddd ...` mention
-- New section in README: "AI-Assisted Setup" — pasting context into
-  CLAUDE.md / .cursorrules / GitHub Copilot Workspaces
+- New section in README: "AI-Assisted Setup" — pasting context into CLAUDE.md /
+  .cursorrules / GitHub Copilot Workspaces
 
 ## Acceptance Criteria
 
@@ -123,6 +149,6 @@ entry point, and consistency across all 21 packages.
 
 ## Notes
 
-CLI sunset is a hard decision — communicate clearly in beta release notes.
-The library is now positioned as: "DDD building blocks + LLM context = AI
-generates your code". This differentiates @vytches/ddd from competing libs.
+CLI sunset is a hard decision — communicate clearly in beta release notes. The
+library is now positioned as: "DDD building blocks + LLM context = AI generates
+your code". This differentiates @vytches/ddd from competing libs.
