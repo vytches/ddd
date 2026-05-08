@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-logging public API surface > exports the documented set of symbols 1`] = `
+[
+  "AggregateLoggingMixin",
+  "ConsoleProvider",
+  "ContextDetector",
+  "DataMasker",
+  "DefaultLogContextBuilder",
+  "DefaultLogEventBuilder",
+  "DefaultLogger",
+  "EnhancedLoggingMiddleware",
+  "LOG_LEVELS",
+  "LogCQRS",
+  "LogCommands",
+  "LogDomainEvents",
+  "LogQueries",
+  "LogStateChanges",
+  "Logger",
+  "isLogLevelEnabled",
+  "parseLogLevel",
+]
+`;

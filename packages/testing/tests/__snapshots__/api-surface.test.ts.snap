@@ -1,0 +1,32 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-testing public API surface > exports the documented set of symbols 1`] = `
+[
+  "AIEnhancedSeeder",
+  "AggregateFactory",
+  "AggregateSeeder",
+  "DomainSeeder",
+  "EntityIdGenerator",
+  "EventSourcedSeeder",
+  "GWTAssertionError",
+  "GeographicSeeder",
+  "ScenarioSeeder",
+  "SimpleTestHarness",
+  "StreamingSeeder",
+  "Test",
+  "TestClock",
+  "TestHarness",
+  "TestResourceBuilder",
+  "TimeScenarioBuilder",
+  "ValueObjectBuilder",
+  "eventArraysMatch",
+  "eventsMatch",
+  "expectError",
+  "expectSuccess",
+  "matching",
+  "safeRun",
+  "safeRunTest",
+  "safeRunWithTimeout",
+  "withTestClock",
+]
+`;

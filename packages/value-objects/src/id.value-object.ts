@@ -6,6 +6,38 @@ import {
 import { InvalidParameterError, MissingValueError } from '@vytches/ddd-domain-primitives';
 import { LibUtils, Result } from '@vytches/ddd-utils';
 
+/**
+ * Tracks deprecation warnings so each deprecated method warns at most once
+ * per process (otherwise tight loops would flood logs).
+ *
+ * @internal
+ */
+const _entityIdFactoryWarned = new Set<string>();
+
+/**
+ * Emit a one-time deprecation warning for an EntityIdFactory call site.
+ *
+ * Why a runtime warning (not just JSDoc): TypeScript's `@deprecated` is a
+ * compile-time hint — consumers using `tsc` without `--strict` or those who
+ * ignore IDE squiggles never see it. A console.warn at first call ensures
+ * the message reaches everyone running the code.
+ *
+ * REL-005 (2026-05-08): EntityIdFactory will be removed in v1.0.0. Until
+ * then this warning fires once per method per process.
+ *
+ * @internal
+ */
+function warnEntityIdFactoryDeprecation(method: string, replacement: string): void {
+  if (_entityIdFactoryWarned.has(method)) return;
+  _entityIdFactoryWarned.add(method);
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[@vytches/ddd-value-objects] EntityIdFactory.${method}() is deprecated and will be removed in v1.0.0. ` +
+      `Use ${replacement} instead. ` +
+      `See https://github.com/vytches/ddd/blob/main/CHANGELOG.md for migration details.`
+  );
+}
+
 export class EntityId<T = string> extends BaseEntityId<T> {
   constructor(value: T, type: IdType) {
     super(value, type);
@@ -174,18 +206,20 @@ export class EntityId<T = string> extends BaseEntityId<T> {
  */
 export class EntityIdFactory implements IEntityIdFactory {
   /**
-   * @deprecated Use EntityId.create() instead
+   * @deprecated Use EntityId.create() instead. Will be removed in v1.0.0.
    */
   static createWithRandomUUID(): EntityId<string> {
+    warnEntityIdFactoryDeprecation('createWithRandomUUID', 'EntityId.create()');
     return EntityId.create();
   }
 
   /**
-   * @deprecated Use EntityId.fromUUID() instead
+   * @deprecated Use EntityId.fromUUID() instead. Will be removed in v1.0.0.
    * @throws {MissingValueError} if value is empty
    * @throws {InvalidParameterError} if value is empty
    */
   static fromUUID(value: string): EntityId<string> {
+    warnEntityIdFactoryDeprecation('fromUUID', 'EntityId.fromUUID()');
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
     }
@@ -198,10 +232,11 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
-   * @deprecated Use EntityId.fromInteger() instead
+   * @deprecated Use EntityId.fromInteger() instead. Will be removed in v1.0.0.
    * @throws {InvalidParameterError} if value is empty
    */
   static fromInteger(value: number): EntityId<string> {
+    warnEntityIdFactoryDeprecation('fromInteger', 'EntityId.fromInteger()');
     if (!LibUtils.isValidInteger(value)) {
       throw InvalidParameterError.withParameter('entity identifier must be a non-negative integer');
     }
@@ -210,10 +245,11 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
-   * @deprecated Use EntityId.fromBigInt() instead
+   * @deprecated Use EntityId.fromBigInt() instead. Will be removed in v1.0.0.
    * @throws {InvalidParameterError} if value is empty
    */
   static fromBigInt(value: string | bigint): EntityId<string> {
+    warnEntityIdFactoryDeprecation('fromBigInt', 'EntityId.fromBigInt()');
     const stringValue = LibUtils.normalizeIdToString(value);
 
     if (!LibUtils.isValidBigInt(stringValue)) {
@@ -224,11 +260,12 @@ export class EntityIdFactory implements IEntityIdFactory {
   }
 
   /**
-   * @deprecated Use EntityId.fromText() instead
+   * @deprecated Use EntityId.fromText() instead. Will be removed in v1.0.0.
    * @throws {MissingValueError} if value is empty
    * @throws {InvalidParameterError} if value is empty
    */
   static fromText(value: string): EntityId<string> {
+    warnEntityIdFactoryDeprecation('fromText', 'EntityId.fromText()');
     if (!LibUtils.hasValue(value)) {
       throw MissingValueError.withValue('entity identifier');
     }

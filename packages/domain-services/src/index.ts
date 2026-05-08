@@ -35,9 +35,7 @@ export {
   ServiceNotFoundError,
 } from './service.errors';
 
-// For advanced usage - full exports
-export * from './base-domain-service';
-export * from './domain-service.decorator';
-export * from './domain-service.interface';
-// Legacy implementations removed - use VytchesDDD DI system instead
-export * from './service.errors';
+// REL-005 (2026-05-08): Removed redundant `export *` from base-domain-service,
+// domain-service.decorator, domain-service.interface, service.errors —
+// every symbol they exposed is already named explicitly above. The
+// `tests/api-surface.test.ts` snapshot guards against silent additions.

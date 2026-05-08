@@ -41,7 +41,18 @@ export type {
 
 export {
   createDomainEvent,
+  /**
+   * @internal Framework-only metadata symbols.
+   *
+   * Re-exported here so cross-package framework code (events decorator,
+   * nestjs explorer service) can resolve them via the standard
+   * `@vytches/ddd-contracts` import path. They are NOT part of the public
+   * consumer API — REL-005 removed them from the curated `@vytches/ddd`
+   * meta-package barrel. Consumers should never import these symbols
+   * directly; they may be removed or reshaped without semver protection.
+   */
   EVENT_HANDLER_METADATA,
+  /** @internal — see EVENT_HANDLER_METADATA */
   EVENT_HANDLER_OPTIONS,
   IEnhancedEventDispatcher,
   IEventBus,

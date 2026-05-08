@@ -1,0 +1,8 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-repositories public API surface > exports the documented set of symbols 1`] = `
+[
+  "IBaseRepository",
+  "VersionError",
+]
+`;

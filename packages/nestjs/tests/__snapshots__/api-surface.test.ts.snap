@@ -1,0 +1,11 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-nestjs public API surface > exports the documented set of symbols 1`] = `
+[
+  "ACLAdapterFor",
+  "ACL_REGISTRY",
+  "NestJSContainerAdapter",
+  "VytchesDDDModule",
+  "VytchesExplorerService",
+]
+`;

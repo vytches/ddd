@@ -1,0 +1,10 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-utils public API surface > exports the documented set of symbols 1`] = `
+[
+  "LibUtils",
+  "MiddlewarePipelineExecutor",
+  "Result",
+  "safeRun",
+]
+`;

@@ -1,0 +1,24 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-cqrs public API surface > exports the documented set of symbols 1`] = `
+[
+  "CQRSConfiguration",
+  "CQRSConfigurationError",
+  "CQRSDiscoveryPlugin",
+  "CQRSExecutionContext",
+  "CQRSModule",
+  "CommandBus",
+  "CommandExecutionError",
+  "CommandHandler",
+  "CqrsValidationError",
+  "EnhancedCommandBus",
+  "EnhancedQueryBus",
+  "HandlerNotFoundError",
+  "ICommandBus",
+  "IQueryBus",
+  "LoggingMiddleware",
+  "QueryBus",
+  "QueryExecutionError",
+  "QueryHandler",
+]
+`;

@@ -1,0 +1,20 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-di public API surface > exports the documented set of symbols 1`] = `
+[
+  "BaseContainerAdapter",
+  "CircularDependencyError",
+  "ContainerBuilder",
+  "ContainerConfigurationError",
+  "ContainerDisposedError",
+  "DIError",
+  "HandlerDiscoveryRegistry",
+  "InvalidRegistrationError",
+  "ServiceAlreadyRegisteredError",
+  "ServiceLifetime",
+  "ServiceLocator",
+  "ServiceNotFoundError",
+  "SimpleContainer",
+  "VytchesDDD",
+]
+`;

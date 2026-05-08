@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-events public API surface > exports the documented set of symbols 1`] = `
+[
+  "BaseEventBus",
+  "CUSTOM_MIDDLEWARE_SYMBOL",
+  "DomainEvent",
+  "DomainToIntegrationTransformer",
+  "EventDiscoveryPlugin",
+  "EventHandler",
+  "IntegrationEvent",
+  "IntegrationEventProcessor",
+  "UnifiedEventBus",
+  "UniversalEventDispatcher",
+  "eventDiscoveryPlugin",
+]
+`;

@@ -1,0 +1,13 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-value-objects public API surface > exports the documented set of symbols 1`] = `
+[
+  "BaseValueObject",
+  "EntityId",
+  "EntityIdFactory",
+  "brandedIdFromText",
+  "brandedIdFromUUID",
+  "createBrandedId",
+  "newBrandedId",
+]
+`;
