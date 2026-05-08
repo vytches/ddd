@@ -21,11 +21,19 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private _domainEvents: IDomainEvent[] = [];
   private _eventHandlers = new Map<string, IAggregateEventHandler>();
   private _capabilities = new CapabilityRegistry();
+  /**
+   * REL-007 (2026-05-08): optional advisory limit on uncommitted events.
+   * Undefined = no limit (default, backward-compat). When set, `apply()`
+   * throws if pushing would exceed the limit — guards against runaway
+   * loops or malicious replay payloads.
+   */
+  private readonly _maxEvents: number | undefined;
 
   constructor(params: IAggregateConstructorParams<TId>) {
     this._id = params.id;
     this._version = params.version || 0;
     this._initialVersion = params.version || 0;
+    this._maxEvents = params.maxEvents;
   }
 
   // ==========================================
@@ -142,6 +150,17 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
       event,
       { metadata: enrichedMetadata }
     );
+
+    // REL-007 (2026-05-08): enforce optional maxEvents advisory limit
+    // BEFORE push, so the aggregate's invariants are preserved on failure.
+    if (this._maxEvents !== undefined && this._domainEvents.length >= this._maxEvents) {
+      throw new Error(
+        `Aggregate ${this.constructor.name} (id=${this._id.toString()}) exceeded ` +
+          `maxEvents limit of ${this._maxEvents}. This usually indicates a runaway ` +
+          `loop or replay of a corrupted event stream. Increase maxEvents in the ` +
+          `aggregate constructor params if the limit is too restrictive for your domain.`
+      );
+    }
 
     this._domainEvents.push(enrichedEvent);
     this.handleEvent(enrichedEvent);

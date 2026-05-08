@@ -48,18 +48,6 @@
     "@vytches/ddd-domain-primitives": "workspace:*",
     "@vytches/ddd-utils": "workspace:*"
   },
-  "peerDependencies": {
-    "@anthropic-ai/sdk": ">=0.24.0",
-    "openai": ">=4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "openai": {
-      "optional": true
-    },
-    "@anthropic-ai/sdk": {
-      "optional": true
-    }
-  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vite": "^7.3.2",
