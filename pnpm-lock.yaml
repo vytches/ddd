@@ -961,6 +961,16 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@20.19.1)(@vitest/ui@4.0.18)(tsx@4.20.3)
 
+  tools/ddd-lint:
+    dependencies:
+      typescript:
+        specifier: ^5.8.0
+        version: 5.8.3
+    devDependencies:
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@4.0.18)(tsx@4.20.3)
+
 packages:
 
   /@actions/core@3.0.0:
@@ -5597,7 +5607,7 @@ packages:
     resolution: {integrity: sha512-tVL6uJgoUdi6icpxmdrn5YNo3g3Dxv+IHJBr0GXHaEdTcw3F+cPKnsXFhli6nO+f/6SDKPHEK1UN+k+TQv0Ehg==}
     peerDependencies:
       msw: ^2.4.9
-      vite: '>=7.3.2'
+      vite: '>=5.4.21'
     peerDependenciesMeta:
       msw:
         optional: true
@@ -5606,7 +5616,7 @@ packages:
     dependencies:
       '@vitest/spy': 2.1.9
       estree-walker: 3.0.3
-      magic-string: 0.30.17
+      magic-string: 0.30.21
       vite: 7.3.2(@types/node@20.19.1)(tsx@4.20.3)
     dev: true
 
@@ -5657,7 +5667,7 @@ packages:
     resolution: {integrity: sha512-oBO82rEjsxLNJincVhLhaxxZdEtV0EFHMK5Kmx5sJ6H9L183dHECjiefOAdnqpIgT5eZwT04PoggUnW88vOBNQ==}
     dependencies:
       '@vitest/pretty-format': 2.1.9
-      magic-string: 0.30.17
+      magic-string: 0.30.21
       pathe: 1.1.2
     dev: true
 
@@ -15077,7 +15087,6 @@ packages:
     resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
-    dev: true
 
   /ufo@1.6.1:
     resolution: {integrity: sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==}
@@ -15405,7 +15414,7 @@ packages:
     hasBin: true
     dependencies:
       cac: 6.7.14
-      debug: 4.4.1
+      debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 1.1.2
       vite: 7.3.2(@types/node@20.19.1)(tsx@4.20.3)

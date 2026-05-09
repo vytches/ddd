@@ -1,0 +1,20 @@
+{
+  "name": "@vytches/ddd-lint",
+  "version": "0.25.0-beta.1",
+  "private": true,
+  "description": "AST-based linter that flags the top 3 DDD anti-patterns in TypeScript code: mutable state in aggregates, thrown errors in the domain layer, and factory create() methods that don't return Result<T>.",
+  "type": "module",
+  "bin": {
+    "ddd-lint": "./bin/ddd-lint.mjs"
+  },
+  "scripts": {
+    "test": "vitest --run",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "typescript": "^5.8.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  }
+}
