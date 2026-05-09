@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-domain-primitives",
-  "version": "0.25.0-beta.1",
+  "version": "0.25.0-beta.2",
   "description": "Core domain primitives and foundational types for Domain-Driven Design",
   "type": "module",
   "main": "./dist/index.cjs",
