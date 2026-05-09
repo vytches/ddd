@@ -2,8 +2,12 @@
 export { AggregateRoot } from './core/aggregate-root';
 export { AggregateBuilder, aggregateBuilder } from './core/aggregate-root.builder';
 
-// Capabilities
-export * from './capabilities';
+// Capabilities (VP-005: explicit exports lock public surface against
+// silent additions from new files in capabilities/)
+export { AuditCapability } from './capabilities/audit-capability';
+export { EventSourcingCapability } from './capabilities/event-sourcing-capability';
+export { SnapshotCapability } from './capabilities/snapshot-capability';
+export { VersioningCapability } from './capabilities/versioning-capability';
 
 // Interfaces and utilities - explicit exports to reduce bundle size
 export type {
