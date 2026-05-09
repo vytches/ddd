@@ -2,6 +2,7 @@ packages:
   - 'packages/**'
   - 'examples/**'
   - 'tools/**'
+  - 'benchmarks'
   # REL-002: explicitly exclude Claude Code agent artifacts.
   # Agent worktrees clone the entire repo and would be picked up as duplicate
   # packages, breaking Nx project graph (see .nxignore).

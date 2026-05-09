@@ -1,0 +1,49 @@
+{
+  "version": "0.25.0-beta.1",
+  "capturedOn": "2026-05-09",
+  "node": "22.x",
+  "notes": "Captured on dev hardware (Linux 6.14, single-thread Node 22). Use as relative baseline only — absolute numbers vary by hardware. Re-capture on the same machine to compare across versions.",
+  "results": {
+    "AggregateRoot.apply() — single event": {
+      "opsPerSec": 1578919,
+      "p99Ms": 0.0015,
+      "rmePct": 0.36
+    },
+    "AggregateRoot.apply() — 100-event replay": {
+      "opsPerSec": 32103,
+      "eventsPerSec": 3210356,
+      "p99Ms": 0.0351,
+      "rmePct": 0.27
+    },
+    "BaseValueObject.equals() — equal objects": {
+      "opsPerSec": 5929420,
+      "p99Ms": 0.0002,
+      "rmePct": 0.1
+    },
+    "BaseValueObject.equals() — not equal": {
+      "opsPerSec": 6061245,
+      "p99Ms": 0.0002,
+      "rmePct": 0.11
+    },
+    "EntityId.create() — UUID generation": {
+      "opsPerSec": 8355359,
+      "p99Ms": 0.0003,
+      "rmePct": 0.09
+    },
+    "EntityId.fromUUID() — validation": {
+      "opsPerSec": 11109997,
+      "p99Ms": 0.0001,
+      "rmePct": 0.11
+    },
+    "LibUtils.isValidUUID() — predicate": {
+      "opsPerSec": 15689797,
+      "p99Ms": 0.0001,
+      "rmePct": 0.05
+    },
+    "LibUtils.deepEqual() — shallow nested": {
+      "opsPerSec": 2888579,
+      "p99Ms": 0.0005,
+      "rmePct": 0.19
+    }
+  }
+}
