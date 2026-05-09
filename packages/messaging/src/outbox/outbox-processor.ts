@@ -101,7 +101,7 @@ export class OutboxProcessor {
       return;
     }
 
-    const [result, error] = await safeRun(() =>
+    const [error, result] = await safeRun(() =>
       this.repository.getUnprocessedMessages(this.options.batchSize, this.options.priorityOrder)
     );
 

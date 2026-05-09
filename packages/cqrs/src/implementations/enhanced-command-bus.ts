@@ -157,8 +157,18 @@ export class EnhancedCommandBus extends ICommandBus {
   private setupResilience(config?: EnhancedCommandBusOptions['resilience']): void {
     const strategies: ResilienceStrategy[] = [];
 
-    // Circuit Breaker
-    if (config?.circuitBreaker?.enabled !== false) {
+    // REL-009 (2026-05-08, BREAKING): circuitBreaker + retry are now OPT-IN
+    // (was opt-out via `enabled !== false`). Retrying domain commands is
+    // unsafe by default — most command handlers are NOT idempotent, so
+    // automatic retry can cause duplicate orders, double charges, etc.
+    // Consumers who want resilience must opt in explicitly:
+    //   { resilience: { retry: { enabled: true, maxAttempts: 3 } } }
+    //
+    // Timeout remains default-on as a safety net — it does NOT affect
+    // idempotency and prevents a hung downstream from blocking the bus.
+
+    // Circuit Breaker (opt-in)
+    if (config?.circuitBreaker?.enabled === true) {
       strategies.push(
         new CircuitBreakerStrategy({
           name: 'CommandBusCircuitBreaker',
@@ -170,8 +180,8 @@ export class EnhancedCommandBus extends ICommandBus {
       );
     }
 
-    // Retry Strategy
-    if (config?.retry?.enabled !== false) {
+    // Retry Strategy (opt-in — see BREAKING note above)
+    if (config?.retry?.enabled === true) {
       strategies.push(
         new RetryStrategy({
           maxAttempts: config?.retry?.maxAttempts ?? this.maxRetries,
@@ -183,12 +193,12 @@ export class EnhancedCommandBus extends ICommandBus {
       );
     }
 
-    // Timeout Strategy
+    // Timeout Strategy (default-on, safety net)
     if (config?.timeout?.enabled !== false) {
       strategies.push(new TimeoutStrategy(config?.timeout?.timeoutMs ?? 30000));
     }
 
-    // Bulkhead Strategy
+    // Bulkhead Strategy (already opt-in)
     if (config?.bulkhead?.enabled) {
       strategies.push(
         new BulkheadStrategy({

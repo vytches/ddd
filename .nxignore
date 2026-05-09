@@ -1,0 +1,5 @@
+# Exclude Claude Code agent artifacts from Nx project graph.
+# Agent worktrees (under .claude/worktrees/) carry full repo clones with
+# duplicate package.json files, which break Nx project name uniqueness.
+# See ADR / REL-002 for context.
+.claude/

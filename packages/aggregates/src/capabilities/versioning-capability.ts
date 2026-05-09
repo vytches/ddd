@@ -3,6 +3,52 @@ import type { IVersioningCapability, IDomainEvent, IEventUpcaster } from '@vytch
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
 import { Logger } from '@vytches/ddd-logging';
 
+/**
+ * Capability that handles **event schema evolution** — when a stored event
+ * shape changes between releases, register an `IEventUpcaster` to migrate
+ * old payloads forward at replay time.
+ *
+ * Pattern: each event has an implicit version (default 1). Newer aggregate
+ * code expects newer-version payload shape. Old events from history are
+ * passed through registered upcasters in version order until they reach
+ * the current version, then the regular event handler runs.
+ *
+ * Without versioning, you must keep old event handlers around forever or
+ * write migration scripts. With versioning, code stays clean and history
+ * stays immutable.
+ *
+ * @example Adding a field with a default
+ * ```typescript
+ * import {
+ *   AggregateBuilder,
+ *   VersioningCapability,
+ * } from '@vytches/ddd-aggregates';
+ *
+ * // v1 payload had no "currency"; v2 requires it.
+ * const order = AggregateBuilder
+ *   .create({ id })
+ *   .withVersioning()
+ *   .build(Order);
+ *
+ * const versioning = order.getCapability(VersioningCapability)!;
+ * versioning.registerUpcaster('OrderCreated', 1, oldPayload => ({
+ *   ...oldPayload,
+ *   currency: 'USD',  // sane default for legacy events
+ * }));
+ * ```
+ *
+ * @example Renaming a field
+ * ```typescript
+ * versioning.registerUpcaster('CustomerUpdated', 1, oldPayload => {
+ *   const { fullName, ...rest } = oldPayload as { fullName: string };
+ *   return { ...rest, displayName: fullName };
+ * });
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class VersioningCapability
   extends Capability<'versioning'>
   implements IVersioningCapability

@@ -11,6 +11,52 @@ import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 
+/**
+ * Default `IQueryBus` implementation — routes queries to their registered
+ * handler, runs configured middleware in order, and resolves handlers either
+ * from manual registrations or from the DI container.
+ *
+ * Mirrors {@link CommandBus}: same registration paths, same middleware
+ * pipeline, same `tryExecute` Result variant. The only difference is that
+ * queries return values (`R`) whereas commands typically return `void`.
+ *
+ * Two registration paths exist; the bus tries them in this order:
+ *
+ * 1. **Manual** — `register(queryType, handler)` or
+ *    `registerFactory(queryType, () => handler)`.
+ * 2. **DI auto-discovery** — apply `@QueryHandler(MyQuery)` and the
+ *    {@link CQRSDiscoveryPlugin} wires it during bootstrap.
+ *
+ * @example Manual registration with typed result
+ * ```typescript
+ * import { QueryBus } from '@vytches/ddd-cqrs';
+ *
+ * class GetOrderById implements IQuery<Order | null> {
+ *   constructor(public id: string) {}
+ * }
+ * class GetOrderByIdHandler {
+ *   async execute(q: GetOrderById): Promise<Order | null> {
+ *     return repo.findById(q.id);
+ *   }
+ * }
+ *
+ * const bus = new QueryBus(container);
+ * bus.register(GetOrderById, new GetOrderByIdHandler());
+ * const order = await bus.execute(new GetOrderById('o-1')); // Order | null
+ * ```
+ *
+ * @example tryExecute returns Result instead of throwing
+ * ```typescript
+ * const r = await bus.tryExecute(new GetOrderById('o-1'));
+ * if (r.isSuccess) return r.value;
+ * if (r.error instanceof HandlerNotFoundError) return null;
+ * throw r.error;
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class QueryBus extends IQueryBus {
   private readonly logger = Logger.forContext('QueryBus');
   private middlewares: ICQRSMiddleware[] = [];

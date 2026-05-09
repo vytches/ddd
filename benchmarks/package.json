@@ -1,0 +1,22 @@
+{
+  "name": "@vytches/benchmarks",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Performance benchmarks for @vytches/ddd hot paths (VP-NEW-001)",
+  "type": "module",
+  "scripts": {
+    "bench": "vitest bench --run",
+    "bench:watch": "vitest bench"
+  },
+  "dependencies": {
+    "@vytches/ddd-aggregates": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-value-objects": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.0"
+  }
+}

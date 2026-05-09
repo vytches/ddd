@@ -76,6 +76,13 @@ export abstract class IBaseRepository {
     // Publish events
     await this.eventDispatcher.dispatchEventsForAggregate(aggregate);
 
+    // REL-009 (2026-05-08): mark events as committed on the aggregate so
+    // a subsequent save() does NOT re-dispatch the same events. Without this,
+    // every domain event was published once per save() call after it was
+    // raised — the bug was silent because most consumer code calls save()
+    // exactly once per command. Discovered during pre-publish API review.
+    aggregate.commit();
+
     this.logger.info('Aggregate saved successfully', {
       aggregateId,
       eventCount: events.length,

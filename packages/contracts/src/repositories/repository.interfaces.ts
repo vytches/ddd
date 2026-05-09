@@ -67,6 +67,77 @@ export interface IExtendedRepository<T extends IRepositoryEntity> extends IRepos
 }
 
 /**
+ * Batch-loading repository contract — explicit support for N+1 prevention.
+ *
+ * VP-002 (2026-05-09): consumers fetching many aggregates by id used to
+ * loop `findById(id)` per item, hitting the storage adapter once per row.
+ * This contract advertises that the implementation *can* (and should)
+ * fetch them in a single round-trip — typically via a `WHERE id IN (?)`
+ * SQL query, a Redis MGET, or a DataLoader-style batched promise.
+ *
+ * The library does NOT ship a concrete implementation (per the
+ * no-adapters principle). Instead it exposes the contract so:
+ *
+ * 1. Storage-adapter authors have a stable shape to implement.
+ * 2. Service-layer code can type-narrow to `IBatchRepository` and pick
+ *    the batched call when available, falling back to per-id fetches
+ *    otherwise.
+ *
+ * Returned arrays MUST preserve the input order and use `null` for ids
+ * that were not found — this lets callers zip the result with the input
+ * without losing the gap information.
+ *
+ * @example Implementing in a storage adapter
+ * ```typescript
+ * class PostgresOrderRepository implements IBatchRepository<Order> {
+ *   async findByIds(ids: readonly string[]): Promise<Array<Order | null>> {
+ *     const rows = await this.db.query(
+ *       'SELECT * FROM orders WHERE id = ANY($1)',
+ *       [ids]
+ *     );
+ *     const byId = new Map(rows.map(r => [r.id, this.toAggregate(r)]));
+ *     return ids.map(id => byId.get(id) ?? null);
+ *   }
+ *   async save(o: Order) { ... }
+ * }
+ * ```
+ *
+ * @example Service code that prefers batched fetch
+ * ```typescript
+ * function isBatchRepo<T extends IRepositoryEntity>(
+ *   repo: IRepository<T>
+ * ): repo is IBatchRepository<T> {
+ *   return typeof (repo as IBatchRepository<T>).findByIds === 'function';
+ * }
+ *
+ * async function loadAll<T extends IRepositoryEntity>(
+ *   repo: IRepository<T>,
+ *   ids: string[]
+ * ): Promise<Array<T | null>> {
+ *   if (isBatchRepo(repo)) return repo.findByIds(ids);
+ *   return Promise.all(ids.map(id => repo.findById?.(id) ?? Promise.resolve(null)));
+ * }
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.25.0
+ */
+export interface IBatchRepository<T extends IRepositoryEntity> extends IExtendedRepository<T> {
+  /**
+   * Fetch multiple entities by id in a single round-trip.
+   *
+   * @param ids - Identifiers to fetch. Order is preserved in the result.
+   *   The `unknown` element type matches `IRepository.findById` (typed-id
+   *   contract is the implementation's responsibility — pass a homogeneous
+   *   array of the id type your storage actually uses).
+   * @returns Array aligned 1:1 with `ids`. Missing entities are `null`,
+   *   never omitted, so `result[i]` always corresponds to `ids[i]`.
+   */
+  findByIds(ids: readonly unknown[]): Promise<Array<T | null>>;
+}
+
+/**
  * Repository provider interface for repository registry/factory pattern
  */
 export interface IRepositoryProvider {

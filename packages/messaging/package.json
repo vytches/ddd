@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-messaging",
-  "version": "0.22.5",
+  "version": "0.25.0-beta.1",
   "description": "Outbox pattern and reliable message delivery",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -15,8 +15,9 @@
   },
   "sideEffects": false,
   "files": [
-    "dist",
-    "README.md"
+    "LLMGUIDE.md",
+    "README.md",
+    "dist"
   ],
   "keywords": [
     "ddd",

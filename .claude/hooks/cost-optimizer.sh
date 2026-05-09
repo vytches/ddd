@@ -1,0 +1,1 @@
+/opt/projects/claude-patterns/hooks/cost-optimizer.sh

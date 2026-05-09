@@ -36,7 +36,14 @@ describe('EnhancedCommandBus', () => {
     };
 
     mockHandler = new TestCommandHandler();
-    enhancedCommandBus = new EnhancedCommandBus(mockContainer);
+    // REL-009 (2026-05-08): retry is now opt-in (was default-on). Tests below
+    // assert `metrics.errors === 3` which depends on retry being active with
+    // maxAttempts=3 — opt in explicitly to preserve that behavior.
+    enhancedCommandBus = new EnhancedCommandBus(mockContainer, {
+      resilience: {
+        retry: { enabled: true, maxAttempts: 3 },
+      },
+    });
   });
 
   describe('constructor', () => {

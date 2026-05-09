@@ -3,6 +3,77 @@ import { Capability } from '@vytches/ddd-contracts';
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
+/**
+ * Capability that enables snapshot creation and restoration on an aggregate
+ * — a performance optimization for event-sourced aggregates with long
+ * event histories. Instead of replaying all events to reconstitute state,
+ * load a recent snapshot and replay only events after it.
+ *
+ * Attach via {@link AggregateBuilder} (preferred) or directly with
+ * `aggregate.addCapability(new SnapshotCapability())`. The capability
+ * stores its state inside the aggregate's `CapabilityRegistry` — there is
+ * no separate persistence; *you* serialize/deserialize the aggregate's
+ * fields via callbacks.
+ *
+ * Two operations:
+ *
+ * - {@link createSnapshot} — produce an `IAggregateSnapshot<TState, TMeta>`
+ *   capturing version, type, id, and a state slice you choose. Hand off to
+ *   your snapshot store (database, blob, file).
+ * - {@link restoreFromSnapshot} — load a snapshot, validate id/type match,
+ *   and restore the aggregate's version + reset uncommitted events. The
+ *   `deserializer` callback is responsible for putting state back into
+ *   the aggregate's private fields.
+ *
+ * @example Creating a snapshot from inside the aggregate
+ * ```typescript
+ * import {
+ *   AggregateRoot,
+ *   AggregateBuilder,
+ *   SnapshotCapability,
+ * } from '@vytches/ddd-aggregates';
+ *
+ * interface OrderState { amount: number; customerId: string; }
+ *
+ * class Order extends AggregateRoot<string> {
+ *   private amount = 0;
+ *   private customerId = '';
+ *
+ *   takeSnapshot(): IAggregateSnapshot<OrderState> {
+ *     const cap = this.getCapability(SnapshotCapability)!;
+ *     return cap.createSnapshot<OrderState>(() => ({
+ *       amount: this.amount,
+ *       customerId: this.customerId,
+ *     }));
+ *   }
+ *
+ *   restore(snap: IAggregateSnapshot<OrderState>): void {
+ *     const cap = this.getCapability(SnapshotCapability)!;
+ *     cap.restoreFromSnapshot(snap, state => {
+ *       this.amount = state.amount;
+ *       this.customerId = state.customerId;
+ *     });
+ *   }
+ * }
+ *
+ * const order = AggregateBuilder
+ *   .create({ id: EntityId.create() })
+ *   .withSnapshots()
+ *   .build(Order);
+ *
+ * const snap = order.takeSnapshot();
+ * await snapshotStore.save(snap);
+ * ```
+ *
+ * @remarks
+ * `restoreFromSnapshot` calls the aggregate's `_internal_setState` —
+ * this is intentional and required, but means snapshots must be the
+ * very first restoration step before any subsequent event replay.
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class SnapshotCapability<TState = unknown, TMeta = unknown>
   extends Capability<'snapshot'>
   implements ISnapshotCapability<TState, TMeta>

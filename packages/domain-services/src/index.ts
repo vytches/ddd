@@ -6,6 +6,11 @@ export {
   UnitOfWorkAwareDomainService,
 } from './base-domain-service';
 
+// PlainDomainService — bare base for stateless domain operations,
+// without DI / event-bus / unit-of-work infrastructure. Added in VF-CANON-001
+// to close the canonical Evans/Vernon gap of a "minimal Service base".
+export { PlainDomainService } from './plain-domain-service';
+
 export {
   DomainService,
   getDIDomainServiceMetadata,
@@ -35,9 +40,7 @@ export {
   ServiceNotFoundError,
 } from './service.errors';
 
-// For advanced usage - full exports
-export * from './base-domain-service';
-export * from './domain-service.decorator';
-export * from './domain-service.interface';
-// Legacy implementations removed - use VytchesDDD DI system instead
-export * from './service.errors';
+// REL-005 (2026-05-08): Removed redundant `export *` from base-domain-service,
+// domain-service.decorator, domain-service.interface, service.errors —
+// every symbol they exposed is already named explicitly above. The
+// `tests/api-surface.test.ts` snapshot guards against silent additions.
