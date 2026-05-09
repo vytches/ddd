@@ -61,6 +61,24 @@ interface EventHandler {
 export class AutoDiscoveryService {
   private readonly options: Required<AutoDiscoveryOptions>;
 
+  /**
+   * VP-006 (2026-05-09): track classes already processed in this discovery
+   * cycle. Multi-context apps (juz-ide-api: 10+ bounded contexts) call
+   * `discover()` per context — without memoization, the same shared base
+   * class gets processed N times, each pass redoing the metadata scan.
+   *
+   * WeakSet so unloaded modules are GC'd. Reset only when explicitly
+   * requested via `reset()`.
+   *
+   * **Assumption**: one `AutoDiscoveryService` instance has ONE configured
+   * `options.contexts` for its entire lifetime. If you need to discover
+   * the same module under different context filters, instantiate a fresh
+   * `AutoDiscoveryService` per filter — do NOT mutate `options` and call
+   * `discover()` again, because the WeakSet will silently skip classes
+   * that the prior filter already saw.
+   */
+  private processedTargets = new WeakSet<ClassConstructor>();
+
   constructor(
     private readonly adapter: NestJSContainerAdapter,
     options: Partial<AutoDiscoveryOptions> = {}
@@ -71,6 +89,15 @@ export class AutoDiscoveryService {
       contexts: options.contexts || [],
       exclude: options.exclude || DEFAULT_EXCLUDE_PATTERNS,
     };
+  }
+
+  /**
+   * Reset the processed-targets memoization cache. Call between independent
+   * discovery cycles (e.g. test isolation, hot-reload), not in production.
+   */
+  reset(): void {
+    // WeakSet has no .clear() — replace via fresh instance.
+    this.processedTargets = new WeakSet();
   }
 
   /**
@@ -110,41 +137,84 @@ export class AutoDiscoveryService {
   }
 
   /**
-   * Process a single class for DDD decorators
+   * Process a single class for DDD decorators (VP-006: single-pass scan).
+   *
+   * Old flow: 5 `Reflect.getMetadata` calls per provider. With 200+
+   * handlers in a typical bounded-context app, that's 1000+ prototype-
+   * chain lookups during cold start, even when most classes carry no
+   * DDD metadata at all.
+   *
+   * New flow:
+   * 1. Memoization: WeakSet short-circuits if class already processed.
+   * 2. Single-pass: read all metadata keys once via `Reflect.getMetadataKeys`.
+   *    Skip the entire class if no DDD keys are present (the common case).
+   * 3. Targeted lookups: only fetch metadata for keys we know exist.
    */
   private async processClass(target: ClassConstructor): Promise<void> {
     if (!target || typeof target !== 'function') {
       return;
     }
 
-    // Check for @DomainService
-    const domainServiceMetadata = Reflect.getMetadata(DOMAIN_SERVICE_METADATA, target);
-    if (domainServiceMetadata) {
-      await this.registerDomainService(target, domainServiceMetadata);
+    // Memoization — skip already-processed classes (multi-context discovery).
+    if (this.processedTargets.has(target)) {
+      return;
     }
 
-    // Check for @CommandHandler
-    const commandHandlerMetadata = Reflect.getMetadata(COMMAND_HANDLER_METADATA, target);
-    if (commandHandlerMetadata) {
-      await this.registerCommandHandler(target, commandHandlerMetadata);
+    // Single-pass key scan. `Reflect.getMetadataKeys` walks the prototype
+    // chain ONCE and returns all defined keys; we then filter to the 5 we
+    // care about. For classes without DDD decorators (most), this is the
+    // entire cost.
+    const keys = Reflect.getMetadataKeys(target);
+    if (!keys || keys.length === 0) {
+      this.processedTargets.add(target);
+      return;
     }
 
-    // Check for @QueryHandler
-    const queryHandlerMetadata = Reflect.getMetadata(QUERY_HANDLER_METADATA, target);
-    if (queryHandlerMetadata) {
-      await this.registerQueryHandler(target, queryHandlerMetadata);
+    // Bitmap of which DDD decorators are present — avoids 5 hasMetadata
+    // calls and gives us a fast exit when none are present.
+    let hasDomain = false;
+    let hasCommand = false;
+    let hasQuery = false;
+    let hasEvent = false;
+    let hasSaga = false;
+
+    for (const key of keys) {
+      if (key === DOMAIN_SERVICE_METADATA) hasDomain = true;
+      else if (key === COMMAND_HANDLER_METADATA) hasCommand = true;
+      else if (key === QUERY_HANDLER_METADATA) hasQuery = true;
+      else if (key === EVENT_HANDLER_METADATA) hasEvent = true;
+      else if (key === SAGA_METADATA) hasSaga = true;
     }
 
-    // Check for @EventHandler
-    const eventHandlerMetadata = Reflect.getMetadata(EVENT_HANDLER_METADATA, target);
-    if (eventHandlerMetadata) {
-      await this.registerEventHandler(target, eventHandlerMetadata);
+    // Mark processed even if no DDD metadata, so future discoveries skip
+    // the keys scan entirely.
+    this.processedTargets.add(target);
+
+    if (!hasDomain && !hasCommand && !hasQuery && !hasEvent && !hasSaga) {
+      return;
     }
 
-    // Check for @Saga
-    const sagaMetadata = Reflect.getMetadata(SAGA_METADATA, target);
-    if (sagaMetadata) {
-      await this.registerSaga(target, sagaMetadata);
+    // Fetch + register only for keys we know exist. Maintains exact same
+    // execution order as the original 5-call sequence for behavior parity.
+    if (hasDomain) {
+      const md = Reflect.getMetadata(DOMAIN_SERVICE_METADATA, target);
+      if (md) await this.registerDomainService(target, md);
+    }
+    if (hasCommand) {
+      const md = Reflect.getMetadata(COMMAND_HANDLER_METADATA, target);
+      if (md) await this.registerCommandHandler(target, md);
+    }
+    if (hasQuery) {
+      const md = Reflect.getMetadata(QUERY_HANDLER_METADATA, target);
+      if (md) await this.registerQueryHandler(target, md);
+    }
+    if (hasEvent) {
+      const md = Reflect.getMetadata(EVENT_HANDLER_METADATA, target);
+      if (md) await this.registerEventHandler(target, md);
+    }
+    if (hasSaga) {
+      const md = Reflect.getMetadata(SAGA_METADATA, target);
+      if (md) await this.registerSaga(target, md);
     }
   }
 
