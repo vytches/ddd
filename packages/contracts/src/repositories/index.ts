@@ -6,6 +6,7 @@ export type {
   IRepositoryEntity,
   IRepository,
   IExtendedRepository,
+  IBatchRepository,
   IRepositoryProvider,
   IUnitOfWork,
   IQueryRepository,

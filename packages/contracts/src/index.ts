@@ -118,6 +118,7 @@ export type {
 
 // Repositories
 export type {
+  IBatchRepository,
   ICQRSRepository,
   IExtendedRepository,
   IQueryRepository,

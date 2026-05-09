@@ -44,23 +44,24 @@ if (result.isFailure) {
 
 ## Key API
 
-| Export                                                           | Description                                                                     |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `Specification.create<T>(predicate)`                             | Create inline spec from lambda — primary pattern                                |
-| `Specification.and<T>(...specs)`                                 | Combine multiple specs with AND (static, variadic)                              |
-| `Specification.or<T>(...specs)`                                  | Combine multiple specs with OR (static, variadic)                               |
-| `Specification.not<T>(spec)`                                     | Negate a spec                                                                   |
-| `Specification.propertyEquals<T>(key, value)`                    | Property equality spec                                                          |
-| `Specification.propertyIn<T>(key, values[])`                     | Property membership spec                                                        |
-| `Specification.propertyBetween<T>(key, min, max)`                | Numeric range spec                                                              |
-| `Specification.alwaysTrue<T>()`                                  | Unconditionally satisfied                                                       |
-| `Specification.alwaysFalse<T>()`                                 | Never satisfied                                                                 |
-| `CompositeSpecification<T>`                                      | Base class for class-based specs; exposes `.and()`, `.or()`, `.not()`           |
-| `AsyncCompositeSpecification<T>`                                 | Async base class with optional `name`, `description`, and `explainFailureAsync` |
-| `AsyncCompositeSpecification.create<T>(predicate, name?, desc?)` | Inline async spec                                                               |
-| `BusinessRuleValidator<T>`                                       | Fluent validator; returns `Result<T, ValidationErrors>`                         |
-| `BusinessRuleValidator.fromSpecification<T>(spec, message)`      | Validator from a single spec                                                    |
-| `ValidationError` / `ValidationErrors`                           | Error types with `property`, `message`, `context`                               |
+| Export                                                           | Description                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Specification.create<T>(predicate)`                             | Create inline spec from lambda — primary pattern                                                                                                                                                                                             |
+| `Specification.and<T>(...specs)`                                 | Combine multiple specs with AND (static, variadic)                                                                                                                                                                                           |
+| `Specification.or<T>(...specs)`                                  | Combine multiple specs with OR (static, variadic)                                                                                                                                                                                            |
+| `Specification.not<T>(spec)`                                     | Negate a spec                                                                                                                                                                                                                                |
+| `Specification.propertyEquals<T>(key, value)`                    | Property equality spec                                                                                                                                                                                                                       |
+| `Specification.propertyIn<T>(key, values[])`                     | Property membership spec                                                                                                                                                                                                                     |
+| `Specification.propertyBetween<T>(key, min, max)`                | Numeric range spec                                                                                                                                                                                                                           |
+| `Specification.alwaysTrue<T>()`                                  | Unconditionally satisfied                                                                                                                                                                                                                    |
+| `Specification.alwaysFalse<T>()`                                 | Never satisfied                                                                                                                                                                                                                              |
+| `CompositeSpecification<T>`                                      | Base class for class-based specs; exposes `.and()`, `.or()`, `.not()`                                                                                                                                                                        |
+| `MemoizedSpecification<T>`                                       | **Per-candidate caching** (VP-002) — wrap any spec; `WeakMap<T, boolean>` cache means repeated `isSatisfiedBy(sameCandidate)` runs the inner spec exactly once. `invalidate(c)` evicts manually. Use only for pure specs (no external state) |
+| `AsyncCompositeSpecification<T>`                                 | Async base class with optional `name`, `description`, and `explainFailureAsync`                                                                                                                                                              |
+| `AsyncCompositeSpecification.create<T>(predicate, name?, desc?)` | Inline async spec                                                                                                                                                                                                                            |
+| `BusinessRuleValidator<T>`                                       | Fluent validator; returns `Result<T, ValidationErrors>`                                                                                                                                                                                      |
+| `BusinessRuleValidator.fromSpecification<T>(spec, message)`      | Validator from a single spec                                                                                                                                                                                                                 |
+| `ValidationError` / `ValidationErrors`                           | Error types with `property`, `message`, `context`                                                                                                                                                                                            |
 
 ## Patterns
 

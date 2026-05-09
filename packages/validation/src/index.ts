@@ -3,6 +3,7 @@ export {
   Specification,
   CompositeSpecification,
   AsyncCompositeSpecification,
+  MemoizedSpecification,
   NotSpecification,
   AndSpecification,
   OrSpecification,
