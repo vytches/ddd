@@ -11,9 +11,11 @@ type: feature
 priority: high
 complexity: medium
 estimated_time: 16h
+actual_time: ~2h so far (pre-release scope + post-release PBT/lifecycle)
 created_by: agent (testing-excellence 2026-05-08)
 created_at: 2026-05-08
-status: planned
+updated_at: 2026-05-09
+status: in_progress
 release_target: v0.25.0-beta.1 (partial) + post-v0.25 (full)
 ```
 
@@ -60,12 +62,48 @@ specific findings:
 
 ## Post-release scope (v0.26+)
 
-- [ ] Property-based tests via fast-check for ValueObject equality / hashCode
-      invariants (5 packages: value-objects, domain-primitives)
-- [ ] Aggregate lifecycle / snapshotting / capability tests
-- [ ] Outbox sequence integration tests in messaging
+- [x] Property-based tests via fast-check for ValueObject equality / hashCode
+      invariants — DONE 2026-05-09 (see Partial delivery below)
+- [x] Aggregate lifecycle / snapshotting / capability tests — DONE 2026-05-09
+- [x] Outbox sequence integration tests in messaging — DONE 2026-05-09
 - [ ] Migrate test naming to GWT for core DDD packages (aggregates,
       value-objects, events) — opportunistically during fix work
+- [ ] Property-based tests for additional VO types beyond `BaseValueObject` /
+      `EntityId` (Money, DateRange, etc. — once user demand surfaces)
+- [ ] Coverage ratio targets: aggregates ≥ 0.6, domain-primitives ≥ 0.5,
+      messaging outbox ≥ 4 integration tests — partially met
+
+## Partial delivery (2026-05-09)
+
+Shipped on `develop` (commit `4e16c7f6`):
+
+- **fast-check 4.7.0** added as workspace devDependency
+- **EntityId PBT** — 11 algebraic invariant properties (reflexivity, symmetry,
+  transitivity, type discrimination, serialization round-trip, factory
+  invariants) in `packages/contracts/tests/domain/entity-id.properties.test.ts`
+- **BaseValueObject PBT** — 14 properties (equality algebra, null-safety,
+  immutability via deep-freeze, serialization) in
+  `packages/value-objects/tests/base-value-object.properties.test.ts`
+- **AggregateRoot lifecycle suite** — 25 cases covering apply() invariants,
+  commit() semantics, loadFromHistory reconstitution, maxEvents (REL-007) guard,
+  capability composition (Audit + Snapshot + Versioning together)
+- **OutboxProcessor sequence tests** — 11 cases covering happy path, priority
+  ordering, retry/failure path, middleware pipeline, short-circuit, batch size,
+  start/stop lifecycle
+- **Bug fix** — `outbox-processor.ts:104` had `[result, error]` destructure but
+  `safeRun` returns `[error, result]`. Caused all `getUnprocessedMessages`
+  results to be silently treated as errors, breaking outbox processing globally.
+  Caught by the new sequence tests and fixed in the same commit.
+
+Test counts (delta):
+
+- aggregates: 39 → 64 (ratio 0.27 → 1.5+)
+- contracts: 91 → 102
+- value-objects: 55 → 69
+- messaging: 21 → 32
+
+Verification: testing-excellence agent — APPROVE_WITH_FIXES, all 3 applied
+(safeRun pattern enforced in PBT, fragile getVersion() assertion removed).
 
 ## Acceptance Criteria
 
