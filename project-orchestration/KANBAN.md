@@ -1,8 +1,25 @@
 # Kanban — @vytches/ddd v0.25.0-beta.1
 
 _Sequential execution list. Claude Code 24/7 — bottleneck is dependencies, not
-hours._ _Created 2026-05-08. Target: `npm publish @vytches/ddd@0.25.0-beta.1`._
-_Source roadmap: [ROADMAP-RELEASE-2026-05.md](./ROADMAP-RELEASE-2026-05.md)_
+hours._ _Created 2026-05-08. Updated 2026-05-09: code-side work complete,
+publishing parked for maintainer time._ _Source roadmap:
+[ROADMAP-RELEASE-2026-05.md](./ROADMAP-RELEASE-2026-05.md)_ _Handoff doc:
+[`/RELEASE-READINESS.md`](../RELEASE-READINESS.md)_
+
+---
+
+## Status (2026-05-09)
+
+✅ **17 of 24 steps complete** — all code-side work done in ~16h (vs 119h
+estimated). Block 1, 2, 3, 4, and Block 5 step 18 (REL-004 version unification)
+all merged to develop.
+
+⏸ **7 steps parked** — REL-003 (publishConfig, code-side but pointless without
+npm setup), REL-011 (GH→npm migration plan), juz-ide-api smoke test, CI dry-run,
+publish, announce. All require maintainer manual npmjs.com setup.
+
+**Resume from `/RELEASE-READINESS.md` when ready to publish.** That doc has the
+resumption checklist, repo state snapshot, and effort breakdown.
 
 ---
 
@@ -11,7 +28,7 @@ _Source roadmap: [ROADMAP-RELEASE-2026-05.md](./ROADMAP-RELEASE-2026-05.md)_
 - Tasks are listed **in execution order** — finish one before starting the next
 - Each task has a **dependency reason** explaining why it comes here
 - "✓ unblocks" lists what becomes possible after this task lands
-- Total: **24 sequential steps, ~120h compute work**
+- Total: **24 sequential steps, ~120h compute work** (17 done, 7 parked)
 - Strict order required for steps marked **🔒 BLOCKING** — others have soft
   ordering for clean diffs
 
@@ -32,7 +49,7 @@ before Block 5 — non-blocking for Block 1–4 work.
 
 ---
 
-### 2. 🔒 REL-002 — Fix Nx project graph + validate:types (4h)
+### 2. 🔒 REL-002 — Fix Nx project graph + validate:types (4h) — ✅ DONE 2026-05-09
 
 **Why second**: every quality gate (build, test, lint, type-check, prerelease)
 fails until Nx works. No subsequent task can run its tests without this.
@@ -48,7 +65,7 @@ clean.
 
 ---
 
-### 3. 🔒 REL-008 — Break contracts → utils import cycle (7h)
+### 3. 🔒 REL-008 — Break contracts → utils import cycle (7h) — ✅ DONE 2026-05-09
 
 **Why third**: `Result<T>` is consumed by ~all 21 packages. Moving it from
 `utils` to `contracts` is a cross-package sweep — must happen **before** any
@@ -63,7 +80,7 @@ clean foundation for all subsequent refactors.
 
 ---
 
-### 4. REL-001 — CLI cleanup + 10 missing LLMGUIDE.md (4h)
+### 4. REL-001 — CLI cleanup + 10 missing LLMGUIDE.md (4h) — ✅ DONE 2026-05-09
 
 **Why fourth**: removes empty `packages/cli/` directory and dead scripts from
 root `package.json`. Generates `LLMGUIDE.md` for 10 packages still missing it
@@ -81,7 +98,7 @@ package).
 
 ## ⛓ Block 2: API hardening — lock the surface
 
-### 5. 🔒 REL-005 — Public API cleanup (12h)
+### 5. 🔒 REL-005 — Public API cleanup (12h) — ✅ DONE 2026-05-09
 
 **Why fifth**: API surface lock is the single biggest `npm publish` risk. After
 this lands, semver bounds us. Must happen **before** examples (VD-002, VD-003)
@@ -101,7 +118,7 @@ DX-NEW-001 StackBlitz pinning.
 
 ---
 
-### 6. 🔒 REL-009 — Pattern correctness bugs (14h)
+### 6. 🔒 REL-009 — Pattern correctness bugs (14h) — ✅ DONE 2026-05-09
 
 **Why sixth**: 4 confirmed bugs + 1 verification, each a behavior change. Doing
 this **after** API surface lock means changes propagate cleanly through
@@ -122,7 +139,7 @@ breaking-change entries finalized.
 
 ---
 
-### 7. REL-007 — Security hardening (6h)
+### 7. REL-007 — Security hardening (6h) — ✅ DONE 2026-05-09
 
 **Why seventh**: Independent of API/pattern work. Can run in parallel with
 others conceptually, but in sequence here for deterministic state.
@@ -136,7 +153,7 @@ for DX-NEW-002 5-min validation).
 
 ---
 
-### 8. VT-001 (pre-release subset) — Surface tests + flaky timer fixes (8h)
+### 8. VT-001 (pre-release subset) — Surface tests + flaky timer fixes (8h) — ✅ DONE 2026-05-09
 
 **Why eighth**: locks the surface from REL-005 with snapshot tests, removes
 `describe.skip` blocks (red flag for OSS adopters), fixes 2 flaky timer tests
@@ -154,7 +171,7 @@ which validates against CI.
 
 ## ⛓ Block 3: Content & infrastructure
 
-### 9. REL-010 — LLM bundle pipeline (4h)
+### 9. REL-010 — LLM bundle pipeline (4h) — ✅ DONE 2026-05-09
 
 **Why ninth**: needs all 21 `LLMGUIDE.md` (REL-001) + locked API surface
 (REL-005) + correct examples (REL-009). Adds 4 scripts to root `package.json`:
@@ -166,7 +183,7 @@ working `pnpm llm:bundle`), DX-NEW-002 (validation includes AI-assisted path).
 
 ---
 
-### 10. VD-002 — Policies V2 examples (10h)
+### 10. VD-002 — Policies V2 examples (10h) — ✅ DONE 2026-05-09
 
 **Why tenth**: builds on stable API (REL-005, REL-009 #5 OrPolicyComposer fix).
 8 examples + tests covering specifications, PolicyGroup, conditional,
@@ -177,7 +194,7 @@ patterns.
 
 ---
 
-### 11. VD-003 — Domain Services examples (8h)
+### 11. VD-003 — Domain Services examples (8h) — ✅ DONE 2026-05-09
 
 **Why eleventh**: same as VD-002 — needs stable API. **Descope candidate**: if
 Block 2 takes longer than expected, defer this to v0.26.
@@ -189,7 +206,7 @@ registration, service composition, transactions, testing).
 
 ---
 
-### 12. VP-005 — Bundle size optimization (8h)
+### 12. VP-005 — Bundle size optimization (8h) — ✅ DONE 2026-05-09
 
 **Why twelfth**: needs API surface locked (REL-005 already replaced wildcard
 exports in 4 barrels). Now applies subpath exports to `policies` (436KB → ≤250KB
@@ -200,7 +217,7 @@ main bundle), removes `dist/testing/` from `contracts`, updates
 
 ---
 
-### 13. VP-NEW-001 — Performance baseline + 3 zero-risk wins (5h)
+### 13. VP-NEW-001 — Performance baseline + 3 zero-risk wins (5h) — ✅ DONE 2026-05-09
 
 **Why thirteenth**: bundle is settled (VP-005), API stable. Now we benchmark the
 _final_ code, not a moving target. 5 hot paths benchmarked, baseline committed,
@@ -214,7 +231,7 @@ cqrs-discovery memoize, FNV-1a hash for getCacheKey).
 
 ## ⛓ Block 4: Documentation
 
-### 14. REL-006 — README + QUICK_START rewrite (6h)
+### 14. REL-006 — README + QUICK_START rewrite (6h) — ✅ DONE 2026-05-09
 
 **Why fourteenth**: docs reflect _final_ code state — APIs locked (REL-005),
 patterns fixed (REL-009), examples written (VD-002, VD-003), LLM workflow ready
@@ -229,7 +246,7 @@ DX-NEW-002 validates the _new_ README walkthrough.
 
 ---
 
-### 15. DX-NEW-001 — StackBlitz playground + badge (4h)
+### 15. DX-NEW-001 — StackBlitz playground + badge (4h) — ✅ DONE 2026-05-09
 
 **Why fifteenth**: needs final README example (REL-006) so the badge link
 matches what users read. Workspace pinned to `examples/quickstart/` once API
@@ -240,7 +257,7 @@ entry points.
 
 ---
 
-### 16. DX-NEW-002 — 5-min start validation (3h)
+### 16. DX-NEW-002 — 5-min start validation (3h) — ✅ DONE 2026-05-09
 
 **Why sixteenth**: must validate against the _final_ docs (REL-006) and _final_
 StackBlitz (DX-NEW-001) and _final_ peer deps (REL-007). Friction log fed back
@@ -255,7 +272,7 @@ working test, friction inventory, `validate-quickstart.sh` + CI integration.
 
 ## ⛓ Block 5: Versioning + publishing
 
-### 17. CHANGELOG generation (2h)
+### 17. CHANGELOG generation (2h) — ✅ DONE 2026-05-09
 
 **Why seventeenth**: all behavior changes from REL-005, REL-009, REL-007,
 VP-NEW-001 are now committed. Run `conventional-changelog-cli` (in devDeps)
@@ -265,7 +282,7 @@ against full git history. Manually curate `## [0.25.0-beta.1]` BREAKING section.
 
 ---
 
-### 18. 🔒 REL-004 — Unify versions + adopt Changesets (3h)
+### 18. 🔒 REL-004 — Unify versions + adopt Changesets (3h) — ✅ DONE 2026-05-09
 
 **Why eighteenth**: very last thing before publish prep. Reset all 21 packages
 to `0.25.0-beta.1`, configure Changesets `fixed: [["@vytches/ddd-*"]]`. Doing
@@ -278,7 +295,7 @@ migration plan against single coherent version set.
 
 ---
 
-### 19. 🔒 REL-003 — Switch publishConfig to public npm + provenance (3h)
+### 19. 🔒 REL-003 — Switch publishConfig to public npm + provenance (3h) — ⏸ PARKED (awaiting maintainer npm setup)
 
 **Why nineteenth**: changes every `package.json` `publishConfig`. After versions
 are unified (REL-004) so we don't double-edit. Adds `--provenance` flag in
@@ -291,7 +308,7 @@ succeeds for one package on a feature branch.
 
 ---
 
-### 20. 🔒 REL-011 — GitHub Packages → npm migration (3h)
+### 20. 🔒 REL-011 — GitHub Packages → npm migration (3h) — ⏸ PARKED (awaiting maintainer npm setup)
 
 **Why twentieth**: depends on REL-003 (publishConfig done) and REL-004 (version
 unified). ADR + CHANGELOG migration recipe + `release.yml` cleanup (remove GH
@@ -303,7 +320,7 @@ Packages publish step). Does NOT publish yet — that's step 23.
 
 ## ⛓ Block 6: Verify + ship
 
-### 21. 🔒 juz-ide-api smoke test (4h)
+### 21. 🔒 juz-ide-api smoke test (4h) — ⏸ PARKED (awaiting maintainer npm setup)
 
 **Why twenty-first**: ground truth before public publish. Pack the library as a
 tarball (`pnpm pack`), install in `juz-ide-api`, run all 16K tests.
@@ -318,7 +335,7 @@ documented BREAKING entries.
 
 ---
 
-### 22. CI dry-run publish (1h)
+### 22. CI dry-run publish (1h) — ⏸ PARKED (awaiting maintainer npm setup)
 
 **Why twenty-second**: dry-run from CI environment, not local machine. Verifies
 `NPM_TOKEN`, provenance signing, registry routing. Catches credential issues
@@ -328,7 +345,7 @@ before the real publish.
 
 ---
 
-### 23. 🚀 npm publish @vytches/ddd@0.25.0-beta.1 (1h)
+### 23. 🚀 npm publish @vytches/ddd@0.25.0-beta.1 (1h) — ⏸ PARKED (awaiting maintainer npm setup)
 
 **Why twenty-third**: the actual release. Trigger `release.yml` workflow. 21
 packages publish to npmjs.org with provenance. GitHub Packages legacy versions
@@ -340,7 +357,7 @@ no auth.
 
 ---
 
-### 24. Announcement + monitoring (1h)
+### 24. Announcement + monitoring (1h) — ⏸ PARKED (awaiting maintainer npm setup)
 
 **Why last**: only after publish is verified. Pin a GitHub release, draft copy
 for r/typescript, dev.to, HN, Twitter. Watch GitHub issues for first 24h.
