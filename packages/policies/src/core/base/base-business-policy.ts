@@ -291,7 +291,9 @@ class OrPolicyComposer<T> extends BaseCompositePolicy<T> implements IPolicyCompo
       violations.push(result.error);
     }
 
-    // All policies failed, return the first violation
+    // REL-009 (2026-05-08): aggregate ALL sub-violations into the result so
+    // consumers can see which OR-branches failed and why. Previously only
+    // the first violation was returned, hiding the full failure context.
     if (violations.length === 0) {
       const violation = this.createViolation(
         'OR_POLICY_ALL_FAILED',
@@ -300,7 +302,24 @@ class OrPolicyComposer<T> extends BaseCompositePolicy<T> implements IPolicyCompo
       );
       return this.failure(violation);
     }
-    return this.failure(violations[0]!);
+
+    const aggregated = this.createViolation(
+      'OR_POLICY_ALL_FAILED',
+      `All ${violations.length} OR policy condition${violations.length === 1 ? '' : 's'} failed`,
+      'ERROR',
+      {
+        details: {
+          violationCount: violations.length,
+          violations: violations.map(v => ({
+            policyId: v.policyId,
+            code: v.code,
+            message: v.message,
+            field: v.field,
+          })),
+        },
+      }
+    );
+    return this.failure(aggregated);
   }
 
   /**

@@ -76,8 +76,10 @@ export {
   CapabilityRegistry,
   createCapabilityRegistry,
   createDomainEvent,
-  EVENT_HANDLER_METADATA,
-  EVENT_HANDLER_OPTIONS,
+  // EVENT_HANDLER_METADATA — removed from public surface in REL-005 (was @internal)
+  // EVENT_HANDLER_OPTIONS  — removed from public surface in REL-005 (was @internal)
+  // Both remain accessible via direct `@vytches/ddd-contracts` import for
+  // framework integrations (events decorator, nestjs explorer).
   IEnhancedEventDispatcher,
   IEventBus,
   IEventDispatcher,
@@ -107,10 +109,12 @@ export * from '@vytches/ddd-policies';
 export * from '@vytches/ddd-validation';
 
 // ===== ARCHITECTURE LAYER =====
-// Events exports with explicit key classes
+// Events exports with explicit key classes.
+// Note: CUSTOM_MIDDLEWARE_SYMBOL was removed from this public surface in
+// REL-005 (was @internal). It remains accessible via a direct
+// `@vytches/ddd-events` import for custom bus implementations.
 export {
   BaseEventBus,
-  CUSTOM_MIDDLEWARE_SYMBOL,
   DomainEvent,
   DomainToIntegrationTransformer,
   EventDiscoveryPlugin,

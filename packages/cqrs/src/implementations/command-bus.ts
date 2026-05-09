@@ -5,12 +5,69 @@ import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 
 import { ICommandBus } from '../abstracts';
-import { HandlerNotFoundError } from '../errors';
+import { CQRSConfigurationError, HandlerNotFoundError } from '../errors';
 import type { ICommand, ICommandHandler } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
 
+/**
+ * Default `ICommandBus` implementation — routes commands to their registered
+ * handler, runs configured middleware in order, and resolves handlers either
+ * from manual registrations or from the DI container.
+ *
+ * Two registration paths exist; the bus tries them in this order:
+ *
+ * 1. **Manual** — `register(commandType, handler)` or
+ *    `registerFactory(commandType, () => handler)` for tests, scripts, and
+ *    cases where DI is not desirable.
+ * 2. **DI auto-discovery** — apply `@CommandHandler(MyCommand)` on a class
+ *    and the {@link CQRSDiscoveryPlugin} wires it into the container during
+ *    bootstrap. `execute()` resolves the handler via reflection metadata.
+ *
+ * Use {@link tryExecute} when you want a `Result<TResult, Error>` instead
+ * of a throwing call — useful for application services that already speak
+ * `Result<T>`.
+ *
+ * @example Manual registration (no DI)
+ * ```typescript
+ * import { CommandBus } from '@vytches/ddd-cqrs';
+ *
+ * class CreateOrder { constructor(public customerId: string) {} }
+ * class CreateOrderHandler {
+ *   async execute(cmd: CreateOrder) { return { id: 'o-1' }; }
+ * }
+ *
+ * const bus = new CommandBus(container);
+ * bus.register(CreateOrder, new CreateOrderHandler());
+ * const result = await bus.execute(new CreateOrder('c-1')); // { id: 'o-1' }
+ * ```
+ *
+ * @example With middleware and validation
+ * ```typescript
+ * import { LoggingMiddleware } from '@vytches/ddd-cqrs';
+ * bus.use(new LoggingMiddleware()); // chain .use(...) for additional middleware
+ *
+ * class CreateOrder implements ICqrsValidatable {
+ *   constructor(public amount: number) {}
+ *   async validate() {
+ *     if (this.amount <= 0) throw new Error('amount must be positive');
+ *   }
+ * }
+ * await bus.execute(new CreateOrder(-5)); // throws before reaching handler
+ * ```
+ *
+ * @example tryExecute returns Result instead of throwing
+ * ```typescript
+ * const r = await bus.tryExecute(new CreateOrder('c-1'));
+ * if (r.isSuccess) console.log('created:', r.value);
+ * else console.error('failed:', r.error);
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class CommandBus extends ICommandBus {
   private readonly logger = Logger.forContext('CommandBus');
   private middlewares: ICQRSMiddleware[] = [];
@@ -116,8 +173,17 @@ export class CommandBus extends ICommandBus {
     // Get handler metadata from command class
     const handlerMetadata = Reflect.getMetadata('di:command-handler', commandClass);
     if (!handlerMetadata) {
-      // For manual registration, we don't have metadata, so throw to trigger fallback
-      throw new Error(`No metadata for ${commandClass.name}`);
+      // REL-009 (2026-05-08): align with QueryBus.getHandlerToken — throw a
+      // typed CQRSConfigurationError with a decorator hint instead of a
+      // generic Error. The outer execute() still catches and re-throws as
+      // HandlerNotFoundError for the "no manual registration AND no
+      // decorator" case, but if this method is called directly (e.g. from
+      // diagnostics), consumers now see the same actionable message in both
+      // buses.
+      throw new CQRSConfigurationError(
+        `No handler registered for command ${commandClass.name}. Did you forget @CommandHandler decorator?`,
+        'CommandBus'
+      );
     }
 
     return handlerMetadata.serviceId || handlerMetadata.handlerType.name;

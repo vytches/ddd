@@ -1,3 +1,52 @@
+/**
+ * Base class for **capabilities** — composable, opt-in features attached
+ * to aggregates or projections at construction time. Lets domain types
+ * gain orthogonal behaviors (audit, snapshots, versioning, replay) without
+ * inheritance chains.
+ *
+ * The pattern: each subclass declares a unique `type` discriminant
+ * (`'snapshot'`, `'audit'`, `'eventSourcing'`, `'versioning'`, etc.) and
+ * a corresponding `static capabilityType` getter for runtime registry
+ * lookup. Two parallel sub-interfaces — `IAggregateCapability` and
+ * `IProjectionCapability` — extend this base with attach/detach
+ * lifecycle hooks specific to their host type.
+ *
+ * Implementations live in feature packages:
+ * - `@vytches/ddd-aggregates`: `AuditCapability`, `SnapshotCapability`,
+ *   `VersioningCapability`, `EventSourcingCapability`.
+ * - `@vytches/ddd-projections`: `CheckpointCapability`,
+ *   `CircuitBreakerCapability`, `DeadLetterCapability`, etc.
+ *
+ * @example Defining a custom capability
+ * ```typescript
+ * import { Capability, IAggregateCapability } from '@vytches/ddd-contracts';
+ *
+ * class MetricsCapability
+ *   extends Capability<'metrics'>
+ *   implements IAggregateCapability<'metrics'>
+ * {
+ *   readonly type = 'metrics' as const;
+ *   static override get capabilityType(): string { return 'metrics'; }
+ *
+ *   private events = 0;
+ *   attach(_agg: unknown): void { this.events = 0; }
+ *   recordEvent(): void { this.events += 1; }
+ *   getCount(): number { return this.events; }
+ * }
+ * ```
+ *
+ * @example Type-narrowing via `isType`
+ * ```typescript
+ * const cap: Capability = aggregate.getCapability(SnapshotCapability);
+ * if (cap.isType('snapshot')) {
+ *   // cap is narrowed to Capability<'snapshot'> here
+ * }
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export abstract class Capability<T extends string = string> {
   /**
    * Unique type identifier for the capability

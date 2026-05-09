@@ -14,6 +14,103 @@ import type {
 } from '@vytches/ddd-contracts';
 import { CapabilityRegistry, createDomainEvent } from '@vytches/ddd-contracts';
 
+/**
+ * Base class for aggregate roots — the *transactional consistency boundary*
+ * of a Domain-Driven Design model. Per Eric Evans (Blue Book, ch. 6):
+ *
+ * > An AGGREGATE is a cluster of associated objects that we treat as a unit
+ * > for the purpose of data changes. Each AGGREGATE has a root and a
+ * > boundary. The root is a single, specific ENTITY contained in the
+ * > AGGREGATE. The root is the only member of the AGGREGATE that outside
+ * > objects are allowed to hold references to.
+ *
+ * `AggregateRoot<TId>` provides:
+ *
+ * - **Identity** via `EntityId<TId>` (`getId()`)
+ * - **Versioning** for optimistic locking (`getVersion()`,
+ *   `getInitialVersion()`)
+ * - **Event emission** via `apply()` — append a `DomainEvent`, increment
+ *   version, run the registered handler to mutate state
+ * - **Event sourcing reconstitution** via `loadFromHistory()` — replay
+ *   events without accumulating new ones
+ * - **Capabilities** — composable, opt-in features (snapshots, audit,
+ *   versioning, event-sourcing) attached without inheritance chains
+ *   (see {@link AggregateBuilder})
+ *
+ * Two state-mutation rules:
+ *
+ * 1. **Never assign fields directly.** All state changes flow through
+ *    `apply(eventType, payload)` so they are recorded as events. Direct
+ *    assignment bypasses event recording and version tracking — the
+ *    aggregate becomes inconsistent with its event stream.
+ * 2. **Register handlers BEFORE applying events.** Wire every event name
+ *    in the constructor via `registerEventHandler('EventName', payload =>
+ *    {...})` before any `apply()` call. Missing handlers do not throw —
+ *    the event is recorded but state remains stale.
+ *
+ * For non-root domain entities (`OrderLine` inside `Order`), use
+ * {@link Entity} — it has identity but no version/event machinery.
+ *
+ * @example Minimal event-sourced aggregate
+ * ```typescript
+ * import { AggregateRoot } from '@vytches/ddd-aggregates';
+ * import { EntityId } from '@vytches/ddd-contracts';
+ *
+ * interface OrderCreatedPayload {
+ *   customerId: string;
+ *   amount: number;
+ * }
+ *
+ * class Order extends AggregateRoot<string> {
+ *   private customerId = '';
+ *   private amount = 0;
+ *
+ *   constructor(params: IAggregateConstructorParams<string>) {
+ *     super(params);
+ *     this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
+ *       this.customerId = payload!.customerId;
+ *       this.amount = payload!.amount;
+ *     });
+ *   }
+ *
+ *   static create(customerId: string, amount: number): Order {
+ *     const order = new Order({ id: EntityId.create(), version: 0 });
+ *     order.apply('OrderCreated', { customerId, amount });
+ *     return order;
+ *   }
+ * }
+ *
+ * const order = Order.create('c-1', 500);
+ * order.getVersion();         // 1
+ * order.getDomainEvents();    // [{ eventName: 'OrderCreated', ... }]
+ * order.commit();             // clear after persisting
+ * order.hasChanges();         // false
+ * ```
+ *
+ * @example Reconstituting from event history
+ * ```typescript
+ * class Order extends AggregateRoot<string> {
+ *   static fromEvents(id: EntityId<string>, events: IDomainEvent[]): Order {
+ *     const order = new Order({ id, version: 0 });
+ *     order.loadFromHistory(events);  // replays events, no new ones recorded
+ *     return order;
+ *   }
+ * }
+ * ```
+ *
+ * @example Bounded uncommitted-event count (REL-007 guard)
+ * ```typescript
+ * const order = new Order({
+ *   id: EntityId.create(),
+ *   version: 0,
+ *   maxEvents: 1000,  // throw if uncommitted events exceed 1000
+ * });
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private readonly _id: EntityId<TId>;
   private _version = 0;
@@ -21,11 +118,19 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private _domainEvents: IDomainEvent[] = [];
   private _eventHandlers = new Map<string, IAggregateEventHandler>();
   private _capabilities = new CapabilityRegistry();
+  /**
+   * REL-007 (2026-05-08): optional advisory limit on uncommitted events.
+   * Undefined = no limit (default, backward-compat). When set, `apply()`
+   * throws if pushing would exceed the limit — guards against runaway
+   * loops or malicious replay payloads.
+   */
+  private readonly _maxEvents: number | undefined;
 
   constructor(params: IAggregateConstructorParams<TId>) {
     this._id = params.id;
     this._version = params.version || 0;
     this._initialVersion = params.version || 0;
+    this._maxEvents = params.maxEvents;
   }
 
   // ==========================================
@@ -104,44 +209,57 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     payload?: P,
     metadata?: Partial<IEventMetadata>
   ): void {
-    let event: IDomainEvent<P | undefined>;
-
-    if (typeof eventTypeOrEvent === 'string') {
-      event = createDomainEvent(eventTypeOrEvent, payload, metadata) as IDomainEvent<P>;
-    } else {
-      event = eventTypeOrEvent;
-      if (metadata) {
-        const sanitizedMetadata = AggregateRoot.sanitizeMetadata({
-          ...event.metadata,
-          ...metadata,
-        });
-        // Preserve prototype chain when merging additional metadata
-        event = Object.assign(Object.create(Object.getPrototypeOf(event)), event, {
-          metadata: sanitizedMetadata,
-        });
-      }
-    }
+    // VP-NEW-002 (2026-05-09): unified one-pass enrichment.
+    // Previous implementation did:
+    //   (a) sanitizeMetadata of merged metadata + Object.create (object-event-with-metadata branch)
+    //   (b) sanitizeMetadata of merged metadata + Object.create (always)
+    // -> 2× allocations + 2× sanitization on object-event paths.
+    // New flow: build the final merged metadata once, sanitize once, allocate once.
 
     this._version++;
 
-    // Enrich with aggregate metadata
-    // CRITICAL: Use Object.assign + Object.create to PRESERVE prototype chain
-    // This allows event classes (e.g., OrderCreatedEvent) to retain their methods
-    // and instanceof checks to work correctly after enrichment
-    const enrichedMetadata: IEventMetadata = AggregateRoot.sanitizeMetadata({
-      ...event.metadata,
+    let event: IDomainEvent<P | undefined>;
+    let baseMetadata: IEventMetadata | undefined;
+
+    if (typeof eventTypeOrEvent === 'string') {
+      // string path: createDomainEvent already builds a plain { eventName, payload, metadata }
+      // and applies the user-supplied metadata; no class identity to preserve.
+      event = createDomainEvent(eventTypeOrEvent, payload, metadata) as IDomainEvent<P>;
+      baseMetadata = event.metadata;
+    } else {
+      // object path: preserve prototype chain for class-based events (instanceof).
+      event = eventTypeOrEvent;
+      baseMetadata = metadata
+        ? ({ ...event.metadata, ...metadata } as IEventMetadata)
+        : event.metadata;
+    }
+
+    // Enrich + sanitize in ONE pass.
+    const enrichedMetadata = AggregateRoot.sanitizeMetadata({
+      ...baseMetadata,
       aggregateId: this._id.toString(),
       aggregateType: this.constructor.name,
       aggregateVersion: this._version,
-      timestamp: event.metadata?.timestamp ?? new Date(),
-    });
+      timestamp: baseMetadata?.timestamp ?? new Date(),
+    } as IEventMetadata);
 
-    // Preserve prototype chain - essential for class-based events
+    // Single Object.create — preserves prototype chain for class-based events.
     const enrichedEvent: IDomainEvent<P> = Object.assign(
       Object.create(Object.getPrototypeOf(event)),
       event,
       { metadata: enrichedMetadata }
     );
+
+    // REL-007 (2026-05-08): enforce optional maxEvents advisory limit
+    // BEFORE push, so the aggregate's invariants are preserved on failure.
+    if (this._maxEvents !== undefined && this._domainEvents.length >= this._maxEvents) {
+      throw new Error(
+        `Aggregate ${this.constructor.name} (id=${this._id.toString()}) exceeded ` +
+          `maxEvents limit of ${this._maxEvents}. This usually indicates a runaway ` +
+          `loop or replay of a corrupted event stream. Increase maxEvents in the ` +
+          `aggregate constructor params if the limit is too restrictive for your domain.`
+      );
+    }
 
     this._domainEvents.push(enrichedEvent);
     this.handleEvent(enrichedEvent);
@@ -248,6 +366,18 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   private static sanitizeMetadata<T extends Record<string, unknown>>(metadata: T): T {
+    // VP-NEW-002: fast path — most metadata never contains prototype-pollution keys.
+    // Use hasOwn directly to avoid building an array via Object.keys() when nothing
+    // needs to be removed. Returns the input unchanged if clean.
+    if (
+      !Object.prototype.hasOwnProperty.call(metadata, '__proto__') &&
+      !Object.prototype.hasOwnProperty.call(metadata, 'constructor') &&
+      !Object.prototype.hasOwnProperty.call(metadata, 'prototype')
+    ) {
+      return metadata;
+    }
+
+    // Slow path — strip the dangerous keys.
     const clean = {} as Record<string, unknown>;
     for (const key of Object.keys(metadata)) {
       if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;

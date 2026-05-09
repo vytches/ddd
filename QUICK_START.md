@@ -2,19 +2,52 @@
 
 Build your first DDD aggregate in under 5 minutes.
 
+## Zero-install — try in your browser
+
+The repo's [`.stackblitzrc`](./.stackblitzrc) launches the
+[`examples/quickstart`](./examples/quickstart) tests on boot:
+
+[**▶ Open in StackBlitz**](https://stackblitz.com/github/vytches/ddd?file=examples/quickstart/src/domain/order.aggregate.ts)
+
+Click → wait for `pnpm install` (about 30s) → terminal automatically runs
+`pnpm test` from `examples/quickstart`. You'll see 16 passing tests in ~2
+seconds. Edit any file in `src/` and tests re-run on save.
+
+WebContainer-based — no local Node, no install, no setup.
+
 ## Install
 
 ```bash
-npm install @vytches/ddd    # meta-package, re-exports everything
+npm install @vytches/ddd
 ```
 
 Or install only what you need:
 
 ```bash
-npm install @vytches/ddd-aggregates @vytches/ddd-events @vytches/ddd-validation
+npm install @vytches/ddd-aggregates @vytches/ddd-events @vytches/ddd-policies
 ```
 
-## 1. Define Domain Events
+## Required `tsconfig.json` flags
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true
+  }
+}
+```
+
+The decorator flags are required for the CQRS / domain-services decorator
+features. `strict: true` is strongly recommended — the library is built and
+type-checked under strict mode.
+
+## 1. Define a Domain Event
 
 ```typescript
 import { DomainEvent } from '@vytches/ddd';
@@ -55,16 +88,10 @@ interface MoneyProps {
 
 class Money extends BaseValueObject<MoneyProps> {
   static create(amount: number, currency: string): Money {
-    const vo = new Money({ amount, currency });
-    if (!vo.validate({ amount, currency })) {
+    if (amount < 0 || !currency) {
       throw new Error(`Invalid money: amount=${amount}, currency=${currency}`);
     }
-    return vo;
-  }
-
-  validate(value: unknown): boolean {
-    const props = value as MoneyProps;
-    return typeof props.amount === 'number' && props.amount >= 0;
+    return new Money({ amount, currency });
   }
 
   add(other: Money): Money {
@@ -76,20 +103,27 @@ class Money extends BaseValueObject<MoneyProps> {
 }
 ```
 
-## 3. Write Inline Specifications
+> **Note:** `BaseValueObject` deep-freezes `this.value` in the constructor (no
+> manual `validate()` call needed inside the ctor). Validate inputs in your
+> factory method before calling `new`.
 
-Prefer `Specification.create()` over class-based specs for one-off rules.
+## 3. Inline Specifications
+
+For ad-hoc business rules, use `Specification.create()` from the validation
+package — keeps logic close to the use site and composable.
 
 ```typescript
-import { Specification } from '@vytches/ddd';
+import { CompositeSpecification } from '@vytches/ddd-validation';
 
 interface OrderState {
   items: ReadonlyArray<{ sku: string; qty: number; price: number }>;
   placed: boolean;
 }
 
-const hasItems = Specification.create<OrderState>(o => o.items.length > 0);
-const isNotPlaced = Specification.create<OrderState>(o => !o.placed);
+const hasItems = CompositeSpecification.create<OrderState>(
+  o => o.items.length > 0
+);
+const isNotPlaced = CompositeSpecification.create<OrderState>(o => !o.placed);
 const canBePlaced = hasItems.and(isNotPlaced);
 ```
 
@@ -107,7 +141,7 @@ class Order extends AggregateRoot<string> {
   constructor() {
     super({ id: EntityId.create(), version: 0 });
 
-    // Register event handlers — these rebuild state from history
+    // Event handlers rebuild state from history (event sourcing)
     this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
       this.customerId = payload.customerId;
     });
@@ -123,7 +157,7 @@ class Order extends AggregateRoot<string> {
   }
 
   addItem(sku: string, name: string, price: number, qty: number): void {
-    Money.create(price, 'USD'); // validates
+    Money.create(price, 'USD'); // throws on invalid
     this.apply(new ItemAdded({ sku, name, price, qty }));
   }
 
@@ -131,14 +165,14 @@ class Order extends AggregateRoot<string> {
     if (
       !canBePlaced.isSatisfiedBy({ items: this.items, placed: this.placed })
     ) {
-      throw new Error('Cannot place order');
+      throw new Error('Cannot place order — empty cart or already placed');
     }
     // emit OrderPlaced event...
   }
 }
 ```
 
-## 5. Use It
+## 5. Use it
 
 ```typescript
 const order = new Order();
@@ -148,26 +182,42 @@ order.place();
 
 // Retrieve uncommitted events for persistence
 const events = order.getDomainEvents();
-order.commit(); // clear after saving
+// ... after persisting, mark as committed:
+order.commit(); // alternatively, BaseRepository does this automatically on save()
 ```
 
-## AI Assistant Integration
+## AI-Assisted Development
 
-Set up LLM-optimized docs for your coding assistant (Claude Code, Cursor,
-Copilot):
+Pair @vytches/ddd with Claude Code, Cursor, GitHub Copilot, or Aider.
+
+### Lightweight setup (recommended)
+
+In your `CLAUDE.md` / `.cursorrules` / Copilot instructions:
+
+```
+@./node_modules/@vytches/ddd-aggregates/LLMGUIDE.md
+@./node_modules/@vytches/ddd-policies/LLMGUIDE.md
+@./node_modules/@vytches/ddd-events/LLMGUIDE.md
+```
+
+Each package ships an `LLMGUIDE.md` with API table, working examples, and
+anti-patterns — just enough context for an AI to scaffold correct code.
+
+### Full library context
+
+For deeper AI assistance, generate a single bundled context file:
 
 ```bash
-npx @vytches/ddd init-context
+git clone https://github.com/vytches/ddd && cd ddd
+pnpm install
+pnpm llm:bundle  # → repomix-output.md (~260K tokens)
 ```
 
-This copies architecture overview, full API reference, and anti-patterns to
-`.claude/vytches-ddd/`. Then add to your `CLAUDE.md`:
+Paste the resulting file into your AI's long-context window once. The assistant
+can then generate aggregates, value objects, command handlers, and policies from
+natural-language prompts.
 
-```
-@.claude/vytches-ddd/llm-context.md
-```
-
-## Full Working Example
+## Full working example
 
 See [`examples/quickstart/`](./examples/quickstart/) for a complete e-commerce
 Order domain with:
@@ -177,14 +227,36 @@ Order domain with:
 - Inline specifications
 - Command and query handlers
 - In-memory repository
-- 16 passing tests (GWT pattern)
+- 16 passing tests (Given-When-Then style)
 
 ```bash
 cd examples/quickstart && pnpm test
 ```
 
+More examples covering policies (8 patterns) and domain services (7 patterns):
+
+- [`examples/policies/`](./examples/policies/) — 17 tests
+- [`examples/domain-services/`](./examples/domain-services/) — 17 tests
+
+## Keep your domain honest — `ddd-lint`
+
+Once you have a few aggregates, run the bundled linter to catch the cheapest DDD
+anti-patterns automatically:
+
+```bash
+pnpm ddd:lint
+```
+
+It flags **public mutable state in aggregates**, **throws inside the domain
+layer**, and **factories that don't return `Result<T, E>`**.
+
+To run the same rules in your own consumer app, see
+[`tools/ddd-lint/CONSUMER-USAGE.md`](./tools/ddd-lint/CONSUMER-USAGE.md).
+
 ## Next Steps
 
-- [Full API Reference](./docs/llm-context.md) — every export, every package
-- [Package Ecosystem](./README.md#-package-ecosystem) — 21 packages overview
-- Per-package guides in `node_modules/@vytches/ddd-*/LLMGUIDE.md`
+- [Package Ecosystem](./README.md#package-ecosystem) — 20 packages overview
+- [Design Decisions](./README.md#design-decisions) — why no sagas, no adapters
+- [Quality tooling](./README.md#quality-tooling--ddd-lint) — ddd-lint setup
+- Per-package guides — `node_modules/@vytches/ddd-*/LLMGUIDE.md`
+- ADRs — [`docs/adr/`](./docs/adr/) — architecture decisions of record

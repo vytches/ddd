@@ -137,3 +137,9 @@ docs/api/
 .claude/roles/
 .mcp.json
 .worktreeinclude
+
+# REL-002: prevent Nx graph pollution from agent worktrees
+.claude/worktrees/
+
+# REL-007: explicitly ignore .env.development (was tracked but always empty)
+.env.development

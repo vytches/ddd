@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
 import type { Result } from '@vytches/ddd-utils';
 import {
@@ -119,20 +119,27 @@ describe('CachedPolicy', () => {
     });
 
     it('should respect TTL expiration', async () => {
-      const shortCachedPolicy = PolicyCachingBehavior.create(testPolicy, {
-        ttl: 100, // 100ms TTL
-      });
+      // VT-001 (2026-05-09): replaced 150ms real sleep with fake-timer
+      // advance — deterministic, ~150× faster, eliminates flakiness on slow CI.
+      vi.useFakeTimers();
+      try {
+        const shortCachedPolicy = PolicyCachingBehavior.create(testPolicy, {
+          ttl: 100, // 100ms TTL
+        });
 
-      // First call
-      await shortCachedPolicy.check(request);
-      expect(testPolicy.callCount).toBe(1);
+        // First call
+        await shortCachedPolicy.check(request);
+        expect(testPolicy.callCount).toBe(1);
 
-      // Wait for TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 150));
+        // Wait for TTL to expire (150ms > 100ms TTL)
+        vi.advanceTimersByTime(150);
 
-      // Second call should execute again
-      await shortCachedPolicy.check(request);
-      expect(testPolicy.callCount).toBe(2);
+        // Second call should execute again
+        await shortCachedPolicy.check(request);
+        expect(testPolicy.callCount).toBe(2);
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('should enforce max cache size', async () => {

@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-projections public API surface > exports the documented set of symbols 1`] = `
+[
+  "BaseIntervalCapability",
+  "BaseProjection",
+  "CheckpointCapability",
+  "CircuitBreakerCapability",
+  "DeadLetterCapability",
+  "ProjectionBuilder",
+  "ProjectionEngine",
+  "ProjectionError",
+  "ProjectionRebuilder",
+  "SnapshotProjectionCapability",
+  "createProjectionRebuilder",
+]
+`;

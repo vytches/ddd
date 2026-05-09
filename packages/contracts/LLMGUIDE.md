@@ -39,23 +39,26 @@ const event: IDomainEvent<OrderPlacedPayload> = {
 
 ## Key API
 
-| Export                   | Kind           | Description                                                                                   |
-| ------------------------ | -------------- | --------------------------------------------------------------------------------------------- |
-| `IDomainEvent<P>`        | interface      | Base contract for all domain events; has `eventName`, `payload?`, `metadata?`                 |
-| `IEventMetadata`         | interface      | Tracing fields: `eventId`, `correlationId`, `causationId`, `aggregateId`, `aggregateVersion`  |
-| `IEventBus<TEvent>`      | abstract class | Publish/subscribe contract; `publish`, `subscribe`, `registerHandler`, `publishMany`          |
-| `IEntityId<T>`           | interface      | Typed aggregate identifier; `getValue()`, `equals()`, `toString()`, `isType()`                |
-| `EntityId<T>`            | class          | Base implementation of `IEntityId`; constructor takes `(value, type)`                         |
-| `IEntityIdFactory`       | interface      | Factory contract: `createWithRandomUUID`, `fromUUID`, `fromInteger`, `fromBigInt`, `fromText` |
-| `IdType`                 | type           | `'uuid' \| 'integer' \| 'text' \| 'bigint'`                                                   |
-| `IRepository<T>`         | interface      | Base persistence contract: `save`, `findById?`, `delete?`                                     |
-| `IExtendedRepository<T>` | interface      | Adds `exists`, `findBySpecification?`, `findOneBySpecification?`                              |
-| `IUnitOfWork`            | interface      | Transaction management: `begin`, `commit`, `rollback`, `getRepository`, `getEventBus`         |
-| `ISpecification<T>`      | interface      | Domain rule: `isSatisfiedBy`, `and`, `or`, `not`, `explainFailure?`                           |
-| `IAsyncSpecification<T>` | interface      | Async version with `isSatisfiedByAsync` and context parameter                                 |
-| `Capability`             | class          | Base for all aggregate capabilities                                                           |
-| `CapabilityRegistry`     | class          | Manages capability instances keyed by constructor                                             |
-| `IAggregateCapability`   | interface      | Marks a class as an aggregate-attachable capability                                           |
+| Export                              | Kind           | Description                                                                                                                                                                   |
+| ----------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IDomainEvent<P>`                   | interface      | Base contract for all domain events; has `eventName`, `payload?`, `metadata?`                                                                                                 |
+| `IEventMetadata`                    | interface      | Tracing fields: `eventId`, `correlationId`, `causationId`, `aggregateId`, `aggregateVersion`                                                                                  |
+| `IEventBus<TEvent>`                 | abstract class | Publish/subscribe contract; `publish`, `subscribe`, `registerHandler`, `publishMany`                                                                                          |
+| `IEntityId<T>`                      | interface      | Typed aggregate identifier; `getValue()`, `equals()`, `toString()`, `isType()`                                                                                                |
+| `EntityId<T>`                       | class          | Base implementation of `IEntityId`; constructor takes `(value, type)`                                                                                                         |
+| `IEntityIdFactory`                  | interface      | Factory contract: `createWithRandomUUID`, `fromUUID`, `fromInteger`, `fromBigInt`, `fromText`                                                                                 |
+| `IdType`                            | type           | `'uuid' \| 'integer' \| 'text' \| 'bigint'`                                                                                                                                   |
+| `IRepository<T>`                    | interface      | Base persistence contract: `save`, `findById?`, `delete?`                                                                                                                     |
+| `IExtendedRepository<T>`            | interface      | Adds `exists`, `findBySpecification?`, `findOneBySpecification?`                                                                                                              |
+| `IBatchRepository<T>`               | interface      | **N+1 prevention** (VP-002) — extends `IRepository` with `findByIds(ids): Promise<Array<T \| null>>`. Order-preserving result; type-narrow at call site to pick batched fetch |
+| `IUnitOfWork`                       | interface      | Transaction management: `begin`, `commit`, `rollback`, `getRepository`, `getEventBus`                                                                                         |
+| `IDomainFactory<TAgg, TProps>`      | interface      | **Factory pattern contract** (VF-CANON-001) — `create(props): Result<TAgg, Error>`. Sibling to `IRepository` for complex aggregate creation                                   |
+| `IAsyncDomainFactory<TAgg, TProps>` | interface      | Async variant of `IDomainFactory`; `create` returns `Promise<Result<...>>` for factories that need DB lookups during creation                                                 |
+| `ISpecification<T>`                 | interface      | Domain rule: `isSatisfiedBy`, `and`, `or`, `not`, `explainFailure?`                                                                                                           |
+| `IAsyncSpecification<T>`            | interface      | Async version with `isSatisfiedByAsync` and context parameter                                                                                                                 |
+| `Capability`                        | class          | Base for all aggregate capabilities                                                                                                                                           |
+| `CapabilityRegistry`                | class          | Manages capability instances keyed by constructor                                                                                                                             |
+| `IAggregateCapability`              | interface      | Marks a class as an aggregate-attachable capability                                                                                                                           |
 
 ## Patterns
 

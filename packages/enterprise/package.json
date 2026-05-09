@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd",
-  "version": "0.23.5",
+  "version": "0.25.0-beta.2",
   "description": "Complete Domain-Driven Design framework for TypeScript",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -20,10 +20,11 @@
     "vytches-ddd": "./bin/init-context.mjs"
   },
   "files": [
-    "dist",
+    "LLMGUIDE.md",
+    "README.md",
     "bin",
-    "llm-context.md",
-    "README.md"
+    "dist",
+    "llm-context.md"
   ],
   "keywords": [
     "ddd",

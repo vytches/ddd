@@ -159,7 +159,7 @@ describe('Domain Services DI Integration', () => {
     });
   });
 
-  describe.skip('Discovery plugin integration', () => {
+  describe.todo('Discovery plugin integration', () => {
     // DomainServiceDiscoveryPlugin has been moved to @vytches/ddd-di
     it('should discover correct number of DI-enhanced services', async () => {
       // const plugin = new DomainServiceDiscoveryPlugin();

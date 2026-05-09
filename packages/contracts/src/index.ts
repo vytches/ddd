@@ -41,7 +41,18 @@ export type {
 
 export {
   createDomainEvent,
+  /**
+   * @internal Framework-only metadata symbols.
+   *
+   * Re-exported here so cross-package framework code (events decorator,
+   * nestjs explorer service) can resolve them via the standard
+   * `@vytches/ddd-contracts` import path. They are NOT part of the public
+   * consumer API — REL-005 removed them from the curated `@vytches/ddd`
+   * meta-package barrel. Consumers should never import these symbols
+   * directly; they may be removed or reshaped without semver protection.
+   */
   EVENT_HANDLER_METADATA,
+  /** @internal — see EVENT_HANDLER_METADATA */
   EVENT_HANDLER_OPTIONS,
   IEnhancedEventDispatcher,
   IEventBus,
@@ -55,6 +66,9 @@ export {
 // export { areAggregateIdsEqual, isAggregateId } from './aggregates';
 // export type { IAggregateId } from './aggregates';
 export type { IAggregateWithEvents } from './aggregates';
+
+// Factory contracts (VF-CANON-001)
+export type { IDomainFactory, IAsyncDomainFactory } from './aggregates';
 
 // Validation
 export type {
@@ -104,6 +118,7 @@ export type {
 
 // Repositories
 export type {
+  IBatchRepository,
   ICQRSRepository,
   IExtendedRepository,
   IQueryRepository,
@@ -116,3 +131,8 @@ export type {
 
 // Shared types (to avoid circular dependencies)
 export type { IAggregateSnapshot } from './shared';
+
+// Result<T,E> primitive — moved from @vytches/ddd-utils in REL-008
+// to keep contracts as the dependency-free foundation layer.
+// utils re-exports this Result via shim for backwards compatibility.
+export { Result } from './shared';

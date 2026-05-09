@@ -1,4 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// ddd-lint-disable no-throw-in-domain
+// Reason: the inline `propertySpec` adapter constructed in
+// `addPropertyRule` deliberately throws from `and`/`or`/`not` because
+// those operators are not meaningful on a property-projected
+// specification. The throws are guards against misuse (programmer error),
+// not domain failures — the validator never actually invokes them on
+// the happy path. Wrapping them in `Result.fail` would change the
+// `ISpecification` contract for every other call site in the codebase.
+
 import type { ISpecification, IValidator } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
 

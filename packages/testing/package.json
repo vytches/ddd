@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-testing",
-  "version": "0.22.5",
+  "version": "0.25.0-beta.2",
   "description": "Test utilities and DDD-specific testing helpers",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -47,18 +47,6 @@
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
     "@vytches/ddd-utils": "workspace:*"
-  },
-  "peerDependencies": {
-    "@anthropic-ai/sdk": ">=0.24.0",
-    "openai": ">=4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "openai": {
-      "optional": true
-    },
-    "@anthropic-ai/sdk": {
-      "optional": true
-    }
   },
   "devDependencies": {
     "typescript": "^5.0.0",

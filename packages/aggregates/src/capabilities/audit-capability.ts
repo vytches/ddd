@@ -2,6 +2,48 @@ import { Capability } from '@vytches/ddd-contracts';
 import type { IAuditCapability, IAuditEvent, IDomainEvent } from '@vytches/ddd-contracts';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
+/**
+ * Capability that records every domain event applied to the aggregate as
+ * an `IAuditEvent`. Useful for compliance, debugging, behavior analytics,
+ * and "what happened" forensics — without polluting the aggregate's
+ * domain logic with cross-cutting audit concerns.
+ *
+ * Mechanism: on attach, intercepts the aggregate's `apply()` method. Every
+ * subsequent `apply(eventName, payload)` call records an `IAuditEvent`
+ * containing the aggregate id, type, version at time of event, original
+ * payload, and an actor (read from `metadata.userId` if present). The
+ * intercepted `apply` is restored on `detach()`.
+ *
+ * **Order matters.** Add this capability *before* any `apply()` calls —
+ * audit only captures events applied after attachment. The recommended
+ * way is via {@link AggregateBuilder} which guarantees correct order.
+ *
+ * @example
+ * ```typescript
+ * import {
+ *   AggregateBuilder,
+ *   AuditCapability,
+ *   asAuditAggregate,
+ * } from '@vytches/ddd-aggregates';
+ *
+ * const order = AggregateBuilder
+ *   .create({ id: EntityId.create() })
+ *   .withAudit()
+ *   .build(Order);
+ *
+ * order.apply('OrderCreated', { customerId: 'c-1' }, { userId: 'u-42' });
+ * order.apply('OrderConfirmed', undefined, { userId: 'u-42' });
+ *
+ * const audit = asAuditAggregate(order).getCapability(AuditCapability)!;
+ * audit.getAuditLog();         // [{ eventName: 'OrderCreated', actor: 'u-42', ... }, ...]
+ * audit.getEventsByName('OrderCreated');
+ * audit.getAuditStatistics(); // { totalEvents: 2, eventsByType: {...}, averageTimeBetweenEvents }
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class AuditCapability extends Capability<'audit'> implements IAuditCapability {
   override readonly type = 'audit' as const;
 

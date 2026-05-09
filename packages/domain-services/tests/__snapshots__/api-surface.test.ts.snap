@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-domain-services public API surface > exports the documented set of symbols 1`] = `
+[
+  "AsyncDomainService",
+  "DomainService",
+  "EventAwareDomainService",
+  "IBaseDomainService",
+  "PlainDomainService",
+  "ServiceCircularError",
+  "ServiceDuplicateError",
+  "ServiceNotFoundError",
+  "UnitOfWorkAwareDomainService",
+  "getDIDomainServiceMetadata",
+  "getDomainServiceMetadata",
+  "isDomainServicePendingDIRegistration",
+]
+`;

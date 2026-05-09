@@ -1,0 +1,19 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-contracts public API surface > exports the documented set of symbols 1`] = `
+[
+  "Capability",
+  "CapabilityRegistry",
+  "EVENT_HANDLER_METADATA",
+  "EVENT_HANDLER_OPTIONS",
+  "EntityId",
+  "IEnhancedEventDispatcher",
+  "IEventBus",
+  "IEventDispatcher",
+  "IEventPersistenceHandler",
+  "Result",
+  "createCapabilityRegistry",
+  "createDomainEvent",
+  "isEventHandler",
+]
+`;

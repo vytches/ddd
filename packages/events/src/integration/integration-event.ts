@@ -4,6 +4,79 @@ import { LibUtils } from '@vytches/ddd-utils';
 import type { IIntegrationEvent, IIntegrationEventMetadata } from './integration-event-interfaces';
 
 /**
+ * Maximum allowed JSON string size for deserialization (1 MB).
+ * @internal
+ */
+export const MAX_DESERIALIZE_SIZE = 1_048_576;
+
+/**
+ * Maximum recursion depth for `sanitizeObject` (REL-007 — prevents stack
+ * overflow from maliciously deep JSON payloads).
+ * @internal
+ */
+export const MAX_SANITIZE_DEPTH = 50;
+
+/**
+ * Recursively strip dangerous prototype-pollution keys (`__proto__`,
+ * `constructor`, `prototype`) from a parsed JSON object. Bounded by
+ * `MAX_SANITIZE_DEPTH` to prevent stack overflow on adversarial payloads.
+ *
+ * REL-007 (2026-05-08): added `maxDepth` parameter — was unbounded.
+ *
+ * @internal
+ * @throws Error if recursion exceeds `maxDepth`
+ */
+export function sanitizeIntegrationPayload<T>(
+  obj: T,
+  maxDepth: number = MAX_SANITIZE_DEPTH,
+  currentDepth = 0
+): T {
+  if (currentDepth > maxDepth) {
+    throw new Error(
+      `Integration event payload exceeds maximum nesting depth of ${maxDepth}. ` +
+        `This may indicate a malformed or malicious payload.`
+    );
+  }
+  if (obj === null || typeof obj !== 'object') return obj;
+  const clean = (Array.isArray(obj) ? [] : {}) as Record<string, unknown>;
+  for (const key of Object.keys(obj as Record<string, unknown>)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    clean[key] = sanitizeIntegrationPayload(
+      (obj as Record<string, unknown>)[key],
+      maxDepth,
+      currentDepth + 1
+    );
+  }
+  return clean as T;
+}
+
+/**
+ * Safely parse + sanitize a JSON string for integration event deserialization.
+ * Enforces 1 MB size cap and 50-level depth cap.
+ *
+ * @internal
+ * @throws Error if size or depth limits exceeded, or JSON is invalid
+ */
+export function safeParseIntegrationJson<T = unknown>(jsonString: string): T {
+  // REL-007 (post-review fix): use Buffer.byteLength for strict byte bound.
+  // String.length returns UTF-16 code units; a string with length === 1M
+  // can be 1-4 MB UTF-8 with emoji or CJK characters. The cap is supposed
+  // to be a strict 1 MB byte limit, so measure actual bytes.
+  // Fallback to TextEncoder for non-Node environments (browser, Workers).
+  const byteLength =
+    typeof Buffer !== 'undefined'
+      ? Buffer.byteLength(jsonString, 'utf8')
+      : new TextEncoder().encode(jsonString).length;
+
+  if (byteLength > MAX_DESERIALIZE_SIZE) {
+    throw new Error(
+      `Event payload exceeds maximum size of ${MAX_DESERIALIZE_SIZE} bytes (actual: ${byteLength})`
+    );
+  }
+  return sanitizeIntegrationPayload(JSON.parse(jsonString)) as T;
+}
+
+/**
  * @public
  * @stable
  * @since 0.22.0
@@ -98,28 +171,30 @@ export abstract class IntegrationEvent<T = unknown> implements IIntegrationEvent
    * @param jsonString JSON string to deserialize
    * @returns Instance of the event class
    */
-  private static readonly MAX_DESERIALIZE_SIZE = 1_048_576; // 1MB
+  /**
+   * @deprecated Use module-level `MAX_DESERIALIZE_SIZE`. Kept as a static
+   * property for backward compatibility with consumers reading
+   * `IntegrationEvent.MAX_DESERIALIZE_SIZE` directly.
+   */
+  private static readonly MAX_DESERIALIZE_SIZE = MAX_DESERIALIZE_SIZE;
 
+  /**
+   * @deprecated Use module-level `sanitizeIntegrationPayload`. Kept as a
+   * thin shim — REL-007 unified the implementation so the class-based
+   * deserializer and the utility function share the same sanitizer
+   * (with depth limit, size cap, and prototype-pollution protection).
+   */
   private static sanitizeObject<T>(obj: T): T {
-    if (obj === null || typeof obj !== 'object') return obj;
-    const clean = (Array.isArray(obj) ? [] : {}) as Record<string, unknown>;
-    for (const key of Object.keys(obj as Record<string, unknown>)) {
-      if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-      clean[key] = IntegrationEvent.sanitizeObject((obj as Record<string, unknown>)[key]);
-    }
-    return clean as T;
+    return sanitizeIntegrationPayload(obj);
   }
 
   public static deserialize<E, P>(
     EventClass: new (payload?: P, metadata?: IIntegrationEventMetadata) => E,
     jsonString: string
   ): E {
-    if (jsonString.length > IntegrationEvent.MAX_DESERIALIZE_SIZE) {
-      throw new Error(
-        `Event payload exceeds maximum size of ${IntegrationEvent.MAX_DESERIALIZE_SIZE} bytes`
-      );
-    }
-    const data = IntegrationEvent.sanitizeObject(JSON.parse(jsonString));
+    const data = safeParseIntegrationJson<{ payload?: P; metadata?: IIntegrationEventMetadata }>(
+      jsonString
+    );
     return new EventClass(data.payload, data.metadata);
   }
 }

@@ -15,6 +15,20 @@ export interface ICoreRules {
   required: <T>(property: keyof T, message?: string) => RuleFunction<T>;
   minLength: <T>(property: keyof T, length: number, message?: string) => RuleFunction<T>;
   maxLength: <T>(property: keyof T, length: number, message?: string) => RuleFunction<T>;
+  /**
+   * Pattern-match a property against a RegExp.
+   *
+   * **Security warning (REL-007):** the `regex` argument is executed against
+   * input data. Do **NOT** construct the RegExp dynamically from
+   * user-controlled strings (e.g. `new RegExp(userInput)`) — this exposes
+   * your application to ReDoS (Regular Expression Denial of Service)
+   * attacks. Use only literal regex patterns in code review-able form, or
+   * pre-validate user input against a strict allow-list before constructing
+   * a RegExp.
+   *
+   * The library performs no internal validation of the regex; that is the
+   * consumer's responsibility.
+   */
   pattern: <T>(property: keyof T, regex: RegExp, message?: string) => RuleFunction<T>;
   range: <T>(property: keyof T, min: number, max: number, message?: string) => RuleFunction<T>;
   email: <T>(property: keyof T, message?: string) => RuleFunction<T>;

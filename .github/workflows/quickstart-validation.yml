@@ -1,0 +1,42 @@
+name: Quickstart Validation (5-min start guarantee)
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "examples/quickstart/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "scripts/validate-quickstart.sh"
+  schedule:
+    # Weekly run on main to catch external regressions (npm registry,
+    # Node release breaking changes, etc.)
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  docker-validation:
+    name: Validate quickstart in fresh node:22-alpine
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run validation
+        run: |
+          chmod +x ./scripts/validate-quickstart.sh
+          ./scripts/validate-quickstart.sh
+
+      - name: Comment on PR if over budget
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '⚠️ Quickstart validation failed or exceeded the 5-minute budget. See workflow logs and `docs/quickstart-validation-friction-log.md`.'
+            })

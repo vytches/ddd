@@ -81,7 +81,7 @@ describe('Domain Service DI Integration', () => {
       expect(isDomainServicePendingDIRegistration(PendingService)).toBe(true);
     });
 
-    it.skip('should register metadata in DIDomainServiceMetadataRegistry', () => {
+    it.todo('should register metadata in DIDomainServiceMetadataRegistry', () => {
       // This functionality has been moved to @vytches/ddd-di
       // @DomainService({
       //   serviceId: 'registryService',
@@ -95,7 +95,7 @@ describe('Domain Service DI Integration', () => {
     });
   });
 
-  describe.skip('DomainServiceDiscoveryPlugin', () => {
+  describe.todo('DomainServiceDiscoveryPlugin', () => {
     // This functionality has been moved to @vytches/ddd-di
     // let plugin: DomainServiceDiscoveryPlugin;
 
@@ -150,7 +150,7 @@ describe('Domain Service DI Integration', () => {
     });
   });
 
-  describe.skip('DIDomainServiceMetadataRegistry', () => {
+  describe.todo('DIDomainServiceMetadataRegistry', () => {
     // This functionality has been moved to @vytches/ddd-di
     // beforeEach(() => {
     //   DIDomainServiceMetadataRegistry.clear();

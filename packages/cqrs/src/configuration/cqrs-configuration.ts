@@ -4,6 +4,55 @@ import type { ICommandBus, IQueryBus } from '../abstracts';
 import { CommandBus, EnhancedCommandBus, EnhancedQueryBus, QueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';
 
+/**
+ * One-stop CQRS bootstrap — wires `commandBus` + `queryBus` from a single
+ * options object. Choose `'basic'` (light, no metrics) or `'enhanced'`
+ * (metrics, performance tracking, retry hooks) per bus, then attach shared
+ * middleware once for both.
+ *
+ * Use directly when you control the DI container, or via {@link CQRSModule}
+ * when you want decorator-driven auto-discovery wired in.
+ *
+ * @example Basic setup
+ * ```typescript
+ * import { CQRSConfiguration } from '@vytches/ddd-cqrs';
+ *
+ * const cqrs = new CQRSConfiguration(container);
+ * cqrs.commandBus.register(CreateOrder, new CreateOrderHandler());
+ * await cqrs.commandBus.execute(new CreateOrder('c-1'));
+ * ```
+ *
+ * @example With shared middleware and enhanced buses
+ * ```typescript
+ * import { CQRSConfiguration, LoggingMiddleware } from '@vytches/ddd-cqrs';
+ *
+ * const cqrs = new CQRSConfiguration(container, {
+ *   commandBusType: 'enhanced',
+ *   queryBusType: 'enhanced',
+ *   middlewares: [new LoggingMiddleware()],
+ * });
+ * ```
+ *
+ * @example NestJS module integration
+ * ```typescript
+ * @Module({
+ *   providers: [
+ *     {
+ *       provide: 'CQRS',
+ *       useFactory: (c: IDependencyContainer) =>
+ *         new CQRSConfiguration(c, { commandBusType: 'enhanced' }),
+ *       inject: ['DI_CONTAINER'],
+ *     },
+ *   ],
+ *   exports: ['CQRS'],
+ * })
+ * class AppModule {}
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class CQRSConfiguration {
   private readonly logger = Logger.forContext('CQRSConfiguration');
   public readonly commandBus: ICommandBus;

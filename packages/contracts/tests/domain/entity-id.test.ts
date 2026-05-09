@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches/ddd-utils';
 import { EntityId } from '../../src/domain/entity-id.implementation';
+import { safeRun } from '../_helpers/safe-run';
 
 describe('EntityId', () => {
   describe('constructor', () => {

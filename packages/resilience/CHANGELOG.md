@@ -3,6 +3,203 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.25.0-beta.2 (2026-05-09)
+
+### Bug Fixes
+
+- **nestjs:** implement configuration methods and reduce any type usage
+  ([#42](https://github.com/vytches/ddd/issues/42))
+  ([2ed336d](https://github.com/vytches/ddd/commit/2ed336d9c32b7f086fe951ab651b2c5cb9a8dcde))
+- **nestjs:** resolve all linter errors and finalize package for release
+  ([#46](https://github.com/vytches/ddd/issues/46))
+  ([625150a](https://github.com/vytches/ddd/commit/625150af1eef1e39c8a304ab3684d4702d366cc5))
+
+- Release/2025 08 12 1 (#33)
+  ([23d7e6f](https://github.com/vytches/ddd/commit/23d7e6fbc703270da37dd81ed36f12bdec2a1648)),
+  closes [#33](https://github.com/vytches/ddd/issues/33)
+- Release/2025 08 11 2 (#32)
+  ([c71ebd6](https://github.com/vytches/ddd/commit/c71ebd6b33ae0c211b8cbe74e57ce4e2a753c344)),
+  closes [#32](https://github.com/vytches/ddd/issues/32)
+- Release/2025 07 28 1 (#24)
+  ([4d6f93a](https://github.com/vytches/ddd/commit/4d6f93ac80407ce7cc7106869bb12b756bc0c72c)),
+  closes [#24](https://github.com/vytches/ddd/issues/24)
+
+### BREAKING CHANGES
+
+- **nestjs:** None - all changes maintain backward compatibility
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.11.0
+* @vytches/ddd-aggregates@0.11.0
+* @vytches/ddd-cli@0.12.0
+* @vytches/ddd-contracts@0.13.0
+* @vytches/ddd-core@0.11.0
+* @vytches/ddd-cqrs@0.11.0
+* @vytches/ddd-di@0.11.0
+* @vytches/ddd-domain-primitives@0.11.0
+* @vytches/ddd-domain-services@0.11.0
+* @vytches/ddd@0.12.0
+* @vytches/ddd-event-scheduling@0.11.0
+* @vytches/ddd-event-store@0.11.0
+* @vytches/ddd-events@0.11.0
+* @vytches/ddd-logging@0.11.0
+* @vytches/ddd-messaging@0.11.0
+* @vytches/ddd-nestjs@2.0.0
+* @vytches/ddd-policies@0.12.0
+* @vytches/ddd-process-managers@0.9.0
+* @vytches/ddd-projections@0.11.0
+* @vytches/ddd-repositories@0.11.0
+* @vytches/ddd-resilience@0.11.0
+* @vytches/ddd-testing@0.11.0
+* @vytches/ddd-utils@0.11.0
+* @vytches/ddd-validation@0.12.0
+* @vytches/ddd-value-objects@0.11.0
+
+- Enterprise package no longer bundles dependencies. Users must install all
+  required @vytches/ddd-\* packages.
+
+This aligns with industry standards (TanStack Query, Zod) where meta-packages
+are thin re-export layers, not fat bundles.
+
+- refactor: build refactored
+
+- refactor(contracts): unify domain event interfaces by merging metadata into
+  base
+- IExtendedDomainEvent interface has been removed. All domain events now use
+  IDomainEvent with an optional metadata field. This eliminates 26 dangerous
+  type castings and simplifies the event system architecture.
+
+  Migration guide:
+
+  - Replace all imports of IExtendedDomainEvent with IDomainEvent
+  - Remove unnecessary type castings to IExtendedDomainEvent
+  - The metadata field is now optional on IDomainEvent
+
+  Benefits:
+
+  - Eliminates type casting risks across the codebase
+  - Simplifies event interface hierarchy
+  - Improves type safety and developer experience
+  - Reduces cognitive load when working with events
+
+  Affected packages: contracts, events, aggregates, messaging, projections,
+  event-scheduling, event-store, repositories, domain-services
+
+- fix: fix merge conflict issues
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.6.0
+* @vytches/ddd-aggregates@0.6.0
+* @vytches/ddd-cli@0.7.0
+* @vytches/ddd-contracts@0.8.0
+* @vytches/ddd-core@0.6.0
+* @vytches/ddd-cqrs@0.6.0
+* @vytches/ddd-di@0.6.0
+* @vytches/ddd-domain-primitives@0.6.0
+* @vytches/ddd-domain-services@0.6.0
+* @vytches/ddd@0.7.0
+* @vytches/ddd-event-scheduling@0.6.0
+* @vytches/ddd-event-store@0.6.0
+* @vytches/ddd-events@0.6.0
+* @vytches/ddd-logging@0.6.0
+* @vytches/ddd-messaging@0.6.0
+* @vytches/ddd-policies@0.7.0
+* @vytches/ddd-projections@0.6.0
+* @vytches/ddd-repositories@0.6.0
+* @vytches/ddd-resilience@0.6.0
+* @vytches/ddd-testing@0.6.0
+* @vytches/ddd-utils@0.6.0
+* @vytches/ddd-validation@0.7.0
+* @vytches/ddd-value-objects@0.6.0
+
+- None - maintains full API compatibility
+
+  Or if you prefer a shorter version:
+
+  fix(build): bundle types for meta-packages to fix package resolution
+
+  Add bundle-meta-types step to build pipeline to generate inline type
+  definitions instead of re-exports. Fixes "Cannot find module '@vytches/ddd'"
+  error in published packages on GitHub Packages registry.
+
+  - Modified build script to run bundle-meta-types after fix:dts
+  - Generates 292-line index.d.ts with all types bundled inline
+  - Fixes @vytches/ddd 0.6.0 package resolution issues
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.5.1
+* @vytches/ddd-aggregates@0.5.1
+* @vytches/ddd-cli@0.6.1
+* @vytches/ddd-contracts@0.7.1
+* @vytches/ddd-core@0.5.1
+* @vytches/ddd-cqrs@0.5.1
+* @vytches/ddd-di@0.5.1
+* @vytches/ddd-domain-primitives@0.5.1
+* @vytches/ddd-domain-services@0.5.1
+* @vytches/ddd@0.6.1
+* @vytches/ddd-event-scheduling@0.5.1
+* @vytches/ddd-event-store@0.5.1
+* @vytches/ddd-events@0.5.1
+* @vytches/ddd-logging@0.5.1
+* @vytches/ddd-messaging@0.5.1
+* @vytches/ddd-policies@0.6.1
+* @vytches/ddd-projections@0.5.1
+* @vytches/ddd-repositories@0.5.1
+* @vytches/ddd-resilience@0.5.1
+* @vytches/ddd-testing@0.5.1
+* @vytches/ddd-utils@0.5.1
+* @vytches/ddd-validation@0.6.1
+* @vytches/ddd-value-objects@0.5.1
+
+- fix: folder removed
+- Enterprise package no longer bundles dependencies. Users must install all
+  required @vytches/ddd-\* packages.
+
+This aligns with industry standards (TanStack Query, Zod) where meta-packages
+are thin re-export layers, not fat bundles.
+
+- refactor: build refactored
+
+- chore: publish releases
+
+* @vytches/ddd-acl@0.3.12
+* @vytches/ddd-aggregates@0.3.12
+* @vytches/ddd-cli@0.4.12
+* @vytches/ddd-contracts@0.4.12
+* @vytches/ddd-core@0.3.12
+* @vytches/ddd-cqrs@0.3.12
+* @vytches/ddd-di@0.3.12
+* @vytches/ddd-domain-primitives@0.3.12
+* @vytches/ddd-domain-services@0.3.12
+* @vytches/ddd@0.4.0
+* @vytches/ddd-event-scheduling@0.3.12
+* @vytches/ddd-event-store@0.3.12
+* @vytches/ddd-events@0.3.12
+* @vytches/ddd-logging@0.3.12
+* @vytches/ddd-messaging@0.3.12
+* @vytches/ddd-policies@0.4.12
+* @vytches/ddd-projections@0.3.12
+* @vytches/ddd-repositories@0.3.12
+* @vytches/ddd-resilience@0.3.12
+* @vytches/ddd-testing@0.3.10
+* @vytches/ddd-utils@0.3.10
+* @vytches/ddd-validation@0.3.12
+* @vytches/ddd-value-objects@0.3.12
+
+- refactor: build refactored
+
+- refactor: build refactored
+
+- refactor: build refactored
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.22.5](https://github.com/vytches/ddd/compare/@vytches/ddd-resilience@0.22.0...@vytches/ddd-resilience@0.22.5) (2026-04-16)
 
 **Note:** Version bump only for package @vytches/ddd-resilience

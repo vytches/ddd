@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-acl public API surface > exports the documented set of symbols 1`] = `
+[
+  "ACLError",
+  "ACLRegistry",
+  "AdapterNotFoundError",
+  "ApplicationError",
+  "BaseACLAdapter",
+  "BaseACLMiddleware",
+  "BaseACLRegistry",
+  "BaseApplicationService",
+  "BaseModelTranslator",
+  "ContextACLRegistry",
+  "EnhancedACLAdapter",
+  "SimpleACLAdapter",
+  "TranslationError",
+  "TypedOperation",
+  "VersionedACLAdapter",
+  "VersionedACLRegistry",
+  "defineACLAdapter",
+]
+`;

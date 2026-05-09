@@ -10,6 +10,59 @@ import { EventSourcingCapability } from '../capabilities/event-sourcing-capabili
 import { SnapshotCapability } from '../capabilities/snapshot-capability';
 import { VersioningCapability } from '../capabilities/versioning-capability';
 
+/**
+ * Fluent builder for assembling an aggregate root with a custom mix of
+ * capabilities (snapshots, audit, versioning, event sourcing) — without
+ * inheritance chains or constructor explosion.
+ *
+ * Why a builder? Capabilities have order-sensitive setup (audit must
+ * intercept `apply()` before any events are recorded) and many aggregates
+ * use only some of them. Hard-coding a base class with all four capabilities
+ * pulls in machinery you may not need; manual wiring is error-prone. The
+ * builder makes order correct by construction.
+ *
+ * @example Single capability
+ * ```typescript
+ * import { AggregateBuilder } from '@vytches/ddd-aggregates';
+ * import { EntityId } from '@vytches/ddd-value-objects';
+ *
+ * const order = AggregateBuilder
+ *   .create({ id: EntityId.create() })
+ *   .withSnapshots()
+ *   .build(Order);
+ * ```
+ *
+ * @example Multiple capabilities, ordered automatically
+ * ```typescript
+ * const order = AggregateBuilder
+ *   .create({ id: EntityId.create() })
+ *   .withVersioning()
+ *   .withAudit()
+ *   .withSnapshots()
+ *   .withEventSourcing(myEventStore)
+ *   .build(Order);
+ * ```
+ *
+ * @example Shorthand — all four built-in capabilities
+ * ```typescript
+ * const order = AggregateBuilder
+ *   .create({ id })
+ *   .buildWithAllCapabilities(Order);
+ * ```
+ *
+ * @example Reconstituting from history with capabilities pre-attached
+ * ```typescript
+ * const order = AggregateBuilder
+ *   .create({ id, version: 0 })
+ *   .withAudit()
+ *   .build(Order);
+ * order.loadFromHistory(eventsFromStore);
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class AggregateBuilder<TId = string> {
   private params: IAggregateConstructorParams<TId>;
   private capabilities: Array<{

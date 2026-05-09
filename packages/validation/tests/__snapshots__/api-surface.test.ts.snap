@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`@vytches/ddd-validation public API surface > exports the documented set of symbols 1`] = `
+[
+  "AdapterUtils",
+  "AlwaysFalseSpecification",
+  "AlwaysTrueSpecification",
+  "AndAsyncSpecification",
+  "AndSpecification",
+  "AsyncCompositeSpecification",
+  "BaseValidationAdapter",
+  "BusinessRuleValidator",
+  "CompositeSpecification",
+  "MemoizedSpecification",
+  "NotAsyncSpecification",
+  "NotSpecification",
+  "OrAsyncSpecification",
+  "OrSpecification",
+  "PredicateSpecification",
+  "PropertyBetweenSpecification",
+  "PropertyEqualsSpecification",
+  "PropertyInSpecification",
+  "RulesRegistry",
+  "Specification",
+  "SpecificationValidator",
+  "ValidationError",
+  "ValidationErrors",
+  "ValidationFacade",
+]
+`;
