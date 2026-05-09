@@ -100,7 +100,8 @@ production-safe.
 - **No sagas / process managers.** Library deliberately ships no saga
   orchestrator. Use a dedicated saga library (e.g. NestJS Sagas, durable
   workflow engines) when you need long-running coordination. Domain events
-  - outbox give you the building blocks; orchestration belongs elsewhere.
+  combined with the outbox pattern give you the building blocks; orchestration
+  belongs elsewhere.
 - **No event-store or ORM adapters.** `IOutboxRepository`, `IEventStore`,
   `IProjectionStore` etc. are interfaces — you implement them against Postgres,
   Redis, EventStoreDB, or whatever your stack uses. Library stays testable and
