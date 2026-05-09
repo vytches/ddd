@@ -1,8 +1,10 @@
 import ts from 'typescript';
 
 import type { LintIssue, LintRule } from '../types.js';
+import { hasFileLevelSuppress } from './suppress.js';
 
 const RULE_ID = 'ddd-003';
+const RULE_SLUG = 'factory-must-return-result';
 
 /**
  * Flags **static `create(...)` methods** on aggregate or factory classes
@@ -35,7 +37,7 @@ export const factoryMustReturnResult: LintRule = {
     'Static `create(...)` methods are domain factories — they must return `Result<T, E>` to ' +
     'preserve the explicit-failure contract.',
   run({ sourceFile, filePath }) {
-    if (hasFileLevelSuppress(sourceFile)) return [];
+    if (hasFileLevelSuppress(sourceFile, RULE_SLUG)) return [];
     const issues: LintIssue[] = [];
 
     const visit = (node: ts.Node): void => {
@@ -71,13 +73,6 @@ export const factoryMustReturnResult: LintRule = {
     return issues;
   },
 };
-
-function hasFileLevelSuppress(sourceFile: ts.SourceFile): boolean {
-  // Cheap check: scan the leading 1024 chars of the source for the directive.
-  // We don't walk JSDoc — single-line comments are the recommended form.
-  const head = sourceFile.text.slice(0, 1024);
-  return head.includes('ddd-lint-disable factory-must-return-result');
-}
 
 function isStaticCreateMethod(method: ts.MethodDeclaration): boolean {
   if (!ts.isIdentifier(method.name) || method.name.text !== 'create') return false;

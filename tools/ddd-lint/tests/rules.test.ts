@@ -118,6 +118,19 @@ describe('ddd-001 — no mutable state in aggregate', () => {
     });
     expect(issues[0]!.line).toBe(2);
   });
+
+  it('honors // ddd-lint-disable no-mutable-state-in-aggregate directive', () => {
+    const src = `// ddd-lint-disable no-mutable-state-in-aggregate
+class Order extends AggregateRoot {
+  customerId = '';
+  amount = 0;
+}`;
+    const issues = noMutableStateInAggregate.run({
+      sourceFile: parse(src),
+      filePath: 'src/aggregates/order.ts',
+    });
+    expect(issues).toEqual([]);
+  });
 });
 
 describe('ddd-002 — no throw in domain', () => {
@@ -201,6 +214,16 @@ describe('ddd-002 — no throw in domain', () => {
       filePath: 'src/domain/x.ts',
     });
     expect(issues).toHaveLength(3);
+  });
+
+  it('honors // ddd-lint-disable no-throw-in-domain directive', () => {
+    const src = `// ddd-lint-disable no-throw-in-domain
+function fail() { throw new Error('intentional'); }`;
+    const issues = noThrowInDomain.run({
+      sourceFile: parse(src),
+      filePath: 'src/domain/x.ts',
+    });
+    expect(issues).toEqual([]);
   });
 });
 

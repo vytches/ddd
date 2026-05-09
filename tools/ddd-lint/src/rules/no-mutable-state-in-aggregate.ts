@@ -1,8 +1,10 @@
 import ts from 'typescript';
 
 import type { LintIssue, LintRule } from '../types.js';
+import { hasFileLevelSuppress } from './suppress.js';
 
 const RULE_ID = 'ddd-001';
+const RULE_SLUG = 'no-mutable-state-in-aggregate';
 
 /**
  * Flags **public mutable property declarations** inside classes that extend
@@ -39,6 +41,7 @@ export const noMutableStateInAggregate: LintRule = {
     'Aggregate roots and entities must not expose mutable state. Use `private readonly` and ' +
     'mutate only inside event handlers via `apply()`.',
   run({ sourceFile, filePath }) {
+    if (hasFileLevelSuppress(sourceFile, RULE_SLUG)) return [];
     const issues: LintIssue[] = [];
 
     const visit = (node: ts.Node): void => {

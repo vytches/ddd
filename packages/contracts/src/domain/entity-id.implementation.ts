@@ -1,3 +1,13 @@
+// ddd-lint-disable no-throw-in-domain
+// Reason: throwing factory methods (fromUUID/fromInteger/fromBigInt/fromText)
+// are intentionally kept for backward compatibility. Result-based variants
+// `tryFromUUID`, `tryFromInteger`, `tryFromBigInt`, `tryFromText` live in
+// `@vytches/ddd-value-objects/result-factories.ts` for new code that
+// prefers Result<T, E> for invalid-input handling. Per the library design
+// decision in README ("throwing reserved for true programmer errors"),
+// passing malformed primitives to a factory is a programmer error, not a
+// domain error.
+
 import type { IEntityId, IdType } from './entity-id.interfaces';
 
 /**

@@ -1,7 +1,18 @@
 # Release Readiness — `@vytches/ddd@0.25.0-beta.1`
 
-**Snapshot date**: 2026-05-09 **Branch**: `develop` **Status**: ✅ **Code-ready
-for public publish** — awaiting maintainer manual steps.
+**Snapshot date**: 2026-05-09 (refreshed post-marathon) **Branch**: `develop`
+**Status**: ✅ **Code-ready for GitHub Packages publish — no remaining
+maintainer prerequisites**.
+
+**Quick decision matrix:**
+
+| Target           | Ready? | What's needed                                    |
+| ---------------- | ------ | ------------------------------------------------ |
+| GitHub Packages  | ✅ YES | `workflow_dispatch` on `release.yml` — see below |
+| npmjs.org public | ⏸ NO  | REL-003 + REL-011 + npmjs.com org registration   |
+
+This document is the single source of truth on what's done and what's left when
+you're ready to push the button on public release.
 
 This document is the single source of truth on what's done and what's left when
 you're ready to push the button on public release. Created at the end of the
@@ -149,19 +160,69 @@ public npm.
 
 ---
 
-## How to resume publish work
+## Path A — Publish to GitHub Packages (READY NOW)
+
+**Pre-flight checklist** (all green as of 2026-05-09 PM):
+
+- [x] All 20 packages on `0.25.0-beta.1`
+- [x] `publishConfig` in every package → `npm.pkg.github.com`, `restricted`
+- [x] `pnpm test:ci` → 24 projects PASS
+- [x] `pnpm type-check` → 21 projects PASS
+- [x] `pnpm ddd:lint packages` → 0 errors, 49 informational warnings
+- [x] Two changesets queued: `version-unification-0-25-beta.md` +
+      `post-marathon-2026-05-09.md` — both `minor` for the entire fixed group
+- [x] CHANGELOG.md has `[0.25.0-beta.1] — 2026-05-09` section
+- [x] Release workflow `.github/workflows/release.yml` configured for
+      `npm.pkg.github.com` with `GITHUB_TOKEN` / `PAT_TOKEN` auth
+
+**Dispatch steps (maintainer, ~5 min hands-on):**
+
+1. Push `develop` to GitHub if not already current.
+2. Open `Actions → Release → Run workflow` on the GitHub UI.
+3. Pick branch `develop`. For first release, leave `release_type: auto` — the
+   workflow uses changesets to compute version bumps from queued entries. (For
+   re-publishing existing versions later, use `release_type: publish-only`.)
+4. Workflow does: validation → `changeset version` (consumes both changesets,
+   writes CHANGELOG, bumps to `0.26.0-beta.1` for the next marathon — or check
+   the changeset bump rules) → `changeset publish` to GitHub Packages → tags +
+   commits back to `develop`.
+5. Verify packages appear at `https://github.com/vytches/ddd/packages` and at
+   `npm view @vytches/ddd --registry=https://npm.pkg.github.com`.
+
+**Post-publish for `juz-ide-api-1`:**
+
+```diff
+// package.json
+- "@vytches/ddd": "^0.23.5",
+- "@vytches/ddd-nestjs": "^12.1.2",
++ "@vytches/ddd": "^0.25.0-beta.1",
++ "@vytches/ddd-nestjs": "^0.25.0-beta.1",
+```
+
+The version jump `12.1.2 → 0.25.0` looks like a downgrade only because nestjs
+was on an independent versioning track before the unification — in practice all
+packages now move together. Migration notes for the breaking changes are in
+`CHANGELOG.md` under `0.25.0-beta.1` (mainly `EnhancedCommandBus` resilience
+defaults are now opt-in).
+
+After upgrade, regenerate the AI context bundle:
+
+```bash
+cd /opt/projects/juz-ide-api-1
+node /opt/projects/vytches-ddd/tools/consumer-llm-bundle/bin/generate.mjs
+# -> ./vytches-ddd-context.md  (now includes all 20 packages, not just 2)
+```
+
+---
+
+## Path B — Publish to npmjs.org (NOT READY)
 
 When you have npm setup time:
 
-1. **Read this doc end-to-end** — confirms what's done.
-2. **Read `project-orchestration/ROADMAP-RELEASE-2026-05.md`** — original
-   roadmap; many items now done, but the publish sequence is still valid.
-3. **Read `project-orchestration/KANBAN.md`** — sequenced task list with
-   dependencies.
-4. **Pick up from REL-003** (publishConfig — code-side, 30 min) → REL-011 (ADR,
-   30 min) → manual npmjs.com setup (30 min) → smoke test (1h) → publish (5 min)
-   → announce (1h).
-5. The full path is well-trod by the work in this branch — only the credential
+1. **Pick up from REL-003** (publishConfig switch, 30 min, code-only) → REL-011
+   (ADR, 30 min) → manual npmjs.com org registration (30 min, maintainer must) →
+   smoke test (1h) → `npm publish` (5 min) → announce (1h).
+2. The full path is well-trod by the work in this branch — only the credential
    setup is outstanding.
 
 If significant time has passed (>1 month), refresh:
