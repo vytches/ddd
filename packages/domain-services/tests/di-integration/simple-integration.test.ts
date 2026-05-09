@@ -7,15 +7,15 @@
  * for reference but are currently disabled.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe } from 'vitest';
 
-describe.skip('Domain Services DI Metadata Integration', () => {
-  it('DI integration functionality has been moved to @vytches/ddd-di package', () => {
-    // All DI integration tests should be performed in the @vytches/ddd-di package
-    // This file is kept for reference only
-    expect(true).toBe(true);
-  });
-});
+// VT-001 (2026-05-09): converted from `describe.skip` to `describe.todo`.
+// Vitest reports `.todo` as intentional pending (positive signal), while
+// `.skip` reads as a red-flag for OSS adopters scanning test output. The
+// original tests have been migrated to @vytches/ddd-di package; this file
+// is kept as a discoverability breadcrumb for anyone searching the
+// domain-services repo for DI integration tests.
+describe.todo('Domain Services DI Metadata Integration — moved to @vytches/ddd-di');
 
 /* Original tests preserved for reference:
 
