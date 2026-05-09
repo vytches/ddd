@@ -11,7 +11,7 @@ complexity: simple
 estimated_time: 3h
 created_by: agent (architecture-guardian, security-audit, documentation-master)
 created_at: 2026-05-08 14:00
-status: planned
+status: parked (awaiting maintainer npmjs.com setup, code-side ready)
 release_target: v0.25.0-beta.1
 ```
 
@@ -26,8 +26,8 @@ Every `package.json` currently has:
 }
 ```
 
-This blocks `npm install @vytches/ddd` for anyone without a GitHub token.
-README claims "From NPM (coming soon)" — coming soon **is now**.
+This blocks `npm install @vytches/ddd` for anyone without a GitHub token. README
+claims "From NPM (coming soon)" — coming soon **is now**.
 
 ## Current State
 
@@ -55,6 +55,6 @@ README claims "From NPM (coming soon)" — coming soon **is now**.
 
 ## Risk
 
-Once published as `@vytches/ddd@0.25.0-beta.1`, the name on public npm is
-ours. Have a fallback name (`@vytches/ddd-core` or scoped under a personal
-account) ready if `@vytches` org is unavailable on npm.
+Once published as `@vytches/ddd@0.25.0-beta.1`, the name on public npm is ours.
+Have a fallback name (`@vytches/ddd-core` or scoped under a personal account)
+ready if `@vytches` org is unavailable on npm.
