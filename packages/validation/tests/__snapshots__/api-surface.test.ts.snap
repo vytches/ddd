@@ -11,6 +11,7 @@ exports[`@vytches/ddd-validation public API surface > exports the documented set
   "BaseValidationAdapter",
   "BusinessRuleValidator",
   "CompositeSpecification",
+  "MemoizedSpecification",
   "NotAsyncSpecification",
   "NotSpecification",
   "OrAsyncSpecification",

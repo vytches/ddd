@@ -131,6 +131,7 @@ exports[`@vytches/ddd-enterprise public API surface > exports the documented set
   "Logger",
   "LoggingMiddleware",
   "MaxRetriesExceededError",
+  "MemoizedSpecification",
   "MessagePriority",
   "MessageStatus",
   "MetricExporterFactory",
