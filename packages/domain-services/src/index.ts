@@ -6,6 +6,11 @@ export {
   UnitOfWorkAwareDomainService,
 } from './base-domain-service';
 
+// PlainDomainService — bare base for stateless domain operations,
+// without DI / event-bus / unit-of-work infrastructure. Added in VF-CANON-001
+// to close the canonical Evans/Vernon gap of a "minimal Service base".
+export { PlainDomainService } from './plain-domain-service';
+
 export {
   DomainService,
   getDIDomainServiceMetadata,

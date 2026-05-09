@@ -46,22 +46,23 @@ order.commit(); // clear pending events after saving
 
 ## Key API
 
-| Export                                 | Kind      | Description                                                  |
-| -------------------------------------- | --------- | ------------------------------------------------------------ |
-| `AggregateRoot<TId>`                   | class     | Base aggregate; manages version, events, and capabilities    |
-| `AggregateBuilder<TId>`                | class     | Fluent builder for constructing aggregates with capabilities |
-| `aggregateBuilder(params)`             | function  | Shorthand factory for `AggregateBuilder.create(params)`      |
-| `AggregateError`                       | class     | Domain error for aggregate-level failures                    |
-| `SnapshotCapability`                   | class     | Enables snapshot creation and restoration                    |
-| `AuditCapability`                      | class     | Attaches an audit log to every event applied                 |
-| `VersioningCapability`                 | class     | Registers event upcasters for schema evolution               |
-| `EventSourcingCapability`              | class     | Integrates with `IEventStore` for persistence                |
-| `asSnapshotAggregate(agg)`             | function  | Casts aggregate, throws if no `SnapshotCapability`           |
-| `asAuditAggregate(agg)`                | function  | Casts aggregate, throws if no `AuditCapability`              |
-| `hasAllCapabilities(agg, [...])`       | function  | Returns `true` if aggregate has every listed capability      |
-| `getAggregateCapabilities(agg)`        | function  | Returns string array of capability type names                |
-| `AggregateWithSnapshotCapability<TId>` | type      | Type-safe alias for snapshot-capable aggregates              |
-| `IAggregateRoot<TId>`                  | interface | Full contract for aggregates                                 |
+| Export                                 | Kind           | Description                                                                                                                                               |
+| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AggregateRoot<TId>`                   | class          | Base aggregate root; manages version, events, capabilities — the _transactional_ root                                                                     |
+| `Entity<TId>`                          | abstract class | Base for **non-root** domain entities (VF-CANON-001) — identity-based equality, no version/event machinery. Use for `OrderLine`, inner aggregate entities |
+| `AggregateBuilder<TId>`                | class          | Fluent builder for constructing aggregates with capabilities                                                                                              |
+| `aggregateBuilder(params)`             | function       | Shorthand factory for `AggregateBuilder.create(params)`                                                                                                   |
+| `AggregateError`                       | class          | Domain error for aggregate-level failures                                                                                                                 |
+| `SnapshotCapability`                   | class          | Enables snapshot creation and restoration                                                                                                                 |
+| `AuditCapability`                      | class          | Attaches an audit log to every event applied                                                                                                              |
+| `VersioningCapability`                 | class          | Registers event upcasters for schema evolution                                                                                                            |
+| `EventSourcingCapability`              | class          | Integrates with `IEventStore` for persistence                                                                                                             |
+| `asSnapshotAggregate(agg)`             | function       | Casts aggregate, throws if no `SnapshotCapability`                                                                                                        |
+| `asAuditAggregate(agg)`                | function       | Casts aggregate, throws if no `AuditCapability`                                                                                                           |
+| `hasAllCapabilities(agg, [...])`       | function       | Returns `true` if aggregate has every listed capability                                                                                                   |
+| `getAggregateCapabilities(agg)`        | function       | Returns string array of capability type names                                                                                                             |
+| `AggregateWithSnapshotCapability<TId>` | type           | Type-safe alias for snapshot-capable aggregates                                                                                                           |
+| `IAggregateRoot<TId>`                  | interface      | Full contract for aggregates                                                                                                                              |
 
 ### `AggregateRoot` method reference
 

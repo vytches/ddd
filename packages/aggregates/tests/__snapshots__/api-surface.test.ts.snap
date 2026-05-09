@@ -6,6 +6,7 @@ exports[`@vytches/ddd-aggregates public API surface > exports the documented set
   "AggregateError",
   "AggregateRoot",
   "AuditCapability",
+  "Entity",
   "EventSourcingCapability",
   "SnapshotCapability",
   "VersioningCapability",
