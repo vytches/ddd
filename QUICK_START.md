@@ -2,6 +2,19 @@
 
 Build your first DDD aggregate in under 5 minutes.
 
+## Zero-install — try in your browser
+
+The repo's [`.stackblitzrc`](./.stackblitzrc) launches the
+[`examples/quickstart`](./examples/quickstart) tests on boot:
+
+[**▶ Open in StackBlitz**](https://stackblitz.com/github/vytches/ddd?file=examples/quickstart/src/domain/order.aggregate.ts)
+
+Click → wait for `pnpm install` (about 30s) → terminal automatically runs
+`pnpm test` from `examples/quickstart`. You'll see 16 passing tests in ~2
+seconds. Edit any file in `src/` and tests re-run on save.
+
+WebContainer-based — no local Node, no install, no setup.
+
 ## Install
 
 ```bash
