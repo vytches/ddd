@@ -12,11 +12,9 @@ maintainer prerequisites**.
 | npmjs.org public | ⏸ NO  | REL-003 + REL-011 + npmjs.com org registration   |
 
 This document is the single source of truth on what's done and what's left when
-you're ready to push the button on public release.
-
-This document is the single source of truth on what's done and what's left when
 you're ready to push the button on public release. Created at the end of the
-release-prep marathon (REL-000 through DX-NEW-002 + REL-004) so the work doesn't
+release-prep marathon (REL-000 through DX-NEW-002 + REL-004) and refreshed after
+the 2026-05-09 PM marathon (VF-CANON-001 through VF-001 MVP) so the work doesn't
 go cold.
 
 ---
