@@ -11,8 +11,8 @@ complexity: medium
 estimated_time: 4h
 created_by: agent (library-quality-verifier)
 created_at: 2026-05-08 14:00
-status:
-  completed (verified 2026-05-09 by /pulse — Nx graph clean, type-check 20/20)
+status: completed
+completed_at: 2026-05-09
 release_target: v0.25.0-beta.1
 blocks:
   - REL-006 (build/release pipeline)
