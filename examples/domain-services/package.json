@@ -1,0 +1,23 @@
+{
+  "name": "@vytches/domain-services-examples",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Examples for @vytches/ddd-domain-services — order processing, payment orchestration, inventory, user registration, composition, transactions, testing",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-domain-services": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.0"
+  }
+}
