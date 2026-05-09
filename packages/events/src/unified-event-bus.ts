@@ -54,6 +54,51 @@ interface HandlerEntry {
 }
 
 /**
+ * Production event bus for systems that mix domain, integration, and audit
+ * events under one publishing surface. Extends {@link BaseEventBus} with:
+ *
+ * - **Bounded context filtering** — register handlers scoped to one or
+ *   more `contextId`s; events from other contexts are ignored. Lets a
+ *   single shared bus carry traffic from many contexts without each
+ *   handler defensively checking origin.
+ * - **Decorator auto-discovery** — on construction, scans the global
+ *   `VytchesDDD` registry for `@EventHandler`-decorated classes and wires
+ *   them in. Plays nicely with `@vytches/ddd-di` and `EventDiscoveryPlugin`.
+ * - **Heterogeneous event types** — handles `IDomainEvent`, `IAuditEvent`,
+ *   and `IIntegrationEvent` through a common `BaseEvent` discriminator.
+ *
+ * Use this when you want one bus for the whole app. For tighter isolation
+ * (per-context bus), construct multiple `BaseEventBus` instances instead.
+ *
+ * @example Basic usage with logging
+ * ```typescript
+ * import { UnifiedEventBus } from '@vytches/ddd-events';
+ *
+ * const bus = new UnifiedEventBus({ enableLogging: true });
+ * bus.subscribe('OrderCreated', async event => {
+ *   await analytics.track('order_created', event.payload);
+ * });
+ * await bus.publish({
+ *   eventName: 'OrderCreated',
+ *   payload: { id: 'o-1' },
+ *   metadata: { contextId: 'sales' },
+ * });
+ * ```
+ *
+ * @example NestJS provider
+ * ```typescript
+ * @Module({
+ *   providers: [
+ *     {
+ *       provide: IEventBus,
+ *       useFactory: () => new UnifiedEventBus({ enableLogging: true }),
+ *     },
+ *   ],
+ *   exports: [IEventBus],
+ * })
+ * class EventsModule {}
+ * ```
+ *
  * @public
  * @stable
  * @since 0.22.0

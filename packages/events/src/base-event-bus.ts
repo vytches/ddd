@@ -28,6 +28,46 @@ import { Logger } from '@vytches/ddd-logging';
 export const CUSTOM_MIDDLEWARE_SYMBOL = Symbol('CUSTOM_MIDDLEWARE');
 
 /**
+ * Concrete in-process event bus with middleware pipeline, DI-aware handler
+ * resolution, and per-event handler caps. Subclasses (e.g. {@link
+ * UnifiedEventBus}) extend this with multi-bus routing, integration-event
+ * shimming, or persistence hooks.
+ *
+ * Default behavior:
+ *
+ * - Synchronous fan-out — all subscribers for an event type run in
+ *   parallel via `Promise.all` (use middleware to enforce ordering or
+ *   serialization).
+ * - DI-aware — when `useDI = true`, class handlers can be passed by
+ *   token/constructor and resolved lazily at publish time.
+ * - Hard cap — `MAX_HANDLERS_PER_EVENT = 100` per event name to catch
+ *   leaks (forgetting to `unsubscribe`). Override for projection-heavy
+ *   apps.
+ * - Pluggable middleware — wrap publish with logging, retry, dedupe,
+ *   metrics. Configured via `options.middlewares`.
+ *
+ * @example Basic in-memory bus (no DI)
+ * ```typescript
+ * import { BaseEventBus } from '@vytches/ddd-events';
+ *
+ * class InMemoryBus extends BaseEventBus {}  // expose protected as needed
+ * const bus = new InMemoryBus({ enableLogging: true }, false);
+ *
+ * bus.subscribe('OrderPaid', async event => {
+ *   console.log('paid', event.payload);
+ * });
+ * await bus.publish({ eventName: 'OrderPaid', payload: { id: 'o-1' } });
+ * ```
+ *
+ * @example With error handler and middleware
+ * ```typescript
+ * const bus = new UnifiedEventBus({
+ *   enableLogging: true,
+ *   onError: (err, type) => Sentry.captureException(err, { extra: { type } }),
+ *   middlewares: [retryMiddleware(3), metricsMiddleware()],
+ * });
+ * ```
+ *
  * @public
  * @stable
  * @since 0.22.0
