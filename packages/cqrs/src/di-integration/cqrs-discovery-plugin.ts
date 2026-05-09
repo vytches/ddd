@@ -20,6 +20,21 @@ export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
   readonly name = 'CQRS';
 
   /**
+   * VP-NEW-001 (2026-05-09): memoize scan results per module reference.
+   *
+   * Modules don't mutate after load, so re-scanning the same module twice
+   * is wasted work. WeakMap keyed by module object ensures cache entries
+   * are GC'd if the module is unloaded.
+   *
+   * Impact: in apps with many bounded contexts each calling
+   * `discoverHandlers([sameModule])` the cost goes from O(N×K) to O(N+K)
+   * where N = number of exports, K = number of context lookups.
+   *
+   * @internal
+   */
+  private readonly scanCache = new WeakMap<object, HandlerInfo[]>();
+
+  /**
    * Check if CQRS package is available
    */
   isAvailable(): boolean {
@@ -44,15 +59,20 @@ export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
   }
 
   /**
-   * Scan a module for CQRS handlers
+   * Scan a module for CQRS handlers (memoized — see `scanCache`).
    */
   private scanModule(module: unknown): HandlerInfo[] {
-    const handlers: HandlerInfo[] = [];
-
     // Handle null/undefined modules
     if (!module || typeof module !== 'object') {
-      return handlers;
+      return [];
     }
+
+    // VP-NEW-001: cache hit short-circuits expensive Object.entries +
+    // Reflect.getMetadata loop.
+    const cached = this.scanCache.get(module as object);
+    if (cached) return cached;
+
+    const handlers: HandlerInfo[] = [];
 
     // Get all exported classes from module
     for (const [, value] of Object.entries(module)) {
@@ -73,6 +93,9 @@ export class CQRSDiscoveryPlugin implements IHandlerDiscoveryPlugin {
       }
     }
 
+    // VP-NEW-001: store result so subsequent scans of the same module
+    // skip the loop entirely.
+    this.scanCache.set(module as object, handlers);
     return handlers;
   }
 }

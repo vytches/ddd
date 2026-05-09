@@ -68,6 +68,16 @@ export abstract class BaseEventBus<
   }
 
   async publish(event: TEvent): Promise<void> {
+    // VP-NEW-001 (2026-05-09): early shortcircuit before middleware pipeline.
+    // When no handlers are registered for this event type, skip the entire
+    // middleware chain — saves the O(M) cost where M is the number of
+    // middlewares (logging, tracing, validation, etc.). Significant for
+    // tests + sparse subscription scenarios where many events have no
+    // listeners.
+    const handlers = this.handlers.get(this.getEventTypeName(event));
+    if (!handlers || handlers.size === 0) {
+      return;
+    }
     await this.publishPipeline(event);
   }
 
