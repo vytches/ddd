@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
 import {
   DefaultResilienceContext,
@@ -107,6 +107,11 @@ describe('CircuitBreaker', () => {
 
   describe('when circuit is half-open', () => {
     beforeEach(async () => {
+      // VT-001 (2026-05-09): replaced real-timer setTimeout (which depended on
+      // system clock and made the suite flaky on slow CI) with fake timers +
+      // advanceTimersByTime — deterministic and ~1000× faster.
+      vi.useFakeTimers();
+
       const context = DefaultResilienceContext.create();
       const operation = vi.fn().mockRejectedValue(new Error('failure'));
 
@@ -115,7 +120,11 @@ describe('CircuitBreaker', () => {
         expect(error).toBeInstanceOf(Error);
       }
 
-      await new Promise(resolve => setTimeout(resolve, defaultConfig.recoveryTimeout + 100));
+      vi.advanceTimersByTime(defaultConfig.recoveryTimeout + 100);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
     });
 
     it('should close circuit after successful operations', async () => {
