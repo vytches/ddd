@@ -84,6 +84,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "nx run-many --target=type-check --all --parallel=3",
+    "ddd:lint": "tsx tools/ddd-lint/src/cli.ts packages",
     "// === QUALITY GATES ===": "",
     "quality": "node scripts/quality-gates/quality-gates.js",
     "quality:ci": "node scripts/quality-gates/quality-gates.js --ci --parallel",

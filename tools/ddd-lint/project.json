@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches/ddd-lint",
+  "projectType": "application",
+  "sourceRoot": "tools/ddd-lint/src",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run tools/ddd-lint/tests --config tools/ddd-lint/vitest.config.mts --reporter=verbose"
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project tools/ddd-lint/tsconfig.json"
+      }
+    }
+  },
+  "tags": ["scope:tool", "type:cli"]
+}
