@@ -11,7 +11,8 @@ complexity: medium
 estimated_time: 4h
 created_by: agent (library-quality-verifier)
 created_at: 2026-05-08 14:00
-status: planned
+status:
+  completed (verified 2026-05-09 by /pulse — Nx graph clean, type-check 20/20)
 release_target: v0.25.0-beta.1
 blocks:
   - REL-006 (build/release pipeline)
@@ -44,8 +45,10 @@ argument, hitting a missing-`--jsx` error.
 
 - [ ] `pnpm type-check` succeeds end-to-end (≤90s)
 - [ ] `pnpm test:ci` runs without graph errors
-- [ ] `pnpm validate:types` uses `--project tsconfig.base.json` or per-package tsconfigs
-- [ ] Investigate `examples/` and `.claude/worktrees/` as sources of duplicate project names
+- [ ] `pnpm validate:types` uses `--project tsconfig.base.json` or per-package
+      tsconfigs
+- [ ] Investigate `examples/` and `.claude/worktrees/` as sources of duplicate
+      project names
 - [ ] Document root cause in `lessons-learned/`
 
 ## Investigation Hints
@@ -53,10 +56,10 @@ argument, hitting a missing-`--jsx` error.
 - Check `nx.json` for stale entries
 - Verify `packages/*/project.json` names are unique
 - **Most likely root cause** (confirmed by critical-reviewer 2026-05-08):
-  `.claude/worktrees/agent-*/` directories created by background agents
-  contain `package.json` files. `pnpm-workspace.yaml` includes `packages/**`
-  but does not exclude `.claude/worktrees`. Two such worktrees were found.
-- **Quick fix**: add `!.claude/**` to `pnpm-workspace.yaml` packages list,
-  or `rm -rf .claude/worktrees/agent-*` in pre-build cleanup
+  `.claude/worktrees/agent-*/` directories created by background agents contain
+  `package.json` files. `pnpm-workspace.yaml` includes `packages/**` but does
+  not exclude `.claude/worktrees`. Two such worktrees were found.
+- **Quick fix**: add `!.claude/**` to `pnpm-workspace.yaml` packages list, or
+  `rm -rf .claude/worktrees/agent-*` in pre-build cleanup
 - Also clean empty `packages/cli/` directory (REL-001 covers this; both fixes
   often unblock Nx together)
