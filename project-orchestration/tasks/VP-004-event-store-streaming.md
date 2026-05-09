@@ -22,8 +22,8 @@ depends_on: VP-002 (Repository Performance)
 
 Original work-item context (event store streaming) was based on assumption of
 in-library event store. Library philosophy (memory note): **no event-store
-adapter, library is dependency-free**. Reread original VP-004 work-item to
-align scope with current architecture.
+adapter, library is dependency-free**. Reread original VP-004 work-item to align
+scope with current architecture.
 
 ## Why Post-Release
 
@@ -32,6 +32,6 @@ Coupled with VP-002, post-stabilization optimization.
 ## Open question
 
 Confirm with user: does this task still apply given the "no adapters" decision?
-If event store is consumer-supplied, this task may be repurposed as
-"Streaming patterns documentation" (how consumers should stream from their
-own event store using `@vytches/ddd-projections`).
+If event store is consumer-supplied, this task may be repurposed as "Streaming
+patterns documentation" (how consumers should stream from their own event store
+using `@vytches/ddd-projections`).

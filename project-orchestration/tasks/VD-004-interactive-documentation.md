@@ -30,8 +30,8 @@ Docs are static markdown without search, playground, or categorization.
 dependency has been cancelled (CLI deprecation per REL-001). After v0.25 ships
 and feedback comes in, prioritize either:
 
-a) StackBlitz playground (1-day, big DX win — see DX-NEW-StackBlitz)
-b) Or full interactive docs (this task)
+a) StackBlitz playground (1-day, big DX win — see DX-NEW-StackBlitz) b) Or full
+interactive docs (this task)
 
 Decision deferred to post-release planning sprint.
 

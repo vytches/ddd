@@ -4,14 +4,14 @@ on:
   pull_request:
     branches: [main, develop]
     paths:
-      - 'examples/quickstart/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
-      - 'scripts/validate-quickstart.sh'
+      - "examples/quickstart/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "scripts/validate-quickstart.sh"
   schedule:
     # Weekly run on main to catch external regressions (npm registry,
     # Node release breaking changes, etc.)
-    - cron: '0 6 * * 1'
+    - cron: "0 6 * * 1"
   workflow_dispatch:
 
 jobs:

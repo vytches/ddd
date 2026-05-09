@@ -1,20 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { safeRun } from '@vytches/ddd-utils';
 import { Capability } from '../../src/capabilities/capability-base';
+import { safeRun } from '../_helpers/safe-run';
 
 class ConcreteCapability extends Capability<'concrete'> {
   readonly type = 'concrete' as const;
 
   static override get capabilityType(): string {
     return 'concrete';
-  }
-}
-
-class AnotherCapability extends Capability<'another'> {
-  readonly type = 'another' as const;
-
-  static override get capabilityType(): string {
-    return 'another';
   }
 }
 

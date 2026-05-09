@@ -8,5 +8,12 @@
  *   import { Result } from '@vytches/ddd-contracts';
  *
  * The shim has zero runtime cost — it is a compile-time re-export only.
+ *
+ * The eslint-disable below silences a false positive from
+ * `@nx/enforce-module-boundaries`: `packages/contracts/vite.config.mts`
+ * imports build helpers from this package, creating a *build-time* cycle
+ * detection. Runtime dependency is one-way (utils → contracts), correct
+ * per package.json — see contracts/vite.config.mts for the matching note.
  */
+// eslint-disable-next-line @nx/enforce-module-boundaries
 export { Result } from '@vytches/ddd-contracts';

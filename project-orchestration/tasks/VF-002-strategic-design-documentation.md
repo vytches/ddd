@@ -39,11 +39,11 @@ Without this, enterprise teams adopting the library risk:
 
 ## Why Post-Release
 
-Documentation-heavy task; ship the code first, then bring the strategic guide
-in v0.26 as a polished separate `docs/strategic-design/` section.
+Documentation-heavy task; ship the code first, then bring the strategic guide in
+v0.26 as a polished separate `docs/strategic-design/` section.
 
 ## Out-of-band consideration
 
 DDD compliance audit (2026-05-08) recommended adding `@BoundedContext('name')`
-decorator + `contextName` metadata field to events. That's a code change, not
-a docs change — could be split into a sub-task `VF-002a` once VF-002 starts.
+decorator + `contextName` metadata field to events. That's a code change, not a
+docs change — could be split into a sub-task `VF-002a` once VF-002 starts.

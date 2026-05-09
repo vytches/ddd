@@ -31,9 +31,9 @@ Outbox pattern bottlenecks:
 
 ## Why Post-Release
 
-Performance optimization, post-API-stabilization. Coupled with messaging
-package which has weak test coverage (testing-excellence: 7 src / 2 tests). Add
-tests **before** optimization — see post-release coverage task.
+Performance optimization, post-API-stabilization. Coupled with messaging package
+which has weak test coverage (testing-excellence: 7 src / 2 tests). Add tests
+**before** optimization — see post-release coverage task.
 
 ## Acceptance Criteria (preserved)
 

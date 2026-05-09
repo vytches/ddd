@@ -29,7 +29,7 @@ export const MAX_SANITIZE_DEPTH = 50;
 export function sanitizeIntegrationPayload<T>(
   obj: T,
   maxDepth: number = MAX_SANITIZE_DEPTH,
-  currentDepth: number = 0
+  currentDepth = 0
 ): T {
   if (currentDepth > maxDepth) {
     throw new Error(

@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { safeRun } from '@vytches/ddd-utils';
 
 import { EntityId } from '../../src/domain/entity-id.implementation';
 import type { IdType } from '../../src/domain/entity-id.interfaces';
+import { safeRun } from '../_helpers/safe-run';
 
 const idTypeArb: fc.Arbitrary<IdType> = fc.constantFrom('text', 'uuid', 'integer', 'bigint');
 

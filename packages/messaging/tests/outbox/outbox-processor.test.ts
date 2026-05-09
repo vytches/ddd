@@ -271,8 +271,11 @@ describe('OutboxProcessor — sequence integration', () => {
     });
 
     it('getStats returns the configuration snapshot', async () => {
-      processor.registerHandler('a.event', { handle: async () => {} });
-      processor.registerHandler('b.event', { handle: async () => {} });
+      const noopHandle = async (): Promise<void> => {
+        /* test stub — handler is never invoked in this case */
+      };
+      processor.registerHandler('a.event', { handle: noopHandle });
+      processor.registerHandler('b.event', { handle: noopHandle });
       processor.use(n => n);
 
       const stats = await processor.getStats();
