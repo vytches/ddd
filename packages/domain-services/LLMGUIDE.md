@@ -43,20 +43,21 @@ class PlaceOrderHandler {
 
 ## Key API
 
-| Export                                    | Kind           | Description                                                |
-| ----------------------------------------- | -------------- | ---------------------------------------------------------- |
-| `IBaseDomainService`                      | interface      | Marker contract; carries `name` + `version`                |
-| `AsyncDomainService`                      | abstract class | Base for services with async operations                    |
-| `EventAwareDomainService`                 | abstract class | Adds protected `publish(event)` for emitting domain events |
-| `UnitOfWorkAwareDomainService`            | abstract class | Adds protected `withUnitOfWork(fn)` for transactional ops  |
-| `DomainService(nameOrOpts)`               | decorator      | Marks a class for DI auto-discovery                        |
-| `getDomainServiceMetadata(target)`        | function       | Read decorator metadata                                    |
-| `getDIDomainServiceMetadata(target)`      | function       | Read DI-specific metadata for auto-registration            |
-| `isDomainServicePendingDIRegistration(t)` | function       | Check if class is registered but not yet wired             |
-| `IDomainService`                          | interface      | Sync domain service contract                               |
-| `IAsyncDomainService`                     | interface      | Async domain service contract                              |
-| `IEventBusAware`                          | interface      | Marks services that publish events                         |
-| `IUnitOfWorkAware`                        | interface      | Marks services that coordinate transactions                |
+| Export                                    | Kind           | Description                                                                                                                                  |
+| ----------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PlainDomainService`                      | abstract class | **Bare baseline** (VF-CANON-001) — only `serviceId`, no logger, no event bus, no UoW. Use for stateless operations without DI infrastructure |
+| `IBaseDomainService`                      | abstract class | Infrastructure-aware base (logger + serviceId)                                                                                               |
+| `AsyncDomainService`                      | abstract class | Base for services with async lifecycle (`initialize`/`dispose`)                                                                              |
+| `EventAwareDomainService`                 | abstract class | Adds protected `publish(event)` for emitting domain events                                                                                   |
+| `UnitOfWorkAwareDomainService`            | abstract class | Adds protected `executeInTransaction(fn)` for atomic ops                                                                                     |
+| `DomainService(nameOrOpts)`               | decorator      | Marks a class for DI auto-discovery                                                                                                          |
+| `getDomainServiceMetadata(target)`        | function       | Read decorator metadata                                                                                                                      |
+| `getDIDomainServiceMetadata(target)`      | function       | Read DI-specific metadata for auto-registration                                                                                              |
+| `isDomainServicePendingDIRegistration(t)` | function       | Check if class is registered but not yet wired                                                                                               |
+| `IDomainService`                          | interface      | Sync domain service contract                                                                                                                 |
+| `IAsyncDomainService`                     | interface      | Async domain service contract                                                                                                                |
+| `IEventBusAware`                          | interface      | Marks services that publish events                                                                                                           |
+| `IUnitOfWorkAware`                        | interface      | Marks services that coordinate transactions                                                                                                  |
 
 ## Patterns
 

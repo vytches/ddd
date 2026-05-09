@@ -67,6 +67,9 @@ export {
 // export type { IAggregateId } from './aggregates';
 export type { IAggregateWithEvents } from './aggregates';
 
+// Factory contracts (VF-CANON-001)
+export type { IDomainFactory, IAsyncDomainFactory } from './aggregates';
+
 // Validation
 export type {
   IAsyncSpecification,

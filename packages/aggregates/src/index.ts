@@ -2,6 +2,11 @@
 export { AggregateRoot } from './core/aggregate-root';
 export { AggregateBuilder, aggregateBuilder } from './core/aggregate-root.builder';
 
+// Entity — base class for non-root domain entities (VF-CANON-001).
+// Identity-based equality; complement to AggregateRoot for inner aggregate
+// entities like OrderLine, Address, etc.
+export { Entity } from './core/entity';
+
 // Capabilities (VP-005: explicit exports lock public surface against
 // silent additions from new files in capabilities/)
 export { AuditCapability } from './capabilities/audit-capability';

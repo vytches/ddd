@@ -6,6 +6,7 @@ exports[`@vytches/ddd-domain-services public API surface > exports the documente
   "DomainService",
   "EventAwareDomainService",
   "IBaseDomainService",
+  "PlainDomainService",
   "ServiceCircularError",
   "ServiceDuplicateError",
   "ServiceNotFoundError",
