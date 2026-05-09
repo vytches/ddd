@@ -1,8 +1,10 @@
 import ts from 'typescript';
 
 import type { LintIssue, LintRule } from '../types.js';
+import { hasFileLevelSuppress } from './suppress.js';
 
 const RULE_ID = 'ddd-002';
+const RULE_SLUG = 'no-throw-in-domain';
 
 /**
  * Flags `throw` statements inside files that look like domain code.
@@ -36,6 +38,7 @@ export const noThrowInDomain: LintRule = {
   description: 'Domain layer must use Result<T> for failure paths instead of throwing exceptions.',
   run({ sourceFile, filePath }) {
     if (!isDomainFile(filePath)) return [];
+    if (hasFileLevelSuppress(sourceFile, RULE_SLUG)) return [];
 
     const issues: LintIssue[] = [];
 
