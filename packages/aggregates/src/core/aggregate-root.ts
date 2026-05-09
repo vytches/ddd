@@ -14,6 +14,103 @@ import type {
 } from '@vytches/ddd-contracts';
 import { CapabilityRegistry, createDomainEvent } from '@vytches/ddd-contracts';
 
+/**
+ * Base class for aggregate roots — the *transactional consistency boundary*
+ * of a Domain-Driven Design model. Per Eric Evans (Blue Book, ch. 6):
+ *
+ * > An AGGREGATE is a cluster of associated objects that we treat as a unit
+ * > for the purpose of data changes. Each AGGREGATE has a root and a
+ * > boundary. The root is a single, specific ENTITY contained in the
+ * > AGGREGATE. The root is the only member of the AGGREGATE that outside
+ * > objects are allowed to hold references to.
+ *
+ * `AggregateRoot<TId>` provides:
+ *
+ * - **Identity** via `EntityId<TId>` (`getId()`)
+ * - **Versioning** for optimistic locking (`getVersion()`,
+ *   `getInitialVersion()`)
+ * - **Event emission** via `apply()` — append a `DomainEvent`, increment
+ *   version, run the registered handler to mutate state
+ * - **Event sourcing reconstitution** via `loadFromHistory()` — replay
+ *   events without accumulating new ones
+ * - **Capabilities** — composable, opt-in features (snapshots, audit,
+ *   versioning, event-sourcing) attached without inheritance chains
+ *   (see {@link AggregateBuilder})
+ *
+ * Two state-mutation rules:
+ *
+ * 1. **Never assign fields directly.** All state changes flow through
+ *    `apply(eventType, payload)` so they are recorded as events. Direct
+ *    assignment bypasses event recording and version tracking — the
+ *    aggregate becomes inconsistent with its event stream.
+ * 2. **Register handlers BEFORE applying events.** Wire every event name
+ *    in the constructor via `registerEventHandler('EventName', payload =>
+ *    {...})` before any `apply()` call. Missing handlers do not throw —
+ *    the event is recorded but state remains stale.
+ *
+ * For non-root domain entities (`OrderLine` inside `Order`), use
+ * {@link Entity} — it has identity but no version/event machinery.
+ *
+ * @example Minimal event-sourced aggregate
+ * ```typescript
+ * import { AggregateRoot } from '@vytches/ddd-aggregates';
+ * import { EntityId } from '@vytches/ddd-contracts';
+ *
+ * interface OrderCreatedPayload {
+ *   customerId: string;
+ *   amount: number;
+ * }
+ *
+ * class Order extends AggregateRoot<string> {
+ *   private customerId = '';
+ *   private amount = 0;
+ *
+ *   constructor(params: IAggregateConstructorParams<string>) {
+ *     super(params);
+ *     this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
+ *       this.customerId = payload!.customerId;
+ *       this.amount = payload!.amount;
+ *     });
+ *   }
+ *
+ *   static create(customerId: string, amount: number): Order {
+ *     const order = new Order({ id: EntityId.create(), version: 0 });
+ *     order.apply('OrderCreated', { customerId, amount });
+ *     return order;
+ *   }
+ * }
+ *
+ * const order = Order.create('c-1', 500);
+ * order.getVersion();         // 1
+ * order.getDomainEvents();    // [{ eventName: 'OrderCreated', ... }]
+ * order.commit();             // clear after persisting
+ * order.hasChanges();         // false
+ * ```
+ *
+ * @example Reconstituting from event history
+ * ```typescript
+ * class Order extends AggregateRoot<string> {
+ *   static fromEvents(id: EntityId<string>, events: IDomainEvent[]): Order {
+ *     const order = new Order({ id, version: 0 });
+ *     order.loadFromHistory(events);  // replays events, no new ones recorded
+ *     return order;
+ *   }
+ * }
+ * ```
+ *
+ * @example Bounded uncommitted-event count (REL-007 guard)
+ * ```typescript
+ * const order = new Order({
+ *   id: EntityId.create(),
+ *   version: 0,
+ *   maxEvents: 1000,  // throw if uncommitted events exceed 1000
+ * });
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private readonly _id: EntityId<TId>;
   private _version = 0;

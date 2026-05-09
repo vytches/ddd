@@ -3,6 +3,42 @@ import { Capability } from '@vytches/ddd-contracts';
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
+/**
+ * Capability that integrates an aggregate with an external `IEventStore` —
+ * the persistence boundary for an event-sourced system. Allows the
+ * aggregate to load its own state from history and persist new events
+ * without coupling domain code to the storage adapter.
+ *
+ * **Important**: this library is dependency-free and ships *no* concrete
+ * `IEventStore` implementation. Provide your own (in-memory, EventStoreDB,
+ * Postgres + JSONB, Kafka topic, etc.) and pass it via
+ * {@link setEventStore}.
+ *
+ * @example Wiring up with a custom store
+ * ```typescript
+ * import {
+ *   AggregateBuilder,
+ *   EventSourcingCapability,
+ * } from '@vytches/ddd-aggregates';
+ *
+ * const eventStore: IEventStore = new MyPostgresEventStore(pool);
+ *
+ * const order = AggregateBuilder
+ *   .create({ id })
+ *   .withEventSourcing()
+ *   .build(Order);
+ *
+ * const es = order.getCapability(EventSourcingCapability)!;
+ * es.setEventStore(eventStore);
+ *
+ * await es.saveToStore();          // persists uncommitted events, increments version
+ * await es.loadFromStore();        // hydrates aggregate from stream
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class EventSourcingCapability
   extends Capability<'eventSourcing'>
   implements IEventSourcingCapability

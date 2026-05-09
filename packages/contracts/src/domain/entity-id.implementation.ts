@@ -1,10 +1,62 @@
-/**
- * Enterprise-grade EntityId implementation
- * This is the fundamental building block for all entity identifiers in the DDD framework
- */
-
 import type { IEntityId, IdType } from './entity-id.interfaces';
 
+/**
+ * Base implementation of {@link IEntityId} — the typed identifier used by
+ * every aggregate, entity, and value object in the framework. Holds a
+ * `value: T` plus a discriminating `type: IdType` (`'text' | 'uuid' |
+ * 'integer' | 'bigint'`) so that "the same string under different id
+ * conventions" never compares as equal by accident.
+ *
+ * **Two-tier design.** This base `EntityId` from `@vytches/ddd-contracts`
+ * has minimal validation — it accepts what its constructor is given. The
+ * extended `EntityId` from `@vytches/ddd-value-objects` adds strict
+ * format validation (UUID regex, BigInt parsing, text safe-char rules)
+ * and is what application code should use. Library packages depend on
+ * this base so they don't pull value-objects into the contracts layer.
+ *
+ * Identity-based equality: two ids are equal only if both `value` *and*
+ * `type` match. Cross-type comparison always returns false.
+ *
+ * Static factories cover the common id flavors:
+ *
+ * - `create()` → random UUID v4 (no external dependency)
+ * - `fromUUID(s)` → typed UUID with regex validation
+ * - `fromInteger(n)` → non-negative integer wrapped as string
+ * - `fromBigInt(v)` → BigInt or numeric string
+ * - `fromText(s)` → safe-char text id (`[a-zA-Z0-9_-]+`)
+ *
+ * The deprecated `createXxx` aliases predate this naming and will be
+ * removed in the next major release.
+ *
+ * @example Standard usage
+ * ```typescript
+ * import { EntityId } from '@vytches/ddd-contracts';
+ *
+ * const a = EntityId.create();                // random UUID
+ * const b = EntityId.fromText('order-42');    // text id
+ * const c = EntityId.fromInteger(42);         // numeric id
+ *
+ * a.equals(EntityId.create());                // false
+ * b.equals(EntityId.fromText('order-42'));    // true
+ * b.equals(EntityId.fromInteger(42));         // false (different type)
+ * ```
+ *
+ * @example Use in an aggregate
+ * ```typescript
+ * class Order extends AggregateRoot<string> {
+ *   constructor(params: IAggregateConstructorParams<string>) {
+ *     super(params);
+ *   }
+ *   static create(): Order {
+ *     return new Order({ id: EntityId.create(), version: 0 });
+ *   }
+ * }
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class EntityId<T = string> implements IEntityId<T> {
   constructor(
     public readonly value: T,

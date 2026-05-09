@@ -1,5 +1,48 @@
 import type { Capability, CapabilityConstructor } from './capability-base';
 
+/**
+ * Type-safe registry of {@link Capability} instances keyed by their
+ * `static capabilityType` discriminator. Used internally by `AggregateRoot`
+ * (and projections) to store attached capabilities; rarely instantiated
+ * directly by domain code.
+ *
+ * Two lookup styles:
+ *
+ * - **By constructor** (`get(CapabilityClass)`) — preferred. Type-safe,
+ *   readable, returns the precise capability subclass type.
+ * - **By type string** (`getByType('snapshot')`) — useful when the
+ *   capability identity is dynamic (e.g. plugin-registered).
+ *
+ * Optional generic `TCapabilities` provides compile-time type narrowing
+ * for `getByType()` when you know the registry's full key→capability
+ * shape upfront.
+ *
+ * @example Using the registry inside an aggregate
+ * ```typescript
+ * import { CapabilityRegistry } from '@vytches/ddd-contracts';
+ * import { SnapshotCapability } from '@vytches/ddd-aggregates';
+ *
+ * const registry = new CapabilityRegistry();
+ * registry.register(new SnapshotCapability());
+ * registry.has(SnapshotCapability);   // true
+ * registry.get(SnapshotCapability);   // SnapshotCapability instance
+ * registry.getTypes();                 // ['snapshot']
+ * ```
+ *
+ * @example Typed access (knows the keys upfront)
+ * ```typescript
+ * type Caps = {
+ *   snapshot: SnapshotCapability;
+ *   audit: AuditCapability;
+ * };
+ * const r = new CapabilityRegistry<Caps>();
+ * const snap = r.getByType('snapshot');  // typed as SnapshotCapability | undefined
+ * ```
+ *
+ * @public
+ * @stable
+ * @since 0.1.0
+ */
 export class CapabilityRegistry<
   TCapabilities extends Record<string, Capability> = Record<string, Capability>,
 > {

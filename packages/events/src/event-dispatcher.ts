@@ -11,6 +11,48 @@ import { UnifiedEventBus } from './unified-event-bus';
 import { Logger } from '@vytches/ddd-logging';
 
 /**
+ * Repository-side event dispatcher — orchestrates middleware pipeline,
+ * specialized processors, and the underlying `IEventBus` to flush an
+ * aggregate's pending events safely.
+ *
+ * Three responsibilities:
+ *
+ * 1. **Drain aggregate** — `dispatchEventsForAggregate(aggregate)` reads
+ *    `getDomainEvents()`, runs them through the pipeline, and calls
+ *    `aggregate.commit()` only on success (failed dispatch leaves events
+ *    pending, so the next `save()` retries).
+ * 2. **Middleware pipeline** — `use(middleware)` registers cross-cutting
+ *    concerns (correlation-id propagation, idempotency tags, retry,
+ *    metrics) that run *before* the event hits the bus.
+ * 3. **Specialized processors** — `registerProcessor(p)` registers
+ *    domain-specific handlers that run *after* publish for events
+ *    matching `p.canProcess(event)`. Useful for projections that need
+ *    direct access to the event without subscribing through the bus.
+ *
+ * Use this in repository implementations of `save()` rather than calling
+ * `eventBus.publishMany()` directly — middleware + processors give you
+ * a uniform place to add observability and side effects without each
+ * repository duplicating the logic.
+ *
+ * @example Repository wiring
+ * ```typescript
+ * import { UniversalEventDispatcher } from '@vytches/ddd-events';
+ *
+ * class OrderRepository {
+ *   constructor(private dispatcher: UniversalEventDispatcher) {}
+ *
+ *   async save(order: Order): Promise<void> {
+ *     await this.persistTo(this.orm, order);
+ *     await this.dispatcher.dispatchEventsForAggregate(order);
+ *   }
+ * }
+ *
+ * const dispatcher = new UniversalEventDispatcher(eventBus)
+ *   .use(correlationIdMiddleware)
+ *   .use(metricsMiddleware)
+ *   .registerProcessor(new ReadModelUpdater());
+ * ```
+ *
  * @public
  * @stable
  * @since 0.22.0
