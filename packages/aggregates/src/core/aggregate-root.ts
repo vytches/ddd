@@ -209,39 +209,41 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     payload?: P,
     metadata?: Partial<IEventMetadata>
   ): void {
-    let event: IDomainEvent<P | undefined>;
-
-    if (typeof eventTypeOrEvent === 'string') {
-      event = createDomainEvent(eventTypeOrEvent, payload, metadata) as IDomainEvent<P>;
-    } else {
-      event = eventTypeOrEvent;
-      if (metadata) {
-        const sanitizedMetadata = AggregateRoot.sanitizeMetadata({
-          ...event.metadata,
-          ...metadata,
-        });
-        // Preserve prototype chain when merging additional metadata
-        event = Object.assign(Object.create(Object.getPrototypeOf(event)), event, {
-          metadata: sanitizedMetadata,
-        });
-      }
-    }
+    // VP-NEW-002 (2026-05-09): unified one-pass enrichment.
+    // Previous implementation did:
+    //   (a) sanitizeMetadata of merged metadata + Object.create (object-event-with-metadata branch)
+    //   (b) sanitizeMetadata of merged metadata + Object.create (always)
+    // -> 2× allocations + 2× sanitization on object-event paths.
+    // New flow: build the final merged metadata once, sanitize once, allocate once.
 
     this._version++;
 
-    // Enrich with aggregate metadata
-    // CRITICAL: Use Object.assign + Object.create to PRESERVE prototype chain
-    // This allows event classes (e.g., OrderCreatedEvent) to retain their methods
-    // and instanceof checks to work correctly after enrichment
-    const enrichedMetadata: IEventMetadata = AggregateRoot.sanitizeMetadata({
-      ...event.metadata,
+    let event: IDomainEvent<P | undefined>;
+    let baseMetadata: IEventMetadata | undefined;
+
+    if (typeof eventTypeOrEvent === 'string') {
+      // string path: createDomainEvent already builds a plain { eventName, payload, metadata }
+      // and applies the user-supplied metadata; no class identity to preserve.
+      event = createDomainEvent(eventTypeOrEvent, payload, metadata) as IDomainEvent<P>;
+      baseMetadata = event.metadata;
+    } else {
+      // object path: preserve prototype chain for class-based events (instanceof).
+      event = eventTypeOrEvent;
+      baseMetadata = metadata
+        ? ({ ...event.metadata, ...metadata } as IEventMetadata)
+        : event.metadata;
+    }
+
+    // Enrich + sanitize in ONE pass.
+    const enrichedMetadata = AggregateRoot.sanitizeMetadata({
+      ...baseMetadata,
       aggregateId: this._id.toString(),
       aggregateType: this.constructor.name,
       aggregateVersion: this._version,
-      timestamp: event.metadata?.timestamp ?? new Date(),
-    });
+      timestamp: baseMetadata?.timestamp ?? new Date(),
+    } as IEventMetadata);
 
-    // Preserve prototype chain - essential for class-based events
+    // Single Object.create — preserves prototype chain for class-based events.
     const enrichedEvent: IDomainEvent<P> = Object.assign(
       Object.create(Object.getPrototypeOf(event)),
       event,
@@ -364,6 +366,18 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   // ==========================================
 
   private static sanitizeMetadata<T extends Record<string, unknown>>(metadata: T): T {
+    // VP-NEW-002: fast path — most metadata never contains prototype-pollution keys.
+    // Use hasOwn directly to avoid building an array via Object.keys() when nothing
+    // needs to be removed. Returns the input unchanged if clean.
+    if (
+      !Object.prototype.hasOwnProperty.call(metadata, '__proto__') &&
+      !Object.prototype.hasOwnProperty.call(metadata, 'constructor') &&
+      !Object.prototype.hasOwnProperty.call(metadata, 'prototype')
+    ) {
+      return metadata;
+    }
+
+    // Slow path — strip the dangerous keys.
     const clean = {} as Record<string, unknown>;
     for (const key of Object.keys(metadata)) {
       if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;

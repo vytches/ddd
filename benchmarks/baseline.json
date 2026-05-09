@@ -2,48 +2,52 @@
   "version": "0.25.0-beta.1",
   "capturedOn": "2026-05-09",
   "node": "22.x",
-  "notes": "Captured on dev hardware (Linux 6.14, single-thread Node 22). Use as relative baseline only — absolute numbers vary by hardware. Re-capture on the same machine to compare across versions.",
+  "notes": "Captured on dev hardware (Linux 6.14, single-thread Node 22). Use as relative baseline only — absolute numbers vary by hardware. Re-capture on the same machine to compare across versions. VP-NEW-002 (2026-05-09) refactor: apply() single +3.9%, replay 100 events +21.7% over VP-NEW-001 baseline.",
   "results": {
     "AggregateRoot.apply() — single event": {
-      "opsPerSec": 1578919,
+      "opsPerSec": 1640055,
       "p99Ms": 0.0015,
-      "rmePct": 0.36
+      "rmePct": 1.19,
+      "previousBaseline": 1578919,
+      "deltaPct": 3.9
     },
     "AggregateRoot.apply() — 100-event replay": {
-      "opsPerSec": 32103,
-      "eventsPerSec": 3210356,
-      "p99Ms": 0.0351,
-      "rmePct": 0.27
+      "opsPerSec": 39056,
+      "eventsPerSec": 3905631,
+      "p99Ms": 0.0716,
+      "rmePct": 1.34,
+      "previousBaseline": 32103,
+      "deltaPct": 21.7
     },
     "BaseValueObject.equals() — equal objects": {
-      "opsPerSec": 5929420,
+      "opsPerSec": 6015340,
       "p99Ms": 0.0002,
-      "rmePct": 0.1
+      "rmePct": 0.11
     },
     "BaseValueObject.equals() — not equal": {
-      "opsPerSec": 6061245,
-      "p99Ms": 0.0002,
+      "opsPerSec": 5735707,
+      "p99Ms": 0.0003,
       "rmePct": 0.11
     },
     "EntityId.create() — UUID generation": {
-      "opsPerSec": 8355359,
+      "opsPerSec": 8192573,
       "p99Ms": 0.0003,
-      "rmePct": 0.09
+      "rmePct": 0.14
     },
     "EntityId.fromUUID() — validation": {
-      "opsPerSec": 11109997,
+      "opsPerSec": 10756339,
       "p99Ms": 0.0001,
-      "rmePct": 0.11
+      "rmePct": 0.04
     },
     "LibUtils.isValidUUID() — predicate": {
-      "opsPerSec": 15689797,
+      "opsPerSec": 14898421,
       "p99Ms": 0.0001,
-      "rmePct": 0.05
+      "rmePct": 0.22
     },
     "LibUtils.deepEqual() — shallow nested": {
-      "opsPerSec": 2888579,
-      "p99Ms": 0.0005,
-      "rmePct": 0.19
+      "opsPerSec": 2858900,
+      "p99Ms": 0.0006,
+      "rmePct": 0.43
     }
   }
 }
