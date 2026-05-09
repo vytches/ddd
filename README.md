@@ -180,6 +180,21 @@ Working code in [`examples/`](examples/):
 
 Each is a runnable workspace project — `cd examples/<name> && pnpm test`.
 
+## AI context bundle for consumer apps
+
+If your application uses `@vytches/ddd` and you pair-program with an AI
+assistant, generate a focused context bundle from your installed packages — much
+smaller than the full-repo `pnpm llm:bundle` (~260K tokens):
+
+```bash
+node /path/to/vytches-ddd/tools/consumer-llm-bundle/bin/generate.mjs
+# -> ./vytches-ddd-context.md  (~30-50K tokens, only your installed packages)
+```
+
+Pure Node script, zero dependencies. See
+[`tools/consumer-llm-bundle/README.md`](tools/consumer-llm-bundle/README.md) for
+vendoring (single-file copy), CLI flags, and `.ai/` workspace conventions.
+
 ## Quality tooling — ddd-lint
 
 The repo ships an internal CLI (`tools/ddd-lint/`) that flags the cheapest DDD

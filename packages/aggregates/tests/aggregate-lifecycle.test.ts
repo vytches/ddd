@@ -19,20 +19,35 @@ interface OrderItemAddedPayload {
   quantity: number;
 }
 
+/**
+ * Test fixture aggregate. Fields are `private` (mutated only inside event
+ * handlers via `apply()`) and exposed via read-only getters — matches the
+ * canonical aggregate pattern enforced by ddd-lint rule `ddd-001`.
+ */
 class Order extends AggregateRoot<string> {
-  customerId = '';
-  amount = 0;
-  items: Array<{ sku: string; quantity: number }> = [];
+  private _customerId = '';
+  private _amount = 0;
+  private _items: ReadonlyArray<{ sku: string; quantity: number }> = [];
 
   constructor(params: IAggregateConstructorParams<string>) {
     super(params);
     this.registerEventHandler<OrderCreatedPayload>('OrderCreated', payload => {
-      this.customerId = payload!.customerId;
-      this.amount = payload!.amount;
+      this._customerId = payload!.customerId;
+      this._amount = payload!.amount;
     });
     this.registerEventHandler<OrderItemAddedPayload>('OrderItemAdded', payload => {
-      this.items = [...this.items, { sku: payload!.sku, quantity: payload!.quantity }];
+      this._items = [...this._items, { sku: payload!.sku, quantity: payload!.quantity }];
     });
+  }
+
+  get customerId(): string {
+    return this._customerId;
+  }
+  get amount(): number {
+    return this._amount;
+  }
+  get items(): ReadonlyArray<{ sku: string; quantity: number }> {
+    return this._items;
   }
 
   // expose protected methods for testing

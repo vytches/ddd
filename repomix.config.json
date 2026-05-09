@@ -30,7 +30,8 @@
     "README.md",
     "QUICK_START.md",
     "tools/ddd-lint/README.md",
-    "tools/ddd-lint/CONSUMER-USAGE.md"
+    "tools/ddd-lint/CONSUMER-USAGE.md",
+    "tools/consumer-llm-bundle/README.md"
   ],
   "ignore": {
     "useGitignore": true,
