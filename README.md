@@ -8,6 +8,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Node 22+](https://img.shields.io/badge/node-%3E%3D22.19-green.svg?style=flat-square)](https://nodejs.org/)
 
+[**▶ Try it in your browser (StackBlitz)**](https://stackblitz.com/github/vytches/ddd?file=examples/quickstart/src/domain/order.aggregate.ts)
+&nbsp;—&nbsp; opens the full monorepo; the `.stackblitzrc` runs
+`examples/quickstart` tests on boot. 16 passing tests in ~2 seconds, no install
+needed.
+
 </div>
 
 ## What is this?
