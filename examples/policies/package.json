@@ -1,0 +1,23 @@
+{
+  "name": "@vytches/policies-examples",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Examples for @vytches/ddd-policies — specifications, PolicyGroup, conditional, event-driven, retry, cache, temporal patterns",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-policies": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-validation": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "vitest": "^4.0.0"
+  }
+}

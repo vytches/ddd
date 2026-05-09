@@ -236,6 +236,31 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
 
+  examples/policies:
+    dependencies:
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@vytches/ddd-domain-primitives':
+        specifier: workspace:*
+        version: link:../../packages/domain-primitives
+      '@vytches/ddd-policies':
+        specifier: workspace:*
+        version: link:../../packages/policies
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+      '@vytches/ddd-validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
+    devDependencies:
+      typescript:
+        specifier: ^5.8.0
+        version: 5.8.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.0.18(@types/node@20.19.1)(@vitest/ui@4.0.18)(tsx@4.20.3)
+
   examples/quickstart:
     dependencies:
       '@vytches/ddd':
@@ -782,9 +807,6 @@ importers:
 
   packages/testing:
     dependencies:
-      '@anthropic-ai/sdk':
-        specifier: '>=0.24.0'
-        version: 0.60.0
       '@faker-js/faker':
         specifier: ^8.0.0
         version: 8.4.1
@@ -797,9 +819,6 @@ importers:
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
-      openai:
-        specifier: '>=4.0.0'
-        version: 5.12.2
     devDependencies:
       typescript:
         specifier: ^5.0.0
@@ -922,11 +941,6 @@ packages:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
     dev: true
-
-  /@anthropic-ai/sdk@0.60.0:
-    resolution: {integrity: sha512-9zu/TXaUy8BZhXedDtt1wT3H4LOlpKDO1/ftiFpeR3N1PCr3KJFKkxxlQWWt1NNp08xSwUNJ3JNY8yhl8av6eQ==}
-    hasBin: true
-    dev: false
 
   /@babel/code-frame@7.27.1:
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -12367,19 +12381,6 @@ packages:
       is-docker: 2.2.1
       is-wsl: 2.2.0
     dev: true
-
-  /openai@5.12.2:
-    resolution: {integrity: sha512-xqzHHQch5Tws5PcKR2xsZGX9xtch+JQFz5zb14dGqlshmmDAFBFEWmeIpf7wVqWV+w7Emj7jRgkNJakyKE0tYQ==}
-    hasBin: true
-    peerDependencies:
-      ws: ^8.18.0
-      zod: ^3.23.8
-    peerDependenciesMeta:
-      ws:
-        optional: true
-      zod:
-        optional: true
-    dev: false
 
   /optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
