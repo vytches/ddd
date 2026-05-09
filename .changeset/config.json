@@ -2,10 +2,15 @@
   "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [],
+  "fixed": [["@vytches/ddd", "@vytches/ddd-*"]],
   "linked": [],
   "access": "public",
-  "baseBranch": "main",
+  "baseBranch": "develop",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "@vytches/quickstart-example",
+    "@vytches/policies-examples",
+    "@vytches/domain-services-examples",
+    "@vytches/benchmarks"
+  ]
 }
