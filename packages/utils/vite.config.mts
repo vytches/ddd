@@ -49,6 +49,15 @@ export default defineConfig({
     },
     rollupOptions: {
       external: id => {
+        // REL-008 (2026-05-08): `src/result.ts` re-exports `Result` from
+        // `@vytches/ddd-contracts` as a backward-compat shim. Contracts is
+        // a real workspace runtime dependency (declared in package.json),
+        // so it must stay external — bundling it would duplicate the type
+        // and break `instanceof` / identity checks for `Result` across
+        // packages.
+        if (id === '@vytches/ddd-contracts' || id.startsWith('@vytches/ddd-contracts/')) {
+          return true;
+        }
         // Keep Node.js built-ins external
         const nodeBuiltins = ['fs', 'fs/promises', 'path', 'os', 'crypto', 'util'];
         return nodeBuiltins.some(builtin => id === builtin || id.startsWith(builtin + '/'));
