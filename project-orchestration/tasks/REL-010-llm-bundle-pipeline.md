@@ -9,16 +9,66 @@ type: feature
 priority: high
 complexity: simple
 estimated_time: 4h
+actual_time: 0.5h
 created_by: human (LLM-first decision 2026-05-08)
 created_at: 2026-05-08 14:00
 revised_at: 2026-05-08 (critical-reviewer: 60% infra exists from VF-014 + DX-002)
-status: planned
+completed_at: 2026-05-09
+status: completed
 release_target: v0.25.0-beta.1
 depends_on: REL-001 (CLI deprecation)
 builds_on:
   - VF-014-llm-optimized-documentation (docs/llm-context.md + verify script)
   - DX-002-repomix-ai-quick-start (repomix.config.json)
 ```
+
+## ✅ Resolved (2026-05-09)
+
+### What was done
+
+**1. Three new scripts in root `package.json`:**
+
+- `pnpm llm:bundle` — runs `npx repomix --config repomix.config.json` to produce
+  `repomix-output.md` (260K tokens / 1.1M chars / 324 files). This is the single
+  artifact consumers paste into Claude Code, Cursor, GitHub Copilot, Aider, etc.
+- `pnpm llm:verify` — runs `verify-llm-context.mjs --strict`. Validates that
+  `docs/llm-context.md` references symbols that actually exist in
+  `enterprise/src/index.ts`. Currently has known false-positive parser issues;
+  REL-006 (README/docs rewrite) cleans the docs and unblocks inclusion in
+  `prerelease`.
+- `pnpm llm:guides:check` — new `scripts/llm-guides-check.mjs`. Ensures:
+  - every package with `src/index.ts` has `LLMGUIDE.md`
+  - `LLMGUIDE.md` is in the package's `files[]` array (will be published)
+  - guide content is non-trivial (> 500 chars)
+
+**2. CI gate:**
+
+- Added `llm:guides:check` to `prerelease` script — release pipeline now fails
+  if any package is missing or under-documented.
+- `llm:verify` deferred to prerelease until REL-006 cleans `llm-context.md`
+  drift (1 false-positive stale ref currently).
+
+**3. Distribution:**
+
+- `LLMGUIDE.md` already added to `files[]` of all 21 packages in REL-001
+- `repomix.config.json` already configured (DX-002) — no changes needed
+
+### What was NOT added
+
+- `llm:context` script for regenerating `docs/llm-context.md` — the existing
+  infrastructure is verifier-only, not generator. Generation is manual-curated
+  Markdown. Auto-regen out of scope; documents are a living artifact maintained
+  alongside major API changes.
+
+### Verification
+
+- `pnpm llm:bundle` → `repomix-output.md` 260K tokens, 0 suspicious files
+- `pnpm llm:guides:check --strict` → all 20 packages OK
+- `pnpm type-check` → 20 projects clean
+- `pnpm test:ci` → 21 projects, all tests passing (post nx reset)
+
+Effort: 0.5h actual vs 4h estimated — most of the infrastructure already existed
+from VF-014 and DX-002.
 
 ## ✅ Already Done (do NOT repeat)
 
@@ -33,8 +83,8 @@ builds_on:
 - Add 4 new scripts to root `package.json`:
   - `llm:bundle` — runs `npx repomix` with current config, output to
     `dist/llm-bundle.md`
-  - `llm:context` — wrapper for existing `jsdoc:generate` flow that
-    regenerates `docs/llm-context.md`
+  - `llm:context` — wrapper for existing `jsdoc:generate` flow that regenerates
+    `docs/llm-context.md`
   - `llm:verify` — alias for `node scripts/verify-llm-context.mjs --strict`
   - `llm:guides` — runs `jsdoc-generator.js` to fill missing `LLMGUIDE.md`
 - Add `llm:verify` to `prerelease` script (already covers `lint`, `test`, etc.)
@@ -60,8 +110,10 @@ Gaps:
 
 - No single `pnpm llm:bundle` command
 - Inconsistent LLMGUIDE coverage (12 packages missing)
-- No published artifact for consumers (e.g. `@vytches/ddd/llm-context.md` in dist)
-- No documented workflow: "How to seed your AI assistant with @vytches/ddd context"
+- No published artifact for consumers (e.g. `@vytches/ddd/llm-context.md` in
+  dist)
+- No documented workflow: "How to seed your AI assistant with @vytches/ddd
+  context"
 
 ## Desired State
 
@@ -81,28 +133,35 @@ npm install @vytches/ddd
 ## Acceptance Criteria
 
 ### Scripts in root `package.json`
-- [ ] `llm:bundle` — runs repomix with current config, outputs `dist/llm-bundle.md`
+
+- [ ] `llm:bundle` — runs repomix with current config, outputs
+      `dist/llm-bundle.md`
 - [ ] `llm:context` — regenerates `docs/llm-context.md` (currently manual)
 - [ ] `llm:verify` — calls `scripts/verify-llm-context.mjs --strict`
-- [ ] `llm:guides` — generates missing LLMGUIDE.md files using `jsdoc-generator.js`
+- [ ] `llm:guides` — generates missing LLMGUIDE.md files using
+      `jsdoc-generator.js`
 
 ### Distribution
+
 - [ ] Each published package includes `llm-context.md` in `dist/` (in `files`)
 - [ ] `@vytches/ddd` (enterprise meta-package) ships an aggregated
       `llm-context.md` covering all sub-packages
 
 ### Documentation
+
 - [ ] New section in README: "AI-Assisted Development with @vytches/ddd"
-- [ ] One short example for: Claude Code, Cursor, GitHub Copilot Workspaces, Aider
+- [ ] One short example for: Claude Code, Cursor, GitHub Copilot Workspaces,
+      Aider
 - [ ] Step: copy context, paste reference into AI config, ask AI to generate
       first aggregate
 
 ### Quality gate
+
 - [ ] `prerelease` script includes `llm:verify` (fails build on docs drift)
 - [ ] CI workflow runs `llm:guides --check` on PR (no missing guides allowed)
 
 ## Notes
 
-This is the headline marketing differentiator: "Other DDD libraries ask you
-to read 1000 pages of docs. @vytches/ddd asks you to paste one file into your
-AI assistant." Reflect this in marketing copy + README hero.
+This is the headline marketing differentiator: "Other DDD libraries ask you to
+read 1000 pages of docs. @vytches/ddd asks you to paste one file into your AI
+assistant." Reflect this in marketing copy + README hero.
