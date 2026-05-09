@@ -236,6 +236,31 @@ importers:
         specifier: ^17.7.2
         version: 17.7.2
 
+  examples/domain-services:
+    dependencies:
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@vytches/ddd-domain-primitives':
+        specifier: workspace:*
+        version: link:../../packages/domain-primitives
+      '@vytches/ddd-domain-services':
+        specifier: workspace:*
+        version: link:../../packages/domain-services
+      '@vytches/ddd-events':
+        specifier: workspace:*
+        version: link:../../packages/events
+      '@vytches/ddd-utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
+    devDependencies:
+      typescript:
+        specifier: ^5.8.0
+        version: 5.8.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.0.18(@types/node@20.19.1)(@vitest/ui@4.0.18)(tsx@4.20.3)
+
   examples/policies:
     dependencies:
       '@vytches/ddd-contracts':
