@@ -28,7 +28,9 @@
     "packages/*/README.md",
     "packages/*/package.json",
     "README.md",
-    "QUICK_START.md"
+    "QUICK_START.md",
+    "tools/ddd-lint/README.md",
+    "tools/ddd-lint/CONSUMER-USAGE.md"
   ],
   "ignore": {
     "useGitignore": true,

@@ -180,6 +180,27 @@ Working code in [`examples/`](examples/):
 
 Each is a runnable workspace project — `cd examples/<name> && pnpm test`.
 
+## Quality tooling — ddd-lint
+
+The repo ships an internal CLI (`tools/ddd-lint/`) that flags the cheapest DDD
+anti-patterns via AST analysis — **mutable state in aggregates**, **throws
+inside the domain layer**, and **factories that don't return `Result<T, E>`**.
+It runs in ~200ms over 458 files.
+
+```bash
+pnpm ddd:lint              # scan packages/
+pnpm ddd:lint examples     # scan a subtree
+```
+
+Want to run the same rules in your application that consumes `@vytches/ddd`? See
+[`tools/ddd-lint/CONSUMER-USAGE.md`](tools/ddd-lint/CONSUMER-USAGE.md) — three
+options: vendor the 6 source files today (zero extra deps beyond TypeScript),
+wait for the npm publish (post-REL-000), or run it from a checked-out monorepo.
+
+Recommended adoption is **staged**: informational → blocking-soon → blocking.
+Hard-gating from day one on a not-yet-clean baseline trains developers to ignore
+the tool.
+
 ## Status
 
 **v0.25.0-beta.1** — first public release on npmjs.org. Library has been in

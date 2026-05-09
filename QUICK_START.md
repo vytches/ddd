@@ -238,9 +238,25 @@ More examples covering policies (8 patterns) and domain services (7 patterns):
 - [`examples/policies/`](./examples/policies/) — 17 tests
 - [`examples/domain-services/`](./examples/domain-services/) — 17 tests
 
+## Keep your domain honest — `ddd-lint`
+
+Once you have a few aggregates, run the bundled linter to catch the cheapest DDD
+anti-patterns automatically:
+
+```bash
+pnpm ddd:lint
+```
+
+It flags **public mutable state in aggregates**, **throws inside the domain
+layer**, and **factories that don't return `Result<T, E>`**.
+
+To run the same rules in your own consumer app, see
+[`tools/ddd-lint/CONSUMER-USAGE.md`](./tools/ddd-lint/CONSUMER-USAGE.md).
+
 ## Next Steps
 
 - [Package Ecosystem](./README.md#package-ecosystem) — 20 packages overview
 - [Design Decisions](./README.md#design-decisions) — why no sagas, no adapters
+- [Quality tooling](./README.md#quality-tooling--ddd-lint) — ddd-lint setup
 - Per-package guides — `node_modules/@vytches/ddd-*/LLMGUIDE.md`
 - ADRs — [`docs/adr/`](./docs/adr/) — architecture decisions of record
