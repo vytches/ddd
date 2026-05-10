@@ -1,19 +1,20 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-05-09 (post-marathon) by /pulse_ _Updated by `/pulse`.
+_Last sync: 2026-05-10 (VT-coverage-marathon) by /pulse_ _Updated by `/pulse`.
 Read-only for humans — agents write here._
 
 ---
 
 ## 🎯 Sprint Focus
 
-Post-release marathon **complete** — 7 backlog tasks shipped in ~5h actual vs
-~82h estimated. Code side now significantly stronger than at morning pulse:
-+canonical Evans patterns, +18 JSDoc examples, +PBT, +outbox bug fix, +apply()
-perf, +DI cold-start optimization, +N+1 contract, +ddd-lint MVP.
+Test-coverage marathon **complete** — VT-002..VT-005 series shipped today,
+all merged to develop. Global library coverage 63.98% → **69.29%** (+5.3pp).
+4 PRs, 11 new test files, ~3000 LOC tests, 0 regressions in 216+ existing
+tests. Quality bar materially higher pre-v0.26.
 
-Publishing still parked (~3.5h maintainer work). Resumption point:
-[`/RELEASE-READINESS.md`](../RELEASE-READINESS.md).
+**Publish chain unchanged**: REL-000 deadline **2026-05-12** (2 days) is the
+only time-bound action. Code-side ~3.5h (REL-003 + REL-011 + smoke) once
+maintainer registers npmjs.com org.
 
 ---
 
@@ -21,16 +22,13 @@ Publishing still parked (~3.5h maintainer work). Resumption point:
 
 <!-- @tech-lead updates this section on /pulse -->
 
-1. **REL-000 deadline 2026-05-12** — 3 days. npmjs.com manual registration is
-   the one time-bound human action on the board. If skipped, no publish path.
-2. **REL-003 / REL-011 unchanged** — still parked, still 3.5h to publish-ready
-   once maintainer schedules.
-3. **VP-004 scope review** — task contradicts no-adapters decision per
-   @product-owner. Decide: repurpose, drop, or fold into VF-002 docs work.
-
-_Frontmatter cleanup completed 2026-05-09 — VT-001, VP-006, VP-002, VF-001 all
-marked `in_progress` with partial-delivery sections. VF-CANON-001 moved to
-`completed-tasks/`. VP-NEW-002 completion record created._
+1. **REL-000 deadline 2026-05-12** — **2 days**. Manual npmjs.com org
+   registration is the one human-gated action; missed window = publish drifts
+   3-4 weeks. No code work needed — calendar problem.
+2. **REL-003 / REL-011 still parked** — 3.5h once REL-000 unblocked. No code
+   blockers.
+3. **VP-004 formal drop pending** — flagged for 3rd consecutive pulse, scope
+   contradicts no-adapters decision. Decide this session: drop or repurpose.
 
 ---
 
@@ -42,88 +40,101 @@ _N/A — this is a library project, no mobile UI._
 
 ## ⚙️ Technical Pulse
 
-<!-- Updated by @tech-lead on 2026-05-09 (post-session) -->
+<!-- Updated by @tech-lead on 2026-05-10 -->
 
-**Build/test**: PASS — 24 projects (was 23, +`@vytches/ddd-lint`), ~290+ tests,
-0 failures, type-check 21/21 (was 20, +ddd-lint). **Debt**: 4 major prose items
-(VP-002/003/004/006), no `tech_debt:` fields in YAML. **Blocked chains**: 0 |
-Parked chain: REL-003 → REL-011 → publish (depth 2, human gate). **Overdue**: 0
-| REL-000 deadline 2026-05-12 — 3 days. **Stale frontmatter (4 files)**: VT-001,
-VP-006, VP-002, VF-001 — `status: planned` but partial work shipped today.
+**Build/test**: PASS — 24 projects, ~330+ tests (VT-002..005 added 62), 0
+failures, **coverage 69.29% (+5.3pp today)**.
+**Debt**: MEDIUM (score 2.5) | Major: 1 (D-001, raw throws in EntityId) |
+Minor: 3 | No new debt from VT series.
+**Blocked chains**: 0 | Parked chain: REL-003 → REL-011 → publish (depth 2,
+human gate at REL-000).
+**Overdue**: 0 | **REL-000 deadline 2026-05-12 — 2 days remaining.**
+**Stale (>14d)**: none — all tasks updated within 7 days.
+**VP-004 decision pending**: scope contradicts no-adapters; 18h at risk.
+Repurpose or drop before next session.
 
-### What shipped today (post-morning-pulse, ~5h actual vs ~82h estimated)
+### What shipped today (VT coverage marathon, ~5h actual vs ~24h estimated)
 
-- **VF-CANON-001**: Entity, PlainDomainService, IDomainFactory — task file
-  current
-- **JSDoc 18 symbols**: ad-hoc, no task file (TOP 20 public API in 4 packages)
-- **VT-001 partial**: PBT (fast-check) + lifecycle (25 cases) + outbox bug fix
-  (`[result, error]` destructure inversion in `outbox-processor.ts:104`)
-- **VP-NEW-002**: apply() refactor — replay **+21.7%** (3.9M events/s), single
-  +3.9%
-- **VP-006 partial**: single-pass reflection (5 calls→1) + WeakSet memo
-- **VP-002 partial**: IBatchRepository contract + MemoizedSpecification
-- **VF-001 MVP**: ddd-lint CLI (3 rules, 29 tests, scans 458 files in ~200ms)
+- **VT-002**: foundation tier (aggregate-errors 100%, aggregate-utilities 89%,
+  id.value-object 88%) — merge `2bb21800`
+- **VT-003**: capabilities (audit/versioning/snapshot/event-sourcing all 90%+)
+  — merge `b8b951a5`
+- **VT-004**: integration layers + base-business-policy (95%+) — merge
+  `c1ebb748`
+- **VT-005**: DI base-adapter, discovery-registry, CQRS configuration — merge
+  `1701df2d`
 
 ### Remaining backlog (8 active, all post-v0.25)
 
-- VP-002 full scope (20h, partial done) | VP-003 (14h, unvalidated)
-- VP-004 (18h, scope question — see Business Pulse) | VP-006 full scope (16h,
-  partial done)
-- VD-004 (20h, deferred) | VF-001 full scope (24h, MVP done) | VF-002 (20h)
-- Publish chain: REL-003 + REL-011 parked
+- VP-002 full scope (20h, partial done) | VP-003 (14h, unvalidated — validate
+  with juz-ide-api before starting)
+- **VP-004 (18h, DROP candidate per @product-owner — 3rd flag)**
+- VP-006 full scope (16h, partial done) | VD-004 (20h, deferred)
+- VF-001 full scope (24h, MVP done) | VF-002 (20h)
+- Publish chain: REL-000 (human, <1h) → REL-003 (3h) → REL-011 (0.5h) parked
 
 ### Critical path to publish
 
-REL-003 (3h, code-only, no npm credentials) → REL-011 (30 min) → npmjs.com
-manual registration (maintainer, before 2026-05-12) → smoke test (1h) → publish.
+REL-000 npmjs.com registration (human, <1h, **deadline 2026-05-12**) →
+REL-003 (3h, code-only) → REL-011 (0.5h, CI wiring) → smoke test (1h) →
+publish. **Total: ~5.5h once maintainer acts.**
 
 ### Velocity
 
-Today's session: ~5h actual vs ~82h estimated (94% time saved via critical agent
-reviews). Total marathon: ~21h actual vs ~209h estimated. Board is clean for
-next session to start at REL-003 or frontmatter cleanup.
+VT-002..005 today: ~5h actual vs ~24h estimated (79% time saved). Marathon
+cumulative: ~26h actual vs ~233h estimated. Board clean; next session:
+REL-000 if maintainer available, else opportunistic VT-001 GWT migration or
+domain-primitives ratio.
 
 ---
 
 ## 💼 Business Pulse
 
-<!-- Updated by @product-owner on 2026-05-09 (post-marathon refresh) -->
+<!-- Updated by @product-owner on 2026-05-10 -->
 
-**Next milestone**: Public publish to npmjs.org — ~1-2w if maintainer schedules
-3.5h this week; drifts to 3-4w if REL-000 deadline (2026-05-12) passes without
-action. **Code readiness**: Complete. 7 tasks shipped in 5h post-pulse session.
-**Unvalidated features**: VP-003, VP-004 (no consumer signal — juz-ide-api rates
-current performance "acceptable"). VP-004 scope may be invalidated by "no
-adapters" decision — flag for repurposing or drop. **Segment gaps**:
-LLM-assisted-dev teams are best-served technically but worst-served in
-positioning. README buries `pnpm llm:bundle` and 21 LLMGUIDE.md files behind
-conventional DDD pitch — biggest single conversion miss for 2026 adopters.
-**Task to cut**: VP-004 (18h, expert) — scope contradicts "no adapters"
-architectural decision. **Key validation question**: "Did you open README,
-LLMGUIDE.md, or your AI assistant when you hit your first problem?" — determines
-whether to invest in VD-004 (docs site) or richer LLM context.
+**Next milestone**: Public publish to npmjs.org — clock: REL-000 human gate
+expires **2026-05-12 (2 days)**.
+**Code readiness**: High. Coverage 69.29% (+5.3pp today), 0 regressions,
+publish chain is REL-003 (3h) + REL-011 (30min) after npmjs.org registration.
+**Unvalidated features**: VP-003 (14h), VP-004 (18h) — 32h parked, no
+consumer signal on either.
+**Drop candidate**: VP-004 — contradicts no-adapters decision, flagged 3rd
+consecutive pulse. Formally drop this session.
+**Sequencing call**: REL-000 registration > REL-003 > README LLM-first reframe.
+Positioning work is high-value but wrong order if publish misses the window.
+**Validation this week**: Ask one juz-ide-api dev: "Hit outbox throughput
+limits?" — 15 min prevents 14h VP-003 spend.
 
-### Most important business insight from today
+### Most important business insight today
 
-**VF-001 MVP (ddd-lint) is the most differentiated deliverable to date.**
+**Coverage win is banked quality, not milestone progress.** VT-002..005
+brought the global library coverage from 63.98% → 69.29% (+5.3pp) — that
+removes a soft credibility blocker for v0.26 launch ("would I depend on a
+library that's only 64% tested?"). But the milestone clock moves only when
+npmjs.org registration happens.
 
-Until today, @vytches/ddd was a "comprehensive implementation" library — it
-provided DDD building blocks but said nothing about whether the consumer was
-using them correctly (table-stakes positioning in 2026; Nest CQRS does the
-same). ddd-lint crosses into a different category: it **enforces correctness**.
-No mainstream TypeScript DDD library ships static analysis flagging mutable
-aggregate state, domain-layer exceptions, and non-Result factory methods.
-
-Install story shifts from "here are the classes you need" to "here is the tool
-that keeps your DDD architecture honest." Lead with this in launch messaging —
-it is a positioning anchor that performance numbers and symbol counts cannot
-match.
+**Highest-leverage next move: finish publish, then reposition.** A reframed
+README with no published package helps no one. Don't let a 30-minute npm org
+registration kill the milestone for the sake of a hours-not-days
+README rewrite that can happen post-publish.
 
 ---
 
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-05-10] @tech-lead: REL-000 is the only human-gated action before publish.
+Miss 2026-05-12 = publish drifts 3-4 weeks. VT-002..005 marathon shipped today
+(~5h actual vs ~24h estimated, coverage +5.3pp); board clean for REL-000 push.
+[2026-05-10] @product-owner: Coverage win is banked quality, not milestone
+progress — milestone clock moves only when npmjs.org registration happens. Two
+days left on REL-000 deadline. [2026-05-10] @product-owner: VP-004 must be
+formally dropped this session — three pulses of flagging without action is
+backlog debt. [2026-05-10] @testing-excellence: VT coverage marathon —
+foundation, capabilities, integration layers, DI/CQRS configuration all moved
+to >80%. Out-of-scope follow-ups (events/integration transformers, policies/
+utils, seeder) documented in completed-tasks/VT-005 for potential VT-006.
 
 [2026-05-09 PM] @product-owner: ddd-lint MVP (VF-001) is the most differentiated
 deliverable to date — crosses from "build blocks" library into "correctness
