@@ -9,14 +9,37 @@ type: test
 priority: medium
 complexity: medium
 estimated_time: 4-6h
+actual_time: ~1h
 created_by: agent (testing-excellence + orchestrate 2026-05-10)
 created_at: 2026-05-10
 updated_at: 2026-05-10
-status: pending
+completed_at: 2026-05-10
+status: completed
 release_target: v0.26.0
-branch: feat/vt-005-di-cqrs-coverage
+branch: feat/vt-005-di-cqrs-coverage (merged)
+merge_commit: 1701df2d
 parent: VT-002, VT-003, VT-004
 ```
+
+## Completion Notes (2026-05-10)
+
+- `di/adapters/base-adapter.ts`: 0% → **high** (validateToken, getTokenKey
+  string/symbol/class, getServicesByTag default impl)
+- `di/discovery/discovery-registry.ts`: 16.66% → **~76%** (plugin
+  registration, sequential + parallel discovery, validateDiscoveryResults
+  via accessMatrix, getSummary, three Factory presets)
+- `cqrs/configuration/cqrs-configuration.ts`: 0% → **high** (basic vs
+  enhanced bus selection, middleware wiring, autoDiscovery deprecated path)
+- `cqrs/configuration/cqrs-module.ts`: 0% → **high** (create / createBasic /
+  createEnhanced static factories)
+- Global library coverage: 68.74% → **69.29%**
+
+**Out of scope (intentional — sub-80% but lower priority):**
+- `cqrs/src/errors`: 41.66% (limited public surface, low risk)
+- `di/discovery/handler-discovery-registry.ts`: still low (separate
+  discovery system; VT-005 targeted plugin-based one)
+
+Verified via `pnpm test:ci` + `pnpm type-check`.
 
 ## Why This Task Exists
 

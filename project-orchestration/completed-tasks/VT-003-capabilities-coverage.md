@@ -9,14 +9,29 @@ type: test
 priority: high
 complexity: medium
 estimated_time: 6-8h
+actual_time: ~1.5h
 created_by: agent (testing-excellence + orchestrate 2026-05-10)
 created_at: 2026-05-10
 updated_at: 2026-05-10
-status: pending
+completed_at: 2026-05-10
+status: completed
 release_target: v0.26.0
-branch: feat/vt-003-capabilities-coverage
+branch: feat/vt-003-capabilities-coverage (merged)
+merge_commit: b8b951a5
 parent: VT-002 (foundation tier — DONE)
 ```
+
+## Completion Notes (2026-05-10)
+
+- `audit-capability.ts`: 69.56% → **100%**
+- `versioning-capability.ts`: 16.12% → **~94%**
+- `snapshot-capability.ts`: 40% → **~90%**
+- `event-sourcing-capability.ts`: 28.57% → **~95%**
+- Aggregate `capabilities/` directory: 41.49% → **97.27%**
+- Global library coverage: 66.12% → **67.11%**
+- 4 test files, all `safeRun`-based, all in `/tests/capabilities/`
+
+Verified via `pnpm test:ci` + `pnpm type-check`.
 
 ## Why This Task Exists
 

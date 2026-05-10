@@ -11,13 +11,28 @@ type: test
 priority: high
 complexity: medium
 estimated_time: 6h
+actual_time: ~1.5h
 created_by: agent (testing-excellence + orchestrate 2026-05-10)
 created_at: 2026-05-10
 updated_at: 2026-05-10
-status: in_progress
+completed_at: 2026-05-10
+status: completed
 release_target: v0.26.0
-branch: feat/vt-002-foundation-coverage
+branch: feat/vt-002-foundation-coverage (merged)
+merge_commit: 2bb21800
 ```
+
+## Completion Notes (2026-05-10)
+
+- `aggregate-errors.ts`: 7.89% → **100%** (38/38 stmts)
+- `aggregate-utilities.ts`: 16.49% → **89.69%** (87/97 stmts)
+- `id.value-object.ts`: 46.05% → **88.15%** (67/76 stmts)
+- `value-objects/src` package: 55.91% → **90.32%**
+- Global library coverage: 63.98% → **66.12%**
+- 62 new tests, all using `safeRun` (no `toThrow`), all in `/tests/`
+- 0 regressions in 216+ existing tests
+
+Verified via `pnpm test:ci` + `pnpm type-check` + `pnpm vitest run --coverage`.
 
 ## Why This Task Exists
 

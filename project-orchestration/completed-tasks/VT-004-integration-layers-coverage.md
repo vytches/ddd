@@ -9,14 +9,33 @@ type: test
 priority: high
 complexity: medium-high
 estimated_time: 8-10h
+actual_time: ~1.5h
 created_by: agent (testing-excellence + orchestrate 2026-05-10)
 created_at: 2026-05-10
 updated_at: 2026-05-10
-status: pending
+completed_at: 2026-05-10
+status: completed
 release_target: v0.26.0
-branch: feat/vt-004-integration-layers-coverage
+branch: feat/vt-004-integration-layers-coverage (merged)
+merge_commit: c1ebb748
 parent: VT-002, VT-003
 ```
+
+## Completion Notes (2026-05-10)
+
+- `events/integration/integration-event.ts`: 10.34% → **95.91%**
+- `events/integration/context-router.ts`: 0% → **high**
+- `policies/core/base/base-business-policy.ts`: 38.15% → **97.36%**
+- Global library coverage: 67.11% → **68.74%**
+
+**Out of scope (deferred to future task if needed):**
+- `events/integration/domain-to-integration-transformer.ts` (still ~0%)
+- `events/integration/integration-event-transformer-registry.ts` (still ~0%)
+- `events/integration/integration-processor.ts` (still ~0%)
+  These are separate concerns from the cross-context routing surface;
+  may justify a VT-006 if v0.26 release SLA requires them at 80%.
+
+Verified via `pnpm test:ci` + `pnpm type-check`.
 
 ## Why This Task Exists
 
