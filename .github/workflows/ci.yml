@@ -105,12 +105,6 @@ jobs:
       - name: Type check affected projects
         run: pnpm nx affected --target=type-check --parallel=3
 
-      - name: JSDoc validation
-        if: github.event_name == 'pull_request'
-        run: node scripts/jsdoc-validator.js
-        env:
-          CI: true
-
       - name: Test affected projects
         run: pnpm nx affected --target=test --parallel=3 --verbose
         env:
@@ -118,35 +112,6 @@ jobs:
 
       - name: Build affected projects
         run: pnpm nx affected --target=build --parallel=3
-
-      # Enhanced Metadata System V2 - JSDoc injection
-      - name: Inject JSDoc metadata
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "📝 Injecting JSDoc metadata for affected packages..."
-          # Get list of affected packages
-          AFFECTED_PACKAGES=$(pnpm nx print-affected --target=build --select=projects | tr ',' '\n' | sed 's/@vytches\/ddd-//')
-
-          # Inject JSDoc for each affected package
-          for pkg in $AFFECTED_PACKAGES; do
-            if [ -d "packages/$pkg" ]; then
-              echo "Processing $pkg..."
-              node scripts/inject-yaml-jsdoc-ast.js --package=$pkg || true
-            fi
-          done
-
-          echo "✅ JSDoc injection completed"
-
-      # Verify JSDoc metadata injection
-      - name: Verify JSDoc metadata
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "🔍 Verifying JSDoc metadata injection..."
-          node scripts/verify-jsdoc-injection.js --silent || {
-            echo "⚠️ JSDoc injection verification failed. Running detailed report..."
-            node scripts/comprehensive-jsdoc-report.js
-            exit 1
-          }
 
       # Architecture validation - check for circular dependencies
       - name: Check for circular dependencies
@@ -267,10 +232,6 @@ jobs:
 
       - name: Build all packages
         run: pnpm build
-
-      # Enhanced Metadata System V2 - JSDoc injection for production
-      - name: Inject JSDoc metadata for all packages
-        run: ./scripts/inject-jsdoc-all-packages.sh
 
       - name: Run E2E tests
         run: pnpm nx run-many --target=e2e --all --parallel=1

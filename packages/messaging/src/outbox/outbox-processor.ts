@@ -94,7 +94,29 @@ export class OutboxProcessor {
   }
 
   /**
-   * Processes a single batch of pending messages
+   * Processes a single batch of pending messages.
+   *
+   * **Dispatch model:** messages within a batch are dispatched **in parallel**
+   * via `Promise.allSettled`. A failure in message N does **not** block
+   * messages N+1..N+M. Each failure is isolated, retry-counted via
+   * `incrementAttempt`, and reset to `PENDING` (or marked `FAILED` after
+   * `maxRetries` attempts) — independently of sibling messages.
+   *
+   * **Ordering:** parallel dispatch means message processing order is
+   * **not guaranteed** within a batch, even if `priorityOrder` was used to
+   * select which messages to fetch. If you need strict ordering, set
+   * `batchSize: 1` (one message per batch = sequential by definition).
+   *
+   * **Throughput:** for N messages and dispatch latency L, total batch time
+   * is approximately L (parallel) rather than N*L (sequential). For 200
+   * messages at 10ms dispatch each: ~10ms parallel vs ~2s sequential.
+   *
+   * **Quiescence:** if there are no pending messages, returns immediately
+   * without invoking handlers.
+   *
+   * @public
+   * @stable
+   * @since 0.1.0
    */
   async processBatch(): Promise<void> {
     if (!this.isRunning) {
@@ -119,7 +141,9 @@ export class OutboxProcessor {
 
     this.logger.info(`Processing ${messages.length} messages`);
 
-    // Process messages in parallel within the batch
+    // Parallel dispatch via Promise.allSettled — failures in any message do
+    // NOT short-circuit the batch. Each message has its own retry/fail state
+    // tracked in the repository (see handleMessageError).
     const processingPromises = messages.map(message => this.processMessage(message));
 
     await Promise.allSettled(processingPromises);

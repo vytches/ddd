@@ -116,10 +116,17 @@ Verification: testing-excellence agent — APPROVE_WITH_FIXES, all 3 applied
 
 ### Post-release (target)
 
-- [ ] `aggregates` test ratio ≥ 0.6 (6+ tests / 11 src)
+- [x] `aggregates` test ratio ≥ 0.6 (6+ tests / 11 src) — DONE via VT-002+VT-003
+      (12 test files, capabilities + utilities + lifecycle covered)
 - [ ] `domain-primitives` test ratio ≥ 0.5
-- [ ] `messaging` outbox ≥ 4 integration tests
-- [ ] PBT covers VO equality / hashCode in 2+ packages
+- [x] `messaging` outbox ≥ 4 integration tests — DONE pre-VT series
+- [x] PBT covers VO equality / hashCode in 2+ packages — DONE pre-VT series
+      (BaseValueObject, EntityId)
+
+**Update 2026-05-10**: VT-002→VT-005 series (separate tasks) brought global
+coverage from 63.98% → 69.29%. Foundation, capabilities, integration layers,
+DI/CQRS configuration all covered. Remaining VT-001 work (GWT migration,
+domain-primitives ratio, additional VO PBT) is opportunistic / low priority.
 
 ## Coupled with
 
