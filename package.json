@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd",
-  "version": "0.25.0-beta.1",
+  "version": "0.26.0",
   "private": true,
   "description": "VytchesDDD - Enterprise-grade TypeScript library implementing Domain-Driven Design patterns",
   "keywords": [
@@ -277,6 +277,7 @@
     ]
   },
   "dependencies": {
+    "@changesets/cli": "^2.27.1",
     "reflect-metadata": "^0.2.2",
     "uuid": "^11.1.0"
   },

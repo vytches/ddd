@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-policies",
-  "version": "0.25.0-beta.2",
+  "version": "0.26.0",
   "description": "Business policies and policy builder patterns",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -58,8 +58,8 @@
     ]
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",

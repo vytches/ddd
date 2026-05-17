@@ -3,6 +3,56 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 0.26.0 (2026-05-17)
+
+### Bug Fixes
+
+- **messaging:** repair broken declaration file caused by JSDoc inline block
+  comments (`/* ... */`) terminating JSDoc blocks early, causing
+  `TS1160: Unterminated template literal` in consumers
+  ([#fix-messaging-dts](https://github.com/vytches/ddd/commit/d9638a04))
+- **build:** remove deprecated Enhanced Metadata System V2 (YAML JSDoc
+  injection) from build pipeline — was the root cause of the `/* ... */`
+  injection into `.d.ts` files
+
+### Features
+
+- **aggregates:** add `Entity<TId>` abstract base class — canonical non-root
+  domain entity with identity-based equality (Evans/Vernon shape), sibling to
+  `AggregateRoot`
+- **domain-services:** add `PlainDomainService` abstract class —
+  infrastructure-free service base with only `serviceId`, for lightweight domain
+  services
+- **contracts:** add `IDomainFactory<TAgg, TProps>` and `IAsyncDomainFactory` —
+  factory pattern contracts returning `Result<TAgg, Error>`, sibling to
+  `IRepository`
+- **contracts:** add `IBatchRepository<T>` — N+1 prevention contract, extends
+  `IExtendedRepository` with order-preserving `findByIds()` (null for misses)
+- **validation:** add `MemoizedSpecification<T>` — per-candidate WeakMap cache
+  for repeated `isSatisfiedBy` calls, with `invalidate()` for manual eviction
+- **aggregates:** `AggregateRoot.apply()` performance refactor — unified
+  one-pass enrichment, eliminates duplicate `Object.create` and double
+  `sanitizeMetadata`. Single-event apply +3.9%, 100-event replay +21.7% (~3.9M
+  events/s)
+- **nestjs:** `AutoDiscoveryService` cold-start optimization — single-pass
+  `Reflect.getMetadataKeys` + WeakSet memoization, ~15-30ms savings on
+  10-context deployments
+- **messaging:** `OutboxProcessor` parallel dispatch documented — contract
+  guarantees parallel fan-out on status success vs serial failure-first handling
+
+### Tests
+
+- Global library coverage: 63.98% → **69.29%** (+5.3pp). Foundation tier,
+  capabilities, integration layers, DI/CQRS configuration all moved to >80%
+  (VT-002..005)
+
+### Chores
+
+- Remove deprecated YAML JSDoc injection system (393 files, 16 scripts, CI
+  steps)
+- Version unification: all `@vytches/ddd-*` packages aligned via `fixed`
+  changeset group
+
 # 0.25.0-beta.2 (2026-05-09)
 
 ### Bug Fixes
