@@ -45,14 +45,6 @@ function createDTSPlugin(context: BuildContext, options: PackageConfigOptions) {
           fs.writeFileSync(indexDtsPath, content);
         }
       }
-
-      // Enhanced Metadata System V2 has been replaced with YAML-based system
-      // YAML processing is now handled by separate scripts, not during build
-      if (options.jsdocExamples?.enabled !== false) {
-        console.log(
-          `[createDTSPlugin] Skipping deprecated Enhanced Metadata System V2 - use YAML system instead`
-        );
-      }
     } catch (error) {
       console.warn(
         `Warning: DTS post-processing failed for ${context.packagePath}:`,
@@ -90,19 +82,7 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
   // Test aliases - removed since test config is not used in Vite build config
 
   const buildConfig = defineConfig({
-    plugins: [
-      // JSDoc examples plugin - DISABLED for library focus on .d.ts only
-      // Enhanced Metadata System V2 processes .d.ts files post-compilation
-      // ...((() => {
-      //   const jsDocEnabled = shouldEnableJSDocPlugin(packageType, options);
-      //   console.log(`[createPackageConfig] JSDoc plugin will be ${jsDocEnabled ? 'ENABLED' : 'DISABLED'} for ${context.packageName}`);
-      //   return jsDocEnabled ? [createJSDocExamplesPlugin(options.jsdocExamples || {})] : [];
-      // })()),
-
-      // Generate DTS with Enhanced Metadata System V2 post-processing
-      // This is the ONLY place where @*-inject directives are processed
-      ...(options.generateDTS !== false ? [createDTSPlugin(context, options)] : []),
-    ],
+    plugins: [...(options.generateDTS !== false ? [createDTSPlugin(context, options)] : [])],
     resolve: {
       alias: buildAliases,
     },
@@ -152,30 +132,3 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
 
 // Import wrapper for the main detection function
 import { createBuildContext } from './package-detection';
-
-/**
- * Determine if JSDoc examples plugin should be enabled for a package type
- */
-function shouldEnableJSDocPlugin(packageType: string, options: PackageConfigOptions): boolean {
-  // Debug logging
-  console.log(
-    `[shouldEnableJSDocPlugin] packageType: ${packageType}, enabled: ${options.jsdocExamples?.enabled}`
-  );
-
-  // Explicitly disabled
-  if (options.jsdocExamples?.enabled === false) {
-    console.log(`[shouldEnableJSDocPlugin] Explicitly disabled`);
-    return false;
-  }
-
-  // Explicitly enabled
-  if (options.jsdocExamples?.enabled === true) {
-    console.log(`[shouldEnableJSDocPlugin] Explicitly enabled`);
-    return true;
-  }
-
-  // Default: enable for foundation and pattern packages (where we have examples)
-  const defaultEnabled = packageType === 'foundation' || packageType === 'pattern';
-  console.log(`[shouldEnableJSDocPlugin] Default enabled: ${defaultEnabled}`);
-  return defaultEnabled;
-}
