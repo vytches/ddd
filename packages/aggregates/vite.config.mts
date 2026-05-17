@@ -1,5 +1,5 @@
-// Aggregates package - foundation layer with new optimized config
-import { createFoundationConfig } from '../utils/build-configs';
-export default createFoundationConfig(__dirname, {
+// Aggregates package - externalizes workspace deps so npm resolves them at runtime
+import { createPatternConfig } from '../utils/build-configs';
+export default createPatternConfig(__dirname, {
   jsdocExamples: { enabled: true },
 });
