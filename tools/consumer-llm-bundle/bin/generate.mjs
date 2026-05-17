@@ -40,37 +40,77 @@ const log = (msg) => {
   if (verbose) stderr.write(`[llm-bundle] ${msg}\n`);
 };
 
-const nodeModules = join(projectRoot, 'node_modules', '@vytches');
-let entries;
+// pnpm puts only top-level deps under node_modules/@vytches — transitive
+// @vytches/ddd-* packages live under node_modules/.pnpm/@vytches+ddd-X@VER/.
+// Walk both locations to capture everything the project actually has.
+const collected = new Map(); // pkgName -> { dir, pkgJson, llmGuide, readme }
+
+function tryPackage(name, dir) {
+  try {
+    if (!statSync(dir).isDirectory()) return;
+  } catch {
+    return;
+  }
+  const pkgJson = readJsonSafe(join(dir, 'package.json'));
+  if (!pkgJson?.name) return;
+  if (pkgJson.name !== '@vytches/ddd' && !pkgJson.name.startsWith('@vytches/ddd-')) return;
+  // Prefer the highest semver if same package found in multiple stores.
+  const existing = collected.get(pkgJson.name);
+  if (existing && compareSemver(existing.pkgJson.version, pkgJson.version) >= 0) return;
+  collected.set(pkgJson.name, {
+    dir,
+    pkgJson,
+    llmGuide: readFileSafe(join(dir, 'LLMGUIDE.md')),
+    readme: readFileSafe(join(dir, 'README.md')),
+  });
+}
+
+// 1. Top-level node_modules/@vytches/*
+const topLevelDir = join(projectRoot, 'node_modules', '@vytches');
 try {
-  entries = readdirSync(nodeModules);
-} catch (error) {
-  stderr.write(`[llm-bundle] cannot read ${nodeModules}: ${error.message}\n`);
+  for (const name of readdirSync(topLevelDir)) {
+    tryPackage(name, join(topLevelDir, name));
+  }
+} catch {
+  /* not an error — meta package may only be in .pnpm */
+}
+
+// 2. node_modules/.pnpm/@vytches+ddd-X@VERSION/node_modules/@vytches/ddd-X
+const pnpmStore = join(projectRoot, 'node_modules', '.pnpm');
+try {
+  for (const entry of readdirSync(pnpmStore)) {
+    if (!entry.startsWith('@vytches+ddd')) continue;
+    const inner = join(pnpmStore, entry, 'node_modules', '@vytches');
+    let names;
+    try {
+      names = readdirSync(inner);
+    } catch {
+      continue;
+    }
+    for (const name of names) {
+      tryPackage(name, join(inner, name));
+    }
+  }
+} catch {
+  /* no .pnpm store — npm or yarn project */
+}
+
+if (collected.size === 0) {
+  stderr.write(
+    `[llm-bundle] no @vytches/ddd or @vytches/ddd-* packages found under ${projectRoot}/node_modules\n`
+  );
   stderr.write('[llm-bundle] is @vytches/ddd installed in this project?\n');
   exit(1);
 }
 
-const packages = entries
-  .filter((name) => name === 'ddd' || name.startsWith('ddd-'))
-  .map((name) => {
-    const dir = join(nodeModules, name);
-    try {
-      if (!statSync(dir).isDirectory()) return null;
-    } catch {
-      return null;
-    }
-    const pkgJson = readJsonSafe(join(dir, 'package.json'));
-    const llmGuide = readFileSafe(join(dir, 'LLMGUIDE.md'));
-    const readme = readFileSafe(join(dir, 'README.md'));
-    return {
-      name: pkgJson?.name ?? `@vytches/${name}`,
-      version: pkgJson?.version ?? 'unknown',
-      description: pkgJson?.description ?? '',
-      llmGuide,
-      readme,
-    };
-  })
-  .filter((p) => p !== null)
+const packages = [...collected.values()]
+  .map(({ pkgJson, llmGuide, readme }) => ({
+    name: pkgJson.name,
+    version: pkgJson.version ?? 'unknown',
+    description: pkgJson.description ?? '',
+    llmGuide,
+    readme,
+  }))
   .sort(orderPackages);
 
 if (packages.length === 0) {
@@ -136,6 +176,24 @@ function readFileSafe(path) {
   } catch {
     return null;
   }
+}
+
+function compareSemver(a, b) {
+  // Returns negative when a < b, positive when a > b, 0 when equal.
+  // Handles `1.2.3-beta.4` style — pre-release sorts before release per SemVer.
+  const [aMain, aPre] = a.split('-');
+  const [bMain, bPre] = b.split('-');
+  const aParts = aMain.split('.').map(Number);
+  const bParts = bMain.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((aParts[i] ?? 0) !== (bParts[i] ?? 0)) {
+      return (aParts[i] ?? 0) - (bParts[i] ?? 0);
+    }
+  }
+  if (!aPre && !bPre) return 0;
+  if (!aPre) return 1;
+  if (!bPre) return -1;
+  return aPre < bPre ? -1 : aPre > bPre ? 1 : 0;
 }
 
 function orderPackages(a, b) {

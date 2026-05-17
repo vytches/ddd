@@ -30,7 +30,7 @@ Co robi `pnpm release`:
 2. Tworzy commit z nowymi wersjami + tagi
 3. Pushuje commit i tagi automatycznie
 4. Buduje wszystkie pakiety
-5. Publikuje na GitHub Packages (dist-tag: `latest`)
+5. Publikuje na npmjs.com (dist-tag: `latest`)
 
 ## Pre-release (Alpha/Beta)
 
@@ -137,27 +137,20 @@ DRY_RUN=true pnpm publish:packages   # Co zostaloby opublikowane?
 
 ## Instalacja pakietow (konsument)
 
-### Jednorazowa konfiguracja
-
-```bash
-echo "@vytches:registry=https://npm.pkg.github.com" >> ~/.npmrc
-echo "//npm.pkg.github.com/:_authToken=TWOJ_GITHUB_PAT" >> ~/.npmrc
-```
-
-Token potrzebuje scope `packages:read` (konsument) lub `packages:write`
-(publikacja).
-
-### Instalacja
+Pakiety sa publiczne na npmjs.com — zadnej konfiguracji nie trzeba.
 
 ```bash
 # Stabilna wersja (latest)
 pnpm add @vytches/ddd-contracts
 
-# Alpha
-pnpm add @vytches/ddd-contracts@alpha
+# Caly zestaw (meta-paczka)
+pnpm add @vytches/ddd
+
+# Beta
+pnpm add @vytches/ddd-contracts@beta
 
 # Konkretna wersja
-pnpm add @vytches/ddd-contracts@0.24.5
+pnpm add @vytches/ddd-contracts@0.25.0
 ```
 
 ## FAQ
@@ -179,11 +172,8 @@ pnpm install --ignore-scripts
 **Q: "tag already exists" error?** A: Usun stare tagi:
 `git tag -l "*alpha.1" | xargs git tag -d`
 
-**Q: Publish fails with 401 Unauthorized?** A: Brak tokenu w `~/.npmrc`. Dodaj:
-
-```
-@vytches:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=TWOJ_GITHUB_PAT
-```
+**Q: Publish fails with 401 Unauthorized?** A: Brak tokenu npm. Sprawdz czy
+secret `NPM_TOKEN` jest ustawiony w GitHub repo → Settings → Secrets → Actions.
+Token generujesz na npmjs.com → profil → Access Tokens → Automation.
 
 **Q: EUNCOMMIT error?** A: Commituj wszystkie zmiany przed `pnpm release`.

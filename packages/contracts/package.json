@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-contracts",
-  "version": "0.25.0-beta.2",
+  "version": "0.26.0",
   "description": "Enterprise-grade contracts & fundamental types for Domain-Driven Design",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -56,7 +56,7 @@
     ]
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   }
 }

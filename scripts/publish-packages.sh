@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-REGISTRY="${REGISTRY:-https://npm.pkg.github.com}"
+REGISTRY="${REGISTRY:-https://registry.npmjs.org}"
 DRY_RUN="${DRY_RUN:-false}"
 PUBLISHED=0
 SKIPPED=0

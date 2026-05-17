@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd",
-  "version": "0.25.0-beta.1",
+  "version": "0.26.0",
   "private": true,
   "description": "VytchesDDD - Enterprise-grade TypeScript library implementing Domain-Driven Design patterns",
   "keywords": [
@@ -58,7 +58,7 @@
     "test:all": "vitest packages/**/*.{test,spec}.ts examples/**/*.{test,spec}.ts --passWithNoTests",
     "test:package": "bash scripts/test-package.sh",
     "// === BUILDING WORKFLOWS ===": "",
-    "build": "nx run-many --target=build --projects=tag:type:lib --parallel=3 && pnpm run fix:dts && pnpm run jsdoc:inject:all && pnpm run bundle:types",
+    "build": "nx run-many --target=build --projects=tag:type:lib --parallel=3 && pnpm run fix:dts && pnpm run bundle:types",
     "build:all": "nx run-many --target=build --all --parallel=3",
     "build:packages": "nx run-many --target=build --projects=tag:type:lib --parallel=3",
     "build:clean": "nx run-many --target=build --projects=tag:type:lib --parallel=3 && pnpm run fix:dts && pnpm run bundle:types",
@@ -68,7 +68,7 @@
     "build:package": "bash scripts/build-package.sh",
     "// === ENTERPRISE LIBRARY VALIDATION ===": "",
     "build:analyze": "pnpm build && node scripts/quality-gates/bundle-size-monitor.js",
-    "build:production": "pnpm build && pnpm jsdoc:verify",
+    "build:production": "pnpm build",
     "build:clean:full": "pnpm clean && pnpm install && pnpm build",
     "build:enterprise": "nx build enterprise",
     "validate": "pnpm validate:exports && pnpm validate:bundles && pnpm validate:types",
@@ -99,26 +99,6 @@
     "architecture:check": "node scripts/architecture-monitor.js",
     "architecture:report": "node scripts/architecture-monitor.js > architecture-report.txt",
     "architecture:ci": "pnpm deps:circular && pnpm quality:bundle && echo '✅ Architecture CI validation passed'",
-    "// === JSDOC & DOCUMENTATION ===": "",
-    "jsdoc:generate": "node scripts/jsdoc-generator.js",
-    "jsdoc:generate:package": "node scripts/jsdoc-generator.js --package",
-    "jsdoc:generate:dry": "node scripts/jsdoc-generator.js --dry-run",
-    "jsdoc:generate:overwrite": "node scripts/jsdoc-generator.js --overwrite",
-    "jsdoc:validate": "node scripts/jsdoc-validator.js",
-    "jsdoc:lint": "eslint --config .eslintrc-jsdoc.json packages/*/src/**/*.ts",
-    "jsdoc:fix": "eslint --config .eslintrc-jsdoc.json packages/*/src/**/*.ts --fix",
-    "jsdoc:publish": "node scripts/jsdoc-publisher.js",
-    "jsdoc:serve": "node scripts/jsdoc-publisher.js --serve",
-    "jsdoc:watch": "node scripts/jsdoc-publisher.js --watch",
-    "jsdoc:inject": "node scripts/inject-yaml-jsdoc-ast.js",
-    "jsdoc:inject:all": "node scripts/inject-all-jsdoc.js",
-    "jsdoc:inject:dry": "node scripts/inject-yaml-jsdoc-ast.js --dry-run",
-    "jsdoc:inject:watch": "nodemon --watch 'docs/**/*.yaml' --watch 'packages/**/.md-settings.yaml' --exec 'pnpm jsdoc:inject'",
-    "jsdoc:verify": "node scripts/verify-jsdoc-injection.js",
-    "jsdoc:monitor": "node scripts/jsdoc-coverage-monitor.js",
-    "jsdoc:diff": "node scripts/jsdoc-coverage-diff.js",
-    "jsdoc:report": "node scripts/comprehensive-jsdoc-report.js",
-    "metadata:validate": "node scripts/validate-metadata-files.js",
     "// === PERFORMANCE BENCHMARKS (VP-NEW-001) ===": "",
     "bench": "pnpm -F @vytches/benchmarks bench",
     "bench:watch": "pnpm -F @vytches/benchmarks bench:watch",
@@ -283,6 +263,7 @@
       "vite@>=5.2.6 <5.4.21": ">=5.4.21",
       "vite@>=6.0.0 <6.4.1": ">=6.4.1",
       "vite@>=7.0.0 <7.3.2": ">=7.3.2",
+      "cross-spawn": ">=6.0.6",
       "yaml": ">=2.8.3"
     }
   },
@@ -297,6 +278,7 @@
     ]
   },
   "dependencies": {
+    "@changesets/cli": "^2.27.1",
     "reflect-metadata": "^0.2.2",
     "uuid": "^11.1.0"
   },
