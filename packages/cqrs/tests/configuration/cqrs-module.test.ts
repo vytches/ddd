@@ -3,7 +3,12 @@ import type { IDependencyContainer } from '@vytches/ddd-di';
 
 import { CQRSModule } from '../../src/configuration/cqrs-module';
 import { CQRSConfiguration } from '../../src/configuration/cqrs-configuration';
-import { CommandBus, EnhancedCommandBus, EnhancedQueryBus, QueryBus } from '../../src/implementations';
+import {
+  CommandBus,
+  EnhancedCommandBus,
+  EnhancedQueryBus,
+  QueryBus,
+} from '../../src/implementations';
 
 const fakeContainer: IDependencyContainer = {
   resolve: vi.fn(),

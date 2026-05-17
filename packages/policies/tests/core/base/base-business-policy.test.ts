@@ -1,18 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
 import { safeRun } from '@vytches/ddd-utils';
-import type { ISpecification, IAsyncSpecification } from '@vytches/ddd-contracts';
+import { describe, expect, it } from 'vitest';
 
+import type { BaseCompositePolicy } from '../../../src/core/base/base-business-policy';
 import {
+  AsyncSpecificationPolicy,
   BaseBusinessPolicy,
   SpecificationPolicy,
-  AsyncSpecificationPolicy,
-  BaseCompositePolicy,
 } from '../../../src/core/base/base-business-policy';
-import { PolicyViolation } from '../../../src/core/models/policy-violation';
 import type {
   IBusinessPolicy,
   PolicyRequest,
 } from '../../../src/core/interfaces/business-policy.interface';
+import { PolicyViolation } from '../../../src/core/models/policy-violation';
 import type { PolicyContext } from '../../../src/core/shared/policy-types';
 
 const ctx = (): PolicyContext => ({
@@ -203,12 +203,7 @@ describe('SpecificationPolicy', () => {
   } as unknown as ISpecification<Order>;
 
   it('returns success when specification is satisfied', async () => {
-    const policy = SpecificationPolicy.fromSpecification(
-      'sp-1',
-      'orders',
-      'Test',
-      passingSpec
-    );
+    const policy = SpecificationPolicy.fromSpecification('sp-1', 'orders', 'Test', passingSpec);
     const result = await policy.check(buildRequest({ amount: 10 }));
     expect(result.isSuccess).toBe(true);
   });

@@ -29,11 +29,12 @@ parent: VT-002, VT-003
 - Global library coverage: 67.11% → **68.74%**
 
 **Out of scope (deferred to future task if needed):**
+
 - `events/integration/domain-to-integration-transformer.ts` (still ~0%)
 - `events/integration/integration-event-transformer-registry.ts` (still ~0%)
-- `events/integration/integration-processor.ts` (still ~0%)
-  These are separate concerns from the cross-context routing surface;
-  may justify a VT-006 if v0.26 release SLA requires them at 80%.
+- `events/integration/integration-processor.ts` (still ~0%) These are separate
+  concerns from the cross-context routing surface; may justify a VT-006 if v0.26
+  release SLA requires them at 80%.
 
 Verified via `pnpm test:ci` + `pnpm type-check`.
 
@@ -44,18 +45,18 @@ single gap. These files implement cross-bounded-context routing — bugs here
 manifest as silently dropped integration events, which is hard to detect in
 production.
 
-| File                                                | Stmts | Branches | Risk |
-| --------------------------------------------------- | ----- | -------- | ---- |
-| `events/src/integration/integration-event.ts`       | 10.34%| 0%       | Cross-context envelope |
-| `events/src/integration/context-router.ts`          | 0%    | 0%       | Routing between contexts |
-| `policies/src/integration/aggregate-hooks.ts`       | 2.38% | 0%       | Policy↔aggregate wiring |
-| `policies/src/integration/policy-extensions.ts`     | 5.26% | 0%       | Policy lifecycle hooks |
-| `policies/src/events/integration-event.ts`          | 17.39%| 31.42%   | Policy event integration |
-| `events/src/base-event-bus.ts`                      | gaps  | gaps     | Event dispatcher |
-| `events/src/event-dispatcher.ts`                    | gaps  | gaps     | Domain event dispatch |
+| File                                            | Stmts  | Branches | Risk                     |
+| ----------------------------------------------- | ------ | -------- | ------------------------ |
+| `events/src/integration/integration-event.ts`   | 10.34% | 0%       | Cross-context envelope   |
+| `events/src/integration/context-router.ts`      | 0%     | 0%       | Routing between contexts |
+| `policies/src/integration/aggregate-hooks.ts`   | 2.38%  | 0%       | Policy↔aggregate wiring |
+| `policies/src/integration/policy-extensions.ts` | 5.26%  | 0%       | Policy lifecycle hooks   |
+| `policies/src/events/integration-event.ts`      | 17.39% | 31.42%   | Policy event integration |
+| `events/src/base-event-bus.ts`                  | gaps   | gaps     | Event dispatcher         |
+| `events/src/event-dispatcher.ts`                | gaps   | gaps     | Domain event dispatch    |
 
-`events/src/integration/` directory: **2.36% / 0%**.
-`policies/src/integration/` directory: **1.53% / 0%**.
+`events/src/integration/` directory: **2.36% / 0%**. `policies/src/integration/`
+directory: **1.53% / 0%**.
 
 ## Scope
 
@@ -104,14 +105,14 @@ pnpm type-check
 
 This is the **highest-risk** of the foundation gap-fill tasks because
 integration layer tests typically need:
+
 - Mock event bus (existing in `packages/testing/`)
 - Multi-aggregate fixtures
 - Cross-package imports (events ↔ policies ↔ aggregates)
 
 If a sub-area proves too entangled (e.g. `context-router.ts` requires deep
-infrastructure), split it into a follow-up task rather than padding tests
-with mocks. The goal is genuine behavioral coverage, not coverage-percentage
-theater.
+infrastructure), split it into a follow-up task rather than padding tests with
+mocks. The goal is genuine behavioral coverage, not coverage-percentage theater.
 
 ## Notes for next-context implementation
 
@@ -119,5 +120,5 @@ theater.
 - Reference: existing `packages/events/tests/unified-event-bus.test.ts` for
   event bus testing style
 - Reference: `packages/policies/tests/events/event-driven-policy.test.ts`
-- After branch + commits: `git checkout develop && git merge --no-ff --no-verify
-  feat/vt-004-integration-layers-coverage`
+- After branch + commits:
+  `git checkout develop && git merge --no-ff --no-verify feat/vt-004-integration-layers-coverage`

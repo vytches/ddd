@@ -141,9 +141,7 @@ describe('SnapshotCapability — restoreFromSnapshot', () => {
 
   it('throws AggregateError when snapshot is null/undefined', () => {
     const { snap } = newSnap();
-    const [error] = safeRun(() =>
-      snap.restoreFromSnapshot(null as never, () => undefined)
-    );
+    const [error] = safeRun(() => snap.restoreFromSnapshot(null as never, () => undefined));
     expect(error).toBeInstanceOf(AggregateError);
   });
 

@@ -2,7 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { IDependencyContainer } from '@vytches/ddd-di';
 
 import { CQRSConfiguration } from '../../src/configuration/cqrs-configuration';
-import { CommandBus, EnhancedCommandBus, EnhancedQueryBus, QueryBus } from '../../src/implementations';
+import {
+  CommandBus,
+  EnhancedCommandBus,
+  EnhancedQueryBus,
+  QueryBus,
+} from '../../src/implementations';
 import type { ICQRSMiddleware } from '../../src/middleware/middleware.interface';
 
 const fakeContainer: IDependencyContainer = {

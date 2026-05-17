@@ -157,9 +157,7 @@ describe('BaseContainerAdapter — getServicesByTag (default)', () => {
 describe('BaseContainerAdapter — abstract registration paths exercise validateToken', () => {
   it('register() rejects null token', () => {
     const adapter = new TestAdapter();
-    const [error] = safeRun(() =>
-      adapter.register(null as unknown as ServiceToken, FooService)
-    );
+    const [error] = safeRun(() => adapter.register(null as unknown as ServiceToken, FooService));
     expect(error).toBeInstanceOf(Error);
   });
 

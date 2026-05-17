@@ -4,7 +4,8 @@
 
 ```yaml
 task_id: VT-003
-title: Cover aggregate capabilities (audit, versioning, snapshot, event-sourcing)
+title:
+  Cover aggregate capabilities (audit, versioning, snapshot, event-sourcing)
 type: test
 priority: high
 complexity: medium
@@ -37,15 +38,15 @@ Verified via `pnpm test:ci` + `pnpm type-check`.
 
 Coverage analysis (2026-05-10) showed `aggregates/src/capabilities/` is the
 fundament of Event Sourcing in this library and is far below the 80% target.
-These capabilities are composed onto every aggregate that uses ES; they are
-the most-imported code path in `juz-ide-api` (16K consumer tests).
+These capabilities are composed onto every aggregate that uses ES; they are the
+most-imported code path in `juz-ide-api` (16K consumer tests).
 
-| File                                                       | Stmts  | Branches | Risk                |
-| ---------------------------------------------------------- | ------ | -------- | ------------------- |
-| `packages/aggregates/src/capabilities/audit-capability.ts` | 69.56% | 38.46%   | Audit logging gaps  |
-| `packages/aggregates/src/capabilities/versioning-capability.ts` | 16.12% | 0%   | Upcaster pipeline   |
-| `packages/aggregates/src/capabilities/snapshot-capability.ts` | 40%   | 18.18%   | Snapshot lifecycle  |
-| `packages/aggregates/src/capabilities/event-sourcing-capability.ts` | 28.57% | 12.5% | Event store interop |
+| File                                                                | Stmts  | Branches | Risk                |
+| ------------------------------------------------------------------- | ------ | -------- | ------------------- |
+| `packages/aggregates/src/capabilities/audit-capability.ts`          | 69.56% | 38.46%   | Audit logging gaps  |
+| `packages/aggregates/src/capabilities/versioning-capability.ts`     | 16.12% | 0%       | Upcaster pipeline   |
+| `packages/aggregates/src/capabilities/snapshot-capability.ts`       | 40%    | 18.18%   | Snapshot lifecycle  |
+| `packages/aggregates/src/capabilities/event-sourcing-capability.ts` | 28.57% | 12.5%    | Event store interop |
 
 Aggregate `capabilities/` directory total: **41.49% / 20%** — well below 80%.
 
@@ -53,14 +54,14 @@ Aggregate `capabilities/` directory total: **41.49% / 20%** — well below 80%.
 
 ### In scope (this task / branch)
 
-- [ ] `packages/aggregates/tests/capabilities/audit-capability.test.ts`
-      — getAuditLog, getAuditStatistics, audit event types, filtering
-- [ ] `packages/aggregates/tests/capabilities/versioning-capability.test.ts`
-      — registerUpcaster, hasUpcaster, getRegisteredEventTypes, duplicate
+- [ ] `packages/aggregates/tests/capabilities/audit-capability.test.ts` —
+      getAuditLog, getAuditStatistics, audit event types, filtering
+- [ ] `packages/aggregates/tests/capabilities/versioning-capability.test.ts` —
+      registerUpcaster, hasUpcaster, getRegisteredEventTypes, duplicate
       detection, missing-upcaster error path
-- [ ] `packages/aggregates/tests/capabilities/snapshot-capability.test.ts`
-      — createSnapshot, restoreFromSnapshot, ID/type mismatch errors,
-      metadata round-trip
+- [ ] `packages/aggregates/tests/capabilities/snapshot-capability.test.ts` —
+      createSnapshot, restoreFromSnapshot, ID/type mismatch errors, metadata
+      round-trip
 - [ ] `packages/aggregates/tests/capabilities/event-sourcing-capability.test.ts`
       — setEventStore, loadFromEventStore, saveToEventStore, missing-store error
 - [ ] Each file ≥80% on all four metrics
@@ -102,5 +103,5 @@ git diff --name-only develop...HEAD | grep -E "src/.*\.test\.ts$" || echo "OK: n
   `aggregate.getCapability(XCapability)`, `aggregate.hasCapability(XCapability)`
 - Existing test for cross-cutting helpers:
   `packages/aggregates/tests/core/aggregate-utilities.test.ts` (added in VT-002)
-- After branch + commits: `git checkout develop && git merge --no-ff --no-verify
-  feat/vt-003-capabilities-coverage`
+- After branch + commits:
+  `git checkout develop && git merge --no-ff --no-verify feat/vt-003-capabilities-coverage`

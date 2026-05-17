@@ -11,9 +11,7 @@ import type { IDependencyContainer } from '../../src/types';
 
 const fakeContainer = {} as IDependencyContainer;
 
-const buildPlugin = (
-  overrides: Partial<IDiscoveryPlugin> = {}
-): IDiscoveryPlugin => ({
+const buildPlugin = (overrides: Partial<IDiscoveryPlugin> = {}): IDiscoveryPlugin => ({
   name: 'TestPlugin',
   packageName: '@test/pkg',
   priority: 100,

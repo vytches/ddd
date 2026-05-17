@@ -107,22 +107,22 @@ await outbox.enqueue(event, { dedupKey: `order-${orderId}-placed` });
 
 ### Dispatch model — parallel within batch
 
-`OutboxProcessor.processBatch()` dispatches all messages in the batch
-**in parallel** via `Promise.allSettled`. This is intentional and contractual:
+`OutboxProcessor.processBatch()` dispatches all messages in the batch **in
+parallel** via `Promise.allSettled`. This is intentional and contractual:
 
 - A failure in message N does **not** block messages N+1..N+M
 - Each message has independent retry/fail tracking via the repository
 - For 200 messages at 10ms dispatch each: ~10ms parallel vs ~2s sequential
 
-If you need strict ordering within a stream, set `batchSize: 1` (one message
-per batch = sequential by definition). Note: parallel dispatch means the
-**execution order** within a batch is not guaranteed, even when messages were
-selected via `priorityOrder`.
+If you need strict ordering within a stream, set `batchSize: 1` (one message per
+batch = sequential by definition). Note: parallel dispatch means the **execution
+order** within a batch is not guaranteed, even when messages were selected via
+`priorityOrder`.
 
 For high-volume use cases where the batch is consistently full, consider
-implementing the adapter pattern via `IOutboxMessageHandler` to dispatch to
-your existing message broker (BullMQ, Kafka, RabbitMQ — your code, no
-library dependency added).
+implementing the adapter pattern via `IOutboxMessageHandler` to dispatch to your
+existing message broker (BullMQ, Kafka, RabbitMQ — your code, no library
+dependency added).
 
 ```typescript
 class BullMQOutboxHandler implements IOutboxMessageHandler {

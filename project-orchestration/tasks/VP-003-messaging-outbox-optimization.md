@@ -23,6 +23,7 @@ branch_part_1: feat/vp-003-outbox-parallel-dispatch-docs (in progress)
 
 **Original problem statement was speculative.** Original VP-003 (14h) assumed
 batching, prioritization, binary serialization were missing. Verification:
+
 - Batching ✅ already present (`batchSize` option, default 10)
 - Prioritization ✅ already present (`priorityOrder` option with 4 levels)
 - Parallel dispatch ✅ already present (`Promise.allSettled` line 122-125)
@@ -32,9 +33,10 @@ batching, prioritization, binary serialization were missing. Verification:
 - **Documentation gap on parallel dispatch ❌ — consumer thought sequential**
 
 Source of validation: juz-ide-api (consumer with 237 aggregates, 16K tests)
-performed migration analysis 2026-05-10. They wrote a custom `OutboxPollerService`
-because the library missed three specific things. They explicitly stated they
-will migrate from custom code to library `OutboxProcessor` if these are addressed.
+performed migration analysis 2026-05-10. They wrote a custom
+`OutboxPollerService` because the library missed three specific things. They
+explicitly stated they will migrate from custom code to library
+`OutboxProcessor` if these are addressed.
 
 This is not "wishlist feedback" — it is a **commitment-style adoption signal**
 from a real production consumer.
@@ -54,14 +56,14 @@ v0.26.0 publish (zero code risk, docs only).
 
 ### Part 2: adaptive re-poll — DEFERRED to v0.26.1 (~1.5h)
 
-- Modify `OutboxProcessor.processBatch()` to return `{ processed: number;
-  batchSize: number }` (backward-compatible — callers ignoring the return value
-  still work)
+- Modify `OutboxProcessor.processBatch()` to return
+  `{ processed: number; batchSize: number }` (backward-compatible — callers
+  ignoring the return value still work)
 - Modify `scheduleProcessing()` so that if last batch was full
   (`processed >= batchSize`), next poll fires immediately (delay=0) instead of
   waiting `processingInterval`
-- This is **NOT** the full AIMD adaptive system — just the simple "if-batch-was-full
-  re-poll immediately" pattern that the consumer described
+- This is **NOT** the full AIMD adaptive system — just the simple
+  "if-batch-was-full re-poll immediately" pattern that the consumer described
 - Add tests covering: full batch → 0 delay, partial batch → normal interval,
   empty batch → normal interval
 
@@ -112,7 +114,8 @@ v0.26.0 publish (zero code risk, docs only).
 
 ## Why This Order
 
-1. Part 1 (docs) is **gift** — eliminates one consumer blocker without code change
+1. Part 1 (docs) is **gift** — eliminates one consumer blocker without code
+   change
 2. Parts 2+3 wait for v0.26.0 publish to avoid feature creep before launch
 3. v0.26.1 within ~1 week is a clean fast-follow pattern; gives juz-ide-api
    concrete migration target
@@ -126,8 +129,7 @@ v0.26.0 publish (zero code risk, docs only).
 
 - Original 14h estimate was based on speculation; revised 4h is based on
   consumer's explicit must-have list
-- juz-ide-api's `BullMQOutboxHandler` pattern is the documentation reference
-  but is NOT shipped as library code (no-adapters decision honored)
-- Consumer rated current outbox "acceptable" but won't migrate without the
-  three blockers — fixing them gives the library its first major
-  production reference
+- juz-ide-api's `BullMQOutboxHandler` pattern is the documentation reference but
+  is NOT shipped as library code (no-adapters decision honored)
+- Consumer rated current outbox "acceptable" but won't migrate without the three
+  blockers — fixing them gives the library its first major production reference

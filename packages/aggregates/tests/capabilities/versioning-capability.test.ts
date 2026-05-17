@@ -30,22 +30,42 @@ const upcasterFor = <TFrom, TTo>(fn: (p: TFrom) => TTo): IEventUpcaster<TFrom, T
 describe('VersioningCapability — registerUpcaster', () => {
   it('registers a single upcaster', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('OrderCreated', 1, upcasterFor((p: unknown) => p));
+    versioning.registerUpcaster(
+      'OrderCreated',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
     expect(versioning.hasUpcaster('OrderCreated', 1)).toBe(true);
   });
 
   it('registers multiple versions for the same event type', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('OrderCreated', 1, upcasterFor((p: unknown) => p));
-    versioning.registerUpcaster('OrderCreated', 2, upcasterFor((p: unknown) => p));
+    versioning.registerUpcaster(
+      'OrderCreated',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
+    versioning.registerUpcaster(
+      'OrderCreated',
+      2,
+      upcasterFor((p: unknown) => p)
+    );
     expect(versioning.hasUpcaster('OrderCreated', 1)).toBe(true);
     expect(versioning.hasUpcaster('OrderCreated', 2)).toBe(true);
   });
 
   it('registers upcasters for different event types', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('A', 1, upcasterFor((p: unknown) => p));
-    versioning.registerUpcaster('B', 1, upcasterFor((p: unknown) => p));
+    versioning.registerUpcaster(
+      'A',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
+    versioning.registerUpcaster(
+      'B',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
     expect(versioning.getRegisteredEventTypes().sort()).toEqual(['A', 'B']);
   });
 
@@ -67,14 +87,26 @@ describe('VersioningCapability — hasUpcaster / getUpcastersForType', () => {
 
   it('hasUpcaster returns false for unregistered version', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('A', 1, upcasterFor((p: unknown) => p));
+    versioning.registerUpcaster(
+      'A',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
     expect(versioning.hasUpcaster('A', 2)).toBe(false);
   });
 
   it('getUpcastersForType returns the version map for a known event type', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('A', 1, upcasterFor((p: unknown) => p));
-    versioning.registerUpcaster('A', 2, upcasterFor((p: unknown) => p));
+    versioning.registerUpcaster(
+      'A',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
+    versioning.registerUpcaster(
+      'A',
+      2,
+      upcasterFor((p: unknown) => p)
+    );
     const map = versioning.getUpcastersForType('A');
     expect(map?.size).toBe(2);
     expect(map?.has(1)).toBe(true);
@@ -90,9 +122,21 @@ describe('VersioningCapability — hasUpcaster / getUpcastersForType', () => {
 describe('VersioningCapability — clearUpcastersForType / getTotalUpcasterCount', () => {
   it('clearUpcastersForType removes all upcasters for that event type only', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('A', 1, upcasterFor((p: unknown) => p));
-    versioning.registerUpcaster('A', 2, upcasterFor((p: unknown) => p));
-    versioning.registerUpcaster('B', 1, upcasterFor((p: unknown) => p));
+    versioning.registerUpcaster(
+      'A',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
+    versioning.registerUpcaster(
+      'A',
+      2,
+      upcasterFor((p: unknown) => p)
+    );
+    versioning.registerUpcaster(
+      'B',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
     versioning.clearUpcastersForType('A');
     expect(versioning.hasUpcaster('A', 1)).toBe(false);
     expect(versioning.hasUpcaster('A', 2)).toBe(false);
@@ -102,9 +146,21 @@ describe('VersioningCapability — clearUpcastersForType / getTotalUpcasterCount
   it('getTotalUpcasterCount sums upcasters across event types', () => {
     const { versioning } = newVersioned();
     expect(versioning.getTotalUpcasterCount()).toBe(0);
-    versioning.registerUpcaster('A', 1, upcasterFor((p: unknown) => p));
-    versioning.registerUpcaster('A', 2, upcasterFor((p: unknown) => p));
-    versioning.registerUpcaster('B', 1, upcasterFor((p: unknown) => p));
+    versioning.registerUpcaster(
+      'A',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
+    versioning.registerUpcaster(
+      'A',
+      2,
+      upcasterFor((p: unknown) => p)
+    );
+    versioning.registerUpcaster(
+      'B',
+      1,
+      upcasterFor((p: unknown) => p)
+    );
     expect(versioning.getTotalUpcasterCount()).toBe(3);
   });
 });
@@ -121,9 +177,7 @@ describe('VersioningCapability — handleVersionedEvent', () => {
       metadata,
     }) as unknown as IDomainEvent;
 
-  const buildHandlers = (
-    handler: IAggregateEventHandler
-  ): Map<string, IAggregateEventHandler> => {
+  const buildHandlers = (handler: IAggregateEventHandler): Map<string, IAggregateEventHandler> => {
     const map = new Map<string, IAggregateEventHandler>();
     map.set('Evt', handler);
     return map;
@@ -138,7 +192,11 @@ describe('VersioningCapability — handleVersionedEvent', () => {
 
   it('upcasts payload through registered upcasters when targetVersion > eventVersion', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('Evt', 1, upcasterFor((p: { v: number }) => ({ v: p.v + 10 })));
+    versioning.registerUpcaster(
+      'Evt',
+      1,
+      upcasterFor((p: { v: number }) => ({ v: p.v + 10 }))
+    );
     const handler = vi.fn();
     versioning.handleVersionedEvent(
       buildEvent('Evt', { v: 1 }, { version: 1, targetVersion: 2 }),
@@ -149,8 +207,16 @@ describe('VersioningCapability — handleVersionedEvent', () => {
 
   it('chains multiple upcasters in sequence (v1 → v2 → v3)', () => {
     const { versioning } = newVersioned();
-    versioning.registerUpcaster('Evt', 1, upcasterFor((p: { v: number }) => ({ v: p.v + 1 })));
-    versioning.registerUpcaster('Evt', 2, upcasterFor((p: { v: number }) => ({ v: p.v * 10 })));
+    versioning.registerUpcaster(
+      'Evt',
+      1,
+      upcasterFor((p: { v: number }) => ({ v: p.v + 1 }))
+    );
+    versioning.registerUpcaster(
+      'Evt',
+      2,
+      upcasterFor((p: { v: number }) => ({ v: p.v * 10 }))
+    );
     const handler = vi.fn();
     versioning.handleVersionedEvent(
       buildEvent('Evt', { v: 1 }, { version: 1, targetVersion: 3 }),
@@ -163,7 +229,11 @@ describe('VersioningCapability — handleVersionedEvent', () => {
   it('skips missing upcasters in the chain (warns instead of throwing)', () => {
     const { versioning } = newVersioned();
     // Only register v2 -> v3, leave v1 -> v2 missing
-    versioning.registerUpcaster('Evt', 2, upcasterFor((p: { v: number }) => ({ v: p.v + 100 })));
+    versioning.registerUpcaster(
+      'Evt',
+      2,
+      upcasterFor((p: { v: number }) => ({ v: p.v + 100 }))
+    );
     const handler = vi.fn();
     versioning.handleVersionedEvent(
       buildEvent('Evt', { v: 1 }, { version: 1, targetVersion: 3 }),

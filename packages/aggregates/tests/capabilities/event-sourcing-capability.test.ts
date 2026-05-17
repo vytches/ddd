@@ -27,9 +27,7 @@ class FakeEventStore implements IEventStore {
     return undefined;
   });
   getEvents = vi.fn(async (_id: unknown): Promise<IDomainEvent[]> => []);
-  getEventsAfterVersion = vi.fn(
-    async (_id: unknown, _v: number): Promise<IDomainEvent[]> => []
-  );
+  getEventsAfterVersion = vi.fn(async (_id: unknown, _v: number): Promise<IDomainEvent[]> => []);
 }
 
 const newES = (): {
