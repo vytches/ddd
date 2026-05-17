@@ -113,6 +113,17 @@ jobs:
       - name: Build affected projects
         run: pnpm nx affected --target=build --parallel=3
 
+      - name: Check dist for absolute paths (publish safety)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Checking dist files for absolute paths from build machine..."
+          if grep -r "/home/runner\|/opt/projects\|/Users/" packages/*/dist/*.cjs packages/*/dist/*.js 2>/dev/null | grep -v "node_modules"; then
+            echo "❌ Absolute paths found in dist! This will break consumers after npm publish."
+            exit 1
+          else
+            echo "✅ No absolute paths in dist files"
+          fi
+
       # Architecture validation - check for circular dependencies
       - name: Check for circular dependencies
         if: github.event_name == 'pull_request'

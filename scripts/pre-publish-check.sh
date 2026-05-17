@@ -63,7 +63,18 @@ else
     HAS_ERRORS=1
 fi
 
-# 7. Check type definitions
+# 7. Check dist for absolute paths (publish safety)
+echo -e "\n📌 Checking dist files for absolute paths..."
+ABS_PATHS=$(grep -r "/home/runner\|/opt/projects\|/Users/" packages/*/dist/*.cjs packages/*/dist/*.js 2>/dev/null | grep -v "node_modules" || true)
+if [ -n "$ABS_PATHS" ]; then
+    echo -e "${RED}❌ Absolute paths found in dist — will break consumers after npm publish:${NC}"
+    echo "$ABS_PATHS"
+    HAS_ERRORS=1
+else
+    echo -e "${GREEN}✅ No absolute paths in dist files${NC}"
+fi
+
+# 8. Check type definitions
 echo -e "\n📌 Checking TypeScript types..."
 if pnpm type-check > /dev/null 2>&1; then
     echo -e "${GREEN}✅ Type checking passed${NC}"
