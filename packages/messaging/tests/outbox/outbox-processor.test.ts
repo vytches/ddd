@@ -8,6 +8,7 @@ import {
 } from '../../src/outbox/outbox-interfaces';
 import { OutboxProcessor } from '../../src/outbox/outbox-processor';
 import { IOutboxRepository } from '../../src/outbox/outbox-repository.interface';
+import type { RetryBackoffConfig } from '../../src/outbox/outbox-processor';
 
 class InMemoryOutboxRepository extends IOutboxRepository {
   store = new Map<string, IOutboxMessage>();
@@ -84,6 +85,12 @@ class InMemoryOutboxRepository extends IOutboxRepository {
 
   async scheduleMessage<T>(message: IOutboxMessage<T>, processAfter: Date): Promise<string> {
     return this.saveMessage({ ...message, processAfter });
+  }
+
+  async scheduleRetry(id: string, processAfter: Date): Promise<void> {
+    const m = this.store.get(id);
+    if (!m) return;
+    this.store.set(id, { ...m, status: MessageStatus.PENDING, processAfter });
   }
 }
 
@@ -300,5 +307,115 @@ describe('OutboxProcessor — sequence integration', () => {
       // batchSize=5, so only 5 should be processed in this run
       expect(handler.handle).toHaveBeenCalledTimes(5);
     });
+  });
+});
+
+describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => {
+  const BACKOFF: RetryBackoffConfig = { initial: 1000, multiplier: 2, maxDelay: 300_000 };
+
+  let repo: InMemoryOutboxRepository;
+
+  const makeProcessor = (backoff?: RetryBackoffConfig) => {
+    const p = new OutboxProcessor(repo, {
+      batchSize: 5,
+      maxRetries: 3,
+      processingInterval: 1000,
+      messageTimeout: 5000,
+      retryBackoff: backoff,
+    });
+    p.registerHandler('test.event', {
+      handle: async () => {
+        throw new Error('always fails');
+      },
+    });
+    p.start();
+    return p;
+  };
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  it('without retryBackoff: resets to PENDING immediately (legacy behavior)', async () => {
+    const p = makeProcessor(undefined);
+    const id = await repo.saveMessage(buildMessage({ id: 'm-1' }));
+
+    await p.processBatch();
+
+    const stored = repo.store.get(id)!;
+    expect(stored.status).toBe(MessageStatus.PENDING);
+    expect(stored.processAfter).toBeUndefined();
+  });
+
+  it('first failure with retryBackoff: schedules processAfter ≈ initial delay', async () => {
+    const before = Date.now();
+    const p = makeProcessor(BACKOFF);
+    const id = await repo.saveMessage(buildMessage({ id: 'm-1' }));
+
+    await p.processBatch();
+
+    const stored = repo.store.get(id)!;
+    expect(stored.status).toBe(MessageStatus.PENDING);
+    expect(stored.processAfter).toBeInstanceOf(Date);
+    const delay = stored.processAfter!.getTime() - before;
+    // delay should be approximately initial (1000ms), allow ±200ms drift
+    expect(delay).toBeGreaterThanOrEqual(800);
+    expect(delay).toBeLessThanOrEqual(1200);
+  });
+
+  it('third failure with retryBackoff: delay = initial × multiplier² (capped at maxDelay)', async () => {
+    // Use maxRetries:4 so attempt 3 still gets backoff (not FAILED)
+    const p = new OutboxProcessor(repo, {
+      batchSize: 5,
+      maxRetries: 4,
+      processingInterval: 1000,
+      messageTimeout: 5000,
+      retryBackoff: BACKOFF,
+    });
+    p.registerHandler('test.event', {
+      handle: async () => {
+        throw new Error('always fails');
+      },
+    });
+    p.start();
+
+    // 2 prior attempts → after incrementAttempt becomes 3, which is < maxRetries(4)
+    const id = await repo.saveMessage(buildMessage({ id: 'm-1', attempts: 2 }));
+
+    const before = Date.now();
+    await p.processBatch(); // attempt becomes 3
+
+    const stored = repo.store.get(id)!;
+    expect(stored.status).toBe(MessageStatus.PENDING);
+    const delay = stored.processAfter!.getTime() - before;
+    // expected: 1000 * 2^(3-1) = 4000ms
+    expect(delay).toBeGreaterThanOrEqual(3800);
+    expect(delay).toBeLessThanOrEqual(4200);
+  });
+
+  it('after maxRetries: marks FAILED regardless of backoff config', async () => {
+    // Simulate already at maxRetries - 1 = 2 attempts
+    const p = makeProcessor(BACKOFF);
+    const id = await repo.saveMessage(buildMessage({ id: 'm-1', attempts: 2 }));
+
+    await p.processBatch(); // attempt becomes 3 = maxRetries → FAILED
+
+    const stored = repo.store.get(id)!;
+    expect(stored.status).toBe(MessageStatus.FAILED);
+    expect(stored.processAfter).toBeUndefined(); // no retry scheduled
+  });
+
+  it('respects maxDelay cap — delay never exceeds maxDelay', async () => {
+    const tightBackoff: RetryBackoffConfig = { initial: 100_000, multiplier: 10, maxDelay: 5000 };
+    const p = makeProcessor(tightBackoff);
+    const id = await repo.saveMessage(buildMessage({ id: 'm-1' }));
+
+    const before = Date.now();
+    await p.processBatch();
+
+    const stored = repo.store.get(id)!;
+    const delay = stored.processAfter!.getTime() - before;
+    // raw delay = 100_000 * 10^0 = 100_000ms, but capped at 5000ms
+    expect(delay).toBeLessThanOrEqual(5200);
   });
 });
