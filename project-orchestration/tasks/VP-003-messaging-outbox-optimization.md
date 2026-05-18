@@ -1,135 +1,438 @@
-# Task: Outbox throughput parity — adoption blockers (juz-ide-api validated)
+# Task: Outbox production readiness — adoption blockers (juz-ide-api validated)
 
 ## Task Metadata
 
 ```yaml
 task_id: VP-003
-title: Outbox parallel dispatch docs + adaptive re-poll + NestJS module
+title:
+  Outbox retry backoff + type filter + InMemoryRepo + adaptive re-poll + NestJS
+  module
 type: feature
 priority: high
-complexity: simple
-estimated_time: 4h
+complexity: medium
+estimated_time: 11h
 created_by: human (work-items archive 2026-03-31)
 created_at: 2026-03-31
 migrated_at: 2026-05-08
-revised_at: 2026-05-10 (consumer feedback from juz-ide-api)
+revised_at: 2026-05-10 (consumer feedback round 1)
+revised_at_2:
+  2026-05-18 (deep analysis + tech-lead + architecture-guardian review)
 status: in_progress
-release_target: v0.26.1 (fast-follow patch after v0.26.0 publish)
-priority_score: 92/100 (raised from 87 — validated adoption deal)
-branch_part_1: feat/vp-003-outbox-parallel-dispatch-docs (in progress)
+release_target:
+  p1_p2: v0.26.1
+  p3: v0.26.2
+priority_score: 95/100
 ```
 
-## Why This Task Exists (revised 2026-05-10)
+---
 
-**Original problem statement was speculative.** Original VP-003 (14h) assumed
-batching, prioritization, binary serialization were missing. Verification:
+## Why This Task Exists (revised 2026-05-18)
 
-- Batching ✅ already present (`batchSize` option, default 10)
-- Prioritization ✅ already present (`priorityOrder` option with 4 levels)
-- Parallel dispatch ✅ already present (`Promise.allSettled` line 122-125)
-- Binary serialization ❌ no consumer signal — DROP
-- **Adaptive re-poll ❌ MISSING — real gap, validated**
-- **NestJS lifecycle integration ❌ MISSING — real gap, validated**
-- **Documentation gap on parallel dispatch ❌ — consumer thought sequential**
+### Historia rewizji
 
-Source of validation: juz-ide-api (consumer with 237 aggregates, 16K tests)
-performed migration analysis 2026-05-10. They wrote a custom
-`OutboxPollerService` because the library missed three specific things. They
-explicitly stated they will migrate from custom code to library
-`OutboxProcessor` if these are addressed.
+**Oryginalne VP-003 (2026-03-31):** spekulatywne — zakładało braki
+batching/prioritization/binary serialization. Weryfikacja pokazała że to
+wszystko już istnieje.
 
-This is not "wishlist feedback" — it is a **commitment-style adoption signal**
-from a real production consumer.
+**Rewizja 1 (2026-05-10):** consumer juz-ide-api potwierdził 3 blokery: brak
+adaptive re-poll, brak NestJS modułu, niejasna dokumentacja parallel dispatch.
+Docs zrobione (Part 1 ✅). Reszta odłożona do v0.26.1.
 
-## Scope (revised — 4h total, sequenced)
+**Rewizja 2 (2026-05-18):** pełna analiza implementacji juz-ide-api vs
+biblioteki ujawniła znacznie głębsze luki. Wymagana przepisanie scope.
 
-### Part 1: parallel dispatch documentation — DONE 2026-05-10 (~30 min)
+### Co juz-ide-api napisało zamiast używać OutboxProcessor
 
-- ✅ JSDoc on `OutboxProcessor.processBatch()` — explicit `Promise.allSettled`
-  contract, ordering caveat, throughput numbers
-- ✅ Inline comment at the dispatch site
-- ✅ `packages/messaging/LLMGUIDE.md` — new "Dispatch model — parallel within
-  batch" section with broker-adapter recipe (no deps added)
+```
+OutboxPollerService (własny) — powody:
+  - OutboxProcessor istnieje i jest eksportowany ALE nie był znany konsumentowi
+    (słaba discoverability, brak dokumentacji, GitHub Packages friction)
+  - Nawet gdyby był znany — blokowały:
+      1. Brak exponential backoff (tight retry loop niebezpieczny przy awarii brokera)
+      2. Brak filtru po messageType (potrzebne dwa osobne pollery)
+      3. Brak crash recovery API w IOutboxRepository
+      4. Brak startup jitter (multi-pod thundering herd)
+      5. Brak InMemoryOutboxRepository (testowanie niemożliwe bez własnego fake)
+```
 
-Branch: `feat/vp-003-outbox-parallel-dispatch-docs` → merge to develop before
-v0.26.0 publish (zero code risk, docs only).
+### Czego NIE WIEDZIAŁA analiza przed rozmową z juz-ide-api
 
-### Part 2: adaptive re-poll — DEFERRED to v0.26.1 (~1.5h)
+juz-ide-api ma **dwa niezależne pollery** na tej samej tabeli `outbox_messages`:
 
-- Modify `OutboxProcessor.processBatch()` to return
-  `{ processed: number; batchSize: number }` (backward-compatible — callers
-  ignoring the return value still work)
-- Modify `scheduleProcessing()` so that if last batch was full
-  (`processed >= batchSize`), next poll fires immediately (delay=0) instead of
-  waiting `processingInterval`
-- This is **NOT** the full AIMD adaptive system — just the simple
-  "if-batch-was-full re-poll immediately" pattern that the consumer described
-- Add tests covering: full batch → 0 delay, partial batch → normal interval,
-  empty batch → normal interval
+| Poller                        | Filtr                        | Logika            | Interval    |
+| ----------------------------- | ---------------------------- | ----------------- | ----------- |
+| `OutboxPollerService`         | wszystkie typy               | fan-out → BullMQ  | 2s + jitter |
+| `GdprAuditChainPollerService` | tylko `GdprAuditChainAppend` | HMAC chain append | 3s + jitter |
 
-### Part 3: NestJS module — DEFERRED to v0.26.1 (~2h)
+Oba używają `FOR UPDATE SKIP LOCKED` żeby nie kolidować. Biblioteka nie ma
+mechanizmu type-filter ani multi-instance support.
 
-- Add to `@vytches/ddd-nestjs` package:
-  - `OutboxProcessorService` extending `OutboxProcessor`, decorated with
-    `@Injectable()`, implementing `OnModuleInit` (`start()`) and
-    `OnModuleDestroy` (`stop()`)
-  - `OutboxProcessorModule` with `forRoot(options)` static factory
-- Zero new external deps — `@nestjs/common` already a dependency of
-  `@vytches/ddd-nestjs`
-- API surface tests + lifecycle smoke test
+---
 
-### Part 4 (out of scope): full AIMD adaptive batch sizing
+## Analiza luk vs. obecna implementacja
 
-- Consumer did not request this; documented as nice-to-have only
-- If demand surfaces post-v0.26.1, separate task
+### `IOutboxRepository` (abstract class)
 
-### Out of scope (DROPPED from original VP-003)
+| Metoda                                           | Stan        | Problem                                                                         |
+| ------------------------------------------------ | ----------- | ------------------------------------------------------------------------------- |
+| `getUnprocessedMessages(limit?, priorityOrder?)` | ✅ istnieje | Brak filtra po `messageTypes` — blokuje wyspecjalizowane pollery                |
+| `resetStaleProcessing(olderThan)`                | ❌ brak     | Crash recovery niemożliwy bez własnej implementacji; juz-ide-api dodało ręcznie |
+| `scheduleRetry(id, processAfter)`                | ❌ brak     | Retry z backoffem niemożliwy bez tej metody                                     |
 
-- ❌ Binary serialization (no consumer signal)
-- ❌ Adaptive batchSize (defer until validated demand)
-- ❌ Backpressure / Reactive Streams (overkill for outbox use case)
-- ❌ Connection pooling for publishers (consumer concern, not library concern)
+**Ważne:** `IOutboxRepository` to `abstract class`, nie interface. Dodanie
+nowych `abstract` metod jest breaking change — każdy konsument musiałby je
+zaimplementować. Rozwiązanie: dodać jako **concrete methods z no-op default**
+(wzorzec Template Method, spójny z obecną architekturą).
+
+### `OutboxProcessor`
+
+| Feature               | Stan    | Problem                                                                                                                 |
+| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Retry backoff         | ❌ brak | `handleMessageError` resetuje do PENDING natychmiast — tight loop wyczerpuje `maxRetries` w sekundy przy awarii brokera |
+| `messageTypes` filter | ❌ brak | Nie można zbudować wyspecjalizowanego pollera bez rzutowania                                                            |
+| Adaptive re-poll      | ❌ brak | Fixed interval — przy burście 1000 eventów przetwarza 10 co 5s zamiast drenować kolejkę                                 |
+| Livelock guard        | ❌ brak | Adaptive re-poll bez guardu → CPU spin przy ciągłym pełnym batchu                                                       |
+| Startup jitter        | ❌ brak | Multi-pod deployments — thundering herd na `FOR UPDATE` przy równoczesnym starcie                                       |
+| Observability hooks   | ❌ brak | Produkcja bez metryk jest ślepa                                                                                         |
+
+### `@vytches/ddd-testing`
+
+| Feature                    | Stan    | Problem                                                                                                   |
+| -------------------------- | ------- | --------------------------------------------------------------------------------------------------------- |
+| `InMemoryOutboxRepository` | ❌ brak | Testowanie OutboxProcessor wymaga pisania własnego fake — boilerplate który biblioteka powinna dostarczyć |
+
+---
+
+## Scope (11h total, sekwencyjny)
+
+### ✅ Part 0: Dokumentacja parallel dispatch — DONE 2026-05-10 (~30 min)
+
+- JSDoc na `processBatch()` — explicit `Promise.allSettled` contract
+- Inline komentarz przy dispatch site
+- `packages/messaging/LLMGUIDE.md` — sekcja "Dispatch model" + broker-adapter
+  recipe
+
+---
+
+### Part 1: Exponential backoff w retry — P1 (~2h)
+
+**Problem:** retry natychmiastowy → przy awarii brokera 3 próby w ciągu sekund →
+FAILED. Stracona wiadomość.
+
+**Rozwiązanie:** użyć istniejącego pola `processAfter` na `IOutboxMessage`. Pole
+istnieje, `getUnprocessedMessages` już je respektuje
+(`WHERE process_after <= NOW()`). Brakuje tylko wiring w retry logic.
+
+**Zmiany:**
+
+1. **`IOutboxRepository`** — dodać concrete method z no-op default:
+
+   ```typescript
+   scheduleRetry(id: string, processAfter: Date): Promise<void> {
+     // Default: no-op — implementacje które nie obsługują processAfter
+     // po prostu zostawią messages w PENDING bez opóźnienia.
+     // Override w pełnych adapterach (Kysely, TypeORM, etc.)
+     return Promise.resolve();
+   }
+   ```
+
+2. **`OutboxProcessorOptions`** — dodać:
+
+   ```typescript
+   retryBackoff?: {
+     initial: number;   // ms, domyślnie 1000
+     multiplier: number; // domyślnie 2
+     maxDelay: number;  // ms, domyślnie 300_000 (5 min)
+   };
+   ```
+
+3. **`OutboxProcessor.handleMessageError()`** — zmienić retry logic:
+   ```typescript
+   const delay = Math.min(
+     opts.initial * Math.pow(opts.multiplier, attempts - 1),
+     opts.maxDelay
+   );
+   await this.repository.scheduleRetry(id, new Date(Date.now() + delay));
+   // zamiast: await this.repository.updateStatus(id, MessageStatus.PENDING)
+   ```
+
+**Testy (3 scenariusze):**
+
+- Pierwsza próba → delay = `initial`
+- Trzecia próba → delay = `initial * multiplier²`
+- Po `maxRetries` → status FAILED, brak `scheduleRetry`
+
+**Backward compat:** `retryBackoff` jest optional, brak = zachowanie jak
+dotychczas (natychmiastowy PENDING).
+
+---
+
+### Part 2: Type filter + crash recovery w `IOutboxRepository` — P1 (~1.5h)
+
+**Zmiany:**
+
+1. **`getUnprocessedMessages`** — dodać optional 3. parametr:
+
+   ```typescript
+   abstract getUnprocessedMessages(
+     limit?: number,
+     priorityOrder?: MessagePriority[],
+     messageTypes?: string[]   // ← NEW, optional → backward-compatible
+   ): Promise<IOutboxMessage[]>;
+   ```
+
+   Implementacja filtruje po `message_type IN (...)` gdy podane.
+
+2. **`resetStaleProcessing`** — concrete method z no-op default:
+
+   ```typescript
+   resetStaleProcessing(olderThan: Date): Promise<number> {
+     // Override: UPDATE outbox_messages SET status='PENDING'
+     //   WHERE status='PROCESSING' AND updated_at < olderThan
+     return Promise.resolve(0);
+   }
+   ```
+
+3. **`OutboxProcessorOptions`** — dodać:
+   ```typescript
+   messageTypes?: string[];          // filtr typów przekazywany do getUnprocessedMessages
+   crashRecoveryIntervalMs?: number; // jeśli podane: auto-woła resetStaleProcessing co N ms
+   crashRecoveryThresholdMs?: number; // jak stara musi być PROCESSING żeby ją resetować (domyślnie 5min)
+   ```
+
+**Testy:**
+
+- Processor z `messageTypes: ['A']` ignoruje wiadomości typu 'B'
+- `crashRecoveryIntervalMs` wyzwala `resetStaleProcessing` cyklicznie
+- `resetStaleProcessing` nie resetuje świeżych PROCESSING
+
+---
+
+### Part 3: `InMemoryOutboxRepository` w `@vytches/ddd-testing` — P1 (~2h)
+
+Konsumenci nie mają czym testować `OutboxProcessor` bez pisania własnego fake.
+To jest core responsibility biblioteki testingowej.
+
+**Implementacja:**
+
+```typescript
+// packages/testing/src/outbox/in-memory-outbox.repository.ts
+export class InMemoryOutboxRepository extends IOutboxRepository {
+  private readonly messages = new Map<string, IOutboxMessage>();
+
+  // pełna implementacja wszystkich abstract methods
+  // + resetStaleProcessing i scheduleRetry jako override
+  // + helper: getAll(), clear() (test isolation)
+}
+```
+
+**Testy:** 25-30 unit testów pokrywających:
+
+- `saveMessage` / `saveBatch` / `getUnprocessedMessages`
+- `messageTypes` filter
+- `processAfter` respektowane (nie zwraca future messages)
+- `resetStaleProcessing` — tylko stare PROCESSING wracają do PENDING
+- `scheduleRetry` — ustawia `processAfter`
+- `clear()` — izolacja między testami
+
+**Export** z `@vytches/ddd-testing/src/index.ts`.
+
+---
+
+### Part 4: Adaptive re-poll + startup jitter w `OutboxProcessor` — P2 (~2h)
+
+**Adaptive re-poll z livelock guardem** (zainspirowane juz-ide-api, bez
+`setImmediate` — cross-runtime):
+
+```typescript
+// OutboxProcessorOptions:
+adaptiveRepoll?: boolean;          // domyślnie false (opt-in)
+adaptiveRepollMaxConsecutive?: number; // livelock guard: po N pełnych batchach → pauza (domyślnie 5)
+adaptiveRepollPauseMs?: number;    // długość pauzy po guard (domyślnie 50)
+```
+
+```typescript
+// scheduleProcessing logic:
+private scheduleProcessing(consecutiveFullBatches = 0): void {
+  const result = await this.processBatch();
+
+  if (this.options.adaptiveRepoll && result.processed >= result.batchSize) {
+    const consecutive = consecutiveFullBatches + 1;
+    const delay = consecutive > this.options.adaptiveRepollMaxConsecutive
+      ? this.options.adaptiveRepollPauseMs  // livelock guard
+      : 0;                                   // immediate re-poll
+    this.scheduleProcessing(consecutive, delay);
+  } else {
+    this.scheduleProcessing(0, this.options.processingInterval);
+  }
+}
+```
+
+**Startup jitter:**
+
+```typescript
+// OutboxProcessorOptions:
+startupJitterMs?: number; // random delay 0..N na start(), domyślnie 0
+```
+
+**`processBatch()` return type** (backward-compatible):
+
+```typescript
+// Promise<void> → Promise<{ processed: number; batchSize: number }>
+// Callers ignorujący return value nie wymagają zmian
+```
+
+**Testy (5 scenariuszy):**
+
+- Pełny batch → natychmiastowy re-poll (delay = 0)
+- Pełny batch ×6 → pauza `adaptiveRepollPauseMs`
+- Partial batch → normalny interval
+- Empty batch → normalny interval
+- `adaptiveRepoll: false` (default) → zawsze normalny interval
+
+---
+
+### Part 5: `OutboxProcessorHooks` + `OutboxProcessorModule` — P3 (~3.5h)
+
+#### 5a. Observability hooks (~1.5h)
+
+Osobny interface (zmiany nie biją w `OutboxProcessorOptions`):
+
+```typescript
+// packages/messaging/src/outbox/outbox-hooks.ts
+export interface OutboxProcessorHooks {
+  onBatchComplete?(result: { processed: number; failed: number; batchSize: number; durationMs: number }): void;
+  onMessageFailed?(message: IOutboxMessage, error: Error, attempt: number): void;
+  onPermanentFailure?(message: IOutboxMessage, error: Error): void;
+}
+
+// W OutboxProcessorOptions:
+hooks?: OutboxProcessorHooks;
+```
+
+Umożliwia: Prometheus counters, DataDog metrics, alerting na permanent failures,
+DLQ routing.
+
+**Testy:** callback woływany przy odpowiednich zdarzeniach (mock function).
+
+#### 5b. `OutboxProcessorModule` w `@vytches/ddd-nestjs` (~2h)
+
+**Thin wrapper** — żadna logika routingu nie może żyć w module, tylko w
+`OutboxProcessor`.
+
+```typescript
+// packages/nestjs/src/outbox/outbox-processor.module.ts
+OutboxProcessorModule.forRootAsync({
+  processors: [
+    {
+      // Globalny procesor
+      repositoryToken: OUTBOX_REPOSITORY,
+      options: { batchSize: 200, adaptiveRepoll: true, startupJitterMs: 500 },
+    },
+    {
+      // Wyspecjalizowany procesor (np. GDPR)
+      repositoryToken: OUTBOX_REPOSITORY,
+      options: { messageTypes: ['GdprAuditChainAppend'], batchSize: 50 },
+      handlerToken: GDPR_OUTBOX_HANDLER,
+    },
+  ],
+});
+```
+
+Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (extends
+`OutboxProcessor` + `@Injectable()` + `OnModuleInit`/`OnModuleDestroy`).
+
+**Testy:** API surface test + lifecycle smoke test (start/stop wywołane).
+
+---
 
 ## Acceptance Criteria
 
-### v0.26.0 (Part 1 only)
+### v0.26.0 (Part 0 — DONE)
 
-- [x] JSDoc explicit on `processBatch` — parallel dispatch contract
-- [x] LLMGUIDE.md section on dispatch model
-- [x] LLMGUIDE.md adapter recipe (broker-agnostic, no deps)
-- [x] No regressions in existing tests
-- [x] Merged to develop pre-publish
+- [x] JSDoc na `processBatch` — parallel dispatch contract
+- [x] LLMGUIDE.md — sekcja dispatch model + broker-adapter recipe
+- [x] Brak regresji testów
+- [x] Merged do develop przed publishem
 
-### v0.26.1 (Parts 2+3 fast-follow)
+### v0.26.1 (Parts 1–4)
 
-- [ ] `processBatch` returns `{ processed, batchSize }` (backward compatible)
-- [ ] Adaptive re-poll: full batch → immediate next poll
-- [ ] Adaptive re-poll covered by tests (3 scenarios)
-- [ ] `OutboxProcessorService` in `@vytches/ddd-nestjs` with `@Injectable()` +
-      lifecycle hooks
-- [ ] `OutboxProcessorModule.forRoot()` exported
-- [ ] API surface tests for new NestJS exports
-- [ ] juz-ide-api migration prep: post on RELEASE-NOTES.md mentioning the three
-      changes by name
+- [ ] `scheduleRetry(id, processAfter)` w `IOutboxRepository` jako concrete
+      no-op
+- [ ] `resetStaleProcessing(olderThan)` w `IOutboxRepository` jako concrete
+      no-op
+- [ ] `getUnprocessedMessages` przyjmuje optional `messageTypes?: string[]`
+- [ ] `OutboxProcessor` retry używa exponential backoff via `processAfter`
+- [ ] `retryBackoff` opcja — 3 scenariusze backoffu pokryte testami
+- [ ] `messageTypes` opcja w `OutboxProcessorOptions`
+- [ ] `crashRecoveryIntervalMs` opcja — auto-woła `resetStaleProcessing`
+- [ ] `InMemoryOutboxRepository` w `@vytches/ddd-testing` — 25+ testów
+- [ ] `InMemoryOutboxRepository` eksportowany z `@vytches/ddd-testing`
+- [ ] `processBatch()` zwraca `{ processed, batchSize }` (backward-compatible)
+- [ ] Adaptive re-poll z livelock guardem — 5 scenariuszy testów
+- [ ] `startupJitterMs` opcja
+- [ ] `adaptiveRepoll` domyślnie `false` (opt-in, brak breaking change)
+- [ ] API surface tests dla wszystkich nowych eksportów
+- [ ] Zero regresji istniejących testów
 
-## Why This Order
+### v0.26.2 (Part 5)
 
-1. Part 1 (docs) is **gift** — eliminates one consumer blocker without code
-   change
-2. Parts 2+3 wait for v0.26.0 publish to avoid feature creep before launch
-3. v0.26.1 within ~1 week is a clean fast-follow pattern; gives juz-ide-api
-   concrete migration target
+- [ ] `OutboxProcessorHooks` interface eksportowany
+- [ ] `hooks` opcja w `OutboxProcessorOptions`
+- [ ] `onBatchComplete`, `onMessageFailed`, `onPermanentFailure` wyzwalane we
+      właściwych momentach
+- [ ] `OutboxProcessorModule.forRootAsync` w `@vytches/ddd-nestjs`
+- [ ] Multi-processor: N procesorów per module
+- [ ] `repositoryToken` + opcjonalny `handlerToken` per processor entry
+- [ ] Lifecycle: `OnModuleInit` → `start()`, `OnModuleDestroy` → `stop()`
+- [ ] API surface tests + lifecycle smoke tests
+
+---
+
+## Decyzje architektoniczne (z architecture-guardian review 2026-05-18)
+
+| Decyzja                             | Wybór                                   | Uzasadnienie                                                                                                        |
+| ----------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Nowe metody w `IOutboxRepository`   | concrete z no-op default                | abstract byłoby breaking change dla istniejących implementorów                                                      |
+| Adaptive re-poll timing             | `setTimeout(0/50)`                      | `setImmediate` jest Node.js-only, biblioteka celuje w edge runtimes                                                 |
+| Hooks                               | osobny `OutboxProcessorHooks` interface | flat options → każda zmiana hooka bije w `OutboxProcessorOptions` semver                                            |
+| `OutboxProcessorModule`             | thin DI wrapper                         | cała logika routingu w `OutboxProcessor` core, moduł = glue code                                                    |
+| `concurrencyKey` (ordered delivery) | ❌ odrzucone                            | application concern — `InMemoryOutboxRepository` nie może tego zaimplementować uczciwie; workaround: `batchSize: 1` |
+| `setImmediate`                      | ❌ odrzucone                            | Node.js-only API                                                                                                    |
+| `pause()`/`resume()`                | ❌ odrzucone                            | brak consumer signal, low ROI                                                                                       |
+| Message TTL                         | ❌ odrzucone                            | niszowy use case, osobny task gdy pojawi się demand                                                                 |
+
+---
+
+## Estymacja czasu
+
+| Part                      | Co                               | Czas     |
+| ------------------------- | -------------------------------- | -------- |
+| 0                         | Docs (DONE)                      | 0.5h ✅  |
+| 1                         | Exponential backoff              | 2h       |
+| 2                         | Type filter + crash recovery API | 1.5h     |
+| 3                         | `InMemoryOutboxRepository`       | 2h       |
+| 4                         | Adaptive re-poll + jitter        | 2h       |
+| 5a                        | `OutboxProcessorHooks`           | 1.5h     |
+| 5b                        | `OutboxProcessorModule` NestJS   | 2h       |
+| **Total P1+P2 (v0.26.1)** |                                  | **7.5h** |
+| **Total P3 (v0.26.2)**    |                                  | **3.5h** |
+
+---
 
 ## Coupled With
 
-- REL-000 / REL-003 / REL-011 — v0.26.0 publish chain (do not block)
-- v0.26.1 will be the first patch release — natural moment to ship fast-follow
+- `@vytches/ddd-testing` — nowy eksport `InMemoryOutboxRepository`
+- `@vytches/ddd-nestjs` — nowy `OutboxProcessorModule` (Part 5b)
+- juz-ide-api migration: po v0.26.1 mogą wyrzucić własne crony i dual-pollers
+  jeśli Parts 1–4 są kompletne
 
-## Notes
+## Historia rewizji
 
-- Original 14h estimate was based on speculation; revised 4h is based on
-  consumer's explicit must-have list
-- juz-ide-api's `BullMQOutboxHandler` pattern is the documentation reference but
-  is NOT shipped as library code (no-adapters decision honored)
-- Consumer rated current outbox "acceptable" but won't migrate without the three
-  blockers — fixing them gives the library its first major production reference
+- **2026-03-31**: utworzenie (spekulatywne, 14h)
+- **2026-05-08**: migracja z work-items archive
+- **2026-05-10**: rewizja 1 po consumer feedback — zmniejszony scope do 4h, Part
+  1 zrobiony
+- **2026-05-18**: rewizja 2 po głębokiej analizie implementacji juz-ide-api +
+  recenzja tech-lead + architecture-guardian — zakres rozszerzony do 11h, 5
+  nowych luk zidentyfikowanych
