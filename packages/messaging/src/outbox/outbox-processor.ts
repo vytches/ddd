@@ -52,9 +52,23 @@ export class OutboxProcessor {
   private readonly logger = Logger.create('OutboxProcessor');
 
   constructor(repository: IOutboxRepository, options: OutboxProcessorOptions = {}) {
+    const batchSize = options.batchSize ?? 10;
+    if (batchSize > 10_000) {
+      throw new RangeError(`OutboxProcessor: batchSize must be ≤ 10,000, got ${batchSize}`);
+    }
+
+    if (options.retryBackoff) {
+      const { initial, multiplier, maxDelay } = options.retryBackoff;
+      if (initial <= 0 || multiplier <= 0 || maxDelay <= 0) {
+        throw new RangeError(
+          `OutboxProcessor: retryBackoff fields must be positive numbers (initial=${initial}, multiplier=${multiplier}, maxDelay=${maxDelay})`
+        );
+      }
+    }
+
     this.repository = repository;
     this.options = {
-      batchSize: options.batchSize ?? 10,
+      batchSize,
       maxRetries: options.maxRetries ?? 3,
       processingInterval: options.processingInterval ?? 5000,
       priorityOrder: options.priorityOrder ?? [

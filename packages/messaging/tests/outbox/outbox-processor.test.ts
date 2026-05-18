@@ -310,6 +310,46 @@ describe('OutboxProcessor — sequence integration', () => {
   });
 });
 
+describe('OutboxProcessor — constructor validation', () => {
+  let repo: InMemoryOutboxRepository;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  it('throws RangeError when batchSize > 10_000', () => {
+    expect(() => new OutboxProcessor(repo, { batchSize: 10_001 })).toThrow(RangeError);
+    expect(() => new OutboxProcessor(repo, { batchSize: 10_001 })).toThrow(/batchSize/);
+  });
+
+  it('accepts batchSize = 10_000 (boundary)', () => {
+    expect(() => new OutboxProcessor(repo, { batchSize: 10_000 })).not.toThrow();
+  });
+
+  it('throws RangeError when retryBackoff has non-positive initial', () => {
+    expect(
+      () =>
+        new OutboxProcessor(repo, { retryBackoff: { initial: 0, multiplier: 2, maxDelay: 60_000 } })
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError when retryBackoff has non-positive multiplier', () => {
+    expect(
+      () =>
+        new OutboxProcessor(repo, {
+          retryBackoff: { initial: 1000, multiplier: -1, maxDelay: 60_000 },
+        })
+    ).toThrow(RangeError);
+  });
+
+  it('throws RangeError when retryBackoff has non-positive maxDelay', () => {
+    expect(
+      () =>
+        new OutboxProcessor(repo, { retryBackoff: { initial: 1000, multiplier: 2, maxDelay: 0 } })
+    ).toThrow(RangeError);
+  });
+});
+
 describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => {
   const BACKOFF: RetryBackoffConfig = { initial: 1000, multiplier: 2, maxDelay: 300_000 };
 
