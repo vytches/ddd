@@ -418,4 +418,68 @@ describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => 
     // raw delay = 100_000 * 10^0 = 100_000ms, but capped at 5000ms
     expect(delay).toBeLessThanOrEqual(5200);
   });
+
+  it('no-op scheduleRetry fallback: message is PENDING, not stuck in PROCESSING', async () => {
+    // Use a repository that inherits the default no-op scheduleRetry
+    class NoOpRetryRepo extends IOutboxRepository {
+      store = new Map<string, IOutboxMessage>();
+      async saveMessage<T>(msg: IOutboxMessage<T>): Promise<string> {
+        this.store.set(msg.id, msg as IOutboxMessage);
+        return msg.id;
+      }
+      async saveBatch<T>(msgs: IOutboxMessage<T>[]): Promise<string[]> {
+        return Promise.all(msgs.map(m => this.saveMessage(m)));
+      }
+      async getUnprocessedMessages(): Promise<IOutboxMessage[]> {
+        return Array.from(this.store.values()).filter(m => m.status === MessageStatus.PENDING);
+      }
+      async getById(id: string): Promise<IOutboxMessage | null> {
+        return this.store.get(id) ?? null;
+      }
+      async updateStatus(id: string, status: MessageStatus, error?: Error): Promise<void> {
+        const m = this.store.get(id);
+        if (!m) return;
+        this.store.set(id, { ...m, status, ...(error ? { lastError: error.message } : {}) });
+      }
+      async updateStatusBatch(ids: string[], status: MessageStatus): Promise<void> {
+        for (const id of ids) await this.updateStatus(id, status);
+      }
+      async incrementAttempt(id: string): Promise<number> {
+        const m = this.store.get(id);
+        if (!m) return 0;
+        const attempts = m.attempts + 1;
+        this.store.set(id, { ...m, attempts });
+        return attempts;
+      }
+      async deleteByStatusAndAge(): Promise<number> {
+        return 0;
+      }
+      async scheduleMessage<T>(msg: IOutboxMessage<T>, processAfter: Date): Promise<string> {
+        return this.saveMessage({ ...msg, processAfter });
+      }
+      // scheduleRetry is intentionally NOT overridden — uses no-op default
+    }
+
+    const noOpRepo = new NoOpRetryRepo();
+    const p = new OutboxProcessor(noOpRepo, {
+      batchSize: 5,
+      maxRetries: 3,
+      processingInterval: 1000,
+      messageTimeout: 5000,
+      retryBackoff: BACKOFF,
+    });
+    p.registerHandler('test.event', {
+      handle: async () => {
+        throw new Error('fails');
+      },
+    });
+    p.start();
+
+    const id = 'msg-noop';
+    await noOpRepo.saveMessage(buildMessage({ id }));
+    await p.processBatch();
+
+    // Message must be PENDING (not stuck in PROCESSING) even though scheduleRetry was a no-op
+    expect(noOpRepo.store.get(id)?.status).toBe(MessageStatus.PENDING);
+  });
 });

@@ -236,6 +236,9 @@ export class OutboxProcessor {
         const { initial, multiplier, maxDelay } = this.options.retryBackoff;
         const delay = Math.min(initial * Math.pow(multiplier, attempts - 1), maxDelay);
         const processAfter = new Date(Date.now() + delay);
+        // Reset to PENDING first so the message is never stuck in PROCESSING
+        // if the repository's scheduleRetry is the inherited no-op.
+        await this.repository.updateStatus(message.id, MessageStatus.PENDING);
         await this.repository.scheduleRetry(message.id, processAfter);
         this.logger.info(
           `Message ${message.id} scheduled for retry in ${delay}ms (attempt ${attempts})`
