@@ -427,6 +427,52 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 - juz-ide-api migration: po v0.26.1 mogą wyrzucić własne crony i dual-pollers
   jeśli Parts 1–4 są kompletne
 
+---
+
+## Security Considerations
+
+> Pełna analiza STRIDE + DREAD + LINDDUN:
+> [`docs/security/threat-models/TM-VP-003.md`](../../docs/security/threat-models/TM-VP-003.md)
+> Data: 2026-05-18
+
+### Wymagane mitigacje — CRITICAL (blokują v0.26.1)
+
+| ID  | Zagrożenie                                                                         | Mitygacja                                                                           |
+| --- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| D1  | Unbounded `batchSize` → OOM / DB overload (DREAD: 21)                              | Walidacja w konstruktorze: `batchSize <= 10_000`, rzuć `Error` przy przekroczeniu   |
+| D3  | `crashRecoveryThresholdMs: 0` resetuje wszystkie PROCESSING wiadomości (DREAD: 20) | Wymuś minimum: `crashRecoveryThresholdMs >= messageTimeout`; domyślnie `300_000` ms |
+| D4  | Backoff integer overflow → `Infinity` delay (DREAD: 15)                            | `Math.min(delay, maxDelay)` przed `new Date(Date.now() + delay)`                    |
+| T3  | Eksplozja hooków = silent failure silences metrics (DREAD: 15)                     | Każde wywołanie hooka owrapować w `safeRun` (try/catch + Logger.error)              |
+
+### Wymagane mitigacje — HIGH (przed v0.26.1)
+
+| ID  | Zagrożenie                                                   | Mitygacja                                                                                                |
+| --- | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| D2  | Adaptive re-poll → DB connection pool exhaustion             | Dokumentować `minPollIntervalMs` default; adaptive re-poll opt-in (`false` domyślnie)                    |
+| I1  | PII w logach error przez `JSON.stringify(message.payload)`   | Logger nigdy nie loguje surowego `payload`; logować tylko `id`, `messageType`, `attempt`                 |
+| I3  | `getStats()` ujawnia nazwy handlerów do 3rd-party systemów   | Udokumentować jako internal/debug; ostrzeżenie w JSDoc                                                   |
+| T2  | `resetStaleProcessing` może zreplayować wiadomości in-flight | Odrzucać `olderThan` w przyszłości (`> Date.now()`); logować wiadomości resettowane                      |
+| E2  | Crash recovery omija GDPR intentional holds                  | Udokumentować: `resetStaleProcessing` nie powinien być wywoływany na wiadomościach z GDPR retention flag |
+
+### LINDDUN — Privacy (HIGH)
+
+- **PII w logach:** payload serialization do error logów → potencjalnie
+  3rd-party log systems (DataDog, Sentry). Logger musi logować tylko `id` +
+  `messageType`.
+- **GDPR Art.17 konflikt:** wiadomości FAILED zachowują pełny payload.
+  Udokumentować że konsument odpowiada za cleanup (`eraseUserPayloads` pattern z
+  juz-ide-api).
+
+### Acceptance Criteria Security (dodane do v0.26.1)
+
+- [ ] `batchSize > 10_000` rzuca błąd w konstruktorze z opisowym komunikatem
+- [ ] `crashRecoveryThresholdMs < messageTimeout` rzuca błąd w konstruktorze
+- [ ] Backoff delay zawsze przez `Math.min(delay, maxDelay)` przed użyciem w
+      `Date`
+- [ ] Hooki wywołane w `safeRun` — błąd hooka nie propaguje do pętli processingu
+- [ ] Logger w `handleMessageError` loguje tylko `id`, `messageType`, `attempt`
+      — nigdy `payload`
+
 ## Historia rewizji
 
 - **2026-03-31**: utworzenie (spekulatywne, 14h)
