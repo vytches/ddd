@@ -87,7 +87,7 @@ class InMemoryOutboxRepository extends IOutboxRepository {
     return this.saveMessage({ ...message, processAfter });
   }
 
-  async scheduleRetry(id: string, processAfter: Date): Promise<void> {
+  override async scheduleRetry(id: string, processAfter: Date): Promise<void> {
     const m = this.store.get(id);
     if (!m) return;
     this.store.set(id, { ...m, status: MessageStatus.PENDING, processAfter });
@@ -361,7 +361,7 @@ describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => 
       maxRetries: 3,
       processingInterval: 1000,
       messageTimeout: 5000,
-      retryBackoff: backoff,
+      ...(backoff !== undefined ? { retryBackoff: backoff } : {}),
     });
     p.registerHandler('test.event', {
       handle: async () => {
