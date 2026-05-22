@@ -1,179 +1,277 @@
 # Release Guide
 
-Praktyczny przewodnik krok-po-kroku. Szczegoly techniczne w
-[ADR-0010](adr/0010-release-process-and-branching-strategy.md).
+Jedyne źródło prawdy o procesie releaseowania. ADR-0010 i ADR-0016 są
+archiwalne — ten plik je zastępuje.
+
+---
+
+## Stan aktualny
+
+| Co              | Gdzie                              |
+| --------------- | ---------------------------------- |
+| Registry        | **npmjs.org** (publiczny, bez auth) |
+| Wersjonowanie   | Fixed — wszystkie pakiety tą samą wersją (lerna.json) |
+| Branching       | `develop` → `release/*` → `main`  |
+| Publish tool    | `pnpm publish` (konwertuje `workspace:*`) |
+| Versioning tool | `lerna version --conventional-commits` |
+
+---
 
 ## Standardowy Release
 
-Kiedy: masz zmiany na main i chcesz opublikowac nowa wersje.
+Kiedy: masz zmiany na `develop` i chcesz opublikować nową wersję.
 
 ```bash
-# 1. Przejdz na main
-git checkout main
-git pull
-
-# 2. Utworz release branch
+# 1. Utwórz release branch z develop
+git checkout develop && git pull
 git checkout -b release/YYYY-MM-DD
 git push -u origin release/YYYY-MM-DD
 
-# 3. Opublikuj (jedno polecenie robi wszystko)
+# 2. Jeden skrypt robi wszystko
 pnpm release
-
-# 4. PR do main (zeby wersje wrocily do main)
-#    Utworz na GitHubie: release/YYYY-MM-DD → main
-#    Po review → merge
 ```
 
 Co robi `pnpm release`:
 
-1. Bumpuje wersje na podstawie commitow (feat → minor, fix → patch)
-2. Tworzy commit z nowymi wersjami + tagi
-3. Pushuje commit i tagi automatycznie
-4. Buduje wszystkie pakiety
-5. Publikuje na npmjs.com (dist-tag: `latest`)
-
-## Pre-release (Alpha/Beta)
-
-Kiedy: masz duzo zmian i chcesz je przetestowac zanim wydasz stabilna wersje.
-
-### Faza 1: Publikacja alpha
+1. `lerna version --conventional-commits --yes` — bumpuje wersje na podstawie
+   commitów (feat → minor, fix → patch), tworzy commit + tagi, pushuje
+   automatycznie
+2. `pnpm build` — buduje wszystkie pakiety
+3. `pnpm publish:packages` — publikuje na npmjs.org (`pnpm publish` konwertuje
+   `workspace:*` do konkretnych wersji)
 
 ```bash
-# 1. Utworz release branch z develop (lub main)
-git checkout develop
-git checkout -b release/YYYY-MM-DD-alpha
-git push -u origin release/YYYY-MM-DD-alpha
-
-# 2. Opublikuj alpha
-pnpm release:alpha
+# 3. PR do main
+gh pr create --title "Release $(date +%Y-%m-%d)" --body "Release"
+# Po review → merge
 ```
 
-Wersje: `0.22.4` → `0.22.5-alpha.0` Dist-tag: `alpha` (nie nadpisuje `latest`)
-
-### Faza 2: Testowanie
-
-```bash
-# W projekcie konsumenckim:
-pnpm add @vytches/ddd-contracts@alpha @vytches/ddd-events@alpha
-```
-
-Jesli cos nie dziala — fix na develop, merge do release brancha, powtorz:
-
-```bash
-pnpm release:alpha    # → alpha.1, alpha.2, itd.
-```
-
-### Faza 3: Stabilny release
-
-```bash
-# 1. Zmerguj alpha branch do main (PR na GitHubie)
-# 2. Utworz nowy release branch z main
-git checkout main && git pull
-git checkout -b release/YYYY-MM-DD
-git push -u origin release/YYYY-MM-DD
-
-# 3. Graduuj alpha do stabilnej
-pnpm lerna version --conventional-commits --conventional-graduate --yes
-
-# 4. Zbuduj i opublikuj
-pnpm build
-pnpm publish:packages
-
-# 5. PR do main
-```
-
-Wersje: `0.22.5-alpha.0` → `0.22.5` Dist-tag: `latest`
-
-**UWAGA:** Standardowy `pnpm release` bumpuje alpha do alpha+1 (nie do
-stabilnej). Do graduacji alpha → stabilna uzyj:
-`pnpm lerna version --conventional-graduate`.
+---
 
 ## Hotfix
 
-Kiedy: krytyczny bug na produkcji, trzeba szybko wydac patch.
+Kiedy: krytyczny bug na produkcji.
 
 ```bash
 git checkout main && git pull
 git checkout -b hotfix/opis-problemu
 git push -u origin hotfix/opis-problemu
 
-# Napraw buga, commituj
+# Napraw, commituj
 git commit -m "fix(package): opis naprawy"
 
-# Wydaj patch
-pnpm release:hotfix
+pnpm release:hotfix   # = patch bump + build + publish
 
 # PR do main
+gh pr create --title "HOTFIX: opis-problemu"
 ```
+
+---
+
+## Pre-release (Alpha / Beta)
+
+Kiedy: chcesz przetestować zmiany z konsumentem zanim wydasz stabilną wersję.
+
+```bash
+# 1. Branch z develop
+git checkout develop
+git checkout -b release/YYYY-MM-DD-alpha
+git push -u origin release/YYYY-MM-DD-alpha
+
+# 2. Publikuj alpha (nie nadpisuje dist-tag latest)
+pnpm release:alpha   # → 0.26.0 staje się 0.27.0-alpha.0
+```
+
+Testowanie w projekcie konsumenckim:
+
+```bash
+npm install @vytches/ddd@alpha
+```
+
+Kolejne alpha po poprawkach:
+
+```bash
+pnpm release:alpha   # → alpha.1, alpha.2, itd.
+```
+
+Graduacja do stabilnej — po zmergowaniu do main:
+
+```bash
+git checkout main && git pull
+git checkout -b release/YYYY-MM-DD
+git push -u origin release/YYYY-MM-DD
+pnpm lerna version --conventional-commits --conventional-graduate --yes
+pnpm build && pnpm publish:packages
+```
+
+> **Uwaga:** Standardowy `pnpm release` bumpuje alpha → alpha+1 (nie do
+> stabilnej). Do graduacji użyj `--conventional-graduate`.
+
+---
 
 ## Publish-only (bez wersjonowania)
 
-Kiedy: wersje juz sa ustawione, chcesz tylko zbudowac i opublikowac.
+Kiedy: wersje są już ustawione, chcesz tylko zbudować i opublikować.
 
 ```bash
 pnpm build
 pnpm publish:packages
 ```
 
-## Dry run (podglad zmian)
+---
+
+## Force Publish
+
+Kiedy: lerna nie widzi zmian (bo dotyczyły tylko root files, docs, CI).
 
 ```bash
-pnpm release:changed     # Jakie pakiety sie zmienily?
-pnpm release:preview      # Co zostanie wydane?
-DRY_RUN=true pnpm publish:packages   # Co zostaloby opublikowane?
+pnpm release:version patch --force-publish --yes
+pnpm build
+pnpm publish:packages
 ```
 
-## Dostepne komendy
+---
 
-| Komenda                | Co robi                                   |
-| ---------------------- | ----------------------------------------- |
-| `pnpm release`         | Pelny release: version + build + publish  |
-| `pnpm release:alpha`   | Alpha pre-release                         |
-| `pnpm release:beta`    | Beta pre-release                          |
-| `pnpm release:hotfix`  | Patch hotfix                              |
-| `pnpm release:publish` | Tylko build + publish (bez wersjonowania) |
-| `pnpm release:changed` | Pokaz zmienione pakiety                   |
-| `pnpm release:preview` | Podglad co zostanie wydane                |
-
-## Instalacja pakietow (konsument)
-
-Pakiety sa publiczne na npmjs.com — zadnej konfiguracji nie trzeba.
+## Podgląd i diagnostyka
 
 ```bash
-# Stabilna wersja (latest)
-pnpm add @vytches/ddd-contracts
+pnpm release:changed      # Które pakiety się zmieniły?
+pnpm release:preview      # Co zostanie wydane?
+DRY_RUN=true pnpm publish:packages   # Dry run publish
+pnpm release:collect      # Lista feat/fix commitów od ostatniego tagu
+```
 
-# Caly zestaw (meta-paczka)
-pnpm add @vytches/ddd
+---
 
-# Beta
-pnpm add @vytches/ddd-contracts@beta
+## Dostępne komendy
+
+| Komenda                | Co robi                                    |
+| ---------------------- | ------------------------------------------ |
+| `pnpm release`         | Pełny release: version + build + publish   |
+| `pnpm release:alpha`   | Alpha pre-release                          |
+| `pnpm release:beta`    | Beta pre-release                           |
+| `pnpm release:hotfix`  | Patch hotfix                               |
+| `pnpm release:publish` | Tylko build + publish (bez wersjonowania)  |
+| `pnpm release:changed` | Pokaż zmienione pakiety                    |
+| `pnpm release:preview` | Podgląd co zostanie wydane                 |
+| `pnpm release:collect` | Commity feat/fix od ostatniego tagu        |
+
+---
+
+## Conventional Commits → Version Bump
+
+```bash
+# PATCH (0.26.0 → 0.26.1)
+fix(cqrs): resolve handler registration race
+docs: update README examples
+test: add coverage for outbox retry
+
+# MINOR (0.26.0 → 0.27.0)
+feat(messaging): add exponential backoff for outbox retry
+perf(aggregates): optimize apply() single-pass enrichment
+
+# MAJOR (0.26.0 → 1.0.0)
+feat!(contracts): redesign IEventBus interface
+
+# lub footer:
+feat(contracts): redesign IEventBus interface
+
+BREAKING CHANGE: IEventBus.publish() now requires metadata object.
+```
+
+> **NIGDY nie pisz `BREAKING CHANGE: None`** — to wyzwala MAJOR bump!
+
+---
+
+## Branch Strategy
+
+```
+develop          ← cała aktywna praca
+  └─ release/*   ← tylko tutaj można robić pnpm release (lerna.json allowBranch)
+       └─ main   ← stabilne tagi, merge po release
+  └─ hotfix/*    ← krytyczne patche z main
+```
+
+Lerna blokuje `lerna version` poza `release/*` i `hotfix/*` — to celowe, żeby
+nie wersjonować przypadkowo z feature branches.
+
+---
+
+## Instalacja pakietów (konsument)
+
+Pakiety są publiczne na npmjs.com — żadnej konfiguracji nie trzeba.
+
+```bash
+# Meta-paczka (wszystko w jednym)
+npm install @vytches/ddd
+
+# Indywidualne pakiety
+npm install @vytches/ddd-aggregates @vytches/ddd-cqrs @vytches/ddd-events
+
+# Alpha/Beta (testowanie pre-release)
+npm install @vytches/ddd@alpha
+npm install @vytches/ddd@beta
 
 # Konkretna wersja
-pnpm add @vytches/ddd-contracts@0.25.0
+npm install @vytches/ddd@0.26.0
 ```
 
-## FAQ
+---
 
-**Q: `pnpm release` bumpuje do alpha+1 zamiast stabilnej?** A: Uzyj
-`pnpm lerna version --conventional-graduate --yes` zamiast `pnpm release`.
+## Błędy i recovery
 
-**Q: Lerna crashuje z "minimatch is not a function"?** A: Overrides w
-package.json sa unbounded. Napraw:
+**`pnpm release` bumpuje alpha → alpha+1 zamiast stabilnej**
 
 ```bash
-sed -i 's/">=3.1.4"/">=3.1.4 <4.0.0"/' package.json
-sed -i 's/">=7.4.8"/">=7.4.8 <8.0.0"/' package.json
-sed -i 's/">=9.0.7"/">=9.0.7 <10.0.0"/' package.json
-sed -i 's/">=2.0.3"/">=2.0.3 <3.0.0"/' package.json
-pnpm install --ignore-scripts
+pnpm lerna version --conventional-graduate --yes
+pnpm build && pnpm publish:packages
 ```
 
-**Q: "tag already exists" error?** A: Usun stare tagi:
-`git tag -l "*alpha.1" | xargs git tag -d`
+**"tag already exists" error**
 
-**Q: Publish fails with 401 Unauthorized?** A: Brak tokenu npm. Sprawdz czy
-secret `NPM_TOKEN` jest ustawiony w GitHub repo → Settings → Secrets → Actions.
-Token generujesz na npmjs.com → profil → Access Tokens → Automation.
+```bash
+git tag -l "*alpha.1" | xargs git tag -d
+```
 
-**Q: EUNCOMMIT error?** A: Commituj wszystkie zmiany przed `pnpm release`.
+**Publish fails z 401 Unauthorized**
+
+Brak tokenu npm. Ustaw `NPM_TOKEN` w GitHub Secrets → Actions lub lokalnie:
+
+```bash
+npm login   # loguje do npmjs.org i zapisuje token do ~/.npmrc
+```
+
+**Release przerwany po `lerna version`, przed publish**
+
+```bash
+git reset --hard HEAD~1          # cofnij commit wersji
+git tag -d @vytches/ddd@x.y.z    # usuń tag (jeśli istnieje)
+# napraw problem, potem:
+pnpm release
+```
+
+**409 Conflict (wersja już istnieje na registry)**
+
+```bash
+pnpm release:version patch --force-publish --yes
+pnpm build && pnpm publish:packages
+```
+
+**EUNCOMMIT error**
+
+Commituj wszystkie zmiany przed `pnpm release`.
+
+---
+
+## Dlaczego pnpm publish, nie lerna publish
+
+`lerna publish` używa `npm publish`, który **nie konwertuje** `workspace:*` do
+rzeczywistych wersji. Konsumenci dostaliby pakiety z literalnym
+`"@vytches/ddd-acl": "workspace:*"` w dependencies — co łamie instalację.
+
+`pnpm publish` konwertuje `workspace:*` automatycznie (np. `"0.26.0"`).
+Dlatego: **lerna tylko wersjonuje**, **pnpm publikuje**.
+
+---
+
+_Zastępuje: ADR-0010 (release process), ADR-0016 (GitHub Packages — zmigrowaliśmy do npmjs.org w REL-011, 2026-05-22)_

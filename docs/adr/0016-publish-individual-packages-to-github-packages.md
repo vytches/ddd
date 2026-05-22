@@ -1,8 +1,12 @@
 # ADR-0016: Publish Individual Packages with Organization Scope to GitHub Packages
 
+> **SUPERSEDED** — Zmigrowaliśmy z GitHub Packages do npmjs.org (REL-011, 2026-05-22).
+> Pakiety są teraz publiczne na npmjs.com bez żadnej konfiguracji auth.
+> Szczegóły: [`docs/RELEASE-GUIDE.md`](../RELEASE-GUIDE.md).
+
 ## Status
 
-**ACCEPTED** - July 24, 2025
+~~**ACCEPTED** - July 24, 2025~~ **SUPERSEDED** - 2026-05-22
 
 ## Context
 
