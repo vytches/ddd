@@ -6,9 +6,9 @@
  * Copies LLM-optimized documentation to your project for AI coding assistants.
  *
  * Usage:
- *   npx @vytches/ddd init-context          # Copy to .claude/vytches-ddd/
- *   npx @vytches/ddd init-context --dir .   # Copy to custom directory
- *   npx @vytches/ddd init-context --verify  # Check if local copy is up-to-date
+ *   npx @vytches/ddd                     # Copy to .claude/vytches-ddd/
+ *   npx @vytches/ddd --dir .             # Copy to custom directory
+ *   npx @vytches/ddd --verify            # Check if local copy is up-to-date
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
@@ -193,7 +193,7 @@ function verifyContext(targetDir) {
   if (allFresh) {
     log(COLORS.green, '\n=', `All context files are up-to-date (v${manifest.version})`);
   } else {
-    log(COLORS.yellow, '\n!', `Some files are outdated. Run 'npx @vytches/ddd init-context' to update.`);
+    log(COLORS.yellow, '\n!', `Some files are outdated. Run 'npx @vytches/ddd' to update.`);
   }
 
   return allFresh;
@@ -204,9 +204,9 @@ function printHelp() {
 ${COLORS.cyan}@vytches/ddd${COLORS.reset} — LLM Context Distribution
 
 ${COLORS.cyan}Usage:${COLORS.reset}
-  npx @vytches/ddd init-context            Copy context to .claude/vytches-ddd/
-  npx @vytches/ddd init-context --dir DIR  Copy context to custom directory
-  npx @vytches/ddd init-context --verify   Check if local copy is up-to-date
+  npx @vytches/ddd                   Copy context to .claude/vytches-ddd/
+  npx @vytches/ddd --dir DIR         Copy context to custom directory
+  npx @vytches/ddd --verify          Check if local copy is up-to-date
 
 ${COLORS.cyan}What it does:${COLORS.reset}
   Copies LLM-optimized documentation for AI coding assistants (Claude Code,
@@ -250,7 +250,7 @@ if (command === 'init-context' || command === 'init') {
   console.log(`${COLORS.dim}Next steps:${COLORS.reset}`);
   console.log(`  1. Add to your CLAUDE.md:  ${COLORS.cyan}@.claude/vytches-ddd/llm-context.md${COLORS.reset}`);
   console.log(`  2. Or add to .cursorrules / .github/copilot-instructions.md`);
-  console.log(`  3. Run ${COLORS.cyan}npx @vytches/ddd init-context --verify${COLORS.reset} after updates\n`);
+  console.log(`  3. Run ${COLORS.cyan}npx @vytches/ddd --verify${COLORS.reset} after updates\n`);
 } else {
   log(COLORS.red, '!', `Unknown command: ${command}`);
   printHelp();

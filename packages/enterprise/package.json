@@ -17,6 +17,7 @@
   },
   "sideEffects": false,
   "bin": {
+    "ddd": "./bin/init-context.mjs",
     "vytches-ddd": "./bin/init-context.mjs"
   },
   "files": [

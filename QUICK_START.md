@@ -193,7 +193,7 @@ Pair @vytches/ddd with Claude Code, Cursor, GitHub Copilot, or Aider.
 ### Setup (one command)
 
 ```bash
-npx @vytches/ddd init-context
+npx @vytches/ddd
 ```
 
 This copies the master context + per-package guides to `.claude/vytches-ddd/`.
@@ -206,8 +206,8 @@ Then add to your `CLAUDE.md` / `.cursorrules` / Copilot instructions:
 Keep context fresh after `npm update`:
 
 ```bash
-npx @vytches/ddd init-context --verify  # shows what's outdated
-npx @vytches/ddd init-context           # re-copies updated guides
+npx @vytches/ddd --verify  # shows what's outdated
+npx @vytches/ddd           # re-copies updated guides
 ```
 
 ### Lightweight alternative (no command)
