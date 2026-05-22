@@ -1,4 +1,4 @@
-# Task: Outbox production readiness — adoption blockers (juz-ide-api validated)
+# Task: Outbox production readiness — adoption blockers (production-validated)
 
 ## Task Metadata
 
@@ -34,14 +34,14 @@ priority_score: 95/100
 batching/prioritization/binary serialization. Weryfikacja pokazała że to
 wszystko już istnieje.
 
-**Rewizja 1 (2026-05-10):** consumer juz-ide-api potwierdził 3 blokery: brak
+**Rewizja 1 (2026-05-10):** consumer a production consumer confirmed 3 blokery: brak
 adaptive re-poll, brak NestJS modułu, niejasna dokumentacja parallel dispatch.
 Docs zrobione (Part 1 ✅). Reszta odłożona do v0.26.1.
 
-**Rewizja 2 (2026-05-18):** pełna analiza implementacji juz-ide-api vs
+**Rewizja 2 (2026-05-18):** pełna analysis of a production consumer implementation vs
 biblioteki ujawniła znacznie głębsze luki. Wymagana przepisanie scope.
 
-### Co juz-ide-api napisało zamiast używać OutboxProcessor
+### What the consumer implemented zamiast używać OutboxProcessor
 
 ```
 OutboxPollerService (własny) — powody:
@@ -55,9 +55,9 @@ OutboxPollerService (własny) — powody:
       5. Brak InMemoryOutboxRepository (testowanie niemożliwe bez własnego fake)
 ```
 
-### Czego NIE WIEDZIAŁA analiza przed rozmową z juz-ide-api
+### What the pre-consumer analysis missed
 
-juz-ide-api ma **dwa niezależne pollery** na tej samej tabeli `outbox_messages`:
+The consumer had **two niezależne pollery** na tej samej tabeli `outbox_messages`:
 
 | Poller                        | Filtr                        | Logika            | Interval    |
 | ----------------------------- | ---------------------------- | ----------------- | ----------- |
@@ -76,7 +76,7 @@ mechanizmu type-filter ani multi-instance support.
 | Metoda                                           | Stan        | Problem                                                                         |
 | ------------------------------------------------ | ----------- | ------------------------------------------------------------------------------- |
 | `getUnprocessedMessages(limit?, priorityOrder?)` | ✅ istnieje | Brak filtra po `messageTypes` — blokuje wyspecjalizowane pollery                |
-| `resetStaleProcessing(olderThan)`                | ❌ brak     | Crash recovery niemożliwy bez własnej implementacji; juz-ide-api dodało ręcznie |
+| `resetStaleProcessing(olderThan)`                | ❌ brak     | Crash recovery niemożliwy bez własnej implementacji; consumer added manually |
 | `scheduleRetry(id, processAfter)`                | ❌ brak     | Retry z backoffem niemożliwy bez tej metody                                     |
 
 **Ważne:** `IOutboxRepository` to `abstract class`, nie interface. Dodanie
@@ -241,7 +241,7 @@ export class InMemoryOutboxRepository extends IOutboxRepository {
 
 ### Part 4: Adaptive re-poll + startup jitter w `OutboxProcessor` — P2 (~2h)
 
-**Adaptive re-poll z livelock guardem** (zainspirowane juz-ide-api, bez
+**Adaptive re-poll z livelock guardem** (inspired by consumer implementation, without
 `setImmediate` — cross-runtime):
 
 ```typescript
@@ -424,7 +424,7 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 
 - `@vytches/ddd-testing` — nowy eksport `InMemoryOutboxRepository`
 - `@vytches/ddd-nestjs` — nowy `OutboxProcessorModule` (Part 5b)
-- juz-ide-api migration: po v0.26.1 mogą wyrzucić własne crony i dual-pollers
+- consumer migration: po v0.26.1 mogą wyrzucić własne crony i dual-pollers
   jeśli Parts 1–4 są kompletne
 
 ---
@@ -461,7 +461,7 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
   `messageType`.
 - **GDPR Art.17 konflikt:** wiadomości FAILED zachowują pełny payload.
   Udokumentować że konsument odpowiada za cleanup (`eraseUserPayloads` pattern z
-  juz-ide-api).
+ consumer project).
 
 ### Acceptance Criteria Security (dodane do v0.26.1)
 
@@ -479,6 +479,6 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 - **2026-05-08**: migracja z work-items archive
 - **2026-05-10**: rewizja 1 po consumer feedback — zmniejszony scope do 4h, Part
   1 zrobiony
-- **2026-05-18**: rewizja 2 po głębokiej analizie implementacji juz-ide-api +
+- **2026-05-18**: revision 2 after deep analysis of consumer implementation +
   recenzja tech-lead + architecture-guardian — zakres rozszerzony do 11h, 5
   nowych luk zidentyfikowanych

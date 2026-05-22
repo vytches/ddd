@@ -30,7 +30,7 @@ priority_score: 72/100
 ## Confirmed by 2026-05-08 performance audit
 
 `packages/nestjs/src/discovery/auto-discovery.service.ts:98–148` — N×5
-`Reflect.getMetadata()` calls per provider. With 200+ handlers in `juz-ide-api`,
+`Reflect.getMetadata()` calls per provider. With 200+ handlers in a large consumer project,
 that's measurable in cold start.
 
 ## Why Post-Release
@@ -63,7 +63,7 @@ Shipped on `develop` (commit `0749bb72`): refactor of
 
 **WeakSet `processedTargets` memoization**:
 
-- Multi-context apps (juz-ide-api: 10+ bounded contexts) previously rescanned
+- Multi-context apps (large consumer project: 10+ bounded contexts) previously rescanned
   the same shared base classes per context. Now scanned at most once per service
   instance.
 - Public `reset()` method clears the cache for test isolation / hot-reload.
