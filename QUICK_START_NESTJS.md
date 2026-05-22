@@ -582,6 +582,29 @@ export class AppModule {}
 
 ## AI-Assisted Development
 
+### Setup (one command)
+
+```bash
+npx @vytches/ddd init-context
+```
+
+Copies master context + per-package NestJS guides to `.claude/vytches-ddd/`.
+Then add to your `CLAUDE.md` / `.cursorrules` / Copilot instructions:
+
+```
+@.claude/vytches-ddd/llm-context.md
+@.claude/vytches-ddd/nestjs.md
+```
+
+Keep context fresh after `npm update`:
+
+```bash
+npx @vytches/ddd init-context --verify  # shows what's outdated
+npx @vytches/ddd init-context           # re-copies updated guides
+```
+
+### Lightweight alternative (no command)
+
 ```
 @./node_modules/@vytches/ddd-nestjs/LLMGUIDE.md
 @./node_modules/@vytches/ddd-cqrs/LLMGUIDE.md
