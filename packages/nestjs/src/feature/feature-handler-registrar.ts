@@ -5,14 +5,17 @@ import {
   type OnModuleDestroy,
   type OnModuleInit,
 } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS DI metadata
 import { ModuleRef } from '@nestjs/core';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS DI metadata
 import { ModulesContainer } from '@nestjs/core/injector';
 import type { Module } from '@nestjs/core/injector/module';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
-import { IEventBus } from '@vytches/ddd-contracts';
+import type { IEventBus } from '@vytches/ddd-contracts';
 import { Logger } from '@vytches/ddd-logging';
 import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS @Optional() DI token
 import { VytchesExplorerService } from '../services/vytches-explorer.service';
 
 interface BusLike {
@@ -21,9 +24,13 @@ interface BusLike {
   registerHandler?(eventType: unknown, handler: unknown): void;
 }
 
+// Class constructor reference used as reflection key — intentional Function usage
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+type ClassRef = Function;
+
 interface HandlerEntry {
-  messageType: Function;
-  handlerType: Function;
+  messageType: ClassRef;
+  handlerType: ClassRef;
   handlerKind: 'command' | 'query' | 'event';
 }
 
@@ -104,7 +111,7 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
         | 'event'
         | undefined;
       const handlerMetadata = Reflect.getMetadata('di:handler-metadata', metatype) as
-        | { messageType?: Function }
+        | { messageType?: ClassRef }
         | undefined;
       const scope =
         (Reflect.getMetadata('di:handler-scope', metatype) as string | undefined) ?? 'context';

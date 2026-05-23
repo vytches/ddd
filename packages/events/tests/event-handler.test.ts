@@ -390,7 +390,9 @@ describe('EventHandler Decorator', () => {
       it('defaults scope to "context"', () => {
         @EventHandler(TestEvent)
         class DefaultScopeHandler {
-          handle(_event: TestEvent): void {}
+          handle(_event: TestEvent): void {
+            // noop stub for decorator metadata tests
+          }
         }
 
         expect(Reflect.getMetadata('di:handler-scope', DefaultScopeHandler)).toBe('context');
@@ -399,7 +401,9 @@ describe('EventHandler Decorator', () => {
       it('stores explicit scope "global"', () => {
         @EventHandler(TestEvent, { scope: 'global' })
         class GlobalScopeHandler {
-          handle(_event: TestEvent): void {}
+          handle(_event: TestEvent): void {
+            // noop stub for decorator metadata tests
+          }
         }
 
         expect(Reflect.getMetadata('di:handler-scope', GlobalScopeHandler)).toBe('global');
@@ -408,7 +412,9 @@ describe('EventHandler Decorator', () => {
       it('stores explicit scope "context"', () => {
         @EventHandler(TestEvent, { scope: 'context' })
         class ContextScopeHandler {
-          handle(_event: TestEvent): void {}
+          handle(_event: TestEvent): void {
+            // noop stub for decorator metadata tests
+          }
         }
 
         expect(Reflect.getMetadata('di:handler-scope', ContextScopeHandler)).toBe('context');

@@ -4,7 +4,8 @@ import { describe, it, expect, vi } from 'vitest';
 import { InMemoryOutboxRepository } from '@vytches/ddd-testing';
 import type { IOutboxMessageHandler } from '@vytches/ddd-messaging';
 
-import { OutboxProcessorModule, OutboxProcessorService } from '../../src/outbox';
+import { OutboxProcessorModule } from '../../src/outbox';
+import type { OutboxProcessorService } from '../../src/outbox';
 
 const OUTBOX_REPO = 'OUTBOX_REPO';
 const OUTBOX_REPO_B = 'OUTBOX_REPO_B';

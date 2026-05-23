@@ -3,7 +3,7 @@ import { ModuleRef } from '@nestjs/core';
 import { ModulesContainer } from '@nestjs/core/injector';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { CommandBus, QueryBus, ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
-import { IEventBus } from '@vytches/ddd-contracts';
+import type { IEventBus } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from '@vytches/ddd-events';
 import { NestJSContainerAdapter } from '../adapters';
 import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';

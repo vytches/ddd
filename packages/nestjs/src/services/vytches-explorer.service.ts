@@ -68,6 +68,7 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
   private _contextOptions?: VytchesContextOptions;
   private discoveredHandlers: HandlerInfo[] = [];
   private initialized = false;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- class constructor ref used as Set key for reflection
   private readonly claimedTypes = new Set<Function>();
 
   constructor(
@@ -112,6 +113,7 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
    * types as handled by a feature-scoped bus. The global fallback in
    * onApplicationBootstrap() skips claimed types.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- class constructor refs used as reflection keys
   claimHandlerTypes(messageTypes: Function[]): void {
     for (const type of messageTypes) {
       this.claimedTypes.add(type);

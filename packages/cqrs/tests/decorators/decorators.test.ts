@@ -325,7 +325,9 @@ describe('CQRS Decorators', () => {
     it('CommandHandler defaults scope to "context"', () => {
       @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
       class TestCommandHandler implements ICommandHandler<TestCommand> {
-        async execute(_command: TestCommand): Promise<void> {}
+        async execute(_command: TestCommand): Promise<void> {
+          // noop stub for decorator metadata tests
+        }
       }
 
       expect(Reflect.getMetadata('di:handler-scope', TestCommandHandler)).toBe('context');
@@ -334,7 +336,9 @@ describe('CQRS Decorators', () => {
     it('CommandHandler stores explicit scope "global"', () => {
       @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand, { scope: 'global' })
       class GlobalCommandHandler implements ICommandHandler<TestCommand> {
-        async execute(_command: TestCommand): Promise<void> {}
+        async execute(_command: TestCommand): Promise<void> {
+          // noop stub for decorator metadata tests
+        }
       }
 
       expect(Reflect.getMetadata('di:handler-scope', GlobalCommandHandler)).toBe('global');
@@ -343,7 +347,9 @@ describe('CQRS Decorators', () => {
     it('CommandHandler stores explicit scope "context"', () => {
       @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand, { scope: 'context' })
       class ContextCommandHandler implements ICommandHandler<TestCommand> {
-        async execute(_command: TestCommand): Promise<void> {}
+        async execute(_command: TestCommand): Promise<void> {
+          // noop stub for decorator metadata tests
+        }
       }
 
       expect(Reflect.getMetadata('di:handler-scope', ContextCommandHandler)).toBe('context');

@@ -72,6 +72,7 @@ vi.mock('@vytches/ddd-logging', () => ({
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 function makeHandlerInfo(messageType: Function) {
   return {
     type: 'command' as const,
@@ -604,13 +605,17 @@ describe('cross-context isolation — ADR-0034 production bug scenario', () => {
     );
 
     // Despite sharing the same class NAME, the two commands are different constructor refs
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     const [ordersMsg] = ordersRegisterFactory.mock.calls[0] as [Function, unknown];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     const [catalogMsg] = catalogRegisterFactory.mock.calls[0] as [Function, unknown];
     expect(ordersMsg).not.toBe(catalogMsg);
 
     // Both message types were claimed with the explorer service
     expect(claimSpy).toHaveBeenCalledTimes(2);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     const claimedBatch1 = claimSpy.mock.calls[0]?.[0] as Function[];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     const claimedBatch2 = claimSpy.mock.calls[1]?.[0] as Function[];
     expect([...claimedBatch1, ...claimedBatch2]).toContain(UpdateReadModelCommand);
     expect([...claimedBatch1, ...claimedBatch2]).toContain(CatalogUpdateReadModelCommand);

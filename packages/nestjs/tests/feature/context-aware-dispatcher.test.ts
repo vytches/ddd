@@ -12,6 +12,7 @@
 import 'reflect-metadata';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { IDomainEvent, IAggregateWithEvents } from '@vytches/ddd-contracts';
+import { IntegrationEvent, DomainEvent } from '@vytches/ddd-events';
 
 import { ContextAwareEventDispatcher } from '../../src/dispatchers/context-aware-event-dispatcher';
 import { FeatureHandlerRegistrar } from '../../src/feature/feature-handler-registrar';
@@ -26,18 +27,6 @@ vi.mock('@vytches/ddd-logging', () => ({
     }),
   },
 }));
-
-// ─── Shared event stubs ───────────────────────────────────────────────────────
-
-class StubIntegrationEvent {
-  readonly eventName = 'StubIntegrationEvent';
-  readonly payload = {};
-}
-
-class StubDomainEvent {
-  readonly eventName = 'StubDomainEvent';
-  readonly payload = {};
-}
 
 // ─── ContextAwareEventDispatcher ─────────────────────────────────────────────
 
@@ -54,8 +43,6 @@ describe('ContextAwareEventDispatcher', () => {
 
   describe('event routing', () => {
     it('routes IntegrationEvent to the global bus', async () => {
-      const { IntegrationEvent } = await import('@vytches/ddd-events');
-
       class OrderShippedIntegrationEvent extends IntegrationEvent {
         constructor() {
           super({ payload: {} } as never);
@@ -81,10 +68,8 @@ describe('ContextAwareEventDispatcher', () => {
     });
 
     it('routes DomainEvent subclass instances to the local bus', async () => {
-      const { DomainEvent } = await import('@vytches/ddd-events');
-
       class OrderPlacedEvent extends DomainEvent {
-        readonly eventName = 'OrderPlacedEvent';
+        override readonly eventName = 'OrderPlacedEvent';
       }
 
       dispatcher = new ContextAwareEventDispatcher(globalBus as never, localBus as never);
@@ -96,15 +81,13 @@ describe('ContextAwareEventDispatcher', () => {
     });
 
     it('dispatches multiple events individually with correct routing', async () => {
-      const { IntegrationEvent, DomainEvent } = await import('@vytches/ddd-events');
-
       class ShippedIntegration extends IntegrationEvent {
         constructor() {
           super({ payload: {} } as never);
         }
       }
       class PlacedDomain extends DomainEvent {
-        readonly eventName = 'Placed';
+        override readonly eventName = 'Placed';
       }
 
       dispatcher = new ContextAwareEventDispatcher(globalBus as never, localBus as never);
@@ -122,8 +105,6 @@ describe('ContextAwareEventDispatcher', () => {
 
   describe('missing bus handling', () => {
     it('silently drops IntegrationEvent when global bus is not provided', async () => {
-      const { IntegrationEvent } = await import('@vytches/ddd-events');
-
       class TestIntegration extends IntegrationEvent {
         constructor() {
           super({ payload: {} } as never);
@@ -161,6 +142,7 @@ describe('ContextAwareEventDispatcher', () => {
       const aggregate: IAggregateWithEvents = {
         getDomainEvents: vi.fn().mockReturnValue([domainEvent]),
         commit: commitSpy,
+        hasChanges: vi.fn().mockReturnValue(true),
       };
 
       await dispatcher.dispatchEventsForAggregate(aggregate);
@@ -178,6 +160,7 @@ describe('ContextAwareEventDispatcher', () => {
       const aggregate: IAggregateWithEvents = {
         getDomainEvents: vi.fn().mockReturnValue([domainEvent]),
         commit: commitSpy,
+        hasChanges: vi.fn().mockReturnValue(true),
       };
 
       await expect(dispatcher.dispatchEventsForAggregate(aggregate)).rejects.toThrow('bus down');
@@ -191,6 +174,7 @@ describe('ContextAwareEventDispatcher', () => {
       const aggregate: IAggregateWithEvents = {
         getDomainEvents: vi.fn().mockReturnValue([]),
         commit: commitSpy,
+        hasChanges: vi.fn().mockReturnValue(false),
       };
 
       await dispatcher.dispatchEventsForAggregate(aggregate);
