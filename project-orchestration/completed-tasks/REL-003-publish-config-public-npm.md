@@ -11,7 +11,7 @@ complexity: simple
 estimated_time: 3h
 created_by: agent (architecture-guardian, security-audit, documentation-master)
 created_at: 2026-05-08 14:00
-status: parked (awaiting maintainer npmjs.com setup, code-side ready)
+status: completed
 release_target: v0.25.0-beta.1
 ```
 

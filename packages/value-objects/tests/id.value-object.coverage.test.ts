@@ -90,7 +90,7 @@ describe('EntityIdFactory (deprecated) — static methods', () => {
     EntityIdFactory.createWithRandomUUID();
     // The contract is "at most once" per process — exact count depends on
     // test order across the file (warning state is module-scoped).
-    const calls = warnSpy.mock.calls.filter(args =>
+    const calls = warnSpy.mock.calls.filter((args: unknown[]) =>
       String(args[0] ?? '').includes('createWithRandomUUID')
     );
     expect(calls.length).toBeLessThanOrEqual(1);

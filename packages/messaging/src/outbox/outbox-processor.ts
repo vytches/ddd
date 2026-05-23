@@ -5,6 +5,15 @@ import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
 
+export interface RetryBackoffConfig {
+  /** Initial delay in milliseconds before first retry (default: 1000) */
+  initial: number;
+  /** Multiplier applied per subsequent attempt (default: 2) */
+  multiplier: number;
+  /** Maximum delay cap in milliseconds (default: 300_000 — 5 min) */
+  maxDelay: number;
+}
+
 export interface OutboxProcessorOptions {
   /** Maximum number of messages to process in one batch */
   batchSize?: number;
@@ -18,11 +27,24 @@ export interface OutboxProcessorOptions {
   messageTimeout?: number;
   /** Enable logging */
   enableLogging?: boolean;
+  /**
+   * Exponential backoff for retries.
+   * When set, failed messages are scheduled for future retry via
+   * `IOutboxRepository.scheduleRetry()` instead of immediately re-queued.
+   * If the repository's `scheduleRetry` is a no-op, messages fall back to
+   * immediate PENDING reset (legacy behavior).
+   * If omitted, immediate retry is used for all messages.
+   */
+  retryBackoff?: RetryBackoffConfig;
 }
+
+type ResolvedOptions = Required<Omit<OutboxProcessorOptions, 'retryBackoff'>> & {
+  retryBackoff: RetryBackoffConfig | undefined;
+};
 
 export class OutboxProcessor {
   private readonly repository: IOutboxRepository;
-  private readonly options: Required<OutboxProcessorOptions>;
+  private readonly options: ResolvedOptions;
   private readonly handlers = new Map<string, IOutboxMessageHandler>();
   private readonly middlewares: OutboxMiddleware[] = [];
   private isRunning = false;
@@ -30,9 +52,23 @@ export class OutboxProcessor {
   private readonly logger = Logger.create('OutboxProcessor');
 
   constructor(repository: IOutboxRepository, options: OutboxProcessorOptions = {}) {
+    const batchSize = options.batchSize ?? 10;
+    if (batchSize > 10_000) {
+      throw new RangeError(`OutboxProcessor: batchSize must be ≤ 10,000, got ${batchSize}`);
+    }
+
+    if (options.retryBackoff) {
+      const { initial, multiplier, maxDelay } = options.retryBackoff;
+      if (initial <= 0 || multiplier <= 0 || maxDelay <= 0) {
+        throw new RangeError(
+          `OutboxProcessor: retryBackoff fields must be positive numbers (initial=${initial}, multiplier=${multiplier}, maxDelay=${maxDelay})`
+        );
+      }
+    }
+
     this.repository = repository;
     this.options = {
-      batchSize: options.batchSize ?? 10,
+      batchSize,
       maxRetries: options.maxRetries ?? 3,
       processingInterval: options.processingInterval ?? 5000,
       priorityOrder: options.priorityOrder ?? [
@@ -43,6 +79,7 @@ export class OutboxProcessor {
       ],
       messageTimeout: options.messageTimeout ?? 30000,
       enableLogging: options.enableLogging ?? false,
+      retryBackoff: options.retryBackoff,
     };
   }
 
@@ -209,8 +246,19 @@ export class OutboxProcessor {
       if (attempts >= this.options.maxRetries) {
         await this.repository.updateStatus(message.id, MessageStatus.FAILED, error);
         this.logger.error(`Message ${message.id} marked as failed after ${attempts} attempts`);
+      } else if (this.options.retryBackoff) {
+        const { initial, multiplier, maxDelay } = this.options.retryBackoff;
+        const delay = Math.min(initial * Math.pow(multiplier, attempts - 1), maxDelay);
+        const processAfter = new Date(Date.now() + delay);
+        // Reset to PENDING first so the message is never stuck in PROCESSING
+        // if the repository's scheduleRetry is the inherited no-op.
+        await this.repository.updateStatus(message.id, MessageStatus.PENDING);
+        await this.repository.scheduleRetry(message.id, processAfter);
+        this.logger.info(
+          `Message ${message.id} scheduled for retry in ${delay}ms (attempt ${attempts})`
+        );
       } else {
-        // Reset to pending for retry
+        // No backoff configured: immediate retry (legacy behavior)
         await this.repository.updateStatus(message.id, MessageStatus.PENDING);
         this.logger.info(`Message ${message.id} scheduled for retry (attempt ${attempts + 1})`);
       }

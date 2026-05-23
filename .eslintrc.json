@@ -334,7 +334,7 @@
       "rules": {}
     },
     {
-      "files": ["*.spec.ts", "*.test.ts", "*.spec.tsx", "*.test.tsx"],
+      "files": ["*.test.ts", "*.test.tsx"],
       "env": {
         "jest": true
       },

@@ -12,7 +12,7 @@ complexity: medium
 estimated_time: 3h
 created_by: human (production-quality decision 2026-05-08)
 created_at: 2026-05-08
-status: parked (awaiting REL-003 + maintainer npm setup)
+status: completed
 release_target: v0.25.0-beta.1
 depends_on:
   - REL-000 (npm scope confirmed available)

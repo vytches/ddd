@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.28.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.28.0) (2026-05-23)
+
+### Bug Fixes
+
+- **cli:** simplify npx commands and add 'ddd' binary alias for reliable npx
+  resolution
+  ([26011af](https://github.com/vytches/ddd/commit/26011afcd4291a971e6e93ee9f8719d2d27b4b52))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 0.27.0 (2026-05-17)
 
 ### Bug Fixes

@@ -74,4 +74,24 @@ export abstract class IOutboxRepository {
     message: IOutboxMessage<T>,
     processAfter: Date
   ): Promise<string>;
+
+  /**
+   * Schedules a retry for a failed message at a specific future time.
+   *
+   * Default implementation is a no-op — repositories that do not support
+   * delayed processing will fall back to immediate retry (PENDING reset).
+   * Override this in concrete repositories to enable exponential backoff.
+   *
+   * **Multi-worker note:** `OutboxProcessor` calls `updateStatus(PENDING)` immediately
+   * before this method. In multi-worker environments, override this to perform
+   * an atomic `UPDATE ... SET status=PENDING, process_after=?` in a single statement,
+   * and ensure `getUnprocessedMessages` filters `WHERE process_after IS NULL OR process_after <= NOW()`
+   * to prevent duplicate dispatch during the window between the two calls.
+   *
+   * @param id Message ID
+   * @param processAfter When to retry the message
+   */
+  scheduleRetry(_id: string, _processAfter: Date): Promise<void> {
+    return Promise.resolve();
+  }
 }

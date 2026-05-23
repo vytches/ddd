@@ -14,7 +14,7 @@ created_by: agent (critical-reviewer 2026-05-08)
 created_at: 2026-05-08
 completed_at:
   2026-05-08 (decision part; manual registration deferred to before Block 5)
-status: in_progress (research done, registration pending)
+status: completed
 release_target: v0.25.0-beta.1
 deadline: 2026-05-12 (4 days from creation — must resolve before Phase 1 work)
 blocks:

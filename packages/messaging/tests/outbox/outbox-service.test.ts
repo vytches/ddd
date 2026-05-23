@@ -17,6 +17,7 @@ describe('OutboxService', () => {
       incrementAttempt: vi.fn().mockResolvedValue(1),
       deleteByStatusAndAge: vi.fn().mockResolvedValue(5),
       scheduleMessage: vi.fn().mockResolvedValue('scheduled-id-456'),
+      scheduleRetry: vi.fn().mockResolvedValue(undefined),
     };
 
     outboxService = new OutboxService(mockRepository);

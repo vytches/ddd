@@ -49,10 +49,11 @@ specific findings:
       DONE: removed `expect(time).toBeGreaterThan(0.5)` assertions on lines 282
       and 400 (these failed when the host machine ran faster than 0.5ms; faster
       execution is never a real test failure).
-- [ ] **Standardize on `.test.ts` (or `.spec.ts`); add ESLint rule** — DEFERRED
-      to v0.26. Current state: 102 `.test.ts` vs 32 `.spec.ts`. Bulk rename of
-      32 files is risky and pure-cosmetic; not worth blocking beta. New tests
-      should default to `.test.ts` per dominant convention.
+- [x] **Standardize on `.test.ts`; add ESLint enforcement** — DONE 2026-05-18.
+      Renamed 34 `.spec.ts` → `.test.ts` via `git mv`. Fixed typo
+      `validation-error..spec.ts` → `validation-error.test.ts`. Updated
+      `.eslintrc.json` to remove `*.spec.ts` from relaxed-rules override (soft
+      enforcement). 155 test files pass, 2201 tests green.
 
 ## Verification (2026-05-09)
 

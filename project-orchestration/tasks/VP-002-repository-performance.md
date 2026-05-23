@@ -35,8 +35,8 @@ Repository performance bottlenecks:
 
 Performance optimization belongs after API stabilization. Refactoring
 performance characteristics post-1.0 with semver-bound API would be much harder
-than now — but the bottleneck risk is small for v0.25 beta consumers
-(`juz-ide-api` is already running this code in production, performance is
+than now — but the bottleneck risk is small for v0.25 beta consumers (a
+production consumer is already running this code in production, performance is
 "acceptable").
 
 ## Acceptance Criteria (preserved + amended)
