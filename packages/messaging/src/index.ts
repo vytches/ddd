@@ -5,6 +5,7 @@ export type {
   IOutboxMessageHandler,
   OutboxMiddleware,
   OutboxProcessorOptions,
+  OutboxProcessorHooks,
   RetryBackoffConfig,
   OutboxServiceOptions,
 } from './outbox';

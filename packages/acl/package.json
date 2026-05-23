@@ -44,7 +44,6 @@
   },
   "devDependencies": {
     "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-testing": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
     "@vytches/ddd-validation": "workspace:*",
     "typescript": "^5.0.0",

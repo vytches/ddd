@@ -20,11 +20,16 @@ export abstract class IOutboxRepository {
    * Gets unprocessed messages from the outbox
    * @param limit Maximum number of messages to retrieve
    * @param priorityOrder Order of priority for processing (default: [CRITICAL, HIGH, NORMAL, LOW])
+   * @param messageTypes Optional allow-list of message types to fetch. When
+   *   provided, only messages whose `messageType` is in this list are returned
+   *   (e.g. `WHERE message_type IN (...)`). Omitting it fetches all types —
+   *   this parameter is optional and backward-compatible.
    * @returns Unprocessed messages
    */
   abstract getUnprocessedMessages(
     limit?: number,
-    priorityOrder?: MessagePriority[]
+    priorityOrder?: MessagePriority[],
+    messageTypes?: string[]
   ): Promise<IOutboxMessage[]>;
 
   /**
@@ -93,5 +98,27 @@ export abstract class IOutboxRepository {
    */
   scheduleRetry(_id: string, _processAfter: Date): Promise<void> {
     return Promise.resolve();
+  }
+
+  /**
+   * Resets messages stuck in `PROCESSING` back to `PENDING` so they can be
+   * re-dispatched. Used for crash recovery: if a worker dies mid-batch, its
+   * in-flight messages remain `PROCESSING` forever without this.
+   *
+   * Default implementation is a no-op returning `0` — repositories that do not
+   * track a per-message "processing since" timestamp simply opt out. Override
+   * in concrete repositories, e.g.:
+   * `UPDATE outbox_messages SET status='PENDING' WHERE status='PROCESSING' AND updated_at < olderThan`.
+   *
+   * **Safety:** implementations MUST only reset messages whose processing
+   * started strictly before `olderThan`. `OutboxProcessor` always passes a past
+   * timestamp (`now - crashRecoveryThresholdMs`, with the threshold validated to
+   * be `>= messageTimeout`), so legitimately in-flight messages are never reset.
+   *
+   * @param olderThan Reset only `PROCESSING` messages last touched before this instant
+   * @returns Number of messages reset to `PENDING`
+   */
+  resetStaleProcessing(_olderThan: Date): Promise<number> {
+    return Promise.resolve(0);
   }
 }

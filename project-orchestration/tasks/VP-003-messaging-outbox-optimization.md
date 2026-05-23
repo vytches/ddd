@@ -17,7 +17,8 @@ migrated_at: 2026-05-08
 revised_at: 2026-05-10 (consumer feedback round 1)
 revised_at_2:
   2026-05-18 (deep analysis + tech-lead + architecture-guardian review)
-status: in_progress
+completed_at: 2026-05-23
+status: done
 release_target:
   p1_p2: v0.26.1
   p3: v0.26.2
@@ -359,35 +360,36 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 
 ### v0.26.1 (Parts 1–4)
 
-- [ ] `scheduleRetry(id, processAfter)` w `IOutboxRepository` jako concrete
+- [x] `scheduleRetry(id, processAfter)` w `IOutboxRepository` jako concrete
       no-op
-- [ ] `resetStaleProcessing(olderThan)` w `IOutboxRepository` jako concrete
+- [x] `resetStaleProcessing(olderThan)` w `IOutboxRepository` jako concrete
       no-op
-- [ ] `getUnprocessedMessages` przyjmuje optional `messageTypes?: string[]`
-- [ ] `OutboxProcessor` retry używa exponential backoff via `processAfter`
-- [ ] `retryBackoff` opcja — 3 scenariusze backoffu pokryte testami
-- [ ] `messageTypes` opcja w `OutboxProcessorOptions`
-- [ ] `crashRecoveryIntervalMs` opcja — auto-woła `resetStaleProcessing`
-- [ ] `InMemoryOutboxRepository` w `@vytches/ddd-testing` — 25+ testów
-- [ ] `InMemoryOutboxRepository` eksportowany z `@vytches/ddd-testing`
-- [ ] `processBatch()` zwraca `{ processed, batchSize }` (backward-compatible)
-- [ ] Adaptive re-poll z livelock guardem — 5 scenariuszy testów
-- [ ] `startupJitterMs` opcja
-- [ ] `adaptiveRepoll` domyślnie `false` (opt-in, brak breaking change)
-- [ ] API surface tests dla wszystkich nowych eksportów
-- [ ] Zero regresji istniejących testów
+- [x] `getUnprocessedMessages` przyjmuje optional `messageTypes?: string[]`
+- [x] `OutboxProcessor` retry używa exponential backoff via `processAfter`
+- [x] `retryBackoff` opcja — 3 scenariusze backoffu pokryte testami
+- [x] `messageTypes` opcja w `OutboxProcessorOptions`
+- [x] `crashRecoveryIntervalMs` opcja — auto-woła `resetStaleProcessing`
+- [x] `InMemoryOutboxRepository` w `@vytches/ddd-testing` — 25+ testów
+- [x] `InMemoryOutboxRepository` eksportowany z `@vytches/ddd-testing`
+- [x] `processBatch()` zwraca `{ processed, batchSize }` (backward-compatible)
+- [x] Adaptive re-poll z livelock guardem — 5 scenariuszy testów
+- [x] `startupJitterMs` opcja
+- [x] `adaptiveRepoll` domyślnie `false` (opt-in, brak breaking change)
+- [x] API surface tests dla wszystkich nowych eksportów
+- [x] Zero regresji istniejących testów
 
 ### v0.26.2 (Part 5)
 
-- [ ] `OutboxProcessorHooks` interface eksportowany
-- [ ] `hooks` opcja w `OutboxProcessorOptions`
-- [ ] `onBatchComplete`, `onMessageFailed`, `onPermanentFailure` wyzwalane we
+- [x] `OutboxProcessorHooks` interface eksportowany
+- [x] `hooks` opcja w `OutboxProcessorOptions`
+- [x] `onBatchComplete`, `onMessageFailed`, `onPermanentFailure` wyzwalane we
       właściwych momentach
-- [ ] `OutboxProcessorModule.forRootAsync` w `@vytches/ddd-nestjs`
-- [ ] Multi-processor: N procesorów per module
-- [ ] `repositoryToken` + opcjonalny `handlerToken` per processor entry
-- [ ] Lifecycle: `OnModuleInit` → `start()`, `OnModuleDestroy` → `stop()`
-- [ ] API surface tests + lifecycle smoke tests
+- [x] `OutboxProcessorModule.forRootAsync` w `@vytches/ddd-nestjs`
+- [x] Multi-processor: N procesorów per module
+- [x] `repositoryToken` + opcjonalny `handlerToken` per processor entry
+      (`handlerToken` → `Record<messageType, IOutboxMessageHandler>`)
+- [x] Lifecycle: `OnModuleInit` → `start()`, `OnModuleDestroy` → `stop()`
+- [x] API surface tests + lifecycle smoke tests
 
 ---
 
@@ -467,12 +469,13 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 
 ### Acceptance Criteria Security (dodane do v0.26.1)
 
-- [ ] `batchSize > 10_000` rzuca błąd w konstruktorze z opisowym komunikatem
-- [ ] `crashRecoveryThresholdMs < messageTimeout` rzuca błąd w konstruktorze
-- [ ] Backoff delay zawsze przez `Math.min(delay, maxDelay)` przed użyciem w
+- [x] `batchSize > 10_000` rzuca błąd w konstruktorze z opisowym komunikatem
+- [x] `crashRecoveryThresholdMs < messageTimeout` rzuca błąd w konstruktorze
+- [x] Backoff delay zawsze przez `Math.min(delay, maxDelay)` przed użyciem w
       `Date`
-- [ ] Hooki wywołane w `safeRun` — błąd hooka nie propaguje do pętli processingu
-- [ ] Logger w `handleMessageError` loguje tylko `id`, `messageType`, `attempt`
+- [x] Hooki wywołane w `safeRun` — błąd hooka nie propaguje do pętli processingu
+      (zaimplementowane jako `safelyInvokeHook` try/catch + `Logger.error`)
+- [x] Logger w `handleMessageError` loguje tylko `id`, `messageType`, `attempt`
       — nigdy `payload`
 
 ## Historia rewizji

@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.29.0](https://github.com/vytches/ddd/compare/v0.28.0...v0.29.0) (2026-05-23)
+
+### Features
+
+- **nestjs:** add `VytchesDDDModule.forFeature()` with per-context
+  `ICommandBus`, `IQueryBus`, `LOCAL_EVENT_BUS` isolation (VP-007 Phase 3)
+  ([514a49b](https://github.com/vytches/ddd/commit/514a49b7))
+- **nestjs:** add `ContextAwareEventDispatcher` routing `IntegrationEvent` →
+  global bus, domain events → `LOCAL_EVENT_BUS` (VP-007 Phase 4)
+  ([62e1566](https://github.com/vytches/ddd/commit/62e1566c))
+- **nestjs:** add `FeatureHandlerRegistrar.onModuleDestroy()` calling
+  `dispose()` on per-context buses (VP-007 Phase 4)
+  ([62e1566](https://github.com/vytches/ddd/commit/62e1566c))
+
 # [0.28.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.28.0) (2026-05-23)
 
 **Note:** Version bump only for package @vytches/ddd-nestjs

@@ -10,6 +10,7 @@ exports[`@vytches/ddd-testing public API surface > exports the documented set of
   "EventSourcedSeeder",
   "GWTAssertionError",
   "GeographicSeeder",
+  "InMemoryOutboxRepository",
   "ScenarioSeeder",
   "SimpleTestHarness",
   "StreamingSeeder",

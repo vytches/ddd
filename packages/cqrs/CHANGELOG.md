@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.29.0](https://github.com/vytches/ddd/compare/v0.28.0...v0.29.0) (2026-05-23)
+
+### Bug Fixes
+
+- **cqrs:** use Function reference as Map key to prevent cross-context handler
+  collision (VP-007) ([b45bbe5](https://github.com/vytches/ddd/commit/b45bbe57))
+
+### Features
+
+- **cqrs:** add `scope` option to `@CommandHandler`, `@QueryHandler`,
+  `@EventHandler` decorators
+  ([f991841](https://github.com/vytches/ddd/commit/f991841b))
+- **cqrs:** add `dispose()` to `EnhancedQueryBus` clearing cache-cleanup
+  interval and caches
+  ([62e1566](https://github.com/vytches/ddd/commit/62e1566c))
+
 # [0.28.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.28.0) (2026-05-23)
 
 **Note:** Version bump only for package @vytches/ddd-cqrs

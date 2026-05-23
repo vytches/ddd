@@ -51,6 +51,15 @@ export interface EventHandlerOptions extends DIDecoratorOptions {
   /** Context filter for event handling - can be single context, multiple contexts, or undefined for all */
   eventContext?: string | string[];
 
+  /**
+   * Bus scope for this handler.
+   * - `'context'` (default) — handler registered in the bounded-context
+   *   `LOCAL_EVENT_BUS` provided by `VytchesDDDModule.forFeature()`.
+   * - `'global'` — handler registered in the application-wide event bus.
+   *   Use for integration event handlers that cross bounded-context boundaries.
+   */
+  scope?: 'context' | 'global';
+
   /** Additional metadata */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
