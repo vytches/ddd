@@ -4,7 +4,7 @@ Date: 2026-05-23
 
 ## Status
 
-2026-05-23 proposed
+2026-05-23 proposed 2026-05-23 accepted — Phases 1–3 implemented
 
 ## Context
 
@@ -230,6 +230,155 @@ context module. Handlers from that module will start using the isolated bus.
 If so — `forFeature()` isolates them without renaming the classes.
 
 Skipping Steps 1 and 2 = behavior identical to before the change.
+
+---
+
+---
+
+## Implementation Notes (Phases 1–3)
+
+### Phase 1 — Map key fix (commit b45bbe57)
+
+`packages/cqrs/` — `CommandBus`, `QueryBus`, `EnhancedCommandBus`,
+`EnhancedQueryBus`:
+
+- `handlers: Map<Function | string, ...>` — constructor reference as primary key
+- `execute()` double-lookup:
+  `handlers.get(cmd.constructor) ?? handlers.get(cmd.constructor.name)`
+- String registration `bus.register('MyCommand', handler)` preserved for
+  backward compatibility
+
+### Phase 2 — `scope` option in decorators (commit f991841b)
+
+`packages/cqrs/` `CommandHandlerOptions` / `QueryHandlerOptions` and  
+`packages/events/` `EventHandlerOptions` now accept
+`scope?: 'context' | 'global'`.  
+Stored as
+`Reflect.defineMetadata('di:handler-scope', scope ?? 'context', handlerClass)`.
+
+### Phase 3 — `forFeature()` + `FeatureHandlerRegistrar`
+
+New files in `packages/nestjs/src/`:
+
+- `feature/vytches-ddd-feature.module.ts` — `VytchesDDDFeatureModule` (separate
+  class, prevents NestJS deduplication)
+- `feature/feature-handler-registrar.ts` — `FeatureHandlerRegistrar` (internal,
+  not exported)
+- `constants.ts` — `LOCAL_EVENT_BUS`, `FEATURE_ANCHOR_INJECTION` tokens
+
+`VytchesExplorerService` lifecycle split:
+
+- `onModuleInit()` → discovery only
+- `onApplicationBootstrap()` → global fallback (skips claimed types)
+- new `claimHandlerTypes(types: Function[])` called by `FeatureHandlerRegistrar`
+
+**Anchor mechanism**: each `forFeature()` call creates
+`Symbol('vytches:feature:<name>')` (non-interned, guaranteed unique).
+`FeatureHandlerRegistrar` receives it via `FEATURE_ANCHOR_INJECTION` and uses it
+to locate its own module in `ModulesContainer` from `@nestjs/core/injector`.
+
+---
+
+## Consumer Usage Guide
+
+### Minimal setup — one bounded-context module
+
+```typescript
+import { Module } from '@nestjs/common';
+import { VytchesDDDModule, LOCAL_EVENT_BUS } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import { CommandHandler, QueryHandler } from '@vytches/ddd-cqrs';
+
+// --- Commands and queries ---
+class PlaceOrderCommand {
+  constructor(public readonly customerId: string) {}
+}
+class GetOrderQuery {
+  constructor(public readonly orderId: string) {}
+}
+
+// --- Handlers (no changes from before — just add @CommandHandler / @QueryHandler) ---
+@CommandHandler(PlaceOrderCommand)
+export class PlaceOrderHandler {
+  async execute(command: PlaceOrderCommand): Promise<void> {
+    /* ... */
+  }
+}
+
+@QueryHandler(GetOrderQuery)
+export class GetOrderHandler {
+  async execute(query: GetOrderQuery): Promise<Order | null> {
+    /* ... */
+  }
+}
+
+// --- Bounded context module ---
+@Module({
+  imports: [
+    VytchesDDDModule.forFeature('orders'), // ← one line of boilerplate
+  ],
+  providers: [PlaceOrderHandler, GetOrderHandler],
+})
+export class OrdersModule {}
+```
+
+The handlers receive the context-scoped `ICommandBus` and `IQueryBus`. The
+global bus never sees them.
+
+### Two contexts with identical command class names
+
+```typescript
+// orders/commands.ts
+class UpdateReadModelCommand {
+  constructor(public orderId: string) {}
+}
+
+// catalog/commands.ts — same class name, different constructor reference
+class UpdateReadModelCommand {
+  constructor(public productId: string) {}
+}
+```
+
+Before Phase 1, the second registration silently overwrote the first.  
+After Phase 1, the `Map<Function, ...>` key is the constructor reference — no
+collision.  
+After Phase 3, `forFeature()` gives each context its own bus — complete
+isolation.
+
+### Injecting the local event bus
+
+```typescript
+import { LOCAL_EVENT_BUS } from '@vytches/ddd-nestjs';
+import { IEventBus } from '@vytches/ddd-contracts';
+
+@Injectable()
+export class OrdersService {
+  constructor(@Inject(LOCAL_EVENT_BUS) private localEventBus: IEventBus) {}
+
+  async placeOrder(): Promise<void> {
+    const event = new OrderPlacedEvent(/* ... */);
+    await this.localEventBus.publish(event); // stays within the orders context
+  }
+}
+```
+
+### Global scope for cross-context handlers (optional)
+
+```typescript
+@CommandHandler(SomeCommand, { scope: 'global' })
+export class SomeGlobalHandler {
+  // This handler goes to the global bus regardless of forFeature()
+}
+```
+
+### Backward compatibility — no forFeature()
+
+Modules that do **not** import `VytchesDDDModule.forFeature()` continue to work
+exactly as before.  
+`VytchesExplorerService.onApplicationBootstrap()` discovers and registers their
+handlers in the global bus.  
+No code changes required for migration — `forFeature()` can be adopted
+incrementally, one context at a time.
 
 ---
 

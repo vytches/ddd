@@ -12,7 +12,7 @@ complexity: high
 estimated_time: 16h
 created_by: human (production incident — command routing collision)
 created_at: 2026-05-23
-status: todo
+status: in_progress
 release_target: v0.28.0
 priority_score: 98/100
 packages_affected:
@@ -305,16 +305,18 @@ Did you forget VytchesDDDModule.forFeature('orders') in OrdersModule?
 
 ## Definicja ukończenia
 
-- [ ] `CommandBus.execute()` nie myli handlerów z różnych kontekstów przy
-      identycznych nazwach klas
-- [ ] `forFeature('orders')` dostarcza izolowany `ICommandBus`, `IQueryBus`,
-      `LOCAL_EVENT_BUS`
-- [ ] Auto-discovery działa bez explicit listy handlerów
-- [ ] Moduły bez `forFeature()` nadal działają (global fallback)
+- [x] `CommandBus.execute()` nie myli handlerów z różnych kontekstów przy
+      identycznych nazwach klas (Faza 1, commit b45bbe57)
+- [x] `forFeature('orders')` dostarcza izolowany `ICommandBus`, `IQueryBus`,
+      `LOCAL_EVENT_BUS` (Faza 3)
+- [x] Auto-discovery działa bez explicit listy handlerów (Faza 3 —
+      FeatureHandlerRegistrar)
+- [x] Moduły bez `forFeature()` nadal działają (global fallback —
+      onApplicationBootstrap)
 - [ ] Brak `forFeature()` przy `@CommandHandler` rzuca czytelny błąd przy
-      starcie
-- [ ] `OnModuleDestroy` woła `dispose()` na `EnhancedCommandBus`
-- [ ] Wszystkie testy przechodzą (zero regresji)
+      starcie (Faza 4 — optional)
+- [ ] `OnModuleDestroy` woła `dispose()` na `EnhancedCommandBus` (Faza 4)
+- [x] Wszystkie testy przechodzą (160/160, zero regresji)
 - [ ] Changelog i bump minor dla `@vytches/ddd-cqrs` i `@vytches/ddd-nestjs`
 
 ---

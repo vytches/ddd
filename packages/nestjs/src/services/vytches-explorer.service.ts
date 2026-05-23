@@ -1,4 +1,4 @@
-import type { OnModuleInit } from '@nestjs/common';
+import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { DiscoveryService, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
@@ -63,11 +63,12 @@ interface BusWithRegistration {
 }
 
 @Injectable()
-export class VytchesExplorerService implements OnModuleInit {
+export class VytchesExplorerService implements OnModuleInit, OnApplicationBootstrap {
   private readonly logger = Logger.forContext('VytchesExplorerService');
   private _contextOptions?: VytchesContextOptions;
   private discoveredHandlers: HandlerInfo[] = [];
   private initialized = false;
+  private readonly claimedTypes = new Set<Function>();
 
   constructor(
     @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
@@ -84,9 +85,7 @@ export class VytchesExplorerService implements OnModuleInit {
     }
 
     try {
-      const handlers = await this.discoverHandlers();
-      this.discoveredHandlers = handlers;
-      await this.registerHandlersWithBuses(handlers);
+      this.discoveredHandlers = await this.discoverHandlers();
       await this.discoverAndRegisterACLAdapters();
       this.initialized = true;
     } catch (error) {
@@ -94,6 +93,28 @@ export class VytchesExplorerService implements OnModuleInit {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
+    }
+  }
+
+  /**
+   * Registers unclaimed handlers into the global buses.
+   *
+   * Runs after all onModuleInit() hooks complete, so FeatureHandlerRegistrar
+   * instances have already claimed their context-specific handlers.
+   */
+  async onApplicationBootstrap(): Promise<void> {
+    const unclaimed = this.discoveredHandlers.filter(h => !this.claimedTypes.has(h.messageType));
+    await this.registerHandlersWithBuses(unclaimed);
+  }
+
+  /**
+   * Called by FeatureHandlerRegistrar during onModuleInit() to mark message
+   * types as handled by a feature-scoped bus. The global fallback in
+   * onApplicationBootstrap() skips claimed types.
+   */
+  claimHandlerTypes(messageTypes: Function[]): void {
+    for (const type of messageTypes) {
+      this.claimedTypes.add(type);
     }
   }
 
