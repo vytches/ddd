@@ -320,4 +320,55 @@ describe('CQRS Decorators', () => {
       expect(isPending).toBeUndefined();
     });
   });
+
+  describe('scope option (VP-007)', () => {
+    it('CommandHandler defaults scope to "context"', () => {
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand)
+      class TestCommandHandler implements ICommandHandler<TestCommand> {
+        async execute(_command: TestCommand): Promise<void> {}
+      }
+
+      expect(Reflect.getMetadata('di:handler-scope', TestCommandHandler)).toBe('context');
+    });
+
+    it('CommandHandler stores explicit scope "global"', () => {
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand, { scope: 'global' })
+      class GlobalCommandHandler implements ICommandHandler<TestCommand> {
+        async execute(_command: TestCommand): Promise<void> {}
+      }
+
+      expect(Reflect.getMetadata('di:handler-scope', GlobalCommandHandler)).toBe('global');
+    });
+
+    it('CommandHandler stores explicit scope "context"', () => {
+      @CommandHandler(TestCommand as new (...args: unknown[]) => TestCommand, { scope: 'context' })
+      class ContextCommandHandler implements ICommandHandler<TestCommand> {
+        async execute(_command: TestCommand): Promise<void> {}
+      }
+
+      expect(Reflect.getMetadata('di:handler-scope', ContextCommandHandler)).toBe('context');
+    });
+
+    it('QueryHandler defaults scope to "context"', () => {
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery)
+      class TestQueryHandler implements IQueryHandler<TestQuery, string> {
+        async execute(_query: TestQuery): Promise<string> {
+          return '';
+        }
+      }
+
+      expect(Reflect.getMetadata('di:handler-scope', TestQueryHandler)).toBe('context');
+    });
+
+    it('QueryHandler stores explicit scope "global"', () => {
+      @QueryHandler(TestQuery as new (...args: unknown[]) => TestQuery, { scope: 'global' })
+      class GlobalQueryHandler implements IQueryHandler<TestQuery, string> {
+        async execute(_query: TestQuery): Promise<string> {
+          return '';
+        }
+      }
+
+      expect(Reflect.getMetadata('di:handler-scope', GlobalQueryHandler)).toBe('global');
+    });
+  });
 });
