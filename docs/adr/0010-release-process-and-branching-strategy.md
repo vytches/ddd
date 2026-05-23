@@ -1,11 +1,13 @@
 # ADR-0010: Release Process and Branching Strategy
 
-> **SUPERSEDED** — Zastąpiony przez [`docs/RELEASE-GUIDE.md`](../RELEASE-GUIDE.md) (2026-05-22).
-> ADR-0010 zawierał nieaktualne informacje: GitHub Packages (teraz npmjs.org), independent versioning (teraz fixed), branch start z `main` (teraz z `develop`).
+> **SUPERSEDED** — Zastąpiony przez
+> [`docs/RELEASE-GUIDE.md`](../RELEASE-GUIDE.md) (2026-05-22). ADR-0010 zawierał
+> nieaktualne informacje: GitHub Packages (teraz npmjs.org), independent
+> versioning (teraz fixed), branch start z `main` (teraz z `develop`).
 
-**Date:** 2025-07-12 **Status:** ~~Accepted~~ **SUPERSEDED** (2026-05-22) **Context:**
-Release process for VytchesDDD library with GitHub Packages and Independent
-Versioning
+**Date:** 2025-07-12 **Status:** ~~Accepted~~ **SUPERSEDED** (2026-05-22)
+**Context:** Release process for VytchesDDD library with GitHub Packages and
+Independent Versioning
 
 ## Context
 

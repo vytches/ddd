@@ -34,12 +34,13 @@ priority_score: 95/100
 batching/prioritization/binary serialization. Weryfikacja pokazała że to
 wszystko już istnieje.
 
-**Rewizja 1 (2026-05-10):** consumer a production consumer confirmed 3 blokery: brak
-adaptive re-poll, brak NestJS modułu, niejasna dokumentacja parallel dispatch.
-Docs zrobione (Part 1 ✅). Reszta odłożona do v0.26.1.
+**Rewizja 1 (2026-05-10):** consumer a production consumer confirmed 3 blokery:
+brak adaptive re-poll, brak NestJS modułu, niejasna dokumentacja parallel
+dispatch. Docs zrobione (Part 1 ✅). Reszta odłożona do v0.26.1.
 
-**Rewizja 2 (2026-05-18):** pełna analysis of a production consumer implementation vs
-biblioteki ujawniła znacznie głębsze luki. Wymagana przepisanie scope.
+**Rewizja 2 (2026-05-18):** pełna analysis of a production consumer
+implementation vs biblioteki ujawniła znacznie głębsze luki. Wymagana
+przepisanie scope.
 
 ### What the consumer implemented zamiast używać OutboxProcessor
 
@@ -57,7 +58,8 @@ OutboxPollerService (własny) — powody:
 
 ### What the pre-consumer analysis missed
 
-The consumer had **two niezależne pollery** na tej samej tabeli `outbox_messages`:
+The consumer had **two niezależne pollery** na tej samej tabeli
+`outbox_messages`:
 
 | Poller                        | Filtr                        | Logika            | Interval    |
 | ----------------------------- | ---------------------------- | ----------------- | ----------- |
@@ -73,11 +75,11 @@ mechanizmu type-filter ani multi-instance support.
 
 ### `IOutboxRepository` (abstract class)
 
-| Metoda                                           | Stan        | Problem                                                                         |
-| ------------------------------------------------ | ----------- | ------------------------------------------------------------------------------- |
-| `getUnprocessedMessages(limit?, priorityOrder?)` | ✅ istnieje | Brak filtra po `messageTypes` — blokuje wyspecjalizowane pollery                |
+| Metoda                                           | Stan        | Problem                                                                      |
+| ------------------------------------------------ | ----------- | ---------------------------------------------------------------------------- |
+| `getUnprocessedMessages(limit?, priorityOrder?)` | ✅ istnieje | Brak filtra po `messageTypes` — blokuje wyspecjalizowane pollery             |
 | `resetStaleProcessing(olderThan)`                | ❌ brak     | Crash recovery niemożliwy bez własnej implementacji; consumer added manually |
-| `scheduleRetry(id, processAfter)`                | ❌ brak     | Retry z backoffem niemożliwy bez tej metody                                     |
+| `scheduleRetry(id, processAfter)`                | ❌ brak     | Retry z backoffem niemożliwy bez tej metody                                  |
 
 **Ważne:** `IOutboxRepository` to `abstract class`, nie interface. Dodanie
 nowych `abstract` metod jest breaking change — każdy konsument musiałby je
@@ -241,8 +243,8 @@ export class InMemoryOutboxRepository extends IOutboxRepository {
 
 ### Part 4: Adaptive re-poll + startup jitter w `OutboxProcessor` — P2 (~2h)
 
-**Adaptive re-poll z livelock guardem** (inspired by consumer implementation, without
-`setImmediate` — cross-runtime):
+**Adaptive re-poll z livelock guardem** (inspired by consumer implementation,
+without `setImmediate` — cross-runtime):
 
 ```typescript
 // OutboxProcessorOptions:
@@ -424,8 +426,8 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 
 - `@vytches/ddd-testing` — nowy eksport `InMemoryOutboxRepository`
 - `@vytches/ddd-nestjs` — nowy `OutboxProcessorModule` (Part 5b)
-- consumer migration: po v0.26.1 mogą wyrzucić własne crony i dual-pollers
-  jeśli Parts 1–4 są kompletne
+- consumer migration: po v0.26.1 mogą wyrzucić własne crony i dual-pollers jeśli
+  Parts 1–4 są kompletne
 
 ---
 
@@ -461,7 +463,7 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
   `messageType`.
 - **GDPR Art.17 konflikt:** wiadomości FAILED zachowują pełny payload.
   Udokumentować że konsument odpowiada za cleanup (`eraseUserPayloads` pattern z
- consumer project).
+  consumer project).
 
 ### Acceptance Criteria Security (dodane do v0.26.1)
 

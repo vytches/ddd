@@ -6,8 +6,8 @@
 
 > **Base classes and decorators for Domain Services**
 
-Domain Services encapsulate business operations that don't belong naturally on
-a single aggregate or value object.
+Domain Services encapsulate business operations that don't belong naturally on a
+single aggregate or value object.
 
 ## Installation
 
@@ -19,42 +19,42 @@ pnpm add @vytches/ddd-domain-services
 
 ### Base classes
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `PlainDomainService` | class | Minimal base — no logger, no DI, no event bus. For pure stateless operations. |
-| `IBaseDomainService` | class | Base with a built-in `Logger` via `Logger.forContext()` |
-| `AsyncDomainService` | class | `IBaseDomainService` with async lifecycle hooks |
-| `EventAwareDomainService` | class | `IBaseDomainService` + `setEventBus(bus)` for domain event publishing |
-| `UnitOfWorkAwareDomainService` | class | `IBaseDomainService` + `setUnitOfWork(uow)` for transactional coordination |
+| Export                         | Kind  | Description                                                                   |
+| ------------------------------ | ----- | ----------------------------------------------------------------------------- |
+| `PlainDomainService`           | class | Minimal base — no logger, no DI, no event bus. For pure stateless operations. |
+| `IBaseDomainService`           | class | Base with a built-in `Logger` via `Logger.forContext()`                       |
+| `AsyncDomainService`           | class | `IBaseDomainService` with async lifecycle hooks                               |
+| `EventAwareDomainService`      | class | `IBaseDomainService` + `setEventBus(bus)` for domain event publishing         |
+| `UnitOfWorkAwareDomainService` | class | `IBaseDomainService` + `setUnitOfWork(uow)` for transactional coordination    |
 
 ### Decorator
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `DomainService` | decorator | Marks a class for DI auto-discovery; stores service metadata |
-| `getDomainServiceMetadata(cls)` | function | Reads metadata set by `@DomainService` |
-| `getDIDomainServiceMetadata(cls)` | function | Reads DI-specific metadata |
-| `isDomainServicePendingDIRegistration(cls)` | function | Returns `true` if the class has been decorated but not yet registered |
+| Export                                      | Kind      | Description                                                           |
+| ------------------------------------------- | --------- | --------------------------------------------------------------------- |
+| `DomainService`                             | decorator | Marks a class for DI auto-discovery; stores service metadata          |
+| `getDomainServiceMetadata(cls)`             | function  | Reads metadata set by `@DomainService`                                |
+| `getDIDomainServiceMetadata(cls)`           | function  | Reads DI-specific metadata                                            |
+| `isDomainServicePendingDIRegistration(cls)` | function  | Returns `true` if the class has been decorated but not yet registered |
 
 ### Interfaces
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `IDomainService` | interface | Core service contract (has `serviceId`) |
-| `IAsyncDomainService` | interface | Adds `initialize()` / `dispose()` |
-| `IEventBusAware` | interface | `setEventBus(bus)` contract |
-| `IUnitOfWorkAware` | interface | `setUnitOfWork(uow)` contract |
-| `DomainServiceOptions` | interface | Options accepted by `@DomainService` |
-| `DIServiceMetadata` | interface | DI metadata shape |
+| Export                         | Kind      | Description                                   |
+| ------------------------------ | --------- | --------------------------------------------- |
+| `IDomainService`               | interface | Core service contract (has `serviceId`)       |
+| `IAsyncDomainService`          | interface | Adds `initialize()` / `dispose()`             |
+| `IEventBusAware`               | interface | `setEventBus(bus)` contract                   |
+| `IUnitOfWorkAware`             | interface | `setUnitOfWork(uow)` contract                 |
+| `DomainServiceOptions`         | interface | Options accepted by `@DomainService`          |
+| `DIServiceMetadata`            | interface | DI metadata shape                             |
 | `EnhancedDomainServiceOptions` | interface | Extended options with DI lifetime and context |
 
 ### Errors
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `ServiceCircularError` | class | Circular service dependency detected |
-| `ServiceDuplicateError` | class | Service registered more than once |
-| `ServiceNotFoundError` | class | Requested service not in registry |
+| Export                  | Kind  | Description                          |
+| ----------------------- | ----- | ------------------------------------ |
+| `ServiceCircularError`  | class | Circular service dependency detected |
+| `ServiceDuplicateError` | class | Service registered more than once    |
+| `ServiceNotFoundError`  | class | Requested service not in registry    |
 
 ## Usage
 
@@ -64,7 +64,9 @@ pnpm add @vytches/ddd-domain-services
 import { PlainDomainService } from '@vytches/ddd-domain-services';
 
 class TaxCalculator extends PlainDomainService {
-  constructor() { super('TaxCalculator'); }
+  constructor() {
+    super('TaxCalculator');
+  }
 
   calculate(amount: number, rate: number): number {
     return amount * rate;
@@ -78,7 +80,9 @@ class TaxCalculator extends PlainDomainService {
 import { IBaseDomainService } from '@vytches/ddd-domain-services';
 
 class PricingService extends IBaseDomainService {
-  constructor() { super('PricingService'); }
+  constructor() {
+    super('PricingService');
+  }
 
   applyDiscount(price: number, pct: number): number {
     this.logger.debug('Applying discount', { price, pct });
@@ -90,16 +94,23 @@ class PricingService extends IBaseDomainService {
 ### EventAwareDomainService — publish domain events
 
 ```typescript
-import { EventAwareDomainService, DomainService } from '@vytches/ddd-domain-services';
+import {
+  EventAwareDomainService,
+  DomainService,
+} from '@vytches/ddd-domain-services';
 import { DomainEvent } from '@vytches/ddd-events';
 
 @DomainService('OrderFulfillmentService', { context: 'Orders' })
 class OrderFulfillmentService extends EventAwareDomainService {
-  constructor() { super('OrderFulfillmentService'); }
+  constructor() {
+    super('OrderFulfillmentService');
+  }
 
   async fulfill(orderId: string): Promise<void> {
     // ... business logic ...
-    await this.eventBus?.publish(new DomainEvent('OrderFulfilled', { orderId }));
+    await this.eventBus?.publish(
+      new DomainEvent('OrderFulfilled', { orderId })
+    );
   }
 }
 ```
@@ -128,6 +139,7 @@ class TransferService extends UnitOfWorkAwareDomainService {
 ## Package boundaries
 
 `@vytches/ddd-domain-services` depends on:
+
 - `@vytches/ddd-contracts` — `IEventBus`
 - `@vytches/ddd-logging` — `Logger`
 - `@vytches/ddd-repositories` — `IUnitOfWork`

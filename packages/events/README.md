@@ -4,7 +4,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Domain events, integration events, and a unified event bus for DDD applications**
+> **Domain events, integration events, and a unified event bus for DDD
+> applications**
 
 ## Installation
 
@@ -16,49 +17,49 @@ pnpm add @vytches/ddd-events
 
 ### Event classes
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `DomainEvent` | class | Base class for domain events (aggregate-level state changes) |
-| `IntegrationEvent` | class | Base class for cross-boundary integration events |
+| Export             | Kind  | Description                                                  |
+| ------------------ | ----- | ------------------------------------------------------------ |
+| `DomainEvent`      | class | Base class for domain events (aggregate-level state changes) |
+| `IntegrationEvent` | class | Base class for cross-boundary integration events             |
 
 ### Buses and dispatchers
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `BaseEventBus` | class | Abstract base for custom event bus implementations |
-| `UnifiedEventBus` | class | Concrete bus that handles domain, integration, and audit events |
-| `UniversalEventDispatcher` | class | Dispatches events to all registered buses simultaneously |
+| Export                     | Kind  | Description                                                     |
+| -------------------------- | ----- | --------------------------------------------------------------- |
+| `BaseEventBus`             | class | Abstract base for custom event bus implementations              |
+| `UnifiedEventBus`          | class | Concrete bus that handles domain, integration, and audit events |
+| `UniversalEventDispatcher` | class | Dispatches events to all registered buses simultaneously        |
 
 ### Integration event processing
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `IntegrationEventProcessor` | class | Processes raw `IntegrationEvent` objects through registered handlers |
+| Export                           | Kind  | Description                                                          |
+| -------------------------------- | ----- | -------------------------------------------------------------------- |
+| `IntegrationEventProcessor`      | class | Processes raw `IntegrationEvent` objects through registered handlers |
 | `DomainToIntegrationTransformer` | class | Transforms `DomainEvent` instances into `IntegrationEvent` instances |
 
 ### Decorators and discovery
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `EventHandler` | decorator | Marks a class as a handler for specific event type(s) |
-| `EventDiscoveryPlugin` | class | `IHandlerDiscoveryPlugin` that discovers `@EventHandler`-decorated classes |
-| `eventDiscoveryPlugin` | object | Pre-built singleton instance of `EventDiscoveryPlugin` |
-| `EventHandlerOptions` | interface | Options accepted by `@EventHandler` |
-| `DIHandlerMetadata` | interface | Metadata stored on handler classes by the decorator |
+| Export                 | Kind      | Description                                                                |
+| ---------------------- | --------- | -------------------------------------------------------------------------- |
+| `EventHandler`         | decorator | Marks a class as a handler for specific event type(s)                      |
+| `EventDiscoveryPlugin` | class     | `IHandlerDiscoveryPlugin` that discovers `@EventHandler`-decorated classes |
+| `eventDiscoveryPlugin` | object    | Pre-built singleton instance of `EventDiscoveryPlugin`                     |
+| `EventHandlerOptions`  | interface | Options accepted by `@EventHandler`                                        |
+| `DIHandlerMetadata`    | interface | Metadata stored on handler classes by the decorator                        |
 
 ### Bus interfaces
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `IDomainEventBus` | interface | Bus for domain events |
-| `IIntegrationEventBus` | interface | Bus for integration events |
-| `IAuditEventBus` | interface | Bus for audit events |
-| `UnifiedEventHandler` | interface | Handler contract accepted by `UnifiedEventBus` |
+| Export                 | Kind      | Description                                    |
+| ---------------------- | --------- | ---------------------------------------------- |
+| `IDomainEventBus`      | interface | Bus for domain events                          |
+| `IIntegrationEventBus` | interface | Bus for integration events                     |
+| `IAuditEventBus`       | interface | Bus for audit events                           |
+| `UnifiedEventHandler`  | interface | Handler contract accepted by `UnifiedEventBus` |
 
 ### Internal symbol (advanced use)
 
-| Export | Kind | Description |
-|--------|------|-------------|
+| Export                     | Kind   | Description                                                                         |
+| -------------------------- | ------ | ----------------------------------------------------------------------------------- |
 | `CUSTOM_MIDDLEWARE_SYMBOL` | symbol | Marker for custom middleware attached to buses; not part of the stable consumer API |
 
 ## Quick start
@@ -99,9 +100,14 @@ class SendConfirmationEmailHandler {
 ### Integration events
 
 ```typescript
-import { IntegrationEvent, DomainToIntegrationTransformer } from '@vytches/ddd-events';
+import {
+  IntegrationEvent,
+  DomainToIntegrationTransformer,
+} from '@vytches/ddd-events';
 
-class OrderCreatedIntegrationEvent extends IntegrationEvent<{ orderId: string }> {
+class OrderCreatedIntegrationEvent extends IntegrationEvent<{
+  orderId: string;
+}> {
   constructor(orderId: string) {
     super('OrderCreated', { orderId }, { source: 'OrderContext' });
   }
@@ -119,7 +125,9 @@ const transformer = new DomainToIntegrationTransformer([
 ## Package boundaries
 
 `@vytches/ddd-events` depends on:
-- `@vytches/ddd-contracts` — `IDomainEvent`, `IEventBus`, `IEventHandler`, metadata keys
+
+- `@vytches/ddd-contracts` — `IDomainEvent`, `IEventBus`, `IEventHandler`,
+  metadata keys
 - `@vytches/ddd-logging` — internal logging
 
 ## License

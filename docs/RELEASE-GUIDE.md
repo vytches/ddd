@@ -1,19 +1,19 @@
 # Release Guide
 
-Jedyne źródło prawdy o procesie releaseowania. ADR-0010 i ADR-0016 są
-archiwalne — ten plik je zastępuje.
+Jedyne źródło prawdy o procesie releaseowania. ADR-0010 i ADR-0016 są archiwalne
+— ten plik je zastępuje.
 
 ---
 
 ## Stan aktualny
 
-| Co              | Gdzie                              |
-| --------------- | ---------------------------------- |
-| Registry        | **npmjs.org** (publiczny, bez auth) |
+| Co              | Gdzie                                                 |
+| --------------- | ----------------------------------------------------- |
+| Registry        | **npmjs.org** (publiczny, bez auth)                   |
 | Wersjonowanie   | Fixed — wszystkie pakiety tą samą wersją (lerna.json) |
-| Branching       | `develop` → `release/*` → `main`  |
-| Publish tool    | `pnpm publish` (konwertuje `workspace:*`) |
-| Versioning tool | `lerna version --conventional-commits` |
+| Branching       | `develop` → `release/*` → `main`                      |
+| Publish tool    | `pnpm publish` (konwertuje `workspace:*`)             |
+| Versioning tool | `lerna version --conventional-commits`                |
 
 ---
 
@@ -145,16 +145,16 @@ pnpm release:collect      # Lista feat/fix commitów od ostatniego tagu
 
 ## Dostępne komendy
 
-| Komenda                | Co robi                                    |
-| ---------------------- | ------------------------------------------ |
-| `pnpm release`         | Pełny release: version + build + publish   |
-| `pnpm release:alpha`   | Alpha pre-release                          |
-| `pnpm release:beta`    | Beta pre-release                           |
-| `pnpm release:hotfix`  | Patch hotfix                               |
-| `pnpm release:publish` | Tylko build + publish (bez wersjonowania)  |
-| `pnpm release:changed` | Pokaż zmienione pakiety                    |
-| `pnpm release:preview` | Podgląd co zostanie wydane                 |
-| `pnpm release:collect` | Commity feat/fix od ostatniego tagu        |
+| Komenda                | Co robi                                   |
+| ---------------------- | ----------------------------------------- |
+| `pnpm release`         | Pełny release: version + build + publish  |
+| `pnpm release:alpha`   | Alpha pre-release                         |
+| `pnpm release:beta`    | Beta pre-release                          |
+| `pnpm release:hotfix`  | Patch hotfix                              |
+| `pnpm release:publish` | Tylko build + publish (bez wersjonowania) |
+| `pnpm release:changed` | Pokaż zmienione pakiety                   |
+| `pnpm release:preview` | Podgląd co zostanie wydane                |
+| `pnpm release:collect` | Commity feat/fix od ostatniego tagu       |
 
 ---
 
@@ -269,9 +269,10 @@ Commituj wszystkie zmiany przed `pnpm release`.
 rzeczywistych wersji. Konsumenci dostaliby pakiety z literalnym
 `"@vytches/ddd-acl": "workspace:*"` w dependencies — co łamie instalację.
 
-`pnpm publish` konwertuje `workspace:*` automatycznie (np. `"0.26.0"`).
-Dlatego: **lerna tylko wersjonuje**, **pnpm publikuje**.
+`pnpm publish` konwertuje `workspace:*` automatycznie (np. `"0.26.0"`). Dlatego:
+**lerna tylko wersjonuje**, **pnpm publikuje**.
 
 ---
 
-_Zastępuje: ADR-0010 (release process), ADR-0016 (GitHub Packages — zmigrowaliśmy do npmjs.org w REL-011, 2026-05-22)_
+_Zastępuje: ADR-0010 (release process), ADR-0016 (GitHub Packages —
+zmigrowaliśmy do npmjs.org w REL-011, 2026-05-22)_

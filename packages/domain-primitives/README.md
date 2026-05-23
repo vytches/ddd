@@ -14,9 +14,12 @@ pnpm add @vytches/ddd-domain-primitives
 
 ## What's included
 
-- **Error hierarchy** — `BaseError` and concrete error types for common domain failures
-- **Error codes** — `DomainErrorCode`, `ApplicationErrorCode`, `FrameworkErrorCode` enums
-- **Actor system** — `IActor` interface and `DefaultActorType` for representing who performed an action
+- **Error hierarchy** — `BaseError` and concrete error types for common domain
+  failures
+- **Error codes** — `DomainErrorCode`, `ApplicationErrorCode`,
+  `FrameworkErrorCode` enums
+- **Actor system** — `IActor` interface and `DefaultActorType` for representing
+  who performed an action
 
 ## Usage
 
@@ -64,37 +67,38 @@ const actor: IActor = {
 
 ### Errors
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `BaseError` | class | Abstract base for all domain errors; extends `Error` |
-| `NotFoundError` | class | Entity or resource not found |
-| `InvalidParameterError` | class | A parameter has an invalid value |
-| `MissingValueError` | class | A required value is absent |
-| `DuplicateError` | class | An entity already exists with the same identity |
-| `IDomainError` | class | Marker base for domain errors (for `instanceof` checks) |
-| `DomainErrorOptions` | interface | Options passed to `BaseError` and subclasses |
-| `ErrorCode` | type | Union of all error code string literals |
-| `ErrorOptions` | interface | Generic error construction options |
+| Export                  | Kind      | Description                                             |
+| ----------------------- | --------- | ------------------------------------------------------- |
+| `BaseError`             | class     | Abstract base for all domain errors; extends `Error`    |
+| `NotFoundError`         | class     | Entity or resource not found                            |
+| `InvalidParameterError` | class     | A parameter has an invalid value                        |
+| `MissingValueError`     | class     | A required value is absent                              |
+| `DuplicateError`        | class     | An entity already exists with the same identity         |
+| `IDomainError`          | class     | Marker base for domain errors (for `instanceof` checks) |
+| `DomainErrorOptions`    | interface | Options passed to `BaseError` and subclasses            |
+| `ErrorCode`             | type      | Union of all error code string literals                 |
+| `ErrorOptions`          | interface | Generic error construction options                      |
 
 ### Error Codes
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `DomainErrorCode` | enum | Error codes for domain-layer errors (e.g. `NOT_FOUND`, `DUPLICATE`, `BUSINESS_RULE_VIOLATION`) |
-| `ApplicationErrorCode` | enum | Error codes for application-layer errors |
-| `FrameworkErrorCode` | enum | Error codes for framework/infrastructure errors |
+| Export                 | Kind | Description                                                                                    |
+| ---------------------- | ---- | ---------------------------------------------------------------------------------------------- |
+| `DomainErrorCode`      | enum | Error codes for domain-layer errors (e.g. `NOT_FOUND`, `DUPLICATE`, `BUSINESS_RULE_VIOLATION`) |
+| `ApplicationErrorCode` | enum | Error codes for application-layer errors                                                       |
+| `FrameworkErrorCode`   | enum | Error codes for framework/infrastructure errors                                                |
 
 ### Actor
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `IActor` | interface | Represents the entity performing an action (id, type) |
-| `DefaultActorType` | enum | Built-in actor types: `USER`, `SYSTEM`, `SERVICE`, `ANONYMOUS` |
-| `ActorError` | class | Error thrown for actor-related failures |
+| Export             | Kind      | Description                                                    |
+| ------------------ | --------- | -------------------------------------------------------------- |
+| `IActor`           | interface | Represents the entity performing an action (id, type)          |
+| `DefaultActorType` | enum      | Built-in actor types: `USER`, `SYSTEM`, `SERVICE`, `ANONYMOUS` |
+| `ActorError`       | class     | Error thrown for actor-related failures                        |
 
 ## Package boundaries
 
-`@vytches/ddd-domain-primitives` depends on `@vytches/ddd-contracts` for shared type definitions. It has no other runtime dependencies.
+`@vytches/ddd-domain-primitives` depends on `@vytches/ddd-contracts` for shared
+type definitions. It has no other runtime dependencies.
 
 ## License
 

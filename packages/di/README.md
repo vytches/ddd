@@ -4,7 +4,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Framework-agnostic dependency injection with global service locator and plugin-based handler discovery**
+> **Framework-agnostic dependency injection with global service locator and
+> plugin-based handler discovery**
 
 ## Installation
 
@@ -16,59 +17,59 @@ pnpm add @vytches/ddd-di
 
 ### Core types
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `ServiceLifetime` | enum | `Transient \| Singleton \| Scoped` |
-| `IDependencyContainer` | interface | Framework-agnostic container contract |
-| `IContainerBuilder` | interface | Fluent builder contract |
-| `ServiceToken<T>` | type | Token used to register/resolve services |
-| `Constructor<T>` | type | `new (...args: any[]) => T` |
-| `ServiceDescriptor` | interface | Registered service metadata |
-| `ServiceFactory<T>` | type | Factory function signature |
-| `ServiceRegistrationOptions` | interface | Options for `register()` calls |
-| `ResolutionContext` | interface | Context object passed during resolution |
+| Export                       | Kind      | Description                             |
+| ---------------------------- | --------- | --------------------------------------- |
+| `ServiceLifetime`            | enum      | `Transient \| Singleton \| Scoped`      |
+| `IDependencyContainer`       | interface | Framework-agnostic container contract   |
+| `IContainerBuilder`          | interface | Fluent builder contract                 |
+| `ServiceToken<T>`            | type      | Token used to register/resolve services |
+| `Constructor<T>`             | type      | `new (...args: any[]) => T`             |
+| `ServiceDescriptor`          | interface | Registered service metadata             |
+| `ServiceFactory<T>`          | type      | Factory function signature              |
+| `ServiceRegistrationOptions` | interface | Options for `register()` calls          |
+| `ResolutionContext`          | interface | Context object passed during resolution |
 
 ### Errors
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `DIError` | class | Base DI error |
-| `ServiceNotFoundError` | class | No service registered under the given token |
-| `CircularDependencyError` | class | Circular dependency detected |
-| `ServiceAlreadyRegisteredError` | class | Token already has a registration |
-| `InvalidRegistrationError` | class | Invalid registration arguments |
-| `ContainerConfigurationError` | class | Container misconfiguration |
-| `ContainerDisposedError` | class | Operation called on a disposed container |
+| Export                          | Kind  | Description                                 |
+| ------------------------------- | ----- | ------------------------------------------- |
+| `DIError`                       | class | Base DI error                               |
+| `ServiceNotFoundError`          | class | No service registered under the given token |
+| `CircularDependencyError`       | class | Circular dependency detected                |
+| `ServiceAlreadyRegisteredError` | class | Token already has a registration            |
+| `InvalidRegistrationError`      | class | Invalid registration arguments              |
+| `ContainerConfigurationError`   | class | Container misconfiguration                  |
+| `ContainerDisposedError`        | class | Operation called on a disposed container    |
 
 ### Service locator
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `VytchesDDD` | class | Global service locator facade — `configure()`, `resolve()`, `reset()` |
-| `ServiceLocator` | class | Lower-level locator implementation |
-| `IServiceLocator` | interface | Contract for service locators |
+| Export            | Kind      | Description                                                           |
+| ----------------- | --------- | --------------------------------------------------------------------- |
+| `VytchesDDD`      | class     | Global service locator facade — `configure()`, `resolve()`, `reset()` |
+| `ServiceLocator`  | class     | Lower-level locator implementation                                    |
+| `IServiceLocator` | interface | Contract for service locators                                         |
 
 ### Containers
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `SimpleContainer` | class | Built-in container for testing and simple apps |
+| Export             | Kind  | Description                                                  |
+| ------------------ | ----- | ------------------------------------------------------------ |
+| `SimpleContainer`  | class | Built-in container for testing and simple apps               |
 | `ContainerBuilder` | class | Fluent API for registering multiple services before building |
 
 ### Adapter
 
-| Export | Kind | Description |
-|--------|------|-------------|
+| Export                 | Kind  | Description                                                           |
+| ---------------------- | ----- | --------------------------------------------------------------------- |
 | `BaseContainerAdapter` | class | Base class for adapting external DI frameworks (NestJS, InversifyJS…) |
 
 ### Handler discovery
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `HandlerDiscoveryRegistry` | class | Manages `IHandlerDiscoveryPlugin` instances |
-| `IHandlerDiscoveryPlugin` | interface | Plugin contract: `discoverHandlers()` |
-| `IHandlerDiscoveryRegistry` | interface | Registry contract |
-| `HandlerInfo` | interface | Discovered handler metadata (`type`, `messageType`, `handlerType`) |
+| Export                      | Kind      | Description                                                        |
+| --------------------------- | --------- | ------------------------------------------------------------------ |
+| `HandlerDiscoveryRegistry`  | class     | Manages `IHandlerDiscoveryPlugin` instances                        |
+| `IHandlerDiscoveryPlugin`   | interface | Plugin contract: `discoverHandlers()`                              |
+| `IHandlerDiscoveryRegistry` | interface | Registry contract                                                  |
+| `HandlerInfo`               | interface | Discovered handler metadata (`type`, `messageType`, `handlerType`) |
 
 ## Quick start
 
@@ -78,7 +79,9 @@ import { VytchesDDD, SimpleContainer, ServiceLifetime } from '@vytches/ddd-di';
 const container = new SimpleContainer();
 
 // Register services
-container.register('EmailService', EmailService, { lifetime: ServiceLifetime.Singleton });
+container.register('EmailService', EmailService, {
+  lifetime: ServiceLifetime.Singleton,
+});
 container.registerFactory('Database', c => {
   const config = c.resolve<Config>('Config');
   return new Database(config.url);
@@ -98,12 +101,16 @@ const email = VytchesDDD.resolve<EmailService>('EmailService');
 import { ContainerBuilder, ServiceLifetime } from '@vytches/ddd-di';
 
 const container = new ContainerBuilder()
-  .register('UserRepository', UserRepository, { lifetime: ServiceLifetime.Singleton })
-  .register('EmailService', EmailService, { lifetime: ServiceLifetime.Singleton })
+  .register('UserRepository', UserRepository, {
+    lifetime: ServiceLifetime.Singleton,
+  })
+  .register('EmailService', EmailService, {
+    lifetime: ServiceLifetime.Singleton,
+  })
   .registerFactory('UserService', c => {
     return new UserService(
       c.resolve<UserRepository>('UserRepository'),
-      c.resolve<EmailService>('EmailService'),
+      c.resolve<EmailService>('EmailService')
     );
   })
   .build();

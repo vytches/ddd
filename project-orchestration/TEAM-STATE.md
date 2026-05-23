@@ -12,7 +12,8 @@ Today's housekeeping: VP-004 formally dropped, DOC-001 README accuracy audit
 completed (17/20 packages had hallucinated APIs — now fixed on disk, publish
 patch to sync npm).
 
-**Next target**: v0.26.1 — VP-003 outbox hardening (Parts 2–4, 7.5h, production-validated).
+**Next target**: v0.26.1 — VP-003 outbox hardening (Parts 2–4, 7.5h,
+production-validated).
 
 ---
 
@@ -40,29 +41,29 @@ _N/A — this is a library project, no mobile UI._
 <!-- Updated by @tech-lead on 2026-05-22 -->
 
 **Build/test**: PASS — 24 projects, 69.29% coverage (stable). **Debt**: MEDIUM
-(score 2.5) | Major: 1 (EntityId raw throws) | Minor: 3 | Stable.
-**Blocked**: 0 code blockers. **Stale (>14d)**: None.
+(score 2.5) | Major: 1 (EntityId raw throws) | Minor: 3 | Stable. **Blocked**: 0
+code blockers. **Stale (>14d)**: None.
 
 **Done today**: VP-004 DROPPED (moved to completed-tasks). DOC-001 README audit
 complete — 17/20 READMEs had hallucinated APIs, all rewritten from src/index.ts.
 
 ### Active backlog (8 tasks)
 
-| ID     | Scope                             | Est      | Notes                              |
-| ------ | --------------------------------- | -------- | ---------------------------------- |
-| VP-003 | Outbox Parts 2–4 (backoff+re-poll) | 7.5h    | Production-validated, ready to start |
-| VT-001 | GWT migration + domain-primitives | ~4h rem  | Opportunistic post-publish         |
-| VP-002 | Repository caching + N+1          | ~15h rem | Partial done; split into -a/-b rec |
-| VP-006 | DI cold-start perf                | ~8h rem  | Partial done; split into -a/-b rec |
-| VF-001 | DDD compliance rule engine        | ~18h rem | MVP shipped (3 rules); rest deferred |
-| VF-002 | Strategic design docs             | 20h      | Planned; validate post-publish     |
-| VD-004 | Docs site search/playground       | 20h      | Deferred; pending user signal      |
-| VA-001 | ddd-agent AI boundary (concept)   | unknown  | Backlog; post-v0.27                |
+| ID     | Scope                              | Est      | Notes                                |
+| ------ | ---------------------------------- | -------- | ------------------------------------ |
+| VP-003 | Outbox Parts 2–4 (backoff+re-poll) | 7.5h     | Production-validated, ready to start |
+| VT-001 | GWT migration + domain-primitives  | ~4h rem  | Opportunistic post-publish           |
+| VP-002 | Repository caching + N+1           | ~15h rem | Partial done; split into -a/-b rec   |
+| VP-006 | DI cold-start perf                 | ~8h rem  | Partial done; split into -a/-b rec   |
+| VF-001 | DDD compliance rule engine         | ~18h rem | MVP shipped (3 rules); rest deferred |
+| VF-002 | Strategic design docs              | 20h      | Planned; validate post-publish       |
+| VD-004 | Docs site search/playground        | 20h      | Deferred; pending user signal        |
+| VA-001 | ddd-agent AI boundary (concept)    | unknown  | Backlog; post-v0.27                  |
 
 ### Velocity
 
-Marathon: ~26h actual vs ~233h estimated. Last 12 days: docs/tests/audit.
-Next action: VP-003 Parts 2–4 on feature branch.
+Marathon: ~26h actual vs ~233h estimated. Last 12 days: docs/tests/audit. Next
+action: VP-003 Parts 2–4 on feature branch.
 
 ---
 
@@ -74,27 +75,36 @@ Next action: VP-003 Parts 2–4 on feature branch.
 
 **Critical near-miss resolved**: DOC-001 — 17/20 package READMEs contained
 hallucinated APIs (`SagaOrchestrator`, `AuthorizationService`, `EventStore`…
-none exist). Fixed same day as publish. First real users avoided broken examples.
+none exist). Fixed same day as publish. First real users avoided broken
+examples.
 
 **Next milestone**: v0.26.1 — outbox production hardening (VP-003 Parts 2–4,
-7.5h, production-validated). Unblocks consumer migration from custom dual-pollers.
+7.5h, production-validated). Unblocks consumer migration from custom
+dual-pollers.
 
 **Validation status**:
-- VP-003 (outbox tuning): VALIDATED ✅ — Parts 1 shipped; Parts 2–4 ready (7.5h).
-- VP-004 (event store streaming): DROPPED ⛔ — 18h, no-adapters violation, zero consumer signal.
+
+- VP-003 (outbox tuning): VALIDATED ✅ — Parts 1 shipped; Parts 2–4 ready
+  (7.5h).
+- VP-004 (event store streaming): DROPPED ⛔ — 18h, no-adapters violation, zero
+  consumer signal.
 - VF-001 (ddd-lint MVP): SHIPPED ✅ — 3 rules + CLI, live.
-- VF-002 (strategic design docs): PLANNED — defer to v0.27, validate post-publish signal.
+- VF-002 (strategic design docs): PLANNED — defer to v0.27, validate
+  post-publish signal.
 
 **Segment coverage**:
+
 - Production TypeScript/Node.js + DDD: 95% ✅
 - First-time DDD adopters: 30% (VF-001 helps; VF-002 will unlock)
 - NestJS shops: 60%
 - AI-integrated systems: 5% (VA-001 concept, post-v0.27)
 
 **Actions next 2 weeks**:
+
 1. Publish patch (v0.26.1 or docs-only) to sync README fixes to npm
 2. Start VP-003 Parts 2–4 on feature branch
-3. Monitor first npm installs — gather DX friction signal for VF-002 prioritization
+3. Monitor first npm installs — gather DX friction signal for VF-002
+   prioritization
 
 ---
 
@@ -102,17 +112,18 @@ none exist). Fixed same day as publish. First real users avoided broken examples
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
 
-[2026-05-22] @tech-lead: v0.26.0 published. VP-004 dropped (moved to completed-tasks).
-DOC-001 README audit done — 17/20 READMEs had hallucinated APIs, all rewritten.
-Active backlog: 8 tasks. No blockers. Next: VP-003 Parts 2–4 feature branch.
-[2026-05-22] @product-owner: README audit was a critical near-miss — fake APIs
-live on npm same day as v0.26.0 publish. Fixed same day. VP-003 Parts 2–4 are
-the highest-value next work (production-validated, unblocks consumer migration).
-Segment gap: first-time DDD adopters underserved; monitor npm signal for VF-002.
-[2026-05-17] @tech-lead: REL-000 is 5 days overdue (deadline 2026-05-12). All
-code is publish-ready. VP-004 must be decided (4th consecutive pulse flag).
-[2026-05-17] @product-owner: VP-003 Parts 2-3 validated by consumer — schedule
-as v0.26.1 fast-follow. VP-004 formal drop clarifies scope.
+[2026-05-22] @tech-lead: v0.26.0 published. VP-004 dropped (moved to
+completed-tasks). DOC-001 README audit done — 17/20 READMEs had hallucinated
+APIs, all rewritten. Active backlog: 8 tasks. No blockers. Next: VP-003 Parts
+2–4 feature branch. [2026-05-22] @product-owner: README audit was a critical
+near-miss — fake APIs live on npm same day as v0.26.0 publish. Fixed same day.
+VP-003 Parts 2–4 are the highest-value next work (production-validated, unblocks
+consumer migration). Segment gap: first-time DDD adopters underserved; monitor
+npm signal for VF-002. [2026-05-17] @tech-lead: REL-000 is 5 days overdue
+(deadline 2026-05-12). All code is publish-ready. VP-004 must be decided (4th
+consecutive pulse flag). [2026-05-17] @product-owner: VP-003 Parts 2-3 validated
+by consumer — schedule as v0.26.1 fast-follow. VP-004 formal drop clarifies
+scope.
 
 [2026-05-10] @tech-lead: REL-000 is the only human-gated action before publish.
 Miss 2026-05-12 = publish drifts 3-4 weeks. VT-002..005 marathon shipped today

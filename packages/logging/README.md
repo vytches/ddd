@@ -4,7 +4,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Structured logging for DDD applications with smart context detection and CQRS integration**
+> **Structured logging for DDD applications with smart context detection and
+> CQRS integration**
 
 ## Installation
 
@@ -16,61 +17,61 @@ pnpm add @vytches/ddd-logging
 
 ### Core
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `LOG_LEVELS` | constant | Ordered array of supported log levels |
-| `parseLogLevel(s)` | function | Parses a string into a `LogLevel` |
-| `isLogLevelEnabled(current, target)` | function | Returns `true` if `target` level is at or above `current` |
-| `DefaultLogContextBuilder` | class | Builds `LogContext` objects |
-| `DefaultLogEventBuilder` | class | Builds `LogEvent` objects |
-| `ILogger` | interface | Logger contract (`debug`, `info`, `warn`, `error`) |
-| `LogLevel` | type | `'debug' \| 'info' \| 'warn' \| 'error'` |
-| `LogContext` | interface | Structured log context shape |
-| `LogEvent` | interface | Full structured event shape emitted to providers |
-| `LogContextBuilder` | interface | Builder contract |
-| `LogEventBuilder` | interface | Builder contract |
-| `LoggerConfiguration` | interface | Configuration shape for `DefaultLogger.configure()` |
-| `LogProvider` | interface | Output provider contract (console, file, remote…) |
+| Export                               | Kind      | Description                                               |
+| ------------------------------------ | --------- | --------------------------------------------------------- |
+| `LOG_LEVELS`                         | constant  | Ordered array of supported log levels                     |
+| `parseLogLevel(s)`                   | function  | Parses a string into a `LogLevel`                         |
+| `isLogLevelEnabled(current, target)` | function  | Returns `true` if `target` level is at or above `current` |
+| `DefaultLogContextBuilder`           | class     | Builds `LogContext` objects                               |
+| `DefaultLogEventBuilder`             | class     | Builds `LogEvent` objects                                 |
+| `ILogger`                            | interface | Logger contract (`debug`, `info`, `warn`, `error`)        |
+| `LogLevel`                           | type      | `'debug' \| 'info' \| 'warn' \| 'error'`                  |
+| `LogContext`                         | interface | Structured log context shape                              |
+| `LogEvent`                           | interface | Full structured event shape emitted to providers          |
+| `LogContextBuilder`                  | interface | Builder contract                                          |
+| `LogEventBuilder`                    | interface | Builder contract                                          |
+| `LoggerConfiguration`                | interface | Configuration shape for `DefaultLogger.configure()`       |
+| `LogProvider`                        | interface | Output provider contract (console, file, remote…)         |
 
 ### Main logger
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `DefaultLogger` | class | Singleton-style logger with `create()`, `forContext()`, and `configure()` |
-| `Logger` | namespace | Convenience facade: `Logger.create()`, `Logger.forContext()`, `Logger.configure()` |
+| Export          | Kind      | Description                                                                        |
+| --------------- | --------- | ---------------------------------------------------------------------------------- |
+| `DefaultLogger` | class     | Singleton-style logger with `create()`, `forContext()`, and `configure()`          |
+| `Logger`        | namespace | Convenience facade: `Logger.create()`, `Logger.forContext()`, `Logger.configure()` |
 
 ### Providers
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `ConsoleProvider` | class | Writes log events to `console` |
-| `ConsoleProviderOptions` | interface | Options for `ConsoleProvider` |
+| Export                   | Kind      | Description                    |
+| ------------------------ | --------- | ------------------------------ |
+| `ConsoleProvider`        | class     | Writes log events to `console` |
+| `ConsoleProviderOptions` | interface | Options for `ConsoleProvider`  |
 
 ### Utilities
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `ContextDetector` | class | Detects bounded context from stack traces or metadata |
-| `DataMasker` | class | Masks sensitive fields in log payloads |
-| `ContextDetectionResult` | interface | Result of context detection |
-| `MaskingOptions` | interface | Masking configuration |
+| Export                   | Kind      | Description                                           |
+| ------------------------ | --------- | ----------------------------------------------------- |
+| `ContextDetector`        | class     | Detects bounded context from stack traces or metadata |
+| `DataMasker`             | class     | Masks sensitive fields in log payloads                |
+| `ContextDetectionResult` | interface | Result of context detection                           |
+| `MaskingOptions`         | interface | Masking configuration                                 |
 
 ### CQRS / Event integration
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `AggregateLoggingMixin` | class | Mixin that adds structured logging to aggregate event handlers |
-| `EnhancedLoggingMiddleware` | class | CQRS middleware that logs command/query execution |
-| `LogCQRS` | decorator | Class decorator that enables CQRS logging on a handler |
-| `LogCommands` | decorator | Enables command-specific logging |
-| `LogQueries` | decorator | Enables query-specific logging |
-| `LogDomainEvents` | decorator | Enables domain event logging |
-| `LogStateChanges` | decorator | Logs aggregate state transitions |
-| `CQRSLoggingOptions` | interface | Options for `LogCQRS` / `LogCommands` / `LogQueries` |
-| `CQRSMiddlewareOptions` | interface | Options for `EnhancedLoggingMiddleware` |
-| `StateChangeLoggingOptions` | interface | Options for `LogStateChanges` |
-| `ExecutionContext` | interface | Re-exported CQRS execution context shape |
-| `ICQRSMiddleware` | interface | Re-exported CQRS middleware interface |
+| Export                      | Kind      | Description                                                    |
+| --------------------------- | --------- | -------------------------------------------------------------- |
+| `AggregateLoggingMixin`     | class     | Mixin that adds structured logging to aggregate event handlers |
+| `EnhancedLoggingMiddleware` | class     | CQRS middleware that logs command/query execution              |
+| `LogCQRS`                   | decorator | Class decorator that enables CQRS logging on a handler         |
+| `LogCommands`               | decorator | Enables command-specific logging                               |
+| `LogQueries`                | decorator | Enables query-specific logging                                 |
+| `LogDomainEvents`           | decorator | Enables domain event logging                                   |
+| `LogStateChanges`           | decorator | Logs aggregate state transitions                               |
+| `CQRSLoggingOptions`        | interface | Options for `LogCQRS` / `LogCommands` / `LogQueries`           |
+| `CQRSMiddlewareOptions`     | interface | Options for `EnhancedLoggingMiddleware`                        |
+| `StateChangeLoggingOptions` | interface | Options for `LogStateChanges`                                  |
+| `ExecutionContext`          | interface | Re-exported CQRS execution context shape                       |
+| `ICQRSMiddleware`           | interface | Re-exported CQRS middleware interface                          |
 
 ## Quick start
 
@@ -123,6 +124,7 @@ const safe = masker.mask({ user: 'alice', password: 'secret' });
 ## Package boundaries
 
 `@vytches/ddd-logging` depends on:
+
 - `@vytches/ddd-contracts` — core type contracts
 
 ## License

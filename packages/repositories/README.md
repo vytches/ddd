@@ -16,37 +16,40 @@ pnpm add @vytches/ddd-repositories
 
 ### Base repository
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `IBaseRepository` | abstract class | Abstract base — extend this for your concrete repositories. Handles event persistence via `IEnhancedEventDispatcher` and `IEventPersistenceHandler`. Provides `save(aggregate)`. |
-| `VersionError` | class | Thrown on optimistic concurrency conflicts; use `VersionError.withEntityIdAndVersions(id, dbVersion, newVersion)` |
-| `IRepositoryAggregate` | interface | Shape required by `IBaseRepository.save()` — must have `getId()`, `getInitialVersion()`, `getDomainEvents()` |
+| Export                 | Kind           | Description                                                                                                                                                                      |
+| ---------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IBaseRepository`      | abstract class | Abstract base — extend this for your concrete repositories. Handles event persistence via `IEnhancedEventDispatcher` and `IEventPersistenceHandler`. Provides `save(aggregate)`. |
+| `VersionError`         | class          | Thrown on optimistic concurrency conflicts; use `VersionError.withEntityIdAndVersions(id, dbVersion, newVersion)`                                                                |
+| `IRepositoryAggregate` | interface      | Shape required by `IBaseRepository.save()` — must have `getId()`, `getInitialVersion()`, `getDomainEvents()`                                                                     |
 
 ### Repository interfaces (from `@vytches/ddd-contracts`)
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `IRepository<T>` | interface | Standard CRUD contract |
+| Export                   | Kind      | Description                                 |
+| ------------------------ | --------- | ------------------------------------------- |
+| `IRepository<T>`         | interface | Standard CRUD contract                      |
 | `IExtendedRepository<T>` | interface | `IRepository` plus additional query methods |
-| `IRepositoryProvider` | interface | Factory/registry for repositories |
+| `IRepositoryProvider`    | interface | Factory/registry for repositories           |
 
 ### Unit of Work
 
-| Export | Kind | Description |
-|--------|------|-------------|
+| Export        | Kind      | Description                                                         |
+| ------------- | --------- | ------------------------------------------------------------------- |
 | `IUnitOfWork` | interface | Transaction boundary contract — `begin()`, `commit()`, `rollback()` |
 
 ## Quick start
 
 ```typescript
 import { IBaseRepository, VersionError } from '@vytches/ddd-repositories';
-import type { IEnhancedEventDispatcher, IEventPersistenceHandler } from '@vytches/ddd-contracts';
+import type {
+  IEnhancedEventDispatcher,
+  IEventPersistenceHandler,
+} from '@vytches/ddd-contracts';
 
 class OrderRepository extends IBaseRepository {
   constructor(
     dispatcher: IEnhancedEventDispatcher,
     persistenceHandler: IEventPersistenceHandler,
-    private readonly db: Database,
+    private readonly db: Database
   ) {
     super(dispatcher, persistenceHandler);
   }
@@ -63,9 +66,9 @@ class OrderRepository extends IBaseRepository {
 
 ## Optimistic concurrency
 
-`IBaseRepository.save()` calls `aggregate.getInitialVersion()` to detect
-stale writes. If the stored version differs from the aggregate's initial
-version, a `VersionError` is thrown:
+`IBaseRepository.save()` calls `aggregate.getInitialVersion()` to detect stale
+writes. If the stored version differs from the aggregate's initial version, a
+`VersionError` is thrown:
 
 ```typescript
 try {
@@ -110,7 +113,9 @@ class PlaceOrderService {
 ## Package boundaries
 
 `@vytches/ddd-repositories` depends on:
-- `@vytches/ddd-contracts` — `IEnhancedEventDispatcher`, `IEventPersistenceHandler`, `EntityId`, aggregate interfaces
+
+- `@vytches/ddd-contracts` — `IEnhancedEventDispatcher`,
+  `IEventPersistenceHandler`, `EntityId`, aggregate interfaces
 - `@vytches/ddd-domain-primitives` — `DomainErrorCode`, `IDomainError`
 - `@vytches/ddd-logging` — internal logging
 - `@vytches/ddd-utils` — `Result`

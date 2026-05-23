@@ -1,6 +1,7 @@
 # @vytches/ddd-aggregates
 
-> Aggregate root implementation with event sourcing, optimistic concurrency, and opt-in capabilities.
+> Aggregate root implementation with event sourcing, optimistic concurrency, and
+> opt-in capabilities.
 
 [![npm version](https://badge.fury.io/js/%40vytches%2Fddd-aggregates.svg)](https://badge.fury.io/js/%40vytches%2Fddd-aggregates)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -14,10 +15,14 @@ pnpm add @vytches/ddd-aggregates
 
 ## What's included
 
-- **`AggregateRoot`** — base class for aggregate roots with identity, versioning, and domain events
-- **`Entity`** — base class for non-root domain entities (identity-based equality, no event machinery)
-- **`AggregateBuilder` / `aggregateBuilder`** — fluent builder for constructing aggregates with capabilities
-- **Capabilities** — `AuditCapability`, `EventSourcingCapability`, `SnapshotCapability`, `VersioningCapability`
+- **`AggregateRoot`** — base class for aggregate roots with identity,
+  versioning, and domain events
+- **`Entity`** — base class for non-root domain entities (identity-based
+  equality, no event machinery)
+- **`AggregateBuilder` / `aggregateBuilder`** — fluent builder for constructing
+  aggregates with capabilities
+- **Capabilities** — `AuditCapability`, `EventSourcingCapability`,
+  `SnapshotCapability`, `VersioningCapability`
 - **Utility functions** — type-safe capability casting and introspection
 - **`AggregateError`** — error class for aggregate-specific failures
 
@@ -34,9 +39,12 @@ class Order extends AggregateRoot<string> {
 
   constructor(params: IAggregateConstructorParams<string>) {
     super(params);
-    this.registerEventHandler<{ customerId: string }>('OrderCreated', payload => {
-      this.customerId = payload!.customerId;
-    });
+    this.registerEventHandler<{ customerId: string }>(
+      'OrderCreated',
+      payload => {
+        this.customerId = payload!.customerId;
+      }
+    );
     this.registerEventHandler<void>('OrderConfirmed', () => {
       this.status = 'confirmed';
     });
@@ -53,8 +61,12 @@ class Order extends AggregateRoot<string> {
     this.apply('OrderConfirmed', undefined);
   }
 
-  getCustomerId(): string { return this.customerId; }
-  getStatus(): string { return this.status; }
+  getCustomerId(): string {
+    return this.customerId;
+  }
+  getStatus(): string {
+    return this.status;
+  }
 }
 
 // Create an order
@@ -63,13 +75,17 @@ order.confirm();
 
 // Domain events are collected until committed
 const events = order.getDomainEvents(); // [OrderCreated, OrderConfirmed]
-order.commit();                          // clears collected events
+order.commit(); // clears collected events
 ```
 
 ### With capabilities
 
 ```typescript
-import { aggregateBuilder, AuditCapability, SnapshotCapability } from '@vytches/ddd-aggregates';
+import {
+  aggregateBuilder,
+  AuditCapability,
+  SnapshotCapability,
+} from '@vytches/ddd-aggregates';
 
 const order = aggregateBuilder(Order)
   .withCapability(AuditCapability)
@@ -108,12 +124,16 @@ class OrderLine extends Entity<string> {
   constructor(
     id: EntityId<string>,
     private sku: string,
-    private quantity: number,
+    private quantity: number
   ) {
     super({ id });
   }
-  getSku(): string { return this.sku; }
-  getQuantity(): number { return this.quantity; }
+  getSku(): string {
+    return this.sku;
+  }
+  getQuantity(): number {
+    return this.quantity;
+  }
 }
 ```
 
@@ -121,60 +141,61 @@ class OrderLine extends Entity<string> {
 
 ### Core Classes
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `AggregateRoot<TId>` | class | Base aggregate root; provides identity, versioning, event collection and event sourcing reconstitution |
-| `Entity<TId>` | class | Base class for non-root domain entities; identity-based equality, no events |
-| `AggregateBuilder` | class | Fluent builder for aggregates with capabilities |
-| `aggregateBuilder` | function | Factory function shorthand for `AggregateBuilder` |
-| `AggregateError` | class | Error thrown for aggregate-specific failures |
+| Export               | Kind     | Description                                                                                            |
+| -------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `AggregateRoot<TId>` | class    | Base aggregate root; provides identity, versioning, event collection and event sourcing reconstitution |
+| `Entity<TId>`        | class    | Base class for non-root domain entities; identity-based equality, no events                            |
+| `AggregateBuilder`   | class    | Fluent builder for aggregates with capabilities                                                        |
+| `aggregateBuilder`   | function | Factory function shorthand for `AggregateBuilder`                                                      |
+| `AggregateError`     | class    | Error thrown for aggregate-specific failures                                                           |
 
 ### Capabilities
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `AuditCapability` | class | Records who created/modified the aggregate and when |
+| Export                    | Kind  | Description                                              |
+| ------------------------- | ----- | -------------------------------------------------------- |
+| `AuditCapability`         | class | Records who created/modified the aggregate and when      |
 | `EventSourcingCapability` | class | Enables event sourcing reconstitution from stored events |
-| `SnapshotCapability` | class | Enables taking and restoring state snapshots |
-| `VersioningCapability` | class | Manages optimistic concurrency version tracking |
+| `SnapshotCapability`      | class | Enables taking and restoring state snapshots             |
+| `VersioningCapability`    | class | Manages optimistic concurrency version tracking          |
 
 ### Capability Utilities
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `asSnapshotAggregate(agg)` | function | Cast to snapshot-capable aggregate; throws if missing |
-| `tryAsSnapshotAggregate(agg)` | function | Cast to snapshot-capable aggregate; returns `null` if missing |
-| `asVersioningAggregate(agg)` | function | Cast to versioning-capable aggregate; throws if missing |
-| `tryAsVersioningAggregate(agg)` | function | Returns `null` if versioning capability absent |
-| `asAuditAggregate(agg)` | function | Cast to audit-capable aggregate; throws if missing |
-| `tryAsAuditAggregate(agg)` | function | Returns `null` if audit capability absent |
-| `asEventSourcingAggregate(agg)` | function | Cast to event-sourcing aggregate; throws if missing |
-| `tryAsEventSourcingAggregate(agg)` | function | Returns `null` if event sourcing capability absent |
-| `getAggregateCapabilities(agg)` | function | Returns all capabilities attached to an aggregate |
-| `hasAllCapabilities(agg, caps)` | function | Returns `true` if aggregate has all listed capabilities |
+| Export                             | Kind     | Description                                                   |
+| ---------------------------------- | -------- | ------------------------------------------------------------- |
+| `asSnapshotAggregate(agg)`         | function | Cast to snapshot-capable aggregate; throws if missing         |
+| `tryAsSnapshotAggregate(agg)`      | function | Cast to snapshot-capable aggregate; returns `null` if missing |
+| `asVersioningAggregate(agg)`       | function | Cast to versioning-capable aggregate; throws if missing       |
+| `tryAsVersioningAggregate(agg)`    | function | Returns `null` if versioning capability absent                |
+| `asAuditAggregate(agg)`            | function | Cast to audit-capable aggregate; throws if missing            |
+| `tryAsAuditAggregate(agg)`         | function | Returns `null` if audit capability absent                     |
+| `asEventSourcingAggregate(agg)`    | function | Cast to event-sourcing aggregate; throws if missing           |
+| `tryAsEventSourcingAggregate(agg)` | function | Returns `null` if event sourcing capability absent            |
+| `getAggregateCapabilities(agg)`    | function | Returns all capabilities attached to an aggregate             |
+| `hasAllCapabilities(agg, caps)`    | function | Returns `true` if aggregate has all listed capabilities       |
 
 ### Interfaces
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `IAggregateRoot` | interface | Full contract for aggregate roots |
-| `IAggregateCapability` | interface | Base capability contract |
+| Export                             | Kind      | Description                                |
+| ---------------------------------- | --------- | ------------------------------------------ |
+| `IAggregateRoot`                   | interface | Full contract for aggregate roots          |
+| `IAggregateCapability`             | interface | Base capability contract                   |
 | `IAggregateConstructorParams<TId>` | interface | Constructor parameter shape for aggregates |
-| `IAggregateEventHandler` | interface | Event handler registration contract |
-| `IAggregateBuilder` | interface | Builder contract |
+| `IAggregateEventHandler`           | interface | Event handler registration contract        |
+| `IAggregateBuilder`                | interface | Builder contract                           |
 
 ### Utility Types
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `AggregateWithSnapshotCapability` | type | Aggregate narrowed to snapshot-capable shape |
-| `AggregateWithVersioningCapability` | type | Aggregate narrowed to versioning-capable shape |
-| `AggregateWithAuditCapability` | type | Aggregate narrowed to audit-capable shape |
-| `AggregateWithEventSourcingCapability` | type | Aggregate narrowed to event-sourcing shape |
+| Export                                 | Kind | Description                                    |
+| -------------------------------------- | ---- | ---------------------------------------------- |
+| `AggregateWithSnapshotCapability`      | type | Aggregate narrowed to snapshot-capable shape   |
+| `AggregateWithVersioningCapability`    | type | Aggregate narrowed to versioning-capable shape |
+| `AggregateWithAuditCapability`         | type | Aggregate narrowed to audit-capable shape      |
+| `AggregateWithEventSourcingCapability` | type | Aggregate narrowed to event-sourcing shape     |
 
 ## Package boundaries
 
 `@vytches/ddd-aggregates` depends on:
+
 - `@vytches/ddd-contracts` — base interfaces and `EntityId`
 - `@vytches/ddd-domain-primitives` — error types
 - `@vytches/ddd-value-objects` — enhanced `EntityId`

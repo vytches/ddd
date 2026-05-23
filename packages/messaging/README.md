@@ -17,22 +17,22 @@ pnpm add @vytches/ddd-messaging
 
 ## What's included
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `MessageStatus` | enum | `PENDING \| PROCESSING \| PROCESSED \| FAILED` |
-| `MessagePriority` | enum | `LOW \| NORMAL \| HIGH \| CRITICAL` |
-| `OutboxMessageFactory` | class | Creates `IOutboxMessage` instances |
-| `OutboxProcessor` | class | Polls the repository and dispatches messages |
-| `EventBusOutboxHandler` | class | `IOutboxMessageHandler` that publishes to an `IEventBus` |
-| `OutboxService` | class | High-level facade: store, schedule, and coordinate processing |
-| `IOutboxRepository` | abstract class | Base repository contract — extend this for your storage backend |
-| `IOutboxMessage` | interface | Message shape with id, payload, status, priority, timestamps |
-| `IOutboxMessageHandler` | interface | Single-method handler: `handle(message): Promise<void>` |
-| `OutboxMiddleware` | type | Middleware signature for the processor pipeline |
-| `OutboxProcessorOptions` | interface | Processor configuration (interval, batch size, retries…) |
-| `OutboxServiceOptions` | interface | Service configuration |
-| `OutboxMessageOptions` | interface | Per-message options (priority, processAfter…) |
-| `RetryBackoffConfig` | interface | Exponential backoff configuration for the processor |
+| Export                   | Kind           | Description                                                     |
+| ------------------------ | -------------- | --------------------------------------------------------------- |
+| `MessageStatus`          | enum           | `PENDING \| PROCESSING \| PROCESSED \| FAILED`                  |
+| `MessagePriority`        | enum           | `LOW \| NORMAL \| HIGH \| CRITICAL`                             |
+| `OutboxMessageFactory`   | class          | Creates `IOutboxMessage` instances                              |
+| `OutboxProcessor`        | class          | Polls the repository and dispatches messages                    |
+| `EventBusOutboxHandler`  | class          | `IOutboxMessageHandler` that publishes to an `IEventBus`        |
+| `OutboxService`          | class          | High-level facade: store, schedule, and coordinate processing   |
+| `IOutboxRepository`      | abstract class | Base repository contract — extend this for your storage backend |
+| `IOutboxMessage`         | interface      | Message shape with id, payload, status, priority, timestamps    |
+| `IOutboxMessageHandler`  | interface      | Single-method handler: `handle(message): Promise<void>`         |
+| `OutboxMiddleware`       | type           | Middleware signature for the processor pipeline                 |
+| `OutboxProcessorOptions` | interface      | Processor configuration (interval, batch size, retries…)        |
+| `OutboxServiceOptions`   | interface      | Service configuration                                           |
+| `OutboxMessageOptions`   | interface      | Per-message options (priority, processAfter…)                   |
+| `RetryBackoffConfig`     | interface      | Exponential backoff configuration for the processor             |
 
 ## Quick start
 
@@ -48,18 +48,26 @@ import { UnifiedEventBus } from '@vytches/ddd-events';
 
 // Implement IOutboxRepository for your storage (e.g. PostgreSQL)
 class PostgresOutboxRepository extends IOutboxRepository {
-  async save(message) { /* ... */ }
-  async findPending(limit) { /* ... */ }
-  async markProcessed(id) { /* ... */ }
-  async markFailed(id, error) { /* ... */ }
+  async save(message) {
+    /* ... */
+  }
+  async findPending(limit) {
+    /* ... */
+  }
+  async markProcessed(id) {
+    /* ... */
+  }
+  async markFailed(id, error) {
+    /* ... */
+  }
 }
 
 const repository = new PostgresOutboxRepository();
-const eventBus   = new UnifiedEventBus();
+const eventBus = new UnifiedEventBus();
 
 // Service stores messages, processor dispatches them
-const service   = new OutboxService(repository);
-const handler   = new EventBusOutboxHandler(eventBus);
+const service = new OutboxService(repository);
+const handler = new EventBusOutboxHandler(eventBus);
 const processor = new OutboxProcessor(repository, handler, {
   processingInterval: 5_000,
   batchSize: 50,
@@ -101,7 +109,11 @@ class KafkaMessageHandler implements IOutboxMessageHandler {
 Extend `IOutboxRepository` and provide persistence:
 
 ```typescript
-import { IOutboxRepository, IOutboxMessage, MessageStatus } from '@vytches/ddd-messaging';
+import {
+  IOutboxRepository,
+  IOutboxMessage,
+  MessageStatus,
+} from '@vytches/ddd-messaging';
 
 class MyOutboxRepository extends IOutboxRepository {
   async save(message: IOutboxMessage): Promise<void> {
@@ -117,7 +129,10 @@ class MyOutboxRepository extends IOutboxRepository {
   }
 
   async markAsFailed(id: string, error: string): Promise<void> {
-    await db.outbox.update(id, { status: MessageStatus.FAILED, lastError: error });
+    await db.outbox.update(id, {
+      status: MessageStatus.FAILED,
+      lastError: error,
+    });
   }
 }
 ```
@@ -125,6 +140,7 @@ class MyOutboxRepository extends IOutboxRepository {
 ## Package boundaries
 
 `@vytches/ddd-messaging` depends on:
+
 - `@vytches/ddd-contracts` — `IDomainEvent`, `IEventBus`
 - `@vytches/ddd-logging` — internal structured logging
 

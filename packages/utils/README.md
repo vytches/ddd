@@ -4,7 +4,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Foundation utilities: Result pattern, safeRun, LibUtils, and middleware pipeline**
+> **Foundation utilities: Result pattern, safeRun, LibUtils, and middleware
+> pipeline**
 
 ## Installation
 
@@ -14,15 +15,15 @@ pnpm add @vytches/ddd-utils
 
 ## What's included
 
-| Export | Kind | Description |
-|--------|------|-------------|
-| `Result<T, E>` | class | Functional error handling — `Result.ok(value)` / `Result.fail(error)` |
-| `safeRun(fn)` | function | Executes `fn` and returns `[error, result]` tuple; never throws |
-| `LibUtils` | class | Static helpers: `LibUtils.getUUID()`, isEmpty checks, type guards |
-| `MiddlewarePipelineExecutor` | class | Composes and executes an ordered middleware chain |
-| `IMiddleware<TIn, TOut>` | interface | Middleware contract for the pipeline |
-| `MiddlewareHandler<TIn, TOut>` | type | Handler function type |
-| `SimpleHandler<T>` | type | Single-argument handler shorthand |
+| Export                         | Kind      | Description                                                           |
+| ------------------------------ | --------- | --------------------------------------------------------------------- |
+| `Result<T, E>`                 | class     | Functional error handling — `Result.ok(value)` / `Result.fail(error)` |
+| `safeRun(fn)`                  | function  | Executes `fn` and returns `[error, result]` tuple; never throws       |
+| `LibUtils`                     | class     | Static helpers: `LibUtils.getUUID()`, isEmpty checks, type guards     |
+| `MiddlewarePipelineExecutor`   | class     | Composes and executes an ordered middleware chain                     |
+| `IMiddleware<TIn, TOut>`       | interface | Middleware contract for the pipeline                                  |
+| `MiddlewareHandler<TIn, TOut>` | type      | Handler function type                                                 |
+| `SimpleHandler<T>`             | type      | Single-argument handler shorthand                                     |
 
 ## Result pattern
 
@@ -95,6 +96,7 @@ const response = await pipeline.execute(request, () => handler(request));
 ## Package boundaries
 
 `@vytches/ddd-utils` depends on:
+
 - `@vytches/ddd-contracts` — `Result` (re-exported from there)
 - `uuid` — for `LibUtils.getUUID()`
 
