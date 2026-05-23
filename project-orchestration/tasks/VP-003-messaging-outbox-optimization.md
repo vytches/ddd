@@ -368,14 +368,14 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 - [x] `retryBackoff` opcja — 3 scenariusze backoffu pokryte testami
 - [x] `messageTypes` opcja w `OutboxProcessorOptions`
 - [x] `crashRecoveryIntervalMs` opcja — auto-woła `resetStaleProcessing`
-- [ ] `InMemoryOutboxRepository` w `@vytches/ddd-testing` — 25+ testów
-- [ ] `InMemoryOutboxRepository` eksportowany z `@vytches/ddd-testing`
+- [x] `InMemoryOutboxRepository` w `@vytches/ddd-testing` — 25+ testów
+- [x] `InMemoryOutboxRepository` eksportowany z `@vytches/ddd-testing`
 - [x] `processBatch()` zwraca `{ processed, batchSize }` (backward-compatible)
 - [x] Adaptive re-poll z livelock guardem — 5 scenariuszy testów
 - [x] `startupJitterMs` opcja
 - [x] `adaptiveRepoll` domyślnie `false` (opt-in, brak breaking change)
-- [ ] API surface tests dla wszystkich nowych eksportów
-- [ ] Zero regresji istniejących testów
+- [x] API surface tests dla wszystkich nowych eksportów
+- [x] Zero regresji istniejących testów
 
 ### v0.26.2 (Part 5)
 
