@@ -8,95 +8,91 @@ Date: 2026-05-23
 
 ## Context
 
-### Odkryty błąd produkcyjny
+### Discovered Production Bug
 
-W projekcie z wieloma bounded contextami używającym `@vytches/ddd-cqrs` wykryto
-błąd krytyczny: komendy z jednego bounded contextu były routowane do handlerów z
-innego bounded contextu. Błąd powodował zapis danych do nieprawidłowego zasobu
-bez rzucania wyjątku — handler kończył się "sukcesem", ale operował na złych
-danych.
+A project with multiple bounded contexts using `@vytches/ddd-cqrs` suffered a
+critical bug: commands from one bounded context were routed to handlers from a
+different bounded context. The bug caused data to be written to the wrong
+resource with no exception thrown — the handler completed "successfully" but
+operated on incorrect data.
 
-**Mechanizm błędu:** `CommandBus` rejestruje handlery pod kluczem
-`commandType.constructor.name` (string) w jednym globalnym `Map`. Gdy wiele
-bounded contextów definiuje klasy o identycznych nazwach (np.
-`UpdateUserReadModelCommand`), kolejne rejestracje nadpisują poprzednie.
-Wygrywającym handlerem jest ten, który załadował się jako ostatni w cyklu
-bootowania NestJS. Wynik jest niedeterministyczny i zależny od kolejności
-importów modułów.
+**Bug mechanism:** `CommandBus` registers handlers under the key
+`commandType.constructor.name` (string) in a single global `Map`. When multiple
+bounded contexts define classes with identical names (e.g.
+`UpdateUserReadModelCommand`), each new registration silently overwrites the
+previous one. The winning handler is whichever loaded last during NestJS
+bootstrap. The result is non-deterministic and depends on module import order.
 
-**Przykład z realnego projektu:**
+**Real-world example:**
 
-Pięć bounded contextów posiadało identycznie nazwaną klasę komendy. Gdy kontekst
-`neighborhood-economy` wysyłał komendę z polami `firstName`/`lastName`, bus
-kierował ją do handlera kontekstu `engagement`, który tych pól nie znał. Handler
-zapisywał `updateInput = {}` — aktualizował nieprawidłową tabelę z pustym
-zestawem pól, pozostawiając dane w `neighborhood-economy` jako `NULL`. Błąd
-objawił się dopiero przy próbie użycia tych danych, długo po zdarzeniu
-inicjującym.
+Five bounded contexts each defined an identically named command class. When
+context `catalog` sent a command containing its domain-specific fields, the bus
+routed it to context `inventory`'s handler, which was unaware of those fields.
+Context `inventory`'s handler wrote `updateInput = {}` — it updated the
+`inventory` table with an empty field set, leaving `catalog`'s data as `NULL`.
+The bug only surfaced when those `NULL` values were actually consumed, long
+after the initiating event.
 
-**Skala problemu:** W typowej aplikacji z 10+ bounded contextami wiele
-"tematycznych" nazw komend (`CreateUserReadModelCommand`, `UpdateStatusCommand`,
-`DeleteCommand`) pojawia się niezależnie w każdym kontekście — to naturalna
-konsekwencja stosowania Ubiquitous Language per-kontekst. Zakaz duplikowania
-nazw byłby wymuszaniem wspólnego języka między kontekstami, co jest
-anti-patternem DDD.
+**Scale of the problem:** In a typical application with 10+ bounded contexts,
+many "thematic" command names (`CreateUserReadModelCommand`,
+`UpdateStatusCommand`, `DeleteCommand`) appear independently in every context —
+a natural consequence of applying Ubiquitous Language per context. Prohibiting
+duplicate names would force a shared language across contexts, which is a DDD
+anti-pattern.
 
-### Przyczyna źródłowa w architekturze biblioteki
+### Root Cause in the Library Architecture
 
-Aktualny design zakłada jeden globalny `CommandBus` i `QueryBus` dla całej
-aplikacji. `VytchesExplorerService` (pakiet `@vytches/ddd-nestjs`) odkrywa
-handlerów ze wszystkich modułów NestJS i rejestruje ich do tych samych
-globalnych instancji busów. Bounded contexty nie mają żadnej własnej przestrzeni
-rejestracji.
+The current design assumes a single global `CommandBus` and `QueryBus` for the
+entire application. `VytchesExplorerService` (package `@vytches/ddd-nestjs`)
+discovers handlers from all NestJS modules and registers them into those same
+global bus instances. Bounded contexts have no dedicated registration namespace.
 
-To podejście jest wygodne dla małych aplikacji z jednym kontekstem, ale łamie
-zasadę autonomii bounded contextu opisaną przez Evansa i Vernona: każdy kontekst
-powinien mieć własną warstwę aplikacyjną i własną obsługę komend, niezależną od
-innych kontekstów.
+This approach is convenient for small single-context applications but violates
+the bounded-context autonomy principle described by Evans and Vernon: each
+context should own its application layer and command handling, independent of
+other contexts.
 
-### Istniejące zabezpieczenie po stronie zdarzeń
+### Existing Isolation for Events
 
-Biblioteka posiada już poprawny podział dla zdarzeń: `DomainEvent` i
-`IntegrationEvent` jako osobne klasy bazowe (`packages/events/`). `CommandBus` i
-`QueryBus` nie miały analogicznego mechanizmu izolacji.
+The library already handles event separation correctly: `DomainEvent` and
+`IntegrationEvent` are distinct base classes (`packages/events/`). `CommandBus`
+and `QueryBus` had no equivalent isolation mechanism.
 
 ---
 
-## Decyzja
+## Decision
 
-### 1. Naprawa klucza Map w CommandBus i QueryBus
+### 1. Fix the Map Key in CommandBus and QueryBus
 
-Zmiana klucza wewnętrznego `Map` z `string` (nazwa klasy) na `Function`
-(referencja do konstruktora). Klasy z różnych bounded contextów mogą mieć
-identyczne nazwy, ale są zawsze różnymi obiektami w pamięci.
+Change the internal `Map` key from `string` (class name) to `Function`
+(constructor reference). Classes from different bounded contexts may share
+identical names but are always distinct objects in memory.
 
 ```typescript
-// PRZED: kolizja gdy dwa konteksty mają klasę o tej samej nazwie
+// BEFORE: collision when two contexts have a class with the same name
 private handlers = new Map<string, handler>();
 this.handlers.set(commandType.name, handler);  // "UpdateUserReadModelCommand"
 
-// PO: referencja do klasy — obiektowo unikalna, bez kolizji
+// AFTER: class reference — object-unique, no collision
 private handlers = new Map<Function | string, handler>();
-this.handlers.set(commandType, handler);  // Function ref — zawsze unikalna
+this.handlers.set(commandType, handler);  // Function ref — always unique
 ```
 
-Zachowany fallback na string key dla wstecznej kompatybilności z rejestracją
-przez string (`bus.register('MyCommand', handler)`).
+String key retained as a fallback for backward-compatible string-based
+registration (`bus.register('MyCommand', handler)`).
 
-### 2. Opcja `scope` w dekoratorach handlerów
+### 2. `scope` Option in Handler Decorators
 
-Dodanie opcjonalnego pola `scope?: 'context' | 'global'` do
-`CommandHandlerOptions`, `QueryHandlerOptions`, `EventHandlerOptions`. Wartość
-domyślna: `'context'`.
+Add an optional `scope?: 'context' | 'global'` field to `CommandHandlerOptions`,
+`QueryHandlerOptions`, and `EventHandlerOptions`. Default: `'context'`.
 
-- `scope: 'context'` → handler rejestrowany w izolowanym busie swojego bounded
-  contextu
-- `scope: 'global'` → handler rejestrowany w globalnym busie (zachowanie
-  dotychczasowe)
+- `scope: 'context'` → handler registered in the isolated bus of its bounded
+  context
+- `scope: 'global'` → handler registered in the global bus (previous behavior)
 
-### 3. `VytchesDDDModule.forFeature(contextName)` — izolacja per bounded context
+### 3. `VytchesDDDModule.forFeature(contextName)` — Per-Bounded-Context Isolation
 
-Nowa metoda modułu dostarcza izolowane instancje busów scoped do NestJS module:
+A new module method provides isolated bus instances scoped to the NestJS module:
 
 ```typescript
 @Module({
@@ -106,37 +102,36 @@ Nowa metoda modułu dostarcza izolowane instancje busów scoped do NestJS module
 export class OrdersModule {}
 ```
 
-Każdy `forFeature()` tworzy:
+Each `forFeature()` creates:
 
-- `ICommandBus` — nowa instancja, scoped do tego modułu
-- `IQueryBus` — nowa instancja, scoped do tego modułu
-- `LOCAL_EVENT_BUS` — nowa instancja EventBus, scoped do tego modułu
+- `ICommandBus` — new instance, scoped to this module
+- `IQueryBus` — new instance, scoped to this module
+- `LOCAL_EVENT_BUS` — new `EventBus` instance, scoped to this module
 
-### 4. Auto-discovery przez `FeatureHandlerRegistrar` (bez explicit list)
+### 4. Auto-Discovery via `FeatureHandlerRegistrar` (No Explicit List Required)
 
-Nowy internal service `FeatureHandlerRegistrar` wstrzykuje `ModulesContainer` z
-`@nestjs/core` i w `onModuleInit()` lokalizuje swój moduł przez unikalny Symbol
-token. Iteruje tylko providerów swojego modułu — brak skanowania całej
-aplikacji, brak pętli try/catch.
+A new internal service `FeatureHandlerRegistrar` injects `ModulesContainer` from
+`@nestjs/core` and in `onModuleInit()` locates its own module via a unique
+Symbol token. It iterates only that module's providers — no full-app scan, no
+try/catch loops.
 
-Informuje `VytchesExplorerService` o typach wiadomości "zajętych" przez ten
-kontekst.
+It notifies `VytchesExplorerService` of the message types "claimed" by this
+context.
 
-### 5. Global fallback — nieprzerywana wsteczna kompatybilność
+### 5. Global Fallback — Unbroken Backward Compatibility
 
-`VytchesExplorerService.onApplicationBootstrap()` (po wszystkich
-`onModuleInit()`):
+`VytchesExplorerService.onApplicationBootstrap()` (after all `onModuleInit()`):
 
-- Pomija typy wiadomości zgłoszone przez `FeatureHandlerRegistrar`
-- Rejestruje pozostałe w globalnym busie
+- Skips message types reported by `FeatureHandlerRegistrar`
+- Registers the rest in the global bus
 
-Moduły bez `forFeature()` działają identycznie jak przed zmianą. Migracja jest
-inkrementalna — można dodawać `forFeature()` kontekst po kontekście bez ryzyka
-regresji.
+Modules without `forFeature()` behave identically to before the change.
+Migration is incremental — `forFeature()` can be added context by context
+without regression risk.
 
-### 6. EventBus — routing przez instanceof, nie przez flagi
+### 6. EventBus — Routing via instanceof, Not Flags
 
-`IEventDispatcher` (adapter NestJS) routuje przez typ klasy bazowej:
+`IEventDispatcher` (NestJS adapter) routes by base class type:
 
 ```typescript
 if (event instanceof IntegrationEvent) {
@@ -146,102 +141,99 @@ if (event instanceof IntegrationEvent) {
 }
 ```
 
-Odrzucono alternatywę `static scope = 'global'` na klasach zdarzeń — takie pole
-wstrzykuje wiedzę infrastrukturalną (routing) do modelu domenowego, naruszając
-zasadę izolacji warstw. Biblioteka posiada już `DomainEvent` /
-`IntegrationEvent` jako semantycznie poprawne rozróżnienie — używamy go.
+The alternative of `static scope = 'global'` on event classes was rejected —
+such a field injects infrastructure knowledge (routing) into the domain model,
+violating layer isolation. The library already has `DomainEvent` /
+`IntegrationEvent` as semantically correct distinct types — we leverage that.
 
 ---
 
-## Rozważane alternatywy
+## Considered Alternatives
 
-### A. Wymaganie globalnie unikalnych nazw klas komend
+### A. Require Globally Unique Command Class Names
 
-**Odrzucone.** Wymuszanie unikalności nazw między kontekstami to narzucanie
-wspólnego Ubiquitous Language, co jest fundamentalnym naruszeniem zasady bounded
-context (Evans, rozdział 14). `UpdateUserReadModelCommand` ma inne znaczenie
-semantyczne w każdym kontekście i powinna móc istnieć niezależnie.
+**Rejected.** Enforcing name uniqueness across contexts means imposing a shared
+Ubiquitous Language, which is a fundamental violation of the bounded-context
+principle (Evans, Chapter 14). `UpdateUserReadModelCommand` has a different
+semantic meaning in each context and should be able to exist independently.
 
-### B. Prefiks kontekstu w nazwie klasy jako konwencja
+### B. Context Prefix in Class Name as Convention
 
-**Odrzucone jako rozwiązanie biblioteki.** Konwencja
-`OrdersUpdateUserReadModelCommand` jest workaroundem, nie naprawą. Biblioteka
-powinna zapewniać izolację architektonicznie, nie przez konwencje nazewnicze
-które można przypadkowo naruszyć. Konwencja pozostaje dopuszczalna jako
-dodatkowa praktyka, ale nie może być jedynym zabezpieczeniem.
+**Rejected as a library solution.** The convention
+`OrdersUpdateUserReadModelCommand` is a workaround, not a fix. The library
+should provide isolation architecturally, not through naming conventions that
+can be accidentally violated. The convention remains acceptable as an additional
+practice but cannot be the sole safeguard.
 
-### C. Jeden bus z namespace'owanymi kluczami
+### C. Single Bus with Namespaced Keys
 
-**Odrzucone.** `"orders:UpdateUserReadModelCommand"` jako klucz wymaga zmiany
-API rejestracji (`bus.register('orders:...', handler)`) i jest niezgodne z
-istniejącymi dekoratorami `@CommandHandler`. Nie eliminuje problemu przy
-auto-discovery.
+**Rejected.** `"orders:UpdateUserReadModelCommand"` as a key requires changing
+the registration API (`bus.register('orders:...', handler)`) and is incompatible
+with existing `@CommandHandler` decorators. It does not eliminate the problem
+with auto-discovery.
 
-### D. Dwie klasy bazowe DomainEvent / IntegrationEvent dla zdarzeń (już istnieje)
+### D. DomainEvent / IntegrationEvent Base Classes for Events (Already Exists)
 
-**Zaakceptowane — już zaimplementowane.** Biblioteka posiada ten podział.
-Wymagało tylko podłączenia do mechanizmu routingu w dispatchers.
-
----
-
-## Konsekwencje
-
-### Pozytywne
-
-- **Eliminacja klasy błędów produkcyjnych.** Identyczne nazwy klas komend w
-  różnych kontekstach przestają być problemem architektonicznym.
-- **Zgodność z kanonicznym DDD.** Każdy bounded context ma własną warstwę
-  obsługi komend, niezależną od innych kontekstów (Evans/Vernon).
-- **Inkrementalna migracja.** Brak breaking change. Istniejące aplikacje
-  działają bez zmian. `forFeature()` można dodawać kontekst po kontekście.
-- **Auto-discovery działa.** Konsument nie musi listować handlerów explicite —
-  biblioteka wykrywa je automatycznie przez `ModulesContainer`.
-- **Lepszy DX przy błędach.** Brak `forFeature()` daje czytelny błąd przy
-  starcie zamiast cichego routing do złego handlera.
-
-### Negatywne
-
-- **Jedna linia boilerplate per bounded context module.**
-  `imports: [VytchesDDDModule.forFeature('orders')]` jest wymagane dla izolacji.
-  Moduły bez tego importu nadal działają globalnie (nie jest to breaking
-  change).
-- **Więcej instancji busów w pamięci.** Każdy `forFeature()` tworzy oddzielne
-  instancje `CommandBus`, `QueryBus`, `EventBus`. Dla 10 kontekstów = 30
-  instancji zamiast 3. Dla typowych zastosowań (handlery jako NestJS singletons,
-  brak intensive caching) overhead jest pomijalny. Cache w `EnhancedCommandBus`
-  powinien być wyłączony dla per-context instancji (`enableCache: false`).
-- **Zależność od `ModulesContainer` (@nestjs/core internals).**
-  `FeatureHandlerRegistrar` używa `ModulesContainer` do lokalizacji własnego
-  modułu. API jest eksportowane przez `@nestjs/core` i używane przez oficjalne
-  biblioteki NestJS (`@nestjs/cqrs`), jednak nie jest dokumentowane jako
-  stabilne. Ryzyko ocenione jako niskie.
-
-### Neutralne
-
-- **Bump wersji: minor dla obu pakietów.** Wszystkie zmiany są addytywne lub
-  dotyczą implementacji wewnętrznej. Żadna zmiana nie jest breaking dla
-  istniejących konsumentów.
-- **`Symbol.for()` zamiast `Symbol()` dla tokenów DI.** Gwarantuje ten sam
-  symbol przy hot-reload i w środowiskach testowych z wielokrotnym importem
-  modułu.
+**Accepted — already implemented.** The library has this split. It only required
+wiring into the routing mechanism in the dispatchers.
 
 ---
 
-## Implikacje dla konsumentów
+## Consequences
 
-Konsumenci z istniejącym globalnym setupem:
+### Positive
 
-**Krok 1 (opcjonalny, zalecany):** dodaj `forFeature('nazwa')` do każdego
-bounded context module. Handlery z tego modułu zaczną używać izolowanego busa.
+- **Elimination of a production bug class.** Identical command class names in
+  different contexts are no longer an architectural problem.
+- **Canonical DDD compliance.** Each bounded context owns its command-handling
+  layer, independent of other contexts (Evans/Vernon).
+- **Incremental migration.** No breaking change. Existing applications work
+  without modification. `forFeature()` can be added context by context.
+- **Auto-discovery works.** Consumers do not need to list handlers explicitly —
+  the library detects them automatically via `ModulesContainer`.
+- **Better DX on errors.** Missing `forFeature()` produces a clear startup error
+  instead of silent routing to the wrong handler.
 
-**Krok 2 (jeśli potrzebny):** sprawdź czy jakieś komendy/queries mają kolizje
-nazw. Jeśli tak — `forFeature()` je izoluje bez zmiany nazw klas.
+### Negative
 
-Brak kroku 1 i 2 = zachowanie identyczne jak przed zmianą.
+- **One line of boilerplate per bounded context module.**
+  `imports: [VytchesDDDModule.forFeature('orders')]` is required for isolation.
+  Modules without this import continue to work globally (not a breaking change).
+- **More bus instances in memory.** Each `forFeature()` creates separate
+  `CommandBus`, `QueryBus`, `EventBus` instances. For 10 contexts = 30 instances
+  instead of 3. For typical use (handlers as NestJS singletons, no intensive
+  caching) the overhead is negligible. The cache in `EnhancedCommandBus` should
+  be disabled for per-context instances (`enableCache: false`).
+- **Dependency on `ModulesContainer` (@nestjs/core internals).**
+  `FeatureHandlerRegistrar` uses `ModulesContainer` to locate its own module.
+  The API is exported by `@nestjs/core` and used by official NestJS libraries
+  (`@nestjs/cqrs`), but is not documented as stable. Risk assessed as low.
+
+### Neutral
+
+- **Version bump: minor for both packages.** All changes are additive or concern
+  internal implementation. No change is breaking for existing consumers.
+- **`Symbol.for()` instead of `Symbol()` for DI tokens.** Guarantees the same
+  symbol across hot-reloads and in test environments with repeated module
+  imports.
 
 ---
 
-## Powiązane decyzje
+## Implications for Consumers
+
+Consumers with an existing global setup:
+
+**Step 1 (optional, recommended):** Add `forFeature('name')` to each bounded
+context module. Handlers from that module will start using the isolated bus.
+
+**Step 2 (if needed):** Check whether any commands/queries have name collisions.
+If so — `forFeature()` isolates them without renaming the classes.
+
+Skipping Steps 1 and 2 = behavior identical to before the change.
+
+---
+
+## Related Decisions
 
 - ADR-0014: DI Integration Bridge Pattern — established the
   `IDependencyContainer` abstraction keeping CQRS framework-agnostic
