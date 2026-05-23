@@ -379,15 +379,16 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 
 ### v0.26.2 (Part 5)
 
-- [ ] `OutboxProcessorHooks` interface eksportowany
-- [ ] `hooks` opcja w `OutboxProcessorOptions`
-- [ ] `onBatchComplete`, `onMessageFailed`, `onPermanentFailure` wyzwalane we
+- [x] `OutboxProcessorHooks` interface eksportowany
+- [x] `hooks` opcja w `OutboxProcessorOptions`
+- [x] `onBatchComplete`, `onMessageFailed`, `onPermanentFailure` wyzwalane we
       właściwych momentach
-- [ ] `OutboxProcessorModule.forRootAsync` w `@vytches/ddd-nestjs`
-- [ ] Multi-processor: N procesorów per module
-- [ ] `repositoryToken` + opcjonalny `handlerToken` per processor entry
-- [ ] Lifecycle: `OnModuleInit` → `start()`, `OnModuleDestroy` → `stop()`
-- [ ] API surface tests + lifecycle smoke tests
+- [x] `OutboxProcessorModule.forRootAsync` w `@vytches/ddd-nestjs`
+- [x] Multi-processor: N procesorów per module
+- [x] `repositoryToken` + opcjonalny `handlerToken` per processor entry
+      (`handlerToken` → `Record<messageType, IOutboxMessageHandler>`)
+- [x] Lifecycle: `OnModuleInit` → `start()`, `OnModuleDestroy` → `stop()`
+- [x] API surface tests + lifecycle smoke tests
 
 ---
 
@@ -471,8 +472,9 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 - [x] `crashRecoveryThresholdMs < messageTimeout` rzuca błąd w konstruktorze
 - [x] Backoff delay zawsze przez `Math.min(delay, maxDelay)` przed użyciem w
       `Date`
-- [ ] Hooki wywołane w `safeRun` — błąd hooka nie propaguje do pętli processingu
-- [ ] Logger w `handleMessageError` loguje tylko `id`, `messageType`, `attempt`
+- [x] Hooki wywołane w `safeRun` — błąd hooka nie propaguje do pętli processingu
+      (zaimplementowane jako `safelyInvokeHook` try/catch + `Logger.error`)
+- [x] Logger w `handleMessageError` loguje tylko `id`, `messageType`, `attempt`
       — nigdy `payload`
 
 ## Historia rewizji

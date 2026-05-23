@@ -5,6 +5,8 @@ exports[`@vytches/ddd-nestjs public API surface > exports the documented set of 
   "ACLAdapterFor",
   "ACL_REGISTRY",
   "NestJSContainerAdapter",
+  "OutboxProcessorModule",
+  "OutboxProcessorService",
   "VytchesDDDModule",
   "VytchesExplorerService",
 ]

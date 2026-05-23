@@ -4,6 +4,7 @@ import { safeRun } from '@vytches/ddd-utils';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
+import type { OutboxProcessorHooks } from './outbox-hooks';
 
 export interface RetryBackoffConfig {
   /** Initial delay in milliseconds before first retry (default: 1000) */
@@ -78,14 +79,24 @@ export interface OutboxProcessorOptions {
    * de-synchronize many processors that boot simultaneously. Defaults to `0`.
    */
   startupJitterMs?: number;
+  /**
+   * Observability callbacks (batch completion, message failure, permanent
+   * failure). Each invocation is isolated in a try/catch — a throwing hook is
+   * logged and never breaks the processing loop. Omit to disable.
+   */
+  hooks?: OutboxProcessorHooks;
 }
 
 type ResolvedOptions = Required<
-  Omit<OutboxProcessorOptions, 'retryBackoff' | 'messageTypes' | 'crashRecoveryIntervalMs'>
+  Omit<
+    OutboxProcessorOptions,
+    'retryBackoff' | 'messageTypes' | 'crashRecoveryIntervalMs' | 'hooks'
+  >
 > & {
   retryBackoff: RetryBackoffConfig | undefined;
   messageTypes: string[] | undefined;
   crashRecoveryIntervalMs: number | undefined;
+  hooks: OutboxProcessorHooks | undefined;
 };
 
 export class OutboxProcessor {
@@ -146,7 +157,24 @@ export class OutboxProcessor {
       adaptiveRepollMaxConsecutive: options.adaptiveRepollMaxConsecutive ?? 5,
       adaptiveRepollPauseMs: options.adaptiveRepollPauseMs ?? 50,
       startupJitterMs: options.startupJitterMs ?? 0,
+      hooks: options.hooks,
     };
+  }
+
+  /**
+   * Invokes an observability hook in isolation. A throwing hook is logged and
+   * swallowed so it can never break the processing loop (mitigation T3).
+   */
+  private safelyInvokeHook(name: string, invoke: () => void): void {
+    if (!this.options.hooks) {
+      return;
+    }
+    try {
+      invoke();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Outbox hook ${name} threw and was ignored: ${errorMessage}`);
+    }
   }
 
   /**
@@ -263,20 +291,40 @@ export class OutboxProcessor {
 
     this.logger.info(`Processing ${messages.length} messages`);
 
+    const startedAt = Date.now();
+
     // Parallel dispatch via Promise.allSettled — failures in any message do
     // NOT short-circuit the batch. Each message has its own retry/fail state
     // tracked in the repository (see handleMessageError).
-    const processingPromises = messages.map(message => this.processMessage(message));
+    const outcomes = await Promise.allSettled(
+      messages.map(message => this.processMessage(message))
+    );
 
-    await Promise.allSettled(processingPromises);
+    // processMessage never rejects (it catches internally), but treat any
+    // rejection defensively as a failure for hook accounting.
+    const failed = outcomes.filter(
+      o => o.status === 'rejected' || (o.status === 'fulfilled' && o.value === false)
+    ).length;
+
     this.logger.info(`Completed processing batch of ${messages.length} messages`);
+
+    this.safelyInvokeHook('onBatchComplete', () =>
+      this.options.hooks?.onBatchComplete?.({
+        processed: messages.length,
+        failed,
+        batchSize,
+        durationMs: Date.now() - startedAt,
+      })
+    );
+
     return { processed: messages.length, batchSize };
   }
 
   /**
-   * Processes a single message through the middleware pipeline
+   * Processes a single message through the middleware pipeline.
+   * @returns `true` if the message was processed successfully, `false` if it failed.
    */
-  private async processMessage(message: IOutboxMessage): Promise<void> {
+  private async processMessage(message: IOutboxMessage): Promise<boolean> {
     const [error] = await safeRun(async () => {
       // Mark as processing
       await this.repository.updateStatus(message.id, MessageStatus.PROCESSING);
@@ -292,7 +340,9 @@ export class OutboxProcessor {
 
     if (error) {
       await this.handleMessageError(message, error);
+      return false;
     }
+    return true;
   }
 
   /**
@@ -329,9 +379,16 @@ export class OutboxProcessor {
       const attempts = await this.repository.incrementAttempt(message.id);
       this.logger.warn(`Message ${message.id} failed, attempt ${attempts}: ${error?.message}`);
 
+      this.safelyInvokeHook('onMessageFailed', () =>
+        this.options.hooks?.onMessageFailed?.(message, error, attempts)
+      );
+
       if (attempts >= this.options.maxRetries) {
         await this.repository.updateStatus(message.id, MessageStatus.FAILED, error);
         this.logger.error(`Message ${message.id} marked as failed after ${attempts} attempts`);
+        this.safelyInvokeHook('onPermanentFailure', () =>
+          this.options.hooks?.onPermanentFailure?.(message, error)
+        );
       } else if (this.options.retryBackoff) {
         const { initial, multiplier, maxDelay } = this.options.retryBackoff;
         const delay = Math.min(initial * Math.pow(multiplier, attempts - 1), maxDelay);

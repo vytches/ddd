@@ -689,6 +689,115 @@ describe('IOutboxRepository.resetStaleProcessing — default (Part 2)', () => {
   });
 });
 
+describe('OutboxProcessor — observability hooks (Part 5a)', () => {
+  let repo: InMemoryOutboxRepository;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  const throwingHandler: IOutboxMessageHandler = {
+    handle: async () => {
+      throw new Error('handler boom');
+    },
+  };
+  const okHandler = (): IOutboxMessageHandler => ({
+    handle: vi.fn().mockResolvedValue(undefined),
+  });
+
+  it('onBatchComplete reports processed, failed, batchSize and duration', async () => {
+    const onBatchComplete = vi.fn();
+    const processor = new OutboxProcessor(repo, { batchSize: 5, hooks: { onBatchComplete } });
+    processor.registerHandler('ok', okHandler());
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'a', messageType: 'ok' }));
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+
+    await processor.processBatch();
+
+    expect(onBatchComplete).toHaveBeenCalledOnce();
+    expect(onBatchComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ processed: 2, failed: 1, batchSize: 5 })
+    );
+    const arg = onBatchComplete.mock.calls[0]![0] as { durationMs: number };
+    expect(typeof arg.durationMs).toBe('number');
+  });
+
+  it('onMessageFailed fires on each failure with the attempt number', async () => {
+    const onMessageFailed = vi.fn();
+    const processor = new OutboxProcessor(repo, {
+      maxRetries: 3,
+      hooks: { onMessageFailed },
+    });
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+    await processor.processBatch();
+
+    expect(onMessageFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'b' }),
+      expect.any(Error),
+      1
+    );
+  });
+
+  it('onPermanentFailure fires once the message is marked FAILED', async () => {
+    const onPermanentFailure = vi.fn();
+    const processor = new OutboxProcessor(repo, {
+      maxRetries: 1, // first failure is terminal
+      hooks: { onPermanentFailure },
+    });
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+    await processor.processBatch();
+
+    expect(onPermanentFailure).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'b' }),
+      expect.any(Error)
+    );
+  });
+
+  it('does not fire onPermanentFailure while retries remain', async () => {
+    const onPermanentFailure = vi.fn();
+    const processor = new OutboxProcessor(repo, {
+      maxRetries: 3,
+      hooks: { onPermanentFailure },
+    });
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+    await processor.processBatch();
+
+    expect(onPermanentFailure).not.toHaveBeenCalled();
+  });
+
+  // Mitigation T3: a throwing hook must never break the processing loop.
+  it('isolates a throwing hook — the batch still completes and messages process', async () => {
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 10,
+      hooks: {
+        onBatchComplete: () => {
+          throw new Error('hook explosion');
+        },
+      },
+    });
+    processor.registerHandler('ok', okHandler());
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'a', messageType: 'ok' }));
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 1, batchSize: 10 });
+    expect(repo.store.get('a')?.status).toBe(MessageStatus.PROCESSED);
+  });
+});
+
 describe('OutboxProcessor.processBatch — return value (Part 4)', () => {
   let repo: InMemoryOutboxRepository;
 

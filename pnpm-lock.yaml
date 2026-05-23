@@ -708,6 +708,9 @@ importers:
       '@vytches/ddd-logging':
         specifier: workspace:*
         version: link:../logging
+      '@vytches/ddd-messaging':
+        specifier: workspace:*
+        version: link:../messaging
       '@vytches/ddd-resilience':
         specifier: workspace:*
         version: link:../resilience

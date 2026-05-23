@@ -53,6 +53,7 @@
     "@vytches/ddd-di": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
     "@vytches/ddd-logging": "workspace:*",
+    "@vytches/ddd-messaging": "workspace:*",
     "@vytches/ddd-resilience": "workspace:*"
   },
   "peerDependencies": {

@@ -16,3 +16,7 @@ export { ACL_REGISTRY } from './constants';
 
 // Types and interfaces
 export type { HandlerInfo, VytchesDDDModuleOptions } from './types';
+
+// Outbox processor module (multi-processor lifecycle wrapper)
+export { OutboxProcessorModule, OutboxProcessorService } from './outbox';
+export type { OutboxProcessorEntry, OutboxProcessorModuleAsyncOptions } from './outbox';
