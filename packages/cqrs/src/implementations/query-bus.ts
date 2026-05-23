@@ -61,7 +61,7 @@ export class QueryBus extends IQueryBus {
   private readonly logger = Logger.forContext('QueryBus');
   private middlewares: ICQRSMiddleware[] = [];
   private handlers: Map<
-    string,
+    Function | string,
     IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
   > = new Map();
 
@@ -70,20 +70,16 @@ export class QueryBus extends IQueryBus {
   }
 
   register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
-    // Support manual registration for flexibility
-    const queryName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-
-    this.handlers.set(queryName, handler);
+    const key = typeof queryType === 'string' ? queryType : (queryType as Function);
+    this.handlers.set(key, handler);
   }
 
   registerFactory<T extends IQuery<R>, R>(
     queryType: unknown,
     factory: () => IQueryHandler<T, R>
   ): void {
-    // Support factory registration for lazy initialization
-    const queryName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-
-    this.handlers.set(queryName, factory);
+    const key = typeof queryType === 'string' ? queryType : (queryType as Function);
+    this.handlers.set(key, factory);
   }
 
   use(middleware: ICQRSMiddleware): this {
@@ -103,11 +99,11 @@ export class QueryBus extends IQueryBus {
   }
 
   async execute<T extends IQuery<R>, R>(query: T): Promise<R> {
-    const queryName = query.constructor.name;
     let handler: IQueryHandler<T, R>;
 
-    // First, check manual registrations
-    const registeredHandler = this.handlers.get(queryName);
+    // Function ref first (no cross-context collision), string fallback for BC
+    const registeredHandler =
+      this.handlers.get(query.constructor) ?? this.handlers.get(query.constructor.name);
     if (registeredHandler) {
       // Check if it's a factory function or direct handler
       if (typeof registeredHandler === 'function' && !('execute' in registeredHandler)) {

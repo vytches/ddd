@@ -398,4 +398,40 @@ describe('EnhancedCommandBus', () => {
       expect(metrics.errors).toBe(0);
     });
   });
+
+  describe('cross-context name collision prevention (VP-007)', () => {
+    it('should route to correct handler when two contexts define classes with identical names', async () => {
+      class UpdateUserReadModelCommand implements ICommand {
+        constructor(public readonly contextA = true) {}
+      }
+
+      const ContextBCommand = class UpdateUserReadModelCommand implements ICommand {
+        constructor(public readonly contextB = true) {}
+      };
+
+      const handlerA = { execute: vi.fn().mockResolvedValue('context-a') };
+      const handlerB = { execute: vi.fn().mockResolvedValue('context-b') };
+
+      enhancedCommandBus.register(UpdateUserReadModelCommand, handlerA);
+      enhancedCommandBus.register(ContextBCommand, handlerB);
+
+      const resultA = await enhancedCommandBus.execute(new UpdateUserReadModelCommand());
+      const resultB = await enhancedCommandBus.execute(new ContextBCommand());
+
+      expect(resultA).toBe('context-a');
+      expect(resultB).toBe('context-b');
+      expect(handlerA.execute).toHaveBeenCalledTimes(1);
+      expect(handlerB.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still resolve handler registered by string name (BC)', async () => {
+      const handler = { execute: vi.fn().mockResolvedValue('by-string') };
+      enhancedCommandBus.register('LegacyCommand', handler);
+
+      class LegacyCommand implements ICommand {}
+      const result = await enhancedCommandBus.execute(new LegacyCommand());
+
+      expect(result).toBe('by-string');
+    });
+  });
 });

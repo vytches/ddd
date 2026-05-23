@@ -168,12 +168,12 @@ export class EnhancedQueryBus extends IQueryBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
   private handlers = new Map<
-    string,
+    Function | string,
     IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
   >();
 
   // Performance optimization: Handler cache
-  private handlerCache = new Map<string, CachedHandler>();
+  private handlerCache = new Map<Function | string, CachedHandler>();
   private readonly HANDLER_CACHE_TTL = 60000; // 1 minute
 
   // Query result cache
@@ -375,12 +375,11 @@ export class EnhancedQueryBus extends IQueryBus {
    * Register query handler
    */
   register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
-    const queryName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-
-    this.handlers.set(queryName, handler);
-    // Clear caches for this query type
-    this.handlerCache.delete(queryName);
-    this.invalidateCacheForQuery(queryName);
+    const key = typeof queryType === 'string' ? queryType : (queryType as Function);
+    const keyName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
+    this.handlers.set(key, handler);
+    this.handlerCache.delete(key);
+    this.invalidateCacheForQuery(keyName);
   }
 
   /**
@@ -390,11 +389,11 @@ export class EnhancedQueryBus extends IQueryBus {
     queryType: unknown,
     factory: () => IQueryHandler<T, R>
   ): void {
-    const queryName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-
-    this.handlers.set(queryName, factory);
-    this.handlerCache.delete(queryName);
-    this.invalidateCacheForQuery(queryName);
+    const key = typeof queryType === 'string' ? queryType : (queryType as Function);
+    const keyName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
+    this.handlers.set(key, factory);
+    this.handlerCache.delete(key);
+    this.invalidateCacheForQuery(keyName);
   }
 
   /**
@@ -496,11 +495,10 @@ export class EnhancedQueryBus extends IQueryBus {
    */
   private async executeCore<T extends IQuery<R>, R>(query: T): Promise<R> {
     const startTime = performance.now();
-    const queryName = query.constructor.name;
 
     try {
       // Get handler (with caching)
-      const handler = await this.resolveHandler<T, R>(queryName, query.constructor);
+      const handler = await this.resolveHandler<T, R>(query.constructor);
 
       // Validate if needed
       if (this.isValidatable(query)) {
@@ -523,31 +521,31 @@ export class EnhancedQueryBus extends IQueryBus {
   }
 
   /**
-   * Resolve handler with caching
+   * Resolve handler with caching. Uses Function reference as primary key to
+   * prevent cross-context handler collision when different bounded contexts
+   * define classes with the same name.
    */
   private async resolveHandler<T extends IQuery<R>, R>(
-    queryName: string,
     queryClass: Function
   ): Promise<IQueryHandler<T, R>> {
-    // Check cache first
+    // Check cache first (keyed by Function ref — no cross-context collision)
     if (this.cacheEnabled) {
-      const cached = this.handlerCache.get(queryName);
+      const cached = this.handlerCache.get(queryClass);
       if (cached && Date.now() - cached.resolvedAt < this.HANDLER_CACHE_TTL) {
         return cached.handler as IQueryHandler<T, R>;
       }
     }
 
-    // Check manual registrations
-    const registered = this.handlers.get(queryName);
+    // Function ref first, string fallback for handlers registered by name (BC)
+    const registered = this.handlers.get(queryClass) ?? this.handlers.get(queryClass.name);
     if (registered) {
       const handler =
         typeof registered === 'function' && !('execute' in registered)
           ? (registered as () => IQueryHandler<T, R>)()
           : (registered as IQueryHandler<T, R>);
 
-      // Cache the resolved handler
       if (this.cacheEnabled) {
-        this.handlerCache.set(queryName, {
+        this.handlerCache.set(queryClass, {
           handler,
           resolvedAt: Date.now(),
         });
@@ -561,9 +559,8 @@ export class EnhancedQueryBus extends IQueryBus {
       const handlerToken = this.getHandlerToken(queryClass) as ServiceToken<IQueryHandler<T, R>>;
       const handler = this.container.resolve<IQueryHandler<T, R>>(handlerToken);
 
-      // Cache the resolved handler
       if (this.cacheEnabled) {
-        this.handlerCache.set(queryName, {
+        this.handlerCache.set(queryClass, {
           handler,
           resolvedAt: Date.now(),
         });
@@ -571,7 +568,7 @@ export class EnhancedQueryBus extends IQueryBus {
 
       return handler;
     } catch {
-      throw new HandlerNotFoundError(queryName, 'query');
+      throw new HandlerNotFoundError(queryClass.name, 'query');
     }
   }
 

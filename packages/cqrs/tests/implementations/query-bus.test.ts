@@ -560,4 +560,49 @@ describe('QueryBus', () => {
       expect(error?.message).toBe('Middleware error');
     });
   });
+
+  describe('cross-context name collision prevention (VP-007)', () => {
+    it('should route to correct handler when two contexts define query classes with identical names', async () => {
+      class GetUserReadModelQuery implements IQuery<string> {}
+
+      const ContextBGetUserReadModelQuery = class GetUserReadModelQuery
+        implements IQuery<string> {};
+
+      const handlerA = { execute: vi.fn().mockResolvedValue('context-a-result') };
+      const handlerB = { execute: vi.fn().mockResolvedValue('context-b-result') };
+
+      queryBus.register(GetUserReadModelQuery, handlerA);
+      queryBus.register(ContextBGetUserReadModelQuery, handlerB);
+
+      const resultA = await queryBus.execute(new GetUserReadModelQuery());
+      const resultB = await queryBus.execute(new ContextBGetUserReadModelQuery());
+
+      expect(resultA).toBe('context-a-result');
+      expect(resultB).toBe('context-b-result');
+      expect(handlerA.execute).toHaveBeenCalledTimes(1);
+      expect(handlerB.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still resolve handler registered by string name (BC)', async () => {
+      const handler = { execute: vi.fn().mockResolvedValue('by-string') };
+      queryBus.register('LegacyQuery', handler);
+
+      class LegacyQuery implements IQuery<string> {}
+      const result = await queryBus.execute(new LegacyQuery());
+
+      expect(result).toBe('by-string');
+    });
+
+    it('should give priority to Function-ref registration over string when both exist', async () => {
+      class SomeQuery implements IQuery<string> {}
+      const handlerByRef = { execute: vi.fn().mockResolvedValue('by-ref') };
+      const handlerByString = { execute: vi.fn().mockResolvedValue('by-string') };
+
+      queryBus.register(SomeQuery, handlerByRef);
+      queryBus.register('SomeQuery', handlerByString);
+
+      const result = await queryBus.execute(new SomeQuery());
+      expect(result).toBe('by-ref');
+    });
+  });
 });
