@@ -190,9 +190,29 @@ order.commit(); // alternatively, BaseRepository does this automatically on save
 
 Pair @vytches/ddd with Claude Code, Cursor, GitHub Copilot, or Aider.
 
-### Lightweight setup (recommended)
+### Setup (one command)
 
-In your `CLAUDE.md` / `.cursorrules` / Copilot instructions:
+```bash
+npx @vytches/ddd
+```
+
+This copies the master context + per-package guides to `.claude/vytches-ddd/`.
+Then add to your `CLAUDE.md` / `.cursorrules` / Copilot instructions:
+
+```
+@.claude/vytches-ddd/llm-context.md
+```
+
+Keep context fresh after `npm update`:
+
+```bash
+npx @vytches/ddd --verify  # shows what's outdated
+npx @vytches/ddd           # re-copies updated guides
+```
+
+### Lightweight alternative (no command)
+
+Reference per-package guides directly — useful if you only use a few packages:
 
 ```
 @./node_modules/@vytches/ddd-aggregates/LLMGUIDE.md
@@ -201,21 +221,7 @@ In your `CLAUDE.md` / `.cursorrules` / Copilot instructions:
 ```
 
 Each package ships an `LLMGUIDE.md` with API table, working examples, and
-anti-patterns — just enough context for an AI to scaffold correct code.
-
-### Full library context
-
-For deeper AI assistance, generate a single bundled context file:
-
-```bash
-git clone https://github.com/vytches/ddd && cd ddd
-pnpm install
-pnpm llm:bundle  # → repomix-output.md (~260K tokens)
-```
-
-Paste the resulting file into your AI's long-context window once. The assistant
-can then generate aggregates, value objects, command handlers, and policies from
-natural-language prompts.
+anti-patterns.
 
 ## Full working example
 

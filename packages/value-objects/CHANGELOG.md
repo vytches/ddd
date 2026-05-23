@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.28.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.28.0) (2026-05-23)
+
+### Bug Fixes
+
+- **tests:** resolve Vitest 4 type errors in value-objects and policies
+  ([9295171](https://github.com/vytches/ddd/commit/92951711a8fefa385ecb65da0c1146ec8fbef35b))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 0.27.0 (2026-05-17)
 
 ### Bug Fixes

@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.28.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.28.0) (2026-05-23)
+
+### Bug Fixes
+
+- **cli:** simplify npx commands and add 'ddd' binary alias for reliable npx
+  resolution
+  ([26011af](https://github.com/vytches/ddd/commit/26011afcd4291a971e6e93ee9f8719d2d27b4b52))
+- **messaging:** add constructor validation to OutboxProcessor (TM-VP-003 D1)
+  ([d4757fa](https://github.com/vytches/ddd/commit/d4757faef212aae0d73bb11ab210cbf613d83a4a))
+- **messaging:** reset to PENDING before scheduleRetry to prevent PROCESSING
+  lock
+  ([8ae2fd1](https://github.com/vytches/ddd/commit/8ae2fd15ca1ef11b9e6d75d5157dbfe84ffeee21))
+- **messaging:** resolve TS errors in outbox tests (TS4114, TS2379, TS2741)
+  ([7ca10c1](https://github.com/vytches/ddd/commit/7ca10c12614539e4867e4a2420de715945f6c68b))
+- **messaging:** upgrade vitest to ^4.0.0 to fix Vite 7 SSR transform compat
+  ([3e1ce37](https://github.com/vytches/ddd/commit/3e1ce37d52f5ed040e97df939fbb21f6af8b89cb))
+- **security:** patch 4 moderate vulnerabilities via pnpm overrides
+  ([e466cfa](https://github.com/vytches/ddd/commit/e466cfa8d055ede41b92ed875fcb39eeb65bc670))
+- **tests:** resolve Vitest 4 type errors in value-objects and policies
+  ([9295171](https://github.com/vytches/ddd/commit/92951711a8fefa385ecb65da0c1146ec8fbef35b))
+
+### Features
+
+- **messaging:** add exponential backoff for outbox retry (VP-003 Part 1)
+  ([04613e6](https://github.com/vytches/ddd/commit/04613e6844245e592aaf946ee234be209238876d))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # 0.27.0 (2026-05-17)
 
 ### Bug Fixes

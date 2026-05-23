@@ -1,87 +1,81 @@
 # Kanban — @vytches/ddd
 
-_Last regenerated: 2026-05-17 by /pulse_
+_Last regenerated: 2026-05-22 by /pulse_
 
 Source of truth: `project-orchestration/tasks/` — this file is regenerated;
-edits here will be overwritten. Update task YAML frontmatter instead. Handoff:
-[`/RELEASE-READINESS.md`](../RELEASE-READINESS.md).
+edits here will be overwritten. Update task YAML frontmatter instead.
 
 ---
 
 ## P0 — Critical
 
-| ID      | Title                                                              | Status      | Est  | Age | Notes                                                                            |
-| ------- | ------------------------------------------------------------------ | ----------- | ---- | --- | -------------------------------------------------------------------------------- |
-| REL-000 | Confirm @vytches scope is reservable on npmjs.org or pick fallback | in_progress | 1h   | 7d  | **OVERDUE 5 DAYS (deadline 2026-05-12).** Human gate — maintainer registers org. |
-| REL-003 | Configure all 20 packages for public npmjs.org with provenance     | parked      | 3h   | 7d  | Code-ready. Unblocks once REL-000 done. No npm credentials needed.               |
-| REL-011 | Move @vytches/\* from GH Packages to npm                           | parked      | 0.5h | 7d  | Depends on REL-003 + REL-000. Migration ADR + release.yml update.                |
+_None. v0.26.0 published. No blocking issues._
+
+---
 
 ## P1 — High
 
-| ID     | Title                                                           | Status      | Est | Age | Notes                                                                                |
-| ------ | --------------------------------------------------------------- | ----------- | --- | --- | ------------------------------------------------------------------------------------ |
-| VT-001 | Cover aggregates/domain-primitives/messaging/contracts (parent) | in_progress | 16h | 7d  | VT-002..005 closed bulk (+5.3pp). Remaining: GWT migration, domain-primitives ratio. |
+| ID     | Title                                                      | Status      | Est     | Notes                                                     |
+| ------ | ---------------------------------------------------------- | ----------- | ------- | --------------------------------------------------------- |
+| VP-003 | Outbox production readiness (backoff + re-poll + recovery) | in_progress | 7.5h    | Parts 2–4 production-validated. Start feature branch now. |
+| VT-001 | Fill critical test coverage gaps (GWT + domain-primitives) | in_progress | ~4h rem | Post-publish opportunistic. GWT migration remaining.      |
+
+---
 
 ## P2 — Normal
 
-| ID     | Title                                                        | Status      | Est | Age | Notes                                                                   |
-| ------ | ------------------------------------------------------------ | ----------- | --- | --- | ----------------------------------------------------------------------- |
-| VF-001 | Automated DDD compliance validation (rule engine + scoring)  | in_progress | 24h | 7d  | MVP shipped (3 rules, 29 tests, 458 files ~200ms). Full scope deferred. |
-| VP-002 | Repository caching + indexed queries + N+1 prevention        | in_progress | 20h | 7d  | IBatchRepository + MemoizedSpecification done. Remainder unvalidated.   |
-| VP-006 | Cold-start, service-resolution, auto-discovery performance   | in_progress | 16h | 7d  | Single-pass reflection + WeakSet memo done. Remainder optional.         |
-| VP-003 | Outbox optimization (adaptive re-poll + NestJS module)       | planned     | 14h | 7d  | Parts 2–3 validated by juz-ide-api. Defer to v0.26.1 fast-follow.       |
-| VF-002 | Bounded context, context mapping, large-scale structure docs | planned     | 20h | 7d  | Strategic design docs for v0.26+ educational content.                   |
-| VD-004 | Search, live playground, categorization for docs site        | planned     | 20h | 7d  | Deferred — depends on docs site infrastructure.                         |
+| ID     | Title                                                        | Status      | Est  | Notes                                                                                 |
+| ------ | ------------------------------------------------------------ | ----------- | ---- | ------------------------------------------------------------------------------------- |
+| VF-001 | Automated DDD compliance validation (rule engine + scoring)  | in_progress | ~18h | MVP shipped (3 rules, CLI live). Remaining rules deferred.                            |
+| VP-002 | Repository caching + indexed queries + N+1 prevention        | in_progress | ~15h | Partial done. Consider split into -a/-b subtasks.                                     |
+| VP-006 | Cold-start, service-resolution, auto-discovery performance   | in_progress | ~8h  | Partial done. Consider split into -a/-b subtasks.                                     |
+| VF-002 | Bounded context, context mapping, large-scale structure docs | planned     | 20h  | Defer to v0.27. Validate post-publish adoption signal first.                          |
+| VD-004 | Search, live playground, categorization for docs site        | planned     | 20h  | Deferred. Pending real user signal. Lighter alternatives: Algolia (4h), Mermaid (4h). |
 
-## P3 — Low
+---
 
-_None._
+## P3 — Low / Backlog
+
+| ID     | Title                                              | Status  | Est     | Notes                                                   |
+| ------ | -------------------------------------------------- | ------- | ------- | ------------------------------------------------------- |
+| VA-001 | `@vytches/ddd-agent` AI boundary package (concept) | backlog | unknown | Post-v0.27. Awaiting production validation in consumer. |
 
 ---
 
 ## Recently Completed (last 14 days)
 
-- **VT-002** — Foundation tier coverage (aggregate-errors, aggregate-utilities,
-  id.value-object) — 2026-05-10
-- **VT-003** — Capabilities coverage (audit/versioning/snapshot/event-sourcing)
-  — 2026-05-10
-- **VT-004** — Integration layers + base-business-policy — 2026-05-10
+- **DOC-001** — README accuracy audit: 17/20 packages had hallucinated APIs, all
+  rewritten — 2026-05-22
+- **VP-004** — DROPPED: event store streaming (no-adapters violation, zero
+  consumer signal) — 2026-05-22
+- **REL-011** — @vytches/\* migration GH Packages → npmjs.org — done
+- **REL-003** — publishConfig for all 20 packages with provenance — done
+- **REL-000** — npm org registration + v0.26.0 published ✅ — done
 - **VT-005** — DI base-adapter + discovery-registry + CQRS configuration —
   2026-05-10
+- **VT-004** — Integration layers + base-business-policy — 2026-05-10
+- **VT-003** — Capabilities coverage (audit/versioning/snapshot/event-sourcing)
+  — 2026-05-10
+- **VT-002** — Foundation tier coverage — 2026-05-10
 - **VF-CANON-001** — Entity, PlainDomainService, IDomainFactory canonical
   patterns — 2026-05-09
-- **VP-NEW-002** — apply() refactor (replay +21.7%, 3.9M events/s) — 2026-05-09
 
 ---
 
-## Critical Path to Publish
+## Critical Path — v0.26.1
 
 ```
-REL-000 (npmjs.com manual registration, <1h, 🔴 OVERDUE 5 DAYS)
+VP-003 Parts 2–4 (7.5h, feature branch)
     ↓
-REL-003 (publishConfig, 3h, code-only)
+docs patch release (README fixes to npm)
     ↓
-REL-011 (CI wiring, 30 min)
-    ↓
-smoke test (1h)
-    ↓
-PUBLISH v0.26.0
+v0.26.1 publish
 ```
-
-**Total: ~5.5h once maintainer acts on REL-000.**
 
 ---
 
 ## Dropped
 
-- **VP-004** — formally flagged for DROP (4th consecutive pulse). Scope
-  "streaming event projections with backpressure" contradicts no-adapters
-  policy; 0 consumer validation. If demand surfaces post-publish, repurpose as
-  4h documentation task.
-
----
-
-## Velocity (cumulative)
-
-- Marathon total: ~26h actual vs ~233h estimated (89% time saved)
-- Last 7 days (2026-05-10..17): docs/tests only, develop branch clean
+- **VP-004** — event store streaming with backpressure. Contradicts no-adapters
+  policy; 0 consumer validation after 5 consecutive pulse flags. If demand
+  surfaces post-publish, repurpose as 4h documentation task.

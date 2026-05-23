@@ -12,7 +12,7 @@ estimated_time: 18h
 created_by: human (work-items archive 2026-03-31)
 created_at: 2026-03-31
 migrated_at: 2026-05-08
-status: planned
+status: dropped
 release_target: post-v0.25
 priority_score: 86/100
 depends_on: VP-002 (Repository Performance)

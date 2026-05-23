@@ -132,9 +132,12 @@ order.commit(); // clear after saving
 
 ### Create a Command and Handler
 
+Handlers return `Result<TValue, TError>` — never throw on domain failures.
+
 ```typescript
 import { CommandBus, CommandHandler } from '@vytches/ddd-enterprise';
 import type { ICommand, ICommandHandler } from '@vytches/ddd-enterprise';
+import { Result } from '@vytches/ddd-enterprise';
 
 // 1. Define the command (plain data object)
 class PlaceOrderCommand implements ICommand {
@@ -144,15 +147,18 @@ class PlaceOrderCommand implements ICommand {
   ) {}
 }
 
-// 2. Implement the handler
+// 2. Implement the handler — Result<TValue, TError> return type
 @CommandHandler(PlaceOrderCommand)
-class PlaceOrderHandler implements ICommandHandler<PlaceOrderCommand, string> {
+class PlaceOrderHandler
+  implements ICommandHandler<PlaceOrderCommand, Result<string, Error>>
+{
   constructor(private readonly orders: OrderRepository) {}
 
-  async execute(command: PlaceOrderCommand): Promise<string> {
-    const order = Order.create(command.customerId, command.amount);
-    await this.orders.save(order);
-    return order.getId().getValue();
+  async execute(command: PlaceOrderCommand): Promise<Result<string, Error>> {
+    const orderResult = Order.create(command.customerId, command.amount);
+    if (orderResult.isFailure) return Result.fail(orderResult.error);
+    await this.orders.save(orderResult.value);
+    return Result.ok(orderResult.value.getId().getValue());
   }
 }
 
@@ -160,8 +166,13 @@ class PlaceOrderHandler implements ICommandHandler<PlaceOrderCommand, string> {
 const bus = new CommandBus(container);
 bus.register(PlaceOrderCommand, new PlaceOrderHandler(orderRepo));
 
-const orderId = await bus.execute(new PlaceOrderCommand('c-1', 500));
+const result = await bus.execute(new PlaceOrderCommand('c-1', 500));
+// result is Result<string, Error> — check result.isSuccess before using result.value
 ```
+
+> **With NestJS:** Use `@CommandHandler` + `@Injectable()` and list the handler
+> in module `providers`. `VytchesExplorerService` registers it with the command
+> bus automatically. See `QUICK_START_NESTJS.md` for the full wiring pattern.
 
 ### Create a Domain Event
 
@@ -546,13 +557,17 @@ Anti-Corruption Layer: keeps external concepts out of domain code.
 **Mutate aggregate state directly.** `this.status = 'paid'` bypasses event
 recording. All state changes must go through `apply()`.
 
-**Call `apply()` before `registerEventHandler()` in the constructor.** Handlers
-must be registered first. Events applied before their handler silently leave
-state un-updated.
+**Call `apply()` before `registerEventHandler()` in the constructor** (when
+using event-sourced aggregates). Handlers must be registered first. Events
+applied before their handler silently leave state un-updated. Note:
+`registerEventHandler` is only needed for event-sourced aggregates that use
+`loadFromHistory()`. If your repository reconstitutes state from a relational DB
+(e.g., via `reconstitute()` static method), you do not need
+`registerEventHandler`.
 
-**Forget `loadFromHistory` in reconstitution.** Repositories that reload
-aggregates must call `loadFromHistory(events)`, not the static `create()`
-factory. Using `create()` fires events again.
+**Forget `loadFromHistory` in event-sourced reconstitution.** Repositories that
+reload event-sourced aggregates must call `loadFromHistory(events)`, not the
+static `create()` factory. Using `create()` fires events again.
 
 **Make value objects mutable.** `BaseValueObject.value` is `readonly`. All
 operations must return new instances (`Money.create(a + b)`), never modify in
@@ -607,6 +622,74 @@ silently allows invalid operations to proceed.
 **Create a new `ACLRegistry` per request.** `ACLRegistry` must be an
 application-scoped singleton. Per-request instances discard all adapter
 registrations.
+
+---
+
+## NestJS Integration
+
+For production NestJS usage, see `QUICK_START_NESTJS.md`. Key differences from
+standalone use:
+
+### Handler decorators and discovery
+
+```typescript
+// Command handler — @Injectable() is required alongside @CommandHandler
+@Injectable()
+@CommandHandler(CreateOrderCommand)
+export class CreateOrderHandler
+  implements ICommandHandler<CreateOrderCommand, Result<string, Error>>
+{
+  async execute(command: CreateOrderCommand): Promise<Result<string, Error>> { ... }
+}
+
+// Query — IQuery<TResult> result type is MANDATORY
+export class GetOrderQuery implements IQuery<OrderDto> {
+  constructor(public readonly orderId: string) {}
+}
+
+// Event handler — method decorator, one class handles multiple events
+@Injectable()
+export class OrdersAuditHandler {
+  @EventHandler(OrderCreated)   // class reference, NOT string
+  async onOrderCreated(event: OrderCreated): Promise<void> { ... }
+
+  @EventHandler(ItemAdded)
+  async onItemAdded(event: ItemAdded): Promise<void> { ... }
+}
+```
+
+### Discovery timing
+
+`VytchesExplorerService` discovers and registers handlers during
+`onApplicationBootstrap()` — after all `onModuleInit()` hooks. ACL registrations
+must still happen in `onModuleInit()`.
+
+```typescript
+// Global DDD module — handler registration
+export class DDDModule implements OnApplicationBootstrap {
+  async onApplicationBootstrap(): Promise<void> {
+    const handlers = await this.explorer.discoverHandlers();
+    for (const handler of handlers)
+      await this.explorer.registerHandler(handler);
+  }
+}
+
+// Bounded context module — ACL registration
+export class OrdersModule implements OnModuleInit {
+  onModuleInit(): void {
+    this.aclRegistry.registerGlobal('orders', this.ordersApi);
+  }
+}
+```
+
+### Cross-context calls
+
+```typescript
+// Call another bounded context via ACL — no direct module import
+const paymentsApi =
+  this.aclRegistry.getGlobalRequired<IPaymentsApi>('payments');
+const status = await paymentsApi.getStatusForOrder(orderId);
+```
 
 ---
 

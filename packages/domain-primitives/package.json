@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-domain-primitives",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "description": "Core domain primitives and foundational types for Domain-Driven Design",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -50,7 +50,7 @@
     "typescript": "^5.0.0",
     "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^4.0.0"
   },
   "nx": {
     "tags": [
