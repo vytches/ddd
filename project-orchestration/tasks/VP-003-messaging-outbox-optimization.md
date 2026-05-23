@@ -359,15 +359,15 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 
 ### v0.26.1 (Parts 1–4)
 
-- [ ] `scheduleRetry(id, processAfter)` w `IOutboxRepository` jako concrete
+- [x] `scheduleRetry(id, processAfter)` w `IOutboxRepository` jako concrete
       no-op
-- [ ] `resetStaleProcessing(olderThan)` w `IOutboxRepository` jako concrete
+- [x] `resetStaleProcessing(olderThan)` w `IOutboxRepository` jako concrete
       no-op
-- [ ] `getUnprocessedMessages` przyjmuje optional `messageTypes?: string[]`
-- [ ] `OutboxProcessor` retry używa exponential backoff via `processAfter`
-- [ ] `retryBackoff` opcja — 3 scenariusze backoffu pokryte testami
-- [ ] `messageTypes` opcja w `OutboxProcessorOptions`
-- [ ] `crashRecoveryIntervalMs` opcja — auto-woła `resetStaleProcessing`
+- [x] `getUnprocessedMessages` przyjmuje optional `messageTypes?: string[]`
+- [x] `OutboxProcessor` retry używa exponential backoff via `processAfter`
+- [x] `retryBackoff` opcja — 3 scenariusze backoffu pokryte testami
+- [x] `messageTypes` opcja w `OutboxProcessorOptions`
+- [x] `crashRecoveryIntervalMs` opcja — auto-woła `resetStaleProcessing`
 - [ ] `InMemoryOutboxRepository` w `@vytches/ddd-testing` — 25+ testów
 - [ ] `InMemoryOutboxRepository` eksportowany z `@vytches/ddd-testing`
 - [ ] `processBatch()` zwraca `{ processed, batchSize }` (backward-compatible)
@@ -467,9 +467,9 @@ Każdy processor entry tworzy osobną instancję `OutboxProcessorService` (exten
 
 ### Acceptance Criteria Security (dodane do v0.26.1)
 
-- [ ] `batchSize > 10_000` rzuca błąd w konstruktorze z opisowym komunikatem
-- [ ] `crashRecoveryThresholdMs < messageTimeout` rzuca błąd w konstruktorze
-- [ ] Backoff delay zawsze przez `Math.min(delay, maxDelay)` przed użyciem w
+- [x] `batchSize > 10_000` rzuca błąd w konstruktorze z opisowym komunikatem
+- [x] `crashRecoveryThresholdMs < messageTimeout` rzuca błąd w konstruktorze
+- [x] Backoff delay zawsze przez `Math.min(delay, maxDelay)` przed użyciem w
       `Date`
 - [ ] Hooki wywołane w `safeRun` — błąd hooka nie propaguje do pętli processingu
 - [ ] Logger w `handleMessageError` loguje tylko `id`, `messageType`, `attempt`

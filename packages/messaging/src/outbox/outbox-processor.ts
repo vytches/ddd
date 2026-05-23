@@ -36,10 +36,34 @@ export interface OutboxProcessorOptions {
    * If omitted, immediate retry is used for all messages.
    */
   retryBackoff?: RetryBackoffConfig;
+  /**
+   * Optional allow-list of message types to process. When set, only messages
+   * of these types are fetched from the repository (passed through to
+   * `getUnprocessedMessages`). Lets multiple processors partition the outbox
+   * by type. Omit to process all types.
+   */
+  messageTypes?: string[];
+  /**
+   * When set, the processor periodically calls
+   * `IOutboxRepository.resetStaleProcessing()` every N ms to recover messages
+   * orphaned in `PROCESSING` by a crashed worker. Omit to disable crash recovery.
+   */
+  crashRecoveryIntervalMs?: number;
+  /**
+   * How old (in ms) a `PROCESSING` message must be before crash recovery resets
+   * it to `PENDING`. Must be `>= messageTimeout` so legitimately in-flight
+   * messages are never reset. Defaults to `max(300_000, messageTimeout)`.
+   * Setting this below `messageTimeout` throws a `RangeError` from the constructor.
+   */
+  crashRecoveryThresholdMs?: number;
 }
 
-type ResolvedOptions = Required<Omit<OutboxProcessorOptions, 'retryBackoff'>> & {
+type ResolvedOptions = Required<
+  Omit<OutboxProcessorOptions, 'retryBackoff' | 'messageTypes' | 'crashRecoveryIntervalMs'>
+> & {
   retryBackoff: RetryBackoffConfig | undefined;
+  messageTypes: string[] | undefined;
+  crashRecoveryIntervalMs: number | undefined;
 };
 
 export class OutboxProcessor {
@@ -49,6 +73,7 @@ export class OutboxProcessor {
   private readonly middlewares: OutboxMiddleware[] = [];
   private isRunning = false;
   private processingTimer?: NodeJS.Timeout | undefined;
+  private crashRecoveryTimer?: NodeJS.Timeout | undefined;
   private readonly logger = Logger.create('OutboxProcessor');
 
   constructor(repository: IOutboxRepository, options: OutboxProcessorOptions = {}) {
@@ -66,6 +91,18 @@ export class OutboxProcessor {
       }
     }
 
+    const messageTimeout = options.messageTimeout ?? 30000;
+    // D3: a too-small crash-recovery threshold would reset messages that are
+    // still legitimately in-flight. Default to max(5min, messageTimeout) so the
+    // invariant always holds out of the box; reject only explicit unsafe values.
+    const crashRecoveryThresholdMs =
+      options.crashRecoveryThresholdMs ?? Math.max(300_000, messageTimeout);
+    if (crashRecoveryThresholdMs < messageTimeout) {
+      throw new RangeError(
+        `OutboxProcessor: crashRecoveryThresholdMs (${crashRecoveryThresholdMs}) must be ≥ messageTimeout (${messageTimeout}) to avoid resetting in-flight messages`
+      );
+    }
+
     this.repository = repository;
     this.options = {
       batchSize,
@@ -77,9 +114,12 @@ export class OutboxProcessor {
         MessagePriority.NORMAL,
         MessagePriority.LOW,
       ],
-      messageTimeout: options.messageTimeout ?? 30000,
+      messageTimeout,
       enableLogging: options.enableLogging ?? false,
       retryBackoff: options.retryBackoff,
+      messageTypes: options.messageTypes,
+      crashRecoveryIntervalMs: options.crashRecoveryIntervalMs,
+      crashRecoveryThresholdMs,
     };
   }
 
@@ -111,6 +151,7 @@ export class OutboxProcessor {
     this.isRunning = true;
     this.logger.info('Starting outbox processor');
     this.scheduleProcessing();
+    this.scheduleCrashRecovery();
   }
 
   /**
@@ -126,6 +167,10 @@ export class OutboxProcessor {
     if (this.processingTimer) {
       clearTimeout(this.processingTimer);
       this.processingTimer = undefined;
+    }
+    if (this.crashRecoveryTimer) {
+      clearTimeout(this.crashRecoveryTimer);
+      this.crashRecoveryTimer = undefined;
     }
     this.logger.info('Stopped outbox processor');
   }
@@ -161,7 +206,11 @@ export class OutboxProcessor {
     }
 
     const [error, result] = await safeRun(() =>
-      this.repository.getUnprocessedMessages(this.options.batchSize, this.options.priorityOrder)
+      this.repository.getUnprocessedMessages(
+        this.options.batchSize,
+        this.options.priorityOrder,
+        this.options.messageTypes
+      )
     );
 
     if (error) {
@@ -280,6 +329,41 @@ export class OutboxProcessor {
       await this.processBatch();
       this.scheduleProcessing();
     }, this.options.processingInterval);
+  }
+
+  /**
+   * Schedules the next crash-recovery cycle. No-op unless
+   * `crashRecoveryIntervalMs` was configured.
+   */
+  private scheduleCrashRecovery(): void {
+    if (!this.isRunning || this.options.crashRecoveryIntervalMs === undefined) {
+      return;
+    }
+
+    this.crashRecoveryTimer = setTimeout(async () => {
+      await this.runCrashRecovery();
+      this.scheduleCrashRecovery();
+    }, this.options.crashRecoveryIntervalMs);
+  }
+
+  /**
+   * Resets messages orphaned in `PROCESSING` (older than
+   * `crashRecoveryThresholdMs`) back to `PENDING` via the repository. Errors are
+   * logged, never thrown — crash recovery must not crash the processor.
+   */
+  private async runCrashRecovery(): Promise<void> {
+    const olderThan = new Date(Date.now() - this.options.crashRecoveryThresholdMs);
+    const [error, count] = await safeRun(() => this.repository.resetStaleProcessing(olderThan));
+
+    if (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Crash recovery failed: ${errorMessage}`);
+      return;
+    }
+
+    if (count && count > 0) {
+      this.logger.warn(`Crash recovery reset ${count} stale PROCESSING message(s) to PENDING`);
+    }
   }
 
   /**

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import {
   MessagePriority,
@@ -32,9 +32,14 @@ class InMemoryOutboxRepository extends IOutboxRepository {
       MessagePriority.HIGH,
       MessagePriority.NORMAL,
       MessagePriority.LOW,
-    ]
+    ],
+    messageTypes?: string[]
   ): Promise<IOutboxMessage[]> {
-    const pending = Array.from(this.store.values()).filter(m => m.status === MessageStatus.PENDING);
+    const pending = Array.from(this.store.values()).filter(
+      m =>
+        m.status === MessageStatus.PENDING &&
+        (messageTypes === undefined || messageTypes.includes(m.messageType))
+    );
 
     const sorted = pending.sort((a, b) => {
       const aPrio = priorityOrder.indexOf(a.priority ?? MessagePriority.NORMAL);
@@ -348,6 +353,31 @@ describe('OutboxProcessor — constructor validation', () => {
         new OutboxProcessor(repo, { retryBackoff: { initial: 1000, multiplier: 2, maxDelay: 0 } })
     ).toThrow(RangeError);
   });
+
+  // D3: a too-small crash-recovery threshold would reset still-in-flight messages.
+  it('throws RangeError when crashRecoveryThresholdMs < messageTimeout', () => {
+    expect(
+      () => new OutboxProcessor(repo, { messageTimeout: 30_000, crashRecoveryThresholdMs: 10_000 })
+    ).toThrow(RangeError);
+    expect(
+      () => new OutboxProcessor(repo, { messageTimeout: 30_000, crashRecoveryThresholdMs: 10_000 })
+    ).toThrow(/crashRecoveryThresholdMs/);
+  });
+
+  it('throws RangeError when crashRecoveryThresholdMs is 0 (resets everything)', () => {
+    expect(() => new OutboxProcessor(repo, { crashRecoveryThresholdMs: 0 })).toThrow(RangeError);
+  });
+
+  it('accepts crashRecoveryThresholdMs === messageTimeout (boundary)', () => {
+    expect(
+      () => new OutboxProcessor(repo, { messageTimeout: 30_000, crashRecoveryThresholdMs: 30_000 })
+    ).not.toThrow();
+  });
+
+  it('default crashRecoveryThresholdMs satisfies the invariant even for large messageTimeout', () => {
+    // messageTimeout (400_000) > the 300_000 floor → default must lift to messageTimeout
+    expect(() => new OutboxProcessor(repo, { messageTimeout: 400_000 })).not.toThrow();
+  });
 });
 
 describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => {
@@ -521,5 +551,140 @@ describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => 
 
     // Message must be PENDING (not stuck in PROCESSING) even though scheduleRetry was a no-op
     expect(noOpRepo.store.get(id)?.status).toBe(MessageStatus.PENDING);
+  });
+});
+
+describe('OutboxProcessor — messageTypes filter (Part 2)', () => {
+  let repo: InMemoryOutboxRepository;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  it('only fetches and processes messages whose type is in messageTypes', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 10, messageTypes: ['type.A'] });
+    const handlerA = vi.fn().mockResolvedValue(undefined);
+    processor.registerHandler('type.A', { handle: handlerA });
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'a-1', messageType: 'type.A' }));
+    await repo.saveMessage(buildMessage({ id: 'b-1', messageType: 'type.B' }));
+
+    await processor.processBatch();
+
+    expect(handlerA).toHaveBeenCalledOnce();
+    expect(repo.store.get('a-1')?.status).toBe(MessageStatus.PROCESSED);
+    // type.B was never fetched → remains untouched
+    expect(repo.store.get('b-1')?.status).toBe(MessageStatus.PENDING);
+  });
+
+  it('passes the messageTypes allow-list through to getUnprocessedMessages', async () => {
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, { messageTypes: ['x', 'y'] });
+    processor.start();
+
+    await processor.processBatch();
+
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), expect.any(Array), ['x', 'y']);
+  });
+
+  it('fetches all types when messageTypes is omitted (backward-compatible)', async () => {
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {});
+    processor.start();
+
+    await processor.processBatch();
+
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), expect.any(Array), undefined);
+  });
+});
+
+describe('OutboxProcessor — crash recovery (Part 2 + D3)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // processingInterval is set huge so the normal processing timer never fires
+  // within the windows we advance — isolating crash-recovery behavior.
+  const IDLE_PROCESSING = 1_000_000;
+
+  it('calls resetStaleProcessing every crashRecoveryIntervalMs', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: IDLE_PROCESSING,
+      crashRecoveryIntervalMs: 10_000,
+      crashRecoveryThresholdMs: 300_000,
+      messageTimeout: 5_000,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(spy).toHaveBeenCalledTimes(2);
+
+    processor.stop();
+  });
+
+  it('passes olderThan = now - crashRecoveryThresholdMs', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: IDLE_PROCESSING,
+      crashRecoveryIntervalMs: 10_000,
+      crashRecoveryThresholdMs: 300_000,
+      messageTimeout: 5_000,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    const olderThan = spy.mock.calls[0]![0];
+    expect(olderThan).toBeInstanceOf(Date);
+    expect(Date.now() - olderThan.getTime()).toBe(300_000);
+
+    processor.stop();
+  });
+
+  it('does not schedule crash recovery when crashRecoveryIntervalMs is omitted', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, { processingInterval: IDLE_PROCESSING });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(IDLE_PROCESSING);
+
+    expect(spy).not.toHaveBeenCalled();
+    processor.stop();
+  });
+
+  it('stop() halts crash-recovery cycles', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: IDLE_PROCESSING,
+      crashRecoveryIntervalMs: 10_000,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    processor.stop();
+    await vi.advanceTimersByTimeAsync(50_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('IOutboxRepository.resetStaleProcessing — default (Part 2)', () => {
+  it('is a no-op returning 0 when not overridden', async () => {
+    const repo = new InMemoryOutboxRepository(); // does not override resetStaleProcessing
+    await expect(repo.resetStaleProcessing(new Date())).resolves.toBe(0);
   });
 });
