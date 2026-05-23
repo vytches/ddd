@@ -1,19 +1,19 @@
-# @vytches/ddd-enterprise
+# @vytches/ddd
 
-[![npm version](https://badge.fury.io/js/%40vytches%2Fddd-enterprise.svg)](https://badge.fury.io/js/%40vytches%2Fddd-enterprise)
+[![npm version](https://badge.fury.io/js/%40vytches%2Fddd.svg)](https://badge.fury.io/js/%40vytches%2Fddd)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **Meta-package — single import for the entire VytchesDDD ecosystem**
 
-`@vytches/ddd-enterprise` re-exports every public symbol from all VytchesDDD
-packages. Install it instead of installing individual packages when you want
-access to everything from a single import.
+`@vytches/ddd` re-exports every public symbol from all VytchesDDD packages.
+Install it instead of installing individual packages when you want access to
+everything from a single import.
 
 ## Installation
 
 ```bash
-pnpm add @vytches/ddd-enterprise
+pnpm add @vytches/ddd
 ```
 
 ## What it re-exports
@@ -42,8 +42,8 @@ The package does **not** add any new symbols. It is a curated aggregation of:
 
 ## Conflict resolution
 
-Some symbols exist in multiple packages. `@vytches/ddd-enterprise` resolves
-conflicts as follows:
+Some symbols exist in multiple packages. `@vytches/ddd` resolves conflicts as
+follows:
 
 | Symbol                 | Source                         | Note                                            |
 | ---------------------- | ------------------------------ | ----------------------------------------------- |
@@ -68,7 +68,7 @@ import {
   safeRun,
   VytchesDDD,
   SimpleContainer,
-} from '@vytches/ddd-enterprise';
+} from '@vytches/ddd';
 ```
 
 ## When to use individual packages instead
