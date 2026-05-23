@@ -79,12 +79,12 @@ export class EnhancedCommandBus extends ICommandBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
   private handlers = new Map<
-    string,
+    Function | string,
     ICommandHandler<ICommand, unknown> | (() => ICommandHandler<ICommand, unknown>)
   >();
 
   // Performance optimization: Handler cache
-  private handlerCache = new Map<string, CachedHandler>();
+  private handlerCache = new Map<Function | string, CachedHandler>();
   private readonly CACHE_TTL = 60000; // 1 minute cache
   private readonly MAX_CACHE_SIZE = 500;
   private cacheCleanupInterval?: NodeJS.Timeout | undefined;
@@ -298,12 +298,9 @@ export class EnhancedCommandBus extends ICommandBus {
     commandType: unknown,
     handler: ICommandHandler<T, TResult>
   ): void {
-    const commandName =
-      typeof commandType === 'string' ? commandType : (commandType as Function).name;
-
-    this.handlers.set(commandName, handler as ICommandHandler<ICommand, unknown>);
-    // Clear cache for this command type
-    this.handlerCache.delete(commandName);
+    const key = typeof commandType === 'string' ? commandType : (commandType as Function);
+    this.handlers.set(key, handler as ICommandHandler<ICommand, unknown>);
+    this.handlerCache.delete(key);
   }
 
   /**
@@ -313,11 +310,9 @@ export class EnhancedCommandBus extends ICommandBus {
     commandType: unknown,
     factory: () => ICommandHandler<T, TResult>
   ): void {
-    const commandName =
-      typeof commandType === 'string' ? commandType : (commandType as Function).name;
-
-    this.handlers.set(commandName, factory as () => ICommandHandler<ICommand, unknown>);
-    this.handlerCache.delete(commandName);
+    const key = typeof commandType === 'string' ? commandType : (commandType as Function);
+    this.handlers.set(key, factory as () => ICommandHandler<ICommand, unknown>);
+    this.handlerCache.delete(key);
   }
 
   /**
@@ -397,11 +392,10 @@ export class EnhancedCommandBus extends ICommandBus {
    */
   private async executeCore<T extends ICommand, TResult = void>(command: T): Promise<TResult> {
     const startTime = performance.now();
-    const commandName = command.constructor.name;
 
     try {
       // Get handler (with caching)
-      const handler = await this.resolveHandler<T, TResult>(commandName, command.constructor);
+      const handler = await this.resolveHandler<T, TResult>(command.constructor);
 
       // Validate if needed
       if (this.isValidatable(command)) {
@@ -424,15 +418,16 @@ export class EnhancedCommandBus extends ICommandBus {
   }
 
   /**
-   * Resolve handler with caching
+   * Resolve handler with caching. Uses Function reference as primary key to
+   * prevent cross-context handler collision when different bounded contexts
+   * define classes with the same name.
    */
   private async resolveHandler<T extends ICommand, TResult = void>(
-    commandName: string,
     commandClass: Function
   ): Promise<ICommandHandler<T, TResult>> {
-    // Check cache first
+    // Check cache first (keyed by Function ref — no cross-context collision)
     if (this.cacheEnabled) {
-      const cached = this.handlerCache.get(commandName);
+      const cached = this.handlerCache.get(commandClass);
       if (cached && Date.now() - cached.resolvedAt < this.CACHE_TTL) {
         this.metrics.cacheHits++;
         return cached.handler as ICommandHandler<T, TResult>;
@@ -441,17 +436,16 @@ export class EnhancedCommandBus extends ICommandBus {
 
     this.metrics.cacheMisses++;
 
-    // Check manual registrations
-    const registered = this.handlers.get(commandName);
+    // Function ref first, string fallback for handlers registered by name (BC)
+    const registered = this.handlers.get(commandClass) ?? this.handlers.get(commandClass.name);
     if (registered) {
       const handler =
         typeof registered === 'function' && !('execute' in registered)
           ? (registered as () => ICommandHandler<T, TResult>)()
           : (registered as ICommandHandler<T, TResult>);
 
-      // Cache the resolved handler
       if (this.cacheEnabled) {
-        this.handlerCache.set(commandName, {
+        this.handlerCache.set(commandClass, {
           handler: handler as ICommandHandler<ICommand, void>,
           resolvedAt: Date.now(),
         });
@@ -467,9 +461,8 @@ export class EnhancedCommandBus extends ICommandBus {
       >;
       const handler = this.container.resolve<ICommandHandler<T, TResult>>(handlerToken);
 
-      // Cache the resolved handler
       if (this.cacheEnabled) {
-        this.handlerCache.set(commandName, {
+        this.handlerCache.set(commandClass, {
           handler: handler as ICommandHandler<ICommand, void>,
           resolvedAt: Date.now(),
         });
@@ -477,7 +470,7 @@ export class EnhancedCommandBus extends ICommandBus {
 
       return handler;
     } catch {
-      throw new HandlerNotFoundError(commandName, 'command');
+      throw new HandlerNotFoundError(commandClass.name, 'command');
     }
   }
 

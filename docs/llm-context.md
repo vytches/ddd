@@ -10,7 +10,7 @@
 ## Installation
 
 ```bash
-npm install @vytches/ddd-enterprise   # meta-package, re-exports everything
+npm install @vytches/ddd   # meta-package, re-exports everything
 # or install individual packages for smaller bundles:
 npm install @vytches/ddd-aggregates @vytches/ddd-value-objects @vytches/ddd-validation
 ```
@@ -34,8 +34,8 @@ higher ones:
 @vytches/ddd-enterprise         — Re-exports everything above
 ```
 
-`@vytches/ddd-enterprise` is the canonical single-package import. Use individual
-packages only when bundle size matters.
+`@vytches/ddd` is the canonical single-package import. Use individual packages
+only when bundle size matters.
 
 ---
 
@@ -44,7 +44,7 @@ packages only when bundle size matters.
 ### Create a Value Object
 
 ```typescript
-import { BaseValueObject } from '@vytches/ddd-enterprise';
+import { BaseValueObject } from '@vytches/ddd';
 
 class Money extends BaseValueObject<number> {
   static create(amount: number): Money {
@@ -71,8 +71,8 @@ price.equals(Money.create(100)); // true
 ### Create an Aggregate Root
 
 ```typescript
-import { AggregateRoot, EntityId } from '@vytches/ddd-enterprise';
-import type { IAggregateConstructorParams } from '@vytches/ddd-enterprise';
+import { AggregateRoot, EntityId } from '@vytches/ddd';
+import type { IAggregateConstructorParams } from '@vytches/ddd';
 
 interface OrderCreatedPayload {
   customerId: string;
@@ -135,9 +135,9 @@ order.commit(); // clear after saving
 Handlers return `Result<TValue, TError>` — never throw on domain failures.
 
 ```typescript
-import { CommandBus, CommandHandler } from '@vytches/ddd-enterprise';
-import type { ICommand, ICommandHandler } from '@vytches/ddd-enterprise';
-import { Result } from '@vytches/ddd-enterprise';
+import { CommandBus, CommandHandler } from '@vytches/ddd';
+import type { ICommand, ICommandHandler } from '@vytches/ddd';
+import { Result } from '@vytches/ddd';
 
 // 1. Define the command (plain data object)
 class PlaceOrderCommand implements ICommand {
@@ -177,7 +177,7 @@ const result = await bus.execute(new PlaceOrderCommand('c-1', 500));
 ### Create a Domain Event
 
 ```typescript
-import { DomainEvent } from '@vytches/ddd-enterprise';
+import { DomainEvent } from '@vytches/ddd';
 
 interface OrderShippedPayload {
   orderId: string;
@@ -211,7 +211,7 @@ Prefer `Specification.create` over class-based specs for all one-off or
 module-local rules.
 
 ```typescript
-import { Specification } from '@vytches/ddd-enterprise';
+import { Specification } from '@vytches/ddd';
 
 interface Order {
   total: number;
@@ -230,7 +230,7 @@ canBePlaced.isSatisfiedBy({ total: 100, status: 'draft', customerId: 'c-1' }); /
 canBePlaced.isSatisfiedBy({ total: 0, status: 'draft', customerId: 'c-1' }); // false
 
 // Fluent validator with error details
-import { BusinessRuleValidator } from '@vytches/ddd-enterprise';
+import { BusinessRuleValidator } from '@vytches/ddd';
 
 const validator = BusinessRuleValidator.create<Order>()
   .addRule('total', o => o.total > 0, 'Total must be positive')
@@ -252,7 +252,7 @@ Only use `CompositeSpecification` when the spec is complex, has injected
 dependencies, or is exported for reuse across modules.
 
 ```typescript
-import { CompositeSpecification } from '@vytches/ddd-enterprise';
+import { CompositeSpecification } from '@vytches/ddd';
 
 class MinimumOrderSpec extends CompositeSpecification<Order> {
   constructor(private readonly minimum: number) {
@@ -271,11 +271,11 @@ policy.isSatisfiedBy(order); // boolean
 ### Create a Repository
 
 ```typescript
-import { IBaseRepository, VersionError } from '@vytches/ddd-enterprise';
+import { IBaseRepository, VersionError } from '@vytches/ddd';
 import type {
   IEnhancedEventDispatcher,
   IEventPersistenceHandler,
-} from '@vytches/ddd-enterprise';
+} from '@vytches/ddd';
 
 class OrderRepository extends IBaseRepository {
   constructor(
@@ -312,8 +312,8 @@ import {
   PolicyBuilder,
   PolicyRequestFactory,
   PolicyViolation,
-} from '@vytches/ddd-enterprise';
-import { Specification } from '@vytches/ddd-enterprise';
+} from '@vytches/ddd';
+import { Specification } from '@vytches/ddd';
 
 const orderPolicy = PolicyBuilder.create<Order>()
   .withId('order-placement')
@@ -343,7 +343,7 @@ import {
   SimpleACLAdapter,
   BaseModelTranslator,
   ACLRegistry,
-} from '@vytches/ddd-enterprise';
+} from '@vytches/ddd';
 
 // Translator isolates external types from domain types
 class UserTranslator extends BaseModelTranslator<DomainUser, ExternalUser> {
@@ -411,7 +411,7 @@ Immutable value holders and validated identifiers.
 | `EntityId.fromText(v)`    | Non-empty text with safe characters                                                       |
 
 ```typescript
-import { BaseValueObject, EntityId } from '@vytches/ddd-enterprise';
+import { BaseValueObject, EntityId } from '@vytches/ddd';
 
 class EmailAddress extends BaseValueObject<string> {
   static create(raw: string): EmailAddress {
@@ -695,8 +695,8 @@ const status = await paymentsApi.getStatusForOrder(orderId);
 
 ## Import Map
 
-All symbols are available from `@vytches/ddd-enterprise`. The table below shows
-which package they come from — useful when using individual packages or when
+All symbols are available from `@vytches/ddd`. The table below shows which
+package they come from — useful when using individual packages or when
 diagnosing naming conflicts.
 
 | Symbol                                                                                                                                                                                                                                                         | Source package                                                                      |
@@ -713,7 +713,7 @@ diagnosing naming conflicts.
 | `ACLRegistry`, `SimpleACLAdapter`, `BaseACLAdapter`, `BaseModelTranslator`, `ContextACLRegistry`, `ACLError`                                                                                                                                                   | `@vytches/ddd-acl`                                                                  |
 | `Result`, `safeRun`                                                                                                                                                                                                                                            | `@vytches/ddd-utils`                                                                |
 
-### Naming conflicts resolved in `@vytches/ddd-enterprise`
+### Naming conflicts resolved in `@vytches/ddd`
 
 | Conflict           | Resolution                                                                                  |
 | ------------------ | ------------------------------------------------------------------------------------------- |

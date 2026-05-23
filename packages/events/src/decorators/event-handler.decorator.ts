@@ -54,6 +54,7 @@ export function EventHandler<T extends IDomainEvent>(
       // Store enhanced metadata for auto-discovery
       Reflect.defineMetadata('di:event-handler', diMetadata, target);
       Reflect.defineMetadata('di:handler-type', 'event', target);
+      Reflect.defineMetadata('di:handler-scope', diOptions.scope ?? 'context', target);
 
       // Store event context for unified event bus
       if (options.eventContext !== undefined) {

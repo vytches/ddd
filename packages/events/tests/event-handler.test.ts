@@ -385,5 +385,40 @@ describe('EventHandler Decorator', () => {
       expect(eventMetadata.eventName).toBe(TestEvent);
       expect(customMetadata).toBe('test-value');
     });
+
+    describe('scope option (VP-007)', () => {
+      it('defaults scope to "context"', () => {
+        @EventHandler(TestEvent)
+        class DefaultScopeHandler {
+          handle(_event: TestEvent): void {
+            // noop stub for decorator metadata tests
+          }
+        }
+
+        expect(Reflect.getMetadata('di:handler-scope', DefaultScopeHandler)).toBe('context');
+      });
+
+      it('stores explicit scope "global"', () => {
+        @EventHandler(TestEvent, { scope: 'global' })
+        class GlobalScopeHandler {
+          handle(_event: TestEvent): void {
+            // noop stub for decorator metadata tests
+          }
+        }
+
+        expect(Reflect.getMetadata('di:handler-scope', GlobalScopeHandler)).toBe('global');
+      });
+
+      it('stores explicit scope "context"', () => {
+        @EventHandler(TestEvent, { scope: 'context' })
+        class ContextScopeHandler {
+          handle(_event: TestEvent): void {
+            // noop stub for decorator metadata tests
+          }
+        }
+
+        expect(Reflect.getMetadata('di:handler-scope', ContextScopeHandler)).toBe('context');
+      });
+    });
   });
 });
