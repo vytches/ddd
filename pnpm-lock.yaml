@@ -374,9 +374,6 @@ importers:
         specifier: workspace:*
         version: link:../validation
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
@@ -408,9 +405,6 @@ importers:
         specifier: workspace:*
         version: link:../value-objects
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -451,9 +445,6 @@ importers:
         specifier: workspace:*
         version: link:../resilience
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -476,9 +467,6 @@ importers:
         specifier: workspace:*
         version: link:../logging
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -529,9 +517,6 @@ importers:
         specifier: workspace:*
         version: link:../validation
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       '@vytches/ddd-utils':
         specifier: workspace:*
         version: link:../utils
@@ -630,9 +615,6 @@ importers:
         specifier: workspace:*
         version: link:../value-objects
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -671,9 +653,6 @@ importers:
         specifier: workspace:*
         version: link:../events
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -775,9 +754,6 @@ importers:
         specifier: workspace:*
         version: link:../validation
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -797,9 +773,6 @@ importers:
         specifier: workspace:*
         version: link:../events
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -825,9 +798,6 @@ importers:
         specifier: workspace:*
         version: link:../logging
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -853,9 +823,6 @@ importers:
         specifier: workspace:*
         version: link:../utils
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -931,9 +898,6 @@ importers:
         specifier: workspace:*
         version: link:../utils
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
@@ -959,9 +923,6 @@ importers:
         specifier: workspace:*
         version: link:../utils
     devDependencies:
-      '@vytches/ddd-testing':
-        specifier: workspace:*
-        version: link:../testing
       typescript:
         specifier: ^5.0.0
         version: 5.8.3
