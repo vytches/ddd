@@ -12,7 +12,7 @@ complexity: high
 estimated_time: 16h
 created_by: human (production incident — command routing collision)
 created_at: 2026-05-23
-status: in_progress
+status: done
 release_target: v0.28.0
 priority_score: 98/100
 packages_affected:
@@ -315,9 +315,11 @@ Did you forget VytchesDDDModule.forFeature('orders') in OrdersModule?
       onApplicationBootstrap)
 - [ ] Brak `forFeature()` przy `@CommandHandler` rzuca czytelny błąd przy
       starcie (Faza 4 — optional)
-- [ ] `OnModuleDestroy` woła `dispose()` na `EnhancedCommandBus` (Faza 4)
-- [x] Wszystkie testy przechodzą (160/160, zero regresji)
-- [ ] Changelog i bump minor dla `@vytches/ddd-cqrs` i `@vytches/ddd-nestjs`
+- [x] `OnModuleDestroy` woła `dispose()` na `EnhancedCommandBus` (Faza 4 —
+      duck-type w `FeatureHandlerRegistrar.onModuleDestroy()`)
+- [x] Wszystkie testy przechodzą (177 nestjs / 244 cqrs, zero regresji)
+- [x] Changelog i bump minor dla `@vytches/ddd-cqrs` i `@vytches/ddd-nestjs` (→
+      0.29.0)
 
 ---
 
