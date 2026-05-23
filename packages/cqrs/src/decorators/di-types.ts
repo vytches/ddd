@@ -34,6 +34,15 @@ export interface CommandHandlerOptions extends DIDecoratorOptions {
   validation?: 'strict' | 'loose' | 'none';
   /** Timeout in milliseconds for command execution */
   timeout?: number;
+  /**
+   * Bus scope for this handler.
+   * - `'context'` (default) — handler registered in the bounded-context bus
+   *   provided by `VytchesDDDModule.forFeature()`. Prevents cross-context
+   *   routing collisions for same-named command classes.
+   * - `'global'` — handler registered in the application-wide bus regardless
+   *   of `forFeature()` presence. Use for cross-cutting handlers.
+   */
+  scope?: 'context' | 'global';
 }
 
 export interface QueryHandlerOptions extends DIDecoratorOptions {
@@ -43,6 +52,12 @@ export interface QueryHandlerOptions extends DIDecoratorOptions {
   cacheTtl?: number;
   /** Timeout in milliseconds for query execution */
   timeout?: number;
+  /**
+   * Bus scope for this handler.
+   * - `'context'` (default) — handler registered in the bounded-context bus.
+   * - `'global'` — handler registered in the application-wide bus.
+   */
+  scope?: 'context' | 'global';
 }
 
 export interface DIHandlerMetadata {

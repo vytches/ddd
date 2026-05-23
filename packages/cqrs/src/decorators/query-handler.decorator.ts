@@ -78,6 +78,7 @@ export function QueryHandler<T extends IQuery<R>, R>(
     // Store metadata in handler class (for auto-discovery)
     Reflect.defineMetadata('di:handler-metadata', metadata, target);
     Reflect.defineMetadata('di:handler-type', 'query', target);
+    Reflect.defineMetadata('di:handler-scope', diOptions.scope ?? 'context', target);
 
     // Mark for DI auto-registration
     if (diOptions.autoRegister !== false) {

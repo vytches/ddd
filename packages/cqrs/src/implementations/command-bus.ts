@@ -72,7 +72,7 @@ export class CommandBus extends ICommandBus {
   private readonly logger = Logger.forContext('CommandBus');
   private middlewares: ICQRSMiddleware[] = [];
   private handlers: Map<
-    string,
+    Function | string,
     ICommandHandler<ICommand, unknown> | (() => ICommandHandler<ICommand, unknown>)
   > = new Map();
 
@@ -84,22 +84,16 @@ export class CommandBus extends ICommandBus {
     commandType: unknown,
     handler: ICommandHandler<T, TResult>
   ): void {
-    // Support manual registration for flexibility
-    const commandName =
-      typeof commandType === 'string' ? commandType : (commandType as Function).name;
-
-    this.handlers.set(commandName, handler);
+    const key = typeof commandType === 'string' ? commandType : (commandType as Function);
+    this.handlers.set(key, handler);
   }
 
   registerFactory<T extends ICommand, TResult = void>(
     commandType: unknown,
     factory: () => ICommandHandler<T, TResult>
   ): void {
-    // Support factory registration for lazy initialization
-    const commandName =
-      typeof commandType === 'string' ? commandType : (commandType as Function).name;
-
-    this.handlers.set(commandName, factory);
+    const key = typeof commandType === 'string' ? commandType : (commandType as Function);
+    this.handlers.set(key, factory);
   }
 
   use(middleware: ICQRSMiddleware): this {
@@ -119,11 +113,11 @@ export class CommandBus extends ICommandBus {
   }
 
   async execute<T extends ICommand, TResult = void>(command: T): Promise<TResult> {
-    const commandName = command.constructor.name;
     let handler: ICommandHandler<T, TResult>;
 
-    // First, check manual registrations
-    const registeredHandler = this.handlers.get(commandName);
+    // Function ref first (no cross-context collision), string fallback for BC
+    const registeredHandler =
+      this.handlers.get(command.constructor) ?? this.handlers.get(command.constructor.name);
     if (registeredHandler) {
       // Check if it's a factory function or direct handler
       if (typeof registeredHandler === 'function' && !('execute' in registeredHandler)) {

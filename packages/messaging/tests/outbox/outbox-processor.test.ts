@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import {
   MessagePriority,
@@ -32,9 +32,14 @@ class InMemoryOutboxRepository extends IOutboxRepository {
       MessagePriority.HIGH,
       MessagePriority.NORMAL,
       MessagePriority.LOW,
-    ]
+    ],
+    messageTypes?: string[]
   ): Promise<IOutboxMessage[]> {
-    const pending = Array.from(this.store.values()).filter(m => m.status === MessageStatus.PENDING);
+    const pending = Array.from(this.store.values()).filter(
+      m =>
+        m.status === MessageStatus.PENDING &&
+        (messageTypes === undefined || messageTypes.includes(m.messageType))
+    );
 
     const sorted = pending.sort((a, b) => {
       const aPrio = priorityOrder.indexOf(a.priority ?? MessagePriority.NORMAL);
@@ -348,6 +353,31 @@ describe('OutboxProcessor — constructor validation', () => {
         new OutboxProcessor(repo, { retryBackoff: { initial: 1000, multiplier: 2, maxDelay: 0 } })
     ).toThrow(RangeError);
   });
+
+  // D3: a too-small crash-recovery threshold would reset still-in-flight messages.
+  it('throws RangeError when crashRecoveryThresholdMs < messageTimeout', () => {
+    expect(
+      () => new OutboxProcessor(repo, { messageTimeout: 30_000, crashRecoveryThresholdMs: 10_000 })
+    ).toThrow(RangeError);
+    expect(
+      () => new OutboxProcessor(repo, { messageTimeout: 30_000, crashRecoveryThresholdMs: 10_000 })
+    ).toThrow(/crashRecoveryThresholdMs/);
+  });
+
+  it('throws RangeError when crashRecoveryThresholdMs is 0 (resets everything)', () => {
+    expect(() => new OutboxProcessor(repo, { crashRecoveryThresholdMs: 0 })).toThrow(RangeError);
+  });
+
+  it('accepts crashRecoveryThresholdMs === messageTimeout (boundary)', () => {
+    expect(
+      () => new OutboxProcessor(repo, { messageTimeout: 30_000, crashRecoveryThresholdMs: 30_000 })
+    ).not.toThrow();
+  });
+
+  it('default crashRecoveryThresholdMs satisfies the invariant even for large messageTimeout', () => {
+    // messageTimeout (400_000) > the 300_000 floor → default must lift to messageTimeout
+    expect(() => new OutboxProcessor(repo, { messageTimeout: 400_000 })).not.toThrow();
+  });
 });
 
 describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => {
@@ -521,5 +551,456 @@ describe('OutboxProcessor — exponential backoff (retryBackoff option)', () => 
 
     // Message must be PENDING (not stuck in PROCESSING) even though scheduleRetry was a no-op
     expect(noOpRepo.store.get(id)?.status).toBe(MessageStatus.PENDING);
+  });
+});
+
+describe('OutboxProcessor — messageTypes filter (Part 2)', () => {
+  let repo: InMemoryOutboxRepository;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  it('only fetches and processes messages whose type is in messageTypes', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 10, messageTypes: ['type.A'] });
+    const handlerA = vi.fn().mockResolvedValue(undefined);
+    processor.registerHandler('type.A', { handle: handlerA });
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'a-1', messageType: 'type.A' }));
+    await repo.saveMessage(buildMessage({ id: 'b-1', messageType: 'type.B' }));
+
+    await processor.processBatch();
+
+    expect(handlerA).toHaveBeenCalledOnce();
+    expect(repo.store.get('a-1')?.status).toBe(MessageStatus.PROCESSED);
+    // type.B was never fetched → remains untouched
+    expect(repo.store.get('b-1')?.status).toBe(MessageStatus.PENDING);
+  });
+
+  it('passes the messageTypes allow-list through to getUnprocessedMessages', async () => {
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, { messageTypes: ['x', 'y'] });
+    processor.start();
+
+    await processor.processBatch();
+
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), expect.any(Array), ['x', 'y']);
+  });
+
+  it('fetches all types when messageTypes is omitted (backward-compatible)', async () => {
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {});
+    processor.start();
+
+    await processor.processBatch();
+
+    expect(spy).toHaveBeenCalledWith(expect.any(Number), expect.any(Array), undefined);
+  });
+});
+
+describe('OutboxProcessor — crash recovery (Part 2 + D3)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // processingInterval is set huge so the normal processing timer never fires
+  // within the windows we advance — isolating crash-recovery behavior.
+  const IDLE_PROCESSING = 1_000_000;
+
+  it('calls resetStaleProcessing every crashRecoveryIntervalMs', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: IDLE_PROCESSING,
+      crashRecoveryIntervalMs: 10_000,
+      crashRecoveryThresholdMs: 300_000,
+      messageTimeout: 5_000,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(spy).toHaveBeenCalledTimes(2);
+
+    processor.stop();
+  });
+
+  it('passes olderThan = now - crashRecoveryThresholdMs', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: IDLE_PROCESSING,
+      crashRecoveryIntervalMs: 10_000,
+      crashRecoveryThresholdMs: 300_000,
+      messageTimeout: 5_000,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    const olderThan = spy.mock.calls[0]![0];
+    expect(olderThan).toBeInstanceOf(Date);
+    expect(Date.now() - olderThan.getTime()).toBe(300_000);
+
+    processor.stop();
+  });
+
+  it('does not schedule crash recovery when crashRecoveryIntervalMs is omitted', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, { processingInterval: IDLE_PROCESSING });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(IDLE_PROCESSING);
+
+    expect(spy).not.toHaveBeenCalled();
+    processor.stop();
+  });
+
+  it('stop() halts crash-recovery cycles', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: IDLE_PROCESSING,
+      crashRecoveryIntervalMs: 10_000,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(10_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    processor.stop();
+    await vi.advanceTimersByTimeAsync(50_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('IOutboxRepository.resetStaleProcessing — default (Part 2)', () => {
+  it('is a no-op returning 0 when not overridden', async () => {
+    const repo = new InMemoryOutboxRepository(); // does not override resetStaleProcessing
+    await expect(repo.resetStaleProcessing(new Date())).resolves.toBe(0);
+  });
+});
+
+describe('OutboxProcessor — observability hooks (Part 5a)', () => {
+  let repo: InMemoryOutboxRepository;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  const throwingHandler: IOutboxMessageHandler = {
+    handle: async () => {
+      throw new Error('handler boom');
+    },
+  };
+  const okHandler = (): IOutboxMessageHandler => ({
+    handle: vi.fn().mockResolvedValue(undefined),
+  });
+
+  it('onBatchComplete reports processed, failed, batchSize and duration', async () => {
+    const onBatchComplete = vi.fn();
+    const processor = new OutboxProcessor(repo, { batchSize: 5, hooks: { onBatchComplete } });
+    processor.registerHandler('ok', okHandler());
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'a', messageType: 'ok' }));
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+
+    await processor.processBatch();
+
+    expect(onBatchComplete).toHaveBeenCalledOnce();
+    expect(onBatchComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ processed: 2, failed: 1, batchSize: 5 })
+    );
+    const arg = onBatchComplete.mock.calls[0]![0] as { durationMs: number };
+    expect(typeof arg.durationMs).toBe('number');
+  });
+
+  it('onMessageFailed fires on each failure with the attempt number', async () => {
+    const onMessageFailed = vi.fn();
+    const processor = new OutboxProcessor(repo, {
+      maxRetries: 3,
+      hooks: { onMessageFailed },
+    });
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+    await processor.processBatch();
+
+    expect(onMessageFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'b' }),
+      expect.any(Error),
+      1
+    );
+  });
+
+  it('onPermanentFailure fires once the message is marked FAILED', async () => {
+    const onPermanentFailure = vi.fn();
+    const processor = new OutboxProcessor(repo, {
+      maxRetries: 1, // first failure is terminal
+      hooks: { onPermanentFailure },
+    });
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+    await processor.processBatch();
+
+    expect(onPermanentFailure).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'b' }),
+      expect.any(Error)
+    );
+  });
+
+  it('does not fire onPermanentFailure while retries remain', async () => {
+    const onPermanentFailure = vi.fn();
+    const processor = new OutboxProcessor(repo, {
+      maxRetries: 3,
+      hooks: { onPermanentFailure },
+    });
+    processor.registerHandler('bad', throwingHandler);
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'b', messageType: 'bad' }));
+    await processor.processBatch();
+
+    expect(onPermanentFailure).not.toHaveBeenCalled();
+  });
+
+  // Mitigation T3: a throwing hook must never break the processing loop.
+  it('isolates a throwing hook — the batch still completes and messages process', async () => {
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 10,
+      hooks: {
+        onBatchComplete: () => {
+          throw new Error('hook explosion');
+        },
+      },
+    });
+    processor.registerHandler('ok', okHandler());
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'a', messageType: 'ok' }));
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 1, batchSize: 10 });
+    expect(repo.store.get('a')?.status).toBe(MessageStatus.PROCESSED);
+  });
+});
+
+describe('OutboxProcessor.processBatch — return value (Part 4)', () => {
+  let repo: InMemoryOutboxRepository;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  it('reports processed count and configured batchSize', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    processor.registerHandler('test.event', { handle: vi.fn().mockResolvedValue(undefined) });
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'm-1' }));
+    await repo.saveMessage(buildMessage({ id: 'm-2' }));
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 2, batchSize: 5 });
+  });
+
+  it('reports processed 0 when there are no pending messages', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    processor.start();
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 0, batchSize: 5 });
+  });
+
+  it('reports processed 0 when the processor is not running', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    await repo.saveMessage(buildMessage({ id: 'm-1' }));
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 0, batchSize: 5 });
+  });
+});
+
+// A repository that always returns a full batch of fresh PENDING messages,
+// simulating a perpetually-busy queue — used to exercise adaptive re-poll.
+class AlwaysFullRepo extends IOutboxRepository {
+  async saveMessage(): Promise<string> {
+    return 'noop';
+  }
+  async saveBatch(): Promise<string[]> {
+    return [];
+  }
+  async getUnprocessedMessages(limit = 10): Promise<IOutboxMessage[]> {
+    return Array.from({ length: limit }, (_, i) =>
+      buildMessage({ id: `full-${i}`, messageType: 'test.event' })
+    );
+  }
+  async getById(): Promise<IOutboxMessage | null> {
+    return null;
+  }
+  async updateStatus(): Promise<void> {
+    /* no-op: messages are regenerated every poll */
+  }
+  async updateStatusBatch(): Promise<void> {
+    /* no-op */
+  }
+  async incrementAttempt(): Promise<number> {
+    return 1;
+  }
+  async deleteByStatusAndAge(): Promise<number> {
+    return 0;
+  }
+  async scheduleMessage(): Promise<string> {
+    return 'noop';
+  }
+}
+
+describe('OutboxProcessor — adaptive re-poll + startup jitter (Part 4)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const resolvingHandler = (): IOutboxMessageHandler => ({
+    handle: vi.fn().mockResolvedValue(undefined),
+  });
+
+  it('full batch re-polls immediately, bursting up to the guard then pausing', async () => {
+    const repo = new AlwaysFullRepo();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 10_000,
+      adaptiveRepoll: true,
+      // defaults: adaptiveRepollMaxConsecutive = 5, adaptiveRepollPauseMs = 50
+    });
+    processor.registerHandler('test.event', resolvingHandler());
+    const t0 = Date.now();
+    processor.start();
+
+    // Drive the timer chain, recording the elapsed clock at each poll. Full
+    // batches re-poll at the SAME instant (delay 0); the async recursion means
+    // a single advance may drain a variable number of same-instant timers, so
+    // we loop and collect timestamps until we have enough to assert the shape.
+    const pollDeltas: number[] = [];
+    for (let i = 0; i < 30 && pollDeltas.length < 8; i++) {
+      const before = spy.mock.calls.length;
+      await vi.advanceTimersToNextTimerAsync();
+      const after = spy.mock.calls.length;
+      for (let k = before; k < after; k++) pollDeltas.push(Date.now() - t0);
+    }
+    processor.stop();
+
+    // The immediate burst: maxConsecutive + 1 = 6 polls, all at the first interval.
+    const burst = pollDeltas.filter(d => d === 10_000);
+    expect(burst).toHaveLength(6);
+    // After the guard trips, cadence throttles to one poll per pauseMs (50ms).
+    expect(pollDeltas[6]).toBe(10_050);
+    expect(pollDeltas[7]).toBe(10_100);
+  });
+
+  it('partial batch falls back to the normal interval (no immediate re-poll)', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 1_000,
+      adaptiveRepoll: true,
+    });
+    processor.registerHandler('test.event', resolvingHandler());
+    processor.start();
+
+    // 2 < batchSize → partial
+    await repo.saveMessage(buildMessage({ id: 'p-1' }));
+    await repo.saveMessage(buildMessage({ id: 'p-2' }));
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // No immediate re-poll: nothing fires until the next full interval
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(2);
+
+    processor.stop();
+  });
+
+  it('empty batch uses the normal interval', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 1_000,
+      adaptiveRepoll: true,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    processor.stop();
+  });
+
+  it('adaptiveRepoll disabled (default): full batches still wait the interval', async () => {
+    const repo = new AlwaysFullRepo();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 1_000,
+      // adaptiveRepoll omitted → false
+    });
+    processor.registerHandler('test.event', resolvingHandler());
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+    // even though every batch is full, no immediate re-poll
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spy).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(2);
+
+    processor.stop();
+  });
+
+  it('startupJitterMs delays the first poll within the configured window', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    // Force jitter to its max so the first poll lands at processingInterval + 500
+    vi.spyOn(Math, 'random').mockReturnValue(0.999);
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: 1_000,
+      startupJitterMs: 500,
+    });
+    processor.start();
+
+    // Before interval + jitter elapses, no poll yet
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(500);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    processor.stop();
   });
 });

@@ -604,4 +604,36 @@ describe('EnhancedQueryBus', () => {
       expect(results).toHaveLength(3); // 3 successful results
     });
   });
+
+  describe('cross-context name collision prevention (VP-007)', () => {
+    it('should route to correct handler when two contexts define query classes with identical names', async () => {
+      class GetUserReadModelQuery implements IQuery<string> {}
+
+      const ContextBQuery = class GetUserReadModelQuery implements IQuery<string> {};
+
+      const handlerA = { execute: vi.fn().mockResolvedValue('context-a-result') };
+      const handlerB = { execute: vi.fn().mockResolvedValue('context-b-result') };
+
+      enhancedQueryBus.register(GetUserReadModelQuery, handlerA);
+      enhancedQueryBus.register(ContextBQuery, handlerB);
+
+      const resultA = await enhancedQueryBus.execute(new GetUserReadModelQuery());
+      const resultB = await enhancedQueryBus.execute(new ContextBQuery());
+
+      expect(resultA).toBe('context-a-result');
+      expect(resultB).toBe('context-b-result');
+      expect(handlerA.execute).toHaveBeenCalledTimes(1);
+      expect(handlerB.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still resolve handler registered by string name (BC)', async () => {
+      const handler = { execute: vi.fn().mockResolvedValue('by-string') };
+      enhancedQueryBus.register('LegacyQuery', handler);
+
+      class LegacyQuery implements IQuery<string> {}
+      const result = await enhancedQueryBus.execute(new LegacyQuery());
+
+      expect(result).toBe('by-string');
+    });
+  });
 });

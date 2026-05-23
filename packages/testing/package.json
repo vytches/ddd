@@ -46,6 +46,7 @@
     "@faker-js/faker": "^8.0.0",
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
+    "@vytches/ddd-messaging": "workspace:*",
     "@vytches/ddd-utils": "workspace:*"
   },
   "devDependencies": {

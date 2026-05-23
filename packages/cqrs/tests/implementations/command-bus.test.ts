@@ -418,4 +418,55 @@ describe('CommandBus', () => {
       expect(executionOrder).toEqual([1, 2, 3, 4]);
     });
   });
+
+  describe('cross-context name collision prevention (VP-007)', () => {
+    it('should route to correct handler when two contexts define classes with identical names', async () => {
+      // Two separate classes with the same name — simulates two bounded contexts
+      class UpdateUserReadModelCommand implements ICommand {
+        constructor(public readonly contextA = true) {}
+      }
+
+      const ContextBUpdateUserReadModelCommand = class UpdateUserReadModelCommand
+        implements ICommand
+      {
+        constructor(public readonly contextB = true) {}
+      };
+
+      const handlerA = { execute: vi.fn().mockResolvedValue('context-a') };
+      const handlerB = { execute: vi.fn().mockResolvedValue('context-b') };
+
+      commandBus.register(UpdateUserReadModelCommand, handlerA);
+      commandBus.register(ContextBUpdateUserReadModelCommand, handlerB);
+
+      const resultA = await commandBus.execute(new UpdateUserReadModelCommand());
+      const resultB = await commandBus.execute(new ContextBUpdateUserReadModelCommand());
+
+      expect(resultA).toBe('context-a');
+      expect(resultB).toBe('context-b');
+      expect(handlerA.execute).toHaveBeenCalledTimes(1);
+      expect(handlerB.execute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still resolve handler registered by string name (BC)', async () => {
+      const handler = { execute: vi.fn().mockResolvedValue('by-string') };
+      commandBus.register('LegacyCommand', handler);
+
+      class LegacyCommand implements ICommand {}
+      const result = await commandBus.execute(new LegacyCommand());
+
+      expect(result).toBe('by-string');
+    });
+
+    it('should give priority to Function-ref registration over string when both exist', async () => {
+      class SomeCommand implements ICommand {}
+      const handlerByRef = { execute: vi.fn().mockResolvedValue('by-ref') };
+      const handlerByString = { execute: vi.fn().mockResolvedValue('by-string') };
+
+      commandBus.register(SomeCommand, handlerByRef);
+      commandBus.register('SomeCommand', handlerByString);
+
+      const result = await commandBus.execute(new SomeCommand());
+      expect(result).toBe('by-ref');
+    });
+  });
 });

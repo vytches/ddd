@@ -48,6 +48,18 @@ export const ACL_ADAPTER_METADATA = 'vytches:acl-adapter';
 export const ACL_REGISTRY = Symbol('ACL_REGISTRY');
 
 /**
+ * Injection token for the per-bounded-context local event bus.
+ * Provided by VytchesDDDModule.forFeature(); inject with @Inject(LOCAL_EVENT_BUS).
+ */
+export const LOCAL_EVENT_BUS = Symbol.for('vytches:local-event-bus');
+
+/**
+ * Internal token used by FeatureHandlerRegistrar to receive the unique anchor
+ * symbol that identifies its own module in ModulesContainer.
+ */
+export const FEATURE_ANCHOR_INJECTION = Symbol.for('vytches:feature-anchor-injection');
+
+/**
  * Default auto-discovery patterns
  */
 export const DEFAULT_DISCOVERY_PATTERNS = [

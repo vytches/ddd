@@ -69,7 +69,8 @@
                   "scope:messaging",
                   "scope:validation",
                   "scope:contracts",
-                  "scope:logging"
+                  "scope:logging",
+                  "scope:testing"
                 ]
               },
               {
@@ -209,6 +210,8 @@
                   "scope:domain-primitives",
                   "scope:contracts",
                   "scope:utils",
+                  "scope:messaging",
+                  "scope:events",
                   "scope:testing"
                 ]
               },

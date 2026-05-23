@@ -4,6 +4,7 @@ import { safeRun } from '@vytches/ddd-utils';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
+import type { OutboxProcessorHooks } from './outbox-hooks';
 
 export interface RetryBackoffConfig {
   /** Initial delay in milliseconds before first retry (default: 1000) */
@@ -36,10 +37,66 @@ export interface OutboxProcessorOptions {
    * If omitted, immediate retry is used for all messages.
    */
   retryBackoff?: RetryBackoffConfig;
+  /**
+   * Optional allow-list of message types to process. When set, only messages
+   * of these types are fetched from the repository (passed through to
+   * `getUnprocessedMessages`). Lets multiple processors partition the outbox
+   * by type. Omit to process all types.
+   */
+  messageTypes?: string[];
+  /**
+   * When set, the processor periodically calls
+   * `IOutboxRepository.resetStaleProcessing()` every N ms to recover messages
+   * orphaned in `PROCESSING` by a crashed worker. Omit to disable crash recovery.
+   */
+  crashRecoveryIntervalMs?: number;
+  /**
+   * How old (in ms) a `PROCESSING` message must be before crash recovery resets
+   * it to `PENDING`. Must be `>= messageTimeout` so legitimately in-flight
+   * messages are never reset. Defaults to `max(300_000, messageTimeout)`.
+   * Setting this below `messageTimeout` throws a `RangeError` from the constructor.
+   */
+  crashRecoveryThresholdMs?: number;
+  /**
+   * When `true`, after a **full** batch (every fetched slot used) the processor
+   * re-polls immediately instead of waiting `processingInterval`, draining a
+   * backlog faster. Defaults to `false` (opt-in — no behavior change).
+   */
+  adaptiveRepoll?: boolean;
+  /**
+   * Livelock guard for `adaptiveRepoll`: after this many consecutive full
+   * batches the processor inserts an `adaptiveRepollPauseMs` pause instead of
+   * re-polling immediately, yielding the event loop. Defaults to `5`.
+   */
+  adaptiveRepollMaxConsecutive?: number;
+  /**
+   * Pause (ms) inserted once the `adaptiveRepollMaxConsecutive` guard trips.
+   * Defaults to `50`.
+   */
+  adaptiveRepollPauseMs?: number;
+  /**
+   * Random delay (0..N ms) added before the first poll on `start()`, to
+   * de-synchronize many processors that boot simultaneously. Defaults to `0`.
+   */
+  startupJitterMs?: number;
+  /**
+   * Observability callbacks (batch completion, message failure, permanent
+   * failure). Each invocation is isolated in a try/catch — a throwing hook is
+   * logged and never breaks the processing loop. Omit to disable.
+   */
+  hooks?: OutboxProcessorHooks;
 }
 
-type ResolvedOptions = Required<Omit<OutboxProcessorOptions, 'retryBackoff'>> & {
+type ResolvedOptions = Required<
+  Omit<
+    OutboxProcessorOptions,
+    'retryBackoff' | 'messageTypes' | 'crashRecoveryIntervalMs' | 'hooks'
+  >
+> & {
   retryBackoff: RetryBackoffConfig | undefined;
+  messageTypes: string[] | undefined;
+  crashRecoveryIntervalMs: number | undefined;
+  hooks: OutboxProcessorHooks | undefined;
 };
 
 export class OutboxProcessor {
@@ -49,6 +106,7 @@ export class OutboxProcessor {
   private readonly middlewares: OutboxMiddleware[] = [];
   private isRunning = false;
   private processingTimer?: NodeJS.Timeout | undefined;
+  private crashRecoveryTimer?: NodeJS.Timeout | undefined;
   private readonly logger = Logger.create('OutboxProcessor');
 
   constructor(repository: IOutboxRepository, options: OutboxProcessorOptions = {}) {
@@ -66,6 +124,18 @@ export class OutboxProcessor {
       }
     }
 
+    const messageTimeout = options.messageTimeout ?? 30000;
+    // D3: a too-small crash-recovery threshold would reset messages that are
+    // still legitimately in-flight. Default to max(5min, messageTimeout) so the
+    // invariant always holds out of the box; reject only explicit unsafe values.
+    const crashRecoveryThresholdMs =
+      options.crashRecoveryThresholdMs ?? Math.max(300_000, messageTimeout);
+    if (crashRecoveryThresholdMs < messageTimeout) {
+      throw new RangeError(
+        `OutboxProcessor: crashRecoveryThresholdMs (${crashRecoveryThresholdMs}) must be ≥ messageTimeout (${messageTimeout}) to avoid resetting in-flight messages`
+      );
+    }
+
     this.repository = repository;
     this.options = {
       batchSize,
@@ -77,10 +147,34 @@ export class OutboxProcessor {
         MessagePriority.NORMAL,
         MessagePriority.LOW,
       ],
-      messageTimeout: options.messageTimeout ?? 30000,
+      messageTimeout,
       enableLogging: options.enableLogging ?? false,
       retryBackoff: options.retryBackoff,
+      messageTypes: options.messageTypes,
+      crashRecoveryIntervalMs: options.crashRecoveryIntervalMs,
+      crashRecoveryThresholdMs,
+      adaptiveRepoll: options.adaptiveRepoll ?? false,
+      adaptiveRepollMaxConsecutive: options.adaptiveRepollMaxConsecutive ?? 5,
+      adaptiveRepollPauseMs: options.adaptiveRepollPauseMs ?? 50,
+      startupJitterMs: options.startupJitterMs ?? 0,
+      hooks: options.hooks,
     };
+  }
+
+  /**
+   * Invokes an observability hook in isolation. A throwing hook is logged and
+   * swallowed so it can never break the processing loop (mitigation T3).
+   */
+  private safelyInvokeHook(name: string, invoke: () => void): void {
+    if (!this.options.hooks) {
+      return;
+    }
+    try {
+      invoke();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Outbox hook ${name} threw and was ignored: ${errorMessage}`);
+    }
   }
 
   /**
@@ -110,7 +204,12 @@ export class OutboxProcessor {
 
     this.isRunning = true;
     this.logger.info('Starting outbox processor');
-    this.scheduleProcessing();
+    const jitter =
+      this.options.startupJitterMs > 0
+        ? Math.floor(Math.random() * this.options.startupJitterMs)
+        : 0;
+    this.scheduleProcessing(0, this.options.processingInterval + jitter);
+    this.scheduleCrashRecovery();
   }
 
   /**
@@ -126,6 +225,10 @@ export class OutboxProcessor {
     if (this.processingTimer) {
       clearTimeout(this.processingTimer);
       this.processingTimer = undefined;
+    }
+    if (this.crashRecoveryTimer) {
+      clearTimeout(this.crashRecoveryTimer);
+      this.crashRecoveryTimer = undefined;
     }
     this.logger.info('Stopped outbox processor');
   }
@@ -151,46 +254,77 @@ export class OutboxProcessor {
    * **Quiescence:** if there are no pending messages, returns immediately
    * without invoking handlers.
    *
+   * @returns `{ processed, batchSize }` — `processed` is how many messages were
+   *   dispatched this batch, `batchSize` the configured limit. A full batch
+   *   (`processed >= batchSize`) signals a likely backlog. Callers that ignore
+   *   the return value are unaffected (the value was previously `void`).
    * @public
    * @stable
    * @since 0.1.0
    */
-  async processBatch(): Promise<void> {
+  async processBatch(): Promise<{ processed: number; batchSize: number }> {
+    const batchSize = this.options.batchSize;
+
     if (!this.isRunning) {
-      return;
+      return { processed: 0, batchSize };
     }
 
     const [error, result] = await safeRun(() =>
-      this.repository.getUnprocessedMessages(this.options.batchSize, this.options.priorityOrder)
+      this.repository.getUnprocessedMessages(
+        batchSize,
+        this.options.priorityOrder,
+        this.options.messageTypes
+      )
     );
 
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error retrieving messages: ${errorMessage}`);
-      return;
+      return { processed: 0, batchSize };
     }
 
     const messages = result;
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       this.logger.debug('No pending messages to process');
-      return;
+      return { processed: 0, batchSize };
     }
 
     this.logger.info(`Processing ${messages.length} messages`);
 
+    const startedAt = Date.now();
+
     // Parallel dispatch via Promise.allSettled — failures in any message do
     // NOT short-circuit the batch. Each message has its own retry/fail state
     // tracked in the repository (see handleMessageError).
-    const processingPromises = messages.map(message => this.processMessage(message));
+    const outcomes = await Promise.allSettled(
+      messages.map(message => this.processMessage(message))
+    );
 
-    await Promise.allSettled(processingPromises);
+    // processMessage never rejects (it catches internally), but treat any
+    // rejection defensively as a failure for hook accounting.
+    const failed = outcomes.filter(
+      o => o.status === 'rejected' || (o.status === 'fulfilled' && o.value === false)
+    ).length;
+
     this.logger.info(`Completed processing batch of ${messages.length} messages`);
+
+    this.safelyInvokeHook('onBatchComplete', () =>
+      this.options.hooks?.onBatchComplete?.({
+        processed: messages.length,
+        failed,
+        batchSize,
+        durationMs: Date.now() - startedAt,
+      })
+    );
+
+    return { processed: messages.length, batchSize };
   }
 
   /**
-   * Processes a single message through the middleware pipeline
+   * Processes a single message through the middleware pipeline.
+   * @returns `true` if the message was processed successfully, `false` if it failed.
    */
-  private async processMessage(message: IOutboxMessage): Promise<void> {
+  private async processMessage(message: IOutboxMessage): Promise<boolean> {
     const [error] = await safeRun(async () => {
       // Mark as processing
       await this.repository.updateStatus(message.id, MessageStatus.PROCESSING);
@@ -206,7 +340,9 @@ export class OutboxProcessor {
 
     if (error) {
       await this.handleMessageError(message, error);
+      return false;
     }
+    return true;
   }
 
   /**
@@ -243,9 +379,16 @@ export class OutboxProcessor {
       const attempts = await this.repository.incrementAttempt(message.id);
       this.logger.warn(`Message ${message.id} failed, attempt ${attempts}: ${error?.message}`);
 
+      this.safelyInvokeHook('onMessageFailed', () =>
+        this.options.hooks?.onMessageFailed?.(message, error, attempts)
+      );
+
       if (attempts >= this.options.maxRetries) {
         await this.repository.updateStatus(message.id, MessageStatus.FAILED, error);
         this.logger.error(`Message ${message.id} marked as failed after ${attempts} attempts`);
+        this.safelyInvokeHook('onPermanentFailure', () =>
+          this.options.hooks?.onPermanentFailure?.(message, error)
+        );
       } else if (this.options.retryBackoff) {
         const { initial, multiplier, maxDelay } = this.options.retryBackoff;
         const delay = Math.min(initial * Math.pow(multiplier, attempts - 1), maxDelay);
@@ -269,17 +412,77 @@ export class OutboxProcessor {
   }
 
   /**
-   * Schedules the next processing cycle
+   * Schedules the next processing cycle.
+   *
+   * With `adaptiveRepoll` enabled, a full batch re-polls immediately (`delay 0`)
+   * to drain a backlog — until `adaptiveRepollMaxConsecutive` consecutive full
+   * batches trip the livelock guard, after which an `adaptiveRepollPauseMs`
+   * pause is inserted. Any non-full batch resets the cadence to
+   * `processingInterval`.
+   *
+   * @param consecutiveFullBatches running count of back-to-back full batches
+   * @param delay milliseconds to wait before the next batch
    */
-  private scheduleProcessing(): void {
+  private scheduleProcessing(
+    consecutiveFullBatches = 0,
+    delay: number = this.options.processingInterval
+  ): void {
     if (!this.isRunning) {
       return;
     }
 
     this.processingTimer = setTimeout(async () => {
-      await this.processBatch();
-      this.scheduleProcessing();
-    }, this.options.processingInterval);
+      const result = await this.processBatch();
+
+      const isFullBatch =
+        this.options.adaptiveRepoll && result.processed > 0 && result.processed >= result.batchSize;
+
+      if (isFullBatch) {
+        const consecutive = consecutiveFullBatches + 1;
+        const nextDelay =
+          consecutive > this.options.adaptiveRepollMaxConsecutive
+            ? this.options.adaptiveRepollPauseMs
+            : 0;
+        this.scheduleProcessing(consecutive, nextDelay);
+      } else {
+        this.scheduleProcessing(0, this.options.processingInterval);
+      }
+    }, delay);
+  }
+
+  /**
+   * Schedules the next crash-recovery cycle. No-op unless
+   * `crashRecoveryIntervalMs` was configured.
+   */
+  private scheduleCrashRecovery(): void {
+    if (!this.isRunning || this.options.crashRecoveryIntervalMs === undefined) {
+      return;
+    }
+
+    this.crashRecoveryTimer = setTimeout(async () => {
+      await this.runCrashRecovery();
+      this.scheduleCrashRecovery();
+    }, this.options.crashRecoveryIntervalMs);
+  }
+
+  /**
+   * Resets messages orphaned in `PROCESSING` (older than
+   * `crashRecoveryThresholdMs`) back to `PENDING` via the repository. Errors are
+   * logged, never thrown — crash recovery must not crash the processor.
+   */
+  private async runCrashRecovery(): Promise<void> {
+    const olderThan = new Date(Date.now() - this.options.crashRecoveryThresholdMs);
+    const [error, count] = await safeRun(() => this.repository.resetStaleProcessing(olderThan));
+
+    if (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Crash recovery failed: ${errorMessage}`);
+      return;
+    }
+
+    if (count && count > 0) {
+      this.logger.warn(`Crash recovery reset ${count} stale PROCESSING message(s) to PENDING`);
+    }
   }
 
   /**

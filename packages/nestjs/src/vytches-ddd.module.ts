@@ -5,6 +5,7 @@ import { DiscoveryModule, DiscoveryService, ModuleRef } from '@nestjs/core';
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { VytchesExplorerService } from './services/vytches-explorer.service';
+import { VytchesDDDFeatureModule } from './feature/vytches-ddd-feature.module';
 import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
 
 /**
@@ -144,6 +145,39 @@ export class VytchesDDDModule {
       exports: [VytchesExplorerService, ...contextExports],
       global: options.isGlobal !== false,
     };
+  }
+
+  /**
+   * Creates an isolated CQRS environment for one bounded context.
+   *
+   * Each bounded-context NestJS module should import this once. It provides
+   * context-scoped `ICommandBus`, `IQueryBus`, and `LOCAL_EVENT_BUS` instances
+   * that override the global buses for handlers within that module.
+   *
+   * `FeatureHandlerRegistrar` automatically discovers handlers decorated with
+   * `@CommandHandler` / `@QueryHandler` / `@EventHandler` in the importing
+   * module and registers them in the local buses, then claims their message types
+   * so the global bus fallback does not double-register them.
+   *
+   * @example
+   * ```typescript
+   * import { VytchesDDDModule, LOCAL_EVENT_BUS } from '@vytches/ddd-nestjs';
+   *
+   * @Module({
+   *   imports: [VytchesDDDModule.forFeature('orders')],
+   *   providers: [CreateOrderHandler, GetOrderQueryHandler],
+   * })
+   * export class OrdersModule {}
+   *
+   * // In a handler — gets the context-scoped bus, not the global one:
+   * @CommandHandler(PlaceOrderCommand)
+   * export class PlaceOrderHandler {
+   *   constructor(@Inject(ICommandBus) private bus: ICommandBus) {}
+   * }
+   * ```
+   */
+  static forFeature(contextName: string): DynamicModule {
+    return VytchesDDDFeatureModule.forFeature(contextName);
   }
 
   static forTesting(options: VytchesDDDModuleOptions = {}): DynamicModule {
