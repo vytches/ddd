@@ -5,19 +5,20 @@ import {
   PolicyEventHandlers,
   globalPolicyEventBus,
   type PolicyEvaluationEvent,
+  type PolicyEventHandler,
 } from '../../src/events';
 import type { PolicyContext } from '../../src/core/interfaces';
 
 describe('PolicyEventBus', () => {
   let eventBus: PolicyEventBus;
-  let mockHandler: ReturnType<typeof vi.fn>;
+  let mockHandler: PolicyEventHandler;
 
   beforeEach(() => {
     eventBus = new PolicyEventBus({
       enableMetrics: true,
       maxHandlers: 10,
     });
-    mockHandler = vi.fn();
+    mockHandler = vi.fn() as unknown as PolicyEventHandler;
   });
 
   describe('Event Subscription', () => {
