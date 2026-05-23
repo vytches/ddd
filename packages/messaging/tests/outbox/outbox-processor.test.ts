@@ -688,3 +688,210 @@ describe('IOutboxRepository.resetStaleProcessing — default (Part 2)', () => {
     await expect(repo.resetStaleProcessing(new Date())).resolves.toBe(0);
   });
 });
+
+describe('OutboxProcessor.processBatch — return value (Part 4)', () => {
+  let repo: InMemoryOutboxRepository;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+  });
+
+  it('reports processed count and configured batchSize', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    processor.registerHandler('test.event', { handle: vi.fn().mockResolvedValue(undefined) });
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'm-1' }));
+    await repo.saveMessage(buildMessage({ id: 'm-2' }));
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 2, batchSize: 5 });
+  });
+
+  it('reports processed 0 when there are no pending messages', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    processor.start();
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 0, batchSize: 5 });
+  });
+
+  it('reports processed 0 when the processor is not running', async () => {
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    await repo.saveMessage(buildMessage({ id: 'm-1' }));
+
+    const result = await processor.processBatch();
+    expect(result).toEqual({ processed: 0, batchSize: 5 });
+  });
+});
+
+// A repository that always returns a full batch of fresh PENDING messages,
+// simulating a perpetually-busy queue — used to exercise adaptive re-poll.
+class AlwaysFullRepo extends IOutboxRepository {
+  async saveMessage(): Promise<string> {
+    return 'noop';
+  }
+  async saveBatch(): Promise<string[]> {
+    return [];
+  }
+  async getUnprocessedMessages(limit = 10): Promise<IOutboxMessage[]> {
+    return Array.from({ length: limit }, (_, i) =>
+      buildMessage({ id: `full-${i}`, messageType: 'test.event' })
+    );
+  }
+  async getById(): Promise<IOutboxMessage | null> {
+    return null;
+  }
+  async updateStatus(): Promise<void> {
+    /* no-op: messages are regenerated every poll */
+  }
+  async updateStatusBatch(): Promise<void> {
+    /* no-op */
+  }
+  async incrementAttempt(): Promise<number> {
+    return 1;
+  }
+  async deleteByStatusAndAge(): Promise<number> {
+    return 0;
+  }
+  async scheduleMessage(): Promise<string> {
+    return 'noop';
+  }
+}
+
+describe('OutboxProcessor — adaptive re-poll + startup jitter (Part 4)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const resolvingHandler = (): IOutboxMessageHandler => ({
+    handle: vi.fn().mockResolvedValue(undefined),
+  });
+
+  it('full batch re-polls immediately, bursting up to the guard then pausing', async () => {
+    const repo = new AlwaysFullRepo();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 10_000,
+      adaptiveRepoll: true,
+      // defaults: adaptiveRepollMaxConsecutive = 5, adaptiveRepollPauseMs = 50
+    });
+    processor.registerHandler('test.event', resolvingHandler());
+    const t0 = Date.now();
+    processor.start();
+
+    // Drive the timer chain, recording the elapsed clock at each poll. Full
+    // batches re-poll at the SAME instant (delay 0); the async recursion means
+    // a single advance may drain a variable number of same-instant timers, so
+    // we loop and collect timestamps until we have enough to assert the shape.
+    const pollDeltas: number[] = [];
+    for (let i = 0; i < 30 && pollDeltas.length < 8; i++) {
+      const before = spy.mock.calls.length;
+      await vi.advanceTimersToNextTimerAsync();
+      const after = spy.mock.calls.length;
+      for (let k = before; k < after; k++) pollDeltas.push(Date.now() - t0);
+    }
+    processor.stop();
+
+    // The immediate burst: maxConsecutive + 1 = 6 polls, all at the first interval.
+    const burst = pollDeltas.filter(d => d === 10_000);
+    expect(burst).toHaveLength(6);
+    // After the guard trips, cadence throttles to one poll per pauseMs (50ms).
+    expect(pollDeltas[6]).toBe(10_050);
+    expect(pollDeltas[7]).toBe(10_100);
+  });
+
+  it('partial batch falls back to the normal interval (no immediate re-poll)', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 1_000,
+      adaptiveRepoll: true,
+    });
+    processor.registerHandler('test.event', resolvingHandler());
+    processor.start();
+
+    // 2 < batchSize → partial
+    await repo.saveMessage(buildMessage({ id: 'p-1' }));
+    await repo.saveMessage(buildMessage({ id: 'p-2' }));
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    // No immediate re-poll: nothing fires until the next full interval
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(2);
+
+    processor.stop();
+  });
+
+  it('empty batch uses the normal interval', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 1_000,
+      adaptiveRepoll: true,
+    });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    processor.stop();
+  });
+
+  it('adaptiveRepoll disabled (default): full batches still wait the interval', async () => {
+    const repo = new AlwaysFullRepo();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      processingInterval: 1_000,
+      // adaptiveRepoll omitted → false
+    });
+    processor.registerHandler('test.event', resolvingHandler());
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(1);
+    // even though every batch is full, no immediate re-poll
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spy).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).toHaveBeenCalledTimes(2);
+
+    processor.stop();
+  });
+
+  it('startupJitterMs delays the first poll within the configured window', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const spy = vi.spyOn(repo, 'getUnprocessedMessages');
+    // Force jitter to its max so the first poll lands at processingInterval + 500
+    vi.spyOn(Math, 'random').mockReturnValue(0.999);
+    const processor = new OutboxProcessor(repo, {
+      processingInterval: 1_000,
+      startupJitterMs: 500,
+    });
+    processor.start();
+
+    // Before interval + jitter elapses, no poll yet
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(spy).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(500);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    processor.stop();
+  });
+});

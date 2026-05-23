@@ -56,6 +56,28 @@ export interface OutboxProcessorOptions {
    * Setting this below `messageTimeout` throws a `RangeError` from the constructor.
    */
   crashRecoveryThresholdMs?: number;
+  /**
+   * When `true`, after a **full** batch (every fetched slot used) the processor
+   * re-polls immediately instead of waiting `processingInterval`, draining a
+   * backlog faster. Defaults to `false` (opt-in — no behavior change).
+   */
+  adaptiveRepoll?: boolean;
+  /**
+   * Livelock guard for `adaptiveRepoll`: after this many consecutive full
+   * batches the processor inserts an `adaptiveRepollPauseMs` pause instead of
+   * re-polling immediately, yielding the event loop. Defaults to `5`.
+   */
+  adaptiveRepollMaxConsecutive?: number;
+  /**
+   * Pause (ms) inserted once the `adaptiveRepollMaxConsecutive` guard trips.
+   * Defaults to `50`.
+   */
+  adaptiveRepollPauseMs?: number;
+  /**
+   * Random delay (0..N ms) added before the first poll on `start()`, to
+   * de-synchronize many processors that boot simultaneously. Defaults to `0`.
+   */
+  startupJitterMs?: number;
 }
 
 type ResolvedOptions = Required<
@@ -120,6 +142,10 @@ export class OutboxProcessor {
       messageTypes: options.messageTypes,
       crashRecoveryIntervalMs: options.crashRecoveryIntervalMs,
       crashRecoveryThresholdMs,
+      adaptiveRepoll: options.adaptiveRepoll ?? false,
+      adaptiveRepollMaxConsecutive: options.adaptiveRepollMaxConsecutive ?? 5,
+      adaptiveRepollPauseMs: options.adaptiveRepollPauseMs ?? 50,
+      startupJitterMs: options.startupJitterMs ?? 0,
     };
   }
 
@@ -150,7 +176,11 @@ export class OutboxProcessor {
 
     this.isRunning = true;
     this.logger.info('Starting outbox processor');
-    this.scheduleProcessing();
+    const jitter =
+      this.options.startupJitterMs > 0
+        ? Math.floor(Math.random() * this.options.startupJitterMs)
+        : 0;
+    this.scheduleProcessing(0, this.options.processingInterval + jitter);
     this.scheduleCrashRecovery();
   }
 
@@ -196,18 +226,24 @@ export class OutboxProcessor {
    * **Quiescence:** if there are no pending messages, returns immediately
    * without invoking handlers.
    *
+   * @returns `{ processed, batchSize }` — `processed` is how many messages were
+   *   dispatched this batch, `batchSize` the configured limit. A full batch
+   *   (`processed >= batchSize`) signals a likely backlog. Callers that ignore
+   *   the return value are unaffected (the value was previously `void`).
    * @public
    * @stable
    * @since 0.1.0
    */
-  async processBatch(): Promise<void> {
+  async processBatch(): Promise<{ processed: number; batchSize: number }> {
+    const batchSize = this.options.batchSize;
+
     if (!this.isRunning) {
-      return;
+      return { processed: 0, batchSize };
     }
 
     const [error, result] = await safeRun(() =>
       this.repository.getUnprocessedMessages(
-        this.options.batchSize,
+        batchSize,
         this.options.priorityOrder,
         this.options.messageTypes
       )
@@ -216,13 +252,13 @@ export class OutboxProcessor {
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error retrieving messages: ${errorMessage}`);
-      return;
+      return { processed: 0, batchSize };
     }
 
     const messages = result;
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       this.logger.debug('No pending messages to process');
-      return;
+      return { processed: 0, batchSize };
     }
 
     this.logger.info(`Processing ${messages.length} messages`);
@@ -234,6 +270,7 @@ export class OutboxProcessor {
 
     await Promise.allSettled(processingPromises);
     this.logger.info(`Completed processing batch of ${messages.length} messages`);
+    return { processed: messages.length, batchSize };
   }
 
   /**
@@ -318,17 +355,42 @@ export class OutboxProcessor {
   }
 
   /**
-   * Schedules the next processing cycle
+   * Schedules the next processing cycle.
+   *
+   * With `adaptiveRepoll` enabled, a full batch re-polls immediately (`delay 0`)
+   * to drain a backlog — until `adaptiveRepollMaxConsecutive` consecutive full
+   * batches trip the livelock guard, after which an `adaptiveRepollPauseMs`
+   * pause is inserted. Any non-full batch resets the cadence to
+   * `processingInterval`.
+   *
+   * @param consecutiveFullBatches running count of back-to-back full batches
+   * @param delay milliseconds to wait before the next batch
    */
-  private scheduleProcessing(): void {
+  private scheduleProcessing(
+    consecutiveFullBatches = 0,
+    delay: number = this.options.processingInterval
+  ): void {
     if (!this.isRunning) {
       return;
     }
 
     this.processingTimer = setTimeout(async () => {
-      await this.processBatch();
-      this.scheduleProcessing();
-    }, this.options.processingInterval);
+      const result = await this.processBatch();
+
+      const isFullBatch =
+        this.options.adaptiveRepoll && result.processed > 0 && result.processed >= result.batchSize;
+
+      if (isFullBatch) {
+        const consecutive = consecutiveFullBatches + 1;
+        const nextDelay =
+          consecutive > this.options.adaptiveRepollMaxConsecutive
+            ? this.options.adaptiveRepollPauseMs
+            : 0;
+        this.scheduleProcessing(consecutive, nextDelay);
+      } else {
+        this.scheduleProcessing(0, this.options.processingInterval);
+      }
+    }, delay);
   }
 
   /**
