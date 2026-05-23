@@ -17,7 +17,8 @@ migrated_at: 2026-05-08
 revised_at: 2026-05-10 (consumer feedback round 1)
 revised_at_2:
   2026-05-18 (deep analysis + tech-lead + architecture-guardian review)
-status: in_progress
+completed_at: 2026-05-23
+status: done
 release_target:
   p1_p2: v0.26.1
   p3: v0.26.2
