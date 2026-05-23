@@ -180,6 +180,7 @@ export class EnhancedQueryBus extends IQueryBus {
   private resultCache: LRUCache<string, CachedResult>;
   private cacheTTL: number;
   private cacheEnabled: boolean;
+  private cacheCleanupInterval: ReturnType<typeof setInterval> | undefined;
 
   // Configuration
   private timeout: number;
@@ -248,7 +249,7 @@ export class EnhancedQueryBus extends IQueryBus {
     }
 
     // Clean caches periodically
-    setInterval(() => {
+    this.cacheCleanupInterval = setInterval(() => {
       this.cleanHandlerCache();
       this.cleanResultCache();
     }, 60000); // Every minute
@@ -849,5 +850,18 @@ export class EnhancedQueryBus extends IQueryBus {
       batchesProcessed: 0,
       circuitBreakerTrips: 0,
     };
+  }
+
+  /**
+   * Cleanup resources — clears the cache cleanup interval and all caches.
+   * Call on application shutdown to prevent setInterval leaks.
+   */
+  dispose(): void {
+    if (this.cacheCleanupInterval) {
+      clearInterval(this.cacheCleanupInterval);
+      this.cacheCleanupInterval = undefined;
+    }
+    this.handlerCache.clear();
+    this.resultCache.clear();
   }
 }

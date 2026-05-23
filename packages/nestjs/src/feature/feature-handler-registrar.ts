@@ -1,4 +1,10 @@
-import { Injectable, Inject, Optional, type OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  Optional,
+  type OnModuleDestroy,
+  type OnModuleInit,
+} from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { ModulesContainer } from '@nestjs/core/injector';
 import type { Module } from '@nestjs/core/injector/module';
@@ -32,7 +38,7 @@ interface HandlerEntry {
  *    fallback does not double-register them.
  */
 @Injectable()
-export class FeatureHandlerRegistrar implements OnModuleInit {
+export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
   private readonly logger = Logger.forContext('FeatureHandlerRegistrar');
 
   constructor(
@@ -63,6 +69,17 @@ export class FeatureHandlerRegistrar implements OnModuleInit {
     }
 
     this.logger.info(`Feature module: registered ${handlers.length} handler(s) in local buses`);
+  }
+
+  onModuleDestroy(): void {
+    // Call dispose() on buses that support it (e.g. EnhancedCommandBus / EnhancedQueryBus
+    // run a setInterval for cache cleanup — skipping dispose() causes a leak in tests).
+    const disposable = (bus: unknown): bus is { dispose(): void } =>
+      typeof (bus as { dispose?: unknown }).dispose === 'function';
+
+    if (disposable(this.commandBus)) this.commandBus.dispose();
+    if (disposable(this.queryBus)) this.queryBus.dispose();
+    if (disposable(this.localEventBus)) (this.localEventBus as { dispose(): void }).dispose();
   }
 
   private findOwnModule(): Module | undefined {

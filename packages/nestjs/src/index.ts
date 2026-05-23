@@ -15,6 +15,9 @@ export { ACLAdapterFor } from './decorators/acl-adapter.decorator';
 export type { ACLAdapterMetadata } from './decorators/acl-adapter.decorator';
 export { ACL_REGISTRY, LOCAL_EVENT_BUS } from './constants';
 
+// Per-context event routing dispatcher (use with forFeature())
+export { ContextAwareEventDispatcher } from './dispatchers/context-aware-event-dispatcher';
+
 // Types and interfaces
 export type { HandlerInfo, VytchesDDDModuleOptions } from './types';
 

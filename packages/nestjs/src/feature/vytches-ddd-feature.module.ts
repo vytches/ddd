@@ -7,6 +7,7 @@ import { IEventBus } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from '@vytches/ddd-events';
 import { NestJSContainerAdapter } from '../adapters';
 import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';
+import { ContextAwareEventDispatcher } from '../dispatchers/context-aware-event-dispatcher';
 import { FeatureHandlerRegistrar } from './feature-handler-registrar';
 
 /**
@@ -74,8 +75,10 @@ export class VytchesDDDFeatureModule {
         ModulesContainer,
         // Registrar that wires handlers into the local buses on module init
         FeatureHandlerRegistrar,
+        // Dispatcher that routes DomainEvents → LOCAL_EVENT_BUS, IntegrationEvents → IEventBus
+        ContextAwareEventDispatcher,
       ],
-      exports: [ICommandBus, IQueryBus, LOCAL_EVENT_BUS],
+      exports: [ICommandBus, IQueryBus, LOCAL_EVENT_BUS, ContextAwareEventDispatcher],
     };
   }
 }
