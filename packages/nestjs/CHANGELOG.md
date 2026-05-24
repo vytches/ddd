@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.29.1](https://github.com/vytches/ddd/compare/v0.27.0...v0.29.1) (2026-05-24)
+
+### Bug Fixes
+
+- **nestjs:** replace @nestjs/core/injector directory import with
+  modules-container
+  ([4132a28](https://github.com/vytches/ddd/commit/4132a28feb83d586e012a334709d94905cc291ba))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [0.29.1](https://github.com/vytches/ddd/compare/v0.29.0...v0.29.1) (2026-05-24)
+
+### Bug Fixes
+
+- **nestjs:** replace directory import `@nestjs/core/injector` with
+  `@nestjs/core/injector/modules-container` to fix `ERR_UNSUPPORTED_DIR_IMPORT`
+  in ESM environments
+
 # [0.29.0](https://github.com/vytches/ddd/compare/v0.28.0...v0.29.0) (2026-05-23)
 
 ### Features
