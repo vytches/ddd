@@ -1,6 +1,6 @@
 import { Module, type DynamicModule } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { ModulesContainer } from '@nestjs/core/injector';
+import { ModulesContainer } from '@nestjs/core/injector/modules-container';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { CommandBus, QueryBus, ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import type { IEventBus } from '@vytches/ddd-contracts';
