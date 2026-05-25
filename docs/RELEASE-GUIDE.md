@@ -5,6 +5,22 @@ Jedyne źródło prawdy o procesie releaseowania. ADR-0010 i ADR-0016 są archiw
 
 ---
 
+## Podział odpowiedzialności (KRYTYCZNE dla Claude Code)
+
+| Kto        | Co robi                                                           |
+| ---------- | ----------------------------------------------------------------- |
+| Claude     | Przygotowuje release branch + bumps wersje lerna + pushuje branch |
+| Właściciel | Merge PR do `main` + publikacja npm ręcznie przez GitHub Actions  |
+
+**Claude NIE uruchamia `pnpm build` ani `pnpm publish:packages`.** **Claude NIE
+uruchamia `pnpm release` (który robi version + build + publish).** **Claude
+uruchamia TYLKO: `pnpm lerna version ... --yes` (samo wersjonowanie).**
+
+Publish odbywa się ręcznie przez właściciela w GitHub Actions: → Actions →
+"Release" workflow → `workflow_dispatch` → `publish-only`
+
+---
+
 ## Stan aktualny
 
 | Co              | Gdzie                                                 |
@@ -22,13 +38,21 @@ Jedyne źródło prawdy o procesie releaseowania. ADR-0010 i ADR-0016 są archiw
 Kiedy: masz zmiany na `develop` i chcesz opublikować nową wersję.
 
 ```bash
+# CLAUDE robi (1-3):
+
 # 1. Utwórz release branch z develop
 git checkout develop && git pull
 git checkout -b release/YYYY-MM-DD
 git push -u origin release/YYYY-MM-DD
 
-# 2. Jeden skrypt robi wszystko
-pnpm release
+# 2. Zbumpuj wersje (TYLKO wersjonowanie, bez build/publish)
+NX_DAEMON=false pnpm lerna version --conventional-commits --yes
+
+# 3. Release branch gotowy — Claude kończy pracę tutaj
+
+# WŁAŚCICIEL robi (4-5):
+# 4. Utwórz PR release/YYYY-MM-DD → main i zmerguj
+# 5. GitHub Actions → "Release" workflow → Run workflow → publish-only
 ```
 
 Co robi `pnpm release`:
