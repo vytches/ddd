@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.29.3](https://github.com/vytches/ddd/compare/v0.27.0...v0.29.3) (2026-05-25)
+
+**Note:** Version bump only for package @vytches/ddd-events
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.29.2](https://github.com/vytches/ddd/compare/v0.27.0...v0.29.2) (2026-05-25)
 
 **Note:** Version bump only for package @vytches/ddd-events
