@@ -55,21 +55,6 @@ NX_DAEMON=false pnpm lerna version --conventional-commits --yes
 # 5. GitHub Actions → "Release" workflow → Run workflow → publish-only
 ```
 
-Co robi `pnpm release`:
-
-1. `lerna version --conventional-commits --yes` — bumpuje wersje na podstawie
-   commitów (feat → minor, fix → patch), tworzy commit + tagi, pushuje
-   automatycznie
-2. `pnpm build` — buduje wszystkie pakiety
-3. `pnpm publish:packages` — publikuje na npmjs.org (`pnpm publish` konwertuje
-   `workspace:*` do konkretnych wersji)
-
-```bash
-# 3. PR do main
-gh pr create --title "Release $(date +%Y-%m-%d)" --body "Release"
-# Po review → merge
-```
-
 ---
 
 ## Hotfix
