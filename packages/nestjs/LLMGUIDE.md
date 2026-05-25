@@ -365,6 +365,46 @@ Handlers must be in `providers` of their module to be injectable and
 discoverable. They are auto-registered with the appropriate bus (command, query,
 event) based on their decorator.
 
+## Known Caveats
+
+### ERR_UNSUPPORTED_DIR_IMPORT / vite-node resolver in Vitest
+
+**Symptom:** Tests fail with `ERR_UNSUPPORTED_DIR_IMPORT` or
+`Cannot find module '@nestjs/core/injector/...'` when running Vitest with
+`pool: 'forks'` or `pool: 'threads'`.
+
+**Root cause:** `@nestjs/core` has no `exports` field, so Node.js native ESM
+falls back to CJS-style `LOAD_AS_FILE` resolution (auto-appends `.js`). Vitest
+uses vite-node as its module resolver, which applies a stricter ESM resolution
+algorithm that does **not** perform this fallback. The library code is correct
+for native Node.js ESM — the mismatch is in vite-node.
+
+**Workaround (consumer side):** Add a resolve alias in your Vitest integration
+config to force the CJS build of this package:
+
+```typescript
+// vitest-integration.config.ts
+import { resolve } from 'path';
+
+export default {
+  resolve: {
+    alias: [
+      {
+        find: '@vytches/ddd-nestjs',
+        replacement: resolve(
+          __dirname,
+          'node_modules/@vytches/ddd-nestjs/dist/index.cjs'
+        ),
+      },
+    ],
+  },
+};
+```
+
+The CJS build uses `require()` which handles directory resolution correctly.
+This alias is only needed for the Vitest test environment — production runtime
+(native Node.js ESM) works without it.
+
 ## Package Dependencies
 
 **Peer dependencies:** `@nestjs/common ^10`, `@nestjs/core ^10`, `rxjs ^7`,

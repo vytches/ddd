@@ -8,7 +8,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS DI metadata
 import { ModuleRef } from '@nestjs/core';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS DI metadata
-import { ModulesContainer } from '@nestjs/core/injector/modules-container';
+import { ModulesContainer } from '@nestjs/core/injector/modules-container.js';
 import type { Module } from '@nestjs/core/injector/module';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';

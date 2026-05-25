@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.29.2](https://github.com/vytches/ddd/compare/v0.27.0...v0.29.2) (2026-05-25)
+
+### Bug Fixes
+
+- **nestjs:** add .js extension to modules-container import for vite-node ESM
+  compat
+  ([674eba5](https://github.com/vytches/ddd/commit/674eba5c43cbbdffce460a9dce206612e893004c))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.29.1](https://github.com/vytches/ddd/compare/v0.27.0...v0.29.1) (2026-05-24)
 
 ### Bug Fixes
