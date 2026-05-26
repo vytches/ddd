@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
+
+### Features
+
+- **messaging:** add OutboxProcessor.registerDefaultHandler + comparePriority
+  helper (VP-008)
+  ([ac59b0a](https://github.com/vytches/ddd/commit/ac59b0ae4067bb42b4a339fc767be1ffc0d89edc))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0] (unreleased) — VP-008
 
 ### Features

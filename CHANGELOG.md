@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
+
+### Bug Fixes
+
+- **build:** externalize workspace deps to prevent absolute paths in dist
+  ([f95d97b](https://github.com/vytches/ddd/commit/f95d97b61d5db4f35016561c6a8e84a60e4b0f37))
+
+### Features
+
+- **messaging:** add OutboxProcessor.registerDefaultHandler + comparePriority
+  helper (VP-008)
+  ([ac59b0a](https://github.com/vytches/ddd/commit/ac59b0ae4067bb42b4a339fc767be1ffc0d89edc))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.29.3](https://github.com/vytches/ddd/compare/v0.27.0...v0.29.3) (2026-05-25)
 
 **Note:** Version bump only for package @vytches/ddd
