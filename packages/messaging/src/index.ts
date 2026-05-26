@@ -13,6 +13,9 @@ export type {
 // Outbox Pattern - Enums
 export { MessageStatus, MessagePriority } from './outbox';
 
+// Outbox Pattern - Functions
+export { comparePriority } from './outbox';
+
 // Outbox Pattern - Classes
 export {
   IOutboxRepository,
