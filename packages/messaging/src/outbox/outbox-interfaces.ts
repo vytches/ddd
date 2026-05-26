@@ -66,3 +66,38 @@ export interface IOutboxMessageHandler<T = unknown> {
 export type OutboxMiddleware = (
   next: (message: IOutboxMessage) => Promise<void>
 ) => (message: IOutboxMessage) => Promise<void>;
+
+const DEFAULT_PRIORITY_ORDER: MessagePriority[] = [
+  MessagePriority.CRITICAL,
+  MessagePriority.HIGH,
+  MessagePriority.NORMAL,
+  MessagePriority.LOW,
+];
+
+/**
+ * Compares two MessagePriority values for sorting purposes.
+ *
+ * Returns a negative number if `a` should be processed before `b`,
+ * positive if `b` before `a`, 0 if equal.
+ *
+ * @param order - Processing order array (first element = highest priority).
+ *   Defaults to [CRITICAL, HIGH, NORMAL, LOW].
+ *   Values absent from the array sort LAST (treated as lowest priority).
+ *   Passing a partial array is safe — missing values are not promoted.
+ *
+ * @example
+ * // Sort messages by priority (highest first):
+ * messages.sort((a, b) => comparePriority(a.priority, b.priority));
+ *
+ * // Custom order:
+ * messages.sort((a, b) => comparePriority(a.priority, b.priority, ['high', 'critical', 'normal', 'low']));
+ */
+export function comparePriority(
+  a: MessagePriority,
+  b: MessagePriority,
+  order: MessagePriority[] = DEFAULT_PRIORITY_ORDER
+): number {
+  const rankA = order.includes(a) ? order.indexOf(a) : order.length;
+  const rankB = order.includes(b) ? order.indexOf(b) : order.length;
+  return rankA - rankB;
+}

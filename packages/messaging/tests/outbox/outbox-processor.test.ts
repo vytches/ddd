@@ -798,6 +798,126 @@ describe('OutboxProcessor — observability hooks (Part 5a)', () => {
   });
 });
 
+describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
+  let repo: InMemoryOutboxRepository;
+  let processor: OutboxProcessor;
+
+  beforeEach(() => {
+    repo = new InMemoryOutboxRepository();
+    processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      maxRetries: 3,
+      processingInterval: 1000,
+      messageTimeout: 5000,
+    });
+    processor.start();
+  });
+
+  it('type-specific handler wins over default handler when type matches', async () => {
+    const specificCalls: string[] = [];
+    const defaultCalls: string[] = [];
+
+    processor.registerHandler('type.A', {
+      handle: async msg => {
+        specificCalls.push(msg.id);
+      },
+    });
+    processor.registerDefaultHandler({
+      handle: async msg => {
+        defaultCalls.push(msg.id);
+      },
+    });
+
+    await repo.saveMessage(buildMessage({ id: 'a-1', messageType: 'type.A' }));
+    await processor.processBatch();
+
+    expect(specificCalls).toEqual(['a-1']);
+    expect(defaultCalls).toHaveLength(0);
+  });
+
+  it('default handler is invoked for a type with no registered type-specific handler', async () => {
+    const defaultCalls: string[] = [];
+
+    processor.registerDefaultHandler({
+      handle: async msg => {
+        defaultCalls.push(msg.id);
+      },
+    });
+
+    await repo.saveMessage(buildMessage({ id: 'u-1', messageType: 'unregistered.type' }));
+    await processor.processBatch();
+
+    expect(defaultCalls).toEqual(['u-1']);
+    expect(repo.store.get('u-1')?.status).toBe(MessageStatus.PROCESSED);
+  });
+
+  it('throws (message ends FAILED/retry) when neither type-specific nor default handler exists', async () => {
+    // No handlers registered at all — missing handler should increment attempts
+    await repo.saveMessage(buildMessage({ id: 'no-handler', messageType: 'orphan.type' }));
+    await processor.processBatch();
+
+    const stored = repo.store.get('no-handler')!;
+    // Missing handler is a processing error — attempt counter incremented
+    expect(stored.attempts).toBeGreaterThan(0);
+    // Status is PENDING (retry) or FAILED depending on maxRetries, but not PROCESSED
+    expect(stored.status).not.toBe(MessageStatus.PROCESSED);
+  });
+
+  it('default handler runs through the full middleware pipeline', async () => {
+    const log: string[] = [];
+
+    processor.use(next => async msg => {
+      log.push(`before:${msg.id}`);
+      await next(msg);
+      log.push(`after:${msg.id}`);
+    });
+    processor.registerDefaultHandler({
+      handle: async msg => {
+        log.push(`default:${msg.id}`);
+      },
+    });
+
+    await repo.saveMessage(buildMessage({ id: 'd-1', messageType: 'any.type' }));
+    await processor.processBatch();
+
+    expect(log).toEqual(['before:d-1', 'default:d-1', 'after:d-1']);
+  });
+
+  it('getStats returns hasDefaultHandler false before and true after registration', async () => {
+    const statsBefore = await processor.getStats();
+    expect(statsBefore.hasDefaultHandler).toBe(false);
+
+    processor.registerDefaultHandler({ handle: vi.fn().mockResolvedValue(undefined) });
+
+    const statsAfter = await processor.getStats();
+    expect(statsAfter.hasDefaultHandler).toBe(true);
+  });
+
+  it('second registerDefaultHandler call silently replaces the first (idempotent)', async () => {
+    const firstCalls: string[] = [];
+    const secondCalls: string[] = [];
+
+    processor.registerDefaultHandler({
+      handle: async msg => {
+        firstCalls.push(msg.id);
+      },
+    });
+
+    processor.registerDefaultHandler({
+      handle: async msg => {
+        secondCalls.push(msg.id);
+      },
+    });
+
+    await repo.saveMessage(buildMessage({ id: 'r-1', messageType: 'replace.type' }));
+    await processor.processBatch();
+
+    expect(firstCalls).toHaveLength(0);
+    expect(secondCalls).toEqual(['r-1']);
+    // No error thrown — idempotent replacement
+  });
+});
+
 describe('OutboxProcessor.processBatch — return value (Part 4)', () => {
   let repo: InMemoryOutboxRepository;
 

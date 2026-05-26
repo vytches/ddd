@@ -103,6 +103,7 @@ export class OutboxProcessor {
   private readonly repository: IOutboxRepository;
   private readonly options: ResolvedOptions;
   private readonly handlers = new Map<string, IOutboxMessageHandler>();
+  private defaultHandler?: IOutboxMessageHandler;
   private readonly middlewares: OutboxMiddleware[] = [];
   private isRunning = false;
   private processingTimer?: NodeJS.Timeout | undefined;
@@ -183,6 +184,26 @@ export class OutboxProcessor {
   registerHandler(messageType: string, handler: IOutboxMessageHandler): void {
     this.handlers.set(messageType, handler);
     this.logger.debug(`Registered handler for message type: ${messageType}`);
+  }
+
+  /**
+   * Registers a catch-all handler invoked when no type-specific handler matches.
+   *
+   * NOTE: Registering a default handler removes the implicit type allowlist —
+   * all future message types, including ones added by mistake or injected via
+   * compromised storage, will be dispatched to this handler. Validate
+   * `message.messageType` inside the handler against a known-types set if your
+   * domain requires an explicit allowlist.
+   *
+   * NOTE: When `messageTypes` filter option is set, the default handler handles
+   * only types that pass through that filter. To handle all types, leave
+   * `messageTypes` unset.
+   *
+   * Calling this method a second time silently replaces the previous default
+   * handler (idempotent).
+   */
+  registerDefaultHandler(handler: IOutboxMessageHandler): void {
+    this.defaultHandler = handler;
   }
 
   /**
@@ -349,9 +370,12 @@ export class OutboxProcessor {
    * Builds the middleware pipeline for message processing
    */
   private buildPipeline(message: IOutboxMessage): (msg: IOutboxMessage) => Promise<void> {
-    const handler = this.handlers.get(message.messageType);
+    const handler = this.handlers.get(message.messageType) ?? this.defaultHandler;
     if (!handler) {
       throw new Error(`No handler registered for message type: ${message.messageType}`);
+    }
+    if (!this.handlers.has(message.messageType)) {
+      this.logger.debug(`Default handler used for message type: ${message.messageType}`);
     }
 
     // Create the final handler function
@@ -504,6 +528,7 @@ export class OutboxProcessor {
     processingInterval: number;
     registeredHandlers: string[];
     middlewareCount: number;
+    hasDefaultHandler: boolean;
   }> {
     return {
       isRunning: this.isRunning,
@@ -512,6 +537,7 @@ export class OutboxProcessor {
       processingInterval: this.options.processingInterval,
       registeredHandlers: Array.from(this.handlers.keys()),
       middlewareCount: this.middlewares.length,
+      hasDefaultHandler: this.defaultHandler !== undefined,
     };
   }
 }
