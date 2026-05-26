@@ -17,14 +17,19 @@ export abstract class IOutboxRepository {
   abstract saveBatch<T = unknown>(messages: IOutboxMessage<T>[]): Promise<string[]>;
 
   /**
-   * Gets unprocessed messages from the outbox
-   * @param limit Maximum number of messages to retrieve
-   * @param priorityOrder Order of priority for processing (default: [CRITICAL, HIGH, NORMAL, LOW])
-   * @param messageTypes Optional allow-list of message types to fetch. When
-   *   provided, only messages whose `messageType` is in this list are returned
-   *   (e.g. `WHERE message_type IN (...)`). Omitting it fetches all types —
-   *   this parameter is optional and backward-compatible.
-   * @returns Unprocessed messages
+   * Returns unprocessed messages up to the given limit.
+   *
+   * @param limit - Maximum number of messages to return.
+   * @param priorityOrder - Ordered array of MessagePriority values defining
+   *   processing order (first element = highest priority, processed first).
+   *   Implementations MUST sort results by the position of each message's
+   *   priority in this array — do NOT use ORDER BY priority directly on the
+   *   string column. Alphabetical sort inverts the intent: 'critical' sorts
+   *   after 'high' alphabetically, causing CRITICAL messages to be processed
+   *   last. Use comparePriority() or array index-based sorting instead.
+   * @param messageTypes - Optional allow-list of message types to return.
+   *   When provided, only messages whose messageType is in this array are
+   *   returned. When absent, all message types are returned.
    */
   abstract getUnprocessedMessages(
     limit?: number,

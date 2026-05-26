@@ -143,3 +143,31 @@ docs/api/
 
 # REL-007: explicitly ignore .env.development (was tracked but always empty)
 .env.development
+.claude/knowledge/patterns/
+.claude/knowledge/patterns-local/
+.claude/knowledge/rules/
+.claude/skills/
+.claude/hooks/cost-optimizer.sh
+.claude/hooks/session-monitor.sh
+.claude/hooks/state-manager.sh
+.claude/agents/code-quality-verifier.md
+.claude/agents/ddd-application-expert.md
+.claude/agents/security-e2e-verifier.md
+.claude/agents/implementers/
+.claude/agents/ts-implementer.md
+.claude/agents/safety-reviewer.md
+.claude/agents/architecture-verifier.md
+.claude/agents/content-reviewer.md
+.claude/agents/astro-implementer.md
+.claude/agents/flutter-architecture-expert.md
+.claude/agents/flutter-quality-verifier.md
+.claude/agents/flutter-ui-verifier.md
+.claude/agents/python-architecture-expert.md
+.claude/agents/python-quality-verifier.md
+.claude/agents/nextjs-architecture-expert.md
+.claude/agents/nextjs-quality-verifier.md
+.claude/agents/sveltekit-architecture-expert.md
+.claude/agents/sveltekit-quality-verifier.md
+.claude/agents/library-api-guardian.md
+.claude/agents/library-quality-verifier.md
+.claude/agents/tech-lead.md

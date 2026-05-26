@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
+
+### Features
+
+- **messaging:** add OutboxProcessor.registerDefaultHandler + comparePriority
+  helper (VP-008)
+  ([ac59b0a](https://github.com/vytches/ddd/commit/ac59b0ae4067bb42b4a339fc767be1ffc0d89edc))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [0.30.0] (unreleased) — VP-008
+
+### Features
+
+- **messaging:** add `registerDefaultHandler` catch-all fallback to
+  `OutboxProcessor` — enables fan-out use case (one handler for N event types)
+  without per-type registration boilerplate
+- **messaging:** export `comparePriority(a, b, order?)` helper — correct
+  priority-aware sorting for `IOutboxRepository` implementations; safe for
+  partial `order` arrays (missing values sort last)
+- **messaging:** extend `getStats()` with `hasDefaultHandler: boolean`
+
+### Documentation
+
+- **messaging:** strengthen `IOutboxRepository.getUnprocessedMessages` JSDoc
+  with MUST clause — warns against `ORDER BY priority` on string column
+  (alphabetical sort inverts intent)
+- **messaging:** LLMGUIDE fan-out recipe with security warnings and SQL `CASE`
+  priority example
+- **messaging:** README Quick Start updated to reflect current constructor API
+
+---
+
 ## [0.29.3](https://github.com/vytches/ddd/compare/v0.27.0...v0.29.3) (2026-05-25)
 
 **Note:** Version bump only for package @vytches/ddd-messaging

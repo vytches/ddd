@@ -1,292 +1,245 @@
-# Outbox Pattern in DomainTS - LLM-Optimized Guide
+# Outbox Pattern — How-To Guide
 
-## Document Metadata
+## Overview
 
-- **Pattern Name**: Outbox Pattern
-- **Category**: Infrastructure Pattern
-- **Purpose**: Ensure reliable message publishing in distributed systems
-- **Library**: DomainTS
-- **Language**: TypeScript
-- **Version**: 1.0.0
-
-## Pattern Overview
-
-### What is the Outbox Pattern?
-
-The Outbox Pattern ensures atomicity between database transactions and message
-publishing. Instead of directly publishing messages after database operations,
-messages are stored in an "outbox" table within the same transaction. A separate
-process then publishes these messages asynchronously.
-
-**Core Benefit**: Prevents data inconsistency when database operations succeed
-but message publishing fails.
-
-### Primary Use Cases
-
-1. **Reliable Event Publishing**: Guarantee domain events are not lost
-2. **Integration Events**: Safely communicate changes to external systems
-3. **Asynchronous Communication**: Decouple message publishing from business
-   transactions
-4. **System Resilience**: Handle temporary failures in message infrastructure
+The Outbox pattern guarantees at-least-once delivery of integration events by
+writing messages to the database in the same transaction as the domain state
+change. A background processor then polls and dispatches them.
 
 ## Core Components
 
-### 1. IOutboxMessage Interface
+### `IOutboxMessage`
 
 ```typescript
-interface IOutboxMessage<T = any> {
-  id: string; // Unique identifier
-  messageType: string; // Type for routing/handling
-  payload: T; // Message content
-  metadata: Record<string, any>; // Additional context
-  status: MessageStatus; // Processing state
-  attempts: number; // Retry counter
-  createdAt: Date; // Creation timestamp
-  processAfter?: Date; // Delayed processing
-  priority?: MessagePriority; // Processing order
-  lastError?: string; // Error information
+interface IOutboxMessage<T = unknown> {
+  id: string;
+  messageType: string;
+  payload: T;
+  metadata: Record<string, unknown>;
+  status: MessageStatus; // PENDING | PROCESSING | PROCESSED | FAILED
+  attempts: number;
+  createdAt: Date;
+  processAfter?: Date; // for delayed / retry-backoff scheduling
+  priority?: MessagePriority; // low | normal | high | critical
+  lastError?: string;
 }
 ```
 
-### 2. Supporting Enums
+### `IOutboxRepository` — what you implement
+
+Extend this abstract class for your storage backend:
 
 ```typescript
-enum MessageStatus {
-  PENDING = 'PENDING', // Awaiting processing
-  PROCESSING = 'PROCESSING', // Currently being processed
-  PROCESSED = 'PROCESSED', // Successfully completed
-  FAILED = 'FAILED', // Processing failed
-}
+class PgOutboxRepository extends IOutboxRepository {
+  async saveMessage<T>(message: IOutboxMessage<T>): Promise<string> { ... }
+  async saveBatch<T>(messages: IOutboxMessage<T>[]): Promise<string[]> { ... }
 
-enum MessagePriority {
-  LOW = 'low',
-  NORMAL = 'normal',
-  HIGH = 'high',
-  CRITICAL = 'critical',
-}
-```
-
-### 3. OutboxMessageFactory
-
-Factory for creating outbox messages with common patterns:
-
-```typescript
-class OutboxMessageFactory {
-  static createMessage<T>(
-    messageType: string,
-    payload: T,
-    options?: OutboxMessageOptions
-  ): IOutboxMessage<T>;
-  static createDelayedMessage<T>(
-    messageType: string,
-    payload: T,
-    delayMs: number,
-    options?: OutboxMessageOptions
-  ): IOutboxMessage<T>;
-  static createHighPriorityMessage<T>(
-    messageType: string,
-    payload: T,
-    options?: OutboxMessageOptions
-  ): IOutboxMessage<T>;
-  static createFromIntegrationEvent<T>(
-    event: IntegrationEvent,
-    options?: OutboxMessageOptions
-  ): IOutboxMessage<T>;
-}
-```
-
-### 4. IOutboxRepository
-
-Abstract interface for outbox persistence:
-
-```typescript
-abstract class IOutboxRepository {
-  // Core operations
-  abstract saveMessage<T>(message: IOutboxMessage<T>): Promise<string>;
-  abstract saveBatch<T>(messages: IOutboxMessage<T>[]): Promise<string[]>;
-
-  // Retrieval
-  abstract getUnprocessedMessages(
+  async getUnprocessedMessages(
     limit?: number,
-    priorityOrder?: MessagePriority[]
-  ): Promise<IOutboxMessage[]>;
-  abstract getById(id: string): Promise<IOutboxMessage | null>;
+    priorityOrder?: MessagePriority[],
+    messageTypes?: string[]
+  ): Promise<IOutboxMessage[]> {
+    // IMPORTANT: sort by priorityOrder array index, NOT by the priority column string.
+    // 'critical' < 'high' alphabetically, so ORDER BY priority DESC processes CRITICAL last.
+    // Use a CASE expression:
+    //   ORDER BY CASE priority
+    //     WHEN 'critical' THEN 0
+    //     WHEN 'high'     THEN 1
+    //     WHEN 'normal'   THEN 2
+    //     WHEN 'low'      THEN 3
+    //     ELSE 4
+    //   END
+    // Or use the exported comparePriority() helper for in-memory sorting.
+  }
 
-  // Status management
-  abstract updateStatus(
-    id: string,
-    status: MessageStatus,
-    error?: Error
-  ): Promise<void>;
-  abstract incrementAttempt(id: string): Promise<number>;
+  async getById(id: string): Promise<IOutboxMessage | null> { ... }
+  async updateStatus(id: string, status: MessageStatus, error?: Error): Promise<void> { ... }
+  async updateStatusBatch(ids: string[], status: MessageStatus): Promise<void> { ... }
+  async incrementAttempt(id: string): Promise<number> { ... }
+  async deleteByStatusAndAge(olderThan: Date, status: MessageStatus): Promise<number> { ... }
+  async scheduleMessage<T>(message: IOutboxMessage<T>, processAfter: Date): Promise<string> { ... }
 
-  // Maintenance
-  abstract deleteByStatusAndAge(
-    olderThan: Date,
-    status: MessageStatus
-  ): Promise<number>;
+  // Optional overrides (default: no-op)
+  async scheduleRetry(id: string, processAfter: Date): Promise<void> { ... }
+  async resetStaleProcessing(olderThan: Date): Promise<number> { ... }
 }
 ```
 
-## Basic Usage Pattern
-
-### 1. Saving Messages with Domain Operations
+## Creating messages
 
 ```typescript
-class OrderService {
-  async placeOrder(order: Order): Promise<void> {
-    await this.unitOfWork.transaction(async () => {
-      // Save domain changes
-      await this.orderRepository.save(order);
+import { OutboxMessageFactory, MessagePriority } from '@vytches/ddd-messaging';
 
-      // Create outbox message in same transaction
-      const outboxMessage = OutboxMessageFactory.createMessage('OrderPlaced', {
-        orderId: order.id,
-        customerId: order.customerId,
-        totalAmount: order.totalAmount,
-      });
+const factory = new OutboxMessageFactory();
 
-      await this.outboxRepository.saveMessage(outboxMessage);
-    });
-  }
-}
-```
-
-### 2. Processing Outbox Messages
-
-```typescript
-class OutboxProcessor {
-  async processMessages(): Promise<void> {
-    const messages = await this.outboxRepository.getUnprocessedMessages(10);
-
-    for (const message of messages) {
-      try {
-        await this.outboxRepository.updateStatus(
-          message.id,
-          MessageStatus.PROCESSING
-        );
-        await this.eventBus.publish(message.messageType, message.payload);
-        await this.outboxRepository.updateStatus(
-          message.id,
-          MessageStatus.PROCESSED
-        );
-      } catch (error) {
-        await this.handleFailure(message, error);
-      }
-    }
-  }
-
-  private async handleFailure(
-    message: IOutboxMessage,
-    error: Error
-  ): Promise<void> {
-    const attempts = await this.outboxRepository.incrementAttempt(message.id);
-
-    if (attempts >= 3) {
-      await this.outboxRepository.updateStatus(
-        message.id,
-        MessageStatus.FAILED,
-        error
-      );
-    } else {
-      // Return to pending for retry
-      await this.outboxRepository.updateStatus(
-        message.id,
-        MessageStatus.PENDING
-      );
-    }
-  }
-}
-```
-
-## Key Concepts
-
-### Message States and Transitions
-
-- **PENDING → PROCESSING**: Message picked up for processing
-- **PROCESSING → PROCESSED**: Successful completion
-- **PROCESSING → FAILED**: Final failure after retries
-- **FAILED/PENDING → PROCESSING**: Retry attempt
-
-### Priority Processing
-
-Messages are processed based on priority (CRITICAL → HIGH → NORMAL → LOW).
-Critical business events (payments, security) should use higher priorities.
-
-### Delayed Processing
-
-Messages can be scheduled for future processing using `processAfter` field.
-Useful for reminders, scheduled tasks, or implementing delays between retries.
-
-### Batch Operations
-
-Multiple messages can be saved in a single transaction using `saveBatch()` for
-related events that must be published together.
-
-## Best Practices
-
-### 1. Transaction Boundaries
-
-Always save outbox messages within the same transaction as domain changes:
-
-```typescript
-// Correct
-await transaction(async () => {
-  await saveOrder(order);
-  await saveOutboxMessage(message);
+const message = factory.create({
+  messageType: 'order.placed',
+  payload: { orderId: '123', customerId: 'abc' },
+  priority: MessagePriority.HIGH,
 });
 ```
 
-### 2. Message Design
+## Saving in a transaction
 
-Messages should be self-contained with all necessary information. Avoid designs
-requiring additional lookups.
+Always save the outbox message in the same transaction as the aggregate:
 
-### 3. Idempotency
+```typescript
+await db.transaction(async tx => {
+  await orderRepo.save(order, tx);
+  await outboxRepo.saveMessage(
+    factory.create({
+      messageType: 'order.placed',
+      payload: { orderId: order.id },
+      priority: MessagePriority.HIGH,
+    })
+  );
+});
+```
 
-Ensure message handlers are idempotent - processing the same message multiple
-times should have the same effect as processing it once.
+## Setting up the processor
 
-### 4. Error Handling
+```typescript
+import { OutboxProcessor, MessagePriority } from '@vytches/ddd-messaging';
 
-Implement retry logic with exponential backoff for transient errors. Distinguish
-between retriable and permanent failures.
+const processor = new OutboxProcessor(repo, {
+  batchSize: 50,
+  processingInterval: 2_000, // ms between polls
+  maxRetries: 3,
+  messageTimeout: 30_000,
+  retryBackoff: { initial: 1_000, multiplier: 2, maxDelay: 300_000 },
+  startupJitterMs: 500, // de-synchronize multi-pod starts
+  adaptiveRepoll: true, // drain backlog without waiting full interval
+  crashRecoveryIntervalMs: 60_000,
+});
+```
 
-### 5. Monitoring
+## Registering handlers
 
-Track key metrics:
+### Per-type handler (strict allowlist)
 
-- Pending messages count
-- Processing time
-- Failure rate
-- Message age
+```typescript
+processor.registerHandler('order.placed', new OrderPlacedHandler(eventBus));
+processor.registerHandler(
+  'payment.captured',
+  new PaymentCapturedHandler(queue)
+);
+```
 
-## Performance Considerations
+### Default (catch-all) handler for fan-out
 
-1. **Database Indexes**: Create indexes on status, priority, and processAfter
-   fields
-2. **Batch Processing**: Process messages in batches for better throughput
-3. **Concurrent Processing**: Use database row locking (e.g.,
-   `FOR UPDATE SKIP LOCKED`)
-4. **Cleanup**: Regularly delete old processed messages
+When all event types are handled identically (e.g. route to a queue per
+context):
 
-## Integration with DomainTS
+```typescript
+import { type IOutboxMessageHandler } from '@vytches/ddd-messaging';
 
-The Outbox Pattern integrates seamlessly with other DomainTS components:
+const KNOWN_TYPES = new Set([
+  'order.placed',
+  'payment.captured',
+  'user.registered',
+]);
 
-- **Unit of Work**: Ensures messages are saved in the same transaction
-- **Domain Events**: Automatically converted to outbox messages
-- **Event Bus**: Publishes messages after successful processing
-- **Repository Pattern**: Consistent data access patterns
+const fanOut: IOutboxMessageHandler = {
+  async handle(message) {
+    // Validate against known set — default handler removes the implicit allowlist
+    if (!KNOWN_TYPES.has(message.messageType)) {
+      throw new Error(`Unknown message type: ${message.messageType}`);
+    }
+    await queue.add(message.messageType, message.payload, {
+      jobId: message.id,
+    });
+  },
+};
 
-## Conclusion
+processor.registerDefaultHandler(fanOut);
+```
 
-The Outbox Pattern provides reliable message publishing with:
+> **Warning:** `registerDefaultHandler` removes the implicit per-type allowlist.
+> Any future message type (including typos or injected rows) will be dispatched
+> automatically. Always validate `message.messageType` inside the handler.
 
-- **Atomicity**: Database and message operations in single transaction
-- **Reliability**: Guaranteed delivery with retry mechanisms
-- **Flexibility**: Support for priorities, delays, and batch operations
-- **Resilience**: Handles failures gracefully with configurable retries
+## Priority helper
 
-This pattern is essential for maintaining consistency in distributed systems
-while ensuring reliable communication between services.
+For in-memory sorting or custom repository implementations:
+
+```typescript
+import { comparePriority, MessagePriority } from '@vytches/ddd-messaging';
+
+// Sort highest-priority first:
+messages.sort((a, b) =>
+  comparePriority(
+    a.priority ?? MessagePriority.NORMAL,
+    b.priority ?? MessagePriority.NORMAL
+  )
+);
+
+// Custom order:
+const order = [
+  MessagePriority.HIGH,
+  MessagePriority.CRITICAL,
+  MessagePriority.NORMAL,
+  MessagePriority.LOW,
+];
+messages.sort((a, b) => comparePriority(a.priority!, b.priority!, order));
+```
+
+Missing values in the `order` array sort last (not first) — safe for partial
+arrays.
+
+## Observability hooks
+
+```typescript
+const processor = new OutboxProcessor(repo, {
+  hooks: {
+    onBatchComplete({ processed, failed, durationMs }) {
+      metrics.record('outbox.batch', { processed, failed, durationMs });
+    },
+    onMessageFailed(message, error, attempt) {
+      logger.warn(
+        `Message ${message.id} failed (attempt ${attempt}): ${error.message}`
+      );
+    },
+    onPermanentFailure(message, error) {
+      alerting.send(
+        `Permanent outbox failure: ${message.messageType} / ${message.id}`
+      );
+    },
+  },
+});
+```
+
+## Processor lifecycle
+
+```typescript
+processor.start(); // begins polling loop (with optional startupJitterMs delay)
+processor.stop(); // stops polling, clears timers
+
+const stats = await processor.getStats();
+// { isRunning, batchSize, maxRetries, processingInterval,
+//   registeredHandlers, middlewareCount, hasDefaultHandler }
+```
+
+## Multiple processors on the same table
+
+Use `messageTypes` to partition the outbox between specialized processors:
+
+```typescript
+// General fan-out processor
+const generalProcessor = new OutboxProcessor(repo, {
+  batchSize: 200,
+  adaptiveRepoll: true,
+});
+generalProcessor.registerDefaultHandler(fanOutHandler);
+generalProcessor.start();
+
+// Dedicated GDPR audit processor
+const gdprProcessor = new OutboxProcessor(repo, {
+  messageTypes: ['GdprAuditChainAppend'],
+  batchSize: 10,
+});
+gdprProcessor.registerHandler('GdprAuditChainAppend', new GdprChainHandler());
+gdprProcessor.start();
+```
+
+Both processors use `FOR UPDATE SKIP LOCKED` (your repository implementation) to
+avoid processing the same row twice.
