@@ -3,10 +3,16 @@ export interface MaskingOptions {
   patterns: string[];
   replacement: string;
   sensitiveKeys: string[];
+  /** Maximum recursion depth when traversing nested objects. Default: 10. */
+  maxDepth: number;
+  /** Strings longer than this are replaced with '[TRUNCATED:string]'. Default: 1000. */
+  maxStringLength: number;
 }
 
 export class DataMasker {
   private static readonly DEFAULT_SENSITIVE_KEYS: string[] = [];
+  private static readonly DEFAULT_MAX_DEPTH = 10;
+  private static readonly DEFAULT_MAX_STRING_LENGTH = 1000;
 
   private static readonly DEFAULT_PATTERNS = [
     /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, // Email
@@ -24,12 +30,14 @@ export class DataMasker {
       patterns: options.patterns ?? [],
       replacement: options.replacement ?? '[MASKED]',
       sensitiveKeys: options.sensitiveKeys ?? DataMasker.DEFAULT_SENSITIVE_KEYS,
+      maxDepth: options.maxDepth ?? DataMasker.DEFAULT_MAX_DEPTH,
+      maxStringLength: options.maxStringLength ?? DataMasker.DEFAULT_MAX_STRING_LENGTH,
     };
 
-    // Use default patterns only when no explicit patterns AND no sensitive keys provided
-    const shouldUseDefaultPatterns =
-      this.options.patterns.length === 0 && this.options.sensitiveKeys.length === 0;
-    const defaultPatterns = shouldUseDefaultPatterns ? DataMasker.DEFAULT_PATTERNS : [];
+    // Default regex patterns always apply unless caller provides explicit pattern overrides.
+    // sensitiveKeys are additive — they extend, not replace, default patterns.
+    const defaultPatterns =
+      this.options.patterns.length === 0 ? DataMasker.DEFAULT_PATTERNS : [];
 
     this.compiledPatterns = [
       ...defaultPatterns,
@@ -43,10 +51,14 @@ export class DataMasker {
     }
 
     const visitedObjects = new WeakSet();
-    return this.maskRecursive(data, visitedObjects);
+    return this.maskRecursive(data, visitedObjects, 0);
   }
 
-  private maskRecursive(value: unknown, visitedObjects: WeakSet<object>): unknown {
+  private maskRecursive(value: unknown, visitedObjects: WeakSet<object>, depth: number): unknown {
+    if (depth > this.options.maxDepth) {
+      return '[TRUNCATED]';
+    }
+
     if (value === null || value === undefined) {
       return value;
     }
@@ -56,19 +68,17 @@ export class DataMasker {
     }
 
     if (Array.isArray(value)) {
-      // Check for circular reference
       if (visitedObjects.has(value)) {
         return '[Circular Reference]';
       }
       visitedObjects.add(value);
 
-      const result = value.map(item => this.maskRecursive(item, visitedObjects));
+      const result = value.map(item => this.maskRecursive(item, visitedObjects, depth + 1));
       visitedObjects.delete(value);
       return result;
     }
 
     if (typeof value === 'object' && value !== null) {
-      // Check for circular reference
       if (visitedObjects.has(value)) {
         return '[Circular Reference]';
       }
@@ -80,7 +90,7 @@ export class DataMasker {
         if (this.isSensitiveKey(key)) {
           result[key] = this.options.replacement;
         } else {
-          result[key] = this.maskRecursive(val, visitedObjects);
+          result[key] = this.maskRecursive(val, visitedObjects, depth + 1);
         }
       }
 
@@ -92,6 +102,10 @@ export class DataMasker {
   }
 
   private maskString(str: string): string {
+    if (str.length > this.options.maxStringLength) {
+      return '[TRUNCATED:string]';
+    }
+
     let masked = str;
 
     for (const pattern of this.compiledPatterns) {

@@ -1,9 +1,27 @@
 import type { Logger } from '../core/index';
 import { DefaultLogger } from '../logger';
+import { DataMasker } from '../utils/data-masker';
 
 export interface CQRSLoggingOptions {
+  /**
+   * When true, the command/query object is included in the log entry.
+   *
+   * **SECURITY WARNING:** `includePayload: true` exposes all command/query fields in logs.
+   * Always use `maskSensitiveData: true` when the handler may receive PII
+   * (email, password, tokens, personal data). Default: false.
+   */
   includePayload?: boolean;
+  /**
+   * When true, the payload is run through DataMasker before logging.
+   * Default: false (backward-compatible).
+   */
   maskSensitiveData?: boolean;
+  /**
+   * Additional field names to mask (case-insensitive substring match).
+   * Additive to default regex patterns (email, SSN, credit card, phone).
+   * Example: `['password', 'token', 'apiKey']`
+   */
+  sensitiveFields?: string[];
   logLevel?: 'debug' | 'info';
   contextName?: string;
 }
@@ -74,6 +92,11 @@ function createLoggingWrapper(
   operationType: string,
   options: CQRSLoggingOptions
 ) {
+  // Singleton per decorator invocation — not re-created on every handler call.
+  const masker = options.maskSensitiveData
+    ? new DataMasker({ sensitiveKeys: options.sensitiveFields ?? [] })
+    : null;
+
   return async function (this: Record<string, unknown>, ...args: unknown[]) {
     const logger = getOrCreateLogger(this, options.contextName);
     const startTime = performance.now();
@@ -90,7 +113,15 @@ function createLoggingWrapper(
     };
 
     if (options.includePayload && commandOrQuery) {
-      logData.payload = commandOrQuery;
+      if (masker) {
+        try {
+          logData.payload = masker.maskData(commandOrQuery);
+        } catch {
+          logData.payload = '[PAYLOAD_MASKING_ERROR]';
+        }
+      } else {
+        logData.payload = commandOrQuery;
+      }
     }
 
     logger[logLevel](`[${operationType}] Executing ${operationName}`, logData);

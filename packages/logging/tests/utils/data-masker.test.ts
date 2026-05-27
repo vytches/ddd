@@ -185,7 +185,8 @@ describe('DataMasker', () => {
           name: 'john',
           password: '[MASKED]',
           profile: {
-            email: 'john@example.com',
+            // email VALUE masked by default email regex (sensitiveKeys are additive, not replacing defaults)
+            email: '[MASKED]',
             secretAnswer: '[MASKED]',
           },
         },
@@ -313,6 +314,104 @@ describe('DataMasker', () => {
         apiKey: '[HIDDEN]',
         normalField: 'value3',
       });
+    });
+  });
+
+  describe('sensitiveKeys as additive to default patterns', () => {
+    it('should apply default regex patterns even when sensitiveKeys are provided', () => {
+      const masker = new DataMasker({
+        enabled: true,
+        sensitiveKeys: ['password'],
+        replacement: '[MASKED]',
+      });
+
+      const data = {
+        password: 'secret123',
+        contactEmail: 'user@example.com',
+        name: 'John',
+      };
+
+      const masked = masker.maskData(data);
+
+      expect(masked).toEqual({
+        password: '[MASKED]',
+        contactEmail: '[MASKED]',
+        name: 'John',
+      });
+    });
+
+    it('should not apply default patterns when explicit patterns override is provided', () => {
+      const masker = new DataMasker({
+        enabled: true,
+        patterns: ['\\bCUSTOM-\\d+\\b'],
+        replacement: '[MASKED]',
+      });
+
+      const data = {
+        ref: 'CUSTOM-123',
+        email: 'user@example.com',
+      };
+
+      const masked = masker.maskData(data);
+
+      expect(masked).toEqual({
+        ref: '[MASKED]',
+        email: 'user@example.com',
+      });
+    });
+  });
+
+  describe('depth and length limits', () => {
+    it('should truncate objects beyond maxDepth', () => {
+      const masker = new DataMasker({ maxDepth: 2 });
+
+      const data = {
+        level1: {
+          level2: {
+            level3: {
+              deep: 'value',
+            },
+          },
+        },
+      };
+
+      const masked = masker.maskData(data) as Record<string, unknown>;
+
+      expect((masked.level1 as Record<string, unknown>).level2).toEqual({ level3: '[TRUNCATED]' });
+    });
+
+    it('should truncate strings beyond maxStringLength', () => {
+      const masker = new DataMasker({ maxStringLength: 20 });
+
+      const data = {
+        short: 'hello',
+        long: 'a'.repeat(21),
+      };
+
+      const masked = masker.maskData(data);
+
+      expect(masked).toEqual({
+        short: 'hello',
+        long: '[TRUNCATED:string]',
+      });
+    });
+
+    it('should use default maxDepth of 10', () => {
+      const masker = new DataMasker();
+
+      let nested: Record<string, unknown> = { value: 'leaf' };
+      for (let i = 0; i < 10; i++) {
+        nested = { child: nested };
+      }
+
+      const [error] = (() => {
+        try {
+          return [undefined, masker.maskData(nested)];
+        } catch (e) {
+          return [e, undefined];
+        }
+      })();
+      expect(error).toBeUndefined();
     });
   });
 
