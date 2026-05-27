@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
+import { Logger } from '@vytches/ddd-logging';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
 import {
   BulkheadStrategy,
@@ -12,7 +13,7 @@ import {
 import 'reflect-metadata';
 import { ICommandBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';
-import type { ICommand, ICommandHandler } from '../interfaces';
+import type { ICommand, ICommandHandler, IResettableBus } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
@@ -75,7 +76,10 @@ interface BatchEntry<T extends ICommand = ICommand, TResult = void> {
 /**
  * Performance-optimized Enhanced Command Bus with resilience patterns
  */
-export class EnhancedCommandBus extends ICommandBus {
+export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
+  // Logger instance
+  private readonly logger = Logger.forContext('EnhancedCommandBus');
+
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
   private handlers = new Map<
@@ -439,19 +443,36 @@ export class EnhancedCommandBus extends ICommandBus {
     // Function ref first, string fallback for handlers registered by name (BC)
     const registered = this.handlers.get(commandClass) ?? this.handlers.get(commandClass.name);
     if (registered) {
-      const handler =
-        typeof registered === 'function' && !('execute' in registered)
-          ? (registered as () => ICommandHandler<T, TResult>)()
-          : (registered as ICommandHandler<T, TResult>);
+      try {
+        const handler =
+          typeof registered === 'function' && !('execute' in registered)
+            ? (registered as () => ICommandHandler<T, TResult>)()
+            : (registered as ICommandHandler<T, TResult>);
 
-      if (this.cacheEnabled) {
-        this.handlerCache.set(commandClass, {
-          handler: handler as ICommandHandler<ICommand, void>,
-          resolvedAt: Date.now(),
+        if (this.cacheEnabled) {
+          this.handlerCache.set(commandClass, {
+            handler: handler as ICommandHandler<ICommand, void>,
+            resolvedAt: Date.now(),
+          });
+        }
+
+        return handler;
+      } catch (factoryError) {
+        // A registered factory threw — almost always a stale closure over a
+        // destroyed DI scope (e.g. a NestJS moduleRef from a torn-down test
+        // module). Left in place it poisons every future call to this command
+        // with an opaque 500. Evict the dead entry so the next call re-resolves
+        // cleanly from the container, and fail this call with a diagnosable
+        // error instead of leaking the raw factory exception.
+        this.handlers.delete(commandClass);
+        this.handlers.delete(commandClass.name);
+        this.handlerCache.delete(commandClass);
+        this.logger.warn('Evicted stale command handler factory; next call re-resolves', {
+          commandName: commandClass.name,
+          error: factoryError instanceof Error ? factoryError.message : String(factoryError),
         });
+        throw new HandlerNotFoundError(commandClass.name, 'command');
       }
-
-      return handler;
     }
 
     // Resolve from DI container
@@ -658,6 +679,17 @@ export class EnhancedCommandBus extends ICommandBus {
       retries: 0,
       batchesProcessed: 0,
     };
+  }
+
+  /**
+   * Evict all registered handlers and the handler cache, returning the bus to
+   * a clean state. Use on DI module teardown (e.g. between test modules sharing
+   * one bus instance) to drop handler factories bound to a destroyed scope.
+   * Does not stop the cache-cleanup timer — use {@link dispose} for that.
+   */
+  reset(): void {
+    this.handlers.clear();
+    this.handlerCache.clear();
   }
 
   /**

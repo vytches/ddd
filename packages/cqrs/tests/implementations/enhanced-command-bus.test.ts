@@ -3,7 +3,7 @@ import { safeRun } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import type { ICommand, ICommandHandler, LoggingMiddleware } from '../../src';
-import { EnhancedCommandBus, ICommandBus } from '../../src';
+import { EnhancedCommandBus, HandlerNotFoundError, ICommandBus } from '../../src';
 
 // Test command implementation
 class TestCommand implements ICommand {
@@ -432,6 +432,67 @@ describe('EnhancedCommandBus', () => {
       const result = await enhancedCommandBus.execute(new LegacyCommand());
 
       expect(result).toBe('by-string');
+    });
+  });
+
+  describe('stale handler factory eviction (VS-003)', () => {
+    class StaleCommand implements ICommand {}
+
+    // Local bus WITHOUT retry resilience — the file-level bus opts into retry,
+    // which would re-attempt (and thus mask) the eviction behavior under test.
+    let bus: EnhancedCommandBus;
+    beforeEach(() => {
+      bus = new EnhancedCommandBus(mockContainer);
+    });
+
+    it('should throw HandlerNotFoundError when a registered factory throws', async () => {
+      bus.registerFactory(StaleCommand, () => {
+        throw new Error('dead moduleRef');
+      });
+
+      await expect(bus.execute(new StaleCommand())).rejects.toBeInstanceOf(HandlerNotFoundError);
+    });
+
+    it('should evict the stale factory so the next call re-resolves from the container', async () => {
+      const goodHandler = { execute: vi.fn().mockResolvedValue('recovered') };
+      vi.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
+        if (key === 'di:command-handler') {
+          return { handlerType: class {} };
+        }
+        return undefined;
+      });
+      (mockContainer.resolve as Mock).mockReturnValue(goodHandler);
+
+      let calls = 0;
+      bus.registerFactory(StaleCommand, () => {
+        calls++;
+        throw new Error('dead moduleRef');
+      });
+
+      await expect(bus.execute(new StaleCommand())).rejects.toBeInstanceOf(HandlerNotFoundError);
+
+      const result = await bus.execute(new StaleCommand());
+      expect(result).toBe('recovered');
+      expect(calls).toBe(1);
+    });
+  });
+
+  describe('reset (VS-003)', () => {
+    it('should evict all registered handlers and cached resolutions', async () => {
+      // Local bus WITHOUT retry — see note in stale-factory eviction block.
+      const bus = new EnhancedCommandBus(mockContainer);
+      class ResettableCommand implements ICommand {}
+      const handler = { execute: vi.fn().mockResolvedValue('before-reset') };
+      bus.register(ResettableCommand, handler);
+
+      expect(await bus.execute(new ResettableCommand())).toBe('before-reset');
+
+      bus.reset();
+
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
+      await expect(bus.execute(new ResettableCommand())).rejects.toBeInstanceOf(
+        HandlerNotFoundError
+      );
     });
   });
 });
