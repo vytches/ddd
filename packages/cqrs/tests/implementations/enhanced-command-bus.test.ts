@@ -435,6 +435,36 @@ describe('EnhancedCommandBus', () => {
     });
   });
 
+  describe('typed handler maps (no execute-probe misclassification)', () => {
+    it('invokes a factory even when the factory function itself carries an `execute` property', async () => {
+      // Local bus WITHOUT retry — file-level bus opts into retry resilience.
+      const bus = new EnhancedCommandBus(mockContainer);
+      class ProbeCommand implements ICommand {}
+      const realHandler = { execute: vi.fn().mockResolvedValue('from-factory') };
+      const factory = Object.assign(() => realHandler, { execute: vi.fn() });
+
+      bus.registerFactory(ProbeCommand, factory as unknown as () => typeof realHandler);
+
+      const result = await bus.execute(new ProbeCommand());
+      expect(result).toBe('from-factory');
+      expect(factory.execute).not.toHaveBeenCalled();
+    });
+
+    it('last registration wins across register/registerFactory kinds', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      class SwapCommand implements ICommand {}
+      const instance = { execute: vi.fn().mockResolvedValue('instance') };
+      const factoryHandler = { execute: vi.fn().mockResolvedValue('factory') };
+
+      bus.register(SwapCommand, instance);
+      bus.registerFactory(SwapCommand, () => factoryHandler);
+      expect(await bus.execute(new SwapCommand())).toBe('factory');
+
+      bus.register(SwapCommand, instance);
+      expect(await bus.execute(new SwapCommand())).toBe('instance');
+    });
+  });
+
   describe('stale handler factory eviction (VS-003)', () => {
     class StaleCommand implements ICommand {}
 

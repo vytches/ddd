@@ -167,9 +167,15 @@ class LRUCache<K, V> {
 export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
-  private handlers = new Map<
+  // Registered handlers split by registration kind. Keeping instances and
+  // factories in separate, typed maps removes the brittle `'execute' in x`
+  // runtime probe (which could misclassify a callable handler or a factory
+  // returning a non-handler). A given key lives in exactly one map: register()
+  // and registerFactory() evict the other kind, preserving last-write-wins.
+  private handlerInstances = new Map<Function | string, IQueryHandler<IQuery<unknown>, unknown>>();
+  private handlerFactories = new Map<
     Function | string,
-    IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
+    () => IQueryHandler<IQuery<unknown>, unknown>
   >();
 
   // Performance optimization: Handler cache
@@ -399,7 +405,8 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
   register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
     const key = typeof queryType === 'string' ? queryType : (queryType as Function);
     const keyName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-    this.handlers.set(key, handler);
+    this.handlerInstances.set(key, handler as IQueryHandler<IQuery<unknown>, unknown>);
+    this.handlerFactories.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
     this.invalidateCacheForQuery(keyName);
   }
@@ -413,7 +420,8 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
   ): void {
     const key = typeof queryType === 'string' ? queryType : (queryType as Function);
     const keyName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-    this.handlers.set(key, factory);
+    this.handlerFactories.set(key, factory as () => IQueryHandler<IQuery<unknown>, unknown>);
+    this.handlerInstances.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
     this.invalidateCacheForQuery(keyName);
   }
@@ -558,32 +566,39 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
       }
     }
 
-    // Function ref first, string fallback for handlers registered by name (BC)
-    const registered = this.handlers.get(queryClass) ?? this.handlers.get(queryClass.name);
-    if (registered) {
+    // Function ref first, string-name fallback for handlers registered by name
+    // (BC). A directly-registered instance is returned as-is; a factory is
+    // invoked lazily. No `'execute' in x` probe — the map a handler lives in is
+    // its kind.
+    const instance =
+      this.handlerInstances.get(queryClass) ?? this.handlerInstances.get(queryClass.name);
+    if (instance) {
+      if (this.cacheEnabled) {
+        this.handlerCache.set(queryClass, { handler: instance, resolvedAt: Date.now() });
+      }
+      return instance as IQueryHandler<T, R>;
+    }
+
+    const factory =
+      this.handlerFactories.get(queryClass) ?? this.handlerFactories.get(queryClass.name);
+    if (factory) {
       try {
-        const handler =
-          typeof registered === 'function' && !('execute' in registered)
-            ? (registered as () => IQueryHandler<T, R>)()
-            : (registered as IQueryHandler<T, R>);
+        const handler = factory() as IQueryHandler<T, R>;
 
         if (this.cacheEnabled) {
-          this.handlerCache.set(queryClass, {
-            handler,
-            resolvedAt: Date.now(),
-          });
+          this.handlerCache.set(queryClass, { handler, resolvedAt: Date.now() });
         }
 
         return handler;
       } catch (factoryError) {
-        // A registered factory threw — almost always a stale closure over a
-        // destroyed DI scope (e.g. a NestJS moduleRef from a torn-down test
-        // module). Left in place it poisons every future call to this query
-        // with an opaque 500. Evict the dead entry so the next call re-resolves
-        // cleanly from the container, and fail this call with a diagnosable
-        // error instead of leaking the raw factory exception.
-        this.handlers.delete(queryClass);
-        this.handlers.delete(queryClass.name);
+        // The factory threw — almost always a stale closure over a destroyed DI
+        // scope (e.g. a NestJS moduleRef from a torn-down test module). Left in
+        // place it poisons every future call to this query with an opaque 500.
+        // Evict the dead entry so the next call re-resolves cleanly from the
+        // container, and fail this call with a diagnosable error instead of
+        // leaking the raw factory exception.
+        this.handlerFactories.delete(queryClass);
+        this.handlerFactories.delete(queryClass.name);
         this.handlerCache.delete(queryClass);
         this.logger.warn('Evicted stale query handler factory; next call re-resolves', {
           queryName: queryClass.name,
@@ -861,7 +876,8 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
    * Does not stop the cache-cleanup timer — use {@link dispose} for that.
    */
   reset(): void {
-    this.handlers.clear();
+    this.handlerInstances.clear();
+    this.handlerFactories.clear();
     this.handlerCache.clear();
     this.resultCache.clear();
   }
