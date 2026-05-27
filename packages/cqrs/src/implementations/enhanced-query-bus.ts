@@ -6,7 +6,7 @@ import { DefaultResilienceContext, ResiliencePolicyBuilder } from '@vytches/ddd-
 import 'reflect-metadata';
 import { IQueryBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';
-import type { IQuery, IQueryHandler } from '../interfaces';
+import type { IQuery, IQueryHandler, IResettableBus } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
@@ -164,7 +164,7 @@ class LRUCache<K, V> {
 /**
  * Performance-optimized Enhanced Query Bus with resilience patterns
  */
-export class EnhancedQueryBus extends IQueryBus {
+export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
   private handlers = new Map<
@@ -248,7 +248,22 @@ export class EnhancedQueryBus extends IQueryBus {
       this.use(new LoggingMiddleware());
     }
 
-    // Clean caches periodically
+    // Clean caches periodically — only when caching is active. Spawning this
+    // unconditionally leaks a live interval (and a reference to the bus) for
+    // every instance, even when cache is disabled (the default). That matters
+    // in test processes that create many bus instances.
+    if (this.cacheEnabled) {
+      this.startCacheCleanup();
+    }
+  }
+
+  /**
+   * Start the periodic cache-cleanup interval if not already running.
+   */
+  private startCacheCleanup(): void {
+    if (this.cacheCleanupInterval) {
+      return;
+    }
     this.cacheCleanupInterval = setInterval(() => {
       this.cleanHandlerCache();
       this.cleanResultCache();
@@ -357,6 +372,12 @@ export class EnhancedQueryBus extends IQueryBus {
     if (!enable) {
       this.resultCache.clear();
       this.handlerCache.clear();
+      if (this.cacheCleanupInterval) {
+        clearInterval(this.cacheCleanupInterval);
+        this.cacheCleanupInterval = undefined;
+      }
+    } else {
+      this.startCacheCleanup();
     }
 
     return this;
@@ -540,19 +561,36 @@ export class EnhancedQueryBus extends IQueryBus {
     // Function ref first, string fallback for handlers registered by name (BC)
     const registered = this.handlers.get(queryClass) ?? this.handlers.get(queryClass.name);
     if (registered) {
-      const handler =
-        typeof registered === 'function' && !('execute' in registered)
-          ? (registered as () => IQueryHandler<T, R>)()
-          : (registered as IQueryHandler<T, R>);
+      try {
+        const handler =
+          typeof registered === 'function' && !('execute' in registered)
+            ? (registered as () => IQueryHandler<T, R>)()
+            : (registered as IQueryHandler<T, R>);
 
-      if (this.cacheEnabled) {
-        this.handlerCache.set(queryClass, {
-          handler,
-          resolvedAt: Date.now(),
+        if (this.cacheEnabled) {
+          this.handlerCache.set(queryClass, {
+            handler,
+            resolvedAt: Date.now(),
+          });
+        }
+
+        return handler;
+      } catch (factoryError) {
+        // A registered factory threw — almost always a stale closure over a
+        // destroyed DI scope (e.g. a NestJS moduleRef from a torn-down test
+        // module). Left in place it poisons every future call to this query
+        // with an opaque 500. Evict the dead entry so the next call re-resolves
+        // cleanly from the container, and fail this call with a diagnosable
+        // error instead of leaking the raw factory exception.
+        this.handlers.delete(queryClass);
+        this.handlers.delete(queryClass.name);
+        this.handlerCache.delete(queryClass);
+        this.logger.warn('Evicted stale query handler factory; next call re-resolves', {
+          queryName: queryClass.name,
+          error: factoryError instanceof Error ? factoryError.message : String(factoryError),
         });
+        throw new HandlerNotFoundError(queryClass.name, 'query');
       }
-
-      return handler;
     }
 
     // Resolve from DI container
@@ -814,6 +852,18 @@ export class EnhancedQueryBus extends IQueryBus {
     this.resultCache.clear();
     this.handlerCache.clear();
     return this;
+  }
+
+  /**
+   * Evict all registered handlers and caches, returning the bus to a clean
+   * state. Use on DI module teardown (e.g. between test modules sharing one
+   * bus instance) to drop handler factories bound to a destroyed scope.
+   * Does not stop the cache-cleanup timer — use {@link dispose} for that.
+   */
+  reset(): void {
+    this.handlers.clear();
+    this.handlerCache.clear();
+    this.resultCache.clear();
   }
 
   /**

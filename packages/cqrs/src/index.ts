@@ -1,5 +1,11 @@
 // Core interfaces
-export type { ICommand, ICommandHandler, IQuery, IQueryHandler } from './interfaces';
+export type {
+  ICommand,
+  ICommandHandler,
+  IQuery,
+  IQueryHandler,
+  IResettableBus,
+} from './interfaces';
 
 // Abstract classes (service tokens)
 export { ICommandBus, IQueryBus } from './abstracts';
