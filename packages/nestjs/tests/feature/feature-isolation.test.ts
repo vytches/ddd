@@ -285,6 +285,46 @@ describe('VytchesExplorerService (Phase 3 additions)', () => {
     // service from beforeEach has buses without a reset() method
     expect(() => service.onModuleDestroy()).not.toThrow();
   });
+
+  describe('strict handler registration (VS-003)', () => {
+    const makeServiceWithFailingBus = () => {
+      const failingBus = {
+        register: vi.fn(),
+        registerFactory: vi.fn(() => {
+          throw new Error('registration boom');
+        }),
+      };
+      const svc = new VytchesExplorerService(
+        { get: vi.fn() } as never,
+        { getProviders: vi.fn().mockReturnValue([]) } as never,
+        failingBus as never,
+        { register: vi.fn(), registerFactory: vi.fn() } as never,
+        undefined,
+        undefined
+      );
+      (svc as unknown as { discoveredHandlers: unknown[] }).discoveredHandlers = [
+        makeHandlerInfo(CommandA),
+      ];
+      return svc;
+    };
+
+    it('swallows registration failures by default (backward compatible)', async () => {
+      const svc = makeServiceWithFailingBus();
+      await expect(svc.onApplicationBootstrap()).resolves.toBeUndefined();
+    });
+
+    it('rethrows registration failures when enabled via setStrictHandlerRegistration()', async () => {
+      const svc = makeServiceWithFailingBus();
+      svc.setStrictHandlerRegistration();
+      await expect(svc.onApplicationBootstrap()).rejects.toThrow('registration boom');
+    });
+
+    it('rethrows when enabled via configureContext({ strictHandlerRegistration: true })', async () => {
+      const svc = makeServiceWithFailingBus();
+      svc.configureContext({ name: 'Test', strictHandlerRegistration: true });
+      await expect(svc.onApplicationBootstrap()).rejects.toThrow('registration boom');
+    });
+  });
 });
 
 // ─── FeatureHandlerRegistrar unit tests ─────────────────────────────────────
