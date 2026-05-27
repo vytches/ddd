@@ -1,81 +1,100 @@
 # Kanban — @vytches/ddd
 
-_Last regenerated: 2026-05-22 by /pulse_
+_Last updated: 2026-05-27 by /threat-model + multi-agent analysis + @product-owner_
 
 Source of truth: `project-orchestration/tasks/` — this file is regenerated;
-edits here will be overwritten. Update task YAML frontmatter instead.
+do not edit manually.
 
 ---
 
-## P0 — Critical
+## 🔴 P0 — Critical (GDPR blocker — v0.31.0-rc)
 
-_None. v0.26.0 published. No blocking issues._
-
----
-
-## P1 — High
-
-| ID     | Title                                                      | Status      | Est     | Notes                                                     |
-| ------ | ---------------------------------------------------------- | ----------- | ------- | --------------------------------------------------------- |
-| VP-003 | Outbox production readiness (backoff + re-poll + recovery) | in_progress | 7.5h    | Parts 2–4 production-validated. Start feature branch now. |
-| VT-001 | Fill critical test coverage gaps (GWT + domain-primitives) | in_progress | ~4h rem | Post-publish opportunistic. GWT migration remaining.      |
+| ID     | Title                                               | Status  | Est | Age | Depends on |
+| ------ | --------------------------------------------------- | ------- | --- | --- | ---------- |
+| VS-001 | logging: CQRS decorators — PII masking              | planned | 2h  | 1d  | VS-003     |
 
 ---
 
-## P2 — Normal
+## 🟠 P1 — High (Security sprint — execute in order)
 
-| ID     | Title                                                        | Status      | Est  | Notes                                                                                 |
-| ------ | ------------------------------------------------------------ | ----------- | ---- | ------------------------------------------------------------------------------------- |
-| VF-001 | Automated DDD compliance validation (rule engine + scoring)  | in_progress | ~18h | MVP shipped (3 rules, CLI live). Remaining rules deferred.                            |
-| VP-002 | Repository caching + indexed queries + N+1 prevention        | in_progress | ~15h | Partial done. Consider split into -a/-b subtasks.                                     |
-| VP-006 | Cold-start, service-resolution, auto-discovery performance   | in_progress | ~8h  | Partial done. Consider split into -a/-b subtasks.                                     |
-| VF-002 | Bounded context, context mapping, large-scale structure docs | planned     | 20h  | Defer to v0.27. Validate post-publish adoption signal first.                          |
-| VD-004 | Search, live playground, categorization for docs site        | planned     | 20h  | Deferred. Pending real user signal. Lighter alternatives: Algolia (4h), Mermaid (4h). |
-
----
-
-## P3 — Low / Backlog
-
-| ID     | Title                                              | Status  | Est     | Notes                                                   |
-| ------ | -------------------------------------------------- | ------- | ------- | ------------------------------------------------------- |
-| VA-001 | `@vytches/ddd-agent` AI boundary package (concept) | backlog | unknown | Post-v0.27. Awaiting production validation in consumer. |
+| ID     | Title                                                    | Status  | Est  | Age | Depends on       |
+| ------ | -------------------------------------------------------- | ------- | ---- | --- | ---------------- |
+| VS-003 | logging: DataMasker — plural key bypass (passwords)      | planned | 1h   | 1d  | —                |
+| VS-002 | logging: ConsoleProvider — DataMasker for event.data     | planned | 1.5h | 1d  | VS-003           |
+| VS-004 | logging: DataMasker — regex validation (ReDoS)           | planned | 2h   | 1d  | VS-003           |
+| VS-005 | policies: CachedPolicy — replace djb2 hash (collisions)  | planned | 1.5h | 1d  | —                |
+| VS-009 | logging: class decorator — wrap only handle(), not all   | planned | 1.5h | 0d  | VS-001 *(new)*   |
+| VS-010 | logging: DataMasker — toJSON() bypass via getter         | planned | 1.5h | 0d  | VS-003 *(new)*   |
 
 ---
 
-## Recently Completed (last 14 days)
+## 🟡 P2 — Normal
 
-- **DOC-001** — README accuracy audit: 17/20 packages had hallucinated APIs, all
-  rewritten — 2026-05-22
-- **VP-004** — DROPPED: event store streaming (no-adapters violation, zero
-  consumer signal) — 2026-05-22
-- **REL-011** — @vytches/\* migration GH Packages → npmjs.org — done
-- **REL-003** — publishConfig for all 20 packages with provenance — done
-- **REL-000** — npm org registration + v0.26.0 published ✅ — done
-- **VT-005** — DI base-adapter + discovery-registry + CQRS configuration —
-  2026-05-10
-- **VT-004** — Integration layers + base-business-policy — 2026-05-10
-- **VT-003** — Capabilities coverage (audit/versioning/snapshot/event-sourcing)
-  — 2026-05-10
-- **VT-002** — Foundation tier coverage — 2026-05-10
-- **VF-CANON-001** — Entity, PlainDomainService, IDomainFactory canonical
-  patterns — 2026-05-09
+| ID     | Title                                                        | Status      | Est      | Age | Notes           |
+| ------ | ------------------------------------------------------------ | ----------- | -------- | --- | --------------- |
+| VS-006 | resilience: CSV exporter — formula injection chars           | planned     | 0.5h     | 1d  |                 |
+| VS-007 | messaging: OutboxProcessor — warn on default handler replace | planned     | 0.5h     | 1d  |                 |
+| VS-011 | logging: @LogCommands default maskSensitiveData: true        | planned     | 0.5h     | 0d  | VS-001 *(new, breaking)* |
+| VS-012 | logging: DataMasker payload size guard (event loop)          | planned     | 1h       | 0d  | VS-010 *(new)*  |
+| VT-001 | Test coverage gap fill                                       | in_progress | ~4h rem  | 18d |                 |
+| VP-002 | Repository caching + N+1                                     | in_progress | ~15h rem | 18d |                 |
+| VP-006 | DI container cold-start performance                          | in_progress | ~8h rem  | 18d |                 |
+| VF-001 | DDD validation / ddd-lint tools                              | in_progress | ~10h rem | 18d |                 |
+| VP-007 | Per-context CQRS buses                                       | ✅ done      | —        | 4d  |                 |
+| VP-008 | OutboxProcessor default handler + priority hardening         | ✅ done      | —        | 2d  |                 |
+| VP-003 | Messaging outbox production hardening                        | ✅ done      | —        | 4d  |                 |
 
 ---
 
-## Critical Path — v0.26.1
+## 🔵 P3 — Low / Deferred
 
+| ID     | Title                                                     | Status  | Est  | Age |
+| ------ | --------------------------------------------------------- | ------- | ---- | --- |
+| VS-008 | value-objects: EntityIdFactory deprecation warn suppress  | planned | 0.5h | 1d  |
+| VF-002 | Strategic design documentation                            | planned | 20h  | 59d |
+| VD-004 | Interactive documentation site                            | planned | 20h  | 59d |
+| VA-001 | AI agent package proposal                                 | backlog | ?    | 59d |
+
+---
+
+## 📊 Summary
+
+| Status      | Count |
+| ----------- | ----- |
+| planned     | 17    |
+| in_progress | 4     |
+| ✅ done      | 3     |
+| backlog     | 1     |
+| **Total**   | **25**|
+
+## 🚀 Security Sprint Plan (v0.31.0)
+
+> Decision (Product Owner 2026-05-27): **Fix scope for VS-001** (not API redesign).
+> API redesign (`payload: 'off'|'masked'|'full'`) planned for v0.32.0.
+> TM-VS-001.md generated: `docs/security/threat-models/TM-VS-001.md`
+
+**Execution order (dependency graph):**
 ```
-VP-003 Parts 2–4 (7.5h, feature branch)
-    ↓
-docs patch release (README fixes to npm)
-    ↓
-v0.26.1 publish
+VS-003 (1h) → VS-001 (2h) → VS-002 (1.5h)
+           ↘  VS-004 (2h) [parallel z VS-001]
+           ↘  VS-010 (1.5h) → VS-012 (1h)
+VS-009 (1.5h) [po VS-001, ten sam plik]
+VS-005 (1.5h) [niezależny]
 ```
 
----
+**PR 1 — Logging stack core (6.5h) → v0.31.0-rc:**
+VS-003 + VS-001 + VS-002 + VS-004
 
-## Dropped
+**PR 2 — DataMasker hardening (3h) → v0.31.0:**
+VS-010 + VS-012 + VS-009
 
-- **VP-004** — event store streaming with backpressure. Contradicts no-adapters
-  policy; 0 consumer validation after 5 consecutive pulse flags. If demand
-  surfaces post-publish, repurpose as 4h documentation task.
+**PR 3 — Other packages + improvements (4h) → v0.31.0 final:**
+VS-005 + VS-006 + VS-007 + VS-008 + VS-011
+
+**Newly discovered issues (2026-05-27):**
+- VS-009: Decorator wraps all class methods, not just `handle` (SEC-LOGGING-005, DREAD 8)
+- VS-010: DataMasker bypass via `toJSON()` getter (SEC-LOGGING-006, DREAD 9)
+- VS-011: `@LogCommands` should default to `maskSensitiveData: true` (breaking, v0.31.1)
+- VS-012: Payload size guard for event loop safety (performance hardening)
+
+_Next pulse: before starting VS-003 or in 7 days._
