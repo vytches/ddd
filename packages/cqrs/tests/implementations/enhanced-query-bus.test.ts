@@ -637,6 +637,36 @@ describe('EnhancedQueryBus', () => {
     });
   });
 
+  describe('typed handler maps (no execute-probe misclassification)', () => {
+    it('invokes a factory even when the factory function itself carries an `execute` property', async () => {
+      class ProbeQuery implements IQuery<string> {}
+      const realHandler = { execute: vi.fn().mockResolvedValue('from-factory') };
+      // The old `'execute' in registered` probe would misclassify this factory
+      // as a handler instance (functions can carry an `execute` prop) and call
+      // factory.execute() instead of factory(). Typed maps make kind explicit.
+      const factory = Object.assign(() => realHandler, { execute: vi.fn() });
+
+      enhancedQueryBus.registerFactory(ProbeQuery, factory as unknown as () => typeof realHandler);
+
+      const result = await enhancedQueryBus.execute(new ProbeQuery());
+      expect(result).toBe('from-factory');
+      expect(factory.execute).not.toHaveBeenCalled();
+    });
+
+    it('last registration wins across register/registerFactory kinds', async () => {
+      class SwapQuery implements IQuery<string> {}
+      const instance = { execute: vi.fn().mockResolvedValue('instance') };
+      const factoryHandler = { execute: vi.fn().mockResolvedValue('factory') };
+
+      enhancedQueryBus.register(SwapQuery, instance);
+      enhancedQueryBus.registerFactory(SwapQuery, () => factoryHandler);
+      expect(await enhancedQueryBus.execute(new SwapQuery())).toBe('factory');
+
+      enhancedQueryBus.register(SwapQuery, instance);
+      expect(await enhancedQueryBus.execute(new SwapQuery())).toBe('instance');
+    });
+  });
+
   describe('stale handler factory eviction (VS-003)', () => {
     class StaleQuery implements IQuery<string> {}
 

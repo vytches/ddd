@@ -82,10 +82,13 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
 
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
-  private handlers = new Map<
-    Function | string,
-    ICommandHandler<ICommand, unknown> | (() => ICommandHandler<ICommand, unknown>)
-  >();
+  // Registered handlers split by registration kind. Keeping instances and
+  // factories in separate, typed maps removes the brittle `'execute' in x`
+  // runtime probe (which could misclassify a callable handler or a factory
+  // returning a non-handler). A given key lives in exactly one map: register()
+  // and registerFactory() evict the other kind, preserving last-write-wins.
+  private handlerInstances = new Map<Function | string, ICommandHandler<ICommand, unknown>>();
+  private handlerFactories = new Map<Function | string, () => ICommandHandler<ICommand, unknown>>();
 
   // Performance optimization: Handler cache
   private handlerCache = new Map<Function | string, CachedHandler>();
@@ -303,7 +306,8 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
     handler: ICommandHandler<T, TResult>
   ): void {
     const key = typeof commandType === 'string' ? commandType : (commandType as Function);
-    this.handlers.set(key, handler as ICommandHandler<ICommand, unknown>);
+    this.handlerInstances.set(key, handler as ICommandHandler<ICommand, unknown>);
+    this.handlerFactories.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
   }
 
@@ -315,7 +319,8 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
     factory: () => ICommandHandler<T, TResult>
   ): void {
     const key = typeof commandType === 'string' ? commandType : (commandType as Function);
-    this.handlers.set(key, factory as () => ICommandHandler<ICommand, unknown>);
+    this.handlerFactories.set(key, factory as () => ICommandHandler<ICommand, unknown>);
+    this.handlerInstances.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
   }
 
@@ -440,14 +445,27 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
 
     this.metrics.cacheMisses++;
 
-    // Function ref first, string fallback for handlers registered by name (BC)
-    const registered = this.handlers.get(commandClass) ?? this.handlers.get(commandClass.name);
-    if (registered) {
+    // Function ref first, string-name fallback for handlers registered by name
+    // (BC). A directly-registered instance is returned as-is; a factory is
+    // invoked lazily. No `'execute' in x` probe — the map a handler lives in is
+    // its kind.
+    const instance =
+      this.handlerInstances.get(commandClass) ?? this.handlerInstances.get(commandClass.name);
+    if (instance) {
+      if (this.cacheEnabled) {
+        this.handlerCache.set(commandClass, {
+          handler: instance as ICommandHandler<ICommand, void>,
+          resolvedAt: Date.now(),
+        });
+      }
+      return instance as unknown as ICommandHandler<T, TResult>;
+    }
+
+    const factory =
+      this.handlerFactories.get(commandClass) ?? this.handlerFactories.get(commandClass.name);
+    if (factory) {
       try {
-        const handler =
-          typeof registered === 'function' && !('execute' in registered)
-            ? (registered as () => ICommandHandler<T, TResult>)()
-            : (registered as ICommandHandler<T, TResult>);
+        const handler = factory() as ICommandHandler<T, TResult>;
 
         if (this.cacheEnabled) {
           this.handlerCache.set(commandClass, {
@@ -458,14 +476,14 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
 
         return handler;
       } catch (factoryError) {
-        // A registered factory threw — almost always a stale closure over a
-        // destroyed DI scope (e.g. a NestJS moduleRef from a torn-down test
-        // module). Left in place it poisons every future call to this command
-        // with an opaque 500. Evict the dead entry so the next call re-resolves
-        // cleanly from the container, and fail this call with a diagnosable
-        // error instead of leaking the raw factory exception.
-        this.handlers.delete(commandClass);
-        this.handlers.delete(commandClass.name);
+        // The factory threw — almost always a stale closure over a destroyed DI
+        // scope (e.g. a NestJS moduleRef from a torn-down test module). Left in
+        // place it poisons every future call to this command with an opaque 500.
+        // Evict the dead entry so the next call re-resolves cleanly from the
+        // container, and fail this call with a diagnosable error instead of
+        // leaking the raw factory exception.
+        this.handlerFactories.delete(commandClass);
+        this.handlerFactories.delete(commandClass.name);
         this.handlerCache.delete(commandClass);
         this.logger.warn('Evicted stale command handler factory; next call re-resolves', {
           commandName: commandClass.name,
@@ -688,7 +706,8 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
    * Does not stop the cache-cleanup timer — use {@link dispose} for that.
    */
   reset(): void {
-    this.handlers.clear();
+    this.handlerInstances.clear();
+    this.handlerFactories.clear();
     this.handlerCache.clear();
   }
 
