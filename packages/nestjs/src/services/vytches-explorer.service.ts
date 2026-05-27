@@ -76,6 +76,7 @@ export class VytchesExplorerService
   private _contextOptions?: VytchesContextOptions;
   private discoveredHandlers: HandlerInfo[] = [];
   private initialized = false;
+  private strictHandlerRegistration = false;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- class constructor ref used as Set key for reflection
   private readonly claimedTypes = new Set<Function>();
 
@@ -155,6 +156,23 @@ export class VytchesExplorerService
 
   configureContext(options: VytchesContextOptions): void {
     this._contextOptions = options;
+    if (options.strictHandlerRegistration !== undefined) {
+      this.strictHandlerRegistration = options.strictHandlerRegistration;
+    }
+  }
+
+  /**
+   * Opt into strict handler registration. When enabled, a failure to register
+   * any discovered handler aborts bootstrap (the error is rethrown from
+   * onApplicationBootstrap) instead of being logged and skipped. Off by default
+   * to preserve backward-compatible boot behavior.
+   *
+   * Call before onApplicationBootstrap() runs (e.g. in your module's
+   * onModuleInit) for it to take effect on auto-discovered handlers.
+   */
+  setStrictHandlerRegistration(enabled = true): this {
+    this.strictHandlerRegistration = enabled;
+    return this;
   }
 
   /**
@@ -394,6 +412,11 @@ export class VytchesExplorerService
             error: error instanceof Error ? error.message : String(error),
           }
         );
+        // Opt-in fail-fast: surface the misconfiguration at bootstrap instead
+        // of letting it become an opaque runtime failure.
+        if (this.strictHandlerRegistration) {
+          throw error instanceof Error ? error : new Error(String(error));
+        }
       }
     }
   }

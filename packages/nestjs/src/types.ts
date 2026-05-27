@@ -196,6 +196,16 @@ export interface VytchesContextOptions {
      */
     exports?: ModuleMetadata['exports'];
   };
+
+  /**
+   * When true, a failure to register any discovered handler aborts bootstrap
+   * (the error is rethrown) instead of being logged and skipped. Use to fail
+   * fast on DI misconfiguration rather than discovering it as an opaque runtime
+   * 500 — particularly valuable for auth/permission handlers.
+   *
+   * @default false
+   */
+  strictHandlerRegistration?: boolean;
 }
 
 /**
