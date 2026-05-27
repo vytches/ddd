@@ -23,12 +23,15 @@ import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
  * VytchesDDDModule.forRoot()
  *
  * @example
- * // With CQRS buses in providers
+ * // With CQRS buses in providers. Prefer useFactory over useValue so each
+ * // module owns its bus instance — a useValue bus is a process-global
+ * // singleton whose handler registrations outlive the module, leaking stale
+ * // handler factories across sequentially-created modules (e.g. tests).
  * @Module({
  *   imports: [VytchesDDDModule.forRoot()],
  *   providers: [
- *     { provide: ICommandBus, useValue: new EnhancedCommandBus(container) },
- *     { provide: IQueryBus, useValue: new EnhancedQueryBus(container) },
+ *     { provide: ICommandBus, useFactory: () => new EnhancedCommandBus(container) },
+ *     { provide: IQueryBus, useFactory: () => new EnhancedQueryBus(container) },
  *   ],
  * })
  */

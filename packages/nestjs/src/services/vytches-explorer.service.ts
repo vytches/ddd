@@ -1,4 +1,4 @@
-import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
+import type { OnApplicationBootstrap, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { DiscoveryService, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
@@ -42,13 +42,18 @@ interface HandlerMetadata {
  *
  * @example
  * ```typescript
- * // In your module - buses are injected automatically:
+ * // In your module - buses are injected automatically.
+ * // Prefer useFactory over useValue: a useValue bus is a process-global
+ * // singleton whose handler registrations outlive the module that created
+ * // them, which leaks stale handler factories across sequentially-created
+ * // modules (e.g. multiple Test.createTestingModule() calls in one process).
+ * // useFactory gives each module its own bus instance, tied to its lifecycle.
  * @Module({
  *   imports: [DiscoveryModule],
  *   providers: [
  *     VytchesExplorerService,
- *     { provide: ICommandBus, useValue: new EnhancedCommandBus(container) },
- *     { provide: IQueryBus, useValue: new EnhancedQueryBus(container) },
+ *     { provide: ICommandBus, useFactory: () => new EnhancedCommandBus(container) },
+ *     { provide: IQueryBus, useFactory: () => new EnhancedQueryBus(container) },
  *   ],
  * })
  * export class MyModule {}
@@ -60,10 +65,13 @@ interface BusWithRegistration {
   registerFactory?(messageType: unknown, factory: () => unknown): void;
   subscribe?(eventType: unknown, handler: unknown): void;
   registerHandler?(eventType: unknown, handler: unknown): void;
+  reset?(): void;
 }
 
 @Injectable()
-export class VytchesExplorerService implements OnModuleInit, OnApplicationBootstrap {
+export class VytchesExplorerService
+  implements OnModuleInit, OnApplicationBootstrap, OnModuleDestroy
+{
   private readonly logger = Logger.forContext('VytchesExplorerService');
   private _contextOptions?: VytchesContextOptions;
   private discoveredHandlers: HandlerInfo[] = [];
@@ -106,6 +114,31 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
   async onApplicationBootstrap(): Promise<void> {
     const unclaimed = this.discoveredHandlers.filter(h => !this.claimedTypes.has(h.messageType));
     await this.registerHandlersWithBuses(unclaimed);
+  }
+
+  /**
+   * Evict this module's handler registrations from the buses on teardown.
+   *
+   * Handlers are registered as factory closures over this service's moduleRef.
+   * When a bus instance outlives the module that populated it (e.g. a process-
+   * global bus shared across sequentially-created test modules), those closures
+   * become stale once the module is destroyed. Resetting the bus here drops them
+   * so the next module starts clean. Buses that do not support reset() (i.e. do
+   * not implement IResettableBus) are skipped.
+   */
+  onModuleDestroy(): void {
+    for (const bus of [this.commandBus, this.queryBus, this.eventBus]) {
+      const resettable = bus as unknown as BusWithRegistration | undefined;
+      if (resettable && typeof resettable.reset === 'function') {
+        try {
+          resettable.reset();
+        } catch (error) {
+          this.logger.warn('Failed to reset bus on module destroy', {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+    }
   }
 
   /**
@@ -348,10 +381,19 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
           }
         }
       } catch (error) {
-        this.logger.warn('Failed to register handler', {
-          handlerName: handler.handlerType.name,
-          error: error instanceof Error ? error.message : String(error),
-        });
+        // A failed registration leaves the bus without a handler for this
+        // message type — every execute() for it will fail at runtime (500).
+        // Surface it loudly at error level so the misconfiguration is visible
+        // at bootstrap rather than discovered as an opaque runtime failure.
+        this.logger.error(
+          'Failed to register handler — messages of this type will fail at runtime',
+          error instanceof Error ? error : undefined,
+          {
+            handlerName: handler.handlerType.name,
+            handlerType: handler.type,
+            error: error instanceof Error ? error.message : String(error),
+          }
+        );
       }
     }
   }

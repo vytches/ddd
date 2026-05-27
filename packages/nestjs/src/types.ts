@@ -12,11 +12,13 @@ export type { HandlerInfo };
  * @example
  * ```typescript
  * // VytchesExplorerService automatically injects ICommandBus and IQueryBus
- * // if they are provided in the module:
+ * // if they are provided in the module. Prefer useFactory/useClass over
+ * // useValue so each module owns its bus instance (a useValue bus is a
+ * // process-global singleton that leaks stale handlers across modules):
  * @Module({
  *   providers: [
- *     { provide: ICommandBus, useValue: new EnhancedCommandBus(container) },
- *     { provide: IQueryBus, useValue: new EnhancedQueryBus(container) },
+ *     { provide: ICommandBus, useFactory: () => new EnhancedCommandBus(container) },
+ *     { provide: IQueryBus, useFactory: () => new EnhancedQueryBus(container) },
  *   ]
  * })
  * ```
