@@ -262,6 +262,29 @@ describe('VytchesExplorerService (Phase 3 additions)', () => {
 
     expect(commandBusMock.registerFactory).not.toHaveBeenCalled();
   });
+
+  it('onModuleDestroy() resets buses that support reset() (VS-003)', () => {
+    const commandReset = vi.fn();
+    const queryReset = vi.fn();
+    const resettableService = new VytchesExplorerService(
+      { get: vi.fn() } as never,
+      { getProviders: vi.fn().mockReturnValue([]) } as never,
+      { register: vi.fn(), registerFactory: vi.fn(), reset: commandReset } as never,
+      { register: vi.fn(), registerFactory: vi.fn(), reset: queryReset } as never,
+      undefined,
+      undefined
+    );
+
+    resettableService.onModuleDestroy();
+
+    expect(commandReset).toHaveBeenCalledTimes(1);
+    expect(queryReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('onModuleDestroy() is a no-op for buses without reset() (VS-003)', () => {
+    // service from beforeEach has buses without a reset() method
+    expect(() => service.onModuleDestroy()).not.toThrow();
+  });
 });
 
 // ─── FeatureHandlerRegistrar unit tests ─────────────────────────────────────
