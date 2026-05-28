@@ -3,6 +3,48 @@
   "worktree": {
     "symlinkDirectories": ["node_modules"]
   },
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Edit(src/**)",
+      "Edit(packages/**)",
+      "Edit(test/**)",
+      "Edit(tests/**)",
+      "Edit(.claude/**)",
+      "Write(src/**)",
+      "Write(packages/**)",
+      "Write(test/**)",
+      "Write(tests/**)",
+      "Write(.claude/**)",
+      "Write(docs/**)",
+      "MultiEdit(src/**)",
+      "MultiEdit(packages/**)",
+      "MultiEdit(test/**)",
+      "MultiEdit(tests/**)",
+      "Bash(pnpm *)",
+      "Bash(git *)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(mkdir *)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Bash(git push --force *)",
+      "Bash(rm -rf *)",
+      "Bash(pnpm publish *)"
+    ]
+  },
   "autoMode": {
     "environment": [
       "Shared TypeScript npm library (Nx monorepo with multiple packages).",
