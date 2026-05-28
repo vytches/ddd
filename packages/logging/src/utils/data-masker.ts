@@ -119,11 +119,8 @@ export class DataMasker {
 
   private isSensitiveKey(key: string): boolean {
     const lowerKey = key.toLowerCase();
-    return this.options.sensitiveKeys.some(sensitiveKey => {
-      const lowerSensitiveKey = sensitiveKey.toLowerCase();
-      // Contains the sensitive key but exclude plural forms
-      // e.g. "token" matches "apiToken" and "userToken" but not "tokens"
-      return lowerKey.includes(lowerSensitiveKey) && !lowerKey.endsWith(`${lowerSensitiveKey}s`);
-    });
+    return this.options.sensitiveKeys.some(sensitiveKey =>
+      lowerKey.includes(sensitiveKey.toLowerCase()),
+    );
   }
 }

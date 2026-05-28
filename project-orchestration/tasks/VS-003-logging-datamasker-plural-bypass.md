@@ -11,7 +11,8 @@ complexity: simple
 estimated_time: 1h
 created_by: agent (security-audit 2026-05-26)
 created_at: 2026-05-26
-status: planned
+status: completed
+completed_at: 2026-05-28
 security_finding: SEC-LOGGING-004
 dread_score: 10
 audit_ref: docs/security/SECURITY-AUDIT-2026-05-26.md
@@ -54,9 +55,9 @@ a false sense of security.
 
 ### Expected Business Value
 
-- [ ] `passwords`, `apiTokens`, `userSecrets` etc. are masked when the corresponding key is in `sensitiveKeys`
-- [ ] Zero false-negatives for common PII field names
-- [ ] Consumers can trust their DataMasker configuration
+- [x] `passwords`, `apiTokens`, `userSecrets` etc. are masked when the corresponding key is in `sensitiveKeys`
+- [x] Zero false-negatives for common PII field names
+- [x] Consumers can trust their DataMasker configuration
 
 ### Success Metrics
 
@@ -102,9 +103,9 @@ private isSensitiveKey(key: string): boolean {
 
 ### Functional Requirements
 
-- [ ] Plural-form keys (`passwords`, `apiTokens`, `userSecrets`) are masked when the corresponding singular is in `sensitiveKeys`
-- [ ] Behaviour for singular keys is unchanged
-- [ ] Substring matching still works (`userPassword` matches `password`)
+- [x] Plural-form keys (`passwords`, `apiTokens`, `userSecrets`) are masked when the corresponding singular is in `sensitiveKeys`
+- [x] Behaviour for singular keys is unchanged
+- [x] Substring matching still works (`userPassword` matches `password`)
 
 ### Non-Functional Requirements
 
@@ -113,10 +114,10 @@ private isSensitiveKey(key: string): boolean {
 
 ### Definition of Done
 
-- [ ] `endsWith` exclusion rule removed
-- [ ] New tests green
-- [ ] Existing tests green (or updated with justification)
-- [ ] SEC-LOGGING-004 marked as resolved
+- [x] `endsWith` exclusion rule removed
+- [x] New tests green (3 new tests in data-masker.test.ts)
+- [x] Existing tests green (1 updated: `tokens` key → `authItems` — old test relied on plural-skip bug)
+- [x] SEC-LOGGING-004 marked as resolved
 
 ## Agent Assignments
 
@@ -131,9 +132,9 @@ supporting_agents: []
 
 - **Agent**: library-expert
 - **Tasks**:
-  - [ ] Remove `!lowerKey.endsWith(...)` from `isSensitiveKey`
-  - [ ] Add tests: `passwords`, `apiTokens`, `userSecrets`, `accessTokens`
-  - [ ] Check whether any existing tests need updating
+  - [x] Remove `!lowerKey.endsWith(...)` from `isSensitiveKey`
+  - [x] Add tests: `passwords`, `apiTokens`, `userSecrets`, `accessTokens`
+  - [x] Check whether any existing tests need updating (1 updated — `tokens` key renamed to `authItems`)
 - **Output**: `data-masker.ts` + tests
 
 ## Progress Tracking
@@ -141,18 +142,20 @@ supporting_agents: []
 ### Current Status
 
 ```yaml
-overall_progress: 0%
-current_phase: planned
+overall_progress: 100%
+current_phase: completed
 blockers: []
-last_updated: 2026-05-26
+last_updated: 2026-05-28
 ```
 
 ### Activity Log
 
-| Date       | Agent     | Action           | Result          |
-| ---------- | --------- | ---------------- | --------------- |
-| 2026-05-26 | sec-audit | Finding detected | SEC-LOGGING-004 |
-| 2026-05-26 | human     | Task created     | VS-003 planned  |
+| Date       | Agent          | Action                           | Result                        |
+| ---------- | -------------- | -------------------------------- | ----------------------------- |
+| 2026-05-26 | sec-audit      | Finding detected                 | SEC-LOGGING-004               |
+| 2026-05-26 | human          | Task created                     | VS-003 planned                |
+| 2026-05-28 | library-expert | Removed `!endsWith` exclusion    | isSensitiveKey fixed          |
+| 2026-05-28 | library-expert | Added 3 new tests, updated 1     | 95/95 green, tsc clean        |
 
 ## Code References
 
@@ -178,11 +181,11 @@ packages:
 
 ### Unit Tests
 
-- [ ] `sensitiveKeys: ['password']`, key `passwords` → masked
-- [ ] `sensitiveKeys: ['token']`, key `apiTokens` → masked
-- [ ] `sensitiveKeys: ['token']`, key `accessTokens` → masked
-- [ ] `sensitiveKeys: ['password']`, key `password` → still masked (unchanged)
-- [ ] `sensitiveKeys: ['password']`, key `userPassword` → still masked (unchanged)
+- [x] `sensitiveKeys: ['password']`, key `passwords` → masked
+- [x] `sensitiveKeys: ['token']`, key `apiTokens` → masked
+- [x] `sensitiveKeys: ['token']`, key `accessTokens` → masked
+- [x] `sensitiveKeys: ['password']`, key `password` → still masked (unchanged)
+- [x] `sensitiveKeys: ['password']`, key `userPassword` → still masked (unchanged)
 
 ## Links & References
 

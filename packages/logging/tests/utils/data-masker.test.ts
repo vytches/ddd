@@ -194,7 +194,7 @@ describe('DataMasker', () => {
       });
     });
 
-    it('should mask arrays', () => {
+    it('should mask arrays — iterates into array items', () => {
       const masker = new DataMasker({
         enabled: true,
         sensitiveKeys: ['token'],
@@ -202,7 +202,7 @@ describe('DataMasker', () => {
       });
 
       const data = {
-        tokens: [
+        authItems: [
           { token: 'abc123', name: 'api' },
           { token: 'xyz789', name: 'refresh' },
         ],
@@ -212,7 +212,7 @@ describe('DataMasker', () => {
       const masked = masker.maskData(data);
 
       expect(masked).toEqual({
-        tokens: [
+        authItems: [
           { token: '[MASKED]', name: 'api' },
           { token: '[MASKED]', name: 'refresh' },
         ],
@@ -313,6 +313,73 @@ describe('DataMasker', () => {
         customSecret: '[HIDDEN]',
         apiKey: '[HIDDEN]',
         normalField: 'value3',
+      });
+    });
+  });
+
+  describe('plural key forms — VS-003', () => {
+    it('masks plural forms: passwords, apiTokens, userSecrets', () => {
+      const masker = new DataMasker({
+        sensitiveKeys: ['password', 'token', 'secret'],
+        replacement: '[MASKED]',
+      });
+
+      const data = {
+        passwords: ['abc', 'def'],
+        apiTokens: 'Bearer xyz',
+        userSecrets: 'top-secret',
+        name: 'Jan',
+      };
+
+      const masked = masker.maskData(data);
+
+      expect(masked).toEqual({
+        passwords: '[MASKED]',
+        apiTokens: '[MASKED]',
+        userSecrets: '[MASKED]',
+        name: 'Jan',
+      });
+    });
+
+    it('still masks singular forms after fix', () => {
+      const masker = new DataMasker({
+        sensitiveKeys: ['password', 'token', 'secret'],
+        replacement: '[MASKED]',
+      });
+
+      const data = {
+        password: 'abc',
+        apiToken: 'Bearer xyz',
+        userSecret: 'top-secret',
+      };
+
+      const masked = masker.maskData(data);
+
+      expect(masked).toEqual({
+        password: '[MASKED]',
+        apiToken: '[MASKED]',
+        userSecret: '[MASKED]',
+      });
+    });
+
+    it('masks accessTokens and refreshTokens (common API patterns)', () => {
+      const masker = new DataMasker({
+        sensitiveKeys: ['token'],
+        replacement: '[MASKED]',
+      });
+
+      const data = {
+        accessTokens: ['tok1', 'tok2'],
+        refreshTokens: 'rt-xyz',
+        tokenCount: 5,
+      };
+
+      const masked = masker.maskData(data);
+
+      expect(masked).toEqual({
+        accessTokens: '[MASKED]',
+        refreshTokens: '[MASKED]',
+        tokenCount: '[MASKED]',
       });
     });
   });
