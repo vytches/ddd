@@ -1,15 +1,34 @@
 import type { LogContext, LogEvent, LogProvider } from '../core/index';
+import type { DataMasker } from '../utils/data-masker';
 
 export interface ConsoleProviderOptions {
   colorize?: boolean;
   prettyPrint?: boolean;
   includeStackTrace?: boolean;
+  /**
+   * Optional DataMasker for standalone ConsoleProvider use (without DefaultLogger).
+   *
+   * **When used through DefaultLogger:** masking is already applied upstream before
+   * the event reaches this provider. Setting `masker` here would cause double-masking.
+   * Only provide this when using ConsoleProvider directly (e.g. custom logger wrappers).
+   *
+   * @example
+   * ```typescript
+   * import { ConsoleProvider, DataMasker } from '@vytches/ddd-logging';
+   *
+   * const provider = new ConsoleProvider({
+   *   masker: new DataMasker({ sensitiveKeys: ['password', 'token'] }),
+   * });
+   * ```
+   */
+  masker?: DataMasker;
 }
 
 export class ConsoleProvider implements LogProvider {
   readonly name = 'console';
 
-  private readonly options: Required<ConsoleProviderOptions>;
+  private readonly options: Required<Omit<ConsoleProviderOptions, 'masker'>>;
+  private readonly masker: DataMasker | undefined;
 
   constructor(options: ConsoleProviderOptions = {}) {
     this.options = {
@@ -17,10 +36,16 @@ export class ConsoleProvider implements LogProvider {
       prettyPrint: options.prettyPrint ?? true,
       includeStackTrace: options.includeStackTrace ?? false,
     };
+    this.masker = options.masker;
   }
 
   write(event: LogEvent): void {
-    const formatted = this.formatEvent(event);
+    const effectiveEvent =
+      this.masker !== undefined && event.data !== undefined
+        ? { ...event, data: this.masker.maskData(event.data) as Record<string, unknown> }
+        : event;
+
+    const formatted = this.formatEvent(effectiveEvent);
 
     switch (event.level) {
       case 'trace':

@@ -10,7 +10,14 @@ export class DefaultLogger implements Logger {
     provider: 'console',
     contextDetection: { enabled: true },
     formatting: { colorize: true, prettyPrint: true },
-    masking: { enabled: true, patterns: [], replacement: '[MASKED]' },
+    masking: {
+      enabled: true,
+      patterns: [],
+      replacement: '[MASKED]',
+      // Defense-in-depth: mask common sensitive key names in addition to default regex patterns.
+      // Consumers can extend or override via DefaultLogger.configure({ masking: { sensitiveKeys: [...] } }).
+      sensitiveKeys: ['password', 'token', 'secret', 'apiKey', 'authorization', 'credential'],
+    },
   };
 
   private static globalProvider: LogProvider | null = null;

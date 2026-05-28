@@ -165,6 +165,56 @@ describe('DefaultLogger', () => {
         password: 'secret123',
       });
     });
+
+    it('default config masks password, token, secret, apiKey, authorization, credential by key', () => {
+      // Reset to library defaults — not the test beforeEach override
+      DefaultLogger.configure({
+        level: 'info',
+        provider: mockProvider,
+        masking: {
+          enabled: true,
+          patterns: [],
+          replacement: '[MASKED]',
+          sensitiveKeys: ['password', 'token', 'secret', 'apiKey', 'authorization', 'credential'],
+        },
+      });
+
+      const logger = DefaultLogger.create('TestContext');
+      logger.info('auth event', {
+        username: 'jan',
+        password: 'secret123',
+        token: 'Bearer abc.def.ghi',
+        apiKey: 'key-xyz',
+        name: 'Jan Kowalski',
+      });
+
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
+      expect(logEvent.data?.['password']).toBe('[MASKED]');
+      expect(logEvent.data?.['token']).toBe('[MASKED]');
+      expect(logEvent.data?.['apiKey']).toBe('[MASKED]');
+      expect(logEvent.data?.['username']).toBe('jan');
+      expect(logEvent.data?.['name']).toBe('Jan Kowalski');
+    });
+
+    it('default config masks email by regex even without sensitiveKeys', () => {
+      DefaultLogger.configure({
+        level: 'info',
+        provider: mockProvider,
+        masking: {
+          enabled: true,
+          patterns: [],
+          replacement: '[MASKED]',
+          sensitiveKeys: [],
+        },
+      });
+
+      const logger = DefaultLogger.create('TestContext');
+      logger.info('user event', { contact: 'jan@example.com', name: 'Jan' });
+
+      const logEvent: LogEvent = writeSpy.mock.calls[0]![0]!;
+      expect(logEvent.data?.['contact']).toBe('[MASKED]');
+      expect(logEvent.data?.['name']).toBe('Jan');
+    });
   });
 
   describe('configuration', () => {

@@ -47,6 +47,11 @@ export interface LoggerConfiguration {
     enabled?: boolean;
     patterns?: string[];
     replacement?: string;
+    /** Key names to mask (case-insensitive substring match). Additive to default regex patterns. */
     sensitiveKeys?: string[];
+    /** Maximum recursion depth for nested objects. Default: 10. */
+    maxDepth?: number;
+    /** Strings longer than this are replaced with '[TRUNCATED:string]'. Default: 1000. */
+    maxStringLength?: number;
   };
 }
