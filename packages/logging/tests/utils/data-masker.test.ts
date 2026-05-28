@@ -521,4 +521,47 @@ describe('DataMasker', () => {
       });
     });
   });
+
+  describe('pattern validation (VS-004)', () => {
+    it('throws RangeError for syntactically invalid pattern with index', () => {
+      const [error] = safeRun(() => new DataMasker({ patterns: ['validpattern', '[invalid'] }));
+      expect(error).toBeInstanceOf(RangeError);
+      expect((error as RangeError).message).toMatch(/index 1/);
+      expect((error as RangeError).message).toMatch(/\[invalid/);
+    });
+
+    it('truncates patterns over 100 chars in error message', () => {
+      const longInvalidPattern = 'a'.repeat(150) + '[invalid';
+      const [error] = safeRun(() => new DataMasker({ patterns: [longInvalidPattern] }));
+      expect(error).toBeInstanceOf(RangeError);
+      const msg = (error as RangeError).message;
+      expect(msg).toContain('...');
+      const excerptMatch = msg.match(/"([^"]+)"/);
+      expect(excerptMatch).not.toBeNull();
+      expect((excerptMatch![1] as string).length).toBeLessThanOrEqual(110);
+    });
+
+    it('rejects patterns exceeding MAX_PATTERN_LENGTH', () => {
+      const [error] = safeRun(() => new DataMasker({ patterns: ['a'.repeat(2001)] }));
+      expect(error).toBeInstanceOf(RangeError);
+      expect((error as RangeError).message).toMatch(/max length/i);
+    });
+
+    it('compiles valid custom patterns without error', () => {
+      const [error, masker] = safeRun(
+        () => new DataMasker({ patterns: ['\\d{3}-\\d{4}', 'TICKET-\\d+'], replacement: '[X]' }),
+      );
+      expect(error).toBeUndefined();
+      const result = masker!.maskData('Call 555-1234 about TICKET-99') as string;
+      expect(result).toContain('[X]');
+      expect(result).not.toContain('555-1234');
+      expect(result).not.toContain('TICKET-99');
+    });
+
+    it('error message includes pattern excerpt for debugging', () => {
+      const [error] = safeRun(() => new DataMasker({ patterns: ['[unclosed'] }));
+      expect(error).toBeInstanceOf(RangeError);
+      expect((error as RangeError).message).toContain('[unclosed');
+    });
+  });
 });
