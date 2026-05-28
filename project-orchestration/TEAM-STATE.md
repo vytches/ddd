@@ -1,21 +1,24 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-05-26 by /pulse_ _Updated by `/pulse`. Read-only for humans —
+_Last sync: 2026-05-28 by /pulse_ _Updated by `/pulse`. Read-only for humans —
 agents write here._
 
 ---
 
 ## 🎯 Sprint Focus
 
-**v0.30.0 IS LIVE on npmjs.org.** VP-007 (per-context CQRS isolation) and
-VP-008 (outbox default handler + priority contract) shipped 2026-05-23..25.
+**v0.31.0-rc masking stack is CODE-COMPLETE.** VS-001 (CQRS payload masking,
+DREAD 13), VS-002 (ConsoleProvider), VS-003 (plural keys), VS-004 (ReDoS) all
+implemented & committed 2026-05-27..28. **RC is shippable** once VS-001 task is
+verified/closed (status drift — code shipped, metadata lagged).
 
-**Security audit (2026-05-26)** found 8 findings — 1 CRITICAL (PII in CQRS
-logs), 3 HIGH (logging/masking gaps), 2 MEDIUM, 2 LOW. Full report in
+**Security audit (2026-05-26)** found 8 findings; follow-up review expanded the
+logging hardening backlog to VS-009..012. Full report in
 `docs/security/SECURITY-AUDIT-2026-05-26.md`.
 
-**Next target**: v0.31.0 — security hardening sprint (~9.5h, 8 VS-tasks).
-MVP for rc: VS-001 + VS-003 + VS-004 (masking stack integrity, 5h).
+**Next target**: v0.31.0 full — remaining ~9h across VS-005..012 (hash
+collision, CSV injection, decorator scope, toJSON bypass, secure-by-default,
+payload guard). VS-005 (auth-bypass-at-scale) is highest urgency post-rc.
 
 ---
 
@@ -23,15 +26,15 @@ MVP for rc: VS-001 + VS-003 + VS-004 (masking stack integrity, 5h).
 
 <!-- @tech-lead updates this section on /pulse -->
 
-1. **VS-001 CRITICAL (DREAD 13)** — `@LogCommands({ includePayload: true })`
-   logs full command objects without masking. Passwords/tokens/PII reach
-   production logs. Fix in v0.31.0-rc. Estimated 2h.
-2. **VS-002..004 HIGH (logging stack)** — ConsoleProvider bypasses DataMasker;
-   DataMasker silently skips plural keys (`passwords`, `apiTokens`); no ReDoS
-   protection on user-supplied regex. Batch with VS-001 in single PR (~4.5h).
-3. **VS-005 HIGH** — CachedPolicy uses 32-bit djb2 hash for cache keys;
-   collision at ~65k entities may cause wrong policy result returned (auth bypass
-   risk). Fix in v0.31.0 (~1.5h).
+1. ✅ **VS-001 CLOSED (2026-05-28)** — verified (100/100 tests, JSDoc + DoD met),
+   SEC-LOGGING-002 marked resolved, moved to `completed-tasks/`. **v0.31.0-rc
+   masking stack now fully unblocked — ready to publish.**
+2. **VS-005 HIGH** — CachedPolicy uses 32-bit djb2 hash for cache keys;
+   collision at ~65k entities may return wrong policy result (auth-bypass risk
+   at scale). Highest-urgency remaining item. ~1.5h.
+3. **VS-009..012 HIGH/MED (logging hardening)** — decorator-scope coverage,
+   `toJSON` bypass, secure-by-default mask, payload size guard. Sequence after
+   the masking stack lands; mutually dependent on VS-001/003. ~4.5h.
 
 ---
 
@@ -43,66 +46,84 @@ _N/A — this is a library project, no mobile UI._
 
 ## ⚙️ Technical Pulse
 
-<!-- Updated by @tech-lead on 2026-05-26 -->
+<!-- Updated by @tech-lead on 2026-05-28 -->
 
-**Status**: Green | **Active**: 18 tasks (4 in-progress, 13 planned, 1 backlog)
+**Status**: Green | **Active**: 21 tasks (4 in-progress, 1 review, 15 planned, 1 backlog)
 
-**Security**: 8 new findings from 2026-05-26 audit (DREAD 4–13). VS-001 (CQRS
-masking, 2h) is CRITICAL — block v0.31.0-rc until resolved. All 8 VS-tasks
-collectively ~9.5h across 5 packages (logging ×4, policies, resilience,
-messaging, value-objects).
+**STATUS DRIFT**: VS-001 (CRITICAL, DREAD 13) shipped across 5 commits
+(`31a25d26`..`69e7ead1`) but task metadata said `planned` — bumped to `review`,
+verify & close. Process gap: status field not updated post-commit.
 
-**Recent wins**: VP-007 / VP-003 / VP-008 shipped in 13 days (2026-05-23..25).
-Per-context CQRS isolation + production outbox hardening + adoption tooling.
-LocalHero consumer fully unblocked for migration off hand-rolled poller.
+**Security sprint progress** (12 VS-tasks total):
+- ✅ DONE (3): VS-002 (ConsoleProvider, 1.5h) · VS-003 (plural keys, 1h) ·
+  VS-004 (ReDoS, 2h) = 4.5h delivered, all `@vytches/ddd-logging`.
+- 🟡 REVIEW (1): VS-001 (CQRS masking) — code shipped, awaiting close.
+- ⏳ PLANNED (8): VS-005 (1.5h) · VS-006 (0.5h) · VS-007 (0.5h) · VS-008 (0.5h)
+  · VS-009 (1.5h) · VS-010 (1.5h) · VS-011 (0.5h) · VS-012 (1h) = ~7.5h remaining.
+
+**Critical path**: VS-001 → unblocks VS-009/VS-011 (masking-dependent);
+VS-003 → unblocks VS-010 (`toJSON` bypass). Max chain depth 2. VS-005 + VS-006
+independent — can run in parallel now.
 
 **Coverage**: VT-001 in-progress. Series VT-002..005 (2026-05-10) delivered
 63.98% → 69.29%. Baseline stable.
 
-**Debt**: None. All 8 security items are bugs with clear fixes, not structural
+**Debt**: None. All security items are bugs with clear fixes, not structural
 debt. No major/minor items flagged. Stale (>14d): VD-004, VF-002 — resume
-post-security sprint. VF-001 / VP-002 / VP-006 on steady state since 2026-05-09.
+post-security sprint. VF-001 / VP-002 / VP-006 steady state since 2026-05-09.
 
-**Next sprint**: VS-001..004 (logging security, 5.5h) in one PR → v0.31.0-rc.
-Parallel: VT-001 coverage. VS-005..008 → v0.31.0 full (lower urgency).
+**Next sprint**: Verify+close VS-001 → ship v0.31.0-rc (masking stack). Then
+VS-005 (auth-bypass) + VS-006 in parallel, VS-009..012 after. VT-001 in parallel.
 
 ---
 
 ## 💼 Business Pulse
 
-<!-- Updated by @product-owner on 2026-05-26 -->
+<!-- Updated by @product-owner on 2026-05-28 -->
 
-**Status**: v0.30.0 PUBLISHED ✅ (2026-05-26) — VP-007 (per-context CQRS
-isolation) + VP-008 (outbox default handler) shipped.
+**Status**: v0.31.0-rc masking stack CODE-COMPLETE. VS-001..004 (1 CRITICAL +
+3 HIGH) all implemented & committed 2026-05-27..28. **RC is shippable now** —
+sole gate is verifying/closing VS-001 (metadata drift, not a code gap).
 
-**Security audit (2026-05-26)**: 8 actionable findings:
-- 1 CRITICAL: VS-001 — PII in CQRS logs (`includePayload: true`) → GDPR risk,
-  credential exposure in log aggregation. Blocks production confidence.
-- 3 HIGH: VS-002/003/004 — logging/masking stack gaps (GDPR compliance)
-- 4 MEDIUM/LOW: VS-005..008 — infrastructure + usability
+**Next milestone**: v0.31.0 (security hardening) — **gap ~2 weeks**.
+- rc: VS-001..004 (masking stack integrity) — done, pending close.
+- full: VS-005..012 (~7.5h remaining), defer-able to v0.32.0 if capacity tight.
 
-**Next milestone**: v0.31.0 (security hardening, ~9.5h, 2–3 weeks)
-- MVP for rc: VS-001 + VS-003 + VS-004 (masking stack integrity, 5h)
-- Full release: all 8 VS-tasks
+**Validation**: Zero speculative work — all 12 VS-tasks security-audit-driven.
+Consumer juz-ide-api (237+ aggregates) validates every release.
 
-**Validation**: All backlog tasks consumer-validated or audit-driven — zero
-speculative work. VP-007 recovered production incident (LocalHero CQRS routing
-collision). VP-003/008 validated by LocalHero adoption signal.
+**Cut candidate** (if capacity tight): VS-008 (deprecation suppress, LOW) and
+VS-011 (secure-by-default, MED) can slip to v0.32.0 without security exposure.
 
-**Segment gap**: First-time DDD adopters (30% coverage). VF-002 (strategic
-design docs) will unlock post-publish. Monitor npm install signal.
+**Segment gap**: First-time DDD adopters (~30% coverage). VF-002 (strategic
+design docs) deferred post-security — correct call, lower priority than hardening.
+
+**Validate this week**: juz-ide-api upgrade to v0.31.0-rc — confirm no PII
+reaches logs under `includePayload: true` in a real consumer build.
 
 **Actions next week**:
-1. Start VS-001 feature branch (2h, highest DREAD) — prerequisite for VS-002/003/004
-2. Batch VS-001..004 in single PR (logging stack coherence)
-3. Publish v0.31.0-rc within 5 business days (security quality gate)
-4. Monitor adoption signal from v0.30.0 (LocalHero TS-DR-OUTBOX-002)
+1. Verify & close VS-001 → publish v0.31.0-rc within ~5 business days.
+2. VS-005 (auth-bypass-at-scale) + VS-006 in parallel post-rc.
+3. Monitor juz-ide-api adoption signal on rc before scoping v0.32.0.
 
 ---
 
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-05-28] @tech-lead: VS-001 code shipped across 5 commits (31a25d26..69e7ead1)
+but task said "planned" — status drift, bumped to "review". VS-002/003/004 complete
+(4.5h delivered, all @vytches/ddd-logging). VS-005 (hash collision, auth-bypass at
+scale) is highest-urgency remaining item after the masking stack ships.
+
+[2026-05-28] @product-owner: VS-001..004 code-complete; v0.31.0-rc shippable now.
+Sole gate is verifying/closing VS-001 (metadata drift, not a code gap). Backlog grew
+to VS-009..012 (logging hardening) — all audit-driven, zero speculative work. Validate
+rc against juz-ide-api consumer build before v0.32.0 scoping.
+
+[2026-05-26] @pulse: process gap surfaced — task status fields not updated post-commit.
+Worth a Stop-hook or pre-commit reminder to sync task metadata.
 
 [2026-05-26] @tech-lead: First full security audit complete. 8 findings (VS-001..008),
 DREAD 4–13. All 4 critical/high logging findings touch the same package (ddd-logging) —

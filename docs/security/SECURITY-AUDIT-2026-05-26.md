@@ -28,7 +28,11 @@
 
 **Pakiet:** `@vytches/ddd-logging`  
 **Plik:** `packages/logging/src/integration/cqrs-decorators.ts:92–93`  
-**Severity:** CRITICAL | DREAD: 13
+**Severity:** CRITICAL | DREAD: 13  
+**Status:** ✅ RESOLVED (VS-001, commit `31a25d26`, 2026-05-27) — `maskSensitiveData: true`
+uruchamia `DataMasker` na payloadzie; dodano `sensitiveFields?: string[]` (additive do
+domyślnych wzorców regex), singleton maskera per dekorator, try/catch fallback. Backward-compat:
+`maskSensitiveData` domyślnie `false`. Pokryte testami (`tests/integration/cqrs-decorators.test.ts`).
 
 ```typescript
 // cqrs-decorators.ts:92
