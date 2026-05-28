@@ -1,5 +1,32 @@
 export interface MaskingOptions {
   enabled: boolean;
+  /**
+   * User-supplied regex patterns compiled via `new RegExp(pattern, 'g')` at construction time.
+   *
+   * **Replace-vs-merge semantics:**
+   * - Empty array (default) — the four built-in PII patterns (email, SSN, credit card, phone)
+   *   are active. No user patterns are added.
+   * - Non-empty array — the built-in patterns are **replaced entirely** by the patterns you
+   *   supply. To extend rather than replace, copy the defaults and append your own patterns.
+   *
+   * @remarks
+   * **ReDoS warning.** Patterns are compiled as-is without heuristic analysis. Avoid patterns
+   * with catastrophic backtracking potential, such as:
+   * - `(a+)+` — nested quantifiers
+   * - `(.*)*` — nested star
+   * - `(a|aa)+` — overlapping alternation
+   *
+   * These patterns cause exponential backtracking on adversarial input. Because `DataMasker`
+   * sits on the hot path of every log event, a single hanging pattern blocks the Node.js
+   * event loop and makes the entire process unresponsive.
+   *
+   * For patterns sourced dynamically (env vars, remote config, user input) validate them
+   * externally with `safe-regex` or compile via the `re2` engine before passing them here.
+   *
+   * Patterns exceeding 2000 characters are rejected with `RangeError` at construction time.
+   *
+   * @see {@link https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS OWASP ReDoS}
+   */
   patterns: string[];
   replacement: string;
   sensitiveKeys: string[];
@@ -13,6 +40,7 @@ export class DataMasker {
   private static readonly DEFAULT_SENSITIVE_KEYS: string[] = [];
   private static readonly DEFAULT_MAX_DEPTH = 10;
   private static readonly DEFAULT_MAX_STRING_LENGTH = 1000;
+  private static readonly MAX_PATTERN_LENGTH = 2000;
 
   private static readonly DEFAULT_PATTERNS = [
     /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, // Email
@@ -41,8 +69,26 @@ export class DataMasker {
 
     this.compiledPatterns = [
       ...defaultPatterns,
-      ...this.options.patterns.map(pattern => new RegExp(pattern, 'g')),
+      ...this.options.patterns.map((pattern, index) => DataMasker.compilePattern(pattern, index)),
     ];
+  }
+
+  private static compilePattern(pattern: string, index: number): RegExp {
+    if (pattern.length > DataMasker.MAX_PATTERN_LENGTH) {
+      throw new RangeError(
+        `DataMasker: pattern at index ${index} exceeds max length of ${DataMasker.MAX_PATTERN_LENGTH} characters (actual length: ${pattern.length})`,
+      );
+    }
+
+    try {
+      return new RegExp(pattern, 'g');
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      const excerpt = pattern.length > 100 ? `${pattern.slice(0, 100)}...` : pattern;
+      throw new RangeError(
+        `DataMasker: invalid regex pattern at index ${index}: "${excerpt}" (${reason})`,
+      );
+    }
   }
 
   maskData(data: unknown): unknown {

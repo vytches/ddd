@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### Fixed
+
+- **DataMasker**: validates regex patterns at construction time. Invalid patterns now throw `RangeError` with actionable error message (pattern index + truncated value + original cause) instead of opaque V8 `SyntaxError` surfaced later in execution. Closes SEC-LOGGING-001 (VS-004). See [TM-VS-004](../../docs/security/threat-models/TM-VS-004.md).
+- **DataMasker**: enforces `MAX_PATTERN_LENGTH = 2000` on user-supplied patterns to prevent memory exhaustion through unbounded pattern strings.
+
+### Documentation
+
+- **DataMasker**: `MaskingOptions.patterns` JSDoc now documents (a) replace-vs-merge semantics with built-in PII patterns, (b) ReDoS warning with unsafe pattern examples, (c) recommendation to validate dynamically-sourced patterns with `safe-regex` or `re2`.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-logging
