@@ -15,8 +15,16 @@ export interface PolicyCacheConfig {
   ttl: number;
 
   /**
-   * Custom key generator for cache entries
-   * Generates cache key from entity and context
+   * Custom key generator for cache entries.
+   *
+   * This is the preferred way to cache by aggregate identity (e.g.
+   * `request => \`${aggregateId}:${version}\``). It gives full control
+   * over the cache key and avoids the cost of serialising the entire entity.
+   *
+   * The default serialisation (`JSON.stringify(entity)`) is a fallback that
+   * works for plain objects but may be unstable for aggregates with value
+   * objects, transient fields, or circular references. Provide `keyGenerator`
+   * whenever your entity has a natural identity.
    */
   keyGenerator?: (request: PolicyRequest<unknown>) => string;
 
@@ -31,7 +39,14 @@ export interface PolicyCacheConfig {
   maxSize?: number;
 
   /**
-   * Whether to cache failure results (violations)
+   * Whether to cache failure results (violations).
+   *
+   * WARNING: Caching negative (deny) results in authorisation policies is
+   * dangerous. A revocation decision (e.g. blacklisting a user or revoking a
+   * role) will not take effect until the cached entry expires. This means an
+   * entity that should receive `deny` continues to receive a stale `allow`
+   * for up to `ttl` milliseconds after the policy is updated. Only enable
+   * this for non-security policies or when staleness is explicitly acceptable.
    */
   cacheFailures?: boolean;
 
@@ -47,16 +62,35 @@ export interface PolicyCacheConfig {
 interface CacheEntry<T> {
   result: Result<T, PolicyViolation>;
   timestamp: Date;
-  lastAccess: number;
   ttl: number;
 }
 
 /**
- * Simple in-memory cache implementation for policies
- * Enterprise-ready with TTL, size limits, and metrics
+ * Node in the doubly-linked list used for O(1) LRU tracking.
+ */
+interface LruNode {
+  key: string;
+  prev: LruNode | null;
+  next: LruNode | null;
+}
+
+/**
+ * Simple in-memory cache implementation for policies.
+ * Enterprise-ready with TTL, size limits, and metrics.
+ *
+ * LRU eviction is O(1) — implemented as a Map + doubly-linked list so that
+ * both insertion and access update the MRU position in constant time.
  */
 class PolicyCache {
   private cache = new Map<string, CacheEntry<unknown>>();
+
+  // Doubly-linked list for O(1) LRU tracking.
+  // `lruHead` = least recently used (eviction candidate)
+  // `lruTail` = most recently used
+  private lruNodes = new Map<string, LruNode>();
+  private lruHead: LruNode | null = null;
+  private lruTail: LruNode | null = null;
+
   private metrics = {
     hits: 0,
     misses: 0,
@@ -80,6 +114,7 @@ class PolicyCache {
     const age = now - entry.timestamp.getTime();
 
     if (age > entry.ttl) {
+      this.removeNode(key);
       this.cache.delete(key);
       this.metrics.evictions++;
       this.metrics.entries--;
@@ -87,8 +122,8 @@ class PolicyCache {
       return null;
     }
 
-    // Update last access for LRU tracking
-    entry.lastAccess = now;
+    // Move to MRU position (O(1) LRU refresh on hit)
+    this.touchNode(key);
 
     this.metrics.hits++;
     return entry.result;
@@ -103,30 +138,23 @@ class PolicyCache {
     ttl: number,
     maxSize?: number
   ): void {
-    // Enforce max size by removing least recently used entry
+    // Enforce max size by evicting the least recently used entry (O(1))
     if (maxSize && this.cache.size >= maxSize) {
-      let lruKey: string | undefined;
-      let lruAccess = Infinity;
-      for (const [k, v] of this.cache.entries()) {
-        if (v.lastAccess < lruAccess) {
-          lruAccess = v.lastAccess;
-          lruKey = k;
-        }
-      }
-      if (lruKey) {
+      const lruKey = this.lruHead?.key;
+      if (lruKey !== undefined) {
+        this.removeNode(lruKey);
         this.cache.delete(lruKey);
         this.metrics.evictions++;
         this.metrics.entries--;
       }
     }
 
-    const now = Date.now();
     this.cache.set(key, {
       result,
       timestamp: new Date(),
-      lastAccess: now,
       ttl,
     });
+    this.addNode(key);
     this.metrics.entries++;
   }
 
@@ -135,6 +163,9 @@ class PolicyCache {
    */
   public clear(): void {
     this.cache.clear();
+    this.lruNodes.clear();
+    this.lruHead = null;
+    this.lruTail = null;
     this.metrics.entries = 0;
   }
 
@@ -150,6 +181,50 @@ class PolicyCache {
    */
   public size(): number {
     return this.cache.size;
+  }
+
+  // --- LRU linked-list helpers ---
+
+  /** Append a new node for `key` at the MRU tail. */
+  private addNode(key: string): void {
+    const node: LruNode = { key, prev: this.lruTail, next: null };
+    if (this.lruTail) {
+      this.lruTail.next = node;
+    } else {
+      this.lruHead = node;
+    }
+    this.lruTail = node;
+    this.lruNodes.set(key, node);
+  }
+
+  /** Move existing node for `key` to MRU tail. */
+  private touchNode(key: string): void {
+    const node = this.lruNodes.get(key);
+    if (!node || node === this.lruTail) return; // already MRU
+
+    // Detach from current position
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    if (this.lruHead === node) this.lruHead = node.next;
+
+    // Append at tail
+    node.prev = this.lruTail;
+    node.next = null;
+    if (this.lruTail) this.lruTail.next = node;
+    this.lruTail = node;
+  }
+
+  /** Remove node for `key` from the linked list. */
+  private removeNode(key: string): void {
+    const node = this.lruNodes.get(key);
+    if (!node) return;
+
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    if (this.lruHead === node) this.lruHead = node.next;
+    if (this.lruTail === node) this.lruTail = node.prev;
+
+    this.lruNodes.delete(key);
   }
 }
 
@@ -173,7 +248,7 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
    * Check policy with caching
    */
   public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
-    const cacheKey = this.generateCacheKey(request);
+    const cacheKey = await this.generateCacheKey(request);
 
     // Try cache first
     const cached = this.cache.get<T>(cacheKey);
@@ -194,9 +269,18 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   }
 
   /**
-   * Generate cache key for request
+   * Generate cache key for request.
+   *
+   * When `keyGenerator` is provided it is used as-is (consumer override).
+   * Otherwise the default key hashes the full context (userId + tenantId +
+   * environment) and entity serialisation through SHA-256 so that no raw PII
+   * is materialised as a plain-text Map key.
+   *
+   * Uses `globalThis.crypto.subtle` (Web Crypto) instead of `node:crypto` to
+   * remain compatible with platform-agnostic bundles (Vite externalises
+   * `node:` builtins for browser-compat builds).
    */
-  private generateCacheKey(request: PolicyRequest<T>): string {
+  private async generateCacheKey(request: PolicyRequest<T>): Promise<string> {
     if (this.config.keyGenerator) {
       return this.config.keyGenerator(request);
     }
@@ -213,9 +297,16 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
       entityKey = this.generateFallbackKey(request.entity);
     }
 
-    const contextKey = `${request.context.userId}_${request.context.tenantId || ''}_${request.context.environment}`;
+    // F4: hash the full context string so that raw userId/tenantId are not
+    // materialised as plain text in the in-memory Map keys.
+    // Use NUL (\x00) as the field separator — it cannot appear in normal
+    // identifiers, so it removes the delimiter ambiguity a printable separator
+    // would allow (e.g. userId "a_b" + tenant "c" vs "a" + "b_c").
+    const contextRaw = `${request.context.userId}\x00${request.context.tenantId || ''}\x00${request.context.environment}`;
+    const contextHash = await this.hashString(contextRaw);
+    const entityHash = await this.hashString(entityKey);
 
-    return `${namespace}:${contextKey}:${this.hashString(entityKey)}`;
+    return `${namespace}:${contextHash}:${entityHash}`;
   }
 
   /**
@@ -263,16 +354,26 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   }
 
   /**
-   * Simple string hash for cache keys
+   * Hash a string using SHA-256 (Web Crypto) and return the first 32 hex
+   * characters (128-bit prefix). This replaces the former djb2 implementation
+   * which had a 32-bit effective space (~2³¹ after Math.abs) causing
+   * birthday collisions at ~65k entries per namespace/context.
+   *
+   * `globalThis.crypto.subtle` is used rather than `node:crypto` to avoid
+   * Vite externalization issues in browser-compat builds. Available on
+   * Node.js >= 19 (standard, no import needed); `engines.node >= 22.19.0`
+   * guarantees availability.
+   *
+   * Async because `subtle.digest` returns a Promise.
    */
-  private hashString(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash).toString(16);
+  private async hashString(str: string): Promise<string> {
+    const encoded = new TextEncoder().encode(str);
+    const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', encoded);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+      .slice(0, 32);
   }
 
   /**
@@ -369,7 +470,6 @@ export class PolicyCachingBehaviorFactory {
       enableMetrics: true,
       namespace: `expensive_${policy.id}`,
     });
-    // Override the ID to include expensive prefix
     // Override the ID to include expensive prefix
     Object.defineProperty(cachedPolicy, 'id', {
       value: `expensive_cached_${policy.id}`,
