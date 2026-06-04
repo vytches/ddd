@@ -4,14 +4,19 @@
 
 ```yaml
 task_id: VS-011
-title: "logging: @LogCommands default maskSensitiveData: true — secure-by-default API"
+title:
+  'logging: @LogCommands default maskSensitiveData: true — secure-by-default API'
 type: improvement
 priority: medium
 complexity: simple
 estimated_time: 0.5h
 created_by: agent (multi-agent analysis 2026-05-27)
 created_at: 2026-05-27
-status: planned
+status: cancelled
+cancelled_at: 2026-06-01
+cancelled_reason:
+  'obsolete — application-logging layer removed (VS-013); @LogCommands decorator
+  deleted, nothing to configure'
 breaking_change: true
 semver_impact: minor
 dread_score: 6
@@ -33,19 +38,23 @@ patterns:
 
 ### Why This Task Exists
 
-DDD Patterns Expert (analiza 2026-05-27) wskazał, że `@LogCommands` powinien domyślnie
-maskować dane wrażliwe, a nie wymagać jawnego `maskSensitiveData: true`.
+DDD Patterns Expert (analiza 2026-05-27) wskazał, że `@LogCommands` powinien
+domyślnie maskować dane wrażliwe, a nie wymagać jawnego
+`maskSensitiveData: true`.
 
 Aktualnie (po VS-001):
+
 ```typescript
 @LogCommands({ includePayload: true })  // maskSensitiveData: false — PII w logach!
 @LogCommands({ includePayload: true, maskSensitiveData: true })  // bezpieczne
 ```
 
-Problem: konsument musi pamiętać o dodaniu `maskSensitiveData: true`. Boolean trap.
+Problem: konsument musi pamiętać o dodaniu `maskSensitiveData: true`. Boolean
+trap.
 
-**Dotyczy tylko `@LogCommands`** — komendy (write side) zawierają PII (dane do zapisu).
-`@LogQueries` może pozostać `maskSensitiveData: false` (filtry są zwykle jawne).
+**Dotyczy tylko `@LogCommands`** — komendy (write side) zawierają PII (dane do
+zapisu). `@LogQueries` może pozostać `maskSensitiveData: false` (filtry są
+zwykle jawne).
 
 ### Expected Business Value
 
@@ -55,8 +64,10 @@ Problem: konsument musi pamiętać o dodaniu `maskSensitiveData: true`. Boolean 
 
 ### Success Metrics
 
-- `@LogCommands({ includePayload: true })` bez `maskSensitiveData` → payload maskowany
-- `@LogCommands({ includePayload: true, maskSensitiveData: false })` → jawnie niebezpieczne, payload surowy
+- `@LogCommands({ includePayload: true })` bez `maskSensitiveData` → payload
+  maskowany
+- `@LogCommands({ includePayload: true, maskSensitiveData: false })` → jawnie
+  niebezpieczne, payload surowy
 - Changelog z jasnym opisem breaking change
 
 ## Technical Context
@@ -145,10 +156,10 @@ last_updated: 2026-05-27
 
 ### Activity Log
 
-| Date       | Agent          | Action                                   | Result          |
-| ---------- | -------------- | ---------------------------------------- | --------------- |
-| 2026-05-27 | multi-agent    | Finding (DDD Patterns Expert + Security) | recommendation  |
-| 2026-05-27 | product-owner  | Task created, P2 priority                | VS-011 planned  |
+| Date       | Agent         | Action                                   | Result         |
+| ---------- | ------------- | ---------------------------------------- | -------------- |
+| 2026-05-27 | multi-agent   | Finding (DDD Patterns Expert + Security) | recommendation |
+| 2026-05-27 | product-owner | Task created, P2 priority                | VS-011 planned |
 
 ## Code References
 
@@ -167,17 +178,18 @@ packages:
 
 ### Technical Risks
 
-| Risk                                      | Probability | Impact | Mitigation                                      |
-| ----------------------------------------- | ----------- | ------ | ----------------------------------------------- |
-| Konsument używa `includePayload: true` bez mask | High   | Low    | To właśnie jest bug, który naprawiamy           |
-| Konsument chce surowy payload z Command   | Low         | Medium | `maskSensitiveData: false` jako jawny opt-out   |
+| Risk                                            | Probability | Impact | Mitigation                                    |
+| ----------------------------------------------- | ----------- | ------ | --------------------------------------------- |
+| Konsument używa `includePayload: true` bez mask | High        | Low    | To właśnie jest bug, który naprawiamy         |
+| Konsument chce surowy payload z Command         | Low         | Medium | `maskSensitiveData: false` jako jawny opt-out |
 
 ## Testing Strategy
 
 ### Unit Tests
 
 - [ ] `@LogCommands({ includePayload: true })` — payload maskowany domyślnie
-- [ ] `@LogCommands({ includePayload: true, maskSensitiveData: false })` — surowy payload
+- [ ] `@LogCommands({ includePayload: true, maskSensitiveData: false })` —
+      surowy payload
 - [ ] `@LogQueries({ includePayload: true })` — domyślnie surowy (bez zmiany)
 
 ## Links & References
