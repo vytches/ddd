@@ -1,7 +1,7 @@
 import { Capability } from '@vytches/ddd-contracts';
 import type { IVersioningCapability, IDomainEvent, IEventUpcaster } from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 
 /**
  * Capability that handles **event schema evolution** — when a stored event
@@ -104,12 +104,11 @@ export class VersioningCapability
     if (eventVersion < currentVersion && this.upcasters.has(event.eventName)) {
       const eventUpcasters = this.upcasters.get(event.eventName)!;
 
-      const logger = Logger.forContext('VersioningCapability');
       for (let version = eventVersion; version < currentVersion; version++) {
         const upcaster = eventUpcasters.get(version);
         if (!upcaster) {
-          logger.warn(
-            'Missing upcaster for event version — event will be processed without upcast',
+          internalLogger.warn(
+            'VersioningCapability: Missing upcaster for event version — event will be processed without upcast',
             {
               eventName: event.eventName,
               fromVersion: version,

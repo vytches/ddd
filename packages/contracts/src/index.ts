@@ -136,3 +136,8 @@ export type { IAggregateSnapshot } from './shared';
 // to keep contracts as the dependency-free foundation layer.
 // utils re-exports this Result via shim for backwards compatibility.
 export { Result } from './shared';
+
+// Internal library diagnostics shim (VS-010). @internal — shared here so all
+// @vytches/ddd-* packages use one console-based implementation instead of
+// duplicating it. NOT an application logging layer; not for consumer use.
+export { internalLogger } from './internal-logger';

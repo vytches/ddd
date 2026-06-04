@@ -112,7 +112,7 @@ export function getWorkspaceAliases(packagePath: string): Record<string, string>
     '@vytches/ddd-repositories': resolve(packagePath, '../repositories/src/index.ts'),
     '@vytches/ddd-aggregates': resolve(packagePath, '../aggregates/src/index.ts'),
     // NOTE: '@vytches/ddd-core' removed to prevent circular dependency
-    '@vytches/ddd-logging': resolve(packagePath, '../logging/src/index.ts'),
+    // NOTE: '@vytches/ddd-logging' removed (VS-010): application-logging layer deleted
     '@vytches/ddd-events': resolve(packagePath, '../events/src/index.ts'),
     '@vytches/ddd-cqrs': resolve(packagePath, '../cqrs/src/index.ts'),
     '@vytches/ddd-di': resolve(packagePath, '../di/src/index.ts'),

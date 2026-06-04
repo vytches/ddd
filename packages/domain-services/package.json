@@ -44,7 +44,6 @@
   },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
-    "@vytches/ddd-logging": "workspace:*",
     "@vytches/ddd-repositories": "workspace:*",
     "@vytches/ddd-validation": "workspace:*"
   },

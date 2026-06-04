@@ -3,7 +3,7 @@ import type { IEventBus, BaseEventBusOptions } from '@vytches/ddd-contracts';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type { IAuditEvent } from '@vytches/ddd-contracts';
 import type { IIntegrationEvent } from './integration/integration-event-interfaces';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 import 'reflect-metadata';
 
 /**
@@ -108,12 +108,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
 
   constructor(options?: BaseEventBusOptions) {
     super(options);
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.info('UnifiedEventBus initialized', {
-      enableLogging: options?.enableLogging ?? true,
-      middlewareCount: options?.middlewares?.length ?? 0,
-    });
-
     // Auto-register discovered handlers on initialization
     this.autoRegisterHandlers();
   }
@@ -139,18 +133,10 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
           for (const handlerInfo of handlers) {
             this.registerDiscoveredHandler(handlerInfo);
           }
-
-          const logger = Logger.forContext('UnifiedEventBus');
-          logger.info('Auto-registered DI handlers', {
-            handlerCount: handlers.length,
-          });
         }
       }
-    } catch (error) {
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('DI auto-registration not available', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+    } catch {
+      // DI auto-registration not available — silent, not an error
     }
   }
 
@@ -163,8 +149,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       const eventContext = Reflect.getMetadata('event:context', handlerInfo.handler);
 
       if (!eventName) {
-        const logger = Logger.forContext('UnifiedEventBus');
-        logger.warn('Handler without event type metadata', {
+        internalLogger.warn('UnifiedEventBus: handler without event type metadata', {
           handlerName: handlerInfo.handler.name,
         });
         return;
@@ -185,35 +170,29 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
           if (handlerInstance && typeof handlerInstance.handle === 'function') {
             await handlerInstance.handle(event);
           } else {
-            const logger = Logger.forContext('UnifiedEventBus');
-            logger.error('Invalid handler instance', undefined, {
+            internalLogger.error('UnifiedEventBus: invalid handler instance', undefined, {
               handlerName: handlerInfo.handler.name,
               hasHandleMethod: !!(handlerInstance && typeof handlerInstance.handle === 'function'),
             });
           }
         } catch (error) {
-          const logger = Logger.forContext('UnifiedEventBus');
-          logger.error('Handler execution failed', error instanceof Error ? error : undefined, {
-            handlerName: handlerInfo.handler.name,
-            errorMessage: error instanceof Error ? error.message : String(error),
-          });
+          internalLogger.error(
+            'UnifiedEventBus: handler execution failed',
+            error instanceof Error ? error : undefined,
+            {
+              handlerName: handlerInfo.handler.name,
+              errorMessage: error instanceof Error ? error.message : String(error),
+            }
+          );
           throw error;
         }
       };
 
       // Register with context awareness
       this.registerHandlerWithContext(eventName.name, handlerFactory, eventContext);
-
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('Registered DI handler', {
-        eventName: eventName.name,
-        handlerName: handlerInfo.handler.name,
-        context: eventContext,
-      });
     } catch (error) {
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.error(
-        'Failed to register discovered handler',
+      internalLogger.error(
+        'UnifiedEventBus: failed to register discovered handler',
         error instanceof Error ? error : undefined,
         {
           handlerName: handlerInfo.handler?.name || 'unknown',
@@ -227,13 +206,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * Publish an event with automatic routing to appropriate handlers
    */
   override async publish(event: BaseEvent): Promise<void> {
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Publishing event', {
-      eventName: event.eventName,
-      contextId: (event as EventWithMetadata).metadata?.contextId,
-      hasPayload: !!(event as { payload?: unknown }).payload,
-    });
-
     // Get context-aware handlers
     const handlers = this.getHandlersForEvent(event);
 
@@ -252,22 +224,11 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     const events = aggregate.getDomainEvents();
     if (events.length === 0) return;
 
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Publishing aggregate events', {
-      eventCount: events.length,
-      aggregateType: aggregate.constructor.name,
-    });
-
     // Use publishMany for optimized batch processing
     await this.publishMany(events);
 
     // Clear events from aggregate after successful publishing
     aggregate.commit();
-
-    logger.debug('Aggregate events published and cleared', {
-      eventCount: events.length,
-      aggregateType: aggregate.constructor.name,
-    });
   }
 
   /**
@@ -307,13 +268,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       actualHandler as UnifiedEventHandler<BaseEvent>,
       contexts
     );
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Subscribed to event', {
-      eventName: eventNameName,
-      contexts,
-      handlerName: actualHandler.name || 'anonymous',
-    });
   }
 
   /**
@@ -330,13 +284,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       handler as UnifiedEventHandler<BaseEvent>,
       contextId
     );
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Subscribed with context filter', {
-      eventName: eventNameName,
-      contexts: contextId,
-      handlerName: handler.name || 'anonymous',
-    });
   }
 
   /**
@@ -350,12 +297,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     const handlerFunction: UnifiedEventHandler<BaseEvent> = event => handler.handle(event as T);
 
     this.registerHandlerWithContext(eventNameName, handlerFunction, undefined);
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Registered class-based handler', {
-      eventName: eventNameName,
-      handlerClass: handler.constructor.name,
-    });
   }
 
   /**
@@ -386,11 +327,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
 
       if (index !== -1) {
         handlers.splice(index, 1);
-        const logger = Logger.forContext('UnifiedEventBus');
-        logger.debug('Unsubscribed class-based handler from event', {
-          eventName: eventNameName,
-          remainingHandlers: handlers.length,
-        });
       }
       return;
     }
@@ -398,11 +334,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     const index = handlers.findIndex(entry => entry.handler === targetHandler);
     if (index !== -1) {
       handlers.splice(index, 1);
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('Unsubscribed from event', {
-        eventName: eventNameName,
-        remainingHandlers: handlers.length,
-      });
     }
   }
 
@@ -412,18 +343,8 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   override async publishMany(events: Array<BaseEvent>): Promise<void> {
     if (events.length === 0) return;
 
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Publishing multiple events', {
-      eventCount: events.length,
-      eventNames: events.map(e => e.eventName),
-    });
-
     // Process all events concurrently for better performance
     await Promise.all(events.map(event => this.publish(event)));
-
-    logger.debug('Batch publishing completed', {
-      eventCount: events.length,
-    });
   }
 
   /**
@@ -502,20 +423,8 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     handlers: UnifiedEventHandler<BaseEvent>[]
   ): Promise<void> {
     if (handlers.length === 0) {
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('No handlers found for event', {
-        eventName: event.eventName,
-        contextId: (event as EventWithMetadata).metadata?.contextId,
-      });
       return;
     }
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Executing handlers', {
-      eventName: event.eventName,
-      handlerCount: handlers.length,
-      contextId: (event as EventWithMetadata).metadata?.contextId,
-    });
 
     // Apply middleware if available
     const executeWithMiddleware = this.buildMiddlewarePipeline(handlers);
@@ -532,8 +441,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
         const errorObj = error instanceof Error ? error : new Error(String(error));
         errors.push(errorObj);
 
-        const logger = Logger.forContext('UnifiedEventBus');
-        logger.error('Handler execution failed', errorObj, {
+        internalLogger.error('UnifiedEventBus: handler execution failed', errorObj, {
           eventName: event.eventName,
           handlerName: handler.name || 'anonymous',
         });

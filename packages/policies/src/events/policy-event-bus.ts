@@ -1,4 +1,4 @@
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 import type { PolicyEvent } from './policy-evaluation-event';
 
 export type PolicyEventHandler<T extends PolicyEvent = PolicyEvent> = (
@@ -35,7 +35,6 @@ export interface PolicyEventBusMetrics {
 }
 
 export class PolicyEventBus {
-  private readonly logger = Logger.forContext('PolicyEventBus');
   private readonly subscriptions = new Map<string, PolicyEventSubscription>();
   private readonly config: Required<PolicyEventBusConfig>;
   private readonly metrics: PolicyEventBusMetrics;
@@ -261,9 +260,13 @@ export class PolicyEventBus {
           // Do nothing
           break;
         case 'log':
-          this.logger.error(errorMessage, error instanceof Error ? error : undefined, {
-            error: error instanceof Error ? error.message : String(error),
-          });
+          internalLogger.error(
+            `PolicyEventBus: ${errorMessage}`,
+            error instanceof Error ? error : undefined,
+            {
+              error: error instanceof Error ? error.message : String(error),
+            }
+          );
           break;
         case 'throw':
           throw new Error(errorMessage);

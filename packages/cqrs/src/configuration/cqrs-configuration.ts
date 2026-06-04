@@ -1,6 +1,6 @@
 import type { IDependencyContainer } from '@vytches/ddd-di';
-import { Logger } from '@vytches/ddd-logging';
 import type { ICommandBus, IQueryBus } from '../abstracts';
+import { internalLogger } from '@vytches/ddd-contracts';
 import { CommandBus, EnhancedCommandBus, EnhancedQueryBus, QueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';
 
@@ -54,7 +54,6 @@ import type { CQRSOptions } from './cqrs-options.interface';
  * @since 0.1.0
  */
 export class CQRSConfiguration {
-  private readonly logger = Logger.forContext('CQRSConfiguration');
   public readonly commandBus: ICommandBus;
   public readonly queryBus: IQueryBus;
 
@@ -83,8 +82,8 @@ export class CQRSConfiguration {
     if (autoDiscovery) {
       // Suppress deprecation warnings in CI to avoid stderr confusion
       if (!process.env.CI) {
-        this.logger.warn(
-          'autoDiscovery option is deprecated. Use DI container auto-discovery instead.'
+        internalLogger.warn(
+          'CQRSConfiguration: autoDiscovery option is deprecated. Use DI container auto-discovery instead.'
         );
       }
       this.commandBus.discoverHandlers();

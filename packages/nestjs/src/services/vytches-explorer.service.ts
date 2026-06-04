@@ -6,7 +6,7 @@ import type { Constructor } from '@vytches/ddd-di';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import { IEventBus, EVENT_HANDLER_METADATA } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
 import { ACL_ADAPTER_METADATA, ACL_REGISTRY } from '../constants';
 import type { ACLAdapterMetadata } from '../decorators/acl-adapter.decorator';
@@ -72,7 +72,6 @@ interface BusWithRegistration {
 export class VytchesExplorerService
   implements OnModuleInit, OnApplicationBootstrap, OnModuleDestroy
 {
-  private readonly logger = Logger.forContext('VytchesExplorerService');
   private _contextOptions?: VytchesContextOptions;
   private discoveredHandlers: HandlerInfo[] = [];
   private initialized = false;
@@ -99,9 +98,13 @@ export class VytchesExplorerService
       await this.discoverAndRegisterACLAdapters();
       this.initialized = true;
     } catch (error) {
-      this.logger.error('Initialization failed', error instanceof Error ? error : undefined, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      internalLogger.error(
+        'VytchesExplorer: Initialization failed',
+        error instanceof Error ? error : undefined,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        }
+      );
       throw error;
     }
   }
@@ -134,7 +137,7 @@ export class VytchesExplorerService
         try {
           resettable.reset();
         } catch (error) {
-          this.logger.warn('Failed to reset bus on module destroy', {
+          internalLogger.warn('VytchesExplorer: Failed to reset bus on module destroy', {
             error: error instanceof Error ? error.message : String(error),
           });
         }
@@ -403,8 +406,8 @@ export class VytchesExplorerService
         // message type — every execute() for it will fail at runtime (500).
         // Surface it loudly at error level so the misconfiguration is visible
         // at bootstrap rather than discovered as an opaque runtime failure.
-        this.logger.error(
-          'Failed to register handler — messages of this type will fail at runtime',
+        internalLogger.error(
+          'VytchesExplorer: Failed to register handler — messages of this type will fail at runtime',
           error instanceof Error ? error : undefined,
           {
             handlerName: handler.handlerType.name,
@@ -492,7 +495,7 @@ export class VytchesExplorerService
         const { contextName, description, version } = aclMetadata;
 
         if (this.aclRegistry.hasContext(contextName)) {
-          this.logger.warn('ACL adapter already registered, skipping', {
+          internalLogger.warn('VytchesExplorer: ACL adapter already registered, skipping', {
             contextName,
             adapterClass: metatype.name,
           });
@@ -506,17 +509,9 @@ export class VytchesExplorerService
         });
 
         registered++;
-        this.logger.info('ACL adapter auto-registered', {
-          contextName,
-          adapterClass: metatype.name,
-        });
       } catch {
         // Skip problematic providers
       }
-    }
-
-    if (registered > 0) {
-      this.logger.info(`Auto-discovered ${registered} ACL adapter(s)`);
     }
   }
 }

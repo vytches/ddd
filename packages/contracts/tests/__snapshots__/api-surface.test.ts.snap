@@ -14,6 +14,7 @@ exports[`@vytches/ddd-contracts public API surface > exports the documented set 
   "Result",
   "createCapabilityRegistry",
   "createDomainEvent",
+  "internalLogger",
   "isEventHandler",
 ]
 `;

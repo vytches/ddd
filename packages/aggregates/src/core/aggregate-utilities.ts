@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Logger } from '@vytches/ddd-logging';
 import { Result } from '@vytches/ddd-utils';
 import type {
   CapabilityConstructor,

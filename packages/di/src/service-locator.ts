@@ -1,5 +1,5 @@
-import { Logger } from '@vytches/ddd-logging';
 import 'reflect-metadata';
+import { internalLogger } from '@vytches/ddd-contracts';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';
 import type { HandlerInfo, IHandlerDiscoveryPlugin } from './discovery/handler-discovery.interface';
 import {
@@ -83,7 +83,6 @@ export interface IServiceLocator {
 
 export class ServiceLocator implements IServiceLocator {
   private static instance: ServiceLocator;
-  private readonly logger = Logger.forContext('ServiceLocator');
   private globalContainer?: IDependencyContainer | undefined;
   private readonly contextContainers = new Map<string, IDependencyContainer>();
   private readonly discoveryRegistry = new HandlerDiscoveryRegistry();
@@ -226,8 +225,6 @@ export class ServiceLocator implements IServiceLocator {
     for (const handler of handlers) {
       this.registerHandlerInContainer(handler, this.globalContainer);
     }
-
-    this.logger.info('Discovered and registered handlers', { count: handlers.length });
   }
 
   /**
@@ -248,7 +245,7 @@ export class ServiceLocator implements IServiceLocator {
         lifetime: ServiceLifetime.Transient,
       });
     } catch (error) {
-      this.logger.warn('Failed to register handler', {
+      internalLogger.warn('ServiceLocator: Failed to register handler', {
         handlerName: handler.handlerType.name,
         error: String(error),
       });
@@ -271,10 +268,8 @@ export class ServiceLocator implements IServiceLocator {
 
       // Reset disposed flag
       this.disposed = false;
-
-      this.logger.info('ServiceLocator reset completed');
     } catch (error) {
-      this.logger.warn('Error during ServiceLocator reset', { error: String(error) });
+      internalLogger.warn('ServiceLocator: Error during reset', { error: String(error) });
     }
   }
 
@@ -297,7 +292,7 @@ export class ServiceLocator implements IServiceLocator {
             container.dispose();
           }
         } catch (error) {
-          this.logger.warn('Error disposing context container', {
+          internalLogger.warn('ServiceLocator: Error disposing context container', {
             contextName,
             error: String(error),
           });
@@ -312,9 +307,8 @@ export class ServiceLocator implements IServiceLocator {
       this.globalContainer = undefined;
 
       this.disposed = true;
-      this.logger.info('ServiceLocator disposed');
     } catch (error) {
-      this.logger.warn('Error during ServiceLocator disposal', { error: String(error) });
+      internalLogger.warn('ServiceLocator: Error during disposal', { error: String(error) });
       this.disposed = true;
     }
   }

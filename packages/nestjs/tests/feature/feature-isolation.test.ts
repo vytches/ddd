@@ -60,16 +60,6 @@ vi.mock('@vytches/ddd-events', () => ({
   })),
 }));
 
-vi.mock('@vytches/ddd-logging', () => ({
-  Logger: {
-    forContext: () => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-    }),
-  },
-}));
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type

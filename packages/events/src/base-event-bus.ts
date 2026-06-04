@@ -20,7 +20,7 @@ const VytchesDDD = {
   ) => unknown | null;
 }; // Temporarily disabled for testing
 import { IEventBus, isEventHandler } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 
 /**
  * @internal
@@ -89,7 +89,6 @@ export abstract class BaseEventBus<
 
   protected publishPipeline: (event: TEvent) => Promise<void>;
 
-  private logger = Logger.create('EventBus');
   private useDI: boolean;
 
   /**
@@ -99,7 +98,6 @@ export abstract class BaseEventBus<
     super();
     this.options = {
       enableLogging: false,
-      logger: (message: string) => this.logger.info(message),
       ...options,
     };
     this.useDI = useDI && !!VytchesDDD;
@@ -123,18 +121,14 @@ export abstract class BaseEventBus<
 
   async publishMany(events: TEvent[]): Promise<void> {
     if (events.length === 0) {
-      this.logger.debug('publishMany called with empty events array');
       return;
     }
-
-    this.logger.info(`Publishing ${events.length} events`);
 
     // Publish all events in parallel for better performance
     const publishPromises = events.map(event => this.publish(event));
 
     try {
       await Promise.all(publishPromises);
-      this.logger.info(`Successfully published ${events.length} events`);
     } catch (error) {
       this.handleError(error as Error, 'publishMany');
       throw error; // Re-throw to let caller handle
@@ -163,11 +157,8 @@ export abstract class BaseEventBus<
       const handlers = this.handlers.get(eventName);
 
       if (!handlers || handlers.size === 0) {
-        this.logger.debug(`No handlers for ${eventName}`);
         return;
       }
-
-      this.logger.debug(`Publishing ${eventName} to ${handlers.size} handlers`);
 
       // Execute handlers
       const promises: Promise<void>[] = [];
@@ -237,8 +228,6 @@ export abstract class BaseEventBus<
     }
 
     handlers.add(handler as EventHandlerFn<TEvent>);
-
-    this.logger.debug(`Subscribed function handler to ${resolvedEventName}`);
   }
 
   /**
@@ -262,8 +251,6 @@ export abstract class BaseEventBus<
     }
 
     handlers.add(handler as IEventHandler<TEvent>);
-
-    this.logger.debug(`Registered class handler to ${resolvedEventName}`);
   }
 
   /**
@@ -283,8 +270,6 @@ export abstract class BaseEventBus<
       if (handlers.size === 0) {
         this.handlers.delete(resolvedEventName);
       }
-
-      this.logger.debug(`Unsubscribed handler from ${resolvedEventName}`);
     }
   }
 
@@ -304,7 +289,7 @@ export abstract class BaseEventBus<
     if (this.options.onError) {
       this.options.onError(error, eventName);
     } else {
-      this.logger.error(`Error processing ${eventName}`, error);
+      internalLogger.error(`BaseEventBus: error processing ${eventName}`, error);
       throw error; // Re-throw by default
     }
   }
@@ -374,20 +359,13 @@ export abstract class BaseEventBus<
    * Uses metadata stored by enhanced @EventHandler decorators
    */
   discoverHandlers(): void {
-    this.logger.debug('Starting event handler discovery');
-
     // Note: Event handlers don't have a centralized registry like commands/queries
     // This is a simplified implementation that would work with explicitly registered handlers
 
     if (this.useDI && VytchesDDD) {
-      this.logger.debug('DI is available, using DI-based handler resolution');
       // For Phase 2C, we implement a pattern where handlers are resolved on-demand from DI
       // This approach is different from Command/Query buses because events can have multiple handlers
-    } else {
-      this.logger.debug('DI not available, using direct instantiation');
     }
-
-    this.logger.debug('Event handler discovery completed');
   }
 
   /**
@@ -433,7 +411,5 @@ export abstract class BaseEventBus<
     };
 
     this.handlers.get(resolvedEventName)!.add(handlerFactory);
-
-    this.logger.debug(`Registered DI-enabled handler factory for ${resolvedEventName}`);
   }
 }

@@ -5,7 +5,6 @@ import type {
   IEventPersistenceHandler,
 } from '@vytches/ddd-contracts';
 import { DomainErrorCode, IDomainError } from '@vytches/ddd-domain-primitives';
-import { Logger } from '@vytches/ddd-logging';
 import { Result } from '@vytches/ddd-utils';
 
 export class VersionError extends IDomainError {
@@ -29,8 +28,6 @@ export interface IRepositoryAggregate extends IAggregateWithEvents {
 }
 
 export abstract class IBaseRepository {
-  protected readonly logger = Logger.forContext(this.constructor.name);
-
   constructor(
     protected readonly eventDispatcher: IEnhancedEventDispatcher,
     protected readonly eventPersistenceHandler: IEventPersistenceHandler
@@ -46,26 +43,16 @@ export abstract class IBaseRepository {
     const events = aggregate.getDomainEvents();
 
     if (events.length === 0) {
-      this.logger.debug('No events to persist', { aggregateId });
       return;
     }
-
-    this.logger.debug('Saving aggregate', {
-      aggregateId,
-      eventCount: events.length,
-      initialVersion: aggregate.getInitialVersion(),
-    });
 
     const currentVersion =
       (await this.eventPersistenceHandler.getCurrentVersion(aggregate.getId())) ?? 0;
     const initialVersion = aggregate.getInitialVersion();
 
     if (initialVersion !== currentVersion) {
-      this.logger.warn('Version conflict detected', {
-        aggregateId,
-        expectedVersion: currentVersion,
-        actualVersion: initialVersion,
-      });
+      // No log here: the thrown VersionError IS the signal — logging before
+      // throw would double-report the same condition in the consumer's logs.
       throw VersionError.withEntityIdAndVersions(aggregateId, currentVersion, initialVersion);
     }
 
@@ -82,12 +69,6 @@ export abstract class IBaseRepository {
     // raised — the bug was silent because most consumer code calls save()
     // exactly once per command. Discovered during pre-publish API review.
     aggregate.commit();
-
-    this.logger.info('Aggregate saved successfully', {
-      aggregateId,
-      eventCount: events.length,
-      newVersion: initialVersion + events.length,
-    });
   }
 
   /**

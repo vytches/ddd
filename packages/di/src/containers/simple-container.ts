@@ -1,4 +1,4 @@
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 import {
   CircularDependencyError,
   ContainerDisposedError,
@@ -17,7 +17,6 @@ import type {
 import { ServiceLifetime } from '../types';
 
 export class SimpleContainer implements IDependencyContainer {
-  private readonly logger = Logger.forContext('SimpleContainer');
   private readonly services = new Map<string, ServiceDescriptor>();
   private readonly singletonInstances = new Map<string, unknown>();
   private readonly scopedInstances = new Map<string, unknown>();
@@ -202,7 +201,9 @@ export class SimpleContainer implements IDependencyContainer {
         try {
           (instance as { dispose: () => void }).dispose();
         } catch (error) {
-          this.logger.warn('Error disposing singleton instance', { error: String(error) });
+          internalLogger.warn('SimpleContainer: Error disposing singleton instance', {
+            error: String(error),
+          });
         }
       }
     }
