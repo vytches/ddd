@@ -1,5 +1,23 @@
 # Task: Usunięcie warstwy logowania aplikacyjnego z @vytches/ddd-logging
 
+> **✅ CLOSED 2026-06-05.** Zmergowane do `develop` (merge `36abbbea`). Pakiet
+> `@vytches/ddd-logging` fizycznie usunięty; `internalLogger` skonsolidowany do
+> `contracts` (`@internal` w barrelu). library-quality-verifier: **PASS**.
+> Bramki zielone: build (19), test (23 projekty), api-surface (19), lint,
+> deps:check, type-check.
+>
+> - **Changelog:** NIE edytujemy ręcznie — `CHANGELOG.md` generuje Lerna
+>   (conventionalCommits, preset angular) przy release. Zmiana udokumentowana
+>   przez conventional commit `fa316eaf` + `MIGRATION.md`. Uwaga: preset angular
+>   pokazuje tylko feat/fix/perf, więc `refactor:` nie pojawi się automatycznie
+>   w release-changelogu (spójne z „publish deferred / nie-breaking"). Jeśli ma
+>   być widoczny przy release — osobna decyzja właściciela.
+> - **Wersja:** Lerna zarządza (zostaje 0.30.0 do release; `target_version`
+>   niżej jest historyczny/aspiracyjny). Patrz [[feedback_versioning_lerna]].
+> - **Follow-upy wydzielone → VS-015:** `outbox-processor` (Error w stringu
+>   zamiast 2. arg `internalLogger.error` → zgubiony stack trace) oraz
+>   `LoggingMiddleware` w cqrs (za wąski typ).
+
 ## Task Metadata
 
 ```yaml
@@ -16,7 +34,9 @@ complexity: high
 estimated_time: 1-2 days
 created_by: agent (architektura, audyt 3-agentowy 2026-05-29)
 created_at: 2026-05-29
-status: in_progress
+status: completed
+completed_at: 2026-06-05
+merged_to: develop (merge 36abbbea; commits fa316eaf + 53fe4c3b)
 supersedes: VS-009 (cancelled)
 memory_ref: feedback_logging_internal_only
 target_version: 0.4.0
