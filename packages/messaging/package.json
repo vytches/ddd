@@ -60,6 +60,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-events": "workspace:*"
   }
 }

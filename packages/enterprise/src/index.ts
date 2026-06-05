@@ -198,7 +198,8 @@ export type {
   ServiceRegistrationOptions,
   ServiceToken,
 } from '@vytches/ddd-di';
-export * from '@vytches/ddd-logging';
+// @vytches/ddd-logging removed (VS-010): the application-logging layer is gone.
+// The library logs only its own diagnostics internally; consumers use their own logger.
 export * from '@vytches/ddd-resilience';
 
 // ===== UTILITY LAYER =====

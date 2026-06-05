@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
-import { Logger } from '@vytches/ddd-logging';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
+import { internalLogger } from '@vytches/ddd-contracts';
 import {
   BulkheadStrategy,
   CircuitBreakerStrategy,
@@ -77,9 +77,6 @@ interface BatchEntry<T extends ICommand = ICommand, TResult = void> {
  * Performance-optimized Enhanced Command Bus with resilience patterns
  */
 export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
-  // Logger instance
-  private readonly logger = Logger.forContext('EnhancedCommandBus');
-
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
   // Registered handlers split by registration kind. Keeping instances and
@@ -485,10 +482,13 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
         this.handlerFactories.delete(commandClass);
         this.handlerFactories.delete(commandClass.name);
         this.handlerCache.delete(commandClass);
-        this.logger.warn('Evicted stale command handler factory; next call re-resolves', {
-          commandName: commandClass.name,
-          error: factoryError instanceof Error ? factoryError.message : String(factoryError),
-        });
+        internalLogger.warn(
+          'EnhancedCommandBus: Evicted stale command handler factory; next call re-resolves',
+          {
+            commandName: commandClass.name,
+            error: factoryError instanceof Error ? factoryError.message : String(factoryError),
+          }
+        );
         throw new HandlerNotFoundError(commandClass.name, 'command');
       }
     }

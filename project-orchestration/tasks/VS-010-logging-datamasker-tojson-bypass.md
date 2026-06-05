@@ -4,14 +4,20 @@
 
 ```yaml
 task_id: VS-010
-title: "logging: DataMasker.maskRecursive — bypass via toJSON() / custom getter returning PII"
+title:
+  'logging: DataMasker.maskRecursive — bypass via toJSON() / custom getter
+  returning PII'
 type: bug
 priority: high
 complexity: moderate
 estimated_time: 1.5h
 created_by: agent (multi-agent analysis 2026-05-27)
 created_at: 2026-05-27
-status: planned
+status: cancelled
+cancelled_at: 2026-06-01
+cancelled_reason:
+  'obsolete — application-logging layer removed (VS-013); DataMasker deleted,
+  internalLogger never receives payloads/PII, nothing to fix'
 security_finding: SEC-LOGGING-006
 dread_score: 9
 audit_ref: docs/security/threat-models/TM-VS-001.md
@@ -32,12 +38,14 @@ patterns:
 
 ### Why This Task Exists
 
-Security Audit (multi-agentowa analiza 2026-05-27) wykrył, że `DataMasker.maskRecursive`
-przetwarza właściwości obiektu przez `Object.entries()`. Jeśli obiekt ma getter
-`toJSON()` lub niestandardowe gettery zwracające PII, maskowanie nie widzi tych wartości
-podczas rekursji — ale logger wywołuje `JSON.stringify()` który dopiero je materializuje.
+Security Audit (multi-agentowa analiza 2026-05-27) wykrył, że
+`DataMasker.maskRecursive` przetwarza właściwości obiektu przez
+`Object.entries()`. Jeśli obiekt ma getter `toJSON()` lub niestandardowe gettery
+zwracające PII, maskowanie nie widzi tych wartości podczas rekursji — ale logger
+wywołuje `JSON.stringify()` który dopiero je materializuje.
 
 Scenariusz ataku:
+
 ```typescript
 class CreateUserCommand {
   private _email: string;
@@ -52,8 +60,9 @@ class CreateUserCommand {
 // → email trafia do logu niezamaskowany
 ```
 
-Częstszy scenariusz w DDD: Value Objects i Aggregates często mają `toJSON()` / `toPrimitives()`,
-które eksponują więcej danych niż widoczne przez `Object.entries()`.
+Częstszy scenariusz w DDD: Value Objects i Aggregates często mają `toJSON()` /
+`toPrimitives()`, które eksponują więcej danych niż widoczne przez
+`Object.entries()`.
 
 ### Expected Business Value
 
@@ -74,19 +83,22 @@ które eksponują więcej danych niż widoczne przez `Object.entries()`.
 // data-masker.ts:79-89
 if (typeof value === 'object' && value !== null) {
   const result: Record<string, unknown> = {};
-  for (const [key, val] of Object.entries(value)) {  // ← nie widzi toJSON()
+  for (const [key, val] of Object.entries(value)) {
+    // ← nie widzi toJSON()
     // ...
   }
   return result;
 }
 ```
 
-Logger downstream wywołuje `JSON.stringify(logData)`, które materializuje `toJSON()` —
-wartości zwrócone przez getter nigdy nie przechodzą przez masker.
+Logger downstream wywołuje `JSON.stringify(logData)`, które materializuje
+`toJSON()` — wartości zwrócone przez getter nigdy nie przechodzą przez masker.
 
 ### Desired State
 
-**Opcja A (rekomendowana):** Normalizacja przez `JSON.parse(JSON.stringify(value))` przed maskowaniem:
+**Opcja A (rekomendowana):** Normalizacja przez
+`JSON.parse(JSON.stringify(value))` przed maskowaniem:
+
 ```typescript
 maskData(data: unknown): unknown {
   if (!this.options.enabled) return data;
@@ -105,15 +117,17 @@ private normalize(data: unknown): unknown {
 }
 ```
 
-**Opcja B:** Sprawdzenie `toJSON()` podczas rekursji i wywołanie go przed processowaniem.
+**Opcja B:** Sprawdzenie `toJSON()` podczas rekursji i wywołanie go przed
+processowaniem.
 
 Opcja A jest prostsza i bardziej kompletna (łapie wszystkie custom gettery).
 
 ### Technical Constraints
 
-- `JSON.parse(JSON.stringify())` dodaje koszt — tylko przy `maskSensitiveData: true`
-- `JSON.parse(JSON.stringify())` usuwa `undefined`, `Date` → `string`, `RegExp` → `{}`
-  — akceptowalne dla danych logowania
+- `JSON.parse(JSON.stringify())` dodaje koszt — tylko przy
+  `maskSensitiveData: true`
+- `JSON.parse(JSON.stringify())` usuwa `undefined`, `Date` → `string`, `RegExp`
+  → `{}` — akceptowalne dla danych logowania
 - Circular refs są obsłużone przez `try/catch` + fallback
 
 ## Requirements & Acceptance Criteria
@@ -178,10 +192,10 @@ last_updated: 2026-05-27
 
 ### Activity Log
 
-| Date       | Agent          | Action                            | Result          |
-| ---------- | -------------- | --------------------------------- | --------------- |
-| 2026-05-27 | multi-agent    | Finding detected (Security Audit) | SEC-LOGGING-006 |
-| 2026-05-27 | product-owner  | Task created, P1 priority         | VS-010 planned  |
+| Date       | Agent         | Action                            | Result          |
+| ---------- | ------------- | --------------------------------- | --------------- |
+| 2026-05-27 | multi-agent   | Finding detected (Security Audit) | SEC-LOGGING-006 |
+| 2026-05-27 | product-owner | Task created, P1 priority         | VS-010 planned  |
 
 ## Code References
 
@@ -199,11 +213,11 @@ packages:
 
 ### Technical Risks
 
-| Risk                                   | Probability | Impact | Mitigation                              |
-| -------------------------------------- | ----------- | ------ | --------------------------------------- |
-| `JSON.parse/stringify` zmienia typ Date | Medium     | Low    | Akceptowalne w kontekście logowania     |
-| Koszt serializacji przy dużych payloadach | Low       | Medium | Ograniczony przez guard VS-012          |
-| Circular ref crash                     | Low         | Medium | try/catch + fallback do raw value       |
+| Risk                                      | Probability | Impact | Mitigation                          |
+| ----------------------------------------- | ----------- | ------ | ----------------------------------- |
+| `JSON.parse/stringify` zmienia typ Date   | Medium      | Low    | Akceptowalne w kontekście logowania |
+| Koszt serializacji przy dużych payloadach | Low         | Medium | Ograniczony przez guard VS-012      |
+| Circular ref crash                        | Low         | Medium | try/catch + fallback do raw value   |
 
 ## Testing Strategy
 

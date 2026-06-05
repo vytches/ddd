@@ -13,7 +13,7 @@ import type { Module } from '@nestjs/core/injector/module';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import type { IEventBus } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS @Optional() DI token
 import { VytchesExplorerService } from '../services/vytches-explorer.service';
@@ -46,8 +46,6 @@ interface HandlerEntry {
  */
 @Injectable()
 export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = Logger.forContext('FeatureHandlerRegistrar');
-
   constructor(
     @Inject(ICommandBus) private readonly commandBus: ICommandBus,
     @Inject(IQueryBus) private readonly queryBus: IQueryBus,
@@ -62,7 +60,7 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
     const ownModule = this.findOwnModule();
 
     if (!ownModule) {
-      this.logger.warn(
+      internalLogger.warn(
         'FeatureHandlerRegistrar: could not locate own module — skipping local registration'
       );
       return;
@@ -74,8 +72,6 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
     if (this.explorerService && handlers.length > 0) {
       this.explorerService.claimHandlerTypes(handlers.map(h => h.messageType));
     }
-
-    this.logger.info(`Feature module: registered ${handlers.length} handler(s) in local buses`);
   }
 
   onModuleDestroy(): void {
@@ -162,7 +158,7 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
           }
         }
       } catch (error) {
-        this.logger.warn('Failed to register handler in feature bus', {
+        internalLogger.warn('FeatureHandlerRegistrar: Failed to register handler in feature bus', {
           handlerName: (handlerType as { name?: string }).name,
           error: error instanceof Error ? error.message : String(error),
         });

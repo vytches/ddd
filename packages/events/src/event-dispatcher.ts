@@ -8,7 +8,7 @@ import type {
 } from '@vytches/ddd-contracts';
 import { IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from './unified-event-bus';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts';
 
 /**
  * Repository-side event dispatcher — orchestrates middleware pipeline,
@@ -97,18 +97,9 @@ export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
     const events = aggregate.getDomainEvents();
     if (events.length === 0) return;
 
-    const logger = Logger.forContext('UniversalEventDispatcher');
-
     // Try to get aggregate ID if available (for repository aggregates)
     const aggregateWithId = aggregate as { getId?: () => { getValue(): string | number } };
     const aggregateId = aggregateWithId.getId ? aggregateWithId.getId()?.getValue() : 'unknown';
-
-    logger.debug('Dispatching events for aggregate', {
-      aggregateId,
-      aggregateType: aggregate.constructor.name,
-      eventCount: events.length,
-      eventNames: events.map(e => e.eventName),
-    });
 
     try {
       // Dispatch all events through the pipeline
@@ -116,14 +107,9 @@ export class UniversalEventDispatcher extends IEnhancedEventDispatcher {
 
       // Clear events from aggregate after successful dispatch
       aggregate.commit();
-
-      logger.debug('Aggregate events dispatched and committed', {
-        aggregateId,
-        eventCount: events.length,
-      });
     } catch (error) {
-      logger.error(
-        'Failed to dispatch aggregate events',
+      internalLogger.error(
+        'UniversalEventDispatcher: failed to dispatch aggregate events',
         error instanceof Error ? error : undefined,
         {
           aggregateId,

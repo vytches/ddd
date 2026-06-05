@@ -17,17 +17,6 @@ import { IntegrationEvent, DomainEvent } from '@vytches/ddd-events';
 import { ContextAwareEventDispatcher } from '../../src/dispatchers/context-aware-event-dispatcher';
 import { FeatureHandlerRegistrar } from '../../src/feature/feature-handler-registrar';
 
-vi.mock('@vytches/ddd-logging', () => ({
-  Logger: {
-    forContext: () => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
-    }),
-  },
-}));
-
 // ─── ContextAwareEventDispatcher ─────────────────────────────────────────────
 
 describe('ContextAwareEventDispatcher', () => {

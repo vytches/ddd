@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
-import { Logger } from '@vytches/ddd-logging';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
+import { internalLogger } from '@vytches/ddd-contracts';
 import { DefaultResilienceContext, ResiliencePolicyBuilder } from '@vytches/ddd-resilience';
 import 'reflect-metadata';
 import { IQueryBus } from '../abstracts';
@@ -205,9 +205,6 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
   // Resilience strategy
   private resilienceStrategy?: ResilienceStrategy;
 
-  // Logger instance
-  private readonly logger = Logger.forContext('EnhancedQueryBus');
-
   // Current options for dynamic reconfiguration
   private options: EnhancedQueryBusOptions;
 
@@ -314,7 +311,9 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
       this.resilienceStrategy = builder.build();
       this.resilienceEnabled = true;
     } catch (error) {
-      this.logger.warn('Failed to setup resilience patterns', { error: String(error) });
+      internalLogger.warn('EnhancedQueryBus: Failed to setup resilience patterns', {
+        error: String(error),
+      });
       this.resilienceEnabled = false;
     }
   }
@@ -600,10 +599,13 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
         this.handlerFactories.delete(queryClass);
         this.handlerFactories.delete(queryClass.name);
         this.handlerCache.delete(queryClass);
-        this.logger.warn('Evicted stale query handler factory; next call re-resolves', {
-          queryName: queryClass.name,
-          error: factoryError instanceof Error ? factoryError.message : String(factoryError),
-        });
+        internalLogger.warn(
+          'EnhancedQueryBus: Evicted stale query handler factory; next call re-resolves',
+          {
+            queryName: queryClass.name,
+            error: factoryError instanceof Error ? factoryError.message : String(factoryError),
+          }
+        );
         throw new HandlerNotFoundError(queryClass.name, 'query');
       }
     }

@@ -3,7 +3,6 @@
  * Zero external dependencies - pure TypeScript implementation
  */
 
-import { Logger } from '@vytches/ddd-logging';
 import type {
   HistogramMetric,
   Metric,
@@ -15,9 +14,10 @@ import type {
   TimerMetric,
 } from './metrics-interfaces';
 
+import { internalLogger } from '@vytches/ddd-contracts';
+
 export class DefaultMetricRegistry implements MetricRegistry {
   private collectors = new Map<string, MetricCollector>();
-  private logger = Logger.create('MetricRegistry');
 
   register(collector: MetricCollector): void {
     const name = collector.getName();
@@ -44,7 +44,12 @@ export class DefaultMetricRegistry implements MetricRegistry {
         allMetrics.push(...metrics);
       } catch (error) {
         // Log error but continue with other collectors
-        this.logger.warn(`Failed to collect metrics from ${collector.getName()}`, { error });
+        internalLogger.warn(
+          `DefaultMetricRegistry: failed to collect metrics from ${collector.getName()}`,
+          {
+            error,
+          }
+        );
       }
     }
 
@@ -71,7 +76,6 @@ export class DefaultMetricRegistry implements MetricRegistry {
 }
 
 export class DefaultObservabilityEventBus implements ObservabilityEventBus {
-  private readonly logger = Logger.forContext('DefaultObservabilityEventBus');
   private listeners = new Map<string, Set<ObservabilityEventListener>>();
   private globalListeners = new Set<ObservabilityEventListener>();
 
@@ -122,7 +126,7 @@ export class DefaultObservabilityEventBus implements ObservabilityEventBus {
     try {
       await listener(event);
     } catch (error) {
-      this.logger.warn('Event listener error', {
+      internalLogger.warn('DefaultObservabilityEventBus: event listener error', {
         error: error instanceof Error ? error.message : String(error),
       });
     }

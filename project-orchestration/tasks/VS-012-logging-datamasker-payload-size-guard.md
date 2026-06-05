@@ -4,14 +4,20 @@
 
 ```yaml
 task_id: VS-012
-title: "logging: DataMasker.maskData — payload size guard to prevent event loop blocking"
+title:
+  'logging: DataMasker.maskData — payload size guard to prevent event loop
+  blocking'
 type: improvement
 priority: medium
 complexity: simple
 estimated_time: 1h
 created_by: agent (multi-agent analysis 2026-05-27)
 created_at: 2026-05-27
-status: planned
+status: cancelled
+cancelled_at: 2026-06-01
+cancelled_reason:
+  'obsolete — application-logging layer removed (VS-013); DataMasker deleted,
+  internalLogger passes only metadata to console (no deep masking traversal)'
 dread_score: 6
 audit_ref: docs/security/threat-models/TM-VS-001.md
 ```
@@ -31,16 +37,17 @@ patterns:
 
 ### Why This Task Exists
 
-Performance Optimizer (analiza 2026-05-27) wskazał, że `DataMasker.maskData()` jest
-synchroniczna i rekurencywna. Dla typowych payloadów komend (kilka pól) koszt jest
-pomijalny (<0.1ms). Jednak przy bardzo dużych payloadach (np. bulk command z tablicą
-1000 elementów, każdy element jako zagnieżdżony obiekt) rekursja może zająć event loop
-na kilkanaście do kilkudziesięciu milisekund.
+Performance Optimizer (analiza 2026-05-27) wskazał, że `DataMasker.maskData()`
+jest synchroniczna i rekurencywna. Dla typowych payloadów komend (kilka pól)
+koszt jest pomijalny (<0.1ms). Jednak przy bardzo dużych payloadach (np. bulk
+command z tablicą 1000 elementów, każdy element jako zagnieżdżony obiekt)
+rekursja może zająć event loop na kilkanaście do kilkudziesięciu milisekund.
 
-Dodatkowo — po VS-010 normalizacja przez `JSON.parse(JSON.stringify())` zwiększa bazowy
-koszt. Dla payloadów > 50KB to może być realne ryzyko wydajnościowe.
+Dodatkowo — po VS-010 normalizacja przez `JSON.parse(JSON.stringify())` zwiększa
+bazowy koszt. Dla payloadów > 50KB to może być realne ryzyko wydajnościowe.
 
 Scenariusze ryzyka:
+
 - `@LogCQRS` na bulk handler (np. `ImportUsersCommand` z 500 rekordami)
 - `@LogCommands` na komendę z dużym załącznikiem (base64 encoded)
 
@@ -52,7 +59,8 @@ Scenariusze ryzyka:
 
 ### Success Metrics
 
-- Payload > 50KB → `[PAYLOAD_TOO_LARGE — masking skipped]` w logu (zamiast maskowania)
+- Payload > 50KB → `[PAYLOAD_TOO_LARGE — masking skipped]` w logu (zamiast
+  maskowania)
 - Payload < 50KB → normalne maskowanie
 - Próg konfigurowalny przez `maxPayloadBytes` w opcjach
 
@@ -97,13 +105,15 @@ maskData(data: unknown): unknown {
 
 - `maxPayloadBytes` musi być opcjonalne (backward-compat)
 - Default 50KB jest pragmatyczny — typowe payloady CQRS < 5KB
-- Guard musi być PRZED normalizacją VS-010 (nie po), żeby uniknąć kosztownej serializacji
+- Guard musi być PRZED normalizacją VS-010 (nie po), żeby uniknąć kosztownej
+  serializacji
 
 ## Requirements & Acceptance Criteria
 
 ### Functional Requirements
 
-- [ ] Payload > `maxPayloadBytes` → placeholder string, nie crash, nie maskowanie
+- [ ] Payload > `maxPayloadBytes` → placeholder string, nie crash, nie
+      maskowanie
 - [ ] Payload w granicach → normalne maskowanie (bez zmiany)
 - [ ] `maxPayloadBytes` konfigurowalny w `MaskingOptions`
 - [ ] Domyślny limit: 50KB (51_200 bytes)
@@ -111,7 +121,8 @@ maskData(data: unknown): unknown {
 ### Non-Functional Requirements
 
 - [ ] Guard działa PRZED rekursją (nie po)
-- [ ] Testy dla: payload poniżej limitu, payload powyżej limitu, limit=0 (wszystko maskowane), limit=Infinity
+- [ ] Testy dla: payload poniżej limitu, payload powyżej limitu, limit=0
+      (wszystko maskowane), limit=Infinity
 - [ ] JSDoc: `maxPayloadBytes` z opisem i przykładem
 
 ### Definition of Done
@@ -155,16 +166,17 @@ supporting_agents: []
 overall_progress: 0%
 current_phase: planned
 blockers:
-  - VS-010 (normalizacja) — VS-012 guard powinien być dodany razem z normalizacją lub po niej
+  - VS-010 (normalizacja) — VS-012 guard powinien być dodany razem z
+    normalizacją lub po niej
 last_updated: 2026-05-27
 ```
 
 ### Activity Log
 
-| Date       | Agent          | Action                                   | Result          |
-| ---------- | -------------- | ---------------------------------------- | --------------- |
-| 2026-05-27 | multi-agent    | Finding (Performance Optimizer)          | recommendation  |
-| 2026-05-27 | product-owner  | Task created, P2 priority                | VS-012 planned  |
+| Date       | Agent         | Action                          | Result         |
+| ---------- | ------------- | ------------------------------- | -------------- |
+| 2026-05-27 | multi-agent   | Finding (Performance Optimizer) | recommendation |
+| 2026-05-27 | product-owner | Task created, P2 priority       | VS-012 planned |
 
 ## Code References
 
@@ -182,10 +194,10 @@ packages:
 
 ### Technical Risks
 
-| Risk                                   | Probability | Impact | Mitigation                         |
-| -------------------------------------- | ----------- | ------ | ---------------------------------- |
-| Guard blokuje normalne małe payloady   | Very Low    | Low    | Default 50KB jest bardzo hojny     |
-| Konsument z dużym payloadem traci maskowanie | Low   | Medium | Placeholder wyraźnie wskazuje co się stało |
+| Risk                                         | Probability | Impact | Mitigation                                 |
+| -------------------------------------------- | ----------- | ------ | ------------------------------------------ |
+| Guard blokuje normalne małe payloady         | Very Low    | Low    | Default 50KB jest bardzo hojny             |
+| Konsument z dużym payloadem traci maskowanie | Low         | Medium | Placeholder wyraźnie wskazuje co się stało |
 
 ## Testing Strategy
 

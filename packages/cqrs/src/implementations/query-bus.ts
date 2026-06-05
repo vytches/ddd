@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
-import { Logger } from '@vytches/ddd-logging';
 import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
+import { internalLogger } from '@vytches/ddd-contracts';
 import 'reflect-metadata';
 
 import { IQueryBus } from '../abstracts';
@@ -58,7 +58,6 @@ import type { ICqrsValidatable } from '../validation';
  * @since 0.1.0
  */
 export class QueryBus extends IQueryBus {
-  private readonly logger = Logger.forContext('QueryBus');
   private middlewares: ICQRSMiddleware[] = [];
   private handlers: Map<
     Function | string,
@@ -92,8 +91,8 @@ export class QueryBus extends IQueryBus {
     // This method is kept for backward compatibility but does nothing
     // Suppress deprecation warnings in CI to avoid stderr confusion
     if (!process.env.CI) {
-      this.logger.warn(
-        'QueryBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
+      internalLogger.warn(
+        'QueryBus: discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
       );
     }
   }

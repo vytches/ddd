@@ -1,6 +1,6 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
 import { safeRun } from '@vytches/ddd-utils';
+import { internalLogger } from '@vytches/ddd-contracts';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';
@@ -108,7 +108,6 @@ export class OutboxProcessor {
   private isRunning = false;
   private processingTimer?: NodeJS.Timeout | undefined;
   private crashRecoveryTimer?: NodeJS.Timeout | undefined;
-  private readonly logger = Logger.create('OutboxProcessor');
 
   constructor(repository: IOutboxRepository, options: OutboxProcessorOptions = {}) {
     const batchSize = options.batchSize ?? 10;
@@ -174,7 +173,7 @@ export class OutboxProcessor {
       invoke();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Outbox hook ${name} threw and was ignored: ${errorMessage}`);
+      internalLogger.error(`OutboxProcessor: hook ${name} threw and was ignored: ${errorMessage}`);
     }
   }
 
@@ -183,7 +182,6 @@ export class OutboxProcessor {
    */
   registerHandler(messageType: string, handler: IOutboxMessageHandler): void {
     this.handlers.set(messageType, handler);
-    this.logger.debug(`Registered handler for message type: ${messageType}`);
   }
 
   /**
@@ -211,7 +209,6 @@ export class OutboxProcessor {
    */
   use(middleware: OutboxMiddleware): void {
     this.middlewares.push(middleware);
-    this.logger.debug('Registered middleware');
   }
 
   /**
@@ -219,12 +216,11 @@ export class OutboxProcessor {
    */
   start(): void {
     if (this.isRunning) {
-      this.logger.warn('Processor is already running');
+      internalLogger.warn('OutboxProcessor: processor is already running');
       return;
     }
 
     this.isRunning = true;
-    this.logger.info('Starting outbox processor');
     const jitter =
       this.options.startupJitterMs > 0
         ? Math.floor(Math.random() * this.options.startupJitterMs)
@@ -238,7 +234,7 @@ export class OutboxProcessor {
    */
   stop(): void {
     if (!this.isRunning) {
-      this.logger.warn('Processor is not running');
+      internalLogger.warn('OutboxProcessor: processor is not running');
       return;
     }
 
@@ -251,7 +247,6 @@ export class OutboxProcessor {
       clearTimeout(this.crashRecoveryTimer);
       this.crashRecoveryTimer = undefined;
     }
-    this.logger.info('Stopped outbox processor');
   }
 
   /**
@@ -300,17 +295,14 @@ export class OutboxProcessor {
 
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Error retrieving messages: ${errorMessage}`);
+      internalLogger.error(`OutboxProcessor: error retrieving messages: ${errorMessage}`);
       return { processed: 0, batchSize };
     }
 
     const messages = result;
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      this.logger.debug('No pending messages to process');
       return { processed: 0, batchSize };
     }
-
-    this.logger.info(`Processing ${messages.length} messages`);
 
     const startedAt = Date.now();
 
@@ -326,8 +318,6 @@ export class OutboxProcessor {
     const failed = outcomes.filter(
       o => o.status === 'rejected' || (o.status === 'fulfilled' && o.value === false)
     ).length;
-
-    this.logger.info(`Completed processing batch of ${messages.length} messages`);
 
     this.safelyInvokeHook('onBatchComplete', () =>
       this.options.hooks?.onBatchComplete?.({
@@ -356,7 +346,6 @@ export class OutboxProcessor {
 
       // Mark as processed
       await this.repository.updateStatus(message.id, MessageStatus.PROCESSED);
-      this.logger.debug(`Successfully processed message ${message.id}`);
     });
 
     if (error) {
@@ -374,10 +363,6 @@ export class OutboxProcessor {
     if (!handler) {
       throw new Error(`No handler registered for message type: ${message.messageType}`);
     }
-    if (!this.handlers.has(message.messageType)) {
-      this.logger.debug(`Default handler used for message type: ${message.messageType}`);
-    }
-
     // Create the final handler function
     const finalHandler = async (msg: IOutboxMessage): Promise<void> => {
       await Promise.race([
@@ -401,7 +386,9 @@ export class OutboxProcessor {
   private async handleMessageError(message: IOutboxMessage, error: Error): Promise<void> {
     try {
       const attempts = await this.repository.incrementAttempt(message.id);
-      this.logger.warn(`Message ${message.id} failed, attempt ${attempts}: ${error?.message}`);
+      internalLogger.warn(
+        `OutboxProcessor: message ${message.id} failed, attempt ${attempts}: ${error?.message}`
+      );
 
       this.safelyInvokeHook('onMessageFailed', () =>
         this.options.hooks?.onMessageFailed?.(message, error, attempts)
@@ -409,7 +396,9 @@ export class OutboxProcessor {
 
       if (attempts >= this.options.maxRetries) {
         await this.repository.updateStatus(message.id, MessageStatus.FAILED, error);
-        this.logger.error(`Message ${message.id} marked as failed after ${attempts} attempts`);
+        internalLogger.error(
+          `OutboxProcessor: message ${message.id} marked as failed after ${attempts} attempts`
+        );
         this.safelyInvokeHook('onPermanentFailure', () =>
           this.options.hooks?.onPermanentFailure?.(message, error)
         );
@@ -421,17 +410,13 @@ export class OutboxProcessor {
         // if the repository's scheduleRetry is the inherited no-op.
         await this.repository.updateStatus(message.id, MessageStatus.PENDING);
         await this.repository.scheduleRetry(message.id, processAfter);
-        this.logger.info(
-          `Message ${message.id} scheduled for retry in ${delay}ms (attempt ${attempts})`
-        );
       } else {
         // No backoff configured: immediate retry (legacy behavior)
         await this.repository.updateStatus(message.id, MessageStatus.PENDING);
-        this.logger.info(`Message ${message.id} scheduled for retry (attempt ${attempts + 1})`);
       }
     } catch (updateError) {
       const errorMessage = updateError instanceof Error ? updateError.message : String(updateError);
-      this.logger.error(`Error updating message status: ${errorMessage}`);
+      internalLogger.error(`OutboxProcessor: error updating message status: ${errorMessage}`);
     }
   }
 
@@ -500,21 +485,14 @@ export class OutboxProcessor {
 
     if (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.error(`Crash recovery failed: ${errorMessage}`);
+      internalLogger.error(`OutboxProcessor: crash recovery failed: ${errorMessage}`);
       return;
     }
 
     if (count && count > 0) {
-      this.logger.warn(`Crash recovery reset ${count} stale PROCESSING message(s) to PENDING`);
-    }
-  }
-
-  /**
-   * Logs messages if logging is enabled
-   */
-  private log(message: string): void {
-    if (this.options.enableLogging) {
-      this.logger.info(message);
+      internalLogger.warn(
+        `OutboxProcessor: crash recovery reset ${count} stale PROCESSING message(s) to PENDING`
+      );
     }
   }
 

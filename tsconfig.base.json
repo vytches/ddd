@@ -42,7 +42,6 @@
       "@vytches/ddd-domain-services": ["packages/domain-services/src/index.ts"],
       "@vytches/ddd-enterprise": ["packages/enterprise/src/index.ts"],
       "@vytches/ddd-events": ["packages/events/src/index.ts"],
-      "@vytches/ddd-logging": ["packages/logging/src/index.ts"],
       "@vytches/ddd-messaging": ["packages/messaging/src/index.ts"],
       "@vytches/ddd-policies": ["packages/policies/src/index.ts"],
       "@vytches/ddd-projections": ["packages/projections/src/index.ts"],
