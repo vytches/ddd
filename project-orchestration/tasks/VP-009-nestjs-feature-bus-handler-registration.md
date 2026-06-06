@@ -5,8 +5,9 @@
 ```yaml
 task_id: VP-009
 title:
-  Fix FeatureHandlerRegistrar.findOwnModule() + GLOBAL_QUERY_BUS/GLOBAL_COMMAND_BUS
-  for ACL + Symbol.for DI tokens (dual-package hazard)
+  Fix FeatureHandlerRegistrar.findOwnModule() +
+  GLOBAL_QUERY_BUS/GLOBAL_COMMAND_BUS for ACL + Symbol.for DI tokens
+  (dual-package hazard)
 type: bug
 priority: high
 complexity: medium
@@ -50,11 +51,12 @@ wprowadzonym w VP-007 (ADR-0034):
    (`LOCAL_EVENT_BUS` vs `IEventBus`), ale brak analogicznej symetrii dla CQRS.
 
 3. **Bug #3 — dual-package hazard (ESM↔CJS) rozłącza tokeny DI.**
-   `IQueryBus`/`ICommandBus` to abstrakcyjne klasy używane jako tokeny `@Inject`.
-   Pakiety są dual-format; gdy ten sam pakiet załaduje się jako ESM i CJS (np.
-   Vitest: kod ESM + nestjs przez `require`/CJS), powstają dwa różne obiekty
-   klasy → DI nie matchuje → `@Optional()` daje `undefined` → query handlery po
-   cichu pomijane → brak handlera → 503. Zgłoszone przez juz-ide-api.
+   `IQueryBus`/`ICommandBus` to abstrakcyjne klasy używane jako tokeny
+   `@Inject`. Pakiety są dual-format; gdy ten sam pakiet załaduje się jako ESM i
+   CJS (np. Vitest: kod ESM + nestjs przez `require`/CJS), powstają dwa różne
+   obiekty klasy → DI nie matchuje → `@Optional()` daje `undefined` → query
+   handlery po cichu pomijane → brak handlera → 503. Zgłoszone przez
+   juz-ide-api.
 
 ### Expected Business Value
 
@@ -112,8 +114,8 @@ rozróżniający przed wyborem fixu.
 - **Bug #2:** dostępne tokeny `GLOBAL_QUERY_BUS` / `GLOBAL_COMMAND_BUS`
   rozwiązujące się zawsze do root-instancji (nie nadpisywane przez
   `forFeature()`), by ACL mógł je wstrzyknąć dla cross-context.
-- **Bug #3:** injection oparte na stabilnych tokenach (`Symbol.for(...)`) zamiast
-  referencji klas abstrakcyjnych → DI matchuje niezależnie od ESM/CJS.
+- **Bug #3:** injection oparte na stabilnych tokenach (`Symbol.for(...)`)
+  zamiast referencji klas abstrakcyjnych → DI matchuje niezależnie od ESM/CJS.
 
 ### Technical Constraints
 
@@ -217,9 +219,9 @@ wariant_C_explicit_handler_list:
   - [ ] Test diagnostyczny: zdjąć `@Optional()` z `@Inject(IQueryBus)` →
         rozróżnić hazard (provider jest, Nest rzuca „can't resolve") od
         missing-provider (brak providera = teren Bug #2)
-  - [ ] Decyzja: tokeny `Symbol.for('vytches:cqrs:query-bus')` zamiast referencji
-        klas abstrakcyjnych (odporne na dual-loading; spójne z anchorem
-        `forFeature`, który już używa `Symbol.for`)
+  - [ ] Decyzja: tokeny `Symbol.for('vytches:cqrs:query-bus')` zamiast
+        referencji klas abstrakcyjnych (odporne na dual-loading; spójne z
+        anchorem `forFeature`, który już używa `Symbol.for`)
   - [ ] Ocena backward-compat: czy `@Inject(IQueryBus)` jako klasa pozostaje
         wstecznie kompatybilny? Rozważyć klasę jako alias na Symbol.for
         (library-api-guardian)
@@ -265,13 +267,13 @@ packages:
 
 ### Technical Risks
 
-| Risk                                 | Probability | Impact | Mitigation                                                |
-| ------------------------------------ | ----------- | ------ | --------------------------------------------------------- |
-| `Module.imports` zmieni się w NestJS | Med         | Med    | Komentarz + test integracyjny na realnym module graph     |
-| Double-import jednego forFeature()   | Low         | Low    | Unikalny Symbol per-call → 1:1; udokumentować jako misuse |
-| Breaking change w API                | Low         | High   | library-api-guardian review przed merge                   |
-| Zmiana tokenów (klasy→Symbol.for) łamie `@Inject(IQueryBus)` u konsumentów | Med | High | Zachować klasę jako alias na Symbol.for; library-api-guardian review |
-| Dual-package hazard także w produkcji (nie tylko Vitest) | Med | High | `deps.inline` to fix TEST-only; Symbol.for naprawia oba środowiska |
+| Risk                                                                       | Probability | Impact | Mitigation                                                           |
+| -------------------------------------------------------------------------- | ----------- | ------ | -------------------------------------------------------------------- |
+| `Module.imports` zmieni się w NestJS                                       | Med         | Med    | Komentarz + test integracyjny na realnym module graph                |
+| Double-import jednego forFeature()                                         | Low         | Low    | Unikalny Symbol per-call → 1:1; udokumentować jako misuse            |
+| Breaking change w API                                                      | Low         | High   | library-api-guardian review przed merge                              |
+| Zmiana tokenów (klasy→Symbol.for) łamie `@Inject(IQueryBus)` u konsumentów | Med         | High   | Zachować klasę jako alias na Symbol.for; library-api-guardian review |
+| Dual-package hazard także w produkcji (nie tylko Vitest)                   | Med         | High   | `deps.inline` to fix TEST-only; Symbol.for naprawia oba środowiska   |
 
 ## Testing Strategy
 
@@ -295,6 +297,8 @@ packages:
 
 - VP-007: per-context-cqrs-buses (funkcja, w której są bugi)
 - VP-008: outbox-fanout-default-handler
+- VP-010: cqrs-bus-lifecycle-guardrails (sibling — odrębny problem:
+  lifecycle/timery/503, nie registration/tokens)
 
 ### External Resources
 
