@@ -2,6 +2,7 @@
 
 exports[`@vytches/ddd-cqrs public API surface > exports the documented set of symbols 1`] = `
 [
+  "COMMAND_BUS_TOKEN",
   "CQRSConfiguration",
   "CQRSConfigurationError",
   "CQRSDiscoveryPlugin",
@@ -17,6 +18,7 @@ exports[`@vytches/ddd-cqrs public API surface > exports the documented set of sy
   "ICommandBus",
   "IQueryBus",
   "LoggingMiddleware",
+  "QUERY_BUS_TOKEN",
   "QueryBus",
   "QueryExecutionError",
   "QueryHandler",
