@@ -49,10 +49,10 @@ describe('FeatureHandlerRegistrar — Bug #1: findOwnModule() Variant A', () => 
     Reflect.defineMetadata('di:handler-scope', 'context', PlaceOrderHandler);
   });
 
-  it('RED — handler in consumer module stays unregistered when findOwnModule() returns feature module', async () => {
-    // This test simulates the bug: featureModule has anchorToken but zero handlers;
-    // consumer module (OrdersModule) has the handler but findOwnModule() does NOT
-    // look at imports — so the handler is never found.
+  it('Variant A fix: handler registered when registrar traverses to consumer module', async () => {
+    // Proves the Bug #1 fix works: featureModule has anchorToken but zero handlers;
+    // Variant A traversal finds the consumer module (OrdersModule) that imports
+    // featureModule and correctly registers the handler from its providers.
 
     // Feature module — owns the anchor (as forFeature() registers it there)
     const featureModule = makeModule({

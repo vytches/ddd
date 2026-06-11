@@ -40,16 +40,24 @@ import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS } from './constants';
 @Module({})
 export class VytchesDDDModule {
   static forRoot(options: VytchesDDDModuleOptions = {}): DynamicModule {
-    // Bridge: when a consumer provides buses under class tokens (ICommandBus /
-    // IQueryBus), these aliases expose them under the stable Symbol tokens that
-    // VytchesExplorerService injects via @Inject(COMMAND_BUS_TOKEN) /
-    // @Inject(QUERY_BUS_TOKEN).
+    // Bridge providers: Symbol→class token aliases for CQRS buses.
     //
-    // useFactory with optional inject instead of useExisting: NestJS throws a
-    // compile-time DI error for useExisting when the target token is absent,
-    // even if the downstream consumer has @Optional. useFactory returns
-    // undefined when the class token is not registered, which @Optional handles
-    // correctly (graceful degradation — module boots without a bus).
+    // Purpose: VytchesExplorerService is injected via Symbol tokens
+    // (@Inject(COMMAND_BUS_TOKEN) / @Inject(QUERY_BUS_TOKEN)), but consumers
+    // typically provide buses under the class tokens (ICommandBus / IQueryBus).
+    // These bridges translate class→Symbol so both injection styles work.
+    //
+    // Why useFactory + optional inject (not useExisting):
+    // NestJS throws a compile-time DI error for useExisting when the target
+    // token is absent — even if the consumer uses @Optional. useFactory returns
+    // undefined when the class token is not registered; @Optional then resolves
+    // to undefined gracefully (module boots without a bus configured).
+    //
+    // GLOBAL_COMMAND_BUS / GLOBAL_QUERY_BUS follow the same pattern and are
+    // exported so cross-context ACL handlers can inject the root-level bus.
+    // forTesting() deliberately does NOT declare GLOBAL_* tokens — it registers
+    // stubs directly under COMMAND_BUS_TOKEN / QUERY_BUS_TOKEN and class tokens,
+    // keeping test modules self-contained without a root bus reference.
     const bridgeProviders: Provider[] = [
       {
         provide: COMMAND_BUS_TOKEN,
