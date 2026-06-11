@@ -6,7 +6,7 @@ import { DefaultResilienceContext, ResiliencePolicyBuilder } from '@vytches/ddd-
 import 'reflect-metadata';
 import { IQueryBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';
-import type { IQuery, IQueryHandler, IResettableBus } from '../interfaces';
+import type { IDisposableBus, IQuery, IQueryHandler, IResettableBus } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
@@ -164,7 +164,7 @@ class LRUCache<K, V> {
 /**
  * Performance-optimized Enhanced Query Bus with resilience patterns
  */
-export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
+export class EnhancedQueryBus extends IQueryBus implements IResettableBus, IDisposableBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
   // Registered handlers split by registration kind. Keeping instances and
@@ -271,6 +271,10 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
       this.cleanHandlerCache();
       this.cleanResultCache();
     }, 60000); // Every minute
+    // unref() allows the process / vitest-worker to exit even when this timer
+    // is still pending. Guards environments without unref (browser runtimes)
+    // with an optional-call.
+    this.cacheCleanupInterval.unref?.();
   }
 
   /**
@@ -606,7 +610,14 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus {
             error: factoryError instanceof Error ? factoryError.message : String(factoryError),
           }
         );
-        throw new HandlerNotFoundError(queryClass.name, 'query');
+        // Include stale-bus hint so the consumer can diagnose the root cause.
+        // The factory threw — most likely the bus was not recreated after
+        // module teardown (use useFactory, not useValue, to tie bus lifetime
+        // to module lifecycle — see VP-010).
+        throw new HandlerNotFoundError(
+          `${queryClass.name} (hint: factory threw — bus may be stale; recreate it via useFactory on each module init)`,
+          'query'
+        );
       }
     }
 
