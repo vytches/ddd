@@ -85,12 +85,51 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
     if (disposable(this.localEventBus)) (this.localEventBus as { dispose(): void }).dispose();
   }
 
+  /**
+   * Locate the consumer module that imported the feature module produced by
+   * VytchesDDDModule.forFeature().
+   *
+   * Variant A implementation (ADR-0034 VP-009):
+   *   Step 1 — find the featureModule: the module in ModulesContainer that
+   *             has anchorToken in its own providers.  That is the
+   *             VytchesDDDFeatureModule instance (it owns the anchor provider
+   *             registered in forFeature()).
+   *   Step 2 — find the consumer module M where M.imports.has(featureModule).
+   *             NestJS keeps resolved Module instances in Module._imports (Set)
+   *             via container.addImport() → module.addImport().  This is an
+   *             internal NestJS API (@nestjs/core/injector/module.ts) — not
+   *             part of the public contract, but used by @nestjs/cqrs and
+   *             the NestJS DevTools.  Stability risk is assessed as low.
+   *   Step 3 — return M; its providers contain the consumer's handlers.
+   *
+   * Edge case: if no module imports the feature module (misconfigured setup),
+   * return undefined so the caller logs a graceful warning without crashing.
+   */
   private findOwnModule(): Module | undefined {
+    // Step 1: locate the VytchesDDDFeatureModule instance by its anchor token.
+    let featureModule: Module | undefined;
     for (const [, mod] of this.modulesContainer.entries()) {
       if (mod.providers.has(this.anchorToken as unknown as never)) {
+        featureModule = mod;
+        break;
+      }
+    }
+
+    if (!featureModule) {
+      return undefined;
+    }
+
+    // Step 2: find the consumer module that imported the feature module.
+    // Module._imports is a Set<Module> maintained by NestJS core internals.
+    for (const [, mod] of this.modulesContainer.entries()) {
+      // NestJS stores resolved Module instances in the _imports Set.
+      // The public accessor is mod.imports (getter for _imports).
+      const imports = (mod as unknown as { imports?: Set<unknown> }).imports;
+      if (imports instanceof Set && imports.has(featureModule)) {
         return mod;
       }
     }
+
     return undefined;
   }
 
