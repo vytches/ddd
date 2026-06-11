@@ -824,4 +824,32 @@ describe('EnhancedQueryBus', () => {
       bus.dispose();
     });
   });
+
+  // VP-010 #6 — regression: reset() evicts factories so a new module starts clean
+  describe('VP-010 #6 — reset evicts factories; new module starts clean (query bus)', () => {
+    it('should not execute stale factory after reset(), and fresh factory registered after reset() works', async () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      class ResetRegressionQuery implements IQuery<string> {}
+
+      // "Module 1": register a factory that will become stale
+      const staleHandler = { execute: vi.fn().mockResolvedValue('stale') };
+      bus.registerFactory(ResetRegressionQuery, () => staleHandler);
+
+      expect(await bus.execute(new ResetRegressionQuery())).toBe('stale');
+
+      // Simulate module teardown — VytchesExplorerService.onModuleDestroy calls reset()
+      bus.reset();
+
+      // After reset, the stale factory is gone; executing should throw
+      const [errorAfterReset] = await safeRun(() => bus.execute(new ResetRegressionQuery()));
+      expect(errorAfterReset).toBeInstanceOf(HandlerNotFoundError);
+
+      // "Module 2": register a fresh factory (new module lifecycle)
+      const freshHandler = { execute: vi.fn().mockResolvedValue('fresh') };
+      bus.registerFactory(ResetRegressionQuery, () => freshHandler);
+
+      expect(await bus.execute(new ResetRegressionQuery())).toBe('fresh');
+      expect(staleHandler.execute).toHaveBeenCalledTimes(1); // only called pre-reset
+    });
+  });
 });
