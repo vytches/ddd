@@ -382,6 +382,71 @@ incrementally, one context at a time.
 
 ---
 
+## Bug #2 Fix — GLOBAL_QUERY_BUS / GLOBAL_COMMAND_BUS tokens for cross-context ACL (VP-009, 2026-06-11)
+
+### Problem
+
+`VytchesDDDModule.forFeature()` provides `ICommandBus` and `IQueryBus` scoped to
+the importing module. Any service inside that module that needs to dispatch
+queries or commands to the root context (e.g. an Anti-Corruption Layer service
+translating between bounded contexts) would receive the feature-local bus
+instead of the application root bus. There was no stable DI token that always
+resolved to the root bus regardless of what `forFeature()` modules shadow in the
+local provider chain.
+
+### Decision
+
+Two new `Symbol.for` tokens are added to `@vytches/ddd-nestjs`:
+
+- `GLOBAL_QUERY_BUS = Symbol.for('vytches:global-query-bus')`
+- `GLOBAL_COMMAND_BUS = Symbol.for('vytches:global-command-bus')`
+
+`VytchesDDDModule.forRoot()` provides both tokens as bridge factories:
+
+```typescript
+{
+  provide: GLOBAL_QUERY_BUS,
+  useFactory: (bus?: IQueryBus) => bus,
+  inject: [{ token: IQueryBus, optional: true }],
+}
+```
+
+`VytchesDDDModule.forFeature()` intentionally does **not** provide these tokens.
+NestJS resolution walks upward to the global module (`@Global()` on
+`VytchesDDDModule`) and resolves the `forRoot()` provider — always the root
+instance.
+
+Symmetry with `LOCAL_EVENT_BUS`:
+
+| Token                | Direction     | Provided by    |
+| -------------------- | ------------- | -------------- |
+| `LOCAL_EVENT_BUS`    | feature-local | `forFeature()` |
+| `GLOBAL_QUERY_BUS`   | root          | `forRoot()`    |
+| `GLOBAL_COMMAND_BUS` | root          | `forRoot()`    |
+
+When no bus is registered (`forRoot()` with empty providers), the factory
+returns `undefined` — the module boots without throwing and `@Optional()`
+consumers receive `undefined` gracefully (Pitfall 5 tolerance).
+
+### Consumer Usage
+
+```typescript
+import { GLOBAL_QUERY_BUS } from '@vytches/ddd-nestjs';
+import type { IQueryBus } from '@vytches/ddd-cqrs';
+
+@Injectable()
+export class CrossContextAclService {
+  constructor(
+    @Inject(GLOBAL_QUERY_BUS) private readonly rootQuery: IQueryBus
+  ) {}
+}
+```
+
+No breaking change. `GLOBAL_QUERY_BUS` and `GLOBAL_COMMAND_BUS` are additive
+exports. Existing code using `ICommandBus` / `IQueryBus` directly is unaffected.
+
+---
+
 ## Bug #3 Fix — Symbol.for DI Tokens (VP-009, 2026-06-11)
 
 ### Problem

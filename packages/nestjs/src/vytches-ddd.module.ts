@@ -7,6 +7,7 @@ import { IEventBus } from '@vytches/ddd-contracts';
 import { VytchesExplorerService } from './services/vytches-explorer.service';
 import { VytchesDDDFeatureModule } from './feature/vytches-ddd-feature.module';
 import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
+import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS } from './constants';
 
 /**
  * VytchesDDD NestJS Integration Module
@@ -60,6 +61,22 @@ export class VytchesDDDModule {
         useFactory: (bus?: IQueryBus) => bus,
         inject: [{ token: IQueryBus, optional: true }],
       },
+      // Global bus tokens — always resolve to the root ICommandBus / IQueryBus.
+      // forFeature() intentionally does NOT provide these tokens, so injection
+      // falls through to forRoot() (the global module) regardless of how many
+      // forFeature() modules shadow ICommandBus / IQueryBus in the consumer.
+      // This is the cross-context ACL symmetry to LOCAL_EVENT_BUS (which gives
+      // the feature-scoped bus); GLOBAL_*_BUS always gives the root bus.
+      {
+        provide: GLOBAL_COMMAND_BUS,
+        useFactory: (bus?: ICommandBus) => bus,
+        inject: [{ token: ICommandBus, optional: true }],
+      },
+      {
+        provide: GLOBAL_QUERY_BUS,
+        useFactory: (bus?: IQueryBus) => bus,
+        inject: [{ token: IQueryBus, optional: true }],
+      },
     ];
 
     const providers: Provider[] = [
@@ -72,7 +89,7 @@ export class VytchesDDDModule {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
       providers,
-      exports: [VytchesExplorerService],
+      exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
       global: options.isGlobal !== false,
     };
   }
@@ -97,8 +114,18 @@ export class VytchesDDDModule {
           useFactory: (bus?: IQueryBus) => bus,
           inject: [{ token: IQueryBus, optional: true }],
         },
+        {
+          provide: GLOBAL_COMMAND_BUS,
+          useFactory: (bus?: ICommandBus) => bus,
+          inject: [{ token: ICommandBus, optional: true }],
+        },
+        {
+          provide: GLOBAL_QUERY_BUS,
+          useFactory: (bus?: IQueryBus) => bus,
+          inject: [{ token: IQueryBus, optional: true }],
+        },
       ],
-      exports: [VytchesExplorerService],
+      exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
       global: true,
     };
   }
