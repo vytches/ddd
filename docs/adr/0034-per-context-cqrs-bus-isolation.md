@@ -382,6 +382,73 @@ incrementally, one context at a time.
 
 ---
 
+## Bug #3 Fix — Symbol.for DI Tokens (VP-009, 2026-06-11)
+
+### Problem
+
+`ICommandBus` and `IQueryBus` are `export abstract class` objects used as DI
+tokens via `@Inject(ICommandBus)`. In dual-package (ESM + CJS) environments
+(e.g. Vitest or Node.js with mixed module graphs), the same package can be
+loaded twice — once as ESM and once as CJS. Each load produces a distinct class
+object reference. NestJS DI compares token identity by reference; when the
+reference diverges, `@Optional() @Inject(ICommandBus)` resolves to `undefined`
+silently. The downstream guard `&& this.commandBus` then skips command-handler
+registration. The symptom is a 503 with no thrown exception.
+
+### Decision
+
+Stable injection tokens `COMMAND_BUS_TOKEN` and `QUERY_BUS_TOKEN` are exported
+from `@vytches/ddd-cqrs` as `Symbol.for('vytches:cqrs:command-bus')` and
+`Symbol.for('vytches:cqrs:query-bus')`. `Symbol.for` uses a global symbol
+registry — the same key always returns the same symbol regardless of how many
+times or in how many formats the module is loaded.
+
+`VytchesExplorerService` now injects via `@Inject(COMMAND_BUS_TOKEN)` and
+`@Inject(QUERY_BUS_TOKEN)` instead of the class references.
+
+`VytchesDDDModule.forRoot()` and `forFeature()` each register bridge providers:
+
+```typescript
+{
+  provide: COMMAND_BUS_TOKEN,
+  useFactory: (bus?: ICommandBus) => bus,
+  inject: [{ token: ICommandBus, optional: true }],
+}
+```
+
+`useFactory` with `optional: true` is used instead of `useExisting` because
+NestJS throws a compile-time DI error for `useExisting` when the target token is
+absent, even if the downstream consumer has `@Optional`. The factory returns
+`undefined` when no bus is registered, which `@Optional` handles correctly.
+
+`forTesting()` registers stubs directly under both the Symbol token and the
+class token alias (`useExisting: COMMAND_BUS_TOKEN`), so both injection styles
+resolve the same stub object (Pitfall 1).
+
+### Migration Guide for Consumers
+
+**No breaking change.** Existing `@Inject(ICommandBus)` decorators in
+application code continue to work as long as the consumer registers a provider
+under `ICommandBus`. The library's internal injection moved to Symbol tokens —
+this is invisible to consumers.
+
+To benefit from the dual-package fix in application-level injection, migrate:
+
+```typescript
+// Before (class token — fragile under dual-package loading)
+@Inject(ICommandBus) private readonly commandBus: ICommandBus
+
+// After (Symbol token — stable across ESM/CJS)
+import { COMMAND_BUS_TOKEN } from '@vytches/ddd-cqrs';
+@Inject(COMMAND_BUS_TOKEN) private readonly commandBus: ICommandBus
+```
+
+For test environments only, `server.deps.inline: ['@vytches']` in
+`vitest.config` is an alternative mitigation (forces single-load of the package)
+— but Symbol tokens are the correct long-term fix.
+
+---
+
 ## Related Decisions
 
 - ADR-0014: DI Integration Bridge Pattern — established the
@@ -391,3 +458,4 @@ incrementally, one context at a time.
 - ADR-0007: Event System Consolidation — established `DomainEvent` /
   `IntegrationEvent` split that this ADR leverages for EventBus routing
 - Task VP-007: implementation details
+- Task VP-009: Bug #3 fix — Symbol.for tokens
