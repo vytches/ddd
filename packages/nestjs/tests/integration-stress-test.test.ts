@@ -91,6 +91,8 @@ vi.mock('@vytches/ddd-cqrs', () => {
     QueryBus: createCQRSMock(),
     EnhancedCommandBus: createCQRSMock(),
     EnhancedQueryBus: createCQRSMock(),
+    COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+    QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
   };
 });
 

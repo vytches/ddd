@@ -49,6 +49,11 @@ vi.mock('@vytches/ddd-cqrs', () => {
     IQueryBus: MockIQueryBus,
     CommandBus: makeCommandBus,
     QueryBus: makeQueryBus,
+    // Symbol tokens must be included so VytchesExplorerService constructor
+    // decorators (@Inject(COMMAND_BUS_TOKEN) / @Inject(QUERY_BUS_TOKEN)) can
+    // be resolved when the module is loaded under this mock.
+    COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+    QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
   };
 });
 
