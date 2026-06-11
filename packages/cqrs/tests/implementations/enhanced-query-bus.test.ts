@@ -753,4 +753,75 @@ describe('EnhancedQueryBus', () => {
       bus.dispose();
     });
   });
+
+  describe('VP-010 #1 — cache-cleanup timer unref (query bus)', () => {
+    it('should call unref() on the cleanup interval when cache is enabled at construction', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: true });
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      setIntervalSpy.mockRestore();
+      bus['cacheCleanupInterval'] = undefined;
+    });
+
+    it('should call unref() on the interval when enableCache(true) is called', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: false });
+      expect(setIntervalSpy).not.toHaveBeenCalled();
+
+      bus.enableCache(true);
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      setIntervalSpy.mockRestore();
+      bus['cacheCleanupInterval'] = undefined;
+    });
+  });
+
+  describe('VP-010 #4 — stale-bus hint in HandlerNotFoundError message (query bus)', () => {
+    it('should include stale-bus hint in error message when factory throws', async () => {
+      class HintQuery implements IQuery<string> {}
+
+      enhancedQueryBus.registerFactory(HintQuery, () => {
+        throw new Error('dead moduleRef');
+      });
+
+      const [error] = await safeRun(() => enhancedQueryBus.execute(new HintQuery()));
+      expect(error).toBeInstanceOf(HandlerNotFoundError);
+      expect((error as HandlerNotFoundError).message).toContain('hint');
+      expect((error as HandlerNotFoundError).message).toContain('useFactory');
+    });
+  });
+
+  describe('VP-010 #5 — IDisposableBus contract (query bus)', () => {
+    it('EnhancedQueryBus exposes a dispose() method', () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+
+    it('dispose() can be called safely when no interval is active', () => {
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: false });
+      expect(() => bus.dispose()).not.toThrow();
+    });
+
+    it('EnhancedQueryBus satisfies the IDisposableBus shape', () => {
+      const bus: import('../../src').IDisposableBus = new EnhancedQueryBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+  });
 });

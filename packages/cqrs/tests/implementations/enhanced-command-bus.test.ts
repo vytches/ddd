@@ -525,4 +525,138 @@ describe('EnhancedCommandBus', () => {
       );
     });
   });
+
+  describe('VP-010 #1 — cache-cleanup timer unref', () => {
+    it('should call unref() on the cleanup interval when cache is enabled at construction', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedCommandBus(mockContainer, { enableCache: true });
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      // Cleanup: restore spies and dispose bus safely
+      setIntervalSpy.mockRestore();
+      // bus.dispose() would call clearInterval on the fake — just reset
+      bus['cacheCleanupInterval'] = undefined;
+    });
+
+    it('should call unref() on the cleanup interval when enableCache(true) is called on a no-cache bus', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedCommandBus(mockContainer, { enableCache: false });
+      // setInterval should NOT have been called yet (cache off)
+      expect(setIntervalSpy).not.toHaveBeenCalled();
+
+      bus.enableCache(true);
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      setIntervalSpy.mockRestore();
+      bus['cacheCleanupInterval'] = undefined;
+    });
+  });
+
+  describe('VP-010 #2 — enableCache default is false', () => {
+    it('should NOT start a cache-cleanup interval when constructed without explicit enableCache', () => {
+      const setIntervalSpy = vi.spyOn(global, 'setInterval');
+      const bus = new EnhancedCommandBus(mockContainer);
+      // Metrics logging middleware uses setInterval? No — only cache does.
+      // Assert no interval was registered (cacheEnabled defaults to false).
+      const internalInterval = (bus as unknown as { cacheCleanupInterval?: unknown })
+        .cacheCleanupInterval;
+      expect(internalInterval).toBeUndefined();
+      setIntervalSpy.mockRestore();
+      bus.dispose();
+    });
+
+    it('should NOT start a cache-cleanup interval when enableCache is explicitly false', () => {
+      const bus = new EnhancedCommandBus(mockContainer, { enableCache: false });
+      const internalInterval = (bus as unknown as { cacheCleanupInterval?: unknown })
+        .cacheCleanupInterval;
+      expect(internalInterval).toBeUndefined();
+      bus.dispose();
+    });
+
+    it('should start a cache-cleanup interval when enableCache is explicitly true', () => {
+      const bus = new EnhancedCommandBus(mockContainer, { enableCache: true });
+      const internalInterval = (bus as unknown as { cacheCleanupInterval?: unknown })
+        .cacheCleanupInterval;
+      expect(internalInterval).toBeDefined();
+      bus.dispose();
+    });
+  });
+
+  describe('VP-010 #4 — stale-bus hint in HandlerNotFoundError message', () => {
+    it('should include stale-bus hint in error message when factory throws', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      class HintCommand implements ICommand {}
+
+      bus.registerFactory(HintCommand, () => {
+        throw new Error('dead moduleRef');
+      });
+
+      const [error] = await safeRun(() => bus.execute(new HintCommand()));
+      expect(error).toBeInstanceOf(HandlerNotFoundError);
+      expect((error as HandlerNotFoundError).message).toContain('hint');
+      expect((error as HandlerNotFoundError).message).toContain('useFactory');
+    });
+  });
+
+  describe('VP-010 #5 — IDisposableBus contract', () => {
+    it('EnhancedCommandBus exposes a dispose() method', () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+
+    it('dispose() can be called on a bus with no active interval (no-op)', () => {
+      const bus = new EnhancedCommandBus(mockContainer, { enableCache: false });
+      expect(() => bus.dispose()).not.toThrow();
+    });
+
+    it('EnhancedCommandBus satisfies the IDisposableBus shape', () => {
+      // Type-level: IDisposableBus requires dispose(): void
+      const bus: import('../../src').IDisposableBus = new EnhancedCommandBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+  });
+
+  // VP-010 #6 — regression: reset() evicts factories so a new module starts clean
+  describe('VP-010 #6 — reset evicts factories; new module starts clean', () => {
+    it('should not execute stale factory after reset(), and fresh factory registered after reset() works', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      class ResetRegressionCommand implements ICommand {}
+
+      // "Module 1": register a factory that will become stale
+      const staleHandler = { execute: vi.fn().mockResolvedValue('stale') };
+      bus.registerFactory(ResetRegressionCommand, () => staleHandler);
+
+      expect(await bus.execute(new ResetRegressionCommand())).toBe('stale');
+
+      // Simulate module teardown — VytchesExplorerService.onModuleDestroy calls reset()
+      bus.reset();
+
+      // After reset, the stale factory is gone; executing should throw
+      const [errorAfterReset] = await safeRun(() => bus.execute(new ResetRegressionCommand()));
+      expect(errorAfterReset).toBeInstanceOf(HandlerNotFoundError);
+
+      // "Module 2": register a fresh factory (new module lifecycle)
+      const freshHandler = { execute: vi.fn().mockResolvedValue('fresh') };
+      bus.registerFactory(ResetRegressionCommand, () => freshHandler);
+
+      expect(await bus.execute(new ResetRegressionCommand())).toBe('fresh');
+      expect(staleHandler.execute).toHaveBeenCalledTimes(1); // only called pre-reset
+    });
+  });
 });
