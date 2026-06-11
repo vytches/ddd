@@ -2,7 +2,7 @@ import type { DynamicModule, ModuleMetadata, Provider } from '@nestjs/common';
 import { Global, Module } from '@nestjs/common';
 import { DiscoveryModule, DiscoveryService, ModuleRef } from '@nestjs/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens in forTesting()
-import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { VytchesExplorerService } from './services/vytches-explorer.service';
 import { VytchesDDDFeatureModule } from './feature/vytches-ddd-feature.module';
@@ -39,7 +39,34 @@ import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
 @Module({})
 export class VytchesDDDModule {
   static forRoot(options: VytchesDDDModuleOptions = {}): DynamicModule {
-    const providers: Provider[] = [VytchesExplorerService, ...(options.providers || [])];
+    // Bridge: when a consumer provides buses under class tokens (ICommandBus /
+    // IQueryBus), these aliases expose them under the stable Symbol tokens that
+    // VytchesExplorerService injects via @Inject(COMMAND_BUS_TOKEN) /
+    // @Inject(QUERY_BUS_TOKEN).
+    //
+    // useFactory with optional inject instead of useExisting: NestJS throws a
+    // compile-time DI error for useExisting when the target token is absent,
+    // even if the downstream consumer has @Optional. useFactory returns
+    // undefined when the class token is not registered, which @Optional handles
+    // correctly (graceful degradation — module boots without a bus).
+    const bridgeProviders: Provider[] = [
+      {
+        provide: COMMAND_BUS_TOKEN,
+        useFactory: (bus?: ICommandBus) => bus,
+        inject: [{ token: ICommandBus, optional: true }],
+      },
+      {
+        provide: QUERY_BUS_TOKEN,
+        useFactory: (bus?: IQueryBus) => bus,
+        inject: [{ token: IQueryBus, optional: true }],
+      },
+    ];
+
+    const providers: Provider[] = [
+      VytchesExplorerService,
+      ...bridgeProviders,
+      ...(options.providers || []),
+    ];
 
     return {
       module: VytchesDDDModule,
@@ -58,7 +85,19 @@ export class VytchesDDDModule {
     return {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
-      providers: [VytchesExplorerService],
+      providers: [
+        VytchesExplorerService,
+        {
+          provide: COMMAND_BUS_TOKEN,
+          useFactory: (bus?: ICommandBus) => bus,
+          inject: [{ token: ICommandBus, optional: true }],
+        },
+        {
+          provide: QUERY_BUS_TOKEN,
+          useFactory: (bus?: IQueryBus) => bus,
+          inject: [{ token: IQueryBus, optional: true }],
+        },
+      ],
       exports: [VytchesExplorerService],
       global: true,
     };
@@ -184,32 +223,38 @@ export class VytchesDDDModule {
   }
 
   static forTesting(options: VytchesDDDModuleOptions = {}): DynamicModule {
+    // Stubs are defined once and registered under both the class token (ICommandBus /
+    // IQueryBus) and the stable Symbol token (COMMAND_BUS_TOKEN / QUERY_BUS_TOKEN).
+    // VytchesExplorerService injects via the Symbol tokens; external consumers that
+    // still use the class token also get the same stub instance (Pitfall 1 fix).
+    const commandBusStub = {
+      register: (): void => {
+        /* noop */
+      },
+      registerFactory: (): void => {
+        /* noop */
+      },
+      execute: () => Promise.resolve({ success: true }),
+    };
+
+    const queryBusStub = {
+      register: (): void => {
+        /* noop */
+      },
+      registerFactory: (): void => {
+        /* noop */
+      },
+      send: () => Promise.resolve({ success: true }),
+    };
+
     const providers: Provider[] = [
       VytchesExplorerService,
-      {
-        provide: ICommandBus,
-        useValue: {
-          register: (): void => {
-            /* noop */
-          },
-          registerFactory: (): void => {
-            /* noop */
-          },
-          execute: () => Promise.resolve({ success: true }),
-        },
-      },
-      {
-        provide: IQueryBus,
-        useValue: {
-          register: (): void => {
-            /* noop */
-          },
-          registerFactory: (): void => {
-            /* noop */
-          },
-          send: () => Promise.resolve({ success: true }),
-        },
-      },
+      // Register under Symbol token — used by VytchesExplorerService constructor
+      { provide: COMMAND_BUS_TOKEN, useValue: commandBusStub },
+      { provide: QUERY_BUS_TOKEN, useValue: queryBusStub },
+      // Alias class tokens to the Symbol-token stubs so both resolve the same object
+      { provide: ICommandBus, useExisting: COMMAND_BUS_TOKEN },
+      { provide: IQueryBus, useExisting: QUERY_BUS_TOKEN },
       {
         provide: IEventBus,
         useValue: {
@@ -233,7 +278,14 @@ export class VytchesDDDModule {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
       providers,
-      exports: [VytchesExplorerService, ICommandBus, IQueryBus, IEventBus],
+      exports: [
+        VytchesExplorerService,
+        COMMAND_BUS_TOKEN,
+        QUERY_BUS_TOKEN,
+        ICommandBus,
+        IQueryBus,
+        IEventBus,
+      ],
       global: false,
     };
   }
