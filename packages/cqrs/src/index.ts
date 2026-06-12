@@ -2,6 +2,7 @@
 export type {
   ICommand,
   ICommandHandler,
+  IDisposableBus,
   IQuery,
   IQueryHandler,
   IResettableBus,

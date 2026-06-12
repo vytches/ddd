@@ -753,4 +753,103 @@ describe('EnhancedQueryBus', () => {
       bus.dispose();
     });
   });
+
+  describe('VP-010 #1 — cache-cleanup timer unref (query bus)', () => {
+    it('should call unref() on the cleanup interval when cache is enabled at construction', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: true });
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      setIntervalSpy.mockRestore();
+      bus['cacheCleanupInterval'] = undefined;
+    });
+
+    it('should call unref() on the interval when enableCache(true) is called', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: false });
+      expect(setIntervalSpy).not.toHaveBeenCalled();
+
+      bus.enableCache(true);
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      setIntervalSpy.mockRestore();
+      bus['cacheCleanupInterval'] = undefined;
+    });
+  });
+
+  describe('VP-010 #4 — stale-bus hint in HandlerNotFoundError message (query bus)', () => {
+    it('should include stale-bus hint in error message when factory throws', async () => {
+      class HintQuery implements IQuery<string> {}
+
+      enhancedQueryBus.registerFactory(HintQuery, () => {
+        throw new Error('dead moduleRef');
+      });
+
+      const [error] = await safeRun(() => enhancedQueryBus.execute(new HintQuery()));
+      expect(error).toBeInstanceOf(HandlerNotFoundError);
+      expect((error as HandlerNotFoundError).message).toContain('hint');
+      expect((error as HandlerNotFoundError).message).toContain('useFactory');
+    });
+  });
+
+  describe('VP-010 #5 — IDisposableBus contract (query bus)', () => {
+    it('EnhancedQueryBus exposes a dispose() method', () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+
+    it('dispose() can be called safely when no interval is active', () => {
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: false });
+      expect(() => bus.dispose()).not.toThrow();
+    });
+
+    it('EnhancedQueryBus satisfies the IDisposableBus shape', () => {
+      const bus: import('../../src').IDisposableBus = new EnhancedQueryBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+  });
+
+  // VP-010 #6 — regression: reset() evicts factories so a new module starts clean
+  describe('VP-010 #6 — reset evicts factories; new module starts clean (query bus)', () => {
+    it('should not execute stale factory after reset(), and fresh factory registered after reset() works', async () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      class ResetRegressionQuery implements IQuery<string> {}
+
+      // "Module 1": register a factory that will become stale
+      const staleHandler = { execute: vi.fn().mockResolvedValue('stale') };
+      bus.registerFactory(ResetRegressionQuery, () => staleHandler);
+
+      expect(await bus.execute(new ResetRegressionQuery())).toBe('stale');
+
+      // Simulate module teardown — VytchesExplorerService.onModuleDestroy calls reset()
+      bus.reset();
+
+      // After reset, the stale factory is gone; executing should throw
+      const [errorAfterReset] = await safeRun(() => bus.execute(new ResetRegressionQuery()));
+      expect(errorAfterReset).toBeInstanceOf(HandlerNotFoundError);
+
+      // "Module 2": register a fresh factory (new module lifecycle)
+      const freshHandler = { execute: vi.fn().mockResolvedValue('fresh') };
+      bus.registerFactory(ResetRegressionQuery, () => freshHandler);
+
+      expect(await bus.execute(new ResetRegressionQuery())).toBe('fresh');
+      expect(staleHandler.execute).toHaveBeenCalledTimes(1); // only called pre-reset
+    });
+  });
 });

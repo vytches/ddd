@@ -13,7 +13,7 @@ import {
 import 'reflect-metadata';
 import { ICommandBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';
-import type { ICommand, ICommandHandler, IResettableBus } from '../interfaces';
+import type { ICommand, ICommandHandler, IDisposableBus, IResettableBus } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
@@ -76,7 +76,7 @@ interface BatchEntry<T extends ICommand = ICommand, TResult = void> {
 /**
  * Performance-optimized Enhanced Command Bus with resilience patterns
  */
-export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
+export class EnhancedCommandBus extends ICommandBus implements IResettableBus, IDisposableBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
   // Registered handlers split by registration kind. Keeping instances and
@@ -136,7 +136,10 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
 
     // Initialize configuration with defaults
     this.maxRetries = options.defaultRetries ?? 3;
-    this.cacheEnabled = options.enableCache ?? true;
+    // Default false matches EnhancedQueryBus (was true, changed for symmetry —
+    // see VP-010 #2). Consumers who relied on implicit command-bus cache should
+    // opt in: new EnhancedCommandBus(container, { enableCache: true }).
+    this.cacheEnabled = options.enableCache ?? false;
     this.batchingEnabled = options.enableBatching ?? false;
     this.maxBatchSize = options.maxBatchSize ?? 10;
     this.batchDelayMs = options.batchDelayMs ?? 100;
@@ -152,6 +155,10 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
     // Clean cache periodically
     if (this.cacheEnabled) {
       this.cacheCleanupInterval = setInterval(() => this.cleanHandlerCache(), this.CACHE_TTL);
+      // unref() allows the process / vitest-worker to exit even when this timer
+      // is still pending. Guards environments that do not have unref (e.g. some
+      // browser runtimes) with an optional-call.
+      this.cacheCleanupInterval.unref?.();
     }
   }
 
@@ -281,6 +288,7 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
       }
     } else if (!this.cacheCleanupInterval) {
       this.cacheCleanupInterval = setInterval(() => this.cleanHandlerCache(), this.CACHE_TTL);
+      this.cacheCleanupInterval.unref?.();
     }
     return this;
   }
@@ -489,7 +497,14 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus {
             error: factoryError instanceof Error ? factoryError.message : String(factoryError),
           }
         );
-        throw new HandlerNotFoundError(commandClass.name, 'command');
+        // Include stale-bus hint so the consumer can diagnose the root cause.
+        // The factory threw — most likely the bus was not recreated after
+        // module teardown (use useFactory, not useValue, to tie bus lifetime
+        // to module lifecycle — see VP-010).
+        throw new HandlerNotFoundError(
+          `${commandClass.name} (hint: factory threw — bus may be stale; recreate it via useFactory on each module init)`,
+          'command'
+        );
       }
     }
 

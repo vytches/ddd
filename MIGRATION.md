@@ -47,3 +47,33 @@ on the console; everything operational is the application's responsibility.
 2. Use your own logger for application logging.
 3. For command/query/event logging, add your own bus middleware or event
    subscriber in the application layer.
+
+---
+
+## → (VP-010) EnhancedCommandBus — enableCache default changed to `false`
+
+**Behavioral change (MINOR).** `EnhancedCommandBus` now defaults `enableCache`
+to `false`, matching `EnhancedQueryBus`. Previously the command bus defaulted to
+`true`, which silently started a background `setInterval` cache-cleanup timer in
+every consumer process — including test processes where hundreds of bus
+instances could accumulate and prevent vitest workers from exiting.
+
+### Who is affected
+
+Consumers that rely on command handler resolution caching without explicitly
+passing `enableCache: true`.
+
+### How to migrate
+
+If you depend on command-result caching, opt in explicitly:
+
+```typescript
+// Before (implicit true) — no longer works
+const bus = new EnhancedCommandBus(container);
+
+// After — explicit opt-in
+const bus = new EnhancedCommandBus(container, { enableCache: true });
+```
+
+If you use `VytchesDDDModule.forFeature()` (recommended), no action is needed —
+the module manages bus construction and lifecycle automatically.

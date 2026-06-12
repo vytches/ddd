@@ -1,6 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { internalLogger } from '@vytches/ddd-contracts';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 
@@ -176,6 +177,67 @@ describe('VytchesDDDModule', () => {
       await module.init();
 
       expect(module).toBeDefined();
+    });
+  });
+
+  // VP-010 #3 — warn when injected bus does not implement reset()
+  // Uses direct instantiation (no Test.createTestingModule) so the spy on the
+  // shared internalLogger object is guaranteed to intercept the real call.
+  describe('VP-010 #3 — warn non-resettable bus', () => {
+    it('should warn when commandBus does not implement reset()', async () => {
+      const warnSpy = vi.spyOn(internalLogger, 'warn');
+
+      // Minimal stubs — only what VytchesExplorerService checks in onModuleInit
+      const busWithoutReset = {
+        register: vi.fn(),
+        registerFactory: vi.fn(),
+        execute: vi.fn(),
+      } as unknown as import('../src/types').VytchesContextOptions extends never ? never : object; // typed as object for clarity
+
+      const busWithReset = {
+        register: vi.fn(),
+        registerFactory: vi.fn(),
+        execute: vi.fn(),
+        reset: vi.fn(),
+      };
+
+      // Minimal DiscoveryService stub
+      const discoveryStub = { getProviders: vi.fn().mockReturnValue([]) };
+      // Minimal ModuleRef stub
+      const moduleRefStub = { get: vi.fn() };
+
+      // Service with a non-resettable commandBus — should warn
+      const svcWithoutReset = new VytchesExplorerService(
+        moduleRefStub as never,
+        discoveryStub as never,
+        busWithoutReset as never,
+        undefined, // queryBus
+        undefined, // eventBus
+        undefined // aclRegistry
+      );
+
+      warnSpy.mockClear();
+      await svcWithoutReset.onModuleInit();
+
+      const warnMessages = warnSpy.mock.calls.map(c => c[0] as string);
+      expect(warnMessages.some(msg => msg.includes('does not implement reset()'))).toBe(true);
+
+      // Service with a resettable commandBus — should NOT emit the specific warn
+      warnSpy.mockClear();
+      const svcWithReset = new VytchesExplorerService(
+        moduleRefStub as never,
+        discoveryStub as never,
+        busWithReset as never,
+        undefined,
+        undefined,
+        undefined
+      );
+      await svcWithReset.onModuleInit();
+
+      const warnMessages2 = warnSpy.mock.calls.map(c => c[0] as string);
+      expect(warnMessages2.some(msg => msg.includes('does not implement reset()'))).toBe(false);
+
+      warnSpy.mockRestore();
     });
   });
 });

@@ -93,6 +93,27 @@ export class VytchesExplorerService
       return;
     }
 
+    // Warn when an injected bus is present but does not support reset().
+    // Without reset() the bus cannot evict stale handler factories on module
+    // teardown, so sequentially-recreated modules (e.g. in tests) will leak
+    // stale closures into the next module. This is a misconfiguration, not a
+    // crash — warn only (do NOT throw).
+    for (const [busLabel, bus] of [
+      ['commandBus', this.commandBus],
+      ['queryBus', this.queryBus],
+      ['eventBus', this.eventBus],
+    ] as const) {
+      if (
+        bus !== undefined &&
+        typeof (bus as unknown as BusWithRegistration).reset !== 'function'
+      ) {
+        internalLogger.warn(
+          `VytchesExplorer: injected ${busLabel} does not implement reset() — stale handler factories will not be evicted on module destroy`,
+          { busLabel, busType: bus.constructor?.name ?? 'unknown' }
+        );
+      }
+    }
+
     try {
       this.discoveredHandlers = await this.discoverHandlers();
       await this.discoverAndRegisterACLAdapters();
