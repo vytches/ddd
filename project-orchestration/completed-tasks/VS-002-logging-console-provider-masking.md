@@ -4,7 +4,7 @@
 
 ```yaml
 task_id: VS-002
-title: "logging: ConsoleProvider — optional DataMasker for event.data"
+title: 'logging: ConsoleProvider — optional DataMasker for event.data'
 type: bug
 priority: high
 complexity: simple
@@ -33,27 +33,32 @@ patterns:
 
 ### Why This Task Exists
 
-`ConsoleProvider` (the default logger in dev/test, frequently used in production)
-serialises `event.data` via `JSON.stringify` without any PII filtering.
+`ConsoleProvider` (the default logger in dev/test, frequently used in
+production) serialises `event.data` via `JSON.stringify` without any PII
+filtering.
 
 **Scope rewrite (2026-05-28):** Discovery during implementation revealed that
-`DefaultLogger` already masks `event.data` at `logger.ts:90` before `provider.write()`.
-The original plan (masker in ConsoleProvider only) was architecturally incomplete.
-Final scope addresses both vectors:
+`DefaultLogger` already masks `event.data` at `logger.ts:90` before
+`provider.write()`. The original plan (masker in ConsoleProvider only) was
+architecturally incomplete. Final scope addresses both vectors:
+
 1. `DefaultLogger` default `sensitiveKeys` — common fields masked by default
 2. `ConsoleProvider.masker` — standalone use without DefaultLogger
 
 ### Expected Business Value
 
-- [x] Consumers using DefaultLogger get password/token/secret/apiKey masked by default
+- [x] Consumers using DefaultLogger get password/token/secret/apiKey masked by
+      default
 - [x] GDPR compliance — PII does not reach stdout/log files via either path
-- [x] Zero breaking change — masker is optional, defaults unchanged for existing configs
+- [x] Zero breaking change — masker is optional, defaults unchanged for existing
+      configs
 
 ### Success Metrics
 
 - `ConsoleProvider({ masker })` → PII masked in output ✓
 - `ConsoleProvider()` → behaviour unchanged (backward-compat) ✓
-- `DefaultLogger` default config masks password/token/secret/apiKey/authorization/credential ✓
+- `DefaultLogger` default config masks
+  password/token/secret/apiKey/authorization/credential ✓
 
 ## Technical Context
 
@@ -86,22 +91,27 @@ write(event: LogEvent): void {
 
 - Backward-compatible: existing `new ConsoleProvider()` unchanged ✓
 - `DataMasker` imported as `import type` in ConsoleProvider — tree-shakeable ✓
-- `exactOptionalPropertyTypes` handled: `masker: DataMasker | undefined` as class field ✓
+- `exactOptionalPropertyTypes` handled: `masker: DataMasker | undefined` as
+  class field ✓
 
 ## Requirements & Acceptance Criteria
 
 ### Functional Requirements
 
 - [x] `ConsoleProvider` accepts optional `masker?: DataMasker` in its options
-- [x] When `masker` is provided — `event.data` is masked before serialisation (once in `write()`)
+- [x] When `masker` is provided — `event.data` is masked before serialisation
+      (once in `write()`)
 - [x] When `masker` is absent — behaviour unchanged
-- [x] Applies to both `formatPretty` and `formatStructured` (masking done before format dispatch)
+- [x] Applies to both `formatPretty` and `formatStructured` (masking done before
+      format dispatch)
 
 ### Non-Functional Requirements
 
 - [x] Backward-compatible public API
-- [x] Tests: masking of email/password in event.data (10 tests in console-provider.test.ts)
-- [x] JSDoc: example showing configuration with DataMasker + double-masking warning
+- [x] Tests: masking of email/password in event.data (10 tests in
+      console-provider.test.ts)
+- [x] JSDoc: example showing configuration with DataMasker + double-masking
+      warning
 
 ### Definition of Done
 
@@ -113,16 +123,18 @@ write(event: LogEvent): void {
 
 ## Security Considerations
 
-> Threat model: [TM-VS-002.md](../../docs/security/threat-models/TM-VS-002.md) — 2026-05-27
+> Threat model: [TM-VS-002.md](../../docs/security/threat-models/TM-VS-002.md) —
+> 2026-05-27
 
-| Zagrożenie | DREAD | Status po VS-002 |
-|-----------|-------|-----------------|
-| I1+I2 — PII w stdout/agregatach logów | 12/15 | RESOLVED — DefaultLogger masks by default |
+| Zagrożenie                                | DREAD | Status po VS-002                          |
+| ----------------------------------------- | ----- | ----------------------------------------- |
+| I1+I2 — PII w stdout/agregatach logów     | 12/15 | RESOLVED — DefaultLogger masks by default |
 | E1+E2 — Token → eskalacja (via agregator) | 11/15 | RESOLVED — token in default sensitiveKeys |
-| T2 — Log injection przez newline | 10/15 | OPEN — osobny issue |
+| T2 — Log injection przez newline          | 10/15 | OPEN — osobny issue                       |
 
-**Residual risk:** shallow merge w `DefaultLogger.configure()` może utracić `sensitiveKeys`
-gdy consumer podaje partial `masking` config — pre-existing issue, nie wprowadzone przez VS-002.
+**Residual risk:** shallow merge w `DefaultLogger.configure()` może utracić
+`sensitiveKeys` gdy consumer podaje partial `masking` config — pre-existing
+issue, nie wprowadzone przez VS-002.
 
 ## Agent Assignments
 
@@ -147,13 +159,13 @@ last_updated: 2026-05-28
 
 ### Activity Log
 
-| Date       | Agent                | Action                          | Result                    |
-| ---------- | -------------------- | ------------------------------- | ------------------------- |
-| 2026-05-26 | sec-audit            | Finding detected                | SEC-LOGGING-003           |
-| 2026-05-26 | human                | Task created                    | VS-002 planned            |
-| 2026-05-27 | ddd-patterns-expert  | Scope review                    | DefaultLogger masks upstream — scope rewrite |
-| 2026-05-28 | library-expert       | Implementation                  | 4 files, 92 tests green   |
-| 2026-05-28 | architecture-guardian | Verification                   | PASS                      |
+| Date       | Agent                 | Action           | Result                                       |
+| ---------- | --------------------- | ---------------- | -------------------------------------------- |
+| 2026-05-26 | sec-audit             | Finding detected | SEC-LOGGING-003                              |
+| 2026-05-26 | human                 | Task created     | VS-002 planned                               |
+| 2026-05-27 | ddd-patterns-expert   | Scope review     | DefaultLogger masks upstream — scope rewrite |
+| 2026-05-28 | library-expert        | Implementation   | 4 files, 92 tests green                      |
+| 2026-05-28 | architecture-guardian | Verification     | PASS                                         |
 
 ## Code References
 
@@ -163,21 +175,21 @@ last_updated: 2026-05-28
 packages:
   - package: '@vytches/ddd-logging'
     files:
-      - src/core/logger.interface.ts      # maxDepth/maxStringLength in masking type
-      - src/logger.ts                     # default sensitiveKeys
+      - src/core/logger.interface.ts # maxDepth/maxStringLength in masking type
+      - src/logger.ts # default sensitiveKeys
       - src/providers/console-provider.ts # masker for standalone use
-      - tests/providers/console-provider.test.ts  # 10 new tests
-      - tests/logger.test.ts              # 2 new masking tests
+      - tests/providers/console-provider.test.ts # 10 new tests
+      - tests/logger.test.ts # 2 new masking tests
 ```
 
 ## Risk Assessment
 
 ### Technical Risks
 
-| Risk            | Probability | Impact | Mitigation                              |
-| --------------- | ----------- | ------ | --------------------------------------- |
-| Breaking change | None        | N/A    | masker is optional, all tests green     |
-| Circular dep    | None        | N/A    | import type — no runtime dependency     |
+| Risk            | Probability | Impact | Mitigation                          |
+| --------------- | ----------- | ------ | ----------------------------------- |
+| Breaking change | None        | N/A    | masker is optional, all tests green |
+| Circular dep    | None        | N/A    | import type — no runtime dependency |
 
 ## Links & References
 
@@ -192,4 +204,5 @@ packages:
 
 ---
 
-_Task managed by Project Orchestrator | Security Audit: 2026-05-26 | Completed: 2026-05-28_
+_Task managed by Project Orchestrator | Security Audit: 2026-05-26 | Completed:
+2026-05-28_

@@ -4,7 +4,9 @@
 
 ```yaml
 task_id: VS-004
-title: "logging: DataMasker — validate user-supplied regex patterns before new RegExp()"
+title:
+  'logging: DataMasker — validate user-supplied regex patterns before new
+  RegExp()'
 type: bug
 priority: high
 complexity: medium
@@ -32,8 +34,8 @@ patterns:
 
 ### Why This Task Exists
 
-`DataMasker` accepts regex patterns as strings (`options.patterns: string[]`) and
-compiles them without any validation:
+`DataMasker` accepts regex patterns as strings (`options.patterns: string[]`)
+and compiles them without any validation:
 
 ```typescript
 // data-masker.ts:36
@@ -56,7 +58,8 @@ backtracking:
 
 ### Success Metrics
 
-- Syntactically invalid patterns throw `RangeError` in the `DataMasker` constructor
+- Syntactically invalid patterns throw `RangeError` in the `DataMasker`
+  constructor
 - Documentation describes the risk and how to configure patterns safely
 
 ## Technical Context
@@ -75,7 +78,8 @@ constructor(options: Partial<MaskingOptions> = {}) {
 
 ### Desired State
 
-Option A (minimum): Validate that the pattern is a valid regex before compiling.  
+Option A (minimum): Validate that the pattern is a valid regex before
+compiling.  
 Option B (better): Heuristic detection of potentially dangerous patterns.  
 Option C (best): Use `safe-regex` or `re2` as an optional dependency.
 
@@ -107,7 +111,8 @@ quantifiers ((a+)+) or overlapping alternations which can cause ReDoS."
 
 ### Functional Requirements
 
-- [x] Invalid regex syntax → `RangeError` thrown in constructor with a clear message
+- [x] Invalid regex syntax → `RangeError` thrown in constructor with a clear
+      message
 - [x] Valid patterns work as before
 - [x] JSDoc describes ReDoS risk and provides safe pattern examples
 
@@ -137,7 +142,8 @@ supporting_agents: []
 
 - **Agent**: library-expert
 - **Tasks**:
-  - [ ] Wrap `new RegExp(pattern, 'g')` in try/catch → `RangeError` with clear message
+  - [ ] Wrap `new RegExp(pattern, 'g')` in try/catch → `RangeError` with clear
+        message
   - [ ] Add JSDoc ReDoS warning (nested quantifiers)
   - [ ] Test: invalid pattern → RangeError
   - [ ] Test: valid pattern → compiles without error
@@ -156,17 +162,17 @@ last_updated: 2026-05-28
 
 ### Activity Log
 
-| Date       | Agent     | Action           | Result          |
-| ---------- | --------- | ---------------- | --------------- |
-| 2026-05-26 | sec-audit       | Finding detected     | SEC-LOGGING-001         |
-| 2026-05-26 | human           | Task created         | VS-004 planned          |
-| 2026-05-28 | threat-model    | TM-VS-004 created    | STRIDE + DREAD + LINDDUN |
-| 2026-05-28 | api-guardian    | Phase 2B review      | APPROVE-WITH-CHANGES    |
-| 2026-05-28 | library-expert  | Implementation       | Source + tests + CHANGELOG applied |
-| 2026-05-28 | vitest          | Test suite           | 30/30 PASS (5 new VS-004 + 25 regression) |
-| 2026-05-28 | tsc             | Typecheck            | Clean — no errors       |
-| 2026-05-28 | quality-verifier | Phase 4A             | PASS — zero violations  |
-| 2026-05-28 | human            | Task closed          | VS-004 completed        |
+| Date       | Agent            | Action            | Result                                    |
+| ---------- | ---------------- | ----------------- | ----------------------------------------- |
+| 2026-05-26 | sec-audit        | Finding detected  | SEC-LOGGING-001                           |
+| 2026-05-26 | human            | Task created      | VS-004 planned                            |
+| 2026-05-28 | threat-model     | TM-VS-004 created | STRIDE + DREAD + LINDDUN                  |
+| 2026-05-28 | api-guardian     | Phase 2B review   | APPROVE-WITH-CHANGES                      |
+| 2026-05-28 | library-expert   | Implementation    | Source + tests + CHANGELOG applied        |
+| 2026-05-28 | vitest           | Test suite        | 30/30 PASS (5 new VS-004 + 25 regression) |
+| 2026-05-28 | tsc              | Typecheck         | Clean — no errors                         |
+| 2026-05-28 | quality-verifier | Phase 4A          | PASS — zero violations                    |
+| 2026-05-28 | human            | Task closed       | VS-004 completed                          |
 
 ## Code References
 
@@ -184,9 +190,9 @@ packages:
 
 ### Technical Risks
 
-| Risk                    | Probability | Impact | Mitigation                    |
-| ----------------------- | ----------- | ------ | ----------------------------- |
-| Breaking for bad regexes | Very Low   | Low    | Throwing RangeError is a bugfix |
+| Risk                     | Probability | Impact | Mitigation                      |
+| ------------------------ | ----------- | ------ | ------------------------------- |
+| Breaking for bad regexes | Very Low    | Low    | Throwing RangeError is a bugfix |
 
 ## Testing Strategy
 
@@ -205,7 +211,8 @@ packages:
 ### External Resources
 
 - `docs/security/SECURITY-AUDIT-2026-05-26.md` — SEC-LOGGING-001
-- OWASP ReDoS: https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS
+- OWASP ReDoS:
+  https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS
 
 ---
 
