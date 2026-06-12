@@ -1,5 +1,10 @@
 # Task: Fix per-context CQRS bus — handler registration + cross-context ACL bus
 
+> **CLOSED 2026-06-12.** Zmergowane do `develop` (HEAD eeb0fc66). Bugi #1–#3
+> wdrożone: `findOwnModule()` traversal (Wariant A), tokeny
+> `GLOBAL_QUERY_BUS`/`GLOBAL_COMMAND_BUS`, decyzja o `Symbol.for` DI tokens.
+> library-quality-verifier: WARN/no-VETO. 483 testow green.
+
 ## Task Metadata
 
 ```yaml
@@ -14,7 +19,9 @@ complexity: medium
 estimated_time: 9h
 created_by: agent
 created_at: 2026-05-29 00:00
-status: planned
+status: completed
+completed_at: 2026-06-12
+merged_to: develop (HEAD eeb0fc66; verifier WARN/no-VETO; 483 tests green)
 ```
 
 ## Domain Context

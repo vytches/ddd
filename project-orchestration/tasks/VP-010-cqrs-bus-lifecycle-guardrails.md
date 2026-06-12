@@ -1,5 +1,12 @@
 # Task: CQRS bus lifecycle guardrails — timer leaks + stale-factory footgun
 
+> **CLOSED 2026-06-12.** Zmergowane do `develop` (HEAD eeb0fc66). Guardraile
+> #1–#6 wdrozone: `unref()` na timerach, `enableCache` symmetry (command→false),
+> `IDisposableBus` wyeksportowany, runtime warning w `VytchesExplorerService`,
+> lepszy komunikat bledu przy stale handlerach, regression E2E
+> create→destroy→create. Guardrajl #7 (base reset()) pominiety — low priority,
+> follow-up w VP-011. library-quality-verifier: WARN/no-VETO. 483 testow green.
+
 ## Task Metadata
 
 ```yaml
@@ -11,9 +18,12 @@ complexity: medium
 estimated_time: 6h
 created_by: agent
 created_at: 2026-06-06
-status: planned
+status: completed
+completed_at: 2026-06-12
+merged_to: develop (HEAD eeb0fc66; verifier WARN/no-VETO; 483 tests green)
 related: VP-009 (per-context CQRS bus — distinct: registration/tokens, not lifecycle)
 memory_ref: consumer_juz_ide_api
+follow_up: VP-011 (base CommandBus/QueryBus reset — skipped #7)
 ```
 
 ## Domain Context
