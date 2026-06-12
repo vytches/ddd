@@ -13,7 +13,7 @@ export { NestJSContainerAdapter } from './adapters';
 // ACL auto-discovery
 export { ACLAdapterFor } from './decorators/acl-adapter.decorator';
 export type { ACLAdapterMetadata } from './decorators/acl-adapter.decorator';
-export { ACL_REGISTRY, LOCAL_EVENT_BUS } from './constants';
+export { ACL_REGISTRY, LOCAL_EVENT_BUS, GLOBAL_QUERY_BUS, GLOBAL_COMMAND_BUS } from './constants';
 
 // Per-context event routing dispatcher (use with forFeature())
 export { ContextAwareEventDispatcher } from './dispatchers/context-aware-event-dispatcher';

@@ -32,6 +32,8 @@ const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
 vi.mock('@vytches/ddd-cqrs', () => ({
   ICommandBus: MockICommandBus,
   IQueryBus: MockIQueryBus,
+  COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+  QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
 }));
 
 // --- Test message types ---

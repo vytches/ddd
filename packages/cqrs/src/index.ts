@@ -7,8 +7,8 @@ export type {
   IResettableBus,
 } from './interfaces';
 
-// Abstract classes (service tokens)
-export { ICommandBus, IQueryBus } from './abstracts';
+// Abstract classes (service tokens) + stable Symbol.for DI tokens (dual-package safe)
+export { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from './abstracts';
 
 // Concrete implementations
 export { CommandBus, QueryBus } from './implementations';

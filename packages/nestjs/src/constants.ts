@@ -54,6 +54,62 @@ export const ACL_REGISTRY = Symbol('ACL_REGISTRY');
 export const LOCAL_EVENT_BUS = Symbol.for('vytches:local-event-bus');
 
 /**
+ * Injection token for the root-scoped query bus.
+ *
+ * Resolves to the root IQueryBus instance regardless of whether the consumer
+ * module has imported VytchesDDDModule.forFeature(), which shadows IQueryBus
+ * with a feature-scoped instance. Analogous to LOCAL_EVENT_BUS on the event
+ * side, but inverse direction: LOCAL_EVENT_BUS gives you the feature-local bus,
+ * while GLOBAL_QUERY_BUS gives you the application root bus.
+ *
+ * Intended for cross-context ACL services that must dispatch queries to the
+ * root context rather than the feature-scoped one.
+ *
+ * Provided by VytchesDDDModule.forRoot(). forFeature() intentionally does NOT
+ * provide this token, so it always falls through to the root module.
+ *
+ * @example
+ * ```typescript
+ * import { GLOBAL_QUERY_BUS } from '@vytches/ddd-nestjs';
+ * import type { IQueryBus } from '@vytches/ddd-cqrs';
+ *
+ * @Injectable()
+ * export class CrossContextAclService {
+ *   constructor(@Inject(GLOBAL_QUERY_BUS) private readonly rootQuery: IQueryBus) {}
+ * }
+ * ```
+ */
+export const GLOBAL_QUERY_BUS = Symbol.for('vytches:global-query-bus');
+
+/**
+ * Injection token for the root-scoped command bus.
+ *
+ * Resolves to the root ICommandBus instance regardless of whether the consumer
+ * module has imported VytchesDDDModule.forFeature(), which shadows ICommandBus
+ * with a feature-scoped instance. Analogous to LOCAL_EVENT_BUS on the event
+ * side, but inverse direction: LOCAL_EVENT_BUS gives you the feature-local bus,
+ * while GLOBAL_COMMAND_BUS gives you the application root bus.
+ *
+ * Intended for cross-context ACL services that must dispatch commands to the
+ * root context rather than the feature-scoped one.
+ *
+ * Provided by VytchesDDDModule.forRoot(). forFeature() intentionally does NOT
+ * provide this token, so it always falls through to the root module.
+ *
+ * @example
+ * ```typescript
+ * import { GLOBAL_COMMAND_BUS } from '@vytches/ddd-nestjs';
+ * import type { ICommandBus } from '@vytches/ddd-cqrs';
+ *
+ * @Injectable()
+ * export class CrossContextAclService {
+ *   constructor(@Inject(GLOBAL_COMMAND_BUS) private readonly rootCommand: ICommandBus) {}
+ * }
+ * ```
+ */
+export const GLOBAL_COMMAND_BUS = Symbol.for('vytches:global-command-bus');
+
+/**
  * Internal token used by FeatureHandlerRegistrar to receive the unique anchor
  * symbol that identifies its own module in ModulesContainer.
  */

@@ -4,7 +4,7 @@ import { DiscoveryService, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import type { Constructor } from '@vytches/ddd-di';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
-import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 import { IEventBus, EVENT_HANDLER_METADATA } from '@vytches/ddd-contracts';
 import { internalLogger } from '@vytches/ddd-contracts';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
@@ -82,8 +82,8 @@ export class VytchesExplorerService
   constructor(
     @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
     @Inject(DiscoveryService) private readonly discoveryService: DiscoveryService,
-    @Optional() @Inject(ICommandBus) private readonly commandBus?: ICommandBus,
-    @Optional() @Inject(IQueryBus) private readonly queryBus?: IQueryBus,
+    @Optional() @Inject(COMMAND_BUS_TOKEN) private readonly commandBus?: ICommandBus,
+    @Optional() @Inject(QUERY_BUS_TOKEN) private readonly queryBus?: IQueryBus,
     @Optional() @Inject(IEventBus) private readonly eventBus?: IEventBus,
     @Optional() @Inject(ACL_REGISTRY) private readonly aclRegistry?: IACLRegistryLike
   ) {}
