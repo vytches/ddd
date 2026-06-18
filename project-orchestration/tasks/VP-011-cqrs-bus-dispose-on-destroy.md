@@ -12,7 +12,8 @@ complexity: low
 estimated_time: 2h
 created_by: agent
 created_at: 2026-06-11
-status: planned
+updated_at: 2026-06-18
+status: review
 related:
   VP-010 (bus lifecycle guardrails — unref, enableCache, IDisposableBus export)
 memory_ref: consumer_juz_ide_api
@@ -52,16 +53,16 @@ jawnie czyszczone.
 
 ### Scope
 
-- [ ] **#1 (P0) woła dispose() w onModuleDestroy** — w
+- [x] **#1 (P0) woła dispose() w onModuleDestroy** — w
       `VytchesExplorerService.onModuleDestroy()`, dla każdego busa który
-      implementuje `IDisposableBus` (duck-type: sprawdzenie obecności metody
-      `dispose` lub `instanceof`/import `IDisposableBus` z `@vytches/ddd-cqrs`),
-      wywołać `dispose()` obok/po `reset()`. Zachować tolerancję błędów:
-      `try/catch` + `internalLogger.warn` analogicznie do obecnej obsługi
-      `reset()`.
-- [ ] **#2 test** — unit test pokrywający ścieżkę: bus z `dispose()` →
-      `dispose()` wywołane przy `onModuleDestroy`; bus bez `dispose()` → brak
-      błędu (graceful skip).
+      implementuje `IDisposableBus` (duck-type: `typeof lifecycle.dispose ===
+      'function'`), wywołać `dispose()` po `reset()`. Tolerancja błędów:
+      `try/catch` + `internalLogger.warn` analogicznie do obsługi `reset()`.
+      `BusWithRegistration` rozszerzony o opcjonalne `dispose?()`.
+- [x] **#2 test** — `tests/explorer-dispose-on-destroy.test.ts`, 6 przypadków:
+      dispose po reset (kolejność), wszystkie 3 busy, graceful skip bez
+      `dispose()`, dispose mimo rzucającego `reset()`, brak crashu gdy
+      `dispose()` rzuca, no-op bez busów. 210/210 testów nestjs zielone.
 
 ### Non-Functional
 

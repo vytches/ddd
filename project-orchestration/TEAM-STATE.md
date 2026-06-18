@@ -1,6 +1,6 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-06-12 by /pulse_ _Updated by `/pulse`. Read-only for humans —
+_Last sync: 2026-06-17 by /pulse_ _Updated by `/pulse`. Read-only for humans —
 agents write here._
 
 ---
@@ -33,14 +33,16 @@ removal.
 1. **VALIDATE VS-013 against juz-ide-api** — application-logging layer was
    removed (merged 2026-06-05). If the consumer is workspace-linked, this is
    breaking immediately (hard dep on now-gone `@vytches/ddd-logging`). Confirm
-   237+ aggregates `build && test` green THIS WEEK before scoping v0.31.0-full.
-2. **VS-014 (configureDiagnostics) unblocked** — VS-013 green. 5h. Adds a
-   consumer-controllable sink/level for library diagnostics (DX anti-pattern
-   fix: an enterprise lib must not emit unsilenceable console output). Then
-   VS-015 (1.5h).
-3. **Status check: VP-002, VP-006, VT-001, VF-001** — `in_progress` with no
-   merge/update signal for 14+ days. Determine if stuck or intentionally paused;
-   resume or formally re-classify. No blockers detected.
+   237+ aggregates `build && test` green THIS WEEK — this is the publication gate
+   for v0.31.0 and has now slipped 5 days since last flagged.
+2. **VP-011 metadata drift** — current branch is
+   `refactor/VP-011-cqrs-bus-dispose-on-destroy` (active work) but task still
+   reads `status: planned`. Bump to `in_progress`. Once landed, VS-014
+   (configureDiagnostics, 5h, unblocked) → VS-015 (1.5h) is the next chain.
+3. **Triage 4 stale in-progress tasks: VP-002, VP-006, VT-001, VF-001** —
+   `in_progress` with no merge/update signal for 39 days. All have partial/MVP
+   delivery shipped 2026-05-09; remaining scope is opportunistic. Formally defer
+   or resume — do not let them slip into "forgotten". No blockers detected.
 
 ---
 
@@ -52,69 +54,80 @@ _N/A — this is a library project, no mobile UI._
 
 ## ⚙️ Technical Pulse
 
-<!-- Updated by @tech-lead on 2026-06-12 -->
+<!-- Updated by @tech-lead on 2026-06-17 -->
 
-**Status**: Green | **Active**: ~18 tasks (4 completed-since-last-sync, 4
-cancelled, 4 in-progress, ~9 planned, 1 backlog). No blocked tasks. Dependency
+**Status**: Green | **Active**: ~14 tasks (1 in-progress active branch, ~10
+planned, 1 backlog, plus 4 stale in-progress). No blocked tasks. Dependency
 graph acyclic.
 
 **Recent wins**:
 
 - ✅ **VP-009 + VP-010 merged** (`eeb0fc66`) — per-context CQRS bus handler
   registration (3 bugs: findOwnModule traversal, GLOBAL_QUERY/COMMAND_BUS,
-  Symbol.for tokens) + lifecycle guardrails #1-#6. 483 tests green, verifier
-  WARN/no-VETO.
+  Symbol.for tokens) + lifecycle guardrails #1-#6 (unref timers, IDisposableBus
+  export). 483 tests green, verifier WARN/no-VETO.
 - ✅ **VS-013 merged** (`36abbbea`) — application-logging layer removed, pure
   domain restored, internalLogger consolidated to `@internal` in contracts.
 - ✅ **Security sprint closed** — VS-001/002/003/004 (masking stack) + VS-005
   (hash-collision auth-bypass) all done.
 
-**Critical path**: VS-013 (done) → unblocks VS-014 (5h, diagnostics control API)
-→ VS-015 (1.5h). VP-009/010 (done) → VP-011 (2h, pure dispose() hygiene, no
-downstream blocker). Max chain depth 2.
+**Active branch**: `refactor/VP-011-cqrs-bus-dispose-on-destroy` — VP-011
+(dispose on `onModuleDestroy`, 2h) is being implemented now, but its task file
+still reads `status: planned`. Metadata sync needed → `in_progress`.
+
+**Critical path** (~10h to v0.31.0): VS-013 (done) gate → **validate vs
+juz-ide-api** → VS-014 (5h, diagnostics control API) → VS-015 (1.5h) →
+VS-006/007/008 audit findings (~1.5h). VP-010 (done) → VP-011 (2h, active, pure
+dispose() hygiene, no downstream blocker). Max chain depth 2.
 
 **Cancelled by VS-013 pivot**: VS-009 (decorator coverage), VS-010 (toJSON
 bypass), VS-011 (secure-by-default), VS-012 (payload guard) — all obsolete once
 the app-logging layer was removed (no DataMasker/decorators/payloads remain).
 
-**Stale (>14d, before 2026-05-29)** — needs status check:
+**Stale (>14d, before 2026-06-03)** — TRIAGE THIS WEEK:
 
-- VP-002 (repo perf) · VP-006 (DI perf) · VF-001 (validation tools) · VT-001
-  (coverage) — all `in_progress` with no merge/update signal.
+- VP-002 (repo perf, 39d) · VP-006 (DI perf, 39d) · VF-001 (validation tools,
+  39d) · VT-001 (coverage, 39d) — all `in_progress` since 2026-05-09 with
+  partial/MVP delivery shipped; remaining scope opportunistic. Confirm
+  paused-vs-blocked; formally defer or resume.
 - VF-002 (strategic docs) · VD-004 (interactive docs) — `planned`, deferred
   post-security (correct call; monitor for drift).
 
 **Coverage**: VT-002..005 (2026-05-10) delivered 63.98% → 69.29%. VT-001 still
-open — confirm stuck vs paused. Baseline stable.
+open — post-release scope (GWT migration, VO PBT) is opportunistic. Baseline
+stable.
 
 **Debt**: 0 major, 0 minor. All security items were bugs with clear fixes, not
 structural debt. VS-013 removal eliminated ~66 operational logs + pure-domain
 violations.
 
-**Next sprint**: Validate VS-013 against juz-ide-api → start VS-014/VS-015 →
-clear small audit findings VS-006/007/008 → VP-011 hygiene. Triage the 4 stale
-in-progress tasks.
+**Next sprint**: Validate VS-013 against juz-ide-api (publication gate) → land
+VP-011 → start VS-014/VS-015 → clear small audit findings VS-006/007/008. Triage
+the 4 stale in-progress tasks; bump VP-011 metadata to `in_progress`.
 
 ---
 
 ## 💼 Business Pulse
 
-<!-- Updated by @product-owner on 2026-06-12 -->
+<!-- Updated by @product-owner on 2026-06-17 -->
 
-**Next milestone**: v0.31.0 (security hardening) — **gap ~1.5–2 weeks**. Masking
+**Next milestone**: v0.31.0 (security hardening) — **gap ~10–14 days**. Masking
 stack + auth-bypass + NestJS CQRS cascade all CLOSED; remaining ~10h is small
-audit findings + DX polish.
+audit findings (VS-006/007/008 = 1.5h), DX polish (VS-014/015 = 6.5h), and bus
+lifecycle hygiene (VP-011 = 2h, deferrable to v0.31.1).
 
-**Logging strategy pivot (VS-013)** is the headline business event: the library
-exits the "app logging" space (where it would lose to Pino/Winston/Bunyan) and
-keeps a lean, consumer-controllable internal-diagnostics surface. Reinforces the
-"most comprehensive DDD library" positioning and unblocks adoption by teams with
+**Headline business event (VS-013 logging pivot)**: the library exits the "app
+logging" space (where it would lose to Pino/Winston/Bunyan) and keeps a lean,
+consumer-controllable internal-diagnostics surface. Reinforces the "most
+comprehensive DDD library" positioning and unblocks adoption by teams with
 strict logging policies. VS-014 (configureDiagnostics) closes the only DX gap
 this opens — an enterprise lib must not emit unsilenceable console output.
 
 **Validation**: Zero speculative work — every task is audit-driven, consumer-
 feedback-driven (VP-009/010/011, VP-002/006 from juz-ide-api usage), or DX
-polish. juz-ide-api (237+ aggregates, 16K tests) validates every release.
+polish. VA-001 (AI agent package, backlog) is concept-only, correctly deferred
+pending juz-ide-api production validation (~2026-08/09). juz-ide-api (237+
+aggregates, 16K tests) validates every release.
 
 **Segment coverage**: Production/scaling teams ~70% (well served by security +
 per-context CQRS buses). First-time DDD adopters ~30% (VF-001 validation tools,
@@ -123,23 +136,46 @@ are not yet in the funnel).
 
 **Cut candidate** (if capacity tight): VP-011 (dispose-on-destroy, 2h, low) —
 VP-010 already shipped `.unref()` on timers, so this is hygiene; ship as v0.31.1
-fast-follow if needed.
+fast-follow with zero customer impact.
 
-**Validate this week**: juz-ide-api upgrade past VS-013. If workspace-linked,
-removing `@vytches/ddd-logging` is an immediate breaking change — confirm 237+
-aggregates `build && test` green before scoping v0.31.0-full.
+**Validate this week** (highest risk): juz-ide-api build green past VS-013. If
+workspace-linked, removing `@vytches/ddd-logging` is an immediate breaking
+change — confirm 237+ aggregates `build && test` green before the v0.31.0
+publication gate opens. Now 5 days slipped.
 
 **Actions next week**:
 
-1. Run the VS-013 consumer validation (highest-risk item this cycle).
-2. Start VS-014 (configureDiagnostics) + VS-015 (follow-ups).
-3. Triage the 4 stale in-progress tasks (VP-002/006, VF-001, VT-001).
+1. Run the VS-013 consumer validation (highest-risk item this cycle; publication
+   blocker).
+2. Triage the 4 stale in-progress tasks (VP-002/006, VF-001, VT-001 — >14d, no
+   merge signal; stuck vs intentionally paused).
+3. Start VS-014 (configureDiagnostics) + VS-015 (follow-ups) once validation
+   clears.
 
 ---
 
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-06-17] @pulse: 5-day sync. VP-011 now active on branch
+`refactor/VP-011-cqrs-bus-dispose-on-destroy` but task metadata still says
+`planned` — drift to fix. Top risk unchanged and now slipped 5 days: VS-013
+juz-ide-api validation (publication gate for v0.31.0). 4 stale in-progress tasks
+(VP-002/006, VF-001, VT-001, all 39d since 2026-05-09) need triage. 0 blocked, 0
+tech debt. ~10h to v0.31.0.
+
+[2026-06-17] @tech-lead: VP-011 branch active — bump status `planned` →
+`in_progress`. Critical path ~10h: VS-013 gate → VS-014 (5h) → VS-015 (1.5h) →
+VS-006/007/008 (1.5h); VP-011 (2h) parallel. The 4 stale in-progress tasks all
+shipped partial/MVP on 2026-05-09 with opportunistic remainder — formally defer
+or resume, don't leave forgotten. Debt 0/0.
+
+[2026-06-17] @product-owner: milestone gap ~10–14d. VS-013 consumer validation
+is the publication blocker and has slipped 5 days — run it before any v0.31.0
+scope advances. VA-001 (AI agent pkg) correctly backlogged: concept-only, no
+demand signal until juz-ide-api production validation (~2026-08/09). Cut VP-011
+to v0.31.1 if capacity tight (VP-010 already shipped `.unref()`).
 
 [2026-06-12] @pulse: full sync after 2-week drift. Security sprint substantially
 closed (VS-001..005 done, VP-009/010 merged). VS-013 logging pivot cancelled

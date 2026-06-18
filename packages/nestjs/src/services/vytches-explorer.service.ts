@@ -66,6 +66,7 @@ interface BusWithRegistration {
   subscribe?(eventType: unknown, handler: unknown): void;
   registerHandler?(eventType: unknown, handler: unknown): void;
   reset?(): void;
+  dispose?(): void;
 }
 
 @Injectable()
@@ -150,15 +151,32 @@ export class VytchesExplorerService
    * become stale once the module is destroyed. Resetting the bus here drops them
    * so the next module starts clean. Buses that do not support reset() (i.e. do
    * not implement IResettableBus) are skipped.
+   *
+   * After reset() (which evicts handlers/state), dispose() is called on buses
+   * that implement IDisposableBus to release background resources — primarily
+   * the cache-cleanup setInterval. reset() does not stop those timers; without
+   * an explicit dispose() they accumulate across repeated create→destroy cycles
+   * in one process (e.g. sequential test modules). Buses without dispose() are
+   * skipped. Ordering matters: reset() clears state first, dispose() then
+   * releases I/O. Both are error-tolerant — failures warn, never throw.
    */
   onModuleDestroy(): void {
     for (const bus of [this.commandBus, this.queryBus, this.eventBus]) {
-      const resettable = bus as unknown as BusWithRegistration | undefined;
-      if (resettable && typeof resettable.reset === 'function') {
+      const lifecycle = bus as unknown as BusWithRegistration | undefined;
+      if (lifecycle && typeof lifecycle.reset === 'function') {
         try {
-          resettable.reset();
+          lifecycle.reset();
         } catch (error) {
           internalLogger.warn('VytchesExplorer: Failed to reset bus on module destroy', {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+      if (lifecycle && typeof lifecycle.dispose === 'function') {
+        try {
+          lifecycle.dispose();
+        } catch (error) {
+          internalLogger.warn('VytchesExplorer: Failed to dispose bus on module destroy', {
             error: error instanceof Error ? error.message : String(error),
           });
         }
