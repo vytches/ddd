@@ -11,15 +11,207 @@ complexity: expert
 estimated_time: unknown (requires real-world validation first)
 created_at: 2026-05-20
 migrated_at: 2026-05-22
+reviewed_at: 2026-06-12 (multi-agent review — spec corrected, see below)
 status: backlog
 release_target: post-v0.27 (after production validation in a consuming project)
 priority_score: 40/100
+demand_signal: 'juz-ide-api scoping AI integration — expect attention ~2026-08/09'
 ```
 
 > **Status**: CONCEPT — interfaces and patterns designed, not yet validated in
 > production. **Decision**: Do NOT implement until patterns are proven stable in
 > at least one production DDD project. **Category**: New Package (optional
 > ecosystem extension) **Priority**: Future (not blocking any current work)
+>
+> **Update 2026-06-12**: juz-ide-api is actively scoping an AI integration. This
+> package is the natural home for that boundary layer and will likely need
+> attention in ~2-3 months once those patterns run in production. The spec below
+> was reviewed by 5 agents (api-guardian, library-expert, developer-experience,
+> performance-optimizer, product-owner) and **corrected** — the original concept
+> referenced 3 symbols that do not exist in the codebase and a `zod` dependency
+> that violates the library's dependency-free rule. See
+> **§ Multi-Agent Review & Corrections** before any implementation.
+
+---
+
+## Multi-Agent Review & Corrections (2026-06-12)
+
+> Reviewed by: `library-api-guardian`, `library-expert`, `developer-experience`,
+> `performance-optimizer`, `product-owner`. Verdict: **direction is sound, spec
+> needs the corrections below before implementation.** Implementation stays
+> deferred (see revised entry conditions at the end of this section).
+
+### Verified errors in the original concept
+
+The concept was written against an assumed API. Three symbols below **do not
+exist** in the current codebase (verified 2026-06-12) and the proposed `zod`
+dependency breaks a core library rule. These are corrected inline in the
+relevant sections and consolidated here:
+
+| # | Issue (original) | Reality / Correction | Severity |
+| - | ---------------- | -------------------- | -------- |
+| 1 | peerDep `@vytches/ddd-core` | Does not exist. `Result<T>` → `@vytches/ddd-contracts`; `IActor` → `@vytches/ddd-domain-primitives` | blocker |
+| 2 | base event `BaseIntegrationEvent` | Does not exist. Real class is `IntegrationEvent<T>` in `@vytches/ddd-events` | blocker |
+| 3 | extend `RequestContext` from `@vytches/ddd-nestjs` (component #2) | No such symbol in nestjs (`RequestContext` only appears as an example string in a `ddd-utils` JSDoc). Re-frame — see correction #4 | blocker |
+| 4 | `zod` as peerDependency; `inputSchema: ZodSchema<TParams>` | Violates dependency-free rule (zod is in **zero** packages). Forces every consumer to install zod even with another validator. Replace with own `SchemaValidator<T>` interface — zod satisfies it structurally, zero breaking | blocker |
+| 5 | in-library rate-limiting via `AIWriteTier` | In-memory counter does not scale horizontally (N pods = N× limit). Ship enum + default constants + `IAIRateLimiter` **interface** only; implementation (Redis/Valkey) stays in consumer | high |
+| 6 | `enum AIWriteTier` | TS `enum` emits a runtime IIFE. Use `as const` object literal (consistent with rest of monorepo) | medium |
+| 7 | `toAnthropicTools()` / `toOpenAITools()` in library (Open Q #7) | **No** — provider formats track their APIs. Expose neutral `toGenericToolSchema()`; provider adapters are docs-only recipes | medium |
+| 8 | offer both decorator + registry discovery (Open Q #4) | Pick one in core: **registry-first**. Decorator binds a pure domain command to the framework — keep it (if at all) in a `/nestjs` subpackage only | medium |
+| 9 | `static fromAI()` as loose convention (Open Q #6) | Runtime-only error if misnamed. Cannot be enforced via instance interface (it's static). Use a factory-type constraint on `commandClass` instead (see correction #3 below). DX still wants this enforced from v0.1 | medium |
+
+Minor: `costUsd: number` (float) risks accumulation error → prefer
+`costMicroUsd: number` (integer); add `examples?: Array<{ input; description }>`
+to `AIToolDefinition` for LLM tool-disambiguation.
+
+### Corrected API sketches
+
+**Correction #1 — schema abstraction (kills the zod dependency):**
+
+```typescript
+// Own minimal interface — zod's ZodSchema satisfies this structurally.
+// Consumers may plug zod, valibot, arktype, or a hand-rolled parser.
+export interface SchemaValidator<T> {
+  parse(input: unknown): T; // throws on invalid
+  safeParse(
+    input: unknown
+  ): { success: true; data: T } | { success: false; error: unknown };
+}
+
+export interface AIToolDefinition<TParams = unknown> {
+  name: string;
+  description: string;
+  inputSchema: SchemaValidator<TParams>; // was: ZodSchema<TParams>
+  commandClass: AICallableClass<object, TParams>; // see correction #3
+  requiredPermission?: { action: string; subject: string };
+  writeTier: AIWriteTier;
+  examples?: Array<{ input: TParams; description: string }>;
+}
+```
+
+**Correction #2 — actorType without a phantom RequestContext:**
+
+`AIRequestContextExtension` as a standalone interface is unnecessary. The actor
+already carries identity. Extend `DefaultActorType` in
+`@vytches/ddd-domain-primitives` with `AI_AGENT = 'ai_agent'` and use the
+existing `IActor.metadata` for `aiSessionId` (convention). This is a
+non-breaking enum extension and means every audit/integration event already
+carries "human vs agent" for free — no handler or aggregate changes.
+
+```typescript
+// in @vytches/ddd-domain-primitives (additive)
+// DefaultActorType: ... | 'ai_agent'
+// convention: actor.metadata.aiSessionId?: string
+```
+
+**Correction #3 — enforce `fromAI()` shape via a type, not a convention:**
+
+```typescript
+// Static methods can't live on an instance interface — use a constructor type.
+export type AICallableClass<TInstance, TParams> = {
+  new (...args: never[]): TInstance;
+  fromAI(params: TParams): TInstance;
+};
+// AIToolDefinition.commandClass: AICallableClass<object, TParams>
+// → a command missing static fromAI() is now a COMPILE error.
+```
+
+**Correction #4 — rate limiting as interface + constants only:**
+
+```typescript
+export const AIWriteTier = {
+  READ: 'READ',
+  WRITE_LOW: 'WRITE_LOW',
+  WRITE_MEDIUM: 'WRITE_MEDIUM',
+  WRITE_HIGH: 'WRITE_HIGH',
+  WRITE_DESTRUCTIVE: 'WRITE_DESTRUCTIVE',
+} as const;
+export type AIWriteTier = (typeof AIWriteTier)[keyof typeof AIWriteTier];
+
+export const AI_DEFAULT_RATE_LIMITS: Record<AIWriteTier, number> = {
+  /* unchanged conservative defaults */
+};
+
+// Implementation lives in the consumer (Redis/Valkey). Library ships interface:
+export interface IAIRateLimiter {
+  checkAndConsume(userId: string, tier: AIWriteTier): Promise<boolean>;
+}
+```
+
+**Correction #5 — permission check is injected, not built-in:**
+
+The dispatcher pipeline's `checkPermission` step is project-specific RBAC/ABAC.
+The library provides the seam, the consumer provides the policy:
+
+```typescript
+export interface IPermissionChecker {
+  can(
+    actor: IActor,
+    permission: { action: string; subject: string }
+  ): Promise<boolean>;
+}
+// InProcess dispatcher receives IPermissionChecker + IAIRateLimiter + IAICommandDispatcher target.
+```
+
+### Corrected dependency graph (acyclic — verified)
+
+```
+@vytches/ddd-agent
+  peerDependencies:
+    @vytches/ddd-contracts          ← Result<T>  (was: ddd-core)
+    @vytches/ddd-domain-primitives  ← IActor / DefaultActorType
+    @vytches/ddd-cqrs               ← CommandBus / QueryBus interfaces
+    @vytches/ddd-events             ← IntegrationEvent<T> (was: BaseIntegrationEvent)
+  # NO zod. NO LLM-provider SDKs. NO NestJS in core.
+  devDependencies:
+    @vytches/ddd-testing            ← MockAICommandDispatcher
+```
+
+No package depends on `ddd-agent`, so the graph stays acyclic. Risk to watch:
+a future `@vytches/ddd-agent-nestjs` must not be imported back by
+`@vytches/ddd-nestjs` (would create a cycle).
+
+### Scope decisions (resolved open questions)
+
+- **OQ #2** — NestJS utilities: separate package `@vytches/ddd-agent-nestjs`
+  later (not a subpath export — complicates dual ESM/CJS). Decorator `@AITool`
+  lives here, never in core.
+- **OQ #3** — `AIWorkflowEngine`: **out of scope**. Orchestration is
+  project-specific; library ships at most an `IAIWorkflow` interface.
+- **OQ #4** — registry-first; decorator only in the nestjs subpackage.
+- **OQ #5** — `AIWriteTier` + `AI_DEFAULT_RATE_LIMITS` as constants: **yes**
+  (pure data, tree-shakeable). Limiter implementation: **no**.
+- **OQ #6** — enforce `fromAI()` via `AICallableClass` type (correction #3).
+- **OQ #7** — provider tool-schema converters: **out** (docs-only recipes).
+
+### Revised v0.1 scope (after validation)
+
+Type-only + minimal-runtime surface, zero external deps:
+
+1. `IAICommandDispatcher`, `AIDispatchContext`, `AIDispatchError` (interfaces)
+2. `SchemaValidator<T>`, `AIToolDefinition<T>`, `AICallableClass<T,P>` (types)
+3. `IPermissionChecker`, `IAIRateLimiter` (interfaces)
+4. `AIWriteTier` + `AI_DEFAULT_RATE_LIMITS` (`as const`)
+5. `AIErrorTranslator` (abstract class) + `AIErrorResponse`
+6. `@vytches/ddd-agent/testing`: `MockAICommandDispatcher`
+
+Defer to v0.2+: `AIWorkflowStepTracedPayload` (15-field event schema — highest
+churn risk, freeze last), provider-neutral `AIToolRegistry.toGenericToolSchema()`.
+
+### Entry conditions before implementation (consensus)
+
+Implementation stays **deferred**, but the trigger is now concrete:
+
+1. **Production validation** — juz-ide-api runs the AI boundary in production for
+   2-3 months and the core interfaces (`IAICommandDispatcher`,
+   `AIToolDefinition`, `actorType`) prove stable. _(Primary trigger — likely
+   ~2026-08/09 given juz-ide-api is already scoping this.)_
+2. **Core quality green first** — current project priority (JSDoc, ts-paths,
+   flaky test) must not be displaced by this. VA-001 does not jump the queue.
+3. **Pre-implementation step** — extract the patterns from juz-ide-api's real
+   usage and diff against the corrected spec above before cutting v0.1. Build one
+   end-to-end recipe (1 command + AIToolDefinition + InProcess dispatcher + L1
+   mock test + L2 actorType assertion) **in juz-ide-api** before extraction.
 
 ---
 
@@ -101,6 +293,10 @@ same** — swap implementations without changing the AI layer.
 
 #### 2. `AIRequestContextExtension` — extension for RequestContext
 
+> ⚠️ **Corrected** — there is no `RequestContext` in `@vytches/ddd-nestjs`. Drop
+> this standalone interface; extend `DefaultActorType` with `'ai_agent'` and use
+> `IActor.metadata.aiSessionId` instead. See § Multi-Agent Review correction #2.
+
 Two new fields for the existing `RequestContext` from `@vytches/ddd-nestjs`:
 
 ```typescript
@@ -119,12 +315,16 @@ agent" without modifying handlers or aggregates.
 export interface AIToolDefinition<TParams = unknown> {
   name: string;
   description: string;
-  inputSchema: ZodSchema<TParams>;
-  commandClass: new (params: TParams) => object;
+  inputSchema: ZodSchema<TParams>; // ⚠️ corrected → SchemaValidator<TParams> (no zod dep)
+  commandClass: new (params: TParams) => object; // ⚠️ → AICallableClass<object, TParams>
   requiredPermission?: { action: string; subject: string };
   writeTier: AIWriteTier;
 }
 ```
+
+> ⚠️ **Corrected** — `ZodSchema` is replaced by an own `SchemaValidator<T>`
+> interface to keep the library dependency-free. See § Multi-Agent Review
+> corrections #1 and #3.
 
 `writeTier` drives rate limiting. `requiredPermission` is checked before
 dispatch. `commandClass` is the bridge to existing CQRS.
@@ -182,7 +382,17 @@ Consuming projects emit
 `class MyWorkflowStepTraced extends BaseIntegrationEvent<AIWorkflowStepTracedPayload>`.
 Self-hosted LLM tracing — full observability without external tooling.
 
+> ⚠️ **Corrected** — base class is `IntegrationEvent<T>` (from
+> `@vytches/ddd-events`), not `BaseIntegrationEvent`. Also prefer
+> `costMicroUsd: number` over float `costUsd`. This 15-field payload is the
+> highest churn risk — defer to v0.2+, freeze last. See § Multi-Agent Review.
+
 #### 6. `AIWriteTier` — enum + default rate limits
+
+> ⚠️ **Corrected** — use an `as const` object literal, not `enum` (avoids the
+> runtime IIFE). Rate-limit **enforcement** is an injected `IAIRateLimiter`, not
+> in-library (in-memory does not scale across pods). See § Multi-Agent Review
+> corrections #4 and #5.
 
 ```typescript
 export enum AIWriteTier {
@@ -299,6 +509,11 @@ documentation on trade-offs.
   devDependencies:
     @vytches/ddd-testing     ← for MockAICommandDispatcher
 ```
+
+> ⚠️ **Corrected** — `@vytches/ddd-core` does not exist (use
+> `@vytches/ddd-contracts` + `@vytches/ddd-domain-primitives`),
+> `BaseIntegrationEvent` → `IntegrationEvent`, and **`zod` is removed entirely**.
+> See the corrected graph in § Multi-Agent Review & Corrections.
 
 Zero dependency on NestJS — core package is framework-agnostic. Optional
 subpackage `@vytches/ddd-agent/nestjs` for NestJS-specific utilities.
