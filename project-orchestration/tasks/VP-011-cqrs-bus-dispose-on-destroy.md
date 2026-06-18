@@ -13,7 +13,7 @@ estimated_time: 2h
 created_by: agent
 created_at: 2026-06-11
 updated_at: 2026-06-18
-status: review
+status: done
 related:
   VP-010 (bus lifecycle guardrails — unref, enableCache, IDisposableBus export)
 memory_ref: consumer_juz_ide_api
