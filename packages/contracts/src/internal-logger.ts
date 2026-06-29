@@ -8,13 +8,18 @@
  * @internal Lives in the foundation package so every sibling @vytches/ddd-*
  * package shares a single implementation (they externalize
  * @vytches/ddd-contracts at build time). Not intended for consumer use.
+ *
+ * Since VS-014: delegates to the configured {@link DiagnosticsSink} instead
+ * of writing directly to `console`. The active sink and level are controlled
+ * by {@link configureDiagnostics}.
  */
-/* eslint-disable no-console */
+import { _emitWarn, _emitError } from './diagnostics/diagnostics-sink';
+
 export const internalLogger = {
   warn(message: string, data?: Record<string, unknown>): void {
-    console.warn(message, data ?? {});
+    _emitWarn(message, data);
   },
   error(message: string, error?: Error, data?: Record<string, unknown>): void {
-    console.error(message, error ?? '', data ?? {});
+    _emitError(message, error, data);
   },
 };
