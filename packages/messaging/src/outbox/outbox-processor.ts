@@ -200,10 +200,14 @@ export class OutboxProcessor {
    * only types that pass through that filter. To handle all types, leave
    * `messageTypes` unset.
    *
-   * Calling this method a second time silently replaces the previous default
-   * handler (idempotent).
+   * Second/subsequent call emits a warning and replaces the previous handler.
    */
   registerDefaultHandler(handler: IOutboxMessageHandler): void {
+    if (this.defaultHandler) {
+      internalLogger.warn(
+        'registerDefaultHandler: replacing existing default handler — previous handler discarded'
+      );
+    }
     this.defaultHandler = handler;
   }
 

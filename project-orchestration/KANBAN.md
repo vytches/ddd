@@ -8,8 +8,10 @@ priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 >
 > **Just shipped this cycle (off-board):** VS-014 (configureDiagnostics, merged
 > `3d97ad62` 2026-06-29) · VS-015 (internalLogger follow-ups — outbox stack
-> trace + LoggingMiddleware type, implemented 2026-06-29, staged pending commit)
-> · VP-011 (dispose on onModuleDestroy, merged 2026-06-17).
+> trace + LoggingMiddleware type, committed `f11f6f96` 2026-06-29) · VS-007
+> (OutboxProcessor warn on default-handler replace, SEC-MESSAGING-001,
+> implemented 2026-06-29, staged pending commit) · VP-011 (dispose on
+> onModuleDestroy, merged 2026-06-17).
 
 ## P0 — Critical
 
@@ -23,15 +25,14 @@ _None._
 
 ## P2 — Normal / Medium
 
-| ID     | Title                                                | Status      | Age  |
-| ------ | ---------------------------------------------------- | ----------- | ---- |
-| VS-006 | CsvMetricExporter — formula injection protection     | planned     | 34d  |
-| VS-007 | OutboxProcessor — warn when default handler replaced | planned     | 34d  |
-| VF-001 | DDD Compliance Validation Tools                      | in_progress | 51d† |
-| VP-002 | Repository Query Performance Enhancement             | in_progress | 51d† |
-| VP-006 | DI Container Performance Optimization                | in_progress | 51d† |
-| VD-004 | Interactive Documentation System                     | planned     | 52d  |
-| VF-002 | Strategic Design Documentation                       | planned     | 52d  |
+| ID     | Title                                            | Status      | Age  |
+| ------ | ------------------------------------------------ | ----------- | ---- |
+| VS-006 | CsvMetricExporter — formula injection protection | planned     | 34d  |
+| VF-001 | DDD Compliance Validation Tools                  | in_progress | 51d† |
+| VP-002 | Repository Query Performance Enhancement         | in_progress | 51d† |
+| VP-006 | DI Container Performance Optimization            | in_progress | 51d† |
+| VD-004 | Interactive Documentation System                 | planned     | 52d  |
+| VF-002 | Strategic Design Documentation                   | planned     | 52d  |
 
 ## P3 — Low
 

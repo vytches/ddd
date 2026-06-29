@@ -802,6 +802,7 @@ describe('OutboxProcessor — observability hooks (Part 5a)', () => {
 describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
   let repo: InMemoryOutboxRepository;
   let processor: OutboxProcessor;
+  let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     repo = new InMemoryOutboxRepository();
@@ -812,6 +813,11 @@ describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
       messageTimeout: 5000,
     });
     processor.start();
+    warnSpy = vi.spyOn(internalLogger, 'warn');
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
   });
 
   it('type-specific handler wins over default handler when type matches', async () => {
@@ -894,7 +900,16 @@ describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
     expect(statsAfter.hasDefaultHandler).toBe(true);
   });
 
-  it('second registerDefaultHandler call silently replaces the first (idempotent)', async () => {
+  it('first registerDefaultHandler call does not emit a replacement warning', () => {
+    processor.registerDefaultHandler({ handle: vi.fn().mockResolvedValue(undefined) });
+
+    const replacingCalls = warnSpy.mock.calls.filter(
+      (c: unknown[]) => typeof c[0] === 'string' && c[0].includes('replacing existing')
+    );
+    expect(replacingCalls).toHaveLength(0);
+  });
+
+  it('second registerDefaultHandler call emits replacement warning and replaces handler', async () => {
     const firstCalls: string[] = [];
     const secondCalls: string[] = [];
 
@@ -910,12 +925,18 @@ describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
       },
     });
 
+    // warn emitted exactly once, on the second (replacement) call
+    const replacingCalls = warnSpy.mock.calls.filter(
+      (c: unknown[]) => typeof c[0] === 'string' && c[0].includes('replacing existing')
+    );
+    expect(replacingCalls).toHaveLength(1);
+
+    // handler is still actually replaced — second handler is used
     await repo.saveMessage(buildMessage({ id: 'r-1', messageType: 'replace.type' }));
     await processor.processBatch();
 
     expect(firstCalls).toHaveLength(0);
     expect(secondCalls).toEqual(['r-1']);
-    // No error thrown — idempotent replacement
   });
 });
 
@@ -1176,7 +1197,7 @@ describe('OutboxProcessor — internalLogger.error stack-trace preservation (VS-
     processor.stop();
 
     const permanentFailCall = errorSpy.mock.calls.find(
-      c => c[0] === 'OutboxProcessor: message permanently failed'
+      (c: unknown[]) => c[0] === 'OutboxProcessor: message permanently failed'
     );
     expect(permanentFailCall).toBeDefined();
     // arg[1] is the Error object, not a stringified message
@@ -1203,7 +1224,7 @@ describe('OutboxProcessor — internalLogger.error stack-trace preservation (VS-
     processor.stop();
 
     const updateFailCall = errorSpy.mock.calls.find(
-      c => c[0] === 'OutboxProcessor: error updating message status'
+      (c: unknown[]) => c[0] === 'OutboxProcessor: error updating message status'
     );
     expect(updateFailCall).toBeDefined();
     expect(updateFailCall?.[1]).toBe(updateError);
@@ -1235,7 +1256,7 @@ describe('OutboxProcessor — internalLogger.error stack-trace preservation (VS-
     processor.stop();
 
     const hookCall = errorSpy.mock.calls.find(
-      c => typeof c[0] === 'string' && c[0].includes('threw and was ignored')
+      (c: unknown[]) => typeof c[0] === 'string' && c[0].includes('threw and was ignored')
     );
     expect(hookCall).toBeDefined();
     // arg[1]: the actual Error object — stack trace preserved

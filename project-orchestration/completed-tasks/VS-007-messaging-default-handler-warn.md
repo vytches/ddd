@@ -4,15 +4,18 @@
 
 ```yaml
 task_id: VS-007
-title: "messaging: OutboxProcessor.registerDefaultHandler — warn log when replacing existing handler"
+title:
+  'messaging: OutboxProcessor.registerDefaultHandler — warn log when replacing
+  existing handler'
 type: bug
 priority: normal
 complexity: simple
 estimated_time: 0.5h
 created_by: agent (security-audit 2026-05-26)
 created_at: 2026-05-26
-status: planned
-security_finding: SEC-MESSAGING-001
+updated_at: 2026-06-29
+status: done
+security_finding: SEC-MESSAGING-001 (resolved 2026-06-29)
 dread_score: 7
 audit_ref: docs/security/SECURITY-AUDIT-2026-05-26.md
 follows_up: VP-008
@@ -32,8 +35,8 @@ patterns:
 
 ### Why This Task Exists
 
-`OutboxProcessor.registerDefaultHandler()` silently replaces any previous handler
-with no signal emitted:
+`OutboxProcessor.registerDefaultHandler()` silently replaces any previous
+handler with no signal emitted:
 
 ```typescript
 // outbox-processor.ts:205
@@ -90,21 +93,24 @@ registerDefaultHandler(handler: IOutboxMessageHandler): void {
 
 ### Functional Requirements
 
-- [ ] Second call to `registerDefaultHandler` → `logger.warn` with replacement message
-- [ ] First call → no warn (no previous handler)
-- [ ] Handler is still replaced (idempotent behaviour unchanged)
+- [x] Second call to `registerDefaultHandler` → `internalLogger.warn` with
+      replacement message
+- [x] First call → no warn (no previous handler)
+- [x] Handler is still replaced (idempotent behaviour unchanged)
 
 ### Non-Functional Requirements
 
-- [ ] Test updated to assert warn log
-- [ ] JSDoc updated: "Second call emits a warning and replaces the previous handler"
+- [x] Test updated to assert warn log
+- [x] JSDoc updated: "Second call emits a warning and replaces the previous
+      handler"
 
 ### Definition of Done
 
-- [ ] `logger.warn` added
-- [ ] Test updated (assertion on warn)
-- [ ] JSDoc updated
-- [ ] SEC-MESSAGING-001 marked as resolved
+- [x] `internalLogger.warn` added (note: file uses module-level
+      `internalLogger`, not `this.logger`)
+- [x] Test updated (assertion on warn)
+- [x] JSDoc updated
+- [x] SEC-MESSAGING-001 marked as resolved
 
 ## Agent Assignments
 
@@ -129,18 +135,19 @@ supporting_agents: []
 ### Current Status
 
 ```yaml
-overall_progress: 0%
-current_phase: planned
+overall_progress: 100%
+current_phase: done
 blockers: []
-last_updated: 2026-05-26
+last_updated: 2026-06-29
 ```
 
 ### Activity Log
 
-| Date       | Agent     | Action           | Result            |
-| ---------- | --------- | ---------------- | ----------------- |
-| 2026-05-26 | sec-audit | Finding detected | SEC-MESSAGING-001 |
-| 2026-05-26 | human     | Task created     | VS-007 planned    |
+| Date       | Agent       | Action                                    | Result                                                                             |
+| ---------- | ----------- | ----------------------------------------- | ---------------------------------------------------------------------------------- |
+| 2026-05-26 | sec-audit   | Finding detected                          | SEC-MESSAGING-001                                                                  |
+| 2026-05-26 | human       | Task created                              | VS-007 planned                                                                     |
+| 2026-06-29 | orchestrate | Implemented + verified (quality+PII PASS) | done; warn on replace, +3 tests, tsc clean, messaging 91/91; staged pending commit |
 
 ## Code References
 
@@ -158,17 +165,17 @@ packages:
 
 ### Technical Risks
 
-| Risk           | Probability | Impact | Mitigation              |
-| -------------- | ----------- | ------ | ----------------------- |
-| Breaking test  | Low         | Low    | Update test expectation |
+| Risk          | Probability | Impact | Mitigation              |
+| ------------- | ----------- | ------ | ----------------------- |
+| Breaking test | Low         | Low    | Update test expectation |
 
 ## Testing Strategy
 
 ### Unit Tests
 
-- [ ] First `registerDefaultHandler` → no warn log
-- [ ] Second `registerDefaultHandler` → warn log containing "replacing existing"
-- [ ] Handler is still replaced after warn
+- [x] First `registerDefaultHandler` → no warn log
+- [x] Second `registerDefaultHandler` → warn log containing "replacing existing"
+- [x] Handler is still replaced after warn
 
 ## Links & References
 
