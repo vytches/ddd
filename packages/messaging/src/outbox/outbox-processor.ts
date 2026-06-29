@@ -172,8 +172,11 @@ export class OutboxProcessor {
     try {
       invoke();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      internalLogger.error(`OutboxProcessor: hook ${name} threw and was ignored: ${errorMessage}`);
+      internalLogger.error(
+        `OutboxProcessor: hook ${name} threw and was ignored`,
+        error instanceof Error ? error : undefined,
+        { hookName: name }
+      );
     }
   }
 
@@ -294,8 +297,10 @@ export class OutboxProcessor {
     );
 
     if (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      internalLogger.error(`OutboxProcessor: error retrieving messages: ${errorMessage}`);
+      internalLogger.error(
+        'OutboxProcessor: error retrieving messages',
+        error instanceof Error ? error : undefined
+      );
       return { processed: 0, batchSize };
     }
 
@@ -396,9 +401,10 @@ export class OutboxProcessor {
 
       if (attempts >= this.options.maxRetries) {
         await this.repository.updateStatus(message.id, MessageStatus.FAILED, error);
-        internalLogger.error(
-          `OutboxProcessor: message ${message.id} marked as failed after ${attempts} attempts`
-        );
+        internalLogger.error('OutboxProcessor: message permanently failed', error, {
+          messageId: message.id,
+          attempts,
+        });
         this.safelyInvokeHook('onPermanentFailure', () =>
           this.options.hooks?.onPermanentFailure?.(message, error)
         );
@@ -415,8 +421,11 @@ export class OutboxProcessor {
         await this.repository.updateStatus(message.id, MessageStatus.PENDING);
       }
     } catch (updateError) {
-      const errorMessage = updateError instanceof Error ? updateError.message : String(updateError);
-      internalLogger.error(`OutboxProcessor: error updating message status: ${errorMessage}`);
+      internalLogger.error(
+        'OutboxProcessor: error updating message status',
+        updateError instanceof Error ? updateError : undefined,
+        { messageId: message.id }
+      );
     }
   }
 
@@ -484,8 +493,10 @@ export class OutboxProcessor {
     const [error, count] = await safeRun(() => this.repository.resetStaleProcessing(olderThan));
 
     if (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      internalLogger.error(`OutboxProcessor: crash recovery failed: ${errorMessage}`);
+      internalLogger.error(
+        'OutboxProcessor: crash recovery failed',
+        error instanceof Error ? error : undefined
+      );
       return;
     }
 

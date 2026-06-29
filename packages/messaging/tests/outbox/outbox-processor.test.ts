@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { internalLogger } from '@vytches/ddd-contracts';
 
 import {
   MessagePriority,
@@ -1122,5 +1123,126 @@ describe('OutboxProcessor — adaptive re-poll + startup jitter (Part 4)', () =>
     expect(spy).toHaveBeenCalledTimes(1);
 
     processor.stop();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// VS-015 Issue 1 — Error object forwarded as 2nd arg of internalLogger.error
+// ---------------------------------------------------------------------------
+describe('OutboxProcessor — internalLogger.error stack-trace preservation (VS-015)', () => {
+  let errorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    errorSpy = vi.spyOn(internalLogger, 'error');
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+  });
+
+  it('passes the Error as arg[1] when getUnprocessedMessages throws', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const boom = new Error('repo-down');
+    vi.spyOn(repo, 'getUnprocessedMessages').mockRejectedValue(boom);
+
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    processor.start();
+    await processor.processBatch();
+    processor.stop();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'OutboxProcessor: error retrieving messages',
+      boom
+      // no context arg for this call — undefined or absent
+    );
+    // Critically: the Error object itself is arg[1], not stringified into the message
+    expect(errorSpy.mock.calls[0]?.[1]).toBe(boom);
+    expect(errorSpy.mock.calls[0]?.[0]).not.toContain(boom.message);
+  });
+
+  it('passes the Error as arg[1] when message permanently fails (maxRetries reached)', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const handler: IOutboxMessageHandler = {
+      handle: vi.fn().mockRejectedValue(new Error('handler-boom')),
+    };
+    await repo.saveMessage(buildMessage({ id: 'perm-fail' }));
+
+    const processor = new OutboxProcessor(repo, { batchSize: 5, maxRetries: 1 });
+    processor.registerHandler('test.event', handler);
+    processor.start();
+
+    // First attempt: increments to attempt=1 which >= maxRetries=1 → permanent failure
+    await processor.processBatch();
+    processor.stop();
+
+    const permanentFailCall = errorSpy.mock.calls.find(
+      c => c[0] === 'OutboxProcessor: message permanently failed'
+    );
+    expect(permanentFailCall).toBeDefined();
+    // arg[1] is the Error object, not a stringified message
+    expect(permanentFailCall?.[1]).toBeInstanceOf(Error);
+    expect(permanentFailCall?.[1]).toHaveProperty('message', 'handler-boom');
+    // metadata is in arg[2], not interpolated into message
+    expect(permanentFailCall?.[2]).toMatchObject({ messageId: 'perm-fail', attempts: 1 });
+  });
+
+  it('passes updateError as arg[1] when repository status update throws', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const handlerError = new Error('handler-threw');
+    const updateError = new Error('db-write-failed');
+    const handler: IOutboxMessageHandler = {
+      handle: vi.fn().mockRejectedValue(handlerError),
+    };
+    await repo.saveMessage(buildMessage({ id: 'update-fail' }));
+    vi.spyOn(repo, 'incrementAttempt').mockRejectedValue(updateError);
+
+    const processor = new OutboxProcessor(repo, { batchSize: 5, maxRetries: 3 });
+    processor.registerHandler('test.event', handler);
+    processor.start();
+    await processor.processBatch();
+    processor.stop();
+
+    const updateFailCall = errorSpy.mock.calls.find(
+      c => c[0] === 'OutboxProcessor: error updating message status'
+    );
+    expect(updateFailCall).toBeDefined();
+    expect(updateFailCall?.[1]).toBe(updateError);
+    expect(updateFailCall?.[0]).not.toContain('db-write-failed');
+  });
+
+  it('passes Error as arg[1] and hookName in arg[2] when a hook throws (safelyInvokeHook)', async () => {
+    // safelyInvokeHook wraps every hook invocation; a throwing hook must NOT
+    // break the processing loop. The error is forwarded to internalLogger.error
+    // as (message, error, { hookName }) — stack trace preserved, nothing interpolated.
+    //
+    // onBatchComplete only fires when at least one message is dispatched, so we
+    // save a message and register a handler to ensure the batch is non-empty.
+    const hookError = new Error('hook-exploded');
+    const repo = new InMemoryOutboxRepository();
+    await repo.saveMessage(buildMessage({ id: 'hook-trigger' }));
+
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      hooks: {
+        onBatchComplete: () => {
+          throw hookError;
+        },
+      },
+    });
+    processor.registerHandler('test.event', { handle: vi.fn().mockResolvedValue(undefined) });
+    processor.start();
+    await processor.processBatch();
+    processor.stop();
+
+    const hookCall = errorSpy.mock.calls.find(
+      c => typeof c[0] === 'string' && c[0].includes('threw and was ignored')
+    );
+    expect(hookCall).toBeDefined();
+    // arg[1]: the actual Error object — stack trace preserved
+    expect(hookCall?.[1]).toBe(hookError);
+    // arg[2]: safe metadata only — hook name, no error message interpolated
+    expect(hookCall?.[2]).toMatchObject({ hookName: 'onBatchComplete' });
+    // arg[0]: message must NOT contain the error's message string
+    expect(hookCall?.[0]).not.toContain(hookError.message);
   });
 });

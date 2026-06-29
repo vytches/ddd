@@ -1,9 +1,22 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import type { ExecutionContext, ICQRSMiddleware } from './middleware.interface';
 
+/**
+ * Minimal logger contract accepted by {@link LoggingMiddleware}.
+ *
+ * Any object with a `log` method that accepts a string — including `console`,
+ * Pino, Winston, or a custom structured logger — satisfies this interface.
+ * The variadic `...args` makes the type compatible with loggers whose `log`
+ * accepts additional optional parameters without requiring callers to supply them.
+ */
+export interface IMiddlewareLogger {
+  log(message: string, ...args: unknown[]): void;
+}
+
 export class LoggingMiddleware implements ICQRSMiddleware {
-  constructor(private logger?: { log: (message: string) => void }) {
-    this.logger = logger || console;
+  private readonly _logger: IMiddlewareLogger;
+
+  constructor(logger?: IMiddlewareLogger) {
+    this._logger = logger ?? console;
   }
 
   async handle(context: ExecutionContext, next: () => Promise<unknown>): Promise<unknown> {
@@ -11,16 +24,16 @@ export class LoggingMiddleware implements ICQRSMiddleware {
     const name = (commandOrQuery as { constructor: { name: string } }).constructor.name;
 
     const startTime = Date.now();
-    this.logger!.log(`[CQRS] Executing ${type}: ${name}`);
+    this._logger.log(`[CQRS] Executing ${type}: ${name}`);
 
     try {
       const result = await next();
       const duration = Date.now() - startTime;
-      this.logger!.log(`[CQRS] ${type} ${name} completed in ${duration}ms`);
+      this._logger.log(`[CQRS] ${type} ${name} completed in ${duration}ms`);
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this.logger!.log(`[CQRS] ${type} ${name} failed after ${duration}ms: ${error}`);
+      this._logger.log(`[CQRS] ${type} ${name} failed after ${duration}ms: ${error}`);
       throw error;
     }
   }

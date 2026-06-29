@@ -13,6 +13,7 @@ complexity: medium
 estimated_time: 5h
 created_by: agent
 created_at: 2026-06-04
+updated_at: 2026-06-29
 status: done
 depends_on: VS-013
 adr_ref: docs/adr/0037-internal-diagnostics-control-sink-injection.md

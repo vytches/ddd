@@ -13,7 +13,8 @@ complexity: simple
 estimated_time: 1.5h
 created_by: agent
 created_at: 2026-06-05
-status: planned
+updated_at: 2026-06-29
+status: done
 split_from: VS-013
 memory_ref: feedback_logging_internal_only
 ```
@@ -73,17 +74,17 @@ Confirm against `packages/cqrs/tests/middleware/logging.middleware.test.ts`.
 
 ## Requirements & Acceptance Criteria
 
-- [ ] outbox-processor: `Error` passed as 2nd arg of `internalLogger.error`;
+- [x] outbox-processor: `Error` passed as 2nd arg of `internalLogger.error`;
       stack trace preserved
-- [ ] LoggingMiddleware type widened to correct contract; existing tests pass
-- [ ] No payload/PII reaches internalLogger
-- [ ] build + test + lint + type-check green
+- [x] LoggingMiddleware type widened to correct contract; existing tests pass
+- [x] No payload/PII reaches internalLogger
+- [x] build + test + lint + type-check green
 
 ### Definition of Done
 
-- [ ] Implemented + reviewed
-- [ ] Tests cover the corrected error path (stack present) and middleware type
-- [ ] All quality gates green
+- [x] Implemented + reviewed
+- [x] Tests cover the corrected error path (stack present) and middleware type
+- [x] All quality gates green
 
 ## Code References
 
@@ -109,6 +110,28 @@ packages:
 Wydzielone z VS-013 2026-06-05 (decyzja właściciela: domknąć VS-013, follow-upy
 osobno). Niskie ryzyko, kosmetyka jakości.
 
+### Completion (2026-06-29, via /orchestrate)
+
+- **Issue 1** — `packages/messaging/src/outbox/outbox-processor.ts`: wszystkie 4
+  wywołania `internalLogger.error` przekazują teraz `Error` jako 2. arg (stack
+  zachowany); metadata (`{ hookName }`, `{ messageId, attempts }`) w 3. arg,
+  zero interpolacji błędu w message.
+- **Issue 2** — `packages/cqrs/src/middleware/logging.middleware.ts`: dodany i
+  wyeksportowany `IMiddlewareLogger` (`log(message, ...args)`), parametr
+  konstruktora poszerzony (wstecznie kompatybilne — wąscy konsumenci i `console`
+  nadal się typują); eksport additive w `middleware/index.ts` + `index.ts`.
+- **Testy**: ścieżka `safelyInvokeHook` (Error w arg[1], `{ hookName }` w
+  arg[2]) + suite poszerzenia typu `IMiddlewareLogger`.
+- **Gates**: lint + test + build GREEN — `@vytches/ddd-messaging` 90/90,
+  `@vytches/ddd-cqrs` 283/283.
+- **Weryfikacja**: library-quality-verifier → PASS; security (PII invariant) →
+  WARN (brak VETO; inwariant `feedback_logging_internal_only` zachowany).
+- **Status git**: zaimplementowane i zweryfikowane, **staged — pending
+  commit/merge** (review i merge po stronie właściciela).
+- **Follow-up (pre-existing, poza zakresem)**: `logging.middleware.ts:36`
+  interpolacja `${error}` w catch; `outbox-processor.ts:395` `warn` z
+  `${error?.message}`.
+
 ---
 
-_Task managed by Project Orchestrator | Last AI Review: 2026-06-05_
+_Task managed by Project Orchestrator | Last AI Review: 2026-06-29_

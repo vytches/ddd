@@ -22,7 +22,7 @@ export { CommandHandler, QueryHandler } from './decorators';
 
 // Middleware
 export { CQRSExecutionContext, LoggingMiddleware } from './middleware';
-export type { ExecutionContext, ICQRSMiddleware } from './middleware';
+export type { ExecutionContext, ICQRSMiddleware, IMiddlewareLogger } from './middleware';
 
 // Registry removed - now using pure metadata approach with DI container auto-discovery
 
