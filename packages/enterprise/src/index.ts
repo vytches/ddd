@@ -87,6 +87,11 @@ export {
   isEventHandler,
 } from '@vytches/ddd-contracts';
 
+// Diagnostics control API — consumers configure library diagnostic output.
+// @see configureDiagnostics, DiagnosticsSink
+export type { DiagnosticsLevel, DiagnosticsOptions, DiagnosticsSink } from '@vytches/ddd-contracts';
+export { configureDiagnostics } from '@vytches/ddd-contracts';
+
 // Export contracts EntityId as base type
 export { EntityId as BaseEntityId } from '@vytches/ddd-contracts';
 

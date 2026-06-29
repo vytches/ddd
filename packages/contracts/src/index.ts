@@ -137,6 +137,15 @@ export type { IAggregateSnapshot } from './shared';
 // utils re-exports this Result via shim for backwards compatibility.
 export { Result } from './shared';
 
+// Diagnostics control API (VS-014, ADR-0037). Public — consumers use this
+// to silence or redirect library diagnostics.
+export type {
+  DiagnosticsSink,
+  DiagnosticsLevel,
+  DiagnosticsOptions,
+} from './diagnostics/diagnostics-sink';
+export { configureDiagnostics } from './diagnostics/diagnostics-sink';
+
 // Internal library diagnostics shim (VS-010). @internal — shared here so all
 // @vytches/ddd-* packages use one console-based implementation instead of
 // duplicating it. NOT an application logging layer; not for consumer use.

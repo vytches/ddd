@@ -13,7 +13,7 @@ complexity: medium
 estimated_time: 5h
 created_by: agent
 created_at: 2026-06-04
-status: planned
+status: done
 depends_on: VS-013
 adr_ref: docs/adr/0037-internal-diagnostics-control-sink-injection.md
 memory_ref: feedback_logging_internal_only
@@ -117,18 +117,18 @@ export function configureDiagnostics(options: DiagnosticsOptions): void;
 
 ### Non-Functional Requirements
 
-- [ ] Testing: unit tests for sink injection, each level, default, delegation
-- [ ] Documentation: ADR-0037 + README diagnostics section + consumer example
-- [ ] Security: invariant audit — sink never receives payloads/PII
-- [ ] API: library-api-guardian confirms additive/non-breaking
+- [x] Testing: unit tests for sink injection, each level, default, delegation
+- [x] Documentation: ADR-0037 + README diagnostics section + consumer example
+- [x] Security: invariant audit — sink never receives payloads/PII
+- [x] API: library-api-guardian confirms additive/non-breaking
 
 ### Definition of Done
 
-- [ ] Implemented + reviewed (library-quality-verifier)
-- [ ] Tests passing (>80% new code)
-- [ ] api-surface snapshots updated (contracts + enterprise) intentionally
-- [ ] ADR-0037 accepted; changeset added
-- [ ] Backward-compat confirmed (library-api-guardian)
+- [x] Implemented + reviewed (library-quality-verifier — GO)
+- [x] Tests passing (>80% new code) — contracts 118/118, enterprise 1/1
+- [x] api-surface snapshots updated (contracts + enterprise) intentionally
+- [x] ADR-0037 accepted; changeset added
+- [x] Backward-compat confirmed (library-api-guardian)
 
 ## Implementation Plan
 
@@ -163,10 +163,10 @@ export function configureDiagnostics(options: DiagnosticsOptions): void;
 
 - **Agent**: documentation-master
 - **Tasks**:
-  - [ ] ADR-0037 → accepted
-  - [ ] README: "Controlling library diagnostics" + Pino example + silence
+  - [x] ADR-0037 → accepted
+  - [x] README: "Controlling library diagnostics" + Pino example + silence
         example
-  - [ ] Changeset (minor)
+  - [x] Changeset (minor)
 - **Output**: docs + changeset
 
 ## Code References
@@ -195,6 +195,30 @@ packages:
 | Sink leaks PII (consumer logs context)      | Low         | Med    | Invariant: internalLogger emits metadata only; document in sink contract |
 | Built on unverified VS-013 base             | Med         | High   | Hard dependency: VS-013 green first                                      |
 | Global mutable state (configureDiagnostics) | Low         | Low    | Documented as process-global; acceptable for diagnostics                 |
+
+## Security Considerations
+
+> Threat model: [TM-VS-014](../../docs/security/threat-models/TM-VS-014.md)
+> (STRIDE + DREAD + LINDDUN, 2026-06-18). **Verdict: PROCEED** — addytywne,
+> non-breaking; dwa blokery przed merge.
+
+**Top findings:**
+
+| ID  | Zagrożenie                                                               | DREAD  | Priorytet | Mitygacja (blokująca?)                                     |
+| --- | ------------------------------------------------------------------------ | ------ | --------- | ---------------------------------------------------------- |
+| D1  | Wyjątek z konsumenckiego sinka propaguje w ścieżkę sterowania biblioteki | **11** | HIGH      | **R1** try/catch + fallback wokół `currentSink.*` (BLOKER) |
+| I1  | Złamanie niezmiennika PII → payload do konsumenckiego sinka              | **10** | MEDIUM↑   | **R2/R4** audyt ~25 call-site'ów + spy-sink test (BLOKER)  |
+| I2  | Wrażliwe dane osadzone w `Error` przekazanym do sinka                    | 9      | MEDIUM    | R3 kontrakt sinka „traktuj `Error` jako wrażliwy"          |
+| T1  | Hijack kanału przez globalny stan (zależność tranzytywna)                | 7      | MEDIUM↓   | S3 dokument: process-global, last-write-wins (świadome)    |
+
+**Blokery merge:** R1 (izolacja sinka) + R2/R4 (audyt + test niezmiennika
+metadata-only). Niezmiennik „internalLogger niesie wyłącznie metadane, nigdy
+payloadów/PII" jest **load-bearing** — sink to nowe konsumenckie ujście tych
+danych. Default safety: `level: 'warn'`, console sink,
+`currentSink`/`currentLevel` nieeksportowane (brak monkeypatch). Privacy
+(LINDDUN): netto LOW-MEDIUM, warunkowane utrzymaniem niezmiennika; brak
+maskowania w bibliotece (obowiązek sinka konsumenta —
+[[feedback_logging_internal_only]]).
 
 ## Testing Strategy
 

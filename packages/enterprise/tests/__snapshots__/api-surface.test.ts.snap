@@ -212,6 +212,7 @@ exports[`@vytches/ddd-enterprise public API surface > exports the documented set
   "asSnapshotAggregate",
   "asVersioningAggregate",
   "comparePriority",
+  "configureDiagnostics",
   "createCapabilityRegistry",
   "createDomainEvent",
   "createProjectionRebuilder",
