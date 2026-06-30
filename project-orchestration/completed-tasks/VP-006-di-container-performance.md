@@ -13,11 +13,24 @@ actual_time: ~30m so far (auto-discovery refactor only)
 created_by: human (work-items archive 2026-03-31)
 created_at: 2026-03-31
 migrated_at: 2026-05-08
-updated_at: 2026-05-09
-status: in_progress
+updated_at: 2026-06-30
+completed_at: 2026-06-30
+status: done
 release_target: post-v0.25
 priority_score: 72/100
+merged: develop (e63dae38, perf 38f7f543 + docs c4d8f97e)
 ```
+
+> **CLOSED 2026-06-30 (reframed scope, analysis-approved).** Library-side work
+> in `@vytches/ddd-di` delivered + merged to `develop`. Original NestJS-consumer
+> criteria (cold start, first-time resolve, ≤4MB) were reframed to
+> library-isolated SLOs (met) and the NestJS-adapter remainder carved out to
+> **VP-006b**. See `analysis/VP-006-di-container-performance.analysis.md`.
+>
+> Delivered: `SimpleContainer.tryResolve` (no double lookup), `getTokenKey`
+> memoize + anonymous-class key fix, `Set` cycle detection, single-instance
+> retention, dev-only `vitest` bench with library-isolated SLOs + baseline +
+> timestamped results archive. 102/102 di tests green; public API unchanged.
 
 ## Current Performance Issues (from work-item)
 

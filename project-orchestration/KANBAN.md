@@ -10,7 +10,9 @@ priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > default-handler replace, SEC-MESSAGING-001, merged `54ac0fef` 2026-06-29) ·
 > VS-015 (outbox stack trace + LoggingMiddleware type, merged `f11f6f96`
 > 2026-06-29) · VS-014 (configureDiagnostics, merged `3d97ad62` 2026-06-29) ·
-> VP-011 (dispose on onModuleDestroy, merged 2026-06-17).
+> VP-011 (dispose on onModuleDestroy, merged 2026-06-17) · VP-006 (ddd-di
+> internal perf optimizations + dev-only bench, merged `e63dae38` 2026-06-30;
+> NestJS-adapter remainder → VP-006b).
 >
 > **Housekeeping**: VP-011 is `status: done` but still in `tasks/` — move to
 > `completed-tasks/` on next `/task-tidy`.
@@ -32,7 +34,6 @@ _None._
 | VS-006 | CsvMetricExporter — formula injection protection | planned     | 35d  |
 | VF-001 | DDD Compliance Validation Tools                  | in_progress | 52d† |
 | VP-002 | Repository Query Performance Enhancement         | in_progress | 52d† |
-| VP-006 | DI Container Performance Optimization            | in_progress | 52d† |
 | VD-004 | Interactive Documentation System                 | planned     | 53d  |
 | VF-002 | Strategic Design Documentation                   | planned     | 53d  |
 
@@ -44,15 +45,17 @@ _None._
 
 ## Backlog
 
-| ID     | Title                                          | Status  | Age |
-| ------ | ---------------------------------------------- | ------- | --- |
-| VA-001 | @vytches/ddd-agent — AI Agent DDD Boundary Pkg | backlog | 41d |
+| ID      | Title                                                  | Status  | Age |
+| ------- | ------------------------------------------------------ | ------- | --- |
+| VA-001  | @vytches/ddd-agent — AI Agent DDD Boundary Pkg         | backlog | 41d |
+| VP-006b | NestJSContainerAdapter resolve/cold-start optimization | backlog | 0d  |
 
 ---
 
 † Age measured from 2026-05-09 (partial/MVP delivery); opportunistic remainder
 since. **Triage this week**: formally defer or resume — VP-002, VP-006, VF-001,
-VT-001 have sat `in_progress` with no merge signal for 52 days.
+VT-001 have sat `in_progress` with no merge signal for 52 days. (VP-006 closed
+2026-06-30.)
 
 **Recommended next task**: VS-006 (CSV formula injection, DREAD 7, 0.5h) — last
 high-value audit win before v0.31.0 publish, then VS-008. Publication gate
