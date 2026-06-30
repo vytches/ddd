@@ -40,7 +40,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext .ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "bench": "vitest bench --config vitest.bench.config.ts && node benchmarks/archive-results.mjs"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

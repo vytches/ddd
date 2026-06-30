@@ -9,6 +9,11 @@ import {
   SimpleContainer,
 } from '../../src';
 
+// Helper: produce a class whose .name is '' (truly anonymous — not bound to a variable)
+function makeAnonymousClass(): new () => object {
+  return new Function('return class {}')() as new () => object;
+}
+
 describe('SimpleContainer', () => {
   // Mock container helper for testing
   const createMockContainer = () => new SimpleContainer();
@@ -279,6 +284,165 @@ describe('SimpleContainer', () => {
       container.register('TestService', TestService, { lifetime: ServiceLifetime.Singleton });
       container.resolve<TestService>('TestService'); // Create instance
 
+      container.dispose();
+
+      expect(disposed).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // D-3/A — tryResolve
+  // ---------------------------------------------------------------------------
+  describe('tryResolve', () => {
+    it('returns the resolved instance when service is registered', () => {
+      class TestService {}
+      container.register('TestService', TestService);
+
+      const result = container.tryResolve<TestService>('TestService');
+
+      expect(result).toBeInstanceOf(TestService);
+    });
+
+    it('returns undefined when service is not registered', () => {
+      const result = container.tryResolve('MissingService');
+
+      expect(result).toBeUndefined();
+    });
+
+    it('still throws CircularDependencyError on cycles (never swallows it)', () => {
+      container.registerFactory('A', c => c.resolve('B'));
+      container.registerFactory('B', c => c.resolve('A'));
+
+      const [err] = safeRun(() => container.tryResolve('A'));
+
+      expect(err).toBeInstanceOf(CircularDependencyError);
+    });
+
+    it('resolves from parent scope when not found locally', () => {
+      class TestService {}
+      container.register('TestService', TestService);
+
+      const scope = container.createScope('test') as SimpleContainer;
+      const result = scope.tryResolve<TestService>('TestService');
+
+      expect(result).toBeInstanceOf(TestService);
+    });
+
+    it('returns undefined when not found in scope or parent', () => {
+      const scope = container.createScope('test') as SimpleContainer;
+
+      const result = scope.tryResolve('AbsentService');
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // D-2/B + OQ-6 — getTokenKey memoisation + anonymous-class stable keys
+  // ---------------------------------------------------------------------------
+  describe('getTokenKey — anonymous class handling (OQ-6 contract)', () => {
+    it('two distinct anonymous classes get distinct token keys', () => {
+      const ClassA = makeAnonymousClass();
+      const ClassB = makeAnonymousClass();
+
+      const instanceA = new ClassA();
+      const instanceB = new ClassB();
+
+      container.registerInstance(ClassA, instanceA);
+      const [secondRegErr] = safeRun(() => container.registerInstance(ClassB, instanceB));
+
+      // Must NOT throw ServiceAlreadyRegisteredError (distinct keys)
+      expect(secondRegErr).toBeUndefined();
+      expect(container.resolve(ClassA)).toBe(instanceA);
+      expect(container.resolve(ClassB)).toBe(instanceB);
+    });
+
+    it('the same anonymous class is stable across multiple resolve calls', () => {
+      const ClassA = makeAnonymousClass();
+      container.register(ClassA, ClassA, { lifetime: ServiceLifetime.Singleton });
+
+      const i1 = container.resolve(ClassA);
+      const i2 = container.resolve(ClassA);
+
+      expect(i1).toBe(i2);
+    });
+
+    it('named class tokens still work correctly', () => {
+      class Named {}
+      container.register(Named, Named);
+
+      expect(container.resolve(Named)).toBeInstanceOf(Named);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // D-2/C — Set-based O(1) cycle detection; DFS order preserved in error message
+  // ---------------------------------------------------------------------------
+  describe('circular dependency detection — DFS order preserved', () => {
+    it('CircularDependencyError message lists tokens in DFS resolution order', () => {
+      container.registerFactory('A', c => c.resolve('B'));
+      container.registerFactory('B', c => c.resolve('A'));
+
+      const [err] = safeRun(() => container.resolve('A'));
+
+      expect(err).toBeInstanceOf(CircularDependencyError);
+      expect((err as Error).message).toContain('A -> B -> A');
+    });
+
+    it('three-node cycle message is ordered correctly', () => {
+      container.registerFactory('X', c => c.resolve('Y'));
+      container.registerFactory('Y', c => c.resolve('Z'));
+      container.registerFactory('Z', c => c.resolve('X'));
+
+      const [err] = safeRun(() => container.resolve('X'));
+
+      expect(err).toBeInstanceOf(CircularDependencyError);
+      expect((err as Error).message).toContain('X -> Y -> Z -> X');
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // D-4 — no double retention for registerInstance
+  // ---------------------------------------------------------------------------
+  describe('registerInstance — no double retention (D-4)', () => {
+    it('registered instance is returned by resolve (same reference)', () => {
+      const instance = { value: 42 };
+      container.registerInstance('svc', instance);
+
+      expect(container.resolve('svc')).toBe(instance);
+    });
+
+    it('repeated resolve calls return the same reference', () => {
+      const instance = { value: 1 };
+      container.registerInstance('svc', instance);
+
+      expect(container.resolve('svc')).toBe(container.resolve('svc'));
+    });
+
+    it('dispose does NOT call dispose() on an instance that was registered but never resolved', () => {
+      let disposed = false;
+      const instance = {
+        dispose() {
+          disposed = true;
+        },
+      };
+
+      container.registerInstance('svc', instance);
+      container.dispose(); // instance never resolved → not in singletonInstances yet
+
+      expect(disposed).toBe(false);
+    });
+
+    it('dispose DOES call dispose() on an instance that was resolved at least once', () => {
+      let disposed = false;
+      const instance = {
+        dispose() {
+          disposed = true;
+        },
+      };
+
+      container.registerInstance('svc', instance);
+      container.resolve('svc'); // populates singletonInstances via resolveInternal caching
       container.dispose();
 
       expect(disposed).toBe(true);

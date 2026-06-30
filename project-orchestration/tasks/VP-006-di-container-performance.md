@@ -82,6 +82,23 @@ Verification: performance-optimizer agent — APPROVE (semantic equivalence
 verified). 2 minor doc fixes applied: assumption documented, register-call
 assertion added to memoization test.
 
+## Scope update (2026-06-30, analysis approved)
+
+See `project-orchestration/analysis/VP-006-di-container-performance.analysis.md`
+(status: approved). Key reframing:
+
+- Criteria 2 (<5ms resolve) and 5 (≤4MB metadata) were measured on the NestJS
+  consumer and are **not** library-addressable. Reframed to library-isolated
+  SLOs (resolve overhead µs/op; descriptor memory KB/1000 services), locked by a
+  dev-only `vitest/bench` regression gate. Old NestJS numbers downgraded to
+  best-effort / measure-and-document (NOT v0.26 blockers).
+- NestJS adapter optimization (the actual source of 15–25ms first-time resolve)
+  **carved out** to sibling task **VP-006b**
+  (`project-orchestration/tasks/VP-006b-nestjs-adapter-performance.md`).
+- VP-006 now scopes ONLY `@vytches/ddd-di` internal changes: `tryResolve` (no
+  double lookup), `getTokenKey` memoization + anonymous-class key fix, `Set`
+  cycle detection, single-instance retention, dev-only bench. NO freeze/intern.
+
 ## Remaining scope (post-2026-05-09)
 
 - Service resolution <5ms first-time (criterion 2)

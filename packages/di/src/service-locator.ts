@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { internalLogger } from '@vytches/ddd-contracts';
+import { SimpleContainer } from './containers/simple-container';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';
 import type { HandlerInfo, IHandlerDiscoveryPlugin } from './discovery/handler-discovery.interface';
 import {
@@ -131,34 +132,60 @@ export class ServiceLocator implements IServiceLocator {
   }
 
   /**
-   * Smart resolution: context-aware when available, global otherwise
+   * Smart resolution: context-aware when available, global otherwise.
+   *
+   * D-3/A: uses a single lookup per container (no isRegistered() pre-check).
+   * CircularDependencyError is never caught here — only ServiceNotFoundError
+   * is suppressed during the context→global fallback.
    */
   resolve<T>(token: ServiceToken<T>, context?: string): T {
     this.ensureNotDisposed();
 
-    // Try context-specific container first
-    if (context) {
-      const contextContainer = this.contextContainers.get(context);
-      if (contextContainer && contextContainer.isRegistered(token)) {
-        return contextContainer.resolve<T>(token);
-      }
-    }
-
-    // Fall back to global container
     if (!this.globalContainer) {
       throw new ContainerConfigurationError(
         'No global container configured. Call configure() first.'
       );
     }
 
-    if (!this.globalContainer.isRegistered(token)) {
-      throw new ServiceNotFoundError(
-        typeof token === 'string' ? token : 'unknown',
-        'Service not registered in any container'
-      );
+    // Try context-specific container first (single lookup)
+    if (context) {
+      const contextContainer = this.contextContainers.get(context);
+      if (contextContainer) {
+        const result = this.trySingleLookup<T>(contextContainer, token);
+        if (result !== undefined) return result;
+      }
     }
 
-    return this.globalContainer.resolve<T>(token);
+    // Try global container (single lookup)
+    const result = this.trySingleLookup<T>(this.globalContainer, token);
+    if (result !== undefined) return result;
+
+    // Preserve the exact error type and message required by D-3/A
+    throw new ServiceNotFoundError(
+      typeof token === 'string' ? token : 'unknown',
+      'Service not registered in any container'
+    );
+  }
+
+  /**
+   * D-3/A: Single-lookup helper. Returns undefined when the service is absent
+   * (ServiceNotFoundError). Any other error (e.g. CircularDependencyError) is
+   * re-thrown immediately so it is never swallowed.
+   */
+  private trySingleLookup<T>(
+    container: IDependencyContainer,
+    token: ServiceToken<T>
+  ): T | undefined {
+    if (container instanceof SimpleContainer) {
+      return container.tryResolve<T>(token);
+    }
+    // Generic fallback for external DI adapters that do not expose tryResolve.
+    try {
+      return container.resolve<T>(token);
+    } catch (e) {
+      if (e instanceof ServiceNotFoundError) return undefined;
+      throw e; // Re-throw CircularDependencyError and all other errors
+    }
   }
 
   /**
