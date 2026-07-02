@@ -55,10 +55,11 @@ jawnie czyszczone.
 
 - [x] **#1 (P0) woła dispose() w onModuleDestroy** — w
       `VytchesExplorerService.onModuleDestroy()`, dla każdego busa który
-      implementuje `IDisposableBus` (duck-type: `typeof lifecycle.dispose ===
-      'function'`), wywołać `dispose()` po `reset()`. Tolerancja błędów:
-      `try/catch` + `internalLogger.warn` analogicznie do obsługi `reset()`.
-      `BusWithRegistration` rozszerzony o opcjonalne `dispose?()`.
+      implementuje `IDisposableBus` (duck-type:
+      `typeof lifecycle.dispose ===     'function'`), wywołać `dispose()` po
+      `reset()`. Tolerancja błędów: `try/catch` + `internalLogger.warn`
+      analogicznie do obsługi `reset()`. `BusWithRegistration` rozszerzony o
+      opcjonalne `dispose?()`.
 - [x] **#2 test** — `tests/explorer-dispose-on-destroy.test.ts`, 6 przypadków:
       dispose po reset (kolejność), wszystkie 3 busy, graceful skip bez
       `dispose()`, dispose mimo rzucającego `reset()`, brak crashu gdy

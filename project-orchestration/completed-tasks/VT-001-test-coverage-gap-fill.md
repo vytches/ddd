@@ -14,10 +14,18 @@ estimated_time: 16h
 actual_time: ~2h so far (pre-release scope + post-release PBT/lifecycle)
 created_by: agent (testing-excellence 2026-05-08)
 created_at: 2026-05-08
-updated_at: 2026-05-09
-status: in_progress
+updated_at: 2026-07-02
+status: done
 release_target: v0.25.0-beta.1 (partial) + post-v0.25 (full)
 ```
+
+## Closed (2026-07-02, triage)
+
+Pre-release scope 100% complete; post-release scope substantially delivered via
+the VT-002→VT-005 series (coverage 63.98% → 69.29%). The task's own 2026-05-10
+update already called remaining work (GWT migration, additional VO PBT,
+domain-primitives ratio) "opportunistic / low priority" — closing rather than
+leaving `in_progress` indefinitely.
 
 ## Why This Task Exists
 

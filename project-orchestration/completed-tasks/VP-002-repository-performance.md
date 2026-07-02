@@ -13,11 +13,19 @@ actual_time: ~45m so far (N+1 contract + spec memoization only)
 created_by: human (work-items archive 2026-03-31)
 created_at: 2026-03-31
 migrated_at: 2026-05-08
-updated_at: 2026-05-09
-status: in_progress
+updated_at: 2026-07-02
+status: done
 release_target: post-v0.25
 priority_score: 88/100
 ```
+
+## Closed (2026-07-02, triage)
+
+Library-side scope is complete (`IBatchRepository`, `MemoizedSpecification`,
+2026-05-09). Remaining items (`CachedRepository<T>` wrapper, AST indexable
+hints, `findManyByIds` benchmarks) are adapter-author concerns per the
+no-adapters principle — out of scope for this library, not deferred work.
+Closing rather than leaving `in_progress` indefinitely.
 
 ## Why This Task Exists
 

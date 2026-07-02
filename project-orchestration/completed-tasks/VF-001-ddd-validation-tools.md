@@ -13,11 +13,20 @@ actual_time: ~1h so far (MVP CLI + 3 rules + tests)
 created_by: human (work-items archive 2026-03-31)
 created_at: 2026-03-31
 migrated_at: 2026-05-08
-updated_at: 2026-05-09
-status: in_progress
+updated_at: 2026-07-02
+status: done
 release_target: post-v0.25 (v0.26 or v0.27)
 priority_score: 82/100
 ```
+
+## Closed (2026-07-02, triage)
+
+MVP is a complete, working, dogfooded deliverable (`@vytches/ddd-lint`, 3 rules,
+CLI, 29 tests, baseline documented for staged adoption). Remaining scope (more
+rules, ubiquitous-language validator, compliance scoring) is optional expansion
+of an internal tool, not required follow-up work — closing rather than leaving
+`in_progress` indefinitely. Re-open as a new task if/when more rules are
+actually wanted.
 
 ## Why This Task Exists
 
