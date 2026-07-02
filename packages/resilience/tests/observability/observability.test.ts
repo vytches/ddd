@@ -300,6 +300,60 @@ describe('Observability System', () => {
       expect(output.split('\n')).toHaveLength(metrics.length + 1); // +1 for header
     });
 
+    describe('CSV formula injection protection (SEC-RESILIENCE-001)', () => {
+      const makeMetric = (name: string, description = ''): Metric => ({
+        name,
+        type: 'counter',
+        labels: {},
+        value: 1,
+        timestamp: 1748246400000,
+        description,
+      });
+
+      const exportRow = (metric: Metric): string => {
+        const exporter = new CsvMetricExporter();
+        const output = exporter.export([metric]);
+        // substring after the header line — split('\n') would break rows
+        // whose quoted fields legitimately contain embedded newlines
+        return output.substring(output.indexOf('\n') + 1);
+      };
+
+      it.each([
+        ['=SUM(A1)', '"=SUM(A1)"'],
+        ['+1', '"+1"'],
+        ['-formula', '"-formula"'],
+        ['@evil', '"@evil"'],
+        ['|pipe', '"|pipe"'],
+        ['%env', '"%env"'],
+      ])('should quote value starting with formula char: %s', (name, expected) => {
+        expect(exportRow(makeMetric(name)).startsWith(`${expected},`)).toBe(true);
+      });
+
+      it('should quote values containing carriage return (RFC 4180)', () => {
+        const row = exportRow(makeMetric('metric\rname'));
+        expect(row.startsWith('"metric\rname"')).toBe(true);
+      });
+
+      it('should keep existing behaviour for commas, quotes and newlines', () => {
+        expect(exportRow(makeMetric('metric,with,commas')).startsWith('"metric,with,commas"')).toBe(
+          true
+        );
+        expect(exportRow(makeMetric('say "hi"')).startsWith('"say ""hi"""')).toBe(true);
+        expect(exportRow(makeMetric('multi\nline')).startsWith('"multi\nline"')).toBe(true);
+      });
+
+      it('should leave normal metric names and empty strings unchanged', () => {
+        expect(exportRow(makeMetric('normal_metric')).startsWith('normal_metric,')).toBe(true);
+        const row = exportRow(makeMetric('normal_metric', ''));
+        expect(row.endsWith(',')).toBe(true); // empty description stays empty, unquoted
+      });
+
+      it('should quote formula chars mid-pipeline too (description field)', () => {
+        const row = exportRow(makeMetric('normal_metric', '=HYPERLINK("http://evil")'));
+        expect(row.endsWith('"=HYPERLINK(""http://evil"")"')).toBe(true);
+      });
+    });
+
     it('should export text format', () => {
       const exporter = new TextMetricExporter();
       const output = exporter.export(metrics);
