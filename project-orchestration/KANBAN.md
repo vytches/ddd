@@ -18,6 +18,14 @@ backlog)._
 > SEC-VALUEOBJECTS-001 resolved) — both moved to `completed-tasks/`. **v0.31.0
 > code scope is complete** — only the VS-013 validation gate remains.
 >
+> **Just shipped (2026-07-02)**: VB-002 done (publish integrity pipeline —
+> consolidated `.d.ts` fixers, ESM fix in `testing`, `reflect-metadata`
+> peerDependency, 18 phantom deps + 1 found during verification, uuid→crypto
+> zero-deps, LICENSE distribution, root rename, vitest CVE-2026-47429 fix,
+> new CI smoke-test gate; commit `82d92fdc`, merged to `develop` via
+> `130e72b1`) — moved to `completed-tasks/`. One of two P0 publish blockers
+> resolved — **VB-003 remains**.
+>
 > **Housekeeping resolved (2026-07-01 `/task-tidy`)**: VP-011 moved to
 > `completed-tasks/`.
 >
@@ -30,7 +38,6 @@ backlog)._
 
 | ID     | Title                                                             | Status  | Age |
 | ------ | ----------------------------------------------------------------- | ------- | --- |
-| VB-002 | Publish Integrity Pipeline (.d.ts, ESM, deps, CI smoke test)      | backlog | 0d  |
 | VB-003 | NestJS forFeature DI wiring (ModulesContainer) + forRootAsync     | backlog | 0d  |
 
 ## P1 — High
@@ -67,7 +74,7 @@ _None._
 
 **Recommended next action**: (1) VS-013 juz-ide-api validation — still the
 v0.31.0 publication gate, **14+ days overdue**, human/cross-team action.
-(2) LIB-AUDIT-2026-07-02 found **4 publish blockers** — VB-002 (broken
-published artifacts) and VB-003 (forFeature DI wiring) are P0 and must land
-before ANY public npm publish. Full findings:
+(2) LIB-AUDIT-2026-07-02 found **4 publish blockers** — VB-002 done
+(2026-07-02, commit `82d92fdc`); **VB-003** (forFeature DI wiring) is the
+remaining P0 and must land before ANY public npm publish. Full findings:
 `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`.
