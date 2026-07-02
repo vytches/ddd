@@ -12,8 +12,11 @@ estimated_time: 20h
 created_by: human (work-items archive 2026-03-31)
 created_at: 2026-03-31
 migrated_at: 2026-05-08
-status: planned
-release_target: post-v0.25 (v0.26 or later)
+updated_at:
+  2026-07-02 (planned → backlog per product-owner review — opportunistic
+  post-release, 55d idle)
+status: backlog
+release_target: post-v0.25 (v0.26 or later, opportunistic)
 priority_score: 77/100
 depends_on: VI-001 (CANCELLED — see REL-001)
 ```

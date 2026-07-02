@@ -34,8 +34,8 @@ _None._
 | ID      | Title                                                  | Status  | Age |
 | ------- | ------------------------------------------------------ | ------- | --- |
 | VS-006  | CsvMetricExporter — formula injection protection       | planned | 36d |
-| VD-004  | Interactive Documentation System                       | planned | 54d |
-| VF-002  | Strategic Design Documentation                         | planned | 54d |
+| VD-004  | Interactive Documentation System                       | backlog | 55d |
+| VF-002  | Strategic Design Documentation                         | backlog | 55d |
 | VP-006b | NestJSContainerAdapter resolve/cold-start optimization | backlog | 1d  |
 
 ## P3 — Low
