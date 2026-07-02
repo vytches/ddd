@@ -25,7 +25,8 @@
     "README.md",
     "bin",
     "dist",
-    "llm-context.md"
+    "llm-context.md",
+    "LICENSE"
   ],
   "keywords": [
     "ddd",
@@ -56,7 +57,7 @@
     "typescript": "^5.0.0",
     "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.1.0"
   },
   "nx": {
     "tags": [

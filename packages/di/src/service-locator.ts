@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import { internalLogger } from '@vytches/ddd-contracts';
 import { SimpleContainer } from './containers/simple-container';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';

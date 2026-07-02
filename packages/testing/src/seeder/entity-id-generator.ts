@@ -4,8 +4,21 @@
  * including sequential, UUID, and custom patterns.
  */
 
+import { createRequire } from 'node:module';
+
 import { faker } from '@faker-js/faker';
 import type { EntityId } from '@vytches/ddd-contracts';
+
+/**
+ * F-C2 (VB-002): the ESM dist build has no `require()` in scope — a bare
+ * `require('@vytches/ddd-value-objects')` throws `ReferenceError` for
+ * consumers importing the ESM entrypoint. `createRequire` gives us a real,
+ * synchronous `require` that works in both ESM and CJS output, without
+ * turning these (synchronous, public-API) methods into async ones — which
+ * a `import()` migration would have forced, a breaking change out of scope
+ * for this fix (VF-024 owns API surface changes).
+ */
+const require = createRequire(import.meta.url);
 
 /**
  * Configuration for EntityId generation patterns

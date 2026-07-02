@@ -4,6 +4,8 @@
  * Designed for performance testing and large-scale data generation scenarios.
  */
 
+import { EventEmitter } from 'node:events';
+
 import { Result } from '@vytches/ddd-utils';
 import { AggregateSeeder, type AggregateSeederConfig } from './aggregate-seeder.js';
 import type {
@@ -12,7 +14,6 @@ import type {
   SeederResult,
   SeedableAggregate,
 } from './shared-seeder-types.js';
-import { EventEmitter } from 'events';
 
 /**
  * Configuration for streaming behavior and performance tuning

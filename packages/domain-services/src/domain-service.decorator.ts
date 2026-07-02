@@ -1,5 +1,8 @@
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.defineMetadata/getMetadata typings — no runtime side effect
+// (reflect-metadata is a peer dependency here, see README).
+import type {} from 'reflect-metadata';
 import { ServiceLifetime } from '@vytches/ddd-di';
-import 'reflect-metadata';
 import type { DIServiceMetadata, EnhancedDomainServiceOptions } from './di-types';
 import { DIDomainServiceMetadataRegistry } from './di-types';
 

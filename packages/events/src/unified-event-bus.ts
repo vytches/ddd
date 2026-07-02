@@ -1,10 +1,12 @@
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import { BaseEventBus } from './base-event-bus';
 import type { IEventBus, BaseEventBusOptions } from '@vytches/ddd-contracts';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type { IAuditEvent } from '@vytches/ddd-contracts';
 import type { IIntegrationEvent } from './integration/integration-event-interfaces';
 import { internalLogger } from '@vytches/ddd-contracts';
-import 'reflect-metadata';
 
 /**
  * Constructor type for class references

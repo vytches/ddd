@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
 import { internalLogger } from '@vytches/ddd-contracts';
-import 'reflect-metadata';
 
 import { IQueryBus } from '../abstracts';
 import { CQRSConfigurationError, HandlerNotFoundError } from '../errors';
