@@ -11,8 +11,10 @@ priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > VP-006b).
 >
 > **Just shipped (2026-07-02)**: VS-006 done (CSV formula injection fix, commit
-> `46fd54e2`, SEC-RESILIENCE-001 resolved) — moved to `completed-tasks/`. VS-008
-> remains the last planned code item before v0.31.0.
+> `46fd54e2`, SEC-RESILIENCE-001 resolved) and VS-008 done (deprecation warn
+> suppression via `VYTCHES_SUPPRESS_DEPRECATION_WARNINGS=1`, commit `6428850d`,
+> SEC-VALUEOBJECTS-001 resolved) — both moved to `completed-tasks/`. **v0.31.0
+> code scope is complete** — only the VS-013 validation gate remains.
 >
 > **Housekeeping resolved (2026-07-01 `/task-tidy`)**: VP-011 moved to
 > `completed-tasks/`.
@@ -40,9 +42,7 @@ _None._
 
 ## P3 — Low
 
-| ID     | Title                                               | Status  | Age |
-| ------ | --------------------------------------------------- | ------- | --- |
-| VS-008 | EntityIdFactory — suppress console.warn deprecation | planned | 36d |
+_None._
 
 ## Backlog
 
@@ -52,6 +52,7 @@ _None._
 
 ---
 
-**Recommended next task**: VS-008 (EntityIdFactory deprecation suppress, 0.5h) —
-last planned code item before v0.31.0. Publication gate remains the juz-ide-api
-VS-013 validation, now **14+ days overdue**.
+**Recommended next action**: v0.31.0 code scope complete (VS-006 + VS-008
+shipped 2026-07-02). Publication gate remains the juz-ide-api VS-013 validation,
+now **14+ days overdue** — human/cross-team action, not a code task. Board is
+quality/DX backlog only.

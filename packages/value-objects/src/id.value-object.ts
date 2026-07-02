@@ -25,10 +25,17 @@ const _entityIdFactoryWarned = new Set<string>();
  * REL-005 (2026-05-08): EntityIdFactory will be removed in v1.0.0. Until
  * then this warning fires once per method per process.
  *
+ * VS-008 (SEC-VALUEOBJECTS-001): set `VYTCHES_SUPPRESS_DEPRECATION_WARNINGS=1`
+ * to silence the warning (e.g. legacy codebases mid-migration, or test
+ * runners that fail on console.warn). Checked at call time, before the
+ * once-per-process slot is consumed — unsetting the variable re-enables
+ * the warning for methods that were only ever called while suppressed.
+ *
  * @internal
  */
 function warnEntityIdFactoryDeprecation(method: string, replacement: string): void {
   if (_entityIdFactoryWarned.has(method)) return;
+  if (process.env['VYTCHES_SUPPRESS_DEPRECATION_WARNINGS'] === '1') return;
   _entityIdFactoryWarned.add(method);
   // eslint-disable-next-line no-console
   console.warn(

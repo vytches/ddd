@@ -134,3 +134,51 @@ describe('EntityIdFactory (deprecated) — instance methods', () => {
     expect(factory.fromText('order-9').value).toBe('order-9');
   });
 });
+
+describe('VYTCHES_SUPPRESS_DEPRECATION_WARNINGS (VS-008 / SEC-VALUEOBJECTS-001)', () => {
+  // The "warned once" set is module-scoped, so each case re-imports a fresh
+  // module instance to control it deterministically.
+  let warnSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    vi.resetModules();
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    warnSpy.mockRestore();
+  });
+
+  it('suppresses the deprecation warning when set to "1"', async () => {
+    vi.stubEnv('VYTCHES_SUPPRESS_DEPRECATION_WARNINGS', '1');
+    const fresh = await import('../src/id.value-object');
+    fresh.EntityIdFactory.createWithRandomUUID();
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('still warns by default (fresh module, env var unset)', async () => {
+    const fresh = await import('../src/id.value-object');
+    fresh.EntityIdFactory.createWithRandomUUID();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(String(warnSpy.mock.calls[0]?.[0])).toContain('createWithRandomUUID');
+  });
+
+  it('does not consume the once-per-process slot while suppressed', async () => {
+    vi.stubEnv('VYTCHES_SUPPRESS_DEPRECATION_WARNINGS', '1');
+    const fresh = await import('../src/id.value-object');
+    fresh.EntityIdFactory.createWithRandomUUID(); // suppressed
+    expect(warnSpy).not.toHaveBeenCalled();
+
+    vi.unstubAllEnvs(); // suppression lifted mid-process
+    fresh.EntityIdFactory.createWithRandomUUID();
+    expect(warnSpy).toHaveBeenCalledTimes(1); // warning still fires later
+  });
+
+  it('does not suppress for values other than "1"', async () => {
+    vi.stubEnv('VYTCHES_SUPPRESS_DEPRECATION_WARNINGS', 'true');
+    const fresh = await import('../src/id.value-object');
+    fresh.EntityIdFactory.createWithRandomUUID();
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+  });
+});
