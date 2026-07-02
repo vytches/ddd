@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
 import { internalLogger } from '@vytches/ddd-contracts';
@@ -10,7 +13,6 @@ import {
   RetryStrategy,
   TimeoutStrategy,
 } from '@vytches/ddd-resilience';
-import 'reflect-metadata';
 import { ICommandBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';
 import type { ICommand, ICommandHandler, IDisposableBus, IResettableBus } from '../interfaces';

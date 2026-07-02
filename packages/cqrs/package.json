@@ -17,7 +17,8 @@
   "files": [
     "dist",
     "README.md",
-    "LLMGUIDE.md"
+    "LLMGUIDE.md",
+    "LICENSE"
   ],
   "keywords": [
     "ddd",
@@ -43,10 +44,11 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
+    "reflect-metadata": "^0.2.2",
     "typescript": "^5.0.0",
     "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.1.0"
   },
   "nx": {
     "tags": [
@@ -61,7 +63,18 @@
   },
   "dependencies": {
     "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-di": "workspace:*",
+    "@vytches/ddd-domain-primitives": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
-    "@vytches/ddd-resilience": "workspace:*"
+    "@vytches/ddd-resilience": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "^0.1.13 || ^0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "reflect-metadata": {
+      "optional": true
+    }
   }
 }

@@ -6,9 +6,18 @@
  * that respects DDD patterns and aggregate boundaries.
  */
 
+import { createRequire } from 'node:module';
+
 import type { EntityId } from '@vytches/ddd-contracts';
 import { Result } from '@vytches/ddd-utils';
 import type { DomainSeederConfig, SeedableAggregate } from './shared-seeder-types.js';
+
+/**
+ * F-C2 (VB-002): see entity-id-generator.ts for the full rationale — a bare
+ * `require()` doesn't exist in the ESM dist build and throws ReferenceError.
+ * `createRequire` restores synchronous require semantics in both formats.
+ */
+const require = createRequire(import.meta.url);
 
 /**
  * Sequence generator function type

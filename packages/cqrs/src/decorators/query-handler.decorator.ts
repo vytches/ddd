@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import 'reflect-metadata';
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.defineMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import type { IQuery, IQueryHandler } from '../interfaces';
 import type { DIHandlerMetadata, QueryHandlerOptions } from './di-types';
 

@@ -1,5 +1,37 @@
 /**
  * Bundle strategies for different package types
+ *
+ * F-M20 (VB-002) — instanceof identity decision, documented per task
+ * acceptance criteria item 10:
+ *
+ * `bundle-all` inlines a package's `@vytches/ddd-*` dependencies into its own
+ * dist instead of externalizing them. If two packages both inline the SAME
+ * class from a shared dependency, `instanceof` checks between an instance
+ * created by one and a class reference imported from the other would fail
+ * (they'd be two different, duplicated class definitions at runtime).
+ *
+ * `bundle-all` is used by exactly two packages: `utils` (packageType
+ * 'tooling', zero @vytches deps of its own) and `contracts` (via
+ * `createFoundationConfig`, which only ever inlines `utils` + `contracts`
+ * itself — see `utils/vite.config.mts`'s explicit `external` function, which
+ * force-externalizes `@vytches/ddd-contracts` with an inline comment
+ * documenting this exact concern, REL-008). Since neither of these two
+ * bundle-all packages re-bundles a class that a THIRD package also inlines,
+ * there is no pair of packages sharing a duplicated foundation class today.
+ *
+ * Every other package in the F-H1 phantom-dependency fix (acl, aggregates,
+ * cqrs, di, domain-services, events, messaging, projections, repositories,
+ * testing) uses `externalize-workspace`, which never inlines `@vytches/ddd-*`
+ * imports at all — consumers always get the single shared instance of a
+ * class from `node_modules`, so `instanceof` identity is preserved by
+ * construction. F-H1 only added missing `dependencies` entries to these
+ * packages' manifests; it did not touch this externalization logic, so this
+ * conclusion holds after that fix as before it.
+ *
+ * Verified via `pnpm test:smoke` (AC1): the smoke test installs every
+ * package's real tarball in isolation and exercises `require()`/`import()`
+ * end-to-end, which would surface a broken `instanceof` chain as a runtime
+ * failure if one existed.
  */
 import type { BundleStrategy, PackageType, BuildContext } from './types';
 

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.defineMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
 import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches/ddd-contracts';
-import 'reflect-metadata';
 import type { DIHandlerMetadata, EventHandlerOptions } from './di-types';
 
 // Re-export for compatibility

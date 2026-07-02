@@ -1,5 +1,5 @@
 {
-  "name": "@vytches/ddd",
+  "name": "@vytches/ddd-workspace",
   "version": "0.26.0",
   "private": true,
   "description": "VytchesDDD - Enterprise-grade TypeScript library implementing Domain-Driven Design patterns",
@@ -20,9 +20,6 @@
   },
   "bugs": {
     "url": "https://github.com/vytches/ddd/issues"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "files": [
     "dist",
@@ -57,6 +54,7 @@
     "test:ci": "nx run-many --target=test --all --parallel=3",
     "test:all": "vitest packages/**/*.{test,spec}.ts examples/**/*.{test,spec}.ts --passWithNoTests",
     "test:package": "bash scripts/test-package.sh",
+    "test:smoke": "bash scripts/smoke-test-publish.sh",
     "// === BUILDING WORKFLOWS ===": "",
     "build": "nx run-many --target=build --projects=tag:type:lib --parallel=3 && pnpm run fix:dts && pnpm run bundle:types",
     "build:all": "nx run-many --target=build --all --parallel=3",
@@ -174,8 +172,8 @@
     "@types/node": "^20.8.0",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.0",
+    "@vitest/ui": "^4.1.0",
     "@vytches/ddd-testing": "workspace:*",
     "chokidar": "^3.5.3",
     "commitizen": "^4.3.0",
@@ -213,7 +211,7 @@
     "verdaccio": "^6.0.5",
     "vite": "^7.3.2",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.0",
     "vitest-sonar-reporter": "^2.0.1",
     "yargs": "^17.7.2"
   },
@@ -280,8 +278,7 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.1",
-    "reflect-metadata": "^0.2.2",
-    "uuid": "^11.1.0"
+    "reflect-metadata": "^0.2.2"
   },
   "nx": {
     "includedScripts": []

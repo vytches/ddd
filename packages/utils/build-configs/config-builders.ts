@@ -9,9 +9,19 @@ import { detectPackageType, getWorkspaceAliases } from './package-detection';
 import type { BuildContext, PackageConfigOptions } from './types';
 
 /**
- * Create DTS plugin configuration with path transformation for meta packages
+ * Create DTS plugin configuration.
+ *
+ * NOTE (F-C1, VB-002): path rewriting for monorepo-relative `.d.ts` imports
+ * (e.g. `from '../../di/src/index.ts'`) used to happen HERE for meta-packages
+ * only, AND separately in `scripts/fix-dts-imports.js` for everything else —
+ * two independent, out-of-sync fixers. That has been consolidated into a
+ * single mechanism: `scripts/fix-dts-imports.js` now runs unconditionally
+ * (no isMetaPackage gate) as a post-build step (`pnpm fix:dts`), recurses
+ * into `dist/**\/*.d.ts` for every package, and derives its rewrite table
+ * dynamically from `packages/*\/package.json` names. Do not reintroduce
+ * path-rewriting logic here — keep this plugin config purely structural.
  */
-function createDTSPlugin(context: BuildContext, options: PackageConfigOptions) {
+function createDTSPlugin(_context: BuildContext, options: PackageConfigOptions) {
   const dtsConfig = options.dtsConfig || {};
 
   const baseConfig = {
@@ -21,43 +31,7 @@ function createDTSPlugin(context: BuildContext, options: PackageConfigOptions) {
     entryRoot: dtsConfig.entryRoot ?? 'src',
   };
 
-  const afterBuildTasks = async () => {
-    try {
-      const fs = await import('fs');
-      const path = await import('path');
-
-      // Meta packages path transformation
-      if (context.isMetaPackage && dtsConfig.transformPaths !== false) {
-        const indexDtsPath = path.resolve(context.packagePath, 'dist/index.d.ts');
-        if (fs.existsSync(indexDtsPath)) {
-          let content = fs.readFileSync(indexDtsPath, 'utf-8');
-
-          // Replace relative paths with package names
-          content = content.replace(
-            /from '\.\.\/\.\.\/([^/]+)\/src\/index\.ts'/g,
-            "from '@vytches/ddd-$1'"
-          );
-          content = content.replace(
-            /from "\.\.\/\.\.\/([^/]+)\/src\/index\.ts"/g,
-            'from "@vytches/ddd-$1"'
-          );
-
-          fs.writeFileSync(indexDtsPath, content);
-        }
-      }
-    } catch (error) {
-      console.warn(
-        `Warning: DTS post-processing failed for ${context.packagePath}:`,
-        error instanceof Error ? error.message : 'Unknown error'
-      );
-      // Don't throw - allow build to continue even if DTS processing fails
-    }
-  };
-
-  return dts({
-    ...baseConfig,
-    afterBuild: afterBuildTasks,
-  });
+  return dts(baseConfig);
 }
 
 /**

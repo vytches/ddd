@@ -17,7 +17,8 @@
     "@vytches/ddd-utils": "workspace:*"
   },
   "devDependencies": {
+    "reflect-metadata": "^0.2.2",
     "typescript": "^5.8.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.1.0"
   }
 }

@@ -197,6 +197,30 @@ const bus = new EnhancedCommandBus(container, {
 - `@vytches/ddd-resilience` — only used by `EnhancedCommandBus` /
   `EnhancedQueryBus`
 
+## Peer dependency: `reflect-metadata`
+
+Decorator-based APIs in this package (handler/service registration decorators,
+`Reflect.getMetadata`/`defineMetadata` lookups) require the
+[`reflect-metadata`](https://www.npmjs.com/package/reflect-metadata) polyfill to
+be loaded **once** before any decorator runs.
+
+This package does **not** import `reflect-metadata` for you — it declares it as
+an optional `peerDependency` instead. Importing it as an unconditional side
+effect would contradict this package's `"sideEffects": false` (a bundler is free
+to strip a side-effecting import from a tree-shakeable package, which would make
+the polyfill's presence non-deterministic).
+
+If you use any decorator from this package, import the polyfill once at your
+application's bootstrap, before anything else:
+
+```typescript
+import 'reflect-metadata';
+// ... the rest of your bootstrap
+```
+
+If your application already depends on `reflect-metadata` (e.g. via NestJS), no
+extra action is needed — the polyfill only needs to be loaded once per process.
+
 ## License
 
 MIT

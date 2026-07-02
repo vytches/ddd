@@ -1,15 +1,45 @@
 /* eslint-disable no-promise-executor-return */
-import { v4 as uuidV4, validate } from 'uuid';
 
 type UUID = 'v4';
 
+/**
+ * RFC 4122/9562 UUID matcher (versions 1-8, plus the nil and max UUIDs).
+ * Mirrors the validation semantics of the `uuid` npm package's `validate()`
+ * (v10+, e.g. the `regex.js` shipped in `uuid@11.1.0`) without the runtime
+ * dependency — case-insensitive, and deliberately NOT restricted to 1-5:
+ * the `uuid` package widened the version nibble to 1-8 and added the max
+ * UUID special case in v10.0.0 to support the newer RFC 9562 UUID versions
+ * (v6/v7/v8); narrowing this back to 1-5 would be a silent behavior
+ * regression for any consumer validating those UUIDs.
+ */
+const UUID_PATTERN =
+  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/i;
+
 export class LibUtils {
+  /**
+   * Generate a UUID v4 using the platform crypto API.
+   *
+   * `globalThis.crypto.randomUUID()` is available in:
+   *   - Node.js >= 19 (standard, no import required)
+   *   - All modern browsers (Web Crypto)
+   *   - Cloudflare Workers / Deno / Bun
+   *
+   * The library's `engines.node >= 22.19.0` ensures availability.
+   * Using globalThis avoids importing `node:crypto`, which Vite externalizes
+   * for browser-compat builds and breaks the utils foundation bundle.
+   *
+   * F-M7 (VB-002): this replaces the vendored `uuid` npm package, which was
+   * bundled inline into `utils`'s dist without a license attribution, a
+   * devDependency entry, or a security-patch path — see
+   * `contracts/src/events/domain-event-utils.ts` for the identical pattern
+   * used elsewhere in this monorepo.
+   */
   static getUUID(type?: UUID) {
     if (type === 'v4') {
-      return uuidV4();
+      return globalThis.crypto.randomUUID();
     }
 
-    return uuidV4();
+    return globalThis.crypto.randomUUID();
   }
 
   private static _isSpecialCaseFalse(input: unknown): boolean {
@@ -181,7 +211,7 @@ export class LibUtils {
   }
 
   static isValidUUID(value: string): boolean {
-    return validate(value);
+    return UUID_PATTERN.test(value);
   }
 
   static isValidInteger(value: number): boolean {

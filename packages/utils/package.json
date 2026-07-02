@@ -17,7 +17,8 @@
   "files": [
     "LLMGUIDE.md",
     "README.md",
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "keywords": [
     "ddd",

@@ -103,6 +103,7 @@ jobs:
           pnpm test --testNamePattern="(critical|security|hotfix)"
           pnpm lint --fix=false
           pnpm type-check
+          pnpm build
           echo "✅ Hotfix validation complete"
 
       - name: Full validation (Standard Release)
@@ -114,6 +115,15 @@ jobs:
           pnpm type-check
           pnpm build
           echo "✅ Full validation complete"
+
+      # VB-002 (AC1): publish integrity smoke test — pack + isolated npm
+      # install + require()/import()/tsc for every publishable package,
+      # outside the pnpm workspace. Runs after build, before this workflow's
+      # `release` job ever calls `publish-packages.sh`, so a broken artifact
+      # (unresolved .d.ts paths, ESM require() crashes, missing peer/prod
+      # deps) blocks the release instead of reaching npm.
+      - name: Run publish integrity smoke test
+        run: pnpm test:smoke
 
   release:
     runs-on: ubuntu-latest

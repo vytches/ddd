@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    // F-C3 (VB-002): loads the reflect-metadata polyfill once for every test
+    // file — see vitest.setup.ts for the full rationale.
+    setupFiles: ['./vitest.setup.ts'],
     include: ['packages/**/tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: [
       '**/node_modules/**',
@@ -57,12 +60,13 @@ export default defineConfig({
     //   'vitest-sonar-reporter': 'test-report.xml',
     // },
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: false,
-        isolate: true,
-      },
-    },
+    // F-H15 (VB-002): `test.poolOptions.threads.{singleThread,isolate}` was
+    // removed in Vitest 4.1 — pool sub-options are now top-level. Both
+    // values here were already Vitest's defaults (isolate: true, threads
+    // run in parallel), so this block is dropped rather than migrated
+    // 1:1 — `isolate` below is kept explicit for clarity, not because the
+    // default changed.
+    isolate: true,
     testTimeout: 10000,
     hookTimeout: 10000,
     teardownTimeout: 5000,
