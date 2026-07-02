@@ -10,8 +10,9 @@ priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > VS-015, VS-014, VP-006 (internal-perf slice; NestJS-adapter remainder →
 > VP-006b).
 >
-> **No board movement this cycle**: VS-006/VS-008 still `planned` (6 days idle
-> since flagged as recommended-next).
+> **Just shipped (2026-07-02)**: VS-006 done (CSV formula injection fix, commit
+> `46fd54e2`, SEC-RESILIENCE-001 resolved) — moved to `completed-tasks/`. VS-008
+> remains the last planned code item before v0.31.0.
 >
 > **Housekeeping resolved (2026-07-01 `/task-tidy`)**: VP-011 moved to
 > `completed-tasks/`.
@@ -33,7 +34,6 @@ _None._
 
 | ID      | Title                                                  | Status  | Age |
 | ------- | ------------------------------------------------------ | ------- | --- |
-| VS-006  | CsvMetricExporter — formula injection protection       | planned | 36d |
 | VD-004  | Interactive Documentation System                       | backlog | 55d |
 | VF-002  | Strategic Design Documentation                         | backlog | 55d |
 | VP-006b | NestJSContainerAdapter resolve/cold-start optimization | backlog | 1d  |
@@ -52,6 +52,6 @@ _None._
 
 ---
 
-**Recommended next task**: VS-006 (CSV formula injection, DREAD 7, 0.5h) —
-unchanged from last pulse, still not started. Publication gate remains the
-juz-ide-api VS-013 validation, now **14+ days overdue**.
+**Recommended next task**: VS-008 (EntityIdFactory deprecation suppress, 0.5h) —
+last planned code item before v0.31.0. Publication gate remains the juz-ide-api
+VS-013 validation, now **14+ days overdue**.
