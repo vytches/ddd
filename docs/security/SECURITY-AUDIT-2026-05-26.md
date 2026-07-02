@@ -301,7 +301,10 @@ registerDefaultHandler(handler: IOutboxMessageHandler): void {
 
 **Pakiet:** `@vytches/ddd-value-objects`  
 **Plik:** `packages/value-objects/src/id.value-object.ts:34`  
-**Severity:** LOW | DREAD: 4
+**Severity:** LOW | DREAD: 4  
+**Status:** ✅ RESOLVED (VS-008, commit `6428850d`, 2026-07-02) —
+`VYTCHES_SUPPRESS_DEPRECATION_WARNINGS=1` wycisza warning; domyślne zachowanie
+bez zmian
 
 ```typescript
 // Intencjonalne — deprecation warning, jeden raz per process
