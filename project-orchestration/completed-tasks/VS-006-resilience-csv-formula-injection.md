@@ -4,14 +4,15 @@
 
 ```yaml
 task_id: VS-006
-title: "resilience: CsvMetricExporter.escapeCsv — block formula injection chars"
+title: 'resilience: CsvMetricExporter.escapeCsv — block formula injection chars'
 type: bug
 priority: normal
 complexity: simple
 estimated_time: 0.5h
 created_by: agent (security-audit 2026-05-26)
 created_at: 2026-05-26
-status: planned
+updated_at: 2026-07-02
+status: done
 security_finding: SEC-RESILIENCE-001
 dread_score: 7
 audit_ref: docs/security/SECURITY-AUDIT-2026-05-26.md
@@ -96,7 +97,8 @@ private escapeCsv(value: string): string {
 
 ### Functional Requirements
 
-- [ ] Values starting with `=`, `+`, `-`, `@`, `|`, `%` → wrapped in double-quotes
+- [ ] Values starting with `=`, `+`, `-`, `@`, `|`, `%` → wrapped in
+      double-quotes
 - [ ] Existing behaviour for `,`, `"`, `\n` unchanged
 - [ ] Empty strings and normal metric names unchanged
 
@@ -107,9 +109,9 @@ private escapeCsv(value: string): string {
 
 ### Definition of Done
 
-- [ ] `escapeCsv` updated
-- [ ] Tests: each injection char → quoted
-- [ ] SEC-RESILIENCE-001 marked as resolved
+- [x] `escapeCsv` updated
+- [x] Tests: each injection char → quoted
+- [x] SEC-RESILIENCE-001 marked as resolved
 
 ## Agent Assignments
 
@@ -134,18 +136,19 @@ supporting_agents: []
 ### Current Status
 
 ```yaml
-overall_progress: 0%
-current_phase: planned
+overall_progress: 100%
+current_phase: done
 blockers: []
-last_updated: 2026-05-26
+last_updated: 2026-07-02
 ```
 
 ### Activity Log
 
-| Date       | Agent     | Action           | Result             |
-| ---------- | --------- | ---------------- | ------------------ |
-| 2026-05-26 | sec-audit | Finding detected | SEC-RESILIENCE-001 |
-| 2026-05-26 | human     | Task created     | VS-006 planned     |
+| Date       | Agent     | Action           | Result                                   |
+| ---------- | --------- | ---------------- | ---------------------------------------- |
+| 2026-05-26 | sec-audit | Finding detected | SEC-RESILIENCE-001                       |
+| 2026-05-26 | human     | Task created     | VS-006 planned                           |
+| 2026-07-02 | claude    | TDD fix + tests  | commit `46fd54e2`, 90/90 green, resolved |
 
 ## Code References
 
@@ -163,9 +166,9 @@ packages:
 
 ### Technical Risks
 
-| Risk                  | Probability | Impact | Mitigation                             |
-| --------------------- | ----------- | ------ | -------------------------------------- |
-| Output format change  | Certain     | Low    | Double-quotes are valid CSV per RFC4180 |
+| Risk                 | Probability | Impact | Mitigation                              |
+| -------------------- | ----------- | ------ | --------------------------------------- |
+| Output format change | Certain     | Low    | Double-quotes are valid CSV per RFC4180 |
 
 ## Testing Strategy
 
