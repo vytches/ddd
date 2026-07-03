@@ -14,12 +14,49 @@ estimated_time: 20h (spans 19 files; scope down per package during /analyze-ddd)
 created_by:
   human (feedback 2026-07-03, round 2 of project_examples_coverage_audit)
 created_at: 2026-07-03
-status: backlog
+status: done
 release_target: pre-first-public-publish (recommended — see Why)
 package: packages/*/LLMGUIDE.md
 findings:
   [project_examples_coverage_audit memory, delivered artifact 2026-07-03]
+completed_at: 2026-07-03
 ```
+
+## Completion Note (2026-07-03)
+
+Implemented via `/analyze-ddd` (approved analysis:
+`project-orchestration/analysis/VD-007-llmguide-completeness-pass.analysis.md`,
+decisions D-1..D-9, units U-0..U-11) and five sequential `/orchestrate-ddd`
+batches (D-8 volume-balanced batching, one Workflow script per batch,
+`project-orchestration/.workflow/`, gitignored scratch):
+
+- **Batch 1**: `di` stale-API pre-flight correction (D-2) + units `di`,
+  `validation`, `acl`, `cqrs`, `domain-services` — all GO.
+- **Batch 2**: `domain-services` combo-enrichment fix (human feedback after
+  batch 1 review — row-only pass was too thin) + `testing`, `nestjs`,
+  `aggregates` — all GO.
+- **Batch 3**: `contracts` (~70 symbols, solo run per D-8) — GO on first
+  attempt.
+- **Batch 4**: `policies` (~61 symbols) — GO after one fix cycle (verifier
+  caught a real fabrication: `withEvents` documented as a 2-arg positional call,
+  actual signature is curried).
+- **Batch 5**: `enterprise` (last, per D-6) — cross-reference table +
+  naming-conflict resolution section (D-5), not full per-symbol parity.
+
+Also folded in packages discovered mid-analysis but missed by the original
+audit: `acl`, `aggregates`, `cqrs`, `domain-services` (OQ-1, answered yes).
+
+**AC #7 verification**: independent re-audit (11 parallel Explore agents, same
+grep-every-export-against-LLMGUIDE methodology as the original audit) across all
+11 touched packages — zero remaining zero-mention symbols in any of them; `di`'s
+stale names (`IContainer`/`Lifetime`/`ContainerError`) confirmed gone.
+
+Committed as three separate commits on
+`feature/VD-007-llmguide-completeness-pass`: `f62e7cdf` (11 packages'
+LLMGUIDE.md), `6b570f21` (`.gitignore` — unrelated repo-hygiene entry for the
+Workflow scratch dir), `025c1312` (analysis artifact). Pre-commit hooks ran
+clean (283 tests, 16 files, 22 Nx projects, no circular deps) — no `--no-verify`
+used (project hook hard-blocks it).
 
 ## Why
 
@@ -61,30 +98,41 @@ coverage.
 
 ## Acceptance Criteria
 
-1. [ ] `di`: fix the Key API table entries describing non-existent symbols
+1. [x] `di`: fix the Key API table entries describing non-existent symbols
        (`IContainer` → `IDependencyContainer`, `Lifetime` → `ServiceLifetime`,
-       `ContainerError` → `DIError`) — a correction, not an addition.
-2. [ ] For each undocumented export identified in the audit, add at minimum a
+       `ContainerError` → `DIError`) — a correction, not an addition. Done in
+       batch 1 pre-flight (D-2); confirmed gone in AC #7 re-audit.
+2. [x] For each undocumented export identified in the audit, add at minimum a
        Key API table row with an accurate description sourced from the code
-       (JSDoc/signature) — no fabricated behavior.
-3. [ ] For exports that represent a meaningfully distinct usage pattern (not
+       (JSDoc/signature) — no fabricated behavior. All 11 touched packages at
+       zero zero-mention symbols per AC #7 re-audit.
+3. [x] For exports that represent a meaningfully distinct usage pattern (not
        just a supporting type), add a short Patterns entry with a working code
        sample — judgment call per package, to be scoped during /analyze-ddd.
-4. [ ] Priority order for the pass (worst-covered first): `testing`,
+       Applied via D-4 heuristic; strengthened mid-task with a binding COMBO
+       REQUIREMENT (human feedback after batch 1) so every unit adds at least
+       one example combining 2+ symbols, not isolated snippets.
+4. [x] Priority order for the pass (worst-covered first): `testing`,
        `contracts`, `policies`, `nestjs`, `di`, `validation` — these six account
-       for the bulk of the 300+ gap.
-5. [ ] `nestjs`: `VytchesDDDFeatureModule`, `ContextAwareEventDispatcher`,
+       for the bulk of the 300+ gap. All six done, plus 4 more discovered
+       mid-analysis (`acl`, `aggregates`, `cqrs`, `domain-services`, OQ-1) and
+       `enterprise`.
+5. [x] `nestjs`: `VytchesDDDFeatureModule`, `ContextAwareEventDispatcher`,
        `GLOBAL_QUERY_BUS`/`GLOBAL_COMMAND_BUS`/`LOCAL_EVENT_BUS`, and the
        `OutboxProcessorModule`/`OutboxProcessorService` subsystem specifically
        need coverage — these are central to how `forFeature()` cross-context
-       wiring actually works.
-6. [ ] Decide and document scope for `enterprise`: given it's an intentionally
+       wiring actually works. Batch 2; includes a combined `forFeature()`-based
+       example using all three bus tokens together.
+6. [x] Decide and document scope for `enterprise`: given it's an intentionally
        curating meta-package, determine whether closing gaps in the six packages
        it re-exports from is sufficient, or whether `enterprise/LLMGUIDE.md`
-       itself needs additional pointers.
-7. [ ] Spot-check: re-run the same audit methodology (grep every exported symbol
+       itself needs additional pointers. Decision D-5: cross-reference table to
+       each re-exported package's own LLMGUIDE.md + dedicated naming-conflict
+       resolution section (9 real conflicts documented), not full row parity.
+7. [x] Spot-check: re-run the same audit methodology (grep every exported symbol
        name against its LLMGUIDE.md) after the pass to confirm the gap actually
-       closed, not just that content was added.
+       closed, not just that content was added. Done — 11 parallel Explore
+       agents, zero zero-mention symbols found across all touched packages.
 
 ## Out of scope
 
