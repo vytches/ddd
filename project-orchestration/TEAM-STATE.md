@@ -1,7 +1,7 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-07-02 by manual triage_ _Updated by `/pulse`. Read-only for
-humans — agents write here._
+_Last sync: 2026-07-03 by `/pulse`_ _Updated by `/pulse`. Read-only for humans —
+agents write here._
 
 ---
 
@@ -17,18 +17,25 @@ app logging layer. This **cancelled** VS-009/010/011/012 as obsolete. Reinforces
 "most comprehensive lean DDD library" positioning without competing against
 Pino/Winston.
 
-**Just shipped:** **VS-007 + VS-015 DONE** — merged to develop (commits
-`54ac0fef`, `f11f6f96`), task files moved to `completed-tasks/`. VS-007: warn
-when OutboxProcessor default handler is replaced (SEC-MESSAGING-001). VS-015:
-preserve outbox stack trace + widen LoggingMiddleware logger type. These close
-the remaining DX gaps opened by the VS-013 logging-removal pivot. VS-014
-(configureDiagnostics) + VP-011 (dispose on onModuleDestroy) landed earlier.
+**Just shipped (2026-07-03):** **VD-007 + VB-003 DONE** — both moved to
+`completed-tasks/`. VD-007: LLMGUIDE.md completeness pass, 300+ previously
+undocumented exports closed across 11 packages (5 `/orchestrate-ddd` batches,
+verified via 11-agent independent re-audit — zero gaps remaining). VB-003:
+`forFeature()` DI wiring fix (**BREAKING CHANGE** — stops cross-context event
+leak, F-C4). These are library-quality/audit infrastructure, not v0.31.0
+publication-path code — they unblock VF-024 (API surface curation) to proceed
+next.
+
+**Previously shipped:** VS-007 + VS-015 DONE (commits `54ac0fef`, `f11f6f96`).
+VS-014 (configureDiagnostics) + VP-011 (dispose on onModuleDestroy) landed
+earlier.
 
 **Next target**: v0.31.0 full — ~1h remaining across two small audit findings:
 **VS-006** (CSV formula injection, 0.5h) + **VS-008** (deprecation suppress,
-0.5h). Both `planned`, zero dependencies, can start immediately. Publication
-gate: **juz-ide-api validation of the VS-013 logging removal** (still open, now
-slipped 12+ days). VS-007/014/015 + VP-011 are off the remaining-work list.
+0.5h). Both `planned`, now **7 days** with zero activity. Publication gate:
+**juz-ide-api validation of the VS-013 logging removal** (still open, now
+slipped **14+ days** — highest-risk item on the board). VS-007/014/015 + VP-011
+are off the remaining-work list.
 
 ---
 
@@ -39,16 +46,21 @@ slipped 12+ days). VS-007/014/015 + VP-011 are off the remaining-work list.
 1. **VALIDATE VS-013 against juz-ide-api (PUBLICATION BLOCKER)** — application-
    logging layer was removed (merged 2026-06-05). If the consumer is workspace-
    linked, removal of `@vytches/ddd-logging` is breaking immediately. Confirm
-   237+ aggregates `build && test` green THIS WEEK — this is the publication
-   gate for v0.31.0 and has now slipped **14+ days** since first flagged
-   (2026-06-17), with zero recorded progress.
-2. **VS-006 + VS-008 still `planned`, zero activity for 6 days** — both
+   237+ aggregates `build && test` green by **2026-07-05** — this is the
+   publication gate for v0.31.0 and has now slipped **14+ days** since first
+   flagged (2026-06-17), with zero recorded progress. Single highest-risk item
+   on the board.
+2. **VS-006 + VS-008 still `planned`, zero activity for 7 days** — both
    zero-blocker, ~1h combined (VS-006 CSV formula-injection guard DREAD 7,
    VS-008 deprecation suppress). Move to `in_progress` and ship — last code
    items before v0.31.0 publish. Bottleneck is clarity/prioritization, not a
-   technical blocker. Both housekeeping/triage items from prior pulses are now
-   resolved: VP-011 archived 2026-07-01 (`/task-tidy`); VP-002/VF-001/VT-001
-   triaged and closed `done` 2026-07-02 (see Team Notes).
+   technical blocker.
+3. **Choose scope for the pre-first-publish pipeline** — VD-007 and VB-003 (both
+   DONE 2026-07-03) were preconditions for library-quality work to proceed;
+   VF-024 (API surface curation, 10h) can now start, followed by/ batched with
+   VB-004 (6h), VF-023 (12h), VF-025 (14h — normal priority). ~30-44h combined,
+   all pre-first-public-publish only (become breaking changes after release). No
+   blocker, just needs a sequencing decision.
 
 ---
 
@@ -60,87 +72,126 @@ _N/A — this is a library project, no mobile UI._
 
 ## ⚙️ Technical Pulse
 
-<!-- Updated by @tech-lead on 2026-07-01 -->
+<!-- Updated by @tech-lead on 2026-07-03 -->
 
-**Status**: 🟡 Yellow | **Velocity**: Stalled — awaiting human decision, not a
-technical blocker | **Debt**: 0 major / 0 minor
+**Status**: 🟡 Yellow | **Velocity**: Momentarily accelerating — two
+analysis-driven audit tasks just landed (VD-007, VB-003) + 7 backlog findings
+from LIB-AUDIT-2026-07-02 now unblocked | **Debt**: 0 major / 0 minor
 
-**Just landed** (unchanged since 2026-06-30): VS-007, VS-015, VS-014, VP-011
-(VP-006 internal-perf slice closed 2026-06-30, NestJS-adapter remainder carved
-out as VP-006b).
+**Just landed** (2026-07-03):
 
-**Active development**: None. Two zero-blocker ~1h tasks (VS-006, VS-008) have
-sat `planned` for 6 days with no activity — the recommended-next-task signal
-from 2026-06-30 has not translated into work starting.
+- **VD-007 DONE**: LLMGUIDE.md completeness pass across 11 packages (300+
+  undocumented exports now documented); 5-batch `/orchestrate-ddd` run + 11
+  parallel verification agents, zero zero-mention symbols remaining. Commits
+  `f62e7cdf`, `6b570f21`, `025c1312` on
+  `feature/VD-007-llmguide-completeness-pass`. Pre-commit hooks green (283
+  tests, 16 files, 22 Nx projects).
+- **VB-003 DONE**: NestJS `forFeature` DI wiring critical fix (F-C4:
+  `ModulesContainer` leak stopped cross-context event dispatch; 215/215 tests
+  green). **Breaking change** (stops cross-context event leak) — flag in
+  changelog. Staged, not yet merged.
 
-**Blocked**: None. Dependency graph acyclic; max chain depth 0.
+**Active development**: None in-progress. 13 tasks in backlog:
 
-**Stale in-progress**: resolved 2026-07-02. VP-002, VF-001, VT-001 triaged and
-closed `done` — library-side scope complete (VP-002: `IBatchRepository`/
-`MemoizedSpecification`; VF-001: `@vytches/ddd-lint` MVP dogfooded; VT-001:
-pre-release 100%, post-release covered by VT-002..005) with remaining scope
-explicitly descoped/opportunistic, not deferred work.
+- **Pre-first-publish critical**: VB-004 (6h, outbox atomic claim + timer
+  leaks), VF-023 (12h, VO/AggregateRoot always-valid + apply atomicity), VF-024
+  (10h, API barrel curation + name collisions), VF-025 (14h, event-bus
+  hardening + projections), VD-005 (8h, docs drift cleanup).
+- **Post-first-publish**: VP-012 (6h, hotpath perf), VT-006 (10h, policies
+  decorators + testing deepEqual coverage).
+- **Research/follow-up**: VD-006 (8h spike, coverage matrix + verification
+  mechanism), VF-026 (4h, ddd-lint anti-pattern rules — fanout-in-handler,
+  deep-import).
+- **Gated by entry conditions**: VA-001 (awaiting juz-ide-api production
+  validation ~2026-08/09); VP-006b (best after VP-006 lands).
+- **Opportunistic, explicitly deferred**: VD-004, VF-002.
 
-VP-011 archival drift resolved 2026-07-01 (moved to `completed-tasks/`).
+Two zero-blocker ~1h tasks (VS-006, VS-008) have sat `planned` for 7 days with
+no activity.
 
-**Debt**: 0 major, 0 minor. Same 15m cleanup candidate carried forward:
-`resilience/metric-registry.ts:50` raw `Error` vs `.message`.
+**Blocked**: None. Dependency graph acyclic; VB-003 + VD-007 completion unblocks
+VF-026 and downstream audit tasks.
 
-**Critical path** (~1h code + publication gate to v0.31.0-full):
+**Stale**: None. VD-004 and VF-002 are 55 days without update but explicitly
+deferred as opportunistic post-v0.31.0 (moved `planned` → `backlog` 2026-07-02),
+not stale. VP-002/VF-001/VT-001/VP-011 resolved 2026-07-01/02.
+
+**Debt**: 0 major, 0 minor. One 15m cleanup candidate carried forward:
+`resilience/metric-registry.ts:50` raw `Error` vs `.message` — rolled into
+VP-012 scope.
+
+**Critical path** (pre-v0.31.0 publication, ~1h code + gate):
 
 1. **Validate VS-013 vs juz-ide-api** (publication gate — **14+ days overdue**,
-   highest risk item on the board)
+   highest risk item on the board — ACTION REQUIRED THIS WEEK)
 2. **VS-006** (0.5h) — CSV formula-injection guard (DREAD 7) — move to
    `in_progress`
 3. **VS-008** (0.5h) — value-objects deprecation suppress
 4. **Publish v0.31.0** → await consumer feedback before v0.32.0 scoping
 
-**Upcoming** (post-v0.31.0): VA-001 analysis approved 2026-07-01 (13 decisions,
-2 HIGH security fixes identified, threat model complete) but entry conditions
-(production validation ~2026-08/09) still unmet — does not jump queue. VF-002
-(strategic design docs) remains `planned`, opportunistic post-release (VF-001
-closed 2026-07-02).
+**Critical path** (post-v0.31.0, library quality, ~30-44h): VF-024 (API
+curation) unblocks library-api-guardian sign-off on the other findings; then
+batch VB-004/VF-023/VF-025 or sequence by risk.
 
-**Coverage**: 69.29% (up from 63.98%, VT-002..005 series 2026-05-10). Stable
-baseline; further gaps opportunistic.
+**Upcoming**: VA-001 (13 decisions approved, entry conditions unmet). VF-002/
+VD-004 deferred, opportunistic.
+
+**Coverage**: 69.29% (stable, VT-002..005 series 2026-05-10). VT-006 is
+enrichment, not recovery.
 
 ---
 
 ## 💼 Business Pulse
 
-<!-- Updated by @product-owner on 2026-07-01 -->
+<!-- Updated by @product-owner on 2026-07-03 -->
 
 **Next milestone**: v0.31.0 (security hardening + DX polish) — **gap ~4–6 days**
 (unchanged code scope, gate risk rising). Remaining: VS-006 (CSV formula
 injection, 0.5h) + VS-008 (deprecation suppress, 0.5h) — ~1h combined, still
-`planned`.
+`planned`, 7 days idle.
 
 **Critical validation now blocking publication gate**: VS-013 (application-
 logging removal) against juz-ide-api (237+ aggregates, 16K tests). **14+ days
 slipped** — if workspace-linked or peer-dependent on `@vytches/ddd-logging`,
-removal is an immediate breaking change. **Must run green `build && test` THIS
-WEEK before v0.31.0 scope closes.** No other technical blockers; chain depth 0.
+removal is an immediate breaking change. **Must run green `build && test` by
+2026-07-05 or publication slips another week.** No other technical blockers.
 
-**New this cycle**: **VA-001 (AI agent package) analysis approved 2026-07-01** —
-13 decisions (D1–D13) including 2 HIGH security fixes (mandatory
-`requiredPermission`, enforced dispatcher pipeline order), threat model
-complete. Entry conditions (production validation in juz-ide-api ~2026-08/09)
-remain unmet — explicit decision: **library-quality work stays prioritized,
-VA-001 does not jump the queue.**
+**Just shipped (2026-07-03)**:
 
-**Validation record**: Zero speculative work. Every active task is audit-driven
-(VS-001..008), consumer-feedback-driven (VP-009/010/011), or DX polish (VS-014).
-VA-001 correctly gated behind real demand signal.
+- **VD-007 DONE** — LLMGUIDE.md completeness pass: 300+ undocumented exports
+  across 11 packages now documented. Five sequential `/orchestrate-ddd` batches,
+  all `GO`. Verification: 11 parallel Explore agents, zero zero-mention symbols
+  remaining.
+- **VB-003 DONE** — `forFeature` DI wiring fix (CRITICAL finding F-C4,
+  cross-context event leak stopped). **BREAKING CHANGE** — flag as such in
+  changelog, not plain `fix:`. 215/215 nestjs tests green; consumer validation
+  confirmed safe (no juz-ide-api call-sites on the affected API). Follow-ups
+  spawned: VF-026 (lint anti-pattern rules), VD-006 (example coverage matrix).
+
+**Pre-first-public-publish pipeline** (post-v0.31.0, ~7–10 days estimated, ~30h
+combined): VD-005 (docs truth cleanup, 8h), VF-023 (DDD foundation guarantees —
+always-valid VO/AggregateRoot atomicity, 12h, CRITICAL structural), VF-024 (API
+surface curation — barrel + name collisions, 10h). All three are
+pre-first-public-publish only — become breaking changes after initial release,
+must ship before first npm publish.
+
+**Validation record**: Zero speculative work. VA-001 (AI agent package, 13
+decisions approved 2026-07-01) correctly gated behind production validation
+(~2026-08/09) — does not jump queue.
 
 **Segment coverage**: Production/scaling teams ~70% served. First-time DDD
 adopters ~30% (VF-001 MVP shipped and closed 2026-07-02; VF-002 still deferred —
-gap remains; DX audit 2026-03-31 scored onboarding 4/10). AI-agent integrators
-0% (VA-001 concept-approved, no demand signal yet).
+DX audit 2026-03-31 scored onboarding 4/10). AI-agent integrators 0% (VA-001
+concept-approved, no demand signal yet — correct call, no premature investment).
 
-**Cut candidate if capacity tightens**: none material in the v0.31.0 scope
-itself (VS-006/008 are ~1h, zero risk; VS-013 validation isn't optional, it's
-the gate). The 3 previously-stale in-progress tasks (VP-002, VF-001, VT-001) are
-no longer a scoping question — triaged and closed `done` 2026-07-02.
+**Cut candidate if capacity tightens**: VD-004 (interactive docs, 20h, already
+opportunistic post-release). Do NOT cut the three pre-first-publish tasks
+(VD-005/VF-023/VF-024) — deferral turns them into breaking changes.
+
+**Unvalidated / research items**: VD-006 (example coverage evaluator mechanism
+has no precedent in the codebase — scope it via /analyze-ddd before committing
+to the 8h estimate); VF-025 (11 event-bus fixes, 14h, post-publish but high
+blast radius — backward-compat decision still pending).
 
 **Validate this week** (highest risk, now overdue): juz-ide-api build green past
 VS-013. Target before 2026-07-05 or publication slips another week.
@@ -149,14 +200,37 @@ VS-013. Target before 2026-07-05 or publication slips another week.
 
 1. Run VS-013 juz-ide-api validation (publication blocker, 14+ days overdue).
 2. Ship VS-006 + VS-008 (~1h combined), then publish v0.31.0.
-
-(Triage of the 3 stale in-progress tasks — done 2026-07-02, see Team Notes.)
+3. Decide sequencing for the pre-first-publish pipeline (VF-024 first — unblocks
+   API sign-off on the rest).
 
 ---
 
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-07-03] @pulse: VD-007 (LLMGUIDE completeness, 11 packages) and VB-003
+(forFeature DI wiring fix, BREAKING CHANGE) both shipped today — moved to
+`completed-tasks/`. These clear preconditions for the next library-quality
+phase: VF-024 (API surface curation) can now proceed. VS-013 juz-ide-api
+validation is unchanged and now the sole item blocking v0.31.0 — **14+ days
+overdue, zero recorded progress across 3 consecutive pulses**. VS-006/VS-008 now
+7 days idle in `planned`. Health: 🟡 yellow — same bottleneck as 2026-07-01/02
+(decision/attention on VS-013), not capability; library-quality work itself is
+moving well.
+
+[2026-07-03] @tech-lead: 🟡 YELLOW. Two audit-infrastructure tasks landed
+(VD-007, VB-003) — unblocks VF-024 and the rest of the 7 LIB-AUDIT-2026-07-02
+findings (~30-44h, all pre-first-publish-critical). VS-013 remains the single
+publication blocker, still 14+ days overdue with no visible recovery plan. Debt
+unchanged 0/0. No new stale/blocked tasks.
+
+[2026-07-03] @product-owner: Milestone gap unchanged ~4-6d; VS-013 validation is
+the only thing standing between now and v0.31.0. Pre-first-publish pipeline
+(VD-005/VF-023/VF-024, ~30h) is well-sequenced and correctly gated as
+publish-before-breaking-changes-lock-in. Segment coverage unchanged (prod/
+scaling 70%, first-time adopters 30%, AI integrators 0% — all correctly
+prioritized). No material cut candidate beyond already-deferred VD-004.
 
 [2026-07-02] @human: Triaged the 3 stale in-progress tasks per pulse's repeated
 request — closed all as `done`, moved to `completed-tasks/`. VP-002:
