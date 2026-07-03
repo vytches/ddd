@@ -60,6 +60,129 @@ const event: IDomainEvent<OrderPlacedPayload> = {
 | `CapabilityRegistry`                | class          | Manages capability instances keyed by constructor                                                                                                                             |
 | `IAggregateCapability`              | interface      | Marks a class as an aggregate-attachable capability                                                                                                                           |
 
+### Event Handling & Dispatch (additional)
+
+| Export                                             | Kind           | Description                                                                                                                                     |
+| -------------------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `EventBusMiddleware`                               | type           | `(next) => (event) => Promise<void>` — intercepts/transforms events inside `IEventBus`'s pipeline; wired via `BaseEventBusOptions.middlewares`  |
+| `IEventDispatcher`                                 | abstract class | Dispatches events from aggregates: `dispatchEventsForAggregate(aggregate)`, `dispatchEvent(event)`, `dispatchEvents(...events)`                 |
+| `IEnhancedEventDispatcher`                         | abstract class | Extends `IEventDispatcher` with `use(middleware)` and `registerProcessor(processor)`                                                            |
+| `EventMiddleware`                                  | type           | `(event, next) => Promise<void>` — pipeline middleware registered via `IEnhancedEventDispatcher.use()`                                          |
+| `IEventProcessor`                                  | interface      | `process(event)`, `canProcess(event)` — pluggable processor registered via `IEnhancedEventDispatcher.registerProcessor`                         |
+| `IEventPersistenceHandler`                         | abstract class | `handleEvent(event): Promise<number>`, `getCurrentVersion(aggregateId)` — persists one event, returns the new aggregate version                 |
+| `IEventHandler<T>`                                 | interface      | Class-based handler contract: `handle(event: T): Promise<void> \| void`; pass an instance to `IEventBus.registerHandler`                        |
+| `EventHandlerFn<T>`                                | type           | `(event: T) => Promise<void> \| void` — function-handler signature used by `IEventBus.subscribe`                                                |
+| `EventHandlerMetadata`                             | interface      | `{ eventType: Constructor }` — metadata shape stored by the `@EventHandler` decorator (in `@vytches/ddd-events`)                                |
+| `isEventHandler(obj)`                              | function       | Type guard: `obj is IEventHandler<IDomainEvent>`; true when `obj` has a callable `handle` method                                                |
+| `EVENT_HANDLER_METADATA` / `EVENT_HANDLER_OPTIONS` | symbol         | `@internal` — decorator metadata keys re-exported only so sibling `@vytches/ddd-*` packages can resolve them; not part of the consumer contract |
+| `IAggregateWithEvents`                             | interface      | `getDomainEvents()`, `commit()`, `hasChanges()` — parameter type of `IEventDispatcher.dispatchEventsForAggregate`                               |
+
+### Event Store
+
+| Export                     | Kind      | Description                                                                                                                                                                             |
+| -------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IEventStore`              | interface | Minimal event store: `getEvents(aggregateId)`, `saveEvents(aggregateId, events, expectedVersion)`, `getEventsAfterVersion(aggregateId, version)`                                        |
+| `IAdvancedEventStore`      | interface | Full-featured store — stream append/read, global log read, snapshots, stream metadata, optional subscriptions. Entry point for the combo pattern below                                  |
+| `IAuditEvent`              | interface | Auditable event record: `eventId`, `timestamp`, `aggregateId`, `aggregateType`, `aggregateVersion`, `eventName`, `payload?`, `actor?`, `previousState?`                                 |
+| `IEventUpcaster<TIn,TOut>` | interface | `upcast(payload, metadata?): TOut` — transforms an event payload across schema versions; registered via `IVersioningCapability.registerUpcaster`                                        |
+| `IStoredDomainEvent<P>`    | interface | `IDomainEvent<P>` persisted with `eventId`, `aggregateId`, `aggregateType`, `aggregateVersion`, `timestamp` — input type for `appendToStream`                                           |
+| `IAppendResult`            | interface | `{ streamId, fromVersion, toVersion, events, position }` — return value of `appendToStream`                                                                                             |
+| `IStoredEvent<T>`          | interface | `IStoredDomainEvent<T>` plus `position`, `streamId`, `streamVersion`, `globalVersion`, `checksum?` — shape read back from a stream                                                      |
+| `IReadStreamOptions`       | interface | `{ fromVersion?, maxCount?, direction?, resolveLinkTos? }` — options for `readStream`                                                                                                   |
+| `IReadAllOptions`          | interface | `{ fromPosition?, maxCount?, direction?, filterByEventType?, filterByStreamPrefix? }` — options for `readAll`                                                                           |
+| `IEventStream<T>`          | interface | A page of events from `readStream`: `{ streamId, events, fromVersion, lastVersion, isEndOfStream, nextVersion }`                                                                        |
+| `IGlobalEventStream<T>`    | interface | A page of events from `readAll`: `{ events, fromPosition, nextPosition, isEndOfStream }`                                                                                                |
+| `IStreamMetadata`          | interface | `{ streamId, created, updated, version, eventCount, firstEventPosition?, lastEventPosition?, deleted?, customMetadata? }` — return type of `getStreamMetadata`                          |
+| `IEventSerializer`         | interface | `serialize(event)`, `deserialize(data)`, `getContentType()` — plugged into `IEventStoreConfig.serializer`                                                                               |
+| `IEventStoreConfig`        | interface | Advanced-store configuration: `serializer?`, `enableSnapshots?`, `snapshotFrequency?`, `enableOptimisticConcurrency?`, `enableChecksums?`, `maxEventsPerStream?`, `eventRetentionDays?` |
+| `IEventStoreAdapter`       | interface | Connection lifecycle for a store implementation: `connect()`, `disconnect()`, `isConnected()`, `clear?()`                                                                               |
+
+### Event Replay
+
+| Export                  | Kind      | Description                                                                                                                                                                                           |
+| ----------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IEventReplay`          | interface | Replays stored events through a handler: `replayFromStream`, `replayAll`, `replayWithFilter`, `getEventsAsIterable`, `countEvents`, `estimateReplayDuration`. Entry point for the combo pattern below |
+| `IAdvancedEventReplay`  | interface | Extends `IEventReplay` with `startReplaySession()` for pausable/resumable/cancellable replay                                                                                                          |
+| `IReplaySession`        | interface | Controllable session from `startReplaySession`: `sessionId`, `progress`, `status`, `pause()`, `resume()`, `cancel()`, `waitForCompletion()`, `onProgress()`, `onError()`                              |
+| `IEventReplayFactory`   | interface | `createBasicReplay()`, `createAdvancedReplay()`, `createCustomReplay(strategy)` — factory for replay strategy instances                                                                               |
+| `IReplayFilter`         | interface | Filter criteria: timestamp/version/position ranges, `eventTypes`, `aggregateTypes`, `aggregateIds`, `streamPrefix`, `maxEvents`, `direction`                                                          |
+| `IReplayConfig`         | interface | Execution tuning: `batchSize?`, `batchDelay?`, `parallel?`, `maxWorkers?`, `skipErrors?`, `eventTimeout?`, `reportProgress?`, `progressInterval?`                                                     |
+| `IReplayProgress`       | interface | Progress snapshot: `totalEvents`, `processedEvents`, `failedEvents`, `skippedEvents`, `currentPosition`, `percentComplete`, `eventsPerSecond`, `startTime`, `lastUpdate`                              |
+| `IReplayResult`         | interface | Outcome of a replay run: `eventsReplayed`, `eventsFailed`, `eventsSkipped`, `duration`, `averageSpeed`, `errors`, `finalProgress`, `success`                                                          |
+| `ReplayEventHandler`    | type      | `(event: IStoredEvent) => Promise<void>` — per-event callback passed to `replayFromStream`/`replayAll`                                                                                                |
+| `ReplayProgressHandler` | type      | `(progress: IReplayProgress) => void` — subscribed via `IReplaySession.onProgress`                                                                                                                    |
+| `ReplayErrorHandler`    | type      | `(error, event) => Promise<boolean>` — return `true` to continue past an error; subscribed via `IReplaySession.onError`                                                                               |
+
+### Validation (additional)
+
+| Export               | Kind      | Description                                                                                                                                |
+| -------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `IValidator<T>`      | interface | `validate(value: T): Result<T, IValidationErrors>` — validation contract sibling to `ISpecification`, returns `Result` instead of throwing |
+| `IValidationRule<T>` | interface | `{ property, validate: (value) => Result<true, IValidationError>, condition? }` — a single composable rule                                 |
+| `IValidationErrors`  | interface | `{ errors: IValidationError[], length }` — the failure branch of `IValidator.validate`                                                     |
+| `IValidationError`   | interface | `{ property, message, context? }` — a single validation failure                                                                            |
+
+### Capabilities (additional)
+
+| Export                                  | Kind      | Description                                                                                                                          |
+| --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `createCapabilityRegistry<T>()`         | function  | Factory returning `new CapabilityRegistry<T>()` — convenience constructor for typed registries                                       |
+| `CapabilityConstructor<T>`              | type      | `(new (...args) => T) & { capabilityType: string }` — constructor shape required by `CapabilityRegistry.get/has/remove`              |
+| `CapabilityMap`                         | type      | `Map<string, Capability>` — internal shape of a capability collection                                                                |
+| `CapabilityType<T>`                     | type      | Extracts the string discriminant `U` from `Capability<U>`                                                                            |
+| `IAuditCapability`                      | interface | `getAuditLog()`, `clearAuditLog()`, `getAuditStatistics?()` — aggregate capability for change history                                |
+| `ICheckpointCapability<TReadModel>`     | interface | `saveCheckpoint`, `loadCheckpoint`, `getInterval()` — projection capability for resumable read-model rebuilds                        |
+| `ICircuitBreakerCapability<TReadModel>` | interface | `recordSuccess`, `recordFailure`, `isOpen()`, `getState()`, `reset()` — projection capability for failure isolation                  |
+| `IDeadLetterCapability<TReadModel>`     | interface | `sendToDeadLetter`, `getDeadLetterEvents`, `retryDeadLetterEvent`, `clearDeadLetterQueue` — projection capability for poison events  |
+| `IEventSourcingCapability`              | interface | `loadFromEventStore`, `saveToEventStore`, `setEventStore`, `getEventStore` — aggregate capability wiring an `IEventStore`            |
+| `IProjectionCapability<T,TReadModel>`   | interface | Sibling of `IAggregateCapability` for projection engines: `attach`, `detach?`, `initialize?`, `cleanup?`                             |
+| `ISnapshotCapability<TState,TMeta>`     | interface | `createSnapshot`, `restoreFromSnapshot`, `saveTemporaryState?`, `getLastSnapshotTimestamp?` — produces/consumes `IAggregateSnapshot` |
+| `IVersioningCapability`                 | interface | `registerUpcaster`, `handleVersionedEvent`, `getRegisteredEventTypes`, `hasUpcaster` — aggregate capability for schema evolution     |
+
+### Domain (additional)
+
+| Export                          | Kind      | Description                                                                                |
+| ------------------------------- | --------- | ------------------------------------------------------------------------------------------ |
+| `IEntityIdConstructorParams<T>` | interface | `{ value: T, type: IdType }` — constructor parameter shape for `IEntityId` implementations |
+
+### Testing
+
+| Export                | Kind      | Description                                                                                                         |
+| --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| `ITestClock`          | interface | `now()`, `advance(ms)`, `setTime(date)`, `reset()` — controllable clock for deterministic time-based tests          |
+| `ITestHarness<T>`     | interface | `setup()`, `teardown()`, `execute(scenario)`, `getContext()` — wraps a test environment's lifecycle                 |
+| `ISafeRunResult<T,E>` | interface | `{ error?, result?, isSuccess(), isFailure() }` — outcome of a guarded test execution                               |
+| `ITestDataBuilder<T>` | interface | `build()`, `reset()`, `clone()` — fluent test-data builder contract                                                 |
+| `ITestScenario`       | interface | `{ name, description?, setup?, execute, cleanup?, expectedOutcome? }` — a named, runnable test scenario             |
+| `ITestFixture<T>`     | interface | `create()`, `createMany(count)`, `createWith(overrides)`, `getDefaults()` — fixture factory contract                |
+| `TestClockOptions`    | interface | `{ initialTime?, frozen?, timezone?, autoAdvance? }` — configuration for `ITestClock` implementations               |
+| `TestHarnessOptions`  | interface | `{ timeout?, captureErrors?, restoreState?, context?, hooks? }` — configuration for `ITestHarness` implementations  |
+| `TestScenarioOptions` | interface | `{ tags?, priority?, skip?, only?, retry?, timeout?, requiredEnv?, metadata? }` — configuration for `ITestScenario` |
+
+### Repositories (additional)
+
+| Export                | Kind      | Description                                                                                                                              |
+| --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `IRepositoryProvider` | interface | `getRepository<T>(name): T \| undefined` — registry/factory lookup contract, simpler than `IUnitOfWork.getRepository` (no throw on miss) |
+| `IQueryRepository<T>` | interface | Read-side of CQRS: `findAll()`, `findWithPagination(limit, offset)`, `count()`                                                           |
+| `IWriteRepository<T>` | interface | Write-side of CQRS: `create(entity)`, `update(entity)`, `deleteById(id)`                                                                 |
+
+### Shared (additional)
+
+| Export                             | Kind      | Description                                                                                                                                                                          |
+| ---------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `IAggregateSnapshot<TState,TMeta>` | interface | `{ aggregateId, version, aggregateType, state, timestamp, metadata?, lastEventId?, checksum? }` — used by `ISnapshotCapability` and `IAdvancedEventStore.getSnapshot`/`saveSnapshot` |
+
+### Diagnostics
+
+| Export                          | Kind      | Description                                                                                                                                                                       |
+| ------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `DiagnosticsSink`               | interface | Consumer-implemented sink: `warn(message, context?)`, `error(message, error?, context?)` — passed to `configureDiagnostics({ sink })`                                             |
+| `DiagnosticsLevel`              | type      | `'silent' \| 'error' \| 'warn'` — verbosity passed to `configureDiagnostics({ level })`                                                                                           |
+| `DiagnosticsOptions`            | interface | `{ sink?, level? }` — argument shape for `configureDiagnostics`                                                                                                                   |
+| `configureDiagnostics(options)` | function  | Configures the library's internal diagnostics channel (sink + level). See pattern below                                                                                           |
+| `internalLogger`                | const     | `@internal` — library-internal diagnostics shim (`warn`/`error`) delegating to the configured `DiagnosticsSink`; not an application logging layer, do not import in consumer code |
+
 ## Patterns
 
 ### Implementing a repository
@@ -154,6 +277,181 @@ class MyEventBus extends IEventBus<IDomainEvent> {
 }
 ```
 
+### Using `createDomainEvent`
+
+```typescript
+import { createDomainEvent } from '@vytches/ddd-contracts';
+
+// eventId + timestamp are generated automatically; only pass what varies
+const event = createDomainEvent(
+  'OrderPlaced',
+  { orderId: 'o-1', amount: 100 },
+  { correlationId: 'req-42' }
+);
+// event.metadata.eventId and event.metadata.timestamp are already filled in
+await eventBus.publish(event);
+```
+
+### Implementing `IValidator`
+
+```typescript
+import type { IValidator, IValidationErrors } from '@vytches/ddd-contracts';
+import { Result } from '@vytches/ddd-contracts';
+
+interface CreateOrderInput {
+  customerId: string;
+  items: unknown[];
+}
+
+class CreateOrderValidator implements IValidator<CreateOrderInput> {
+  validate(
+    value: CreateOrderInput
+  ): Result<CreateOrderInput, IValidationErrors> {
+    const errors = [];
+    if (!value.customerId) {
+      errors.push({
+        property: 'customerId',
+        message: 'customerId is required',
+      });
+    }
+    if (value.items.length === 0) {
+      errors.push({
+        property: 'items',
+        message: 'at least one item is required',
+      });
+    }
+    if (errors.length > 0) {
+      return Result.fail({ errors, length: errors.length });
+    }
+    return Result.ok(value);
+  }
+}
+```
+
+### Event-sourcing workflow: append → read → replay → snapshot
+
+Chains `IAdvancedEventStore`, `IEventReplay`, and `IAggregateSnapshot` — the
+layers a typical event-sourced aggregate combines to persist its history and
+rehydrate state, instead of using any one of them in isolation.
+
+```typescript
+import type {
+  IAdvancedEventStore,
+  IEventReplay,
+  IStoredDomainEvent,
+  IAggregateSnapshot,
+} from '@vytches/ddd-contracts';
+
+declare const eventStore: IAdvancedEventStore;
+declare const eventReplay: IEventReplay;
+declare const order: { apply(e: IStoredDomainEvent): void; toState(): unknown };
+
+const streamId = `order-${orderId}`;
+
+// 1. Append events to a stream (produced when an aggregate is saved)
+const events: IStoredDomainEvent[] = [
+  {
+    eventId: crypto.randomUUID(),
+    eventName: 'OrderPlaced',
+    aggregateId: orderId,
+    aggregateType: 'Order',
+    aggregateVersion: 1,
+    timestamp: new Date(),
+    payload: { amount: 100 },
+  },
+];
+const appendResult = await eventStore.appendToStream(streamId, events);
+// appendResult: { streamId, fromVersion, toVersion, events, position }
+
+// 2. Read the stream back directly (e.g. to feed a read model)
+const page = await eventStore.readStream(streamId, { fromVersion: 0 });
+console.log(page.events.length, page.isEndOfStream);
+
+// 3. Or replay it through a handler to rehydrate an aggregate
+const replayResult = await eventReplay.replayFromStream(
+  streamId,
+  async storedEvent => order.apply(storedEvent),
+  { fromStreamVersion: 0 },
+  { batchSize: 100 }
+);
+console.log(replayResult.success, replayResult.eventsReplayed);
+
+// 4. Periodically snapshot so future loads skip replaying from event 0
+const snapshot: IAggregateSnapshot = {
+  aggregateId: orderId,
+  version: appendResult.toVersion,
+  aggregateType: 'Order',
+  state: order.toState(),
+  timestamp: new Date(),
+};
+await eventStore.saveSnapshot(streamId, snapshot);
+
+// 5. On next load: restore the snapshot, then replay only events after it
+const restored = await eventStore.getSnapshot(streamId);
+if (restored) {
+  await eventReplay.replayFromStream(
+    streamId,
+    async storedEvent => order.apply(storedEvent),
+    { fromStreamVersion: restored.version }
+  );
+}
+```
+
+### Advanced replay: pausable session
+
+Builds on the workflow above using `IAdvancedEventReplay` when a replay needs to
+be monitored, paused under load, or cancelled — e.g. rebuilding a large
+projection during business hours.
+
+```typescript
+import type {
+  IAdvancedEventReplay,
+  IReplaySession,
+} from '@vytches/ddd-contracts';
+
+declare const advancedReplay: IAdvancedEventReplay;
+
+const session: IReplaySession = await advancedReplay.startReplaySession(
+  async event => rebuildProjection(event),
+  { aggregateTypes: ['Order'] },
+  { batchSize: 200, reportProgress: true }
+);
+
+session.onProgress(progress => {
+  console.log(
+    `${progress.percentComplete}% (${progress.processedEvents}/${progress.totalEvents})`
+  );
+});
+session.onError(async (error, event) => {
+  logger.warn('replay error', { eventId: event.eventId, error });
+  return true; // continue past this event
+});
+
+// Pause under load, resume later
+await session.pause();
+await session.resume();
+
+const result = await session.waitForCompletion();
+console.log(result.success, result.eventsReplayed);
+```
+
+### Configuring diagnostics
+
+```typescript
+import { configureDiagnostics } from '@vytches/ddd-contracts';
+
+// Silence all library-internal diagnostics (useful in tests or production)
+configureDiagnostics({ level: 'silent' });
+
+// Route to a structured logger instead of console
+configureDiagnostics({
+  sink: {
+    warn: (m, c) => pino.warn(c, m),
+    error: (m, e, c) => pino.error({ ...c, err: e }, m),
+  },
+});
+```
+
 ## Anti-Patterns
 
 **Using `any` instead of generic parameters.** Every interface is generic.
@@ -178,6 +476,14 @@ as the default repository type for aggregates.
 `EntityId` in contracts does not validate the value — that is done by the
 extended `EntityId` in `@vytches/ddd-value-objects`. Always use the
 value-objects package's `EntityId` in application code.
+
+**Importing `internalLogger`, `EVENT_HANDLER_METADATA`, or
+`EVENT_HANDLER_OPTIONS` in application code.** These are `@internal` —
+re-exported from contracts only so sibling `@vytches/ddd-*` packages (events
+decorator, NestJS explorer service) can resolve them via the standard import
+path. They carry no semver guarantee and may be reshaped or removed without
+notice. Use `configureDiagnostics` to control diagnostics output instead of
+touching `internalLogger` directly.
 
 ## Hidden Features
 

@@ -52,23 +52,35 @@ const result = await registry
 
 ## Key API
 
-| Export                                      | Description                                                                                        |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ACLRegistry`                               | Global registry; `registerDirect`, `registerEnhanced`, `importFromContext`                         |
-| `ACLRegistry.registerDirect(name, adapter)` | Register an adapter by context name                                                                |
-| `ACLRegistry.getRequired<D, E>(name)`       | Get adapter or throw if absent                                                                     |
-| `ACLRegistry.get<D, E>(name)`               | Get adapter or `undefined`                                                                         |
-| `BaseACLAdapter<D, E, R>`                   | Abstract base; implement `registerSupportedOperations()`                                           |
-| `SimpleACLAdapter<D, E, R>`                 | Concrete adapter for simple cases; `SimpleACLAdapter.create(...)` factory                          |
-| `EnhancedACLAdapter`                        | Adds `executeTyped` for operation-level type safety                                                |
-| `BaseModelTranslator<D, E>`                 | Abstract translator; implement `performToExternalTranslation` and `performFromExternalTranslation` |
-| `BaseACLMiddleware`                         | Abstract middleware; implement `execute(op, model, opts, next)`                                    |
-| `ContextACLRegistry`                        | Per-bounded-context registry; export to `ACLRegistry` via `importFromContext`                      |
-| `VersionedACLRegistry`                      | Registry with versioned adapter support                                                            |
-| `ACLError`                                  | Error type for ACL failures; `ACLError.operationFailed(context, op, cause)`                        |
-| `IACLAdapter<D, E, R>`                      | Core adapter interface: `execute`, `fetch`, `supportsOperation`, `getContextInfo`                  |
-| `IModelTranslator<D, E>`                    | Translator interface: `toExternal`, `fromExternal`, optional `validateDomain`, `validateExternal`  |
-| `IExternalAPI<E, R>`                        | External system interface: `execute`, `fetch`, `healthCheck`                                       |
+| Export                                      | Description                                                                                                                                                                               |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ACLRegistry`                               | Global registry; `registerDirect`, `registerEnhanced`, `importFromContext`                                                                                                                |
+| `ACLRegistry.registerDirect(name, adapter)` | Register an adapter by context name                                                                                                                                                       |
+| `ACLRegistry.getRequired<D, E>(name)`       | Get adapter or throw if absent                                                                                                                                                            |
+| `ACLRegistry.get<D, E>(name)`               | Get adapter or `undefined`                                                                                                                                                                |
+| `ImportOptions`                             | Options for `ACLRegistry.importFromContext(ctx, options)`: `overwriteConflicts`, `validateAdapters`                                                                                       |
+| `BaseACLRegistry`                           | Abstract base extended by `ACLRegistry`, `ContextACLRegistry`, `VersionedACLRegistry`; provides `register`, `get`, `getRequired`, `hasContext`, `getRegisteredContexts`, `exportAdapters` |
+| `ACLRegistrationMetadata`                   | Metadata recorded per registration (used by `BaseACLRegistry.register`): `contextName`, `registeredAt`, `registeredBy`, optional `description`/`version`/`source`                         |
+| `AdapterDefinition<D, E>`                   | Declarative adapter definition produced by `defineACLAdapter` and consumed by `ACLRegistry.fromDefinitions` — see Declarative Registration below                                          |
+| `BaseACLAdapter<D, E, R>`                   | Abstract base; implement `registerSupportedOperations()`                                                                                                                                  |
+| `SimpleACLAdapter<D, E, R>`                 | Concrete adapter for simple cases; `SimpleACLAdapter.create(...)` factory                                                                                                                 |
+| `EnhancedACLAdapter`                        | Adds `executeTyped` for operation-level type safety                                                                                                                                       |
+| `IEnhancedACLAdapter<D, E, R>`              | Interface implemented by `EnhancedACLAdapter`: extends `IACLAdapter` with `use(middleware)` and `executeTyped(operation, model, opts)`                                                    |
+| `TypedOperation<TInput, TOutput>`           | Abstract operation descriptor passed to `executeTyped`; extend it, implement `name`, optionally `validateBusinessRules` — see Pattern 4                                                   |
+| `BaseModelTranslator<D, E>`                 | Abstract translator; implement `performToExternalTranslation` and `performFromExternalTranslation`                                                                                        |
+| `BaseACLMiddleware`                         | Abstract middleware; implement `execute(op, model, opts, next)`                                                                                                                           |
+| `ContextACLRegistry`                        | Per-bounded-context registry; export to `ACLRegistry` via `importFromContext`                                                                                                             |
+| `VersionedACLRegistry`                      | Registry with versioned adapter support                                                                                                                                                   |
+| `VersionedACLAdapter<D, E, R>`              | Thin wrapper around a `VersionedACLRegistry` context; constructor takes `(registry, defaultContextName)`, resolves the right version and forwards `execute` — see Pattern 5               |
+| `ACLError`                                  | Error type for ACL failures; `ACLError.operationFailed(context, op, cause)`                                                                                                               |
+| `AdapterNotFoundError`                      | `ACLError` subtype thrown when no adapter is registered for a context; `AdapterNotFoundError.forContext(contextName, adapterName)` factory                                                |
+| `TranslationError`                          | `ACLError` subtype for translation failures; carries `sourceModel` and `direction`; factories `TranslationError.forToExternal(...)` / `.forFromExternal(...)`                             |
+| `IACLAdapter<D, E, R>`                      | Core adapter interface: `execute`, `fetch`, `supportsOperation`, `getContextInfo`                                                                                                         |
+| `IModelTranslator<D, E>`                    | Translator interface: `toExternal`, `fromExternal`, optional `validateDomain`, `validateExternal`                                                                                         |
+| `IExternalAPI<E, R>`                        | External system interface: `execute`, `fetch`, `healthCheck`                                                                                                                              |
+| `BaseApplicationService`                    | Abstract base for application-layer services; provides `validateRequest(request, validator)` and `handleDomainError(error)` helpers — see Pattern 6                                       |
+| `IApplicationService`                       | Interface implemented by `BaseApplicationService`: exposes readonly `serviceName`                                                                                                         |
+| `ApplicationError`                          | Generic application-layer error wrapping an inner/domain error; returned by `BaseApplicationService.handleDomainError`                                                                    |
 
 ## Patterns
 
@@ -159,6 +171,101 @@ const result = await adapter.fetch(productId);
 if (result.isSuccess) {
   const domainProduct = result.value; // already translated via BaseModelTranslator
   return domainProduct;
+}
+```
+
+### Pattern 4: Typed operations with `executeTyped`
+
+Extend `TypedOperation` to describe a single operation (name + optional
+business-rule validation) instead of passing a raw operation string. Pass the
+instance to `EnhancedACLAdapter.executeTyped`, which runs
+`validateBusinessRules` (if present) before delegating to `execute`.
+
+```typescript
+import { TypedOperation, EnhancedACLAdapter } from '@vytches/ddd-acl';
+import { Result } from '@vytches/ddd-utils';
+
+class ChargeCard extends TypedOperation<DomainPayment, PaymentReceipt> {
+  readonly name = 'charge';
+  readonly description = 'Charge a card via the payment gateway';
+
+  validateBusinessRules(input: DomainPayment) {
+    if (input.amount.isNegative()) {
+      return Result.fail(new Error('Amount must be positive'));
+    }
+    return Result.ok(undefined);
+  }
+}
+
+const adapter: EnhancedACLAdapter<
+  DomainPayment,
+  ExternalPayment,
+  PaymentReceipt
+> = EnhancedACLAdapter.create(
+  'PaymentsContext',
+  'StripeGateway',
+  translator,
+  externalAPI,
+  ['charge']
+);
+
+const result = await adapter.executeTyped(new ChargeCard(), domainPayment);
+```
+
+### Pattern 5: Resolving adapters by version
+
+Use `VersionedACLRegistry` to register multiple versions of the same context's
+adapter, then wrap it in a `VersionedACLAdapter` so callers don't need to pass a
+version on every call — it resolves the latest (or an explicitly requested)
+version internally.
+
+```typescript
+import { VersionedACLRegistry, VersionedACLAdapter } from '@vytches/ddd-acl';
+
+const registry = new VersionedACLRegistry();
+registry.registerVersioned('PaymentsContext', '1.0.0', adapterV1);
+registry.registerVersioned('PaymentsContext', '2.0.0', adapterV2);
+
+const payments = new VersionedACLAdapter<DomainPayment, ExternalPayment>(
+  registry,
+  'PaymentsContext'
+);
+
+// Resolves the latest registered version (2.0.0) unless `options.version` is set
+const result = await payments.execute('charge', domainPayment);
+payments.getAvailableVersions(); // ['1.0.0', '2.0.0']
+```
+
+### Pattern 6: Application service base class
+
+`BaseApplicationService` is a small abstract base for application-layer services
+that orchestrate calls into ACL adapters/translators. It centralizes request
+validation (via a `BusinessRuleValidator`) and converts unexpected errors into a
+consistent `ApplicationError`.
+
+```typescript
+import { BaseApplicationService, ApplicationError } from '@vytches/ddd-acl';
+
+class SyncUserService extends BaseApplicationService {
+  constructor(private readonly registry: ACLRegistry) {
+    super('SyncUserService');
+  }
+
+  async sync(request: SyncUserRequest) {
+    const validation = this.validateRequest(request, syncUserValidator);
+    if (validation.isFailure) {
+      return Result.fail(validation.error);
+    }
+
+    try {
+      const adapter = this.registry.getRequired<DomainUser, ExternalUser>(
+        'UserContext'
+      );
+      return await adapter.execute('sync', request.user);
+    } catch (error) {
+      throw this.handleDomainError(error); // wraps into ApplicationError
+    }
+  }
 }
 ```
 

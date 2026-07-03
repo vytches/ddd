@@ -40,13 +40,25 @@ export class AppModule {}
 
 ## Key API
 
-| Export                   | Kind      | Purpose                                                        |
-| ------------------------ | --------- | -------------------------------------------------------------- |
-| `VytchesDDDModule`       | class     | Static module with `forRoot()`, `forContext()`, `forTesting()` |
-| `VytchesExplorerService` | class     | Auto-discovers decorated handlers in `onApplicationBootstrap`  |
-| `NestJSContainerAdapter` | class     | Bridge between NestJS DI and VytchesDDD container              |
-| `ACLAdapterFor`          | decorator | Marks ACL adapter for auto-discovery (since 0.24.0)            |
-| `ACL_REGISTRY`           | token     | Injection token for ACLRegistry                                |
+| Export                              | Kind      | Purpose                                                                                                                                                                                                                                          |
+| ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `VytchesDDDModule`                  | class     | Static module with `forRoot()`, `forContext()`, `forTesting()`                                                                                                                                                                                   |
+| `VytchesExplorerService`            | class     | Auto-discovers decorated handlers in `onApplicationBootstrap`                                                                                                                                                                                    |
+| `NestJSContainerAdapter`            | class     | Bridge between NestJS DI and VytchesDDD container                                                                                                                                                                                                |
+| `ACLAdapterFor`                     | decorator | Marks ACL adapter for auto-discovery (since 0.24.0)                                                                                                                                                                                              |
+| `ACL_REGISTRY`                      | token     | Injection token for ACLRegistry                                                                                                                                                                                                                  |
+| `VytchesDDDFeatureModule`           | class     | Static module with `forFeature(contextName)` — isolated `ICommandBus`/`IQueryBus`/`LOCAL_EVENT_BUS` per bounded context; see [Feature-Scoped Bounded Context](#feature-scoped-bounded-context-with-forfeature-global-buses--local-event-routing) |
+| `ContextAwareEventDispatcher`       | class     | Routes `IntegrationEvent` → global `IEventBus`, other domain events → `LOCAL_EVENT_BUS`; provide in a `forFeature()` module (since 0.28.0)                                                                                                       |
+| `LOCAL_EVENT_BUS`                   | token     | Injection token for the per-context event bus; provided by `forFeature()`, injected via `@Inject(LOCAL_EVENT_BUS)`                                                                                                                               |
+| `GLOBAL_QUERY_BUS`                  | token     | Injection token resolving to the root `IQueryBus`, bypassing any `forFeature()` shadowing — for cross-context ACL services                                                                                                                       |
+| `GLOBAL_COMMAND_BUS`                | token     | Injection token resolving to the root `ICommandBus`, bypassing any `forFeature()` shadowing — for cross-context ACL services                                                                                                                     |
+| `OutboxProcessorModule`             | class     | Static module with `forRootAsync()` — wires one or more `OutboxProcessorService` instances from DI-resolved repository/handler tokens                                                                                                            |
+| `OutboxProcessorService`            | class     | NestJS lifecycle wrapper around `OutboxProcessor` (starts/stops on module init/destroy); created internally by `OutboxProcessorModule.forRootAsync()`, not instantiated directly                                                                 |
+| `ACLAdapterMetadata`                | type      | Metadata shape stored by `@ACLAdapterFor` (see row above)                                                                                                                                                                                        |
+| `HandlerInfo`                       | type      | Return type of `VytchesExplorerService.discoverHandlers()` / `getHandlers()`                                                                                                                                                                     |
+| `VytchesDDDModuleOptions`           | type      | Options parameter for `VytchesDDDModule.forRoot()` / `forContext()` / `forTesting()`                                                                                                                                                             |
+| `OutboxProcessorEntry`              | type      | One processor config entry in `OutboxProcessorModuleAsyncOptions.processors`                                                                                                                                                                     |
+| `OutboxProcessorModuleAsyncOptions` | type      | Options parameter for `OutboxProcessorModule.forRootAsync()`                                                                                                                                                                                     |
 
 ## Module Configuration Methods
 
@@ -254,6 +266,107 @@ export class DDDModule implements OnApplicationBootstrap {
 export class PaymentsModule {}
 // Only handlers in this module are registered for the 'payments' context
 ```
+
+### Feature-Scoped Bounded Context with `forFeature()` (Global Buses + Local Event Routing)
+
+`VytchesDDDModule.forFeature(contextName)` creates an isolated `ICommandBus` /
+`IQueryBus` / `LOCAL_EVENT_BUS` for one bounded-context module and exports them
+plus `ContextAwareEventDispatcher`. Combine `ContextAwareEventDispatcher` to
+route domain events locally and integration events globally, and
+`GLOBAL_QUERY_BUS` / `GLOBAL_COMMAND_BUS` when an ACL service in this context
+must reach the **root** buses instead of the feature-scoped ones that
+`forFeature()` shadows `ICommandBus`/`IQueryBus` with.
+
+```typescript
+import { Module, Injectable, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  VytchesDDDModule,
+  ContextAwareEventDispatcher,
+  GLOBAL_QUERY_BUS,
+  GLOBAL_COMMAND_BUS,
+  ACL_REGISTRY,
+} from '@vytches/ddd-nestjs';
+import type { IQueryBus, ICommandBus } from '@vytches/ddd-cqrs';
+import type { ACLRegistry } from '@vytches/ddd-acl';
+
+// Repository dispatches domain events to the *local* bus, integration events globally
+@Injectable()
+class OrderRepository {
+  constructor(private readonly dispatcher: ContextAwareEventDispatcher) {}
+
+  async save(order: Order): Promise<void> {
+    await this.db.save(order);
+    await this.dispatcher.dispatchEventsForAggregate(order);
+    // DomainEvents      → LOCAL_EVENT_BUS (this context only)
+    // IntegrationEvents → IEventBus       (global, outbox-compatible)
+  }
+}
+
+// ACL service in this context must query the ROOT bus, not the feature-scoped
+// one forFeature() shadows ICommandBus/IQueryBus with for this module
+@Injectable()
+class OrdersAclService implements OnModuleInit {
+  constructor(
+    @Inject(GLOBAL_QUERY_BUS) private readonly rootQuery: IQueryBus,
+    @Inject(GLOBAL_COMMAND_BUS) private readonly rootCommand: ICommandBus,
+    @Inject(ACL_REGISTRY) private readonly aclRegistry: ACLRegistry
+  ) {}
+
+  onModuleInit(): void {
+    this.aclRegistry.registerGlobal('orders', this);
+  }
+}
+
+@Module({
+  imports: [VytchesDDDModule.forFeature('orders')],
+  providers: [
+    CreateOrderHandler,
+    GetOrderQueryHandler,
+    OrderRepository,
+    OrdersAclService,
+  ],
+})
+export class OrdersModule {}
+```
+
+`forFeature('orders')` exports `ICommandBus`, `IQueryBus`, `LOCAL_EVENT_BUS`,
+and `ContextAwareEventDispatcher` — all scoped to this module only.
+`GLOBAL_QUERY_BUS` / `GLOBAL_COMMAND_BUS` are provided separately by
+`VytchesDDDModule.forRoot()` at the application root and always resolve to the
+root buses, regardless of any `forFeature()` shadowing in the importing module.
+
+### Outbox Processor Module
+
+```typescript
+import { OutboxProcessorModule } from '@vytches/ddd-nestjs';
+
+@Module({
+  imports: [
+    OutboxProcessorModule.forRootAsync({
+      processors: [
+        {
+          repositoryToken: OUTBOX_REPOSITORY,
+          options: { batchSize: 200, adaptiveRepoll: true },
+        },
+        {
+          repositoryToken: OUTBOX_REPOSITORY,
+          options: { messageTypes: ['GdprAuditChainAppend'], batchSize: 50 },
+          handlerToken: GDPR_OUTBOX_HANDLERS,
+          processorToken: GDPR_OUTBOX_PROCESSOR,
+        },
+      ],
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+Each entry in `processors` yields its own `OutboxProcessorService` instance
+(started on `onModuleInit`, stopped on `onModuleDestroy`) — run a broad
+processor alongside specialized ones, e.g. a GDPR-only processor filtered via
+`options.messageTypes`. `OutboxProcessorService` is a thin lifecycle wrapper; it
+is not registered as a provider directly, only created internally by
+`forRootAsync()`'s per-entry factory.
 
 ### Testing with Mock Buses
 
