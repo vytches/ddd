@@ -31,7 +31,16 @@ function makeModule(opts: {
 
 // ─── Bug #1 — findOwnModule() must return the consumer module, not the feature module ──
 
-describe('FeatureHandlerRegistrar — Bug #1: findOwnModule() Variant A', () => {
+// NOTE (VB-003 / D-8a): these tests exercise the findOwnModule() traversal
+// ALGORITHM only, against a hand-built plain-Map stand-in for ModulesContainer.
+// That is valid coverage for the traversal logic itself, but it does NOT cover
+// real DI wiring / provider shadowing (F-C4, TM-VB-003-001) — a hand-built map
+// can never reproduce "ModulesContainer shadowed by a bare-class provider entry"
+// because these tests inject the container directly, bypassing Nest's DI
+// resolution entirely. For a regression test of the actual F-C4 bug (a real
+// Test.createTestingModule().compile() + app.init() cycle), see
+// tests/feature/feature-di-wiring.e2e.test.ts.
+describe('FeatureHandlerRegistrar — Bug #1: findOwnModule() Variant A (algorithm-only)', () => {
   class PlaceOrderCommand {}
   class PlaceOrderHandler {
     execute = vi.fn();

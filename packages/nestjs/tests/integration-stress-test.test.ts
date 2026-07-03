@@ -474,37 +474,10 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
       app = await Test.createTestingModule({
         imports: [
           // User Management Context
-          VytchesDDDModule.forContext('UserManagement', {
-            bridgeToNestJS: true,
-            handlers: {
-              include: ['*User*', '*Create*', '*Get*'],
-              prefix: 'User',
-            },
-            performance: {
-              performanceTarget: 100,
-              performanceMode: 'production',
-              autoOptimize: true,
-            },
-            monitoring: {
-              enabled: true,
-              warnAt: 80,
-              errorAt: 150,
-            },
-          }),
+          VytchesDDDModule.forContext('UserManagement', {}),
 
           // Order Processing Context
-          VytchesDDDModule.forContext('OrderProcessing', {
-            bridgeToNestJS: true,
-            handlers: {
-              include: ['*Order*'],
-              prefix: 'Order',
-            },
-            performance: {
-              performanceTarget: 150,
-              performanceMode: 'production',
-              autoOptimize: true,
-            },
-          }),
+          VytchesDDDModule.forContext('OrderProcessing', {}),
 
           // Business Module
           UserModule,
@@ -560,16 +533,7 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
 
     it('should handle high-load concurrent operations', async () => {
       app = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('HighLoad', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 50,
-              autoOptimize: true,
-              performanceMode: 'production',
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('HighLoad', {})],
         providers: [
           UserDomainService,
           CreateUserCommandHandler,
@@ -656,13 +620,12 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
       app = await Test.createTestingModule({
         imports: [
           VytchesDDDModule.forContexts({
-            globalBridgeToNestJS: true,
             contexts: {
-              MemoryTest1: { performance: { performanceTarget: 100 } },
-              MemoryTest2: { performance: { performanceTarget: 100 } },
-              MemoryTest3: { performance: { performanceTarget: 100 } },
-              MemoryTest4: { performance: { performanceTarget: 100 } },
-              MemoryTest5: { performance: { performanceTarget: 100 } },
+              MemoryTest1: {},
+              MemoryTest2: {},
+              MemoryTest3: {},
+              MemoryTest4: {},
+              MemoryTest5: {},
             },
           }),
         ],
@@ -745,13 +708,7 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
       const createStart = performance.now();
 
       app = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('LifecycleTest', {
-            bridgeToNestJS: true,
-            performance: { performanceTarget: 100 },
-          }),
-          TestLifecycleModule,
-        ],
+        imports: [VytchesDDDModule.forContext('LifecycleTest', {}), TestLifecycleModule],
       }).compile();
 
       const createTime = performance.now() - createStart;
@@ -820,20 +777,7 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
       }
 
       app = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('ResilienceTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 100,
-              autoOptimize: true,
-            },
-            monitoring: {
-              enabled: true,
-              warnAt: 80,
-              errorAt: 200,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('ResilienceTest', {})],
         providers: [UnreliableHandler, UserDomainService],
       }).compile();
 
@@ -908,18 +852,9 @@ describe('VytchesDDDModule - Integration Stress Tests', () => {
           imports: [
             VytchesDDDModule.forContexts({
               contexts: {
-                StableContext: {
-                  bridgeToNestJS: true,
-                  performance: { performanceTarget: 100 },
-                },
-                UnstableContext: {
-                  bridgeToNestJS: true,
-                  performance: { performanceTarget: 100 },
-                },
-                IsolatedContext: {
-                  bridgeToNestJS: false, // Izolowany kontekst
-                  performance: { performanceTarget: 150 },
-                },
+                StableContext: {},
+                UnstableContext: {},
+                IsolatedContext: {},
               },
             }),
           ],

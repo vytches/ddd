@@ -114,24 +114,3 @@ export const GLOBAL_COMMAND_BUS = Symbol.for('vytches:global-command-bus');
  * symbol that identifies its own module in ModulesContainer.
  */
 export const FEATURE_ANCHOR_INJECTION = Symbol.for('vytches:feature-anchor-injection');
-
-/**
- * Default auto-discovery patterns
- */
-export const DEFAULT_DISCOVERY_PATTERNS = [
-  '**/*.service.ts',
-  '**/*.handler.ts',
-  '**/*.saga.ts',
-  '**/*.policy.ts',
-];
-
-/**
- * Default exclude patterns for auto-discovery
- */
-export const DEFAULT_EXCLUDE_PATTERNS = [
-  '**/node_modules/**',
-  '**/dist/**',
-  '**/tests/**',
-  '**/*.test.ts',
-  '**/*.spec.ts',
-];

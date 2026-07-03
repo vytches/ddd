@@ -161,6 +161,12 @@ describe('CT-3 (RED→GREEN): GLOBAL_QUERY_BUS resolves to root instance when fo
       ],
     }).compile();
 
+    // VB-003 / D-8b: onModuleInit() (where FeatureHandlerRegistrar's logic
+    // lives) only runs on init(), not on compile() alone — without this call
+    // the test previously never exercised that lifecycle hook.
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
     const service = moduleRef.get(AclConsumerService);
 
     // The feature-scoped IQueryBus is the one from the test module's providers.
@@ -171,7 +177,7 @@ describe('CT-3 (RED→GREEN): GLOBAL_QUERY_BUS resolves to root instance when fo
     expect(service.globalBus).not.toBe(featureQueryBus);
     expect(service.globalBus).toBe(rootQueryBus);
 
-    await moduleRef.close();
+    await app.close();
   });
 
   it('GLOBAL_COMMAND_BUS resolves to root ICommandBus, not the feature-scoped one', async () => {
@@ -209,6 +215,10 @@ describe('CT-3 (RED→GREEN): GLOBAL_QUERY_BUS resolves to root instance when fo
       ],
     }).compile();
 
+    // VB-003 / D-8b: ensure onModuleInit() actually executes.
+    const app = moduleRef.createNestApplication();
+    await app.init();
+
     const service = moduleRef.get(AclCommandConsumerService);
 
     expect(service.featureScopedBus).toBe(featureCommandBus);
@@ -216,7 +226,7 @@ describe('CT-3 (RED→GREEN): GLOBAL_QUERY_BUS resolves to root instance when fo
     expect(service.globalBus).not.toBe(featureCommandBus);
     expect(service.globalBus).toBe(rootCommandBus);
 
-    await moduleRef.close();
+    await app.close();
   });
 });
 

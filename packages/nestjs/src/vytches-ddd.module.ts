@@ -102,42 +102,6 @@ export class VytchesDDDModule {
     };
   }
 
-  static forRootAsync(options: {
-    imports?: ModuleMetadata['imports'];
-    useFactory?: (...args: unknown[]) => Promise<VytchesDDDModuleOptions> | VytchesDDDModuleOptions;
-    inject?: Array<string | symbol | unknown>;
-  }): DynamicModule {
-    return {
-      module: VytchesDDDModule,
-      imports: [DiscoveryModule, ...(options.imports || [])],
-      providers: [
-        VytchesExplorerService,
-        {
-          provide: COMMAND_BUS_TOKEN,
-          useFactory: (bus?: ICommandBus) => bus,
-          inject: [{ token: ICommandBus, optional: true }],
-        },
-        {
-          provide: QUERY_BUS_TOKEN,
-          useFactory: (bus?: IQueryBus) => bus,
-          inject: [{ token: IQueryBus, optional: true }],
-        },
-        {
-          provide: GLOBAL_COMMAND_BUS,
-          useFactory: (bus?: ICommandBus) => bus,
-          inject: [{ token: ICommandBus, optional: true }],
-        },
-        {
-          provide: GLOBAL_QUERY_BUS,
-          useFactory: (bus?: IQueryBus) => bus,
-          inject: [{ token: IQueryBus, optional: true }],
-        },
-      ],
-      exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
-      global: true,
-    };
-  }
-
   static forContext(
     context: string,
     options: VytchesDDDModuleOptions & { context?: VytchesContextOptions } = {}
@@ -154,10 +118,10 @@ export class VytchesDDDModule {
         provide: contextServiceName,
         useFactory: (moduleRef: ModuleRef, discoveryService: DiscoveryService) => {
           const explorer = new VytchesExplorerService(moduleRef, discoveryService);
-          (explorer as unknown as { contextConfig: unknown }).contextConfig = {
-            context,
-            ...options,
-          };
+          // F-M5 / D-3: real configureContext() API, not an unsafe private-field
+          // cast. options.context carries the per-context sub-options (e.g.
+          // strictHandlerRegistration) so it is actually reachable here.
+          explorer.configureContext({ ...(options.context || {}), name: context });
           return explorer;
         },
         inject: [ModuleRef, DiscoveryService],
@@ -197,10 +161,10 @@ export class VytchesDDDModule {
         provide: contextServiceName,
         useFactory: (moduleRef: ModuleRef, discoveryService: DiscoveryService) => {
           const explorer = new VytchesExplorerService(moduleRef, discoveryService);
-          (explorer as unknown as { contextConfig: unknown }).contextConfig = {
-            context: contextName,
-            ...contextConfig,
-          };
+          // F-M5 / D-3: real configureContext() API, not an unsafe private-field
+          // cast — so per-context options like strictHandlerRegistration are
+          // actually reachable.
+          explorer.configureContext({ ...contextConfig, name: contextName });
           return explorer;
         },
         inject: [ModuleRef, DiscoveryService],

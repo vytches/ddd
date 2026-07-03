@@ -230,17 +230,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
   describe('Real NestJS Container Integration', () => {
     beforeEach(async () => {
       module = await Test.createTestingModule({
-        imports: [
-          TestBusinessModule,
-          VytchesDDDModule.forContext('EnterpriseTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 200,
-              performanceMode: 'production',
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [TestBusinessModule, VytchesDDDModule.forContext('EnterpriseTest', {})],
       }).compile();
 
       app = module.createNestApplication();
@@ -340,15 +330,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
       const serviceClasses = createRealisticServiceClasses(200);
 
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('LargeScaleTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 1000,
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('LargeScaleTest', {})],
         providers: serviceClasses,
       }).compile();
 
@@ -423,11 +405,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
         const serviceClasses = createRealisticServiceClasses(count);
 
         const testModule = await Test.createTestingModule({
-          imports: [
-            VytchesDDDModule.forContext(`ScaleTest${count}`, {
-              performance: { autoOptimize: true },
-            }),
-          ],
+          imports: [VytchesDDDModule.forContext(`ScaleTest${count}`, {})],
           providers: serviceClasses,
         }).compile();
 
@@ -499,12 +477,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
   describe('Enterprise Error Handling', () => {
     beforeEach(async () => {
       module = await Test.createTestingModule({
-        imports: [
-          TestBusinessModule,
-          VytchesDDDModule.forContext('ErrorTest', {
-            bridgeToNestJS: true,
-          }),
-        ],
+        imports: [TestBusinessModule, VytchesDDDModule.forContext('ErrorTest', {})],
       }).compile();
 
       app = module.createNestApplication();

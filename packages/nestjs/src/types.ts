@@ -90,61 +90,11 @@ export interface VytchesDDDModuleOptions {
   isGlobal?: boolean;
 
   /**
-   * Bridge to NestJS DI container
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  bridgeToNestJS?: boolean;
-
-  /**
-   * Performance configuration
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  performance?: {
-    performanceTarget?: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-
-  /**
-   * Handler configuration
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  handlers?: {
-    include?: string[];
-    exclude?: string[];
-    prefix?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-
-  /**
-   * Contexts configuration for multi-context scenarios
-   * @deprecated Legacy option from VP-012, kept for test compatibility
+   * Contexts configuration for multi-context scenarios.
+   * Read by forContexts() to derive per-context providers.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contexts?: string[] | Record<string, any>;
-
-  /**
-   * Monitoring configuration
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  monitoring?: {
-    enabled?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-
-  /**
-   * Global bridge to NestJS configuration (used in forContexts)
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  globalBridgeToNestJS?: boolean;
-
-  /**
-   * Enable contexts flag
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  enableContexts?: boolean;
 }
 
 /**

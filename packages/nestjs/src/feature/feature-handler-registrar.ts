@@ -6,9 +6,7 @@ import {
   type OnModuleInit,
 } from '@nestjs/common';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS DI metadata
-import { ModuleRef } from '@nestjs/core';
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS DI metadata
-import { ModulesContainer } from '@nestjs/core/injector/modules-container.js';
+import { ModuleRef, ModulesContainer } from '@nestjs/core';
 import type { Module } from '@nestjs/core/injector/module';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
@@ -17,6 +15,7 @@ import { internalLogger } from '@vytches/ddd-contracts';
 import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS @Optional() DI token
 import { VytchesExplorerService } from '../services/vytches-explorer.service';
+import { BusRegistrationLedger } from '../services/bus-registration-ledger';
 
 interface BusLike {
   register?(messageType: unknown, handler: unknown): void;
@@ -51,9 +50,11 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
     @Inject(IQueryBus) private readonly queryBus: IQueryBus,
     @Inject(LOCAL_EVENT_BUS) private readonly localEventBus: IEventBus,
     @Inject(FEATURE_ANCHOR_INJECTION) private readonly anchorToken: symbol,
-    private readonly moduleRef: ModuleRef,
-    private readonly modulesContainer: ModulesContainer,
-    @Optional() private readonly explorerService?: VytchesExplorerService
+    @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
+    @Inject(ModulesContainer) private readonly modulesContainer: ModulesContainer,
+    @Optional()
+    @Inject(VytchesExplorerService)
+    private readonly explorerService?: VytchesExplorerService
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -125,8 +126,15 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
       // NestJS stores resolved Module instances in the _imports Set.
       // The public accessor is mod.imports (getter for _imports).
       const imports = (mod as unknown as { imports?: Set<unknown> }).imports;
-      if (imports instanceof Set && imports.has(featureModule)) {
-        return mod;
+      if (imports instanceof Set) {
+        if (imports.has(featureModule)) {
+          return mod;
+        }
+      } else {
+        internalLogger.warn(
+          'FeatureHandlerRegistrar: mod.imports is not a Set — NestJS internal Module.imports ' +
+            'shape may have changed; falling through to undefined for this module'
+        );
       }
     }
 
@@ -177,23 +185,52 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
 
         if (handlerKind === 'command') {
           const bus = this.commandBus as unknown as BusLike;
-          if (typeof bus.registerFactory === 'function') {
-            bus.registerFactory(messageType, handlerFactory);
-          } else if (typeof bus.register === 'function') {
-            bus.register(messageType, handlerFactory());
+          // F-M5: same bus-scoped ledger used by VytchesExplorerService — a
+          // local bus can be shared across sequentially-created feature
+          // modules (e.g. useValue-provided bus, or two forFeature() calls
+          // resolving the same underlying instance), so the same
+          // idempotent-skip / conflict-throw guard applies here too.
+          const claim = BusRegistrationLedger.claimCommandOrQuery(
+            bus,
+            'command',
+            messageType,
+            handlerType
+          );
+          if (claim === 'register') {
+            if (typeof bus.registerFactory === 'function') {
+              bus.registerFactory(messageType, handlerFactory);
+            } else if (typeof bus.register === 'function') {
+              bus.register(messageType, handlerFactory());
+            }
           }
         } else if (handlerKind === 'query') {
           const bus = this.queryBus as unknown as BusLike;
-          if (typeof bus.registerFactory === 'function') {
-            bus.registerFactory(messageType, handlerFactory);
-          } else if (typeof bus.register === 'function') {
-            bus.register(messageType, handlerFactory());
+          const claim = BusRegistrationLedger.claimCommandOrQuery(
+            bus,
+            'query',
+            messageType,
+            handlerType
+          );
+          if (claim === 'register') {
+            if (typeof bus.registerFactory === 'function') {
+              bus.registerFactory(messageType, handlerFactory);
+            } else if (typeof bus.register === 'function') {
+              bus.register(messageType, handlerFactory());
+            }
           }
         } else {
           const bus = this.localEventBus as unknown as BusLike;
-          const instance = handlerFactory();
-          if (typeof bus.registerHandler === 'function') {
-            bus.registerHandler(messageType, instance);
+          const eventTypeName =
+            typeof messageType === 'function' ? messageType.name : String(messageType);
+          // F-M5: events allow legitimate fan-out (multiple distinct handler
+          // types per eventType) — claimEvent only dedupes exact
+          // (eventType, handlerType) repeats, never conflicts.
+          const claim = BusRegistrationLedger.claimEvent(bus, eventTypeName, handlerType);
+          if (claim === 'register') {
+            const instance = handlerFactory();
+            if (typeof bus.registerHandler === 'function') {
+              bus.registerHandler(messageType, instance);
+            }
           }
         }
       } catch (error) {

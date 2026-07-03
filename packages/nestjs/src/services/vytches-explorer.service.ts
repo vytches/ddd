@@ -10,6 +10,7 @@ import { internalLogger } from '@vytches/ddd-contracts';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
 import { ACL_ADAPTER_METADATA, ACL_REGISTRY } from '../constants';
 import type { ACLAdapterMetadata } from '../decorators/acl-adapter.decorator';
+import { BusRegistrationLedger } from './bus-registration-ledger';
 
 /**
  * Minimal interface for ACL registry — avoids hard dependency on @vytches/ddd-acl
@@ -406,17 +407,38 @@ export class VytchesExplorerService
 
         if (handler.type === 'command' && this.commandBus) {
           const bus = this.commandBus as unknown as BusWithRegistration;
-          if (typeof bus.registerFactory === 'function') {
-            bus.registerFactory(messageType, handlerFactory);
-          } else if (typeof bus.register === 'function') {
-            bus.register(messageType, handlerFactory());
+          // F-M5: bus-scoped ledger prevents double-registering the same
+          // handler (e.g. when forRoot() and forContext() each run their own
+          // VytchesExplorerService instance against the same shared bus) and
+          // rejects a genuine conflict (a different handler claiming the
+          // same messageType on the same bus).
+          const claim = BusRegistrationLedger.claimCommandOrQuery(
+            bus,
+            'command',
+            messageType,
+            handlerType
+          );
+          if (claim === 'register') {
+            if (typeof bus.registerFactory === 'function') {
+              bus.registerFactory(messageType, handlerFactory);
+            } else if (typeof bus.register === 'function') {
+              bus.register(messageType, handlerFactory());
+            }
           }
         } else if (handler.type === 'query' && this.queryBus) {
           const bus = this.queryBus as unknown as BusWithRegistration;
-          if (typeof bus.registerFactory === 'function') {
-            bus.registerFactory(messageType, handlerFactory);
-          } else if (typeof bus.register === 'function') {
-            bus.register(messageType, handlerFactory());
+          const claim = BusRegistrationLedger.claimCommandOrQuery(
+            bus,
+            'query',
+            messageType,
+            handlerType
+          );
+          if (claim === 'register') {
+            if (typeof bus.registerFactory === 'function') {
+              bus.registerFactory(messageType, handlerFactory);
+            } else if (typeof bus.register === 'function') {
+              bus.register(messageType, handlerFactory());
+            }
           }
         } else if (handler.type === 'event' && this.eventBus) {
           const bus = this.eventBus as unknown as BusWithRegistration;
@@ -424,19 +446,25 @@ export class VytchesExplorerService
             typeof messageType === 'function' ? messageType.name : String(messageType);
 
           const handlerMeta = handler.metadata as Record<string, unknown> | undefined;
-          if (handlerMeta?.methodName) {
-            // Method-level event handler - subscribe with bound method
-            const methodName = handlerMeta.methodName as string;
-            const instance = handlerFactory() as Record<string, unknown>;
-            const method = instance[methodName];
-            if (typeof method === 'function' && typeof bus.subscribe === 'function') {
-              bus.subscribe(eventTypeName, method.bind(instance));
-            }
-          } else {
-            // Class-level event handler with handle() method
-            const handlerInstance = handlerFactory();
-            if (typeof bus.registerHandler === 'function') {
-              bus.registerHandler(eventTypeName, handlerInstance);
+          // F-M5: events legitimately allow multiple distinct handler types
+          // per eventType (fan-out) — the ledger only dedupes exact
+          // (eventType, handlerType) repeats, it never conflicts here.
+          const claim = BusRegistrationLedger.claimEvent(bus, eventTypeName, handlerType);
+          if (claim === 'register') {
+            if (handlerMeta?.methodName) {
+              // Method-level event handler - subscribe with bound method
+              const methodName = handlerMeta.methodName as string;
+              const instance = handlerFactory() as Record<string, unknown>;
+              const method = instance[methodName];
+              if (typeof method === 'function' && typeof bus.subscribe === 'function') {
+                bus.subscribe(eventTypeName, method.bind(instance));
+              }
+            } else {
+              // Class-level event handler with handle() method
+              const handlerInstance = handlerFactory();
+              if (typeof bus.registerHandler === 'function') {
+                bus.registerHandler(eventTypeName, handlerInstance);
+              }
             }
           }
         }
@@ -463,9 +491,15 @@ export class VytchesExplorerService
     }
   }
 
-  // Legacy compatibility
+  // Legacy compatibility: `.context` mirrors `_contextOptions.name`, set via
+  // configureContext(). Historically this read an unsafely-cast private
+  // `contextConfig` field set directly by forContext()/forContexts(); both now
+  // go through the real configureContext() API instead (F-M5 / D-3).
   getContextConfiguration(): Record<string, unknown> | null {
-    return ((this as Record<string, unknown>).contextConfig as Record<string, unknown>) || null;
+    if (!this._contextOptions) {
+      return null;
+    }
+    return { context: this._contextOptions.name, ...this._contextOptions };
   }
 
   /**
