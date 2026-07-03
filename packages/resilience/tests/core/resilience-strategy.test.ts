@@ -87,6 +87,48 @@ describe('ResilienceStrategy', () => {
 
       expect(result).toBe('success');
     });
+
+    // VB-004 regression: restructuring execute() from a .then()/.catch()
+    // chain to try/finally (to wire in context.dispose?.()) must not
+    // regress the strategy's OWN pre-existing race timer, on either path.
+    describe('own timer clearance after VB-004 dispose() wiring', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('clears its own race timer after the operation resolves before the timeout', async () => {
+        const baseline = vi.getTimerCount();
+        const strategy = new TimeoutStrategy(1000);
+        const operation = vi.fn().mockResolvedValue('success');
+
+        const result = await strategy.execute(operation, context);
+
+        expect(result).toBe('success');
+        expect(vi.getTimerCount()).toBe(baseline);
+      });
+
+      it('clears its own race timer after the timeout fires and rejects', async () => {
+        const baseline = vi.getTimerCount();
+        const strategy = new TimeoutStrategy(100);
+        const operation = vi.fn(() => new Promise(resolve => setTimeout(resolve, 200)));
+
+        const pending = strategy.execute(operation, context);
+        const assertion = expect(pending).rejects.toBeInstanceOf(TimeoutError);
+
+        await vi.advanceTimersByTimeAsync(100);
+        await assertion;
+
+        // Drain the still-pending inner operation's own timer so it does
+        // not leak into the next test.
+        await vi.advanceTimersByTimeAsync(200);
+
+        expect(vi.getTimerCount()).toBe(baseline);
+      });
+    });
   });
 
   describe('CompositeResilienceStrategy', () => {

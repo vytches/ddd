@@ -12,11 +12,24 @@ export interface ResilienceContext {
   fork(timeout?: number): ResilienceContext;
   withMetadata(key: string, value: unknown): ResilienceContext;
   withTimeout(timeoutMs: number): ResilienceContext;
+
+  /**
+   * Releases resources held by this context: the fork timeout (if any) and
+   * the abort listener registered on the parent signal. Optional for
+   * backward compatibility -- existing implementers of this interface are
+   * unaffected. Consumers that fork/derive a context (e.g. via `fork()` or
+   * `withTimeout()`) should call `context.dispose?.()` once the operation
+   * using that context has settled (success or failure) to avoid leaking
+   * timers and event listeners.
+   */
+  dispose?(): void;
 }
 
 export class DefaultResilienceContext implements ResilienceContext {
   private abortController: AbortController;
   private _metadata: Map<string, unknown>;
+  private _disposeTimerId: ReturnType<typeof setTimeout> | undefined = undefined;
+  private _disposeAbortCleanup: (() => void) | undefined = undefined;
 
   constructor(
     public readonly correlationId: string = LibUtils.getUUID(),
@@ -39,36 +52,66 @@ export class DefaultResilienceContext implements ResilienceContext {
 
   fork(timeout?: number): ResilienceContext {
     const newController = new AbortController();
+    let parentAbortCleanup: (() => void) | undefined;
 
     // Forward abort from parent
     if (this.signal.aborted) {
       newController.abort(this.signal.reason);
     } else {
-      this.signal.addEventListener(
-        'abort',
-        () => {
-          newController.abort(this.signal.reason);
-        },
-        { once: true }
-      );
+      const onParentAbort = (): void => {
+        newController.abort(this.signal.reason);
+      };
+      this.signal.addEventListener('abort', onParentAbort, { once: true });
+      // {once: true} only auto-removes the listener when the parent aborts;
+      // on the happy path (context settles without the parent ever
+      // aborting) the listener would otherwise remain registered on the
+      // parent signal for the parent's lifetime. dispose() removes it.
+      parentAbortCleanup = () => {
+        this.signal.removeEventListener('abort', onParentAbort);
+      };
     }
 
     // Set timeout if specified
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     if (timeout !== undefined && timeout > 0) {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         if (!newController.signal.aborted) {
           newController.abort(new TimeoutError(`Operation timed out after ${timeout}ms`));
         }
       }, timeout);
     }
 
-    return new DefaultResilienceContext(
+    const child = new DefaultResilienceContext(
       this.correlationId,
       this.startTime,
       this.attempt,
       this._metadata,
       newController
     );
+
+    child._disposeTimerId = timeoutId;
+    child._disposeAbortCleanup = parentAbortCleanup;
+
+    return child;
+  }
+
+  /**
+   * Clears the fork timeout (if this context was created with one) and
+   * removes the abort listener registered on the parent signal during
+   * fork()/withAttempt(). Safe to call multiple times; a no-op once
+   * already disposed or when this context holds neither resource (e.g.
+   * a context created directly via the constructor or `static create()`).
+   */
+  dispose(): void {
+    if (this._disposeTimerId !== undefined) {
+      clearTimeout(this._disposeTimerId);
+      this._disposeTimerId = undefined;
+    }
+
+    if (this._disposeAbortCleanup !== undefined) {
+      this._disposeAbortCleanup();
+      this._disposeAbortCleanup = undefined;
+    }
   }
 
   withMetadata(key: string, value: unknown): ResilienceContext {
@@ -103,27 +146,33 @@ export class DefaultResilienceContext implements ResilienceContext {
 
   static withAttempt(context: ResilienceContext, attempt: number): ResilienceContext {
     const newController = new AbortController();
+    let parentAbortCleanup: (() => void) | undefined;
 
     // Propagate abort from parent context to child attempt
     if (context.signal.aborted) {
       newController.abort(context.signal.reason);
     } else {
-      context.signal.addEventListener(
-        'abort',
-        () => {
-          newController.abort(context.signal.reason);
-        },
-        { once: true }
-      );
+      const onParentAbort = (): void => {
+        newController.abort(context.signal.reason);
+      };
+      context.signal.addEventListener('abort', onParentAbort, { once: true });
+      // Same {once: true} happy-path leak as fork() -- see dispose().
+      parentAbortCleanup = () => {
+        context.signal.removeEventListener('abort', onParentAbort);
+      };
     }
 
-    return new DefaultResilienceContext(
+    const child = new DefaultResilienceContext(
       context.correlationId,
       context.startTime,
       attempt,
       new Map(context.metadata),
       newController
     );
+
+    child._disposeAbortCleanup = parentAbortCleanup;
+
+    return child;
   }
 }
 

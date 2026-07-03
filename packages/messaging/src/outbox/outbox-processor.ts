@@ -85,6 +85,30 @@ export interface OutboxProcessorOptions {
    * logged and never breaks the processing loop. Omit to disable.
    */
   hooks?: OutboxProcessorHooks;
+  /**
+   * Opt-in: when `true`, `processBatch` calls `IOutboxRepository.claimBatch()`
+   * instead of `getUnprocessedMessages()`, and `processMessage` skips its own
+   * (now redundant) `updateStatus(id, PROCESSING)` call for messages obtained
+   * this way — the repository's `claimBatch` is responsible for the
+   * PROCESSING mark.
+   *
+   * **Correctness depends on the repository.** `claimBatch` is an optional
+   * method on `IOutboxRepository` with a non-atomic default implementation
+   * (read then mark, two steps). Setting `useClaimBatch: true` against a
+   * repository that has NOT overridden `claimBatch` with a real atomic
+   * claim (e.g. `SELECT ... FOR UPDATE SKIP LOCKED`) provides **no**
+   * additional safety over the default `getUnprocessedMessages` path — it
+   * only prevents duplicate dispatch when the repository's `claimBatch` is
+   * genuinely atomic.
+   *
+   * If the repository does not implement `claimBatch` at all (the method is
+   * `undefined`, e.g. a hand-rolled repository predating this option), the
+   * processor logs a warning once and falls back to
+   * `getUnprocessedMessages` for that batch.
+   *
+   * Defaults to `false` — no behavior change for existing consumers (AC#5).
+   */
+  useClaimBatch?: boolean;
 }
 
 type ResolvedOptions = Required<
@@ -108,6 +132,8 @@ export class OutboxProcessor {
   private isRunning = false;
   private processingTimer?: NodeJS.Timeout | undefined;
   private crashRecoveryTimer?: NodeJS.Timeout | undefined;
+  /** Guards the one-time fallback warning when `useClaimBatch` is set but the repository has no `claimBatch`. */
+  private warnedMissingClaimBatch = false;
 
   constructor(repository: IOutboxRepository, options: OutboxProcessorOptions = {}) {
     const batchSize = options.batchSize ?? 10;
@@ -158,6 +184,7 @@ export class OutboxProcessor {
       adaptiveRepollPauseMs: options.adaptiveRepollPauseMs ?? 50,
       startupJitterMs: options.startupJitterMs ?? 0,
       hooks: options.hooks,
+      useClaimBatch: options.useClaimBatch ?? false,
     };
   }
 
@@ -292,12 +319,34 @@ export class OutboxProcessor {
       return { processed: 0, batchSize };
     }
 
+    // AC#1: when useClaimBatch is enabled and the repository provides an
+    // atomic claimBatch(), use it — the returned messages are already marked
+    // PROCESSING by the repository, closing the read-then-mark race window
+    // that exists with plain getUnprocessedMessages(). Falls back to
+    // getUnprocessedMessages() (with a one-time warning) if the repository
+    // has no claimBatch at all.
+    const claimFn = this.repository.claimBatch;
+    const useClaim = this.options.useClaimBatch === true && typeof claimFn === 'function';
+    if (this.options.useClaimBatch && !useClaim && !this.warnedMissingClaimBatch) {
+      this.warnedMissingClaimBatch = true;
+      internalLogger.warn(
+        'OutboxProcessor: useClaimBatch is enabled but the repository does not implement claimBatch() — falling back to getUnprocessedMessages (no atomic-claim protection)'
+      );
+    }
+
     const [error, result] = await safeRun(() =>
-      this.repository.getUnprocessedMessages(
-        batchSize,
-        this.options.priorityOrder,
-        this.options.messageTypes
-      )
+      useClaim && claimFn
+        ? claimFn.call(
+            this.repository,
+            batchSize,
+            this.options.priorityOrder,
+            this.options.messageTypes
+          )
+        : this.repository.getUnprocessedMessages(
+            batchSize,
+            this.options.priorityOrder,
+            this.options.messageTypes
+          )
     );
 
     if (error) {
@@ -319,7 +368,7 @@ export class OutboxProcessor {
     // NOT short-circuit the batch. Each message has its own retry/fail state
     // tracked in the repository (see handleMessageError).
     const outcomes = await Promise.allSettled(
-      messages.map(message => this.processMessage(message))
+      messages.map(message => this.processMessage(message, useClaim))
     );
 
     // processMessage never rejects (it catches internally), but treat any
@@ -342,12 +391,17 @@ export class OutboxProcessor {
 
   /**
    * Processes a single message through the middleware pipeline.
+   * @param alreadyClaimed When `true`, the message was already marked
+   *   `PROCESSING` by `IOutboxRepository.claimBatch()` — the redundant
+   *   `updateStatus(id, PROCESSING)` call is skipped.
    * @returns `true` if the message was processed successfully, `false` if it failed.
    */
-  private async processMessage(message: IOutboxMessage): Promise<boolean> {
+  private async processMessage(message: IOutboxMessage, alreadyClaimed = false): Promise<boolean> {
     const [error] = await safeRun(async () => {
-      // Mark as processing
-      await this.repository.updateStatus(message.id, MessageStatus.PROCESSING);
+      // Mark as processing (skipped when claimBatch already did this atomically)
+      if (!alreadyClaimed) {
+        await this.repository.updateStatus(message.id, MessageStatus.PROCESSING);
+      }
 
       // Build middleware pipeline
       const pipeline = this.buildPipeline(message);
@@ -374,15 +428,26 @@ export class OutboxProcessor {
     }
     // Create the final handler function
     const finalHandler = async (msg: IOutboxMessage): Promise<void> => {
-      await Promise.race([
-        handler.handle(msg),
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error('Message processing timeout')),
-            this.options.messageTimeout
-          )
-        ),
-      ]);
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      try {
+        await Promise.race([
+          handler.handle(msg),
+          new Promise<never>((_, reject) => {
+            timeoutId = setTimeout(
+              () => reject(new Error('Message processing timeout')),
+              this.options.messageTimeout
+            );
+          }),
+        ]);
+      } finally {
+        // D-1: clear the timeout regardless of which race branch resolved —
+        // otherwise a fast handler.handle() still leaves the timeout timer
+        // running for the full messageTimeout, leaking a Node timer per
+        // message (visible under fake timers / vi.getTimerCount()). The race
+        // loser (the rejecting timer) never produces an unhandled rejection
+        // here because it is cleared, not left pending.
+        if (timeoutId !== undefined) clearTimeout(timeoutId);
+      }
     };
 
     // Build the middleware chain from right to left

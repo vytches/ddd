@@ -81,22 +81,25 @@ export class TimeoutStrategy implements ResilienceStrategy {
     context: ResilienceContext
   ): Promise<T> {
     const timeoutContext = context.withTimeout(this.timeoutMs);
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    return new Promise<T>((resolve, reject) => {
-      const timeoutId = setTimeout(() => {
-        reject(new TimeoutError(`Operation timed out after ${this.timeoutMs}ms`));
-      }, this.timeoutMs);
+    try {
+      return await new Promise<T>((resolve, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new TimeoutError(`Operation timed out after ${this.timeoutMs}ms`));
+        }, this.timeoutMs);
 
-      operation(timeoutContext)
-        .then(result => {
-          clearTimeout(timeoutId);
-          resolve(result);
-        })
-        .catch(error => {
-          clearTimeout(timeoutId);
-          reject(error);
-        });
-    });
+        operation(timeoutContext).then(resolve).catch(reject);
+      });
+    } finally {
+      // VB-004: clear this strategy's own race timer (unchanged behavior)
+      // AND dispose the forked context's internal fork timer + parent
+      // abort listener, on both the success and failure path.
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+      timeoutContext.dispose?.();
+    }
   }
 }
 

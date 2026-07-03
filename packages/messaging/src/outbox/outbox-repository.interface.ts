@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { IOutboxMessage, MessagePriority, MessageStatus } from './outbox-interfaces';
+import { MessageStatus } from './outbox-interfaces';
+import type { IOutboxMessage, MessagePriority } from './outbox-interfaces';
 
 export abstract class IOutboxRepository {
   /**
@@ -19,6 +20,23 @@ export abstract class IOutboxRepository {
   /**
    * Returns unprocessed messages up to the given limit.
    *
+   * **Not a claim.** This is a pure read — it does not mark returned messages
+   * as `PROCESSING` or otherwise reserve them. `OutboxProcessor` calls
+   * `updateStatus(id, PROCESSING)` for each message *after* this read
+   * returns, which means there is a window between "read" and "claimed"
+   * during which two concurrent processors (or two calls racing on the same
+   * processor) can both read the same PENDING message and both dispatch it.
+   * Multi-worker deployments that need "exactly one processor claims each
+   * message" should implement {@link claimBatch} with an atomic
+   * read+mark (e.g. `SELECT ... FOR UPDATE SKIP LOCKED` or a single
+   * `UPDATE ... WHERE status='PENDING' RETURNING *` statement / compare-
+   * and-swap on `status`) rather than relying on this method plus a
+   * follow-up `updateStatus`.
+   *
+   * Regardless of claim strategy, handlers should be idempotent to side
+   * effects — transient failures or duplicate-claim races may cause a
+   * handler to run more than once.
+   *
    * @param limit - Maximum number of messages to return.
    * @param priorityOrder - Ordered array of MessagePriority values defining
    *   processing order (first element = highest priority, processed first).
@@ -36,6 +54,56 @@ export abstract class IOutboxRepository {
     priorityOrder?: MessagePriority[],
     messageTypes?: string[]
   ): Promise<IOutboxMessage[]>;
+
+  /**
+   * Atomically claims a batch of unprocessed messages: reads PENDING
+   * messages *and* marks them `PROCESSING` in the same operation, so two
+   * concurrent callers (two processor instances, or two racing calls on one
+   * instance) never both receive the same message.
+   *
+   * **Optional, and non-atomic by default.** This method is declared with
+   * `?` — it is NOT part of the required abstract contract, so existing
+   * `IOutboxRepository` subclasses keep compiling unmodified (AC#5). The
+   * default implementation provided here is a convenience shim only: it
+   * calls {@link getUnprocessedMessages} and then `updateStatusBatch(...,
+   * PROCESSING)` as two separate steps. **That is NOT atomic** — it has the
+   * exact same read-then-mark race window as calling
+   * `getUnprocessedMessages` + `updateStatus` manually, and is safe only for
+   * a single-worker deployment. Override `claimBatch` in a concrete
+   * repository (e.g. backed by `SELECT ... FOR UPDATE SKIP LOCKED`, or a
+   * single atomic `UPDATE ... WHERE status='PENDING' LIMIT n RETURNING *`)
+   * to get real multi-worker/multi-processor safety.
+   *
+   * `OutboxProcessor` only calls this method when
+   * `OutboxProcessorOptions.useClaimBatch` is explicitly set to `true`
+   * (opt-in, default `false`) — see AC#1/AC#2. When enabled, the processor
+   * skips its own redundant `updateStatus(id, PROCESSING)` call for messages
+   * returned by `claimBatch`, since claiming already performed that mark.
+   *
+   * Handlers should be idempotent to side effects regardless — transient
+   * failures or duplicate-claim races (e.g. with the non-atomic default
+   * implementation) may still cause a handler to run more than once.
+   *
+   * @param limit - Maximum number of messages to claim.
+   * @param priorityOrder - See {@link getUnprocessedMessages}.
+   * @param messageTypes - See {@link getUnprocessedMessages}.
+   * @returns Messages that were claimed (already marked `PROCESSING`).
+   */
+  async claimBatch?(
+    limit?: number,
+    priorityOrder?: MessagePriority[],
+    messageTypes?: string[]
+  ): Promise<IOutboxMessage[]> {
+    const messages = await this.getUnprocessedMessages(limit, priorityOrder, messageTypes);
+    if (messages.length === 0) {
+      return messages;
+    }
+    await this.updateStatusBatch(
+      messages.map(m => m.id),
+      MessageStatus.PROCESSING
+    );
+    return messages.map(m => ({ ...m, status: MessageStatus.PROCESSING }));
+  }
 
   /**
    * Gets specific message by ID
