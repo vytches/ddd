@@ -143,6 +143,9 @@ docs/api/
 
 # REL-007: explicitly ignore .env.development (was tracked but always empty)
 .env.development
+
+# /orchestrate-ddd Workflow scripts (scratch, per-run, not source)
+project-orchestration/.workflow/
 .claude/knowledge/patterns/
 .claude/knowledge/patterns-local/
 .claude/knowledge/rules/
