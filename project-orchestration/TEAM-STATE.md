@@ -102,8 +102,9 @@ from LIB-AUDIT-2026-07-02 now unblocked | **Debt**: 0 major / 0 minor
 - **Research/follow-up**: VD-006 split 2026-07-04 (per `/analyze-ddd`) into
   **VD-006a** (8h, generator + CI enforcement — mechanical) and **VD-006b** (10h
   R&D, semantic combination-sanity evaluator + pilots, depends on VD-006a,
-  explicit pass/fail exit criterion); VF-026 (4h, ddd-lint anti-pattern rules —
-  fanout-in-handler, deep-import).
+  explicit pass/fail exit criterion); VF-026 (5h, ddd-lint anti-pattern rules —
+  fanout-in-handler, deep-import, plus wiring ddd:lint into CI as informational,
+  added 2026-07-04).
 - **Gated by entry conditions**: VA-001 (awaiting juz-ide-api production
   validation ~2026-08/09); VP-006b (best after VP-006 lands).
 - **Opportunistic, explicitly deferred**: VD-004, VF-002.
