@@ -99,9 +99,11 @@ from LIB-AUDIT-2026-07-02 now unblocked | **Debt**: 0 major / 0 minor
   hardening + projections), VD-005 (8h, docs drift cleanup).
 - **Post-first-publish**: VP-012 (6h, hotpath perf), VT-006 (10h, policies
   decorators + testing deepEqual coverage).
-- **Research/follow-up**: VD-006 (8h spike, coverage matrix + verification
-  mechanism), VF-026 (4h, ddd-lint anti-pattern rules — fanout-in-handler,
-  deep-import).
+- **Research/follow-up**: VD-006 split 2026-07-04 (per `/analyze-ddd`) into
+  **VD-006a** (8h, generator + CI enforcement — mechanical) and **VD-006b** (10h
+  R&D, semantic combination-sanity evaluator + pilots, depends on VD-006a,
+  explicit pass/fail exit criterion); VF-026 (4h, ddd-lint anti-pattern rules —
+  fanout-in-handler, deep-import).
 - **Gated by entry conditions**: VA-001 (awaiting juz-ide-api production
   validation ~2026-08/09); VP-006b (best after VP-006 lands).
 - **Opportunistic, explicitly deferred**: VD-004, VF-002.
@@ -166,7 +168,8 @@ removal is an immediate breaking change. **Must run green `build && test` by
   cross-context event leak stopped). **BREAKING CHANGE** — flag as such in
   changelog, not plain `fix:`. 215/215 nestjs tests green; consumer validation
   confirmed safe (no juz-ide-api call-sites on the affected API). Follow-ups
-  spawned: VF-026 (lint anti-pattern rules), VD-006 (example coverage matrix).
+  spawned: VF-026 (lint anti-pattern rules), VD-006 (example coverage matrix —
+  split 2026-07-04 into VD-006a/VD-006b, see Technical Pulse).
 
 **Pre-first-public-publish pipeline** (post-v0.31.0, ~7–10 days estimated, ~30h
 combined): VD-005 (docs truth cleanup, 8h), VF-023 (DDD foundation guarantees —
@@ -188,10 +191,12 @@ concept-approved, no demand signal yet — correct call, no premature investment
 opportunistic post-release). Do NOT cut the three pre-first-publish tasks
 (VD-005/VF-023/VF-024) — deferral turns them into breaking changes.
 
-**Unvalidated / research items**: VD-006 (example coverage evaluator mechanism
-has no precedent in the codebase — scope it via /analyze-ddd before committing
-to the 8h estimate); VF-025 (11 event-bus fixes, 14h, post-publish but high
-blast radius — backward-compat decision still pending).
+**Unvalidated / research items**: VD-006 scoped via `/analyze-ddd` (2026-07-04)
+and split — VD-006a (generator + CI, 8h) is now well-scoped like any other
+mechanical task; **VD-006b** (semantic-eval evaluator + pilots, 10h) remains
+genuinely unprecedented R&D, but is now bounded by an explicit pass/fail exit
+criterion instead of an open-ended estimate. VF-025 (11 event-bus fixes, 14h,
+post-publish but high blast radius — backward-compat decision still pending).
 
 **Validate this week** (highest risk, now overdue): juz-ide-api build green past
 VS-013. Target before 2026-07-05 or publication slips another week.
@@ -208,6 +213,19 @@ VS-013. Target before 2026-07-05 or publication slips another week.
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-07-04] @human: Ran `/analyze-ddd VD-006` — 3-stage panel (architect →
+library-quality-verifier → tech-lead synthesis) found the 8h estimate couldn't
+cover both the mechanical generator (AC#2/#3) and the greenfield semantic-eval
+R&D (AC#4, zero precedent in this repo). Approved split into VD-006a
+(generator + CI enforcement, 8h) and VD-006b (semantic-eval harness + 2 pilots,
+10h R&D, depends on VD-006a, explicit pass/fail exit criterion). Panel also
+corrected an initial architect claim — `examples/policies` and
+`examples/domain-services` DO already run in CI today (confirmed against a real
+historical commit), narrowing VD-006a's scope versus the original estimate.
+Original VD-006 task file marked `status: split`, kept as historical record;
+task files created for both children. KANBAN/TEAM-STATE updated to reflect the
+split.
 
 [2026-07-03] @pulse: VD-007 (LLMGUIDE completeness, 11 packages) and VB-003
 (forFeature DI wiring fix, BREAKING CHANGE) both shipped today — moved to

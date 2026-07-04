@@ -15,6 +15,14 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > VB-003 was the last of the two original publish blockers (VB-002 landed
 > 2026-07-02). Follow-ups spawned: VF-026, VD-006 (both already on this board).
 >
+> **Split (2026-07-04)**: **VD-006** → `/analyze-ddd` panel found the 8h
+> estimate couldn't cover both halves; approved split into **VD-006a**
+> (generator + CI enforcement, 8h) and **VD-006b** (semantic-eval harness +
+> pilots, 10h R&D, depends on VD-006a, explicit pass/fail exit criterion).
+> Original VD-006 task file marked `status: split`, kept as historical record.
+> Analysis:
+> `project-orchestration/analysis/VD-006-example-coverage-matrix.analysis.md`.
+>
 > **Just shipped (2026-07-02)**: VS-006, VS-008, VB-002 — see prior cycle notes
 > in git history of this file. **v0.31.0 code scope is complete** — only the
 > VS-013 validation gate remains.
@@ -45,7 +53,8 @@ _None._ VB-003 (the last P0 publish blocker) shipped 2026-07-03.
 | VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog | 1d  |
 | VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog | 1d  |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
-| VD-006  | Example coverage matrix (features × levels × combinations, spike) | backlog | 0d  |
+| VD-006a | Example coverage matrix generator + CI enforcement (mechanism)    | backlog | 0d  |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
 | VF-026  | ddd-lint anti-pattern rules (fanout-in-handler, deep-import)      | backlog | 0d  |
 
 ## P3 — Low
