@@ -1,0 +1,19 @@
+{
+  "name": "@vytches/example-matrix",
+  "version": "0.26.0",
+  "private": true,
+  "description": "VD-006a — generates the examples/* package x combination coverage matrix (matrix.json + docs/COVERAGE-MATRIX.md) from actual repo state via TypeScript AST parsing. This is an ADDITIONAL report alongside the L1/L2/L3 test-pyramid coverage gate (vitest --coverage) — it does NOT replace or measure unit-test coverage quality, only whether a declared package combination has a real example file backed by a passing test.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest --run",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "typescript": "^5.8.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^4.1.1",
+    "vitest": "^2.1.9"
+  }
+}

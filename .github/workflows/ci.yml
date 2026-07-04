@@ -165,6 +165,44 @@ jobs:
           echo "Verifying LLM context matches exports..."
           node scripts/verify-llm-context.mjs
 
+      # VD-006a: examples/* combination coverage matrix (tools/example-matrix).
+      # This is an ADDITIONAL report alongside the existing L1/L2/L3
+      # test-pyramid coverage gate (`nx affected --target=test`, vitest
+      # --coverage) above — it does NOT measure or replace unit-test
+      # coverage. It only verifies that:
+      #   (a) every example file has a passing test importing it,
+      #   (b) every combination declared in
+      #       tools/example-matrix/expected-combinations.yaml has a
+      #       matching file on disk, and
+      #   (c) the committed docs/coverage-matrix.json /
+      #       docs/COVERAGE-MATRIX.md are not stale relative to current
+      #       repo state.
+      # Hard failures on (a)/(b)/(c) fail the build (D-3). A new,
+      # undeclared examples/*/ combination is a SOFT warning only (D-7) —
+      # surfaced as a GitHub Actions annotation, never a build failure —
+      # so authoring a new example ahead of updating the manifest does not
+      # block the PR.
+      - name: Check example coverage matrix (VD-006a)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Checking examples/* coverage matrix against tools/example-matrix/expected-combinations.yaml..."
+          set +e
+          pnpm example-matrix:check 2>&1 | tee example-matrix-check.log
+          STATUS=${PIPESTATUS[0]}
+          set -e
+
+          # D-7: surface undeclared-combination soft warnings as PR annotations
+          # without failing the build.
+          grep '^\[soft' example-matrix-check.log | while IFS= read -r line; do
+            echo "::warning::${line}"
+          done
+
+          if [ "$STATUS" -ne 0 ]; then
+            echo "❌ example-matrix --check failed — a declared combination is missing its file/passing test, or docs/coverage-matrix.json / docs/COVERAGE-MATRIX.md is stale. Run 'pnpm example-matrix:generate' locally and commit the result, or add the missing example/test."
+            exit 1
+          fi
+          echo "✅ example-matrix --check passed (see header comment above: this is additional to, not a substitute for, the L1/L2/L3 vitest --coverage gate)."
+
       - name: Check if quality gates needed
         id: check_gates
         run: |
