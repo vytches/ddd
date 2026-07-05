@@ -61,15 +61,15 @@ fresh and confirmed in a real PR:
 6. [ ] Wire `ddd:lint` into CI, at minimum as **informational** (e.g.
        `pnpm ddd:lint || true`), per the tool's own README-stated rollout plan
        (Informational → Blocking-soon → Blocking). Confirmed 2026-07-04:
-       `ddd:lint` is wired into **neither** `.github/workflows/ci.yml` (the only
-       lint step there is ESLint via `nx affected --target=lint`) **nor**
-       `.husky/pre-commit` today — it only runs when someone remembers to invoke
-       it manually. Adding `ddd-004`/`ddd-005` to a linter nobody actually runs
-       compounds this gap rather than fixing it; this task should not ship two
-       more rules into that same blind spot. (Dogfooding confirmed 2026-07-04: a
-       live run against `packages/` already finds real findings — 3 errors, 48
-       warnings across 35 files — so the mechanism itself works, it's the
-       enforcement wiring that's missing.)
+       `ddd:lint` is wired into **neither** `.github/workflows/ci.yml` (the
+       only lint step there is ESLint via `nx affected --target=lint`) **nor**
+       `.husky/pre-commit` today — it only runs when someone remembers to
+       invoke it manually. Adding `ddd-004`/`ddd-005` to a linter nobody
+       actually runs compounds this gap rather than fixing it; this task
+       should not ship two more rules into that same blind spot. (Dogfooding
+       confirmed 2026-07-04: a live run against `packages/` already finds real
+       findings — 3 errors, 48 warnings across 35 files — so the mechanism
+       itself works, it's the enforcement wiring that's missing.)
 
 ## Out of scope
 
