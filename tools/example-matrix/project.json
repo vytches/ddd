@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches/example-matrix",
+  "projectType": "application",
+  "sourceRoot": "tools/example-matrix/src",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run tools/example-matrix/tests --config tools/example-matrix/vitest.config.mts --reporter=verbose"
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project tools/example-matrix/tsconfig.json"
+      }
+    }
+  },
+  "tags": ["scope:tool", "type:cli"]
+}

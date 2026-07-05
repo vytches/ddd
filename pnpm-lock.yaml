@@ -955,6 +955,22 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.1)(@vitest/ui@4.1.9)(tsx@4.20.3)
 
+  tools/example-matrix:
+    dependencies:
+      typescript:
+        specifier: ^5.8.0
+        version: 5.8.3
+    devDependencies:
+      '@types/js-yaml':
+        specifier: ^4.0.9
+        version: 4.0.9
+      js-yaml:
+        specifier: '>=4.1.1'
+        version: 4.1.1
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@20.19.1)(@vitest/ui@4.1.9)(tsx@4.20.3)
+
 packages:
 
   /@actions/core@3.0.0:

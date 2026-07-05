@@ -14,12 +14,25 @@ estimated_time: 8h (research/spike — full scope after /analyze-ddd)
 created_by:
   human (feedback 2026-07-03, follow-up on project_examples_coverage_audit)
 created_at: 2026-07-03
-status: backlog
+status: split
+superseded_by: [VD-006a, VD-006b]
 release_target: unscheduled
 package: docs/, examples/, tools/
 findings:
-  [project_examples_coverage_audit memory, delivered artifact 2026-07-03]
+  [
+    project_examples_coverage_audit memory,
+    delivered artifact 2026-07-03,
+    project-orchestration/analysis/VD-006-example-coverage-matrix.analysis.md,
+  ]
 ```
+
+**Split 2026-07-04** — the `/analyze-ddd` panel found the 8h estimate could not
+cover both the mechanical generator (AC#2/#3) and the greenfield semantic-eval
+R&D (AC#4). Approved (OQ-1): split into
+[VD-006a](./VD-006a-example-matrix-generator.md) (generator + CI, ~8h) and
+[VD-006b](./VD-006b-semantic-eval-harness.md) (semantic-eval harness + pilots,
+~10h R&D, depends on VD-006a). This task file is kept as the historical record
+of the original scope; track work under VD-006a/VD-006b going forward.
 
 ## Why
 

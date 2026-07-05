@@ -10,7 +10,7 @@ title:
 type: feature
 priority: normal
 complexity: simple
-estimated_time: 4h
+estimated_time: 5h
 created_by: human (feedback 2026-07-03)
 created_at: 2026-07-03
 status: backlog
@@ -58,6 +58,18 @@ fresh and confirmed in a real PR:
 5. [ ] The Anti-Patterns section in the LLMGUIDE.md of affected packages (at
        least `@vytches/ddd-nestjs`) updated with a link to the lint rule as the
        enforceable counterpart of the prose description.
+6. [ ] Wire `ddd:lint` into CI, at minimum as **informational** (e.g.
+       `pnpm ddd:lint || true`), per the tool's own README-stated rollout plan
+       (Informational → Blocking-soon → Blocking). Confirmed 2026-07-04:
+       `ddd:lint` is wired into **neither** `.github/workflows/ci.yml` (the
+       only lint step there is ESLint via `nx affected --target=lint`) **nor**
+       `.husky/pre-commit` today — it only runs when someone remembers to
+       invoke it manually. Adding `ddd-004`/`ddd-005` to a linter nobody
+       actually runs compounds this gap rather than fixing it; this task
+       should not ship two more rules into that same blind spot. (Dogfooding
+       confirmed 2026-07-04: a live run against `packages/` already finds real
+       findings — 3 errors, 48 warnings across 35 files — so the mechanism
+       itself works, it's the enforcement wiring that's missing.)
 
 ## Out of scope
 
