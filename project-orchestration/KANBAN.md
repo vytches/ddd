@@ -23,6 +23,12 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > Analysis:
 > `project-orchestration/analysis/VD-006-example-coverage-matrix.analysis.md`.
 >
+> **Just shipped (2026-07-05)**: **VD-006a** done (example-matrix generator + CI
+> `--check` enforcement, commit `ff985aa9` on
+> `feature/VD-006a-example-matrix-generator`, not yet pushed/PR'd) — moved to
+> `completed-tasks/`. **VD-006b** now unblocked (depends on VD-006a's manifest
+> `level` field, which has landed).
+>
 > **Just shipped (2026-07-02)**: VS-006, VS-008, VB-002 — see prior cycle notes
 > in git history of this file. **v0.31.0 code scope is complete** — only the
 > VS-013 validation gate remains.
@@ -53,7 +59,6 @@ _None._ VB-003 (the last P0 publish blocker) shipped 2026-07-03.
 | VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog | 1d  |
 | VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog | 1d  |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
-| VD-006a | Example coverage matrix generator + CI enforcement (mechanism)    | backlog | 0d  |
 | VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
 | VF-026  | ddd-lint anti-pattern rules (fanout-in-handler, deep-import)      | backlog | 0d  |
 

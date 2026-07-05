@@ -99,12 +99,13 @@ from LIB-AUDIT-2026-07-02 now unblocked | **Debt**: 0 major / 0 minor
   hardening + projections), VD-005 (8h, docs drift cleanup).
 - **Post-first-publish**: VP-012 (6h, hotpath perf), VT-006 (10h, policies
   decorators + testing deepEqual coverage).
-- **Research/follow-up**: VD-006 split 2026-07-04 (per `/analyze-ddd`) into
-  **VD-006a** (8h, generator + CI enforcement — mechanical) and **VD-006b** (10h
-  R&D, semantic combination-sanity evaluator + pilots, depends on VD-006a,
-  explicit pass/fail exit criterion); VF-026 (5h, ddd-lint anti-pattern rules —
-  fanout-in-handler, deep-import, plus wiring ddd:lint into CI as
-  informational, added 2026-07-04).
+- **Research/follow-up**: **VD-006a done** 2026-07-05 (generator + CI
+  enforcement — commit `ff985aa9` on `feature/VD-006a-example-matrix-generator`,
+  not yet pushed/PR'd; moved to `completed-tasks/`). **VD-006b** (10h R&D,
+  semantic combination-sanity evaluator + pilots) now unblocked — its dependency
+  on VD-006a's manifest `level` field is satisfied. VF-026 (5h, ddd-lint
+  anti-pattern rules — fanout-in-handler, deep-import, plus wiring ddd:lint into
+  CI as informational, added 2026-07-04).
 - **Gated by entry conditions**: VA-001 (awaiting juz-ide-api production
   validation ~2026-08/09); VP-006b (best after VP-006 lands).
 - **Opportunistic, explicitly deferred**: VD-004, VF-002.
