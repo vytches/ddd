@@ -48,14 +48,34 @@ export class ACLError extends IDomainError {
 }
 
 export class TranslationError extends ACLError {
+  /**
+   * The domain/external model that failed to translate. VS-017 (SA-C1):
+   * kept as a non-enumerable property (defined via `Object.defineProperty`
+   * below, not a constructor parameter-property) so it stays available for
+   * programmatic access in a debugger or `catch` block, but is NEVER
+   * included in `JSON.stringify(err)` — the exact path that fires on
+   * cross-context schema drift, i.e. the error a consumer is most likely to
+   * pipe straight into a JSON logger.
+   */
+  public readonly sourceModel: unknown;
+
+  public readonly direction: 'TO_EXTERNAL' | 'FROM_EXTERNAL';
+
   constructor(
     message: string,
     contextName: string,
-    public readonly sourceModel: unknown,
-    public readonly direction: 'TO_EXTERNAL' | 'FROM_EXTERNAL',
+    sourceModel: unknown,
+    direction: 'TO_EXTERNAL' | 'FROM_EXTERNAL',
     error?: Error
   ) {
     super(message, contextName, 'TRANSLATION', error);
+    Object.defineProperty(this, 'sourceModel', {
+      value: sourceModel,
+      enumerable: false,
+      writable: false,
+      configurable: false,
+    });
+    this.direction = direction;
   }
 
   static forToExternal(

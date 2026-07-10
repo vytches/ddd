@@ -17,6 +17,40 @@ class TestDomainError extends IDomainError {
   }
 }
 
+describe('IDomainError.toJSON() (VS-017, SA-H6)', () => {
+  it('JSON.stringify includes message, code, timestamp, data', () => {
+    const error = new TestDomainError('Something failed', {
+      code: 'MY_CODE',
+      data: { entityId: 'e-1' },
+    });
+
+    const parsed = JSON.parse(JSON.stringify(error));
+
+    expect(parsed.message).toBe('Something failed');
+    expect(parsed.code).toBe('MY_CODE');
+    expect(parsed.data).toEqual({ entityId: 'e-1' });
+    expect(parsed.timestamp).toBeDefined();
+  });
+
+  it('JSON.stringify never includes stack', () => {
+    const error = new TestDomainError('Something failed');
+    const json = JSON.stringify(error);
+
+    expect(json).not.toContain('"stack"');
+  });
+
+  it('is a strict whitelist -- subclass-added enumerable fields are not auto-included', () => {
+    class SubclassWithExtraField extends IDomainError {
+      public readonly extraField = 'should-not-leak';
+    }
+    const error = new SubclassWithExtraField('msg');
+    const json = JSON.stringify(error);
+
+    expect(json).not.toContain('extraField');
+    expect(json).not.toContain('should-not-leak');
+  });
+});
+
 describe('IDomainError Flexibility', () => {
   describe('Backward Compatibility', () => {
     it('should accept enum codes as before', () => {

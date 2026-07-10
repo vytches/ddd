@@ -200,4 +200,37 @@ describe('TranslationError', () => {
       expect(error.metadata).toEqual({ requestId: 'req-123' });
     });
   });
+
+  describe('VS-017 (SA-C1): sourceModel is non-enumerable — safe to JSON.stringify', () => {
+    it('does not include sourceModel in JSON.stringify output, even with PII-bearing fields', () => {
+      const piiModel = {
+        ssn: '123-45-6789',
+        email: 'user@example.com',
+        creditCard: '4111111111111111',
+      };
+      const error = TranslationError.forToExternal('Conversion failed', 'PaymentContext', piiModel);
+
+      const json = JSON.stringify(error);
+
+      expect(json).not.toContain('123-45-6789');
+      expect(json).not.toContain('user@example.com');
+      expect(json).not.toContain('4111111111111111');
+      expect(json).not.toContain('sourceModel');
+    });
+
+    it('still exposes sourceModel via direct property access (debugger/catch block)', () => {
+      const model = { orderId: 'ORD-1' };
+      const error = TranslationError.forToExternal('Conversion failed', 'OrderContext', model);
+
+      expect(error.sourceModel).toBe(model);
+    });
+
+    it('JSON.stringify output includes message (via inherited IDomainError.toJSON)', () => {
+      const error = TranslationError.forToExternal('Conversion failed', 'OrderContext', {});
+      const parsed = JSON.parse(JSON.stringify(error));
+
+      expect(parsed.message).toBe('Conversion failed');
+      expect(parsed.stack).toBeUndefined();
+    });
+  });
 });

@@ -185,6 +185,29 @@ describe('PolicyViolation', () => {
       expect(violation.details).toEqual({ test: 'value' });
       expect(violation.timestamp).toEqual(new Date('2023-01-01T00:00:00.000Z'));
     });
+
+    it('VS-017 (SA-H5): default toJSON()/JSON.stringify() does NOT include stack', () => {
+      const violation = new PolicyViolation({
+        code: 'TEST_ERROR',
+        message: 'Test message',
+        severity: 'ERROR',
+      });
+
+      expect(violation.toJSON().stack).toBeUndefined();
+      const parsed = JSON.parse(JSON.stringify(violation));
+      expect(parsed.stack).toBeUndefined();
+    });
+
+    it('VS-017 (SA-H5): explicit toJSON({ includeStack: true }) opts in to the stack', () => {
+      const violation = new PolicyViolation({
+        code: 'TEST_ERROR',
+        message: 'Test message',
+        severity: 'ERROR',
+      });
+
+      const json = violation.toJSON({ includeStack: true });
+      expect(json.stack).toBeDefined();
+    });
   });
 });
 
