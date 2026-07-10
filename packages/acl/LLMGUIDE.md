@@ -294,6 +294,13 @@ impossible. Always implement a named translator class.
 in infrastructure setup (e.g., module init, DI container). Application services
 should only call `registry.getRequired(...)`.
 
+**Assuming `TranslationError`/`ACLError` are unsafe to log.** They are safe to
+`JSON.stringify()` (VS-017) — the failing domain/external model is kept as a
+non-enumerable `sourceModel` property (still reachable via `error.sourceModel`
+in a debugger or `catch` block, never via `JSON.stringify`). Do not work around
+this by manually copying the model into a log line yourself — that reintroduces
+the exact leak the non-enumerable property exists to prevent.
+
 **Calling `execute()` with an unsupported operation string.** `BaseACLAdapter`
 returns `Result.fail(ACLError.unsupportedOperation(...))` for unregistered
 operations. Always call `supportsOperation(op)` or rely on a typed wrapper to

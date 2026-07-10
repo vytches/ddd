@@ -97,3 +97,9 @@ try {
   to a `Result.fail()` at the boundary.
 - **Do not use `IActor` as a security principal** — it is metadata for audit
   trails, not authentication. Authorization happens before the domain runs.
+- **Do not put a raw domain/external model object into an error's `data`
+  field.** `IDomainError.toJSON()` (VS-017) is safe to call — it whitelists
+  `name`/`code`/`message`/`timestamp`/`data` and never leaks `stack` or
+  subclass-added properties — but `data` itself is a serialization boundary:
+  whatever you put there ships in `JSON.stringify(err)`. Attach IDs and
+  primitive context, never a full model that might carry PII.

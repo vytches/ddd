@@ -122,6 +122,16 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > scope-creep) — merged to `develop`. All ACs resolved (AC1 descoped, not failed
 > — see above). Moved to `completed-tasks/`.
 
+> **Just shipped (2026-07-10)**: **VS-017** done (error serialization —
+> `IDomainError.toJSON()` strict whitelist (name/code/message/timestamp/data,
+> never stack or subclass fields), `TranslationError.sourceModel` made
+> non-enumerable, `PolicyViolation.toJSON()` stack now opt-in only; 11 new tests
+> incl. a PII-bearing-model regression through the real `BaseModelTranslator`
+> failure path) — merged to `develop`. Blast-radius checked across every
+> `IDomainError` subclass (aggregates, domain-services, projections,
+> repositories, acl, domain-primitives) — all green, zero regressions. Moved to
+> `completed-tasks/`.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
@@ -132,7 +142,6 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 | ------ | ----------------------------------------------------------------- | ------- | --- |
 | VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog | 1d  |
 | VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog | 1d  |
-| VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog | 0d  |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 0d  |
 | VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog | 0d  |
 | VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog | 0d  |
