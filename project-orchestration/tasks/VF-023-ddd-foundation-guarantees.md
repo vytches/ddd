@@ -14,7 +14,7 @@ created_at: 2026-07-02
 status: backlog
 release_target: pre-first-public-publish (BC window — po publikacji to breaking changes)
 package: '@vytches/ddd-value-objects', '@vytches/ddd-aggregates'
-findings: [F-C5, F-C6, F-H4, F-H5, F-M2, SA-M7, SA-M9]
+findings: [F-C5, F-C6, F-H4, F-H5, F-M2, SA-M7, SA-M9, UX-C15, UX-C18]
 ```
 
 ## Dlaczego
@@ -83,6 +83,15 @@ implicite.
        wersjonowanego zapisu (compare-and-set na expectedVersion) — inaczej
        "optimistic concurrency" biblioteki nie daje żadnej gwarancji; LLMGUIDE
        repositories/contracts zaktualizowane (doc-only, bez zmiany sygnatur).
+10. [ ] **UX-C15 (LIB-UX-AUDIT-2026-07-10):** `AggregateRoot.equals()` dodane
+        (parytet z `Entity.equals()`, identity po `_id.equals()`) — własny JSDoc
+        klasy (aggregate-root.ts:32-35) już twierdzi, że istnieje; czysta
+        addycja, non-breaking.
+11. [ ] **UX-C18 (LIB-UX-AUDIT-2026-07-10):** `getDomainEvents()` zwraca tylko
+        płytką kopię tablicy (aggregate-root.ts:175-177) — mutacja
+        `event.payload` przez konsumenta sięga wewnętrznego stanu pending
+        events; rozstrzygnąć razem z AC2 (deep freeze vs udokumentowane shallow)
+        — jedna spójna decyzja dla VO i eventów.
 
 ## Out of scope
 

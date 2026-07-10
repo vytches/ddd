@@ -20,7 +20,8 @@ release_target:
   post-first-public-publish (opportunistic — internal-only change, does not gate
   publish)
 package: '@vytches/ddd-resilience'
-findings: [SA-M12]
+findings: [SA-M12, UX-C6]
+estimated_time_note: 'bumped 1h→2h on 2026-07-10 (UX-C6 added scope)'
 ```
 
 ## Why
@@ -55,6 +56,18 @@ parent-abort listener — but never calls `attemptContext.dispose?.()`, unlike
 accumulate unboundedly on the shared signal. This is exactly the class of leak
 this task's native-AbortSignal rewrite eliminates — fixing it here avoids
 patching the manual mechanism twice.
+
+**UX-C6 (LIB-UX-AUDIT-2026-07-10) — added scope:** `bulkhead.ts` is a **third
+site** of the identical leak class this task fixes, missed by the prior audits:
+(a) `executeWithTimeout` (`packages/resilience/src/patterns/bulkhead.ts:86`)
+forks `context.withTimeout(...)` exactly like circuit-breaker/timeout-strategy
+but never calls `.dispose?.()` (no `dispose` string anywhere in the file); (b)
+worse, `enqueue` (`bulkhead.ts:117-127`) adds a `{once:true}` abort listener per
+queued task that is only removed by its own firing — when the queued task
+completes **normally**, the listener stays; with a long-lived shared context
+(the documented `contextProvider` pattern) listeners accumulate unboundedly
+exactly under load, when queueing actually happens. `bulkhead.test.ts` has zero
+dispose/listener/timer assertions.
 
 **Why this was split out of VB-004 rather than done there:** `fork()` currently
 returns a context wrapping a real `AbortController`, and
@@ -91,6 +104,11 @@ budget; it is well-scoped as its own small task instead.
        `finally`, matching circuit-breaker/timeout) or made structurally
        unnecessary by the native `AbortSignal.any()` composition; test: listener
        count on a reused parent context is stable across N `execute()` calls.
+7. [ ] **UX-C6:** `bulkhead.ts` covered by the same mechanism —
+       `executeWithTimeout` disposes (or natively composes) its forked timeout
+       context, and `enqueue`'s abort listener is removed when a queued task
+       settles normally; test: listener count on a reused context is stable
+       across N bulkhead calls that hit the queue path.
 
 ## Out of scope
 

@@ -45,6 +45,20 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > first): registry/DI collision semantics (SA-H4/M10/L4), injectable Clock
 > (SA-M8).
 
+> **Usability/DX audit (2026-07-10)**: full-library usability & integration
+> audit (`project-orchestration/analysis/LIB-UX-AUDIT-2026-07-10.analysis.md`,
+> findings UX-Cx/UX-Tx) spawned **VF-029/VF-030/VF-031** (P1) and
+> **VF-032/VF-033** (P2), and amended VF-023 (AggregateRoot.equals,
+> getDomainEvents shallow copy), VF-027 (bulkhead leaks UX-C6, est. 1h→2h),
+> VT-006 (PolicyEventBus timer UX-C7), VD-005 (non-compiling README/LLMGUIDE
+> snippets + docs compile gate, est. 8h→12h). Key strategic point: **VF-031
+> (surface diet) shares the pre-first-publish hard window with VF-024** —
+> removals become breaking changes after publish. NOT tasked (by design): ACL
+> registry silent-overwrite (part of the deferred SA-H4/M10/L4
+> collision-semantics `/analyze-ddd` decision); Fallback pattern for resilience
+> and retry-engine consolidation (policies vs resilience) — need design
+> decisions first.
+
 ## P0 — Critical
 
 | ID     | Title                                                          | Status  | Age |
@@ -61,6 +75,9 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 | VS-018 | CQRS LoggingMiddleware under diagnostics control                  | backlog | 0d  |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 0d  |
 | VF-026 | ddd-lint anti-pattern rules + fix broken isDomainFile() gate      | backlog | 6d  |
+| VF-029 | EventBus integrity (split registries, DI stub, fan-out abort)     | backlog | 0d  |
+| VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog | 0d  |
+| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog | 0d  |
 
 ## P2 — Normal / Medium
 
@@ -74,6 +91,8 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 | VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog | 1d  |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
 | VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
+| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 0d  |
+| VF-033  | Validation hardening & one validation story                       | backlog | 0d  |
 
 ## P3 — Low
 

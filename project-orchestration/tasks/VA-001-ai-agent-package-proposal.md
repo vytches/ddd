@@ -342,6 +342,68 @@ przepis w dokumentacji z wklejalnym snippetem (OQ6):
 
 ---
 
+## Consumer feedback — juz-ide-api, pre-implementation (2026-07-09)
+
+> Zebrane podczas projektowania TS-SEC-ONBEHALF-001 (ExecutionActor + onBehalf
+> dla admin/CS — konsumencka strona kontraktu actor/subject, w którą wepnie się
+> dispatcher). Status: **kandydaci na decyzje D20-D22 do następnego panelu** —
+> nie zmieniają zamrożonych decyzji D1-D19, wskazują luki spec-u wykryte na
+> realnym konsumencie (dokładnie to, czego wymaga Entry Condition #3).
+
+- **D20 (kandydat, LUKA v0.1): execution-context propagation seam.** In-process
+  dispatch wykonuje `commandBus.execute()` POZA request scope — a w juz-ide-api
+  (i każdym konsumencie na nestjs-cls) handlery czytają tożsamość z CLS
+  (`RequestContextService`), nie z komendy. Bez ustanowienia kontekstu wokół
+  kroków 4-5 pipeline'u krok 5 failuje (handler nie zna userId) albo — gorzej —
+  wykona się na resztkowym kontekście innego żądania (leak między requestami).
+  Propozycja: opcjonalny seam w deps fabryki, np.
+  `contextBinder?: <T>(actor: IAIActor, ctx: AIDispatchContext, fn: () => Promise<T>) => Promise<T>`,
+  wywoływany przez dispatcher wokół kroków 4-5; konsument binduje w nim swój CLS
+  (executionActor + onBehalfOfUserId). Minimum absolutne, jeśli seam odpada:
+  jawna dokumentacja "konsument MUSI opakować dispatch własnym context-scope" +
+  przykład w recipe.
+- **D21 (kandydat, doc-note przy pipeline): semantyka
+  `IPermissionChecker.can(actor, ...)`.** Uprawnienia muszą być rozstrzygane
+  względem grantów UŻYTKOWNIKA z `context.userId` (subject), nie tożsamości
+  `ai_agent` — invariant "AI ma te same uprawnienia co user" (juz-ide-api
+  canvas-domain.md §2/§7). Bez tej noty naturalną (błędną) implementacją
+  konsumenta jest globalne "co może ai_agent" = fail-open ponad uprawnienia
+  konkretnego usera. Nota powinna stać obok istniejącej noty ABAC (D17).
+- **D22 (kandydat, v0.2+/domain-primitives): standard delegacji.** juz-ide-api
+  wprowadza po swojej stronie `ExecutionActor` (na `IActor`) +
+  `onBehalfOfUserId` w request context — jeden kontrakt dla CS (nagłówek +
+  guard) i AI (dispatcher). Po walidacji produkcyjnej rozważyć w
+  `ddd-domain-primitives` standardowy kształt delegacji
+  (`IDelegatedActor extends IActor { onBehalfOf: { type, id } }` lub
+  udokumentowana konwencja `metadata.onBehalfOf`) — ten sam gate co Entry
+  Condition #1, nie wcześniej.
+- **D23 (kandydat, doc-note przy D18/D21): hot path permission-checkera +
+  taksonomia fail-closed infra.** Feedback z rewizji TS-SEC-ONBEHALF-001 (D8:
+  synchroniczny access-log onBehalf, fail-closed przed disclosure). (a)
+  `IPermissionChecker.can()` jest na hot path — wołany per dispatch; przy
+  limitach rzędu ~20 tool calls/turn naturalna (błędna) implementacja konsumenta
+  to lookup DB per call. Doc-note obok D21: konsument POWINIEN cache'ować granty
+  subjecta w scope sesji/requestu (z inwalidacją) — kalibracja "wolumen znikomy"
+  z flow CS nie przenosi się na AI. (b) Konsumenckie seamy fail-closed (audyt /
+  access-log niedostępny → odmowa PRZED wykonaniem, wzorzec break-the-glass)
+  muszą mieć jasną reprezentację w domyślnym `AIErrorTranslator`: kategoria
+  `internal_error` z `retryable: false` w obrębie tury — inaczej pętla LLM
+  ponawia wywołanie, które z definicji nie przejdzie, i pali limit tool calls.
+- **D24 (kandydat, priorytet D2): MCP jako drugi adapter wymaga introspekcji
+  schema w v0.1.** Ustalenie architektoniczne juz-ide-api (sesja 2026-07-09):
+  MCP = cienki adapter prezentacyjny nad `IAICommandDispatcher` dla hostów
+  agenta POZA procesem (konsola CS/admin w Claude Desktop; później publiczny
+  remote MCP per audiencja user/CS/B2G — NIGDY per bounded context, nigdy jako
+  wewnętrzny RPC, nigdy dynamiczne konsumowanie obcych `tools/list`).
+  Konsekwencje dla spec: (a) budowa `tools/list` wymaga introspekcji schema — D2
+  (`toGenericToolSchema()`, publiczny dostęp do `schema` w ddd-validation)
+  powinno wejść do v0.1, nie v0.2+; (b) kandydatem na przepis end-to-end z Entry
+  Condition #3 jest wewnętrzny serwer `mcp-cs-admin` nad ExecutionActor/onBehalf
+  (waliduje registry → permission → access-log → audit → mapowanie
+  AIToolDefinition↔tools/list jednym małym wdrożeniem wewnętrznym).
+
+---
+
 ## What the Package Does NOT Contain
 
 | Component                                  | Why it stays out                            |
