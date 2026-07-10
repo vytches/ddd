@@ -103,6 +103,18 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > AC1-5 (new `ddd-004`/`ddd-005` rules) need `/analyze-ddd` to nail down the
 > exact fanout-in-handler definition before implementing — not attempted.
 
+> **`/analyze-ddd VF-026` run + approved (2026-07-10)**: panel
+> (architecture-guardian + library-api-guardian) confirmed `ddd-004`
+> "fanout-in-handler" doesn't map to one generalizable AST rule (VB-003 actually
+> fixed two unrelated things: a dead parallel implementation, and an
+> inline-dedup→delegated-ledger refactor). **Descoped** — not implemented as a
+> lint rule; VB-003's real lesson goes into LLMGUIDE prose only. Spun off
+> **VF-034** (knip/ts-prune in CI, informational, for dead-code detection — the
+> actual right tool for that class of bug). `ddd-005`
+> (deep-import-instead-of-barrel) design approved, high confidence, ready to
+> implement — remaining VF-026 scope is AC2-5 only. Artifact:
+> `project-orchestration/analysis/VF-026-ddd-lint-anti-pattern-rules.analysis.md`.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
@@ -115,7 +127,7 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 | VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog     | 1d  |
 | VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog     | 0d  |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog     | 0d  |
-| VF-026 | ddd-lint new rules ddd-004/005 (AC0/AC6 done, needs /analyze-ddd) | in_progress | 6d  |
+| VF-026 | ddd-lint ddd-005 (AC0/AC6 done, ddd-004 descoped, ready to code)  | in_progress | 6d  |
 | VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog     | 0d  |
 | VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog     | 0d  |
 
@@ -131,6 +143,7 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 | VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog | 1d  |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
 | VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 0d  |
 | VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 0d  |
 | VF-033  | Validation hardening & one validation story                       | backlog | 0d  |
 

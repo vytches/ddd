@@ -5,12 +5,13 @@
 ```yaml
 task_id: VF-026
 title:
-  Enforceable anti-pattern rules — fanout-in-handler, deep-import instead of
-  public barrel + fix broken isDomainFile() gate (ddd-002 is a no-op)
+  Enforceable anti-pattern rule ddd-005 (deep-import instead of public barrel) +
+  fix broken isDomainFile() gate (ddd-002 is a no-op) — ddd-004
+  fanout-in-handler DESCOPED (see analysis)
 type: feature
 priority: high
 complexity: simple
-estimated_time: 7h
+estimated_time: 5h
 created_by: human (feedback 2026-07-03)
 created_at: 2026-07-03
 updated_at: 2026-07-10
@@ -71,19 +72,36 @@ existing blind spot, so the fix belongs in this task.
        violations: suppression comment (with a one-line reason) for intentional
        dual-API throw factories, follow-up fix list for the rest — no violation
        left unclassified.
-1. [ ] ddd-lint rule: `ddd-004` (or next free number) — detects fanout in a
-       handler, with the exact definition confirmed during /analyze-ddd against
-       the real VB-003 example.
+1. [x] ~~ddd-lint rule: `ddd-004` — fanout in a handler~~ — **DESCOPED**
+       2026-07-10 per `/analyze-ddd` (see
+       `project-orchestration/analysis/VF-026-ddd-lint-anti-pattern-rules.analysis.md`,
+       OQ-1 answered (a)). Research into the actual VB-003 commit found the
+       phrase doesn't map to one generalizable AST rule (it conflated a
+       dead-parallel-implementation removal with an
+       inline-dedup→delegated-ledger refactor). Not implemented as a ddd-lint
+       rule. VB-003's real lesson is captured as LLMGUIDE prose only (AC5
+       below); dead-code detection is a separate follow-up (VF-034).
 2. [ ] ddd-lint rule: `ddd-005` — detects a deep import from a package's
-       internal path instead of its public barrel.
-3. [ ] Each rule: a positive test (catches the violation) + a negative test (no
-       false positive on correct code), following the pattern of the existing
-       rules in `tools/ddd-lint/src/rules/`.
-4. [ ] Entry in `tools/ddd-lint/README.md` with a "bad"/"good" example for both
-       rules.
+       internal path instead of its public barrel. Design approved in the
+       analysis artifact (D-1): flag any `@vytches/ddd-<pkg>/<subpath>` import
+       (every package today only declares `exports['.']`, so any subpath is
+       unambiguously a violation) or a relative import crossing a
+       `packages/<name>/` boundary; scope cross-package only (same-package
+       relative imports never flagged); exclude `*.test.ts`/`*.spec.ts`;
+       type-only imports still flagged; severity `error`.
+3. [ ] `ddd-005`: a positive test (catches the violation) + a negative test (no
+       false positive on correct code — incl. same-package relative imports and
+       test-file exclusion), following the pattern of the existing rules in
+       `tools/ddd-lint/src/rules/`.
+4. [ ] Entry in `tools/ddd-lint/README.md` with a "bad"/"good" example for
+       `ddd-005`.
 5. [ ] The Anti-Patterns section in the LLMGUIDE.md of affected packages (at
-       least `@vytches/ddd-nestjs`) updated with a link to the lint rule as the
-       enforceable counterpart of the prose description.
+       least `@vytches/ddd-nestjs`) updated with: (a) a link to `ddd-005` as the
+       enforceable counterpart of the "explicit barrel exports" prose rule, and
+       (b) since AC1 is descoped, a PROSE-ONLY note (no rule) describing
+       VB-003's actual lesson — avoid dead/competing parallel implementations of
+       a responsibility another class already owns (the
+       `auto-discovery.service.ts` story).
 6. [x] Wire `ddd:lint` into CI, at minimum as **informational** (e.g.
        `pnpm ddd:lint || true`), per the tool's own README-stated rollout plan
        (Informational → Blocking-soon → Blocking). Confirmed 2026-07-04:
@@ -184,6 +202,16 @@ PR author/reviewer actually meant by the anti-pattern. Recommend running
 `/analyze-ddd VF-026` (or a fresh follow-up task id) to nail down AC1/AC2's rule
 definitions before implementing, now that AC0's higher-priority scanner fix and
 AC6's CI wiring are shipped independently.
+
+### 2026-07-10 — `/analyze-ddd VF-026` run, approved, AC1 descoped
+
+Full panel analysis (architecture-guardian + library-api-guardian) confirmed
+AC1's premise didn't hold up (see AC1's strikethrough note above) and produced a
+ready-to-implement design for AC2/`ddd-005` (see AC2's note above). Artifact:
+`project-orchestration/analysis/VF-026-ddd-lint-anti-pattern-rules.analysis.md`
+(`status: approved`, OQ-1/OQ-2 answered). Follow-up task spun up per the descope
+decision: `VF-034-dead-code-detection-ci.md` (knip/ts-prune in CI, independent
+of ddd-lint). Remaining scope for this task is AC2-5, `ddd-005` only.
 
 ## References
 
