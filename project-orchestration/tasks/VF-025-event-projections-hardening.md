@@ -8,7 +8,7 @@ title: UnifiedEventBus hardening, BaseEventBus DI stub, projections retry/checkp
 type: bug
 priority: normal
 complexity: complex
-estimated_time: 14h
+estimated_time: 11h
 created_by: LIB-AUDIT-2026-07-02
 created_at: 2026-07-02
 status: backlog
@@ -37,21 +37,33 @@ wystawia niedziałające API metryk.
    > zostaje tylko dedup subskrypcji. AC2 (identity unsubscribe) i agregacja
    > błędów z AC3 również zrealizowane w VF-029 (AggregatedEventHandlerError +
    > sprzątanie pustych kluczy).
-2. [ ] Unsubscribe po tożsamości: `Map<originalHandler, wrapper>` zamiast
-       matchingu `toString().includes('handler.handle(event)')` (:323-331).
-3. [ ] Błędy fan-outu agregowane (`AggregateError` lub `errors` na rzucanym
-       błędzie) zamiast gubienia errors[2..n] (:436-462); sprzątanie pustych
-       kluczy Map przy unsubscribe.
-4. [ ] Auto-rejestracja z `globalThis.VytchesDDD` w konstruktorze (:109-141) —
-       za opt-in flagą lub usunięta (cross-context leakage).
+2. [x] ~~Unsubscribe po tożsamości~~ — DONE w VF-029
+       (`classHandlerWrappers: Map<object, Map<string, wrapper>>`,
+       unified-event-bus.ts:112-119).
+3. [x] ~~Błędy fan-outu agregowane~~ — DONE w VF-029
+       (`AggregatedEventHandlerError`, publiczny eksport; puste klucze Map
+       sprzątane przy unsubscribe).
+4. [ ] Auto-rejestracja z `globalThis.VytchesDDD` w konstruktorze
+       (unified-event-bus.ts:130-149) — **wciąż otwarte**: VF-029 usunęło tylko
+       zaślepkę DI w `BaseEventBus` (AC6 poniżej); ten, osobny,
+       `autoRegisterHandlers()` w `UnifiedEventBus` nadal istnieje, wciąż za
+       opt-out (nie opt-in) i wciąż z gołym catch bez diagnostyki (SA-M5,
+       potwierdzone w SEC-AUDIT-2026-07-09 — zakres bez zmian, patrz
+       References).
 5. [ ] Udokumentowana semantyka `publishMany` (brak gwarancji kolejności między
        zdarzeniami) i różnice vs BaseEventBus.
+   > NOTE 2026-07-10: częściowo zrobione w VF-029 —
+   > `publishMany(events, { sequential? })` dodane z JSDoc ostrzeżeniem, że
+   > domyślny `Promise.all` nie gwarantuje kolejności. Zostaje: LLMGUIDE
+   > events/projections nadal nie odsyła do tej sekcji JSDoc — dopisać link.
 
 ### BaseEventBus (F-H9)
 
-6. [ ] Zaślepka DI `resolve: () => null` (base-event-bus.ts:11-21) — realne DI
-       albo default `useDI=false` + null-safe `registerHandlerFactory` (dziś:
-       gwarantowany TypeError przy publish).
+6. [x] ~~Zaślepka DI `resolve: () => null`~~ — DONE w VF-029: cała maszyneria
+       `useDI`/`VytchesDDD` stub/`discoverHandlers()`/`registerHandlerFactory`
+       usunięta z `BaseEventBus` (zero realnych konsumentów, BREAKING CHANGE
+       pre-publish). AC4 powyżej to OSOBNA ścieżka (auto-rejestracja
+       `UnifiedEventBus`) — nie jest tym samym kodem i nie została ruszona.
 
 ### Projekcje (F-H10, F-M4)
 
