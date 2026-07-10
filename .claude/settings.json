@@ -45,6 +45,10 @@
       "Bash(pnpm publish *)"
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"$HOME/.claude/hooks/statusline-pm.js\""
+  },
   "autoMode": {
     "environment": [
       "Shared TypeScript npm library (Nx monorepo with multiple packages).",
