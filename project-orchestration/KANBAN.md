@@ -74,6 +74,15 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > (119), policies (225), aggregates (191) tests + type-check green, enterprise
 > api-surface green. Moved to `completed-tasks/`. **P0 board is now clear.**
 
+> **Just shipped (2026-07-10)**: **VS-018** done (CQRS `LoggingMiddleware` — new
+> `enableExecutionLogging` option, default OFF and decoupled from
+> `enableMetrics`; failure path no longer blind-interpolates `${error}`; new
+> `LibUtils.sanitizeLogMessage()` shared by `LoggingMiddleware` and
+> `outbox-processor` against log injection; commit on
+> `feature/VS-018-cqrs-logging-middleware-diagnostics`, merged to `develop`) —
+> utils (164), cqrs (289), messaging (96) tests + type-check green, enterprise
+> api-surface + nestjs (215) green. Moved to `completed-tasks/`.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
@@ -85,7 +94,6 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 | VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog | 1d  |
 | VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog | 1d  |
 | VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog | 0d  |
-| VS-018 | CQRS LoggingMiddleware under diagnostics control                  | backlog | 0d  |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 0d  |
 | VF-026 | ddd-lint anti-pattern rules + fix broken isDomainFile() gate      | backlog | 6d  |
 | VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog | 0d  |

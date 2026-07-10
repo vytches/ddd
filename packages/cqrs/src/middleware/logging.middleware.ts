@@ -1,3 +1,4 @@
+import { LibUtils } from '@vytches/ddd-utils';
 import type { ExecutionContext, ICQRSMiddleware } from './middleware.interface';
 
 /**
@@ -33,7 +34,17 @@ export class LoggingMiddleware implements ICQRSMiddleware {
       return result;
     } catch (error) {
       const duration = Date.now() - startTime;
-      this._logger.log(`[CQRS] ${type} ${name} failed after ${duration}ms: ${error}`);
+      // VS-018: never blind-interpolate `${error}` — error.message conventionally
+      // embeds the offending input value (e.g. "Invalid email: x@y.com"), an
+      // indirect PII-to-log vector. Log only the error name plus a
+      // control-char-sanitized message (log-injection guard).
+      const errorName = error instanceof Error ? error.name : 'UnknownError';
+      const errorMessage = LibUtils.sanitizeLogMessage(
+        error instanceof Error ? error.message : String(error)
+      );
+      this._logger.log(
+        `[CQRS] ${type} ${name} failed after ${duration}ms: ${errorName}: ${errorMessage}`
+      );
       throw error;
     }
   }

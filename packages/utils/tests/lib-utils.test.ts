@@ -949,4 +949,24 @@ describe('LibUtils', () => {
       expect(LibUtils.deepEqual(complex1, complex3)).toBe(false);
     });
   });
+
+  describe('sanitizeLogMessage (VS-018)', () => {
+    it('strips embedded newlines and carriage returns (log-injection guard)', () => {
+      expect(LibUtils.sanitizeLogMessage('line1\nline2\rline3')).toBe('line1 line2 line3');
+    });
+
+    it('strips other C0 control characters and DEL', () => {
+      expect(LibUtils.sanitizeLogMessage('a\x00b\x1fc\x7fd')).toBe('a b c d');
+    });
+
+    it('leaves ordinary text untouched', () => {
+      expect(LibUtils.sanitizeLogMessage('Invalid email: user@example.com')).toBe(
+        'Invalid email: user@example.com'
+      );
+    });
+
+    it('handles an empty string', () => {
+      expect(LibUtils.sanitizeLogMessage('')).toBe('');
+    });
+  });
 });

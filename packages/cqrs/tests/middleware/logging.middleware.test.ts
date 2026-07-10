@@ -153,6 +153,42 @@ describe('LoggingMiddleware', () => {
         );
       });
 
+      it('sanitizes control characters embedded in the error message (VS-018)', async () => {
+        const command = new TestCommand('test-data');
+        const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');
+        const error = new Error('line1\nline2\rline3');
+
+        nextFunction.mockRejectedValue(error);
+
+        const [middlewareError] = await safeRun(() => middleware.handle(context, nextFunction));
+        expect(middlewareError).toBe(error);
+
+        const logCall = mockLogger.log.mock.calls[1]?.[0] as string;
+        expect(logCall).not.toMatch(/[\n\r]/);
+        expect(logCall).toContain('line1 line2 line3');
+      });
+
+      it('logs a non-Error thrown value without crashing (VS-018)', async () => {
+        const command = new TestCommand('test-data');
+        const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');
+
+        nextFunction.mockRejectedValue('a plain string rejection');
+
+        // safeRun wraps non-Error rejections into an Error — but the
+        // middleware's own catch sees the raw string first (before safeRun
+        // repackages it), which is what this test actually verifies via the
+        // logged message below.
+        const [middlewareError] = await safeRun(() => middleware.handle(context, nextFunction));
+        expect(middlewareError?.message).toBe('a plain string rejection');
+
+        expect(mockLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.stringMatching(
+            /^\[CQRS\] command TestCommand failed after \d+ms: UnknownError: a plain string rejection$/
+          )
+        );
+      });
+
       it('should measure execution time for failed operations', async () => {
         const command = new TestCommand('test-data');
         const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');

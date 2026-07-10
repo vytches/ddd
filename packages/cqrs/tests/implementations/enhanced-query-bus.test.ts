@@ -2,8 +2,8 @@ import type { IDependencyContainer } from '@vytches/ddd-di';
 import { safeRun } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import type { IQuery, IQueryHandler, LoggingMiddleware } from '../../src';
-import { EnhancedQueryBus, HandlerNotFoundError, IQueryBus } from '../../src';
+import type { IQuery, IQueryHandler } from '../../src';
+import { EnhancedQueryBus, HandlerNotFoundError, IQueryBus, LoggingMiddleware } from '../../src';
 
 // Test query implementation
 class TestQuery implements IQuery<string> {
@@ -42,6 +42,16 @@ describe('EnhancedQueryBus', () => {
   describe('constructor', () => {
     it('should extend IQueryBus', () => {
       expect(enhancedQueryBus).toBeInstanceOf(IQueryBus);
+    });
+
+    it('does not install LoggingMiddleware by default (VS-018)', () => {
+      expect(enhancedQueryBus['middlewares']).toEqual([]);
+    });
+
+    it('installs LoggingMiddleware only when enableExecutionLogging is explicitly true (VS-018)', () => {
+      const loggingBus = new EnhancedQueryBus(mockContainer, { enableExecutionLogging: true });
+      expect(loggingBus['middlewares']).toHaveLength(1);
+      expect(loggingBus['middlewares'][0]).toBeInstanceOf(LoggingMiddleware);
     });
 
     it('should initialize metrics with default values', () => {
@@ -394,8 +404,14 @@ describe('EnhancedQueryBus', () => {
         },
       };
 
+      // VS-018: LoggingMiddleware is opt-in (no longer installed by default),
+      // so this test explicitly enables it to exercise middleware ordering.
+      const loggingQueryBus = new EnhancedQueryBus(mockContainer, {
+        enableExecutionLogging: true,
+      });
+
       // Mock LoggingMiddleware to track execution
-      const loggingMiddleware = enhancedQueryBus['middlewares'][0] as LoggingMiddleware;
+      const loggingMiddleware = loggingQueryBus['middlewares'][0] as LoggingMiddleware;
       const originalHandle = loggingMiddleware.handle.bind(loggingMiddleware);
       vi.spyOn(loggingMiddleware, 'handle').mockImplementation(async (context, next) => {
         executionOrder.push('logging-start');
@@ -404,7 +420,7 @@ describe('EnhancedQueryBus', () => {
         return result;
       });
 
-      enhancedQueryBus.use(customMiddleware);
+      loggingQueryBus.use(customMiddleware);
 
       vi.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
         if (key === 'di:query-handler') {
@@ -422,7 +438,7 @@ describe('EnhancedQueryBus', () => {
         return `Result for ${query.id}`;
       });
 
-      await enhancedQueryBus.execute(query);
+      await loggingQueryBus.execute(query);
 
       expect(executionOrder).toEqual([
         'logging-start',

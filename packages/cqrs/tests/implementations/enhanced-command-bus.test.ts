@@ -2,8 +2,13 @@ import type { IDependencyContainer } from '@vytches/ddd-di';
 import { safeRun } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import type { ICommand, ICommandHandler, LoggingMiddleware } from '../../src';
-import { EnhancedCommandBus, HandlerNotFoundError, ICommandBus } from '../../src';
+import type { ICommand, ICommandHandler } from '../../src';
+import {
+  EnhancedCommandBus,
+  HandlerNotFoundError,
+  ICommandBus,
+  LoggingMiddleware,
+} from '../../src';
 
 // Test command implementation
 class TestCommand implements ICommand {
@@ -49,6 +54,16 @@ describe('EnhancedCommandBus', () => {
   describe('constructor', () => {
     it('should extend ICommandBus', () => {
       expect(enhancedCommandBus).toBeInstanceOf(ICommandBus);
+    });
+
+    it('does not install LoggingMiddleware by default (VS-018)', () => {
+      expect(enhancedCommandBus['middlewares']).toEqual([]);
+    });
+
+    it('installs LoggingMiddleware only when enableExecutionLogging is explicitly true (VS-018)', () => {
+      const loggingBus = new EnhancedCommandBus(mockContainer, { enableExecutionLogging: true });
+      expect(loggingBus['middlewares']).toHaveLength(1);
+      expect(loggingBus['middlewares'][0]).toBeInstanceOf(LoggingMiddleware);
     });
 
     it('should initialize metrics with default values', () => {
@@ -330,8 +345,14 @@ describe('EnhancedCommandBus', () => {
         },
       };
 
+      // VS-018: LoggingMiddleware is opt-in (no longer installed by default),
+      // so this test explicitly enables it to exercise middleware ordering.
+      const loggingCommandBus = new EnhancedCommandBus(mockContainer, {
+        enableExecutionLogging: true,
+      });
+
       // Mock LoggingMiddleware to track execution
-      const loggingMiddleware = enhancedCommandBus['middlewares'][0] as LoggingMiddleware;
+      const loggingMiddleware = loggingCommandBus['middlewares'][0] as LoggingMiddleware;
       const originalHandle = loggingMiddleware.handle.bind(loggingMiddleware);
       vi.spyOn(loggingMiddleware, 'handle').mockImplementation(async (context, next) => {
         executionOrder.push('logging-start');
@@ -340,7 +361,7 @@ describe('EnhancedCommandBus', () => {
         return result;
       });
 
-      enhancedCommandBus.use(customMiddleware);
+      loggingCommandBus.use(customMiddleware);
 
       vi.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
         if (key === 'di:command-handler') {
@@ -357,7 +378,7 @@ describe('EnhancedCommandBus', () => {
         executionOrder.push('handler');
       });
 
-      await enhancedCommandBus.execute(command);
+      await loggingCommandBus.execute(command);
 
       expect(executionOrder).toEqual([
         'logging-start',
