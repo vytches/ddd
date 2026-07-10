@@ -67,11 +67,16 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > nestjs (215) tests + type-check green, enterprise api-surface green. Moved to
 > `completed-tasks/`.
 
+> **Just shipped (2026-07-10)**: **VS-016** done (EntityId.create() +
+> policies/aggregates correlation-ID generators — Math.random UUID →
+> crypto.randomUUID/LibUtils.getUUID; commit on
+> `feature/VS-016-entity-id-crypto-uuid`, merged to `develop`) — contracts
+> (119), policies (225), aggregates (191) tests + type-check green, enterprise
+> api-surface green. Moved to `completed-tasks/`. **P0 board is now clear.**
+
 ## P0 — Critical
 
-| ID     | Title                                                          | Status  | Age |
-| ------ | -------------------------------------------------------------- | ------- | --- |
-| VS-016 | EntityId.create() Math.random UUID → crypto.randomUUID (SA-C2) | backlog | 0d  |
+_None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 

@@ -1,4 +1,5 @@
 import { internalLogger } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
 import type { PolicyEvent } from './policy-evaluation-event';
 
 export type PolicyEventHandler<T extends PolicyEvent = PolicyEvent> = (
@@ -302,7 +303,7 @@ export class PolicyEventBus {
   }
 
   private generateSubscriptionId(): string {
-    return `sub_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `sub_${LibUtils.getUUID()}`;
   }
 }
 

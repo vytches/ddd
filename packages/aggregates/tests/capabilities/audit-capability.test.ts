@@ -102,7 +102,11 @@ describe('AuditCapability — recording', () => {
       metadata: {},
     } as unknown as IDomainEvent;
     audit.recordEvent(event);
-    expect(audit.getAuditLog()[0]?.eventId).toMatch(/^audit-\d+-/);
+    // VS-016: fallback id is now `audit-<uuid>` (crypto.randomUUID), not the
+    // former `audit-<timestamp>-<Math.random()>`.
+    expect(audit.getAuditLog()[0]?.eventId).toMatch(
+      /^audit-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    );
   });
 
   it('recordEvent(event) records arbitrary domain events outside apply() flow', () => {

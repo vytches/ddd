@@ -1,5 +1,6 @@
 import { Capability } from '@vytches/ddd-contracts';
 import type { IAuditCapability, IAuditEvent, IDomainEvent } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
@@ -159,7 +160,7 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
    */
   recordEvent(event: IDomainEvent): void {
     const auditEvent: IAuditEvent = {
-      eventId: (event.metadata?.eventId as string) || `audit-${Date.now()}-${Math.random()}`,
+      eventId: (event.metadata?.eventId as string) || `audit-${LibUtils.getUUID()}`,
       eventName: event.eventName,
       aggregateId: this.aggregate.getId().toString(),
       aggregateType: this.aggregate.constructor.name,

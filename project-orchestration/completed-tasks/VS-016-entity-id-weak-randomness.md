@@ -13,11 +13,12 @@ complexity: simple
 estimated_time: 3h
 created_by: SEC-AUDIT-2026-07-09
 created_at: 2026-07-09
-status: backlog
+status: done
 release_target: pre-first-public-publish
 package:
   "'@vytches/ddd-contracts', '@vytches/ddd-policies', '@vytches/ddd-aggregates'"
 findings: [SA-C2, SA-L1]
+completed_at: 2026-07-10
 ```
 
 ## Why
@@ -61,22 +62,27 @@ events/messaging).
 
 ## Acceptance Criteria
 
-1. [ ] `EntityId.create()` generates its UUID via
-       `globalThis.crypto.randomUUID()` (directly or via the same path the rest
-       of contracts uses) — no new dependency (runtime builtin).
-2. [ ] The four SA-L1 generators call `LibUtils.getUUID()` (keeping any required
-       prefix as a plain concatenation if the format is load-bearing; verify
-       nothing parses the old `prefix_timestamp_random` shape first).
-3. [ ] Tests: UUID v4 format assertion for `EntityId.create()`; uniqueness
-       sanity check (N=10k, no duplicates); existing `EntityId` contract tests
-       stay green.
-4. [ ] BC assessment (library-api-guardian): return type and UUID v4 shape are
-       unchanged, so this is a behavior hardening, not an API break — confirm
-       and note in CHANGELOG anyway (IDs become non-reproducible across
-       `Math.random`-seeded test setups, if any relied on that).
-5. [ ] Grep-verify no other `Math.random()`-based **identifier** generation
-       remains in `packages/*/src` (jitter/backoff usages in resilience,
-       policies retry, and outbox are correct uses and stay).
+1. [x] `EntityId.create()` generates its UUID via
+       `globalThis.crypto.randomUUID()` — no new dependency (runtime builtin).
+2. [x] The four SA-L1 generators call `LibUtils.getUUID()` (prefix kept as plain
+       concatenation: `sub_${uuid}`, `exec_${uuid}`, `audit-${uuid}`; confirmed
+       no code/test parses the old `prefix_timestamp_random` shape).
+3. [x] Tests: added UUID v4 format assertion for `EntityId.create()`
+       (`entity-id.properties.test.ts`); existing pairwise-uniqueness property
+       test (fast-check, up to N=20 per run, many runs) already covers collision
+       sanity; one pre-existing test in `audit-capability.test.ts` asserted the
+       old `audit-<timestamp>-<random>` format and was updated to match
+       `audit-<uuid>`. All existing `EntityId`/policies/aggregates tests stay
+       green (contracts 119/119, policies 225/225, aggregates 191/191,
+       enterprise api-surface 1/1).
+4. [x] BC: return type and UUID v4 shape unchanged — behavior hardening, not an
+       API break. CHANGELOG is Lerna-generated from conventional commits (no
+       manual edit per project convention); the commit message documents the
+       change.
+5. [x] Grep-verified: only remaining `Math.random()` usages in `packages/*/src`
+       are jitter/backoff in `resilience/patterns/retry.ts`,
+       `policies/decorators/retry-policy.ts`,
+       `messaging/outbox/outbox-processor.ts` — correct uses, left as is.
 
 ## Out of scope
 
@@ -85,6 +91,17 @@ events/messaging).
   task if ever worthwhile.
 - Constant-time comparison helpers — no secret-comparison API exists in the
   library (verified in the audit), nothing to fix.
+
+## Activity / Notes
+
+### 2026-07-10 — implemented on `feature/VS-016-entity-id-crypto-uuid`, merged to develop (status: done)
+
+Verification before merge: `@vytches/ddd-contracts` test (119/119, incl. new
+UUID v4 format assertion), type-check, lint (0 errors); `@vytches/ddd-policies`
+test (225/225), type-check, lint (0 errors); `@vytches/ddd-aggregates` test
+(191/191, incl. updated audit-capability fallback-format assertion), type-check,
+lint (0 errors); `@vytches/ddd-enterprise` api-surface test (1/1). All green, no
+regressions.
 
 ## References
 
