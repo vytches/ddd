@@ -4,6 +4,7 @@ import ts from 'typescript';
 import { factoryMustReturnResult } from '../src/rules/factory-must-return-result.js';
 import { noMutableStateInAggregate } from '../src/rules/no-mutable-state-in-aggregate.js';
 import { noThrowInDomain } from '../src/rules/no-throw-in-domain.js';
+import { deepImportInsteadOfBarrel } from '../src/rules/deep-import-instead-of-barrel.js';
 
 function parse(src: string, filePath = 'src/aggregates/order.ts'): ts.SourceFile {
   return ts.createSourceFile(filePath, src, ts.ScriptTarget.ES2022, true);
@@ -363,6 +364,101 @@ describe('ddd-003 — factory must return Result', () => {
     const issues = factoryMustReturnResult.run({
       sourceFile: parse(src),
       filePath: 'src/value-objects/money.ts',
+    });
+    expect(issues).toEqual([]);
+  });
+});
+
+describe('ddd-005 — deep import instead of barrel', () => {
+  it('flags a deep subpath import from another @vytches/ddd-* package', () => {
+    const src = `import { Internal } from '@vytches/ddd-contracts/src/internal';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'packages/orders/src/aggregates/order.ts'),
+      filePath: 'packages/orders/src/aggregates/order.ts',
+    });
+    expect(issues).toHaveLength(1);
+    expect(issues[0]!.ruleId).toBe('ddd-005');
+    expect(issues[0]!.message).toContain('@vytches/ddd-contracts/src/internal');
+  });
+
+  it('flags a deep subpath re-export from another @vytches/ddd-* package', () => {
+    const src = `export { Internal } from '@vytches/ddd-contracts/dist/internal.js';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'packages/orders/src/aggregates/order.ts'),
+      filePath: 'packages/orders/src/aggregates/order.ts',
+    });
+    expect(issues).toHaveLength(1);
+  });
+
+  it('flags a type-only deep subpath import (no exemption for types)', () => {
+    const src = `import type { Internal } from '@vytches/ddd-contracts/src/internal';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'packages/orders/src/aggregates/order.ts'),
+      filePath: 'packages/orders/src/aggregates/order.ts',
+    });
+    expect(issues).toHaveLength(1);
+  });
+
+  it('flags a relative import that crosses out of the current package into a different one', () => {
+    const src = `import { Foo } from '../../../payments/src/domain/foo';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'packages/orders/src/aggregates/order.ts'),
+      filePath: 'packages/orders/src/aggregates/order.ts',
+    });
+    expect(issues).toHaveLength(1);
+    expect(issues[0]!.ruleId).toBe('ddd-005');
+    expect(issues[0]!.message).toContain('payments');
+    expect(issues[0]!.message).toContain('orders');
+  });
+
+  it('does NOT flag a same-package relative import', () => {
+    const src = `import { Foo } from '../value-objects/money.js';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'packages/orders/src/aggregates/order.ts'),
+      filePath: 'packages/orders/src/aggregates/order.ts',
+    });
+    expect(issues).toEqual([]);
+  });
+
+  it('does NOT flag a bare package import with no subpath', () => {
+    const src = `import { Result } from '@vytches/ddd-contracts';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'packages/orders/src/aggregates/order.ts'),
+      filePath: 'packages/orders/src/aggregates/order.ts',
+    });
+    expect(issues).toEqual([]);
+  });
+
+  it('does NOT flag a relative import in a file outside any packages/ directory', () => {
+    const src = `import { Foo } from '../../other-tool/src/foo';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'tools/ddd-lint/src/rules/some-rule.ts'),
+      filePath: 'tools/ddd-lint/src/rules/some-rule.ts',
+    });
+    expect(issues).toEqual([]);
+  });
+
+  it('does NOT flag test files', () => {
+    const src = `import { Internal } from '@vytches/ddd-contracts/src/internal';`;
+    for (const path of [
+      'packages/orders/src/aggregates/order.test.ts',
+      'packages/orders/tests/aggregates/order.ts',
+      'packages/orders/src/aggregates/__tests__/order.ts',
+    ]) {
+      const issues = deepImportInsteadOfBarrel.run({
+        sourceFile: parse(src, path),
+        filePath: path,
+      });
+      expect(issues, `path=${path}`).toEqual([]);
+    }
+  });
+
+  it('honors // ddd-lint-disable deep-import-instead-of-barrel directive', () => {
+    const src = `// ddd-lint-disable deep-import-instead-of-barrel
+import { Internal } from '@vytches/ddd-contracts/src/internal';`;
+    const issues = deepImportInsteadOfBarrel.run({
+      sourceFile: parse(src, 'packages/orders/src/aggregates/order.ts'),
+      filePath: 'packages/orders/src/aggregates/order.ts',
     });
     expect(issues).toEqual([]);
   });

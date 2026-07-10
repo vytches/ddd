@@ -115,21 +115,27 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > implement — remaining VF-026 scope is AC2-5 only. Artifact:
 > `project-orchestration/analysis/VF-026-ddd-lint-anti-pattern-rules.analysis.md`.
 
+> **Just shipped (2026-07-10)**: **VF-026** done (`ddd-005`
+> deep-import-instead-of-barrel rule + README/LLMGUIDE docs, via
+> `/orchestrate-ddd` — single unit, GO on first attempt, zero escalations;
+> independently re-verified: 42/42 tests, typecheck clean, no `ddd-004`
+> scope-creep) — merged to `develop`. All ACs resolved (AC1 descoped, not failed
+> — see above). Moved to `completed-tasks/`.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-| ID     | Title                                                             | Status      | Age |
-| ------ | ----------------------------------------------------------------- | ----------- | --- |
-| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog     | 1d  |
-| VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog     | 1d  |
-| VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog     | 0d  |
-| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog     | 0d  |
-| VF-026 | ddd-lint ddd-005 (AC0/AC6 done, ddd-004 descoped, ready to code)  | in_progress | 6d  |
-| VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog     | 0d  |
-| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog     | 0d  |
+| ID     | Title                                                             | Status  | Age |
+| ------ | ----------------------------------------------------------------- | ------- | --- |
+| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog | 1d  |
+| VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog | 1d  |
+| VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog | 0d  |
+| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 0d  |
+| VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog | 0d  |
+| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog | 0d  |
 
 ## P2 — Normal / Medium
 

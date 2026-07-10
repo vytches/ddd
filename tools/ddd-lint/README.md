@@ -1,12 +1,13 @@
 # @vytches/ddd-lint
 
-AST-based linter that flags the top 3 DDD anti-patterns in TypeScript code:
+AST-based linter that flags DDD anti-patterns in TypeScript code:
 
-| Rule      | Severity  | What it catches                                                                               |
-| --------- | --------- | --------------------------------------------------------------------------------------------- |
-| `ddd-001` | `error`   | Public/mutable property declarations on classes that extend `AggregateRoot` or `Entity`.      |
-| `ddd-002` | `error`   | `throw` statements inside files under `/domain/`, `/aggregates/`, `/value-objects/`, etc.     |
-| `ddd-003` | `warning` | Static `create()` methods whose return type is not `Result<T, E>` or `Promise<Result<T, E>>`. |
+| Rule      | Severity  | What it catches                                                                                                                                                                   |
+| --------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ddd-001` | `error`   | Public/mutable property declarations on classes that extend `AggregateRoot` or `Entity`.                                                                                          |
+| `ddd-002` | `error`   | `throw` statements inside files under `/domain/`, `/aggregates/`, `/value-objects/`, etc.                                                                                         |
+| `ddd-003` | `warning` | Static `create()` methods whose return type is not `Result<T, E>` or `Promise<Result<T, E>>`.                                                                                     |
+| `ddd-005` | `error`   | Cross-package imports that bypass a package's public barrel — deep `@vytches/ddd-<pkg>/<subpath>` imports, or relative imports that escape into another package's directory tree. |
 
 VF-001 MVP — internal tooling, not published to npm. Designed for the
 `@vytches/ddd` consumer monorepos to catch the cheapest DDD-compliance mistakes
@@ -51,6 +52,13 @@ Consequences:
   `ddd-003`. `static fromX()`, `static of()`, etc. are exempt because they often
   have specialized semantics. Suppress per file with
   `// ddd-lint-disable factory-must-return-result` near the top.
+- **Barrel-boundary detection is syntactic path-matching, not real module
+  resolution.** `ddd-005` string-matches module specifiers and resolves relative
+  paths textually (no filesystem I/O, no `tsconfig` paths awareness). It also
+  assumes every `@vytches/ddd-*` package exposes only a bare `exports["."]`
+  entry today — if a future package declares real subpath exports, this rule's
+  blanket "any subpath is a violation" logic will need an allowlist (see the
+  rule's JSDoc header for the tracked gap).
 
 ## Adding new rules
 

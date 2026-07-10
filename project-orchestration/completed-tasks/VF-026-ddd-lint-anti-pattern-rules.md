@@ -15,7 +15,8 @@ estimated_time: 5h
 created_by: human (feedback 2026-07-03)
 created_at: 2026-07-03
 updated_at: 2026-07-10
-status: in_progress
+status: done
+completed_at: 2026-07-10
 release_target: unscheduled
 package: tools/ddd-lint
 findings: [lessons from VB-003-nestjs-forfeature-di-wiring, SA-M1]
@@ -81,27 +82,27 @@ existing blind spot, so the fix belongs in this task.
        inline-dedup→delegated-ledger refactor). Not implemented as a ddd-lint
        rule. VB-003's real lesson is captured as LLMGUIDE prose only (AC5
        below); dead-code detection is a separate follow-up (VF-034).
-2. [ ] ddd-lint rule: `ddd-005` — detects a deep import from a package's
-       internal path instead of its public barrel. Design approved in the
-       analysis artifact (D-1): flag any `@vytches/ddd-<pkg>/<subpath>` import
-       (every package today only declares `exports['.']`, so any subpath is
-       unambiguously a violation) or a relative import crossing a
-       `packages/<name>/` boundary; scope cross-package only (same-package
-       relative imports never flagged); exclude `*.test.ts`/`*.spec.ts`;
-       type-only imports still flagged; severity `error`.
-3. [ ] `ddd-005`: a positive test (catches the violation) + a negative test (no
-       false positive on correct code — incl. same-package relative imports and
-       test-file exclusion), following the pattern of the existing rules in
-       `tools/ddd-lint/src/rules/`.
-4. [ ] Entry in `tools/ddd-lint/README.md` with a "bad"/"good" example for
-       `ddd-005`.
-5. [ ] The Anti-Patterns section in the LLMGUIDE.md of affected packages (at
-       least `@vytches/ddd-nestjs`) updated with: (a) a link to `ddd-005` as the
-       enforceable counterpart of the "explicit barrel exports" prose rule, and
-       (b) since AC1 is descoped, a PROSE-ONLY note (no rule) describing
-       VB-003's actual lesson — avoid dead/competing parallel implementations of
-       a responsibility another class already owns (the
-       `auto-discovery.service.ts` story).
+2. [x] ddd-lint rule: `ddd-005` — detects a deep import from a package's
+       internal path instead of its public barrel. Implemented exactly per D-1:
+       `packages/*/package.json` subpath imports flagged (deep
+       `@vytches/ddd-<pkg>/<subpath>`, both `/src/` and `/dist/` shapes) plus
+       cross-package relative-path escapes (resolved via `node:path posix`
+       string math against the file's `packages/<X>/` segment); scope
+       cross-package only; test-file exclusion + `ddd-lint-disable` directive
+       both honored; type-only imports still flagged; severity `error`. File:
+       `tools/ddd-lint/src/rules/deep-import-instead-of-barrel.ts`.
+3. [x] `ddd-005`: 9 test cases in `tools/ddd-lint/tests/rules.test.ts`
+       (positive: deep subpath import/re-export/type-only, cross-package
+       relative escape; negative: same-package relative import, bare package
+       import, file outside `packages/`, test-file exclusion ×3 shapes,
+       suppression directive). Full suite 42/42 green (33 prior + 9 new).
+4. [x] `ddd-005` row added to `tools/ddd-lint/README.md`'s rules table +
+       heuristic-limitation bullet in "Scope and trade-offs".
+5. [x] `packages/nestjs/LLMGUIDE.md`'s Anti-Patterns section updated with both:
+       (a) a `ddd-005` entry (WRONG/CORRECT code example, explicit rule
+       reference), and (b) a prose-only entry for VB-003's actual lesson (dead
+       parallel implementation, `auto-discovery.service.ts` story), explicitly
+       stating no static tool enforces it and pointing to VF-034.
 6. [x] Wire `ddd:lint` into CI, at minimum as **informational** (e.g.
        `pnpm ddd:lint || true`), per the tool's own README-stated rollout plan
        (Informational → Blocking-soon → Blocking). Confirmed 2026-07-04:
@@ -213,7 +214,17 @@ ready-to-implement design for AC2/`ddd-005` (see AC2's note above). Artifact:
 decision: `VF-034-dead-code-detection-ci.md` (knip/ts-prune in CI, independent
 of ddd-lint). Remaining scope for this task is AC2-5, `ddd-005` only.
 
-## References
+### 2026-07-10 — `/orchestrate-ddd VF-026` run, GO on first attempt, merged to develop
+
+Single-unit Workflow run (6 agents: impl → diffcheck → typecheck → verify →
+final-gate → stage, zero retries, zero escalations). `library-quality-verifier`
+returned GO on both the unit verify and the final gate. Independently
+re-verified (not just trusting agent self-report): full test suite 42/42 green,
+`tsc --noEmit` clean, read the actual rule implementation and confirmed both
+detection paths from D-1 are real (not a stub), confirmed zero `ddd-004`/fanout
+scope-creep, spot-checked both doc additions for accuracy. Committed directly to
+`develop` (workflow ran against the already-checked-out `develop` worktree, no
+feature branch). Task complete — all ACs done (AC1 descoped, not failed).
 
 - `tools/ddd-lint/src/rules/no-throw-in-domain.ts` and neighboring files — the
   rule pattern to follow (and, per SA-M1, the broken `isDomainFile()` to fix).

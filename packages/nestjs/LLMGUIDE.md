@@ -466,6 +466,38 @@ class GetOrderQuery implements IQuery { ... }
 class GetOrderQuery implements IQuery<OrderDto> { ... }
 ```
 
+**Deep-importing another package's internals instead of its public barrel.**
+Enforced by `ddd-005` in `@vytches/ddd-lint` (grep `tools/ddd-lint` for the
+rule) — reaching past a package's `index.ts` into its `src/` or `dist/`
+internals, or via a relative path that escapes into another package's directory
+tree, turns an internal implementation detail into a de facto public API
+contract and breaks the acyclic package-boundary guarantee.
+
+```typescript
+// WRONG: deep subpath import bypasses the public barrel
+import { InternalHelper } from '@vytches/ddd-contracts/src/internal/helper';
+
+// WRONG: relative import escapes this package into another one
+import { InternalHelper } from '../../../contracts/src/internal/helper';
+
+// CORRECT: import from the package's public barrel
+import { ExportedThing } from '@vytches/ddd-contracts';
+```
+
+**Keeping a dead parallel implementation of a responsibility another class
+already owns.** This is a judgment-call anti-pattern — no static tool in this
+repo enforces it today (see VF-034 for a proposed knip/ts-prune-based check for
+this class of issue). Concrete historical example (VB-003):
+`auto-discovery.service.ts` was a stub whose `discover()` unconditionally
+returned `[]`, duplicating the real auto-discovery responsibility that
+`VytchesExplorerService` already owned and correctly implemented. It was dead
+code masquerading as a working alternative — not wired up, never exercised, but
+present and readable enough to look like a legitimate second option. It was
+removed entirely in VB-003. When two classes appear to solve the same problem,
+prefer deleting the non-functional one over leaving it "just in case" — a stub
+that silently does nothing is more dangerous than no implementation at all,
+because it can be picked up by mistake.
+
 ## Discovery Timing
 
 ```
