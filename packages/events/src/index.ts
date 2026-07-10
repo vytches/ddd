@@ -7,6 +7,9 @@ export { EventHandler, EventDiscoveryPlugin, eventDiscoveryPlugin } from './deco
 export type { EventHandlerOptions, DIHandlerMetadata } from './decorators';
 
 export { BaseEventBus } from './base-event-bus';
+export type { PublishManyOptions } from './base-event-bus';
+
+export { AggregatedEventHandlerError } from './aggregated-event-handler-error';
 
 /**
  * @internal Framework-only middleware marker symbol.

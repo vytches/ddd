@@ -45,23 +45,25 @@ await bus.publish(new OrderPlacedEvent({ orderId: 'o-1', amount: 100 }));
 
 ## Key API
 
-| Export                                    | Kind           | Description                                                                                 |
-| ----------------------------------------- | -------------- | ------------------------------------------------------------------------------------------- |
-| `DomainEvent<T>`                          | abstract class | Base for domain events; auto-generates `eventId`, `occurredOn`, `eventName` from class name |
-| `IntegrationEvent<T>`                     | abstract class | Base for integration events; adds `serialize()` / static `deserialize()`, `schemaVersion`   |
-| `IDomainEventBus`                         | type alias     | `IEventBus<IDomainEvent>` — for within-context events                                       |
-| `IIntegrationEventBus`                    | type alias     | `IEventBus<IIntegrationEvent>` — for cross-context events                                   |
-| `IAuditEventBus`                          | type alias     | `IEventBus<IAuditEvent>` — for compliance/audit events                                      |
-| `UnifiedEventBus`                         | class          | Handles all three event types; routes by class name with optional context filtering         |
-| `BaseEventBus<T>`                         | class          | Extend this to create custom bus implementations                                            |
-| `UniversalEventDispatcher`                | class          | Dispatches events to multiple registered buses simultaneously                               |
-| `EventHandler(EventClass, opts?)`         | decorator      | Registers class or method as event handler; supports DI auto-discovery                      |
-| `EventDiscoveryPlugin`                    | class          | Scans metadata to auto-register `@EventHandler`-decorated classes                           |
-| `DomainToIntegrationTransformer<D,I>`     | abstract class | Override `transform()` to map a domain event to an integration event                        |
-| `IntegrationEventProcessor`               | class          | Processes integration events through a pipeline                                             |
-| `DomainEvent.withMetadata(partial)`       | method         | Returns a new event copy with merged metadata                                               |
-| `IntegrationEvent.serialize()`            | method         | Serializes to JSON string with payload + metadata                                           |
-| `IntegrationEvent.deserialize(Cls, json)` | static         | Deserializes JSON back to typed event instance (max 1MB)                                    |
+| Export                                    | Kind           | Description                                                                                   |
+| ----------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| `DomainEvent<T>`                          | abstract class | Base for domain events; auto-generates `eventId`, `occurredOn`, `eventName` from class name   |
+| `IntegrationEvent<T>`                     | abstract class | Base for integration events; adds `serialize()` / static `deserialize()`, `schemaVersion`     |
+| `IDomainEventBus`                         | type alias     | `IEventBus<IDomainEvent>` — for within-context events                                         |
+| `IIntegrationEventBus`                    | type alias     | `IEventBus<IIntegrationEvent>` — for cross-context events                                     |
+| `IAuditEventBus`                          | type alias     | `IEventBus<IAuditEvent>` — for compliance/audit events                                        |
+| `UnifiedEventBus`                         | class          | Handles all three event types; routes by class name with optional context filtering           |
+| `BaseEventBus<T>`                         | class          | Extend this to create custom bus implementations                                              |
+| `UniversalEventDispatcher`                | class          | Dispatches events to multiple registered buses simultaneously                                 |
+| `EventHandler(EventClass, opts?)`         | decorator      | Registers class or method as event handler; supports DI auto-discovery                        |
+| `EventDiscoveryPlugin`                    | class          | Scans metadata to auto-register `@EventHandler`-decorated classes                             |
+| `DomainToIntegrationTransformer<D,I>`     | abstract class | Override `transform()` to map a domain event to an integration event                          |
+| `IntegrationEventProcessor`               | class          | Processes integration events through a pipeline                                               |
+| `DomainEvent.withMetadata(partial)`       | method         | Returns a new event copy with merged metadata                                                 |
+| `IntegrationEvent.serialize()`            | method         | Serializes to JSON string with payload + metadata                                             |
+| `IntegrationEvent.deserialize(Cls, json)` | static         | Deserializes JSON back to typed event instance (max 1MB)                                      |
+| `AggregatedEventHandlerError`             | class          | Thrown after fan-out when handlers failed and no `onError` is set; `.errors` has all failures |
+| `PublishManyOptions`                      | interface      | `{ sequential?: boolean }` — opt-in strict ordering for `publishMany`                         |
 
 ## Patterns
 
@@ -124,6 +126,47 @@ const options: BaseEventBusOptions = {
 
 const bus = new UnifiedEventBus(options);
 ```
+
+### Handler error semantics (run-all fan-out)
+
+Both `BaseEventBus` and `UnifiedEventBus` share one error semantics: **every**
+handler runs to completion even when earlier handlers throw. Failures are
+collected during fan-out and surfaced only afterwards:
+
+- `onError` configured → each failure is routed to the hook; `publish` resolves.
+- no `onError` → failures are logged and thrown as a single
+  `AggregatedEventHandlerError` (inspect `.errors` for individual failures).
+
+```typescript
+import {
+  AggregatedEventHandlerError,
+  UnifiedEventBus,
+} from '@vytches/ddd-events';
+
+const bus = new UnifiedEventBus();
+try {
+  await bus.publish(event);
+} catch (error) {
+  if (error instanceof AggregatedEventHandlerError) {
+    error.errors.forEach(failure => logger.error('handler failed', failure));
+  }
+}
+```
+
+### publishMany ordering
+
+**WARNING:** by default `publishMany` fires all events in parallel via
+`Promise.all` — there is **no cross-event ordering guarantee**. Handlers of
+`events[1]` may complete before handlers of `events[0]`. For an aggregate's
+batch where projections depend on order (`OrderCreated` before `ItemAdded`), opt
+in to sequential mode:
+
+```typescript
+await bus.publishMany(aggregate.getDomainEvents(), { sequential: true });
+```
+
+Sequential mode publishes strictly in array order; a failing event stops the
+remaining events. Note: `publishEventsForAggregate` uses the parallel default.
 
 ### Metadata correlation across events
 
