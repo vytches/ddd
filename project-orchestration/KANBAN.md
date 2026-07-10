@@ -83,21 +83,41 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > utils (164), cqrs (289), messaging (96) tests + type-check green, enterprise
 > api-surface + nestjs (215) green. Moved to `completed-tasks/`.
 
+> **Partially shipped (2026-07-10)**: **VF-026** AC0+AC6 done, AC1-5 still open
+> (`in_progress`, stays in `tasks/`). Fixed the broken `isDomainFile()` scanner
+> (SA-M1 — path-segment matching instead of substring, was a no-op for any
+> domain folder as the first path segment) + regression tests; re-ran `ddd-002`
+> over `packages/` and triaged all 60 surfaced findings via a research agent
+> (none skipped): 17 suppressed as confirmed dual-API (`aggregate-utilities.ts`,
+> `id.value-object.ts` — same pattern as the already-suppressed
+> `entity-id.implementation.ts`), 43 real findings recorded as a follow-up fix
+> list in the task file (mostly builder `.build()` validation that should return
+> `Result`), 3 borderline/no-action. Wired `pnpm ddd:lint || true` into CI as
+> informational (AC6, tool's own Stage-1 rollout plan). Tool suite 33/33,
+> aggregates 191/191, value-objects 90/90 green. **New finding needing its own
+> task**: `policy-builder.ts:538` and `policy-group.ts:330` —
+> composite/multi-step policy evaluation silently throws instead of returning
+> `Result` for real, reachable step-type combinations (`shouldSatisfyAny()`,
+> `.mustAsync()`, `.mustSatisfyRules()` used in a multi-step policy) — a genuine
+> bug in the public policies API, zero test coverage on the affected paths.
+> AC1-5 (new `ddd-004`/`ddd-005` rules) need `/analyze-ddd` to nail down the
+> exact fanout-in-handler definition before implementing — not attempted.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-| ID     | Title                                                             | Status  | Age |
-| ------ | ----------------------------------------------------------------- | ------- | --- |
-| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog | 1d  |
-| VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog | 1d  |
-| VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog | 0d  |
-| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 0d  |
-| VF-026 | ddd-lint anti-pattern rules + fix broken isDomainFile() gate      | backlog | 6d  |
-| VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog | 0d  |
-| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog | 0d  |
+| ID     | Title                                                             | Status      | Age |
+| ------ | ----------------------------------------------------------------- | ----------- | --- |
+| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog     | 1d  |
+| VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog     | 1d  |
+| VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog     | 0d  |
+| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog     | 0d  |
+| VF-026 | ddd-lint new rules ddd-004/005 (AC0/AC6 done, needs /analyze-ddd) | in_progress | 6d  |
+| VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog     | 0d  |
+| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog     | 0d  |
 
 ## P2 — Normal / Medium
 

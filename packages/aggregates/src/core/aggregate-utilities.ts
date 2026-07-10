@@ -1,3 +1,14 @@
+// ddd-lint-disable no-throw-in-domain
+// Reason: throwing factory methods (asSnapshotAggregate/asVersioningAggregate/
+// asAuditAggregate/asEventSourcingAggregate) are intentionally kept for
+// backward compatibility. Result-based variants (tryAsSnapshotAggregate/
+// tryAsVersioningAggregate/tryAsAuditAggregate/tryAsEventSourcingAggregate)
+// live alongside each in this same file for new code that prefers
+// Result<T, E>. Per the library design decision in README ("throwing
+// reserved for true programmer errors"), passing a capability-less aggregate
+// to a typed accessor is a programmer error, not a domain error. Confirmed
+// during VF-026 (SEC-AUDIT-2026-07-09 SA-M1) triage — all 4 throws in this
+// file follow this pattern, no other throws present.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Result } from '@vytches/ddd-utils';
 import type {
