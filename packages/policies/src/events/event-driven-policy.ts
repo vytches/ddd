@@ -1,4 +1,5 @@
 import { internalLogger } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
 import type { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
@@ -287,7 +288,7 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
   }
 
   private generateExecutionId(): string {
-    return `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `exec_${LibUtils.getUUID()}`;
   }
 }
 
