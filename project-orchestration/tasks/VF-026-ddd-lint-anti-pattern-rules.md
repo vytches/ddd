@@ -13,8 +13,8 @@ complexity: simple
 estimated_time: 7h
 created_by: human (feedback 2026-07-03)
 created_at: 2026-07-03
-updated_at: 2026-07-09
-status: backlog
+updated_at: 2026-07-10
+status: in_progress
 release_target: unscheduled
 package: tools/ddd-lint
 findings: [lessons from VB-003-nestjs-forfeature-di-wiring, SA-M1]
@@ -63,7 +63,7 @@ existing blind spot, so the fix belongs in this task.
 
 ## Acceptance Criteria
 
-0. [ ] **SA-M1 (do this FIRST):** `isDomainFile()` matches path **segments**
+0. [x] **SA-M1 (do this FIRST):** `isDomainFile()` matches path **segments**
        (e.g. split on `/` and compare segments, or anchor with a leading-`(^|/)`
        regex) instead of raw `includes('/…/')`; regression tests cover both
        invocation shapes (`ddd-lint packages` from repo root and absolute
@@ -84,7 +84,7 @@ existing blind spot, so the fix belongs in this task.
 5. [ ] The Anti-Patterns section in the LLMGUIDE.md of affected packages (at
        least `@vytches/ddd-nestjs`) updated with a link to the lint rule as the
        enforceable counterpart of the prose description.
-6. [ ] Wire `ddd:lint` into CI, at minimum as **informational** (e.g.
+6. [x] Wire `ddd:lint` into CI, at minimum as **informational** (e.g.
        `pnpm ddd:lint || true`), per the tool's own README-stated rollout plan
        (Informational → Blocking-soon → Blocking). Confirmed 2026-07-04:
        `ddd:lint` is wired into **neither** `.github/workflows/ci.yml` (the only
@@ -104,6 +104,86 @@ existing blind spot, so the fix belongs in this task.
   ddd-lint is sufficient.
 - Systematically adding an Anti-Patterns section to all 19 LLMGUIDE.md files — a
   separate task, if deemed worthwhile after this pilot.
+
+## Activity / Notes
+
+### 2026-07-10 — AC0 + AC6 done on `feature/VF-026-ddd-lint-fix-and-rules`; AC1-5 remain open
+
+**AC0 (isDomainFile fix):** `isDomainFile()` now splits the normalized path into
+segments and checks exact segment membership in
+`{domain, aggregates, value-objects, specifications, policies}` instead of
+`includes('/name/')` substring matching. Added a regression test proving the
+exact bug shape (domain folder as the FIRST path segment, no leading slash —
+what `runLint({ root: 'packages' })` actually produces) plus a false-positive
+guard test (`my-aggregates-helper` no longer matches). Full tool suite: 33/33
+passing; `tsc --noEmit` clean.
+
+**Full re-scan + triage (delegated to a research agent, all 60 pre-existing
+findings classified, none skipped):**
+
+- **Suppressed (confirmed dual-API, same pattern as
+  `contracts/entity-id.implementation.ts`):**
+  `aggregates/src/core/aggregate-utilities.ts` (4 throws — asX/tryAsX pairs) and
+  `value-objects/src/id.value-object.ts` (12 of 13 throws — fromX/tryFromX pairs
+  on `EntityId` + deprecated `EntityIdFactory`; the 13th is a genuinely
+  exhaustive `IdType` switch). Both got the same
+  `// ddd-lint-disable no-throw-in-domain` header with reasoning. Verified:
+  `pnpm ddd:lint` error count dropped 63 → 46 (exactly the 17 suppressed
+  throws); aggregates test 191/191, value-objects test 90/90 unaffected.
+
+- **Follow-up fix list — 43 real findings across 14 files, NOT fixed here** (out
+  of scope for a lint-tool task; each needs its own review/PR): builder
+  `.build()`/`validateBuilder()` validation that throws instead of returning
+  `Result` (`policy-builder.ts`, `policy-definition.ts`, `temporal-policy.ts`,
+  `policy-context-builder.ts`, `policy-request-builder.ts`, `policy-registry.ts`
+  — the latter's `validateDefinition()` alone is 8 findings); capability methods
+  with no Result alternative (`event-sourcing-capability.ts`,
+  `snapshot-capability.ts`); `base-business-policy.ts`'s 4 "not yet implemented"
+  placeholder throws (already tracked as VT-006 F-M10 — confirmed match, not
+  duplicated); `event-driven-policy.ts:184` re-throwing instead of honoring its
+  own declared `Promise<Result<T, PolicyViolation>>` return type;
+  `policy-event-bus.ts:106` (`subscribe()` cap exceeded, no Result twin);
+  `policy-registry.ts:24` (`register()` duplicate ID, no `tryRegister`). Full
+  file:line list preserved in the triage agent's report (not duplicated here —
+  see git history of this task file / session transcript if needed verbatim;
+  summarized above by file).
+
+- **Two newly-discovered real production bugs, escalate separately (not part of
+  this task's scope, flagging so they aren't lost):** `policy-builder.ts:538`
+  (`BuiltCompositePolicy.createPolicyFromStep`) and `policy-group.ts:330`
+  (`GroupCompositePolicy.createPolicyFromStep`) each handle only 2 of a wider
+  step-type union in their composite/multi-step evaluation path. Real public
+  builder methods (`shouldSatisfyAny()`, `.mustAsync()`, `.mustSatisfyAsync()`,
+  `.mustSatisfyRules()`) construct step types that these `switch` statements
+  don't handle — a composite policy mixing those in throws at `check()` time
+  instead of returning `Result.fail(...)`, silently breaking the method's own
+  contract for real, reachable usage (not dead code). No existing test covers
+  `shouldSatisfyAny()` at all. **Recommend a new P1 bug task** (candidate id:
+  next free `VF-0XX` or fold into VT-006's policies-hardening scope) before
+  publish, since this affects the public policies API's core evaluation path.
+
+- **3 borderline/no-action items (C, judgment calls, listed for completeness):**
+  `conditional-policy-builder.ts:177,249` (dead union members, unreachable via
+  current public API — narrow the type or remove, low priority);
+  `policy-event-bus.ts:273` (opt-in `errorStrategy: 'throw'` escape hatch —
+  arguably fine as documented opt-in behavior, human sign-off recommended if
+  ever revisited).
+
+**AC6 (CI wiring):** added a `DDD compliance (informational)` step to
+`.github/workflows/ci.yml` right after the existing ESLint step, running
+`pnpm ddd:lint || true` — matches the tool's own README-documented Stage 1
+rollout (Informational → Blocking-soon → Blocking). YAML validated
+(`python3 -c "import yaml; yaml.safe_load(...)"`). `.husky/pre-commit` left
+untouched (not required by AC6's "at minimum" wording).
+
+**AC1-5 remain open (new `ddd-004`/`ddd-005` rules — fanout-in-handler,
+deep-import-instead-of-barrel).** Not attempted: AC1 explicitly requires "the
+exact definition confirmed during /analyze-ddd against the real VB-003 example"
+— inventing that rule's precise shape unilaterally risks not matching what the
+PR author/reviewer actually meant by the anti-pattern. Recommend running
+`/analyze-ddd VF-026` (or a fresh follow-up task id) to nail down AC1/AC2's rule
+definitions before implementing, now that AC0's higher-priority scanner fix and
+AC6's CI wiring are shipped independently.
 
 ## References
 

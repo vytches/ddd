@@ -1,3 +1,17 @@
+// ddd-lint-disable no-throw-in-domain
+// Reason: throwing factory methods (fromUUID/fromInteger/fromBigInt/fromText
+// on both EntityId and the deprecated EntityIdFactory wrapper) are
+// intentionally kept for backward compatibility. Result-based variants
+// (tryFromUUID/tryFromInteger/tryFromBigInt/tryFromText) live alongside each
+// on EntityId in this same file for new code that prefers Result<T, E>. Per
+// the library design decision in README ("throwing reserved for true
+// programmer errors"), passing malformed primitives to a factory is a
+// programmer error, not a domain error — identical rationale to
+// `@vytches/ddd-contracts/entity-id.implementation.ts`, this package's base
+// class. The remaining throw in `validate()` is an exhaustive switch over
+// the closed IdType union (uuid|integer|bigint|text) — an unreachable
+// default, not a domain-validation throw. Confirmed during VF-026
+// (SEC-AUDIT-2026-07-09 SA-M1) triage.
 import {
   EntityId as BaseEntityId,
   type IEntityIdFactory,

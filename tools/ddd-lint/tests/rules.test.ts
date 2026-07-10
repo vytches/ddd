@@ -216,6 +216,40 @@ describe('ddd-002 — no throw in domain', () => {
     expect(issues).toHaveLength(3);
   });
 
+  it('flags throw when the domain folder IS the first path segment, no leading slash (SA-M1 regression)', () => {
+    // This is the exact shape produced by the real CLI: `runLint({ root:
+    // 'packages' })` yields paths relative to that root, so
+    // `packages/aggregates/src/x.ts` on disk becomes `aggregates/src/x.ts` —
+    // no leading slash before "aggregates". The old `includes('/aggregates/')`
+    // check silently never matched this shape (0 findings in the wired
+    // script vs 100+ when scanned from the repo root, where every domain
+    // folder has a preceding `packages/` segment). If this regresses, the
+    // rule is a no-op again in its actual CI/CLI wiring.
+    const src = `function validate(x: number) { if (x < 0) throw new Error('negative'); }`;
+    for (const path of [
+      'aggregates/src/core/aggregate-root.ts',
+      'domain/errors.ts',
+      'value-objects/money.ts',
+      'specifications/order-spec.ts',
+      'policies/registry/policy-registry.ts',
+    ]) {
+      const issues = noThrowInDomain.run({ sourceFile: parse(src), filePath: path });
+      expect(issues, `path=${path}`).toHaveLength(1);
+    }
+  });
+
+  it('does NOT flag a folder that merely contains a domain word as substring (no false positive from segment matching)', () => {
+    const src = `if (true) throw new Error('x');`;
+    for (const path of [
+      'src/my-aggregates-helper/util.ts',
+      'src/domain-tools/format.ts',
+      'src/policies-config/loader.ts',
+    ]) {
+      const issues = noThrowInDomain.run({ sourceFile: parse(src), filePath: path });
+      expect(issues, `path=${path}`).toEqual([]);
+    }
+  });
+
   it('honors // ddd-lint-disable no-throw-in-domain directive', () => {
     const src = `// ddd-lint-disable no-throw-in-domain
 function fail() { throw new Error('intentional'); }`;

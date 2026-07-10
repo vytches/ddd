@@ -102,6 +102,13 @@ jobs:
       - name: Lint affected projects
         run: pnpm nx affected --target=lint --parallel=3
 
+      # VF-026: DDD anti-pattern lint (tools/ddd-lint) — Stage 1 of the
+      # tool's own documented rollout plan (README.md: Informational →
+      # Blocking-soon → Blocking). `|| true` is intentional at this stage;
+      # do not remove it without following the announced merge-gate date.
+      - name: DDD compliance (informational)
+        run: pnpm ddd:lint || true
+
       - name: Type check affected projects
         run: pnpm nx affected --target=type-check --parallel=3
 
