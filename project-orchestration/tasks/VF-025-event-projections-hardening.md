@@ -14,17 +14,17 @@ created_at: 2026-07-02
 status: backlog
 release_target: post-first-publish OK (ale przed 1.0)
 package: '@vytches/ddd-events', '@vytches/ddd-projections', '@vytches/ddd-resilience', '@vytches/ddd-cqrs'
-findings: [F-H7, F-H9, F-H10, F-H11, F-M1, F-M3, F-M4, F-M6, F-M9, F-M13, F-M16]
+findings: [F-H7, F-H9, F-H10, F-H11, F-M1, F-M3, F-M4, F-M6, F-M9, F-M13, F-M16, SA-M5, SA-M6]
 ```
 
 ## Dlaczego
 
 Audyt rozstrzygnął, że **UnifiedEventBus jest kanonicznym busem**
-(HOW-TO-event-bus.md, JSDoc @public @stable, default w
-UniversalEventDispatcher, LOCAL_EVENT_BUS w module NestJS) — a to właśnie on
-nie ma zabezpieczeń, które ma jego klasa bazowa. Do tego warstwa projekcji
-ma strukturalnie kompletne, ale częściowo niepodłączone mechanizmy
-(retry-config, checkpointy), a resilience wystawia niedziałające API metryk.
+(HOW-TO-event-bus.md, JSDoc @public @stable, default w UniversalEventDispatcher,
+LOCAL_EVENT_BUS w module NestJS) — a to właśnie on nie ma zabezpieczeń, które ma
+jego klasa bazowa. Do tego warstwa projekcji ma strukturalnie kompletne, ale
+częściowo niepodłączone mechanizmy (retry-config, checkpointy), a resilience
+wystawia niedziałające API metryk.
 
 ## Zakres / Acceptance Criteria
 
@@ -37,16 +37,16 @@ ma strukturalnie kompletne, ale częściowo niepodłączone mechanizmy
 3. [ ] Błędy fan-outu agregowane (`AggregateError` lub `errors` na rzucanym
        błędzie) zamiast gubienia errors[2..n] (:436-462); sprzątanie pustych
        kluczy Map przy unsubscribe.
-4. [ ] Auto-rejestracja z `globalThis.VytchesDDD` w konstruktorze (:109-141)
-       — za opt-in flagą lub usunięta (cross-context leakage).
-5. [ ] Udokumentowana semantyka `publishMany` (brak gwarancji kolejności
-       między zdarzeniami) i różnice vs BaseEventBus.
+4. [ ] Auto-rejestracja z `globalThis.VytchesDDD` w konstruktorze (:109-141) —
+       za opt-in flagą lub usunięta (cross-context leakage).
+5. [ ] Udokumentowana semantyka `publishMany` (brak gwarancji kolejności między
+       zdarzeniami) i różnice vs BaseEventBus.
 
 ### BaseEventBus (F-H9)
 
-6. [ ] Zaślepka DI `resolve: () => null` (base-event-bus.ts:11-21) —
-       realne DI albo default `useDI=false` + null-safe
-       `registerHandlerFactory` (dziś: gwarantowany TypeError przy publish).
+6. [ ] Zaślepka DI `resolve: () => null` (base-event-bus.ts:11-21) — realne DI
+       albo default `useDI=false` + null-safe `registerHandlerFactory` (dziś:
+       gwarantowany TypeError przy publish).
 
 ### Projekcje (F-H10, F-M4)
 
@@ -57,29 +57,28 @@ ma strukturalnie kompletne, ale częściowo niepodłączone mechanizmy
        reset checkpointów przy clear (obecnie TODO,
        projection-rebuilder.ts:282-284).
 9. [ ] `loadCheckpoint` wpięte w rebuilder (resume) LUB udokumentowany wymóg
-       idempotentnego `apply` do czasu wdrożenia; ProjectionProcessor
-       przestaje połykać błędy (konfigurowalna strategia).
+       idempotentnego `apply` do czasu wdrożenia; ProjectionProcessor przestaje
+       połykać błędy (konfigurowalna strategia).
 
 ### Resilience (F-H7)
 
 10. [ ] `enableMetrics`/`getResilienceMetrics()`/klasy `*MetricCollector`:
-        podłączone do circuit-breaker/retry/bulkhead ALBO usunięte
-        z publicznego API (dziś: udokumentowana funkcja, która nie działa).
-        Bonus: reset failureCount przy OPEN→HALF_OPEN (spójność metryk).
+        podłączone do circuit-breaker/retry/bulkhead ALBO usunięte z publicznego
+        API (dziś: udokumentowana funkcja, która nie działa). Bonus: reset
+        failureCount przy OPEN→HALF_OPEN (spójność metryk).
 
 ### CQRS (F-M1, F-M9 — opcjonalnie w tym tasku lub follow-up)
 
-11. [ ] `register()`/`registerFactory()` typowane względem
-        command/query (koniec `commandType: unknown`); warn przy silent
-        overwrite handlera.
+11. [ ] `register()`/`registerFactory()` typowane względem command/query (koniec
+        `commandType: unknown`); warn przy silent overwrite handlera.
 12. [ ] (Opcjonalnie) split enhanced-query-bus.ts (946 linii) /
         enhanced-command-bus.ts (742) — ekstrakcja cache/TTL z dispatchu.
 
 ### Przekrojowe
 
 13. [ ] Singletony (`globalPolicyEventBus`, `GlobalMetricRegistry`,
-        `GlobalObservabilityEventBus`) kluczowane na
-        `globalThis`/`Symbol.for` — ochrona przed dual ESM/CJS load (F-M6).
+        `GlobalObservabilityEventBus`) kluczowane na `globalThis`/`Symbol.for` —
+        ochrona przed dual ESM/CJS load (F-M6).
 14. [ ] Decyzja/dokumentacja: `eventName` z `constructor.name` a minifikacja
         (F-M13); upcasting bez jawnego `targetVersion` (F-M16).
 
@@ -92,3 +91,7 @@ ma strukturalnie kompletne, ale częściowo niepodłączone mechanizmy
 
 - Analysis: `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`
   (F-H7, F-H9, F-H10, F-H11, F-M1, F-M3, F-M4, F-M6 + Załączniki G, J)
+- Analysis: `project-orchestration/analysis/SEC-AUDIT-2026-07-09.analysis.md` —
+  niezależnie potwierdza AC3 (SA-M6: `executeHandlers` rzuca tylko `errors[0]`,
+  unified-event-bus.ts:438-465) i AC4 (SA-M5: goły catch bez diagnostyki w
+  `autoRegisterHandlers`, :120-143). Zakres bez zmian.

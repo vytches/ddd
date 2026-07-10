@@ -36,17 +36,31 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > **Housekeeping/triage resolved (2026-07-01/02)**: VP-011, VP-002, VF-001,
 > VT-001 closed/archived to `completed-tasks/`.
 
+> **Security audit (2026-07-09)**: full-library pattern audit
+> (`project-orchestration/analysis/SEC-AUDIT-2026-07-09.analysis.md`, findings
+> SA-XX) spawned **VS-016** (P0), **VS-017/VS-018/VF-028** (P1), amended
+> VF-023/VF-024/VF-025/VF-026/VF-027, and bumped **VF-026** normal→high (the
+> `ddd-002 no-throw-in-domain` lint gate turned out to be a no-op in CI wiring).
+> Two items deliberately NOT tasked (need `/analyze-ddd` design decisions
+> first): registry/DI collision semantics (SA-H4/M10/L4), injectable Clock
+> (SA-M8).
+
 ## P0 — Critical
 
-_None._ VB-003 (the last P0 publish blocker) shipped 2026-07-03.
+| ID     | Title                                                          | Status  | Age |
+| ------ | -------------------------------------------------------------- | ------- | --- |
+| VS-016 | EntityId.create() Math.random UUID → crypto.randomUUID (SA-C2) | backlog | 0d  |
 
 ## P1 — High
 
 | ID     | Title                                                             | Status  | Age |
 | ------ | ----------------------------------------------------------------- | ------- | --- |
-| VB-004 | Outbox atomic claim + happy-path timer leaks                      | backlog | 1d  |
 | VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog | 1d  |
 | VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog | 1d  |
+| VS-017 | Error serialization leakage (sourceModel, stack, toJSON)          | backlog | 0d  |
+| VS-018 | CQRS LoggingMiddleware under diagnostics control                  | backlog | 0d  |
+| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 0d  |
+| VF-026 | ddd-lint anti-pattern rules + fix broken isDomainFile() gate      | backlog | 6d  |
 
 ## P2 — Normal / Medium
 
@@ -60,7 +74,6 @@ _None._ VB-003 (the last P0 publish blocker) shipped 2026-07-03.
 | VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog | 1d  |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
 | VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
-| VF-026  | ddd-lint anti-pattern rules (fanout-in-handler, deep-import)      | backlog | 0d  |
 
 ## P3 — Low
 

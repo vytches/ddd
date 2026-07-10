@@ -20,7 +20,7 @@ release_target:
   post-first-public-publish (opportunistic — internal-only change, does not gate
   publish)
 package: '@vytches/ddd-resilience'
-findings: []
+findings: [SA-M12]
 ```
 
 ## Why
@@ -44,6 +44,17 @@ Together these eliminate the manual `setTimeout`, the manual `clearTimeout`, the
 manual `addEventListener('abort', ...)`/`removeEventListener` pairing, and the
 `unref()` question — all in one stroke, with no public signature change (the
 public surface still deals in `AbortSignal`).
+
+**SA-M12 (SEC-AUDIT-2026-07-09) — added scope:** `RetryPolicy.execute()`
+(`packages/resilience/src/patterns/retry.ts:39-58`) creates an `attemptContext`
+per attempt via `DefaultResilienceContext.withAttempt()` — which registers a
+parent-abort listener — but never calls `attemptContext.dispose?.()`, unlike
+`circuit-breaker.ts:70` and `resilience-strategy.ts:101` (both dispose in
+`finally` per VB-004 D-4). When a `ResilienceContext` is reused across multiple
+`execute()` calls (a supported pattern via `contextProvider`), abort listeners
+accumulate unboundedly on the shared signal. This is exactly the class of leak
+this task's native-AbortSignal rewrite eliminates — fixing it here avoids
+patching the manual mechanism twice.
 
 **Why this was split out of VB-004 rather than done there:** `fork()` currently
 returns a context wrapping a real `AbortController`, and
@@ -75,6 +86,11 @@ budget; it is well-scoped as its own small task instead.
 5. [ ] Regression: existing
        `CircuitBreaker`/`TimeoutStrategy`/resilience-context test suites stay
        green.
+6. [ ] **SA-M12:** `RetryPolicy.execute()` attempt contexts no longer leak
+       parent-abort listeners — either disposed explicitly per attempt (in
+       `finally`, matching circuit-breaker/timeout) or made structurally
+       unnecessary by the native `AbortSignal.any()` composition; test: listener
+       count on a reused parent context is stable across N `execute()` calls.
 
 ## Out of scope
 
@@ -89,6 +105,8 @@ budget; it is well-scoped as its own small task instead.
 - Spawned from:
   `project-orchestration/analysis/VB-004-outbox-atomic-claim.analysis.md` (open
   question OQ-3, decision D-4 — the interim fix this task properly replaces).
+- Analysis: `project-orchestration/analysis/SEC-AUDIT-2026-07-09.analysis.md`
+  (SA-M12 — RetryPolicy attempt-context disposal gap, added 2026-07-09).
 - Panel consultation (2026-07-03, architecture-guardian + library-api-guardian +
   library-expert): unanimous recommendation to create this task now rather than
   leave it as a prose recommendation buried in the analysis artifact (this
