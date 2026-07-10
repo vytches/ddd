@@ -14,12 +14,13 @@ complexity: medium
 estimated_time: 10h
 created_by: LIB-UX-AUDIT-2026-07-10
 created_at: 2026-07-10
-status: review
+status: done
 release_target:
   pre-first-publish preferred (silent-wrong-behavior class; deletions cheaper
   before publish — coordinate with VF-031)
 package: '@vytches/ddd-events'
 findings: [UX-C1, UX-C2, UX-C3, UX-C8, UX-C9, UX-C10]
+completed_at: 2026-07-10
 ```
 
 ## Why
@@ -102,7 +103,12 @@ no error, no log, just handlers that never fire or fire partially:
 
 ## Activity / Notes
 
-### 2026-07-10 — implemented on `feature/VF-029-eventbus-integrity` (status: review)
+### 2026-07-10 — implemented on `feature/VF-029-eventbus-integrity`, verified & merged to develop (status: done)
+
+Re-verified before merge: `@vytches/ddd-events` test (120/120), type-check, lint
+(5 pre-existing warnings, 0 errors, none introduced by this diff) green;
+`@vytches/ddd-nestjs` test (215/215) + type-check green;
+`@vytches/ddd-enterprise` api-surface test green.
 
 **Decision (UX-C1 + UX-C3): DI machinery DELETED.** The hardcoded `VytchesDDD`
 stub (`base-event-bus.ts:10-21`), the `useDI` constructor option, the no-op

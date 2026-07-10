@@ -59,6 +59,14 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 > and retry-engine consolidation (policies vs resilience) — need design
 > decisions first.
 
+> **Just shipped (2026-07-10)**: **VF-029** done (EventBus integrity —
+> split-registry dead-registration path, DI-stub scaffolding deleted, unified
+> fan-out error semantics via new `AggregatedEventHandlerError`, identity-based
+> unsubscribe, `publishMany({ sequential })` ordering opt-in; commit `b77e5102`
+> on `feature/VF-029-eventbus-integrity`, merged to `develop`) — events (120),
+> nestjs (215) tests + type-check green, enterprise api-surface green. Moved to
+> `completed-tasks/`.
+
 ## P0 — Critical
 
 | ID     | Title                                                          | Status  | Age |
@@ -75,7 +83,6 @@ updated_at populated on these tasks). Grouped by priority (P0 critical · P1 hig
 | VS-018 | CQRS LoggingMiddleware under diagnostics control                  | backlog | 0d  |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 0d  |
 | VF-026 | ddd-lint anti-pattern rules + fix broken isDomainFile() gate      | backlog | 6d  |
-| VF-029 | EventBus integrity (split registries, DI stub, fan-out abort)     | backlog | 0d  |
 | VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog | 0d  |
 | VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog | 0d  |
 
