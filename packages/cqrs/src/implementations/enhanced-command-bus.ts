@@ -25,6 +25,15 @@ import type { ICqrsValidatable } from '../validation';
  */
 export interface EnhancedCommandBusOptions {
   enableMetrics?: boolean;
+  /**
+   * Install the default {@link LoggingMiddleware}, which logs every
+   * command's start/completion/failure via `console` (or a custom logger
+   * passed to it directly). **Off by default** (VS-018) — decoupled from
+   * `enableMetrics`, which previously implied logging as a side effect and
+   * bypassed `configureDiagnostics` entirely. Opt in explicitly for
+   * execution tracing during development/debugging.
+   */
+  enableExecutionLogging?: boolean;
   enableCache?: boolean;
   defaultTimeout?: number;
   defaultRetries?: number;
@@ -149,8 +158,11 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus, I
     // Setup resilience patterns
     this.setupResilience(options.resilience);
 
-    // Add default logging middleware if metrics enabled
-    if (options.enableMetrics !== false) {
+    // VS-018: execution logging is opt-in (default off), decoupled from
+    // enableMetrics. LoggingMiddleware defaults to raw console when no
+    // custom logger is supplied — that is only reachable when a consumer
+    // explicitly requests it here.
+    if (options.enableExecutionLogging === true) {
       this.use(new LoggingMiddleware());
     }
 

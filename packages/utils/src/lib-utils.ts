@@ -210,6 +210,17 @@ export class LibUtils {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  /**
+   * Strip ASCII control characters (C0 range + DEL) from a string before
+   * it's interpolated into a log line. Prevents log injection — forged log
+   * entries via embedded `\r`/`\n` — when the string may carry untrusted
+   * data (e.g. an error message built from external input). VS-018.
+   */
+  static sanitizeLogMessage(input: string): string {
+    // eslint-disable-next-line no-control-regex -- intentional: stripping C0 control chars
+    return input.replace(/[\x00-\x1f\x7f]/g, ' ');
+  }
+
   static isValidUUID(value: string): boolean {
     return UUID_PATTERN.test(value);
   }

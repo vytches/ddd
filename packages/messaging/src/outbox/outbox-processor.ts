@@ -1,5 +1,5 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
-import { safeRun } from '@vytches/ddd-utils';
+import { LibUtils, safeRun } from '@vytches/ddd-utils';
 import { internalLogger } from '@vytches/ddd-contracts';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
@@ -460,8 +460,11 @@ export class OutboxProcessor {
   private async handleMessageError(message: IOutboxMessage, error: Error): Promise<void> {
     try {
       const attempts = await this.repository.incrementAttempt(message.id);
+      // VS-018: sanitize error.message before interpolation — a handler may
+      // embed untrusted data in a thrown error, which would otherwise be a
+      // log-injection vector (forged log lines via embedded \r/\n).
       internalLogger.warn(
-        `OutboxProcessor: message ${message.id} failed, attempt ${attempts}: ${error?.message}`
+        `OutboxProcessor: message ${message.id} failed, attempt ${attempts}: ${LibUtils.sanitizeLogMessage(error?.message ?? String(error))}`
       );
 
       this.safelyInvokeHook('onMessageFailed', () =>
