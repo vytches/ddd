@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
-import { DomainEvent, UnifiedEventBus } from '../src';
+import { AggregatedEventHandlerError, DomainEvent, UnifiedEventBus } from '../src';
 import type { IIntegrationEvent } from '../src/integration/integration-event-interfaces';
 
 // Test events
@@ -191,6 +191,40 @@ describe('UnifiedEventBus', () => {
       await eventBus.publish(testEvent);
       expect(handler.handle).toHaveBeenCalledTimes(1); // Still 1, not called again
     });
+
+    it('should remove exactly the requested class handler when two share an event (UX-C8)', async () => {
+      class HandlerA {
+        handle(_event: TestDomainEvent): void {
+          // intentional no-op
+        }
+      }
+      class HandlerB {
+        handle(_event: TestDomainEvent): void {
+          // intentional no-op
+        }
+      }
+      const handlerA = new HandlerA();
+      const handlerB = new HandlerB();
+      const spyA = vi.spyOn(handlerA, 'handle');
+      const spyB = vi.spyOn(handlerB, 'handle');
+
+      eventBus.registerHandler(TestDomainEvent, handlerA);
+      eventBus.registerHandler(TestDomainEvent, handlerB);
+
+      eventBus.unsubscribe(TestDomainEvent, handlerB);
+      await eventBus.publish(new TestDomainEvent({ id: 'test-1' }));
+
+      expect(spyA).toHaveBeenCalledTimes(1); // A still fires
+      expect(spyB).not.toHaveBeenCalled(); // B is gone
+    });
+
+    it('should clean up empty registry keys after the last unsubscribe', () => {
+      const handler = vi.fn();
+      eventBus.subscribe(TestDomainEvent, handler);
+      eventBus.unsubscribe(TestDomainEvent, handler);
+
+      expect(eventBus.getRegisteredEventTypes()).toEqual([]);
+    });
   });
 
   describe('Multiple Events Publishing', () => {
@@ -207,10 +241,30 @@ describe('UnifiedEventBus', () => {
 
       expect(handler).toHaveBeenCalledTimes(3);
     });
+
+    it('should preserve strict array order with { sequential: true } (UX-C10)', async () => {
+      const order: string[] = [];
+      eventBus.subscribe(TestDomainEvent, async event => {
+        const id = (event.payload as { id: string }).id;
+        if (id === 'first') {
+          // Delay the first event's handler; parallel dispatch would let
+          // the second event's handler finish before it.
+          await new Promise(resolve => setTimeout(resolve, 20));
+        }
+        order.push(id);
+      });
+
+      await eventBus.publishMany(
+        [new TestDomainEvent({ id: 'first' }), new TestDomainEvent({ id: 'second' })],
+        { sequential: true }
+      );
+
+      expect(order).toEqual(['first', 'second']);
+    });
   });
 
   describe('Error Handling', () => {
-    it('should handle errors in event handlers', async () => {
+    it('should route handler errors to onError and resolve publish (onError owns errors)', async () => {
       const workingHandler = vi.fn();
       const onError = vi.fn();
 
@@ -227,7 +281,8 @@ describe('UnifiedEventBus', () => {
       const testEvent = new TestDomainEvent({ id: 'test-1' });
 
       const [publishError] = await safeRun(() => eventBus.publish(testEvent));
-      expect(publishError?.message).toBe('Handler error');
+      expect(publishError).toBeUndefined(); // onError configured => publish resolves
+      expect(onError).toHaveBeenCalledTimes(1);
       expect(onError).toHaveBeenCalledWith(expect.any(Error), 'TestDomainEvent');
       expect(workingHandler).toHaveBeenCalled(); // Should still be called
     });
@@ -250,10 +305,103 @@ describe('UnifiedEventBus', () => {
       const testEvent = new TestDomainEvent({ id: 'test-1' });
 
       const [publishError] = await safeRun(() => eventBus.publish(testEvent));
-      expect(publishError).toBeInstanceOf(Error);
+      expect(publishError).toBeUndefined();
       expect(handler1).toHaveBeenCalled();
       expect(handler2).toHaveBeenCalled();
-      expect(onError).toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledWith(expect.any(Error), 'TestDomainEvent');
+    });
+
+    it('should run all handlers and throw AggregatedEventHandlerError by default (no onError)', async () => {
+      const first = vi.fn(() => {
+        throw new Error('first failed');
+      });
+      const middle = vi.fn();
+      const last = vi.fn(() => {
+        throw new Error('last failed');
+      });
+
+      eventBus.subscribe(TestDomainEvent, first);
+      eventBus.subscribe(TestDomainEvent, middle);
+      eventBus.subscribe(TestDomainEvent, last);
+
+      const [publishError] = await safeRun(() =>
+        eventBus.publish(new TestDomainEvent({ id: 'test-1' }))
+      );
+
+      expect(first).toHaveBeenCalled();
+      expect(middle).toHaveBeenCalled();
+      expect(last).toHaveBeenCalled();
+      expect(publishError).toBeInstanceOf(AggregatedEventHandlerError);
+      const aggregated = publishError as AggregatedEventHandlerError;
+      expect(aggregated.eventName).toBe('TestDomainEvent');
+      expect(aggregated.errors.map(e => e.message)).toEqual(
+        expect.arrayContaining(['first failed', 'last failed'])
+      );
+      expect(aggregated.errors).toHaveLength(2);
+    });
+  });
+
+  describe('Registry Integrity (UX-C1)', () => {
+    it('getHandlers/getRegisteredEventTypes reflect the active handler registry', () => {
+      const handler = vi.fn();
+      eventBus.subscribe(TestDomainEvent, handler);
+      eventBus.subscribe('TestIntegrationEvent', () => undefined);
+
+      expect(eventBus.getRegisteredEventTypes().sort()).toEqual([
+        'TestDomainEvent',
+        'TestIntegrationEvent',
+      ]);
+      const handlers = eventBus.getHandlers(TestDomainEvent);
+      expect(handlers).toBeDefined();
+      expect(handlers!.size).toBe(1);
+      expect(handlers!.has(handler)).toBe(true);
+    });
+
+    it('getHandlers returns undefined for unknown event types', () => {
+      expect(eventBus.getHandlers('NopeEvent')).toBeUndefined();
+    });
+
+    it('clearHandlers empties the active registry so publish fires nothing', async () => {
+      const handler = vi.fn();
+      const classHandler = { handle: vi.fn() };
+      eventBus.subscribe(TestDomainEvent, handler);
+      eventBus.registerHandler(TestDomainEvent, classHandler);
+
+      eventBus.clearHandlers();
+      await eventBus.publish(new TestDomainEvent({ id: 'test-1' }));
+
+      expect(handler).not.toHaveBeenCalled();
+      expect(classHandler.handle).not.toHaveBeenCalled();
+      expect(eventBus.getRegisteredEventTypes()).toEqual([]);
+      expect(eventBus.getHandlers(TestDomainEvent)).toBeUndefined();
+    });
+  });
+
+  describe('Handler Cap (UX-C9)', () => {
+    it('enforces MAX_HANDLERS_PER_EVENT across every registration path', () => {
+      for (let i = 0; i < 99; i++) {
+        eventBus.subscribe(TestDomainEvent, () => undefined);
+      }
+      // 100th handler via a different path still counts against the cap
+      eventBus.registerHandler(TestDomainEvent, { handle: vi.fn() });
+
+      expect(() => eventBus.subscribeToContext('ctx', TestDomainEvent, () => undefined)).toThrow(
+        'Maximum handlers (100) exceeded for event "TestDomainEvent"'
+      );
+    });
+
+    it('respects a subclass override of MAX_HANDLERS_PER_EVENT', () => {
+      class CappedBus extends UnifiedEventBus {
+        static override readonly MAX_HANDLERS_PER_EVENT = 2;
+      }
+      const cappedBus = new CappedBus();
+
+      cappedBus.subscribe(TestDomainEvent, () => undefined);
+      cappedBus.subscribe(TestDomainEvent, () => undefined);
+
+      expect(() => cappedBus.subscribe(TestDomainEvent, () => undefined)).toThrow(
+        'Maximum handlers (2) exceeded for event "TestDomainEvent"'
+      );
     });
   });
 

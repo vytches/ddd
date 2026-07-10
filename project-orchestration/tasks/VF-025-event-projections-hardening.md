@@ -32,6 +32,11 @@ wystawia niedziałające API metryk.
 
 1. [ ] Egzekwowanie `MAX_HANDLERS_PER_EVENT` w `registerHandlerWithContext`
        (unified-event-bus.ts:381-389); dedup subskrypcji (Set/identity).
+   > NOTE 2026-07-10: cap enforcement DONE w VF-029 (assertHandlerCapacity w
+   > registerHandlerWithContext + static przez this.constructor); w tym tasku
+   > zostaje tylko dedup subskrypcji. AC2 (identity unsubscribe) i agregacja
+   > błędów z AC3 również zrealizowane w VF-029 (AggregatedEventHandlerError +
+   > sprzątanie pustych kluczy).
 2. [ ] Unsubscribe po tożsamości: `Map<originalHandler, wrapper>` zamiast
        matchingu `toString().includes('handler.handle(event)')` (:323-331).
 3. [ ] Błędy fan-outu agregowane (`AggregateError` lub `errors` na rzucanym
