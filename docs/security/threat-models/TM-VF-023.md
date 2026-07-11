@@ -1,7 +1,7 @@
 # TM-VF-023 — BaseValueObject always-valid + AggregateRoot atomic apply + internal-state lock
 
-**Status:** DRAFT — pending Tech Lead sign-off **Date:** 2026-07-11 **Task:**
-`project-orchestration/tasks/VF-023-ddd-foundation-guarantees.md`
+**Status:** APPROVED (2026-07-11) **Date:** 2026-07-11 **Task:**
+`project-orchestration/completed-tasks/VF-023-ddd-foundation-guarantees.md`
 **Granularity:** Feature TM (adapted for library context — no HTTP endpoints, no
 PII, no auth)
 

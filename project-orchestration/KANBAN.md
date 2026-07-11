@@ -1,6 +1,6 @@
 # KANBAN — @vytches/ddd
 
-_Last manually updated 2026-07-11 (VF-024 shipped, moved to completed-tasks/;
+_Last manually updated 2026-07-11 (VF-023 shipped, moved to completed-tasks/;
 tables current as of this date). Age = days since created_at. Grouped by
 priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
@@ -118,19 +118,42 @@ priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > library-api-guardian sign-off on VF-023 and VF-031.** Moved to
 > `completed-tasks/`.
 
+> **Shipped (2026-07-11)**: **VF-023** done — DDD foundation guarantees for
+> `BaseValueObject`/`AggregateRoot` (all 11 acceptance criteria). Constructor
+> now calls `validate()` and throws on invalid input (F-C5). Deep freeze for VO
+> values and domain events; `equals()` via `LibUtils.deepEqual`, not
+> `JSON.stringify` (F-H5). `apply()` guards moved before `_version`/
+> `_domainEvents` mutation, fixing version desync on throw+retry (F-C6).
+> `_internal_setState` gated behind a module-private Symbol token, closing the
+> **Critical** invariant-bypass (F-H4); `SnapshotCapability` updated in
+> lockstep. `onMissingHandler` (`'warn'`/`'throw'`) config for missing event
+> handlers, applied to both live `apply()` and replay (F-M2/SA-M7).
+> `IEventPersistenceHandler` JSDoc now requires atomic compare-and-set semantics
+> (SA-M9). `AggregateRoot.equals()` added (UX-C15). Threat model `TM-VF-023.md`
+> flipped DRAFT → APPROVED. **BREAKING CHANGE** — see CHANGELOG.md for migration
+> notes. Verified: 274/274 tests + typecheck clean across the 5 directly-touched
+> packages; pre-commit's full 22-24 project run caught a real regression the
+> 5-package pass missed (`examples/quickstart`'s `Money` VO relied on the
+> pre-VF-023 construct-then-manually-validate pattern) — fixed by migrating it
+> to the `getInvalidValueMessage()` hook, same pattern already used in
+> `base-value-object.test.ts`; re-verified 24/24 projects green. External
+> validation against the real consumer (juz-ide-api, 237+ aggregates) is
+> deferred to manual sign-off before any npm tag/release — not blocking this
+> merge to `develop` per explicit authorization. Moved to `completed-tasks/`.
+> **Unblocks VF-031**, next in the pre-first-publish sequence.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-_Ordered by actual work priority: VF-024 (pre-publish API surface) shipped
-2026-07-11 and unblocked sign-off on VF-023/VF-031, which now lead; then the
+_Ordered by actual work priority: VF-024 and VF-023 (pre-publish API surface,
+DDD foundation guarantees) shipped, unblocking VF-031, which now leads; then the
 newly-filed real bug (VF-035), then independent hardening (VF-028, VF-030)._
 
 | ID     | Title                                                         | Status  | Age |
 | ------ | ------------------------------------------------------------- | ------- | --- |
-| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)      | backlog | 8d  |
 | VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)      | backlog | 0d  |
 | VF-035 | Composite policy step-coverage bug (throws instead of Result) | backlog | 0d  |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)   | backlog | 1d  |
@@ -168,13 +191,15 @@ clears, not a current priority._
 ---
 
 **Recommended next action**: (1) VS-013 juz-ide-api validation — still the
-v0.31.0 publication gate, **overdue since 2026-07-05**, human/cross-team action.
-(2) **VF-024** shipped 2026-07-11 (API surface curation) — now unblocks
-library-api-guardian sign-off on **VF-023** and **VF-031**, which lead the
-pre-first-publish pipeline; both still involve consumer-impacting design calls
-(VO deep-freeze, further surface-diet removals) worth a human review pass before
-implementation. (3) **VF-035** (composite-policy step-coverage bug, now filed)
-is a real production bug in the public policies API — schedule alongside the
-pre-publish work, no design review needed, just implementation. Full audit
-findings: `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
+v0.31.0 publication gate, **overdue since 2026-07-05**, human/cross-team action;
+also now the gate for AC8 of the just-shipped VF-023 (external validation
+against the 237+ aggregate consumer, deferred to manual sign-off before any npm
+tag/release). (2) **VF-024** and **VF-023** shipped 2026-07-11 (API surface
+curation; DDD foundation guarantees) — now unblock **VF-031**, which leads the
+pre-first-publish pipeline; it still involves consumer-impacting design calls
+(further surface-diet removals) worth a human review pass before implementation.
+(3) **VF-035** (composite-policy step-coverage bug, now filed) is a real
+production bug in the public policies API — schedule alongside the pre-publish
+work, no design review needed, just implementation. Full audit findings:
+`project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.
