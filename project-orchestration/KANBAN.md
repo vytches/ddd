@@ -1,6 +1,6 @@
 # KANBAN — @vytches/ddd
 
-_Last manually updated 2026-07-11 (VF-031 shipped, moved to completed-tasks/;
+_Last manually updated 2026-07-11 (VF-035 shipped, moved to completed-tasks/;
 tables current as of this date). Age = days since created_at. Grouped by
 priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
@@ -93,6 +93,15 @@ priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > **Filed (2026-07-11)**: **VF-035** — the composite-policy step-coverage bug
 > flagged above (`policy-builder.ts:538`/`policy-group.ts:330`) now has a task
 > file (P1, pre-publish). See P1 table below.
+>
+> **Shipped (2026-07-11)**: **VF-035** done — all three `createPolicyFromStep`
+> switches now cover their full step-type unions via shared internal factories
+> (`step-policy-factory.ts`), new `OrGroupsPolicy` makes `shouldSatisfyAny()`
+> actually work (it threw for every documented usage), `assertNever` guards turn
+> future union growth into typecheck failures, and `shouldSatisfyAny()` returns
+> `IPolicyStepBuilder` (AC7, pre-publish signature fix). Two commits on develop:
+> `a880b32b` (fix) + `63a07593` (feat). Analysis + Q1–Q4 decision trail:
+> `analysis/VF-035.analysis.md`. Moved to `completed-tasks/`.
 
 > **Session boundary (2026-07-11)**: board reviewed and re-ordered by actual
 > work priority (not just chronological/creation order) ahead of a fresh
@@ -170,15 +179,15 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-_Ordered by actual work priority: VF-024, VF-023, and VF-031 (pre-publish API
-surface, DDD foundation guarantees, surface diet) shipped; the newly-filed real
-bug (VF-035) now leads, then independent hardening (VF-028, VF-030)._
+_Ordered by actual work priority: VF-024, VF-023, VF-031, and VF-035
+(pre-publish API surface, DDD foundation guarantees, surface diet, composite
+policy step-coverage bug) all shipped; independent hardening (VF-028, VF-030)
+leads now._
 
-| ID     | Title                                                         | Status  | Age |
-| ------ | ------------------------------------------------------------- | ------- | --- |
-| VF-035 | Composite policy step-coverage bug (throws instead of Result) | backlog | 0d  |
-| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)   | backlog | 1d  |
-| VF-030 | DI token identity (fn.name collision, Scoped→Transient)       | backlog | 0d  |
+| ID     | Title                                                       | Status  | Age |
+| ------ | ----------------------------------------------------------- | ------- | --- |
+| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN) | backlog | 1d  |
+| VF-030 | DI token identity (fn.name collision, Scoped→Transient)     | backlog | 0d  |
 
 ## P2 — Normal / Medium
 
@@ -218,9 +227,10 @@ also now the gate for AC8 of the shipped VF-023 (external validation against the
 tag/release). (2) **VF-024**, **VF-023**, and **VF-031** all shipped 2026-07-11
 (API surface curation; DDD foundation guarantees; surface diet) — the
 pre-first-publish pipeline's design-heavy work is now clear except VF-031's
-deferred AC3 (owned by VF-032). (3) **VF-035** (composite-policy step-coverage
-bug, filed 2026-07-11) is a real production bug in the public policies API and
-is the recommended next task to pick up — no design review needed, just
-implementation, and it's already leading the P1 table. Full audit findings:
+deferred AC3 (owned by VF-032). (3) **VF-035** shipped 2026-07-11 (composite
+policy step-coverage bug — the known real production bug in the public policies
+API is fixed; commits `a880b32b` + `63a07593`); next up in P1 is independent
+hardening: **VF-028** (resilience correctness), then **VF-030** (DI token
+identity). Full audit findings:
 `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.

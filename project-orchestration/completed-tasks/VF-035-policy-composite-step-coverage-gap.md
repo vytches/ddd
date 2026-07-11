@@ -14,7 +14,7 @@ complexity: medium
 estimated_time: 8h
 created_by: 'VF-026 triage (research agent, 2026-07-10)'
 created_at: 2026-07-10
-status: backlog
+status: done
 release_target:
   pre-first-public-publish (public policies API core evaluation path)
 package: "'@vytches/ddd-policies'"
@@ -63,10 +63,10 @@ the builder's public surface.
 
 ## Acceptance Criteria
 
-1. [ ] `PolicyBuilder.createPolicyFromStep` (single-step path,
+1. [x] `PolicyBuilder.createPolicyFromStep` (single-step path,
        policy-builder.ts:347) handles all 7 `PolicyBuildStep` member types,
        including `group-or`.
-2. [ ] `BuiltCompositePolicy.createPolicyFromStep` (multi-step path,
+2. [x] `BuiltCompositePolicy.createPolicyFromStep` (multi-step path,
        policy-builder.ts:538) handles all 7 `PolicyBuildStep` member types.
        Prefer extracting ONE shared step-evaluation function used by both the
        single-step and composite paths (root-causing the duplication instead of
@@ -75,22 +75,22 @@ the builder's public surface.
        them separate but add a compile-time exhaustiveness check (e.g. a
        `never`-typed default case) so a future new step type fails typecheck
        instead of silently reproducing this bug.
-3. [ ] `GroupCompositePolicy.createPolicyFromStep` (policy-group.ts:330) handles
+3. [x] `GroupCompositePolicy.createPolicyFromStep` (policy-group.ts:330) handles
        all 3 `PolicyGroupStep` member types, including `async-specification`.
-4. [ ] Add a compile-time exhaustiveness guard (TypeScript `never` check in the
+4. [x] Add a compile-time exhaustiveness guard (TypeScript `never` check in the
        `default` branch of each switch) to all three functions, so adding a new
        step-type member to either union without updating all evaluators becomes
        a **typecheck failure**, not a silent runtime gap — this is the actual
        root cause and must be prevented from recurring.
-5. [ ] Tests: `shouldSatisfyAny()` used as the sole step (AC1); a composite
+5. [x] Tests: `shouldSatisfyAny()` used as the sole step (AC1); a composite
        policy combining `.must(spec)` with `.mustAsync()`,
        `.mustSatisfyAsync()`, `.mustSatisfyRules()`, and `.shouldSatisfyAny()`
        each in turn, verifying `check()` returns `Result` (never throws) for
        every combination (AC2); `PolicyGroup.must().mustAsync().getPolicy()`
        composite mode returning `Result` correctly (AC3).
-6. [ ] Regression: full `@vytches/ddd-policies` test suite green; confirm no
+6. [x] Regression: full `@vytches/ddd-policies` test suite green; confirm no
        existing behavior for `specification`/`predicate` steps changed.
-7. [ ] `shouldSatisfyAny()` returns `IPolicyStepBuilder<T>` instead of
+7. [x] `shouldSatisfyAny()` returns `IPolicyStepBuilder<T>` instead of
        `IPolicyBuilder<T>` (interface + implementation), enabling
        `.withCode()/.withMessage()/.withSeverity()` chaining on the `group-or`
        step — as a SEPARATE commit within this task (API adjustment, not part of
@@ -121,3 +121,18 @@ the builder's public surface.
   "Activity / Notes" section, "Two newly-discovered real production bugs".
 - `project-orchestration/KANBAN.md` (2026-07-10 consolidated shipped banner) —
   flagged as "not yet tasked" until this file.
+
+## Activity / Notes
+
+- 2026-07-11: Full STOP1→STOP2 flow. Analysis artifact:
+  `project-orchestration/analysis/VF-035.analysis.md` (advisory panel +
+  two-guardian consult; Q1–Q4 answered in frontmatter; Q4 widened scope to AC7).
+  Implementation via orchestrate-ddd Workflow — layers core/api/tests all GO
+  (api needed 3 attempts: TEST-REGRESSION + D6/TEST-WEAK fixed in loop), final
+  VETO gate GO, full package suite green, api-surface snapshot unchanged.
+  Shipped in two commits on develop: `a880b32b` (fix: shared step-policy
+  factories, OrGroupsPolicy, assertNever exhaustiveness guards, test matrix) +
+  `63a07593` (feat: shouldSatisfyAny → IPolicyStepBuilder, AC7). Follow-up
+  candidates noted in the analysis (logicOperator OR ignored by composite
+  AND-loop; per-check policy recreation; test-file split; dead 'conditional'
+  union-member cleanup) — deliberately NOT tasked yet.
