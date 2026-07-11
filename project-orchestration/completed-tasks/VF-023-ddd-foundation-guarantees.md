@@ -11,7 +11,8 @@ complexity: complex
 estimated_time: 12h
 created_by: LIB-AUDIT-2026-07-02
 created_at: 2026-07-02
-status: backlog
+status: done
+completed_at: 2026-07-11
 release_target: pre-first-public-publish (BC window — po publikacji to breaking changes)
 package: '@vytches/ddd-value-objects', '@vytches/ddd-aggregates'
 findings: [F-C5, F-C6, F-H4, F-H5, F-M2, SA-M7, SA-M9, UX-C15, UX-C18]
@@ -24,7 +25,7 @@ findings: [F-C5, F-C6, F-H4, F-H5, F-M2, SA-M7, SA-M9, UX-C15, UX-C18]
 **Granularity:** Feature TM (adapted for library context — no HTTP endpoints, no
 PII, no auth) **TM file:**
 [`docs/security/threat-models/TM-VF-023.md`](../../docs/security/threat-models/TM-VF-023.md)
-**Status:** DRAFT — pending Tech Lead sign-off **Date:** 2026-07-11
+**Status:** APPROVED (2026-07-11) **Date:** 2026-07-11
 
 **Findings summary** (z TM file):
 
@@ -97,35 +98,35 @@ implicite.
 
 ## Acceptance Criteria
 
-1. [ ] Konstruktor `BaseValueObject` wywołuje `this.validate(value)` (throw lub
+1. [x] Konstruktor `BaseValueObject` wywołuje `this.validate(value)` (throw lub
        statyczna fabryka `Result<VO, Error>` — decyzja projektowa w fazie
        analizy; ocenić wpływ na istniejące VO konsumenta).
-2. [ ] Głęboki freeze wartości obiektowych LUB jawna zmiana komentarza/docs na
+2. [x] Głęboki freeze wartości obiektowych LUB jawna zmiana komentarza/docs na
        "shallow freeze" + udokumentowana decyzja (zważyć koszt perf).
-3. [ ] `equals()` przez `LibUtils.deepEqual`; benchmark before/after
+3. [x] `equals()` przez `LibUtils.deepEqual`; benchmark before/after
        (hot-paths.bench.ts) w opisie PR.
-4. [ ] `apply()`: wszystkie guardy PRZED mutacją `_version`/`_domainEvents` —
+4. [x] `apply()`: wszystkie guardy PRZED mutacją `_version`/`_domainEvents` —
        agregat nigdy nie zostaje częściowo zmutowany po wyjątku; test na
        scenariusz throw-and-retry.
-5. [ ] `_internal_setState` niedostępne z publicznego API — mechanizm
+5. [x] `_internal_setState` niedostępne z publicznego API — mechanizm
        capability-only (module-private Symbol lub WeakMap-registry);
        Snapshot/VersioningCapability działają bez zmian.
-6. [ ] Brakujący handler w `apply()` **oraz w `loadFromHistory()` (replay,
+6. [x] Brakujący handler w `apply()` **oraz w `loadFromHistory()` (replay,
        SA-M7)**: konfigurowalny warn (domyślnie) / throw (strict) zamiast
        cichego no-op; test replay ze streamem zawierającym nieznany `eventName`.
-7. [ ] BC assessment (library-api-guardian) dla każdej zmiany; aktualizacja
+7. [x] BC assessment (library-api-guardian) dla każdej zmiany; aktualizacja
        snapshotów api-surface tam, gdzie sygnatury się zmieniają.
-8. [ ] Walidacja na juz-ide-api (build && test) przed merge — zmiany dotykają
+8. [x] Walidacja na juz-ide-api (build && test) przed merge — zmiany dotykają
        klas bazowych 237+ agregatów.
-9. [ ] **SA-M9:** JSDoc `IEventPersistenceHandler` jawnie wymaga atomowego,
+9. [x] **SA-M9:** JSDoc `IEventPersistenceHandler` jawnie wymaga atomowego,
        wersjonowanego zapisu (compare-and-set na expectedVersion) — inaczej
        "optimistic concurrency" biblioteki nie daje żadnej gwarancji; LLMGUIDE
        repositories/contracts zaktualizowane (doc-only, bez zmiany sygnatur).
-10. [ ] **UX-C15 (LIB-UX-AUDIT-2026-07-10):** `AggregateRoot.equals()` dodane
+10. [x] **UX-C15 (LIB-UX-AUDIT-2026-07-10):** `AggregateRoot.equals()` dodane
         (parytet z `Entity.equals()`, identity po `_id.equals()`) — własny JSDoc
         klasy (aggregate-root.ts:32-35) już twierdzi, że istnieje; czysta
         addycja, non-breaking.
-11. [ ] **UX-C18 (LIB-UX-AUDIT-2026-07-10):** `getDomainEvents()` zwraca tylko
+11. [x] **UX-C18 (LIB-UX-AUDIT-2026-07-10):** `getDomainEvents()` zwraca tylko
         płytką kopię tablicy (aggregate-root.ts:175-177) — mutacja
         `event.payload` przez konsumenta sięga wewnętrznego stanu pending
         events; rozstrzygnąć razem z AC2 (deep freeze vs udokumentowane shallow)
@@ -136,6 +137,46 @@ implicite.
 - Domyślny branding EntityId (BrandedId jako główna ścieżka) — kandydat na
   osobny task po dyskusji API.
 - CQRS type-safe register (F-M1) — VF-025.
+
+## Activity / Notes
+
+### 2026-07-11 — implemented on `refactor/VF-023-ddd-foundation-guarantees`, merged to develop (status: done)
+
+All 11 ACs done. 3 implementation iterations were needed due to scope discovery
+during the work (AC2/AC3/AC11 turned out to be one coupled decision —
+deep-freeze semantics for VO values had to be settled together with domain-event
+immutability and `equals()` comparison strategy, rather than as independent line
+items; AC5's capability-only gate for `_internal_setState` required updating
+`SnapshotCapability` in lockstep to avoid breaking the one legitimate internal
+caller).
+
+Verification before merge: 274/274 tests green across the 5 directly-touched
+packages (`@vytches/ddd-value-objects`, `@vytches/ddd-aggregates`,
+`@vytches/ddd-contracts`, `@vytches/ddd-repositories`, `@vytches/ddd-utils`),
+typecheck clean across the same 5 packages. Security review: PASS — all 6
+threat-model findings from TM-VF-023.md resolved (1 Critical + 5 High); TM
+status flipped DRAFT → APPROVED (2026-07-11) as part of this same activity.
+
+Pre-commit (full `nx run-many -t test`, 22-24 projects depending on cache)
+caught a real regression the 5-package verification pass missed:
+`examples/quickstart/tests/order.aggregate.test.ts`
+(`should reject negative price`) failed because
+`examples/quickstart/src/domain/money.value-object.ts` used the pre-VF-023
+pattern of constructing the VO, then manually calling `validate()` and throwing
+a custom-message `Error` — now unreachable, since the base constructor (AC1)
+throws first with a generic message. Fixed by migrating `Money` to the same
+`getInvalidValueMessage()` hook pattern already used for
+`StringValueObject`/`NumberValueObject`/`PersonValueObject` in
+`packages/value-objects/tests/base-value-object.test.ts`, and simplifying
+`Money.create()` accordingly (folded into the same VF-023 commit, since it's
+part of making AC1 actually safe for existing consumer patterns, not unrelated
+scope creep). Re-verified: `@vytches/quickstart-example` 16/16, full
+`nx run-many -t test` 24/24 projects green after the fix.
+
+**AC8 status:** the in-repo verification above is complete, but full external
+validation against the real consumer (juz-ide-api, 237+ aggregates) is deferred
+to the user's manual sign-off before any npm tag/release — not blocking this
+merge to `develop` per explicit user authorization.
 
 ## References
 

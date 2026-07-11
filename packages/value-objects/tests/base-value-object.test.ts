@@ -7,14 +7,18 @@ import { BaseValueObject } from '../src/base-value-object';
 class StringValueObject extends BaseValueObject<string> {
   constructor(value: string) {
     super(value);
-
-    if (!this.validate(value)) {
-      throw new Error('Invalid string value');
-    }
   }
 
   validate(value: string): boolean {
     return typeof value === 'string' && value.length > 0;
+  }
+
+  // VF-023 (D-1 regression fix): the base constructor throws synchronously
+  // BEFORE this class's constructor body runs, so a post-`super()` throw
+  // here would be unreachable. Override the message hook instead to keep
+  // the subclass-specific error text.
+  protected override getInvalidValueMessage(): string {
+    return 'Invalid string value';
   }
 }
 
@@ -22,14 +26,15 @@ class StringValueObject extends BaseValueObject<string> {
 class NumberValueObject extends BaseValueObject<number> {
   constructor(value: number) {
     super(value);
-
-    if (!this.validate(value)) {
-      throw new Error('Invalid number value');
-    }
   }
 
   validate(value: number): boolean {
     return typeof value === 'number' && !isNaN(value) && isFinite(value);
+  }
+
+  // VF-023 (D-1 regression fix): see StringValueObject above.
+  protected override getInvalidValueMessage(): string {
+    return 'Invalid number value';
   }
 
   // Override toJSON for specific formatting
@@ -51,10 +56,11 @@ interface Person {
 class PersonValueObject extends BaseValueObject<Person> {
   constructor(value: Person) {
     super(value);
+  }
 
-    if (!this.validate(value)) {
-      throw new Error('Invalid person data');
-    }
+  // VF-023 (D-1 regression fix): see StringValueObject above.
+  protected override getInvalidValueMessage(): string {
+    return 'Invalid person data';
   }
 
   validate(value: Person): boolean {
@@ -368,25 +374,31 @@ describe('BaseValueObject', () => {
   });
 
   describe('Immutability', () => {
-    // INFO: TypeScript does not allow direct modification of class properties
-    // INFO: For now, the object is mutable in JS, it is not in TS
+    // VF-023 (D-3, AC2/AC3): resurrected as a real assertion. The original
+    // comment claimed "TypeScript does not allow direct modification... in
+    // JS it is mutable" and left the test disabled. That's no longer true
+    // for object-valued VOs: `BaseValueObject` now deep-freezes `value` on
+    // construction (LibUtils.deepFreeze), so post-construction mutation
+    // attempts on any own property of the value — top-level or nested —
+    // throw a TypeError in strict mode (ES modules are always strict).
+    it('should ensure value objects are immutable — post-construction mutation throws', () => {
+      // Arrange
+      const person = { id: '123', name: 'John Doe', age: 30 };
+      const vo = new PersonValueObject(person);
 
-    // it('should ensure value objects are immutable', () => {
-    //   // Arrange
-    //   const stringValue = 'immutable';
-    //   const vo = new StringValueObject(stringValue);
+      // Act & Assert - Attempt to modify the value directly must throw
+      // (frozen object, strict mode), and the value object's state must
+      // remain unchanged.
+      const [error] = safeRun(() => {
+        (vo.getValue() as Person).name = 'modified';
+      });
+      expect(error).toBeInstanceOf(TypeError);
+      expect(vo.getValue().name).toBe('John Doe');
 
-    //   // Act - Attempt to modify the value directly (this should not be allowed in TypeScript)
-    //   // But we'll test the runtime behavior for safety
-    //   try {
-    //     (vo as any).value = 'modified';
-    //   } catch (e) {
-    //     // Some environments might throw for this attempt
-    //   }
-
-    //   // Assert
-    //   expect(vo.getValue()).toBe(stringValue);
-    // });
+      // Deep freeze: the object itself and any nested structures are frozen,
+      // not just the top-level reference.
+      expect(Object.isFrozen(vo.getValue())).toBe(true);
+    });
 
     it('should ensure complex objects are not affected by external changes', () => {
       // Arrange

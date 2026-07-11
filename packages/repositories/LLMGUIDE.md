@@ -100,6 +100,18 @@ await repo.save(invoice); // persists event, dispatches, bumps version
 version. If they differ, it throws `VersionError`. Handle conflicts by reloading
 and retrying.
 
+**VF-023 AC9 (SA-M9):** `save()`'s version check (`getCurrentVersion()`) and the
+event write (`handleEvent()`) are two separate, non-atomic calls at the
+`IBaseRepository` level. This library does NOT guarantee optimistic concurrency
+by itself — your `IEventPersistenceHandler` implementation MUST perform the
+version check and the write as a single atomic/compare-and-set operation against
+the underlying store (e.g. `UPDATE ... WHERE version = expectedVersion`, or a
+unique constraint on `(aggregateId, version)`). Without that, two concurrent
+`save()` calls can both pass the check and both write, silently losing an update
+despite `VersionError` appearing to enforce a guarantee. See
+`IEventPersistenceHandler`'s JSDoc in `@vytches/ddd-contracts` for the full
+requirement.
+
 ```typescript
 async function approveWithRetry(id: string, maxAttempts = 3): Promise<void> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

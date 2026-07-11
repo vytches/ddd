@@ -219,16 +219,40 @@ describe('AggregateRoot — full lifecycle', () => {
       expect(error?.message).toMatch(/maxEvents/);
     });
 
-    it('preserves invariants — failed apply does not push partial event', () => {
+    // VF-023 (D-7, AC4, regression test for F-C6): the maxEvents guard must
+    // run BEFORE any state mutation. Combined into ONE test per D-7 — a
+    // naive fix could satisfy "event list does not grow" while still
+    // leaving `_version` desynced (bumped on the throwing call), which
+    // would then compound into version+2 on the very next successful
+    // apply(). Both halves of the invariant must hold together.
+    it('preserves invariants — failed apply mutates nothing, and immediate valid retry produces version+1 (not version+2)', () => {
       const order = newOrder({ maxEvents: 1 });
       order.applyEvent('OrderItemAdded', { sku: 'A', quantity: 1 });
 
-      // The second apply throws because maxEvents=1 is reached. We don't
-      // assert anything about getVersion() here — internal version-bump
-      // ordering relative to the maxEvents check is an implementation
-      // detail. The real invariant is that the event list does not grow.
-      safeRun(() => order.applyEvent('OrderItemAdded', { sku: 'B', quantity: 1 }));
+      const versionBefore = order.getVersion();
+      const eventsBefore = order.getDomainEvents();
+      const domainEventsSnapshot = [...eventsBefore];
+
+      // The second apply throws because maxEvents=1 is reached.
+      const [error] = safeRun(() => order.applyEvent('OrderItemAdded', { sku: 'B', quantity: 1 }));
+      expect(error).toBeDefined();
+
+      // Nothing about the aggregate's state changed as a result of the
+      // thrown guard: version, event count, and event content are all
+      // identical to before the failed call.
+      expect(order.getVersion()).toBe(versionBefore);
       expect(order.getDomainEvents()).toHaveLength(1);
+      expect(order.getDomainEvents()).toEqual(domainEventsSnapshot);
+
+      // An immediate valid retry on the SAME instance (commit() clears the
+      // uncommitted-event count so the maxEvents guard no longer blocks)
+      // must produce version+1 relative to versionBefore — NOT version+2,
+      // which would indicate the failed call had already bumped `_version`
+      // before throwing (the exact F-C6 regression this test guards
+      // against).
+      order.commit();
+      order.applyEvent('OrderItemAdded', { sku: 'C', quantity: 1 });
+      expect(order.getVersion()).toBe(versionBefore + 1);
     });
 
     it('undefined maxEvents = no limit (backward compatible)', () => {
@@ -337,6 +361,63 @@ describe('AggregateRoot — full lifecycle', () => {
       // overload to preserve identity; passing (string, payload) creates plain.
       expect(stored.eventName).toBe('OrderCreated');
       expect(stored.payload).toEqual(orig.payload);
+    });
+  });
+
+  describe('internal state gating (VF-023 D-2, AC5, CRITICAL F-H4)', () => {
+    // Only the happy path (SnapshotCapability calling with the real
+    // INTERNAL_STATE_TOKEN) was previously covered. This asserts the actual
+    // enforcement: a forged/wrong token must be rejected, otherwise the
+    // gate is decorative rather than a real barrier against bypassing
+    // apply()/loadFromHistory() to corrupt the version/event-log invariant.
+    it('throws TypeError when called with a forged/wrong token', () => {
+      const order = newOrder();
+
+      const [error] = safeRun(() =>
+        (
+          order as unknown as { _internal_setState: (token: unknown, state: unknown) => void }
+        )._internal_setState('wrong-token', {
+          version: 999,
+          initialVersion: 0,
+          domainEvents: [],
+        })
+      );
+
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error?.message).toMatch(/invalid or missing internal state token/);
+
+      // The forged call must not have mutated anything.
+      expect(order.getVersion()).toBe(0);
+    });
+  });
+
+  describe('equals() — identity-based equality (VF-023 AC10)', () => {
+    it('two aggregates with the same id are equal, regardless of state/version differences', () => {
+      const id = EntityId.create();
+      const a = new Order({ id, version: 0 });
+      const b = new Order({ id, version: 0 });
+      b.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+
+      expect(a.equals(b)).toBe(true);
+      expect(b.equals(a)).toBe(true);
+    });
+
+    it('two aggregates with different ids are not equal', () => {
+      const a = newOrder();
+      const b = newOrder();
+
+      expect(a.equals(b)).toBe(false);
+    });
+
+    it('an aggregate is equal to itself', () => {
+      const a = newOrder();
+      expect(a.equals(a)).toBe(true);
+    });
+
+    it('returns false for null/undefined', () => {
+      const a = newOrder();
+      expect(a.equals(null)).toBe(false);
+      expect(a.equals(undefined)).toBe(false);
     });
   });
 
