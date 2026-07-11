@@ -193,7 +193,7 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
   /**
    * Define complex OR group logic - at least one group must pass
    */
-  public shouldSatisfyAny(...groups: IPolicyGroup<T>[]): IPolicyBuilder<T> {
+  public shouldSatisfyAny(...groups: IPolicyGroup<T>[]): IPolicyStepBuilder<T> {
     const step: PolicyBuildStep<T> = {
       type: 'group-or',
       groups,
@@ -204,7 +204,7 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
     };
 
     this.steps.push(step);
-    return this;
+    return new PolicyStepBuilder(this, step);
   }
 
   /**
