@@ -5,7 +5,7 @@ import { LibUtils } from '@vytches/ddd-utils';
 
 import type { IProjectionEngine } from './projection-interfaces';
 import type { ProjectionEngineRegistry } from './projection-registry';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 export class ProjectionProcessor implements IEventProcessor {
   constructor(private readonly engineRegistry: ProjectionEngineRegistry) {}

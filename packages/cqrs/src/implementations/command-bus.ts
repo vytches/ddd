@@ -4,7 +4,7 @@
 import type {} from 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 import { ICommandBus } from '../abstracts';
 import { CQRSConfigurationError, HandlerNotFoundError } from '../errors';

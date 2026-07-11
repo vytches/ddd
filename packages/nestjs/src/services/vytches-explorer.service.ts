@@ -5,8 +5,8 @@ import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import type { Constructor } from '@vytches/ddd-di';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
 import { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
-import { IEventBus, EVENT_HANDLER_METADATA } from '@vytches/ddd-contracts';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { IEventBus } from '@vytches/ddd-contracts';
+import { EVENT_HANDLER_METADATA, internalLogger } from '@vytches/ddd-contracts/internal';
 import type { HandlerInfo, VytchesContextOptions } from '../types';
 import { ACL_ADAPTER_METADATA, ACL_REGISTRY } from '../constants';
 import type { ACLAdapterMetadata } from '../decorators/acl-adapter.decorator';

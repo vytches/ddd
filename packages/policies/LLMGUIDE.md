@@ -420,8 +420,11 @@ policy logic can branch on `request.context.environment`.
 cache config (ttl, key extractor) to `PolicyCachingBehaviorFactory.create()` to
 get a caching policy decorator without subclassing.
 
-**`globalPolicyEventBus` is a pre-built singleton.** Import it for quick setup
-in tests or small applications instead of constructing a new `PolicyEventBus`.
+**There is no pre-built `PolicyEventBus` singleton.** VF-024/SA-M11 removed
+`globalPolicyEventBus` from the public barrel — a process-global, un-partitioned
+fan-out singleton is not safe to publish as public API (no tenant/context
+isolation, shared subscriber cap across all consumers). Construct your own
+instance instead: `new PolicyEventBus()`.
 
 **`SpecificationPolicy.fromSpecification` and
 `AsyncSpecificationPolicy.fromAsyncSpecification`** are static factories for

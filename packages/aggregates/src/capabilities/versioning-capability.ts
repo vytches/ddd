@@ -1,7 +1,7 @@
 import { Capability } from '@vytches/ddd-contracts';
 import type { IVersioningCapability, IDomainEvent, IEventUpcaster } from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 /**
  * Capability that handles **event schema evolution** — when a stored event

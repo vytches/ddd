@@ -5,7 +5,7 @@ import {
   ContainerDisposedError,
   ServiceAlreadyRegisteredError,
   ServiceLifetime,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
   SimpleContainer,
 } from '../../src';
 
@@ -140,11 +140,11 @@ describe('SimpleContainer', () => {
   });
 
   describe('error handling', () => {
-    it('should throw ServiceNotFoundError for unregistered service', () => {
+    it('should throw ContainerServiceNotFoundError for unregistered service', () => {
       const [serviceNotFoundError] = safeRun(() => {
         container.resolve('UnregisteredService');
       });
-      expect(serviceNotFoundError).toBeInstanceOf(ServiceNotFoundError);
+      expect(serviceNotFoundError).toBeInstanceOf(ContainerServiceNotFoundError);
     });
 
     it('should throw ServiceAlreadyRegisteredError for duplicate registration', () => {

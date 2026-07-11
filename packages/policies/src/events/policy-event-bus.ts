@@ -1,4 +1,4 @@
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { LibUtils } from '@vytches/ddd-utils';
 import type { PolicyEvent } from './policy-evaluation-event';
 
@@ -307,11 +307,12 @@ export class PolicyEventBus {
   }
 }
 
-export const globalPolicyEventBus = new PolicyEventBus({
-  enableMetrics: true,
-  parallelExecution: true,
-  errorStrategy: 'log',
-});
+// globalPolicyEventBus removed (VF-024, AC9 / SA-M11): a module-level
+// singleton instantiated at import time, shared process-wide with no
+// tenant/context partitioning — publishing it as public API was a
+// backward-compat trap once real consumers depended on the shared instance.
+// Construct your own: `new PolicyEventBus({ enableMetrics: true,
+// parallelExecution: true, errorStrategy: 'log' })`. See CHANGELOG.md.
 
 export class PolicyEventHandlers {
   /**

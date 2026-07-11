@@ -4,7 +4,6 @@ exports[`@vytches/ddd-events public API surface > exports the documented set of 
 [
   "AggregatedEventHandlerError",
   "BaseEventBus",
-  "CUSTOM_MIDDLEWARE_SYMBOL",
   "DomainEvent",
   "DomainToIntegrationTransformer",
   "EventDiscoveryPlugin",

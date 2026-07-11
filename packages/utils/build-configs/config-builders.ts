@@ -55,6 +55,24 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
 
   // Test aliases - removed since test config is not used in Vite build config
 
+  // VF-024 (AC4): support additional named entries (e.g. `internal`) built
+  // alongside the main `index` entry, for symbols that must stay out of the
+  // package's public barrel but remain reachable via a dedicated subpath
+  // export (`@vytches/ddd-<pkg>/internal`).
+  const additionalEntries = options.additionalEntries ?? {};
+  const hasAdditionalEntries = Object.keys(additionalEntries).length > 0;
+  const libEntry = hasAdditionalEntries
+    ? {
+        index: resolve(packagePath, 'src/index.ts'),
+        ...Object.fromEntries(
+          Object.entries(additionalEntries).map(([name, relPath]) => [
+            name,
+            resolve(packagePath, relPath),
+          ])
+        ),
+      }
+    : resolve(packagePath, 'src/index.ts');
+
   const buildConfig = defineConfig({
     plugins: [...(options.generateDTS !== false ? [createDTSPlugin(context, options)] : [])],
     resolve: {
@@ -63,10 +81,12 @@ export function createPackageConfig(packagePath: string, options: PackageConfigO
     build: {
       outDir: 'dist',
       lib: {
-        entry: resolve(packagePath, 'src/index.ts'),
+        entry: libEntry,
         name: `VytchesDDD${context.packageName.charAt(0).toUpperCase() + context.packageName.slice(1).replace(/-([a-z])/g, (_match: string, letter: string) => letter.toUpperCase())}`,
         formats: ['es', 'cjs'],
-        fileName: format => `index.${format === 'es' ? 'js' : format}`,
+        fileName: hasAdditionalEntries
+          ? (format, entryName) => `${entryName}.${format === 'es' ? 'js' : format}`
+          : format => `index.${format === 'es' ? 'js' : format}`,
       },
       rollupOptions: {
         external: externalFn,

@@ -34,7 +34,7 @@ pnpm add @vytches/ddd-di
 | Export                          | Kind  | Description                                 |
 | ------------------------------- | ----- | ------------------------------------------- |
 | `DIError`                       | class | Base DI error                               |
-| `ServiceNotFoundError`          | class | No service registered under the given token |
+| `ContainerServiceNotFoundError` | class | No service registered under the given token |
 | `CircularDependencyError`       | class | Circular dependency detected                |
 | `ServiceAlreadyRegisteredError` | class | Token already has a registration            |
 | `InvalidRegistrationError`      | class | Invalid registration arguments              |
@@ -132,12 +132,15 @@ await VytchesDDD.discoverAndRegisterHandlers();
 ## Error handling
 
 ```typescript
-import { ServiceNotFoundError, CircularDependencyError } from '@vytches/ddd-di';
+import {
+  ContainerServiceNotFoundError,
+  CircularDependencyError,
+} from '@vytches/ddd-di';
 
 try {
   VytchesDDD.resolve<unknown>('UnknownService');
 } catch (error) {
-  if (error instanceof ServiceNotFoundError) {
+  if (error instanceof ContainerServiceNotFoundError) {
     console.error('Service missing:', error.message);
   }
 }

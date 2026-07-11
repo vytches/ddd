@@ -14,7 +14,7 @@ import 'reflect-metadata';
 import { describe, it, expect, vi } from 'vitest';
 
 import { FeatureHandlerRegistrar } from '../../src/feature/feature-handler-registrar';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

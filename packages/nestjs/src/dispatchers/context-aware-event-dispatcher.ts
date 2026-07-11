@@ -3,7 +3,7 @@ import type { IAggregateWithEvents, IDomainEvent } from '@vytches/ddd-contracts'
 import { IEventDispatcher } from '@vytches/ddd-contracts';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { IntegrationEvent } from '@vytches/ddd-events';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { LOCAL_EVENT_BUS } from '../constants';
 
 /**

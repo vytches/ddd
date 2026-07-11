@@ -8,7 +8,7 @@ import type {
   IDomainEvent,
 } from '@vytches/ddd-contracts';
 import { IEventBus, isEventHandler } from '@vytches/ddd-contracts';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { AggregatedEventHandlerError } from './aggregated-event-handler-error';
 
 /**

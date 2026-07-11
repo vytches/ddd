@@ -1,4 +1,4 @@
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import type {
   HandlerInfo,
   IHandlerDiscoveryPlugin,

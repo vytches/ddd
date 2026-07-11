@@ -1,11 +1,11 @@
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { SimpleContainer } from './containers/simple-container';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';
 import type { HandlerInfo, IHandlerDiscoveryPlugin } from './discovery/handler-discovery.interface';
 import {
   ContainerConfigurationError,
   ContainerDisposedError,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
 } from './errors';
 import type { IDependencyContainer, ServiceToken } from './types';
 import { ServiceLifetime } from './types';
@@ -134,7 +134,7 @@ export class ServiceLocator implements IServiceLocator {
    * Smart resolution: context-aware when available, global otherwise.
    *
    * D-3/A: uses a single lookup per container (no isRegistered() pre-check).
-   * CircularDependencyError is never caught here — only ServiceNotFoundError
+   * CircularDependencyError is never caught here — only ContainerServiceNotFoundError
    * is suppressed during the context→global fallback.
    */
   resolve<T>(token: ServiceToken<T>, context?: string): T {
@@ -160,7 +160,7 @@ export class ServiceLocator implements IServiceLocator {
     if (result !== undefined) return result;
 
     // Preserve the exact error type and message required by D-3/A
-    throw new ServiceNotFoundError(
+    throw new ContainerServiceNotFoundError(
       typeof token === 'string' ? token : 'unknown',
       'Service not registered in any container'
     );
@@ -168,7 +168,7 @@ export class ServiceLocator implements IServiceLocator {
 
   /**
    * D-3/A: Single-lookup helper. Returns undefined when the service is absent
-   * (ServiceNotFoundError). Any other error (e.g. CircularDependencyError) is
+   * (ContainerServiceNotFoundError). Any other error (e.g. CircularDependencyError) is
    * re-thrown immediately so it is never swallowed.
    */
   private trySingleLookup<T>(
@@ -182,7 +182,7 @@ export class ServiceLocator implements IServiceLocator {
     try {
       return container.resolve<T>(token);
     } catch (e) {
-      if (e instanceof ServiceNotFoundError) return undefined;
+      if (e instanceof ContainerServiceNotFoundError) return undefined;
       throw e; // Re-throw CircularDependencyError and all other errors
     }
   }

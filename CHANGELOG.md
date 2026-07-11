@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### BREAKING CHANGES
+
+VF-024 — public API surface curation ahead of the first public publish (pre-1.0
+BC window; see `project-orchestration/tasks/VF-024-prepublish-api-surface.md`):
+
+- **di:** `ServiceNotFoundError` renamed to `ContainerServiceNotFoundError` to
+  resolve a silent name collision with `@vytches/ddd-domain-services`'
+  `ServiceNotFoundError` (the two used to be indistinguishable via `instanceof`
+  when both were in scope). Update any `instanceof ServiceNotFoundError` checks
+  against DI container errors to `ContainerServiceNotFoundError`.
+- **value-objects:** `EntityIdFactory` (deprecated, runtime-warned) removed. Use
+  `EntityId.create()` / `EntityId.createWithRandomUUID()` /
+  `EntityId.fromUUID()` / `EntityId.fromInteger()` / `EntityId.fromBigInt()` /
+  `EntityId.fromText()` instead, depending on the identifier shape.
+- **contracts, events:** `internalLogger`, `EVENT_HANDLER_METADATA`,
+  `EVENT_HANDLER_OPTIONS` (contracts) and `CUSTOM_MIDDLEWARE_SYMBOL` (events)
+  removed from the public `.` barrel — they were never meant to be public API.
+  They remain available to sibling `@vytches/ddd-*` packages only, via the
+  `@vytches/ddd-contracts/internal` and `@vytches/ddd-events/internal` subpaths,
+  which carry no semver stability guarantee for external consumers.
+- **enterprise:** `BaseEntityId` (the `@vytches/ddd-contracts` `EntityId`
+  re-exported under an alias to avoid colliding with the
+  `@vytches/ddd-value-objects` `EntityId`) renamed to `ContractsEntityId` for
+  clarity.
+- **policies:** `globalPolicyEventBus` (a process-global, un-partitioned
+  singleton instantiated at import time) removed from the public barrel
+  (SA-M11). Construct your own instance instead: `new PolicyEventBus()`.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 ### Bug Fixes

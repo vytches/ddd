@@ -48,7 +48,7 @@ follows:
 | Symbol                 | Source                         | Note                                            |
 | ---------------------- | ------------------------------ | ----------------------------------------------- |
 | `EntityId`             | `@vytches/ddd-value-objects`   | Enhanced implementation                         |
-| `BaseEntityId`         | `@vytches/ddd-contracts`       | Foundation interface re-exported under alias    |
+| `ContractsEntityId`    | `@vytches/ddd-contracts`       | Foundation interface re-exported under alias    |
 | `ExecutionContext`     | `@vytches/ddd-cqrs`            | Most commonly used variant                      |
 | `safeRun`              | `@vytches/ddd-utils`           | Production utility (not the testing version)    |
 | `ServiceNotFoundError` | `@vytches/ddd-domain-services` | Takes precedence over `@vytches/ddd-di` variant |

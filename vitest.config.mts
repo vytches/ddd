@@ -87,52 +87,119 @@ export default defineConfig({
         return false; // Don't print EISDIR errors in CI
       }
     },
-    alias: {
-      '@vytches/ddd-core': new URL('./packages/core/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-domain-primitives': new URL(
-        './packages/domain-primitives/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches/ddd-value-objects': new URL(
-        './packages/value-objects/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches/ddd-repositories': new URL('./packages/repositories/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-aggregates': new URL('./packages/aggregates/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-utils': new URL('./packages/utils/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-validation': new URL('./packages/validation/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-policies': new URL('./packages/policies/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-events': new URL('./packages/events/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-cqrs': new URL('./packages/cqrs/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-acl': new URL('./packages/acl/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-projections': new URL('./packages/projections/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-messaging': new URL('./packages/messaging/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-resilience': new URL('./packages/resilience/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-testing': new URL('./packages/testing/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-enterprise': new URL('./packages/enterprise/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-cli': new URL('./packages/cli/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-contracts': new URL('./packages/contracts/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-domain-services': new URL(
-        './packages/domain-services/src/index.ts',
-        import.meta.url
-      ).pathname,
-      '@vytches/ddd-logging': new URL('./packages/logging/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-di': new URL('./packages/di/src/index.ts', import.meta.url).pathname,
-      '@vytches/ddd-event-store': new URL('./packages/event-store/src/index.ts', import.meta.url)
-        .pathname,
-      '@vytches/ddd-process-managers': new URL(
-        './packages/process-managers/src/index.ts',
-        import.meta.url
-      ).pathname,
-    },
+    // VF-024 (AC4): array form (not object) — rollup/alias's string `find`
+    // does *prefix* matching (matches `X` or `X/...`), so the array is
+    // checked in order and first match wins. The `/internal` subpath
+    // aliases MUST be listed before their base-package alias, otherwise the
+    // base-package entry (e.g. `@vytches/ddd-contracts`) prefix-matches
+    // `@vytches/ddd-contracts/internal` first, aliases it to the wrong
+    // target, and resolution falls through to real node_modules lookup —
+    // which fails under vite-node's SSR external import (ERR_MODULE_NOT_FOUND)
+    // because the workspace root's node_modules/@vytches only contains
+    // ddd-testing.
+    alias: [
+      {
+        find: '@vytches/ddd-contracts/internal',
+        replacement: new URL('./packages/contracts/src/internal.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-events/internal',
+        replacement: new URL('./packages/events/src/internal.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-core',
+        replacement: new URL('./packages/core/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-domain-primitives',
+        replacement: new URL('./packages/domain-primitives/src/index.ts', import.meta.url)
+          .pathname,
+      },
+      {
+        find: '@vytches/ddd-value-objects',
+        replacement: new URL('./packages/value-objects/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-repositories',
+        replacement: new URL('./packages/repositories/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-aggregates',
+        replacement: new URL('./packages/aggregates/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-utils',
+        replacement: new URL('./packages/utils/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-validation',
+        replacement: new URL('./packages/validation/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-policies',
+        replacement: new URL('./packages/policies/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-events',
+        replacement: new URL('./packages/events/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-cqrs',
+        replacement: new URL('./packages/cqrs/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-acl',
+        replacement: new URL('./packages/acl/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-projections',
+        replacement: new URL('./packages/projections/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-messaging',
+        replacement: new URL('./packages/messaging/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-resilience',
+        replacement: new URL('./packages/resilience/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-testing',
+        replacement: new URL('./packages/testing/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-enterprise',
+        replacement: new URL('./packages/enterprise/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-cli',
+        replacement: new URL('./packages/cli/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-contracts',
+        replacement: new URL('./packages/contracts/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-domain-services',
+        replacement: new URL('./packages/domain-services/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-logging',
+        replacement: new URL('./packages/logging/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-di',
+        replacement: new URL('./packages/di/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-event-store',
+        replacement: new URL('./packages/event-store/src/index.ts', import.meta.url).pathname,
+      },
+      {
+        find: '@vytches/ddd-process-managers',
+        replacement: new URL('./packages/process-managers/src/index.ts', import.meta.url)
+          .pathname,
+      },
+    ],
   },
 });

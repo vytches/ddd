@@ -4,7 +4,7 @@ import {
   CircularDependencyError,
   ContainerConfigurationError,
   ServiceLocator,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
   SimpleContainer,
   VytchesDDD,
 } from '../src';
@@ -114,13 +114,13 @@ describe('ServiceLocator', () => {
       expect(instance).toBeInstanceOf(TestService);
     });
 
-    it('should throw ServiceNotFoundError when service not found', () => {
+    it('should throw ContainerServiceNotFoundError when service not found', () => {
       VytchesDDD.configure(globalContainer);
 
       const [serviceNotFoundError] = safeRun(() => {
         VytchesDDD.resolve('UnregisteredService');
       });
-      expect(serviceNotFoundError).toBeInstanceOf(ServiceNotFoundError);
+      expect(serviceNotFoundError).toBeInstanceOf(ContainerServiceNotFoundError);
     });
 
     it('should throw ContainerConfigurationError when no global container configured', () => {
@@ -297,24 +297,24 @@ describe('ServiceLocator', () => {
       expect(err).toBeInstanceOf(CircularDependencyError);
     });
 
-    it('ServiceNotFoundError message preserves canonical format for string token', () => {
+    it('ContainerServiceNotFoundError message preserves canonical format for string token', () => {
       VytchesDDD.configure(globalContainer);
 
       const [err] = safeRun(() => VytchesDDD.resolve('MySpecificService'));
 
-      expect(err).toBeInstanceOf(ServiceNotFoundError);
+      expect(err).toBeInstanceOf(ContainerServiceNotFoundError);
       // Exact message shape required by D-3/A: token name + context string
       expect((err as Error).message).toContain('MySpecificService');
       expect((err as Error).message).toContain('Service not registered in any container');
     });
 
-    it('ServiceNotFoundError uses "unknown" for non-string tokens', () => {
+    it('ContainerServiceNotFoundError uses "unknown" for non-string tokens', () => {
       VytchesDDD.configure(globalContainer);
       const sym = Symbol('TestSym');
 
       const [err] = safeRun(() => VytchesDDD.resolve(sym));
 
-      expect(err).toBeInstanceOf(ServiceNotFoundError);
+      expect(err).toBeInstanceOf(ContainerServiceNotFoundError);
       expect((err as Error).message).toContain('unknown');
       expect((err as Error).message).toContain('Service not registered in any container');
     });

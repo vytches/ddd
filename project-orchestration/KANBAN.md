@@ -1,8 +1,8 @@
 # KANBAN — @vytches/ddd
 
-_Last manually updated 2026-07-10 (banner history consolidated; tables current
-as of this date). Age = days since created_at. Grouped by priority (P0 critical
-· P1 high · P2 normal/medium · P3 low · backlog)._
+_Last manually updated 2026-07-11 (VF-024 shipped, moved to completed-tasks/;
+tables current as of this date). Age = days since created_at. Grouped by
+priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -100,24 +100,41 @@ as of this date). Age = days since created_at. Grouped by priority (P0 critical
 > stays in `## Backlog` below P3, not a current priority; revisit after the
 > pre-publish pipeline (P1) is clear.
 
+> **Shipped (2026-07-11)**: **VF-024** done — public API surface curated ahead
+> of first publish (all 9 acceptance criteria). Enterprise barrel: 10×
+> `export *` → explicit named exports. `ServiceNotFoundError` renamed
+> `ContainerServiceNotFoundError` (di), resolving the domain-services collision.
+> Deprecated `EntityIdFactory` removed (clean pre-1.0 removal, not
+> shipped-then-deprecated). `internalLogger` +
+> `EVENT_HANDLER_METADATA`/`EVENT_HANDLER_OPTIONS` (contracts) and
+> `CUSTOM_MIDDLEWARE_SYMBOL` (events) moved out of public barrels to `/internal`
+> subpath exports. `BaseEntityId` renamed `ContractsEntityId`. **SA-M11**
+> resolved: `globalPolicyEventBus` process-global singleton removed from the
+> policies barrel. `testing` barrel seeder `export *` → explicit. api-extractor
+> signature checking now blocking in CI for enterprise (was advisory-only).
+> Verified: 24/24 projects green (test + type-check) — pre-commit caught and
+> fixed a real gap in the `/internal` subpath wiring (3 `examples/*` vitest
+> configs needed the same array-form alias fix as the root config). **Unblocks
+> library-api-guardian sign-off on VF-023 and VF-031.** Moved to
+> `completed-tasks/`.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-_Ordered by actual work priority: pre-publish BC-window blockers first (VF-024
-unblocks sign-off on VF-023/VF-031), then the newly-filed real bug (VF-035),
-then independent hardening (VF-028, VF-030)._
+_Ordered by actual work priority: VF-024 (pre-publish API surface) shipped
+2026-07-11 and unblocked sign-off on VF-023/VF-031, which now lead; then the
+newly-filed real bug (VF-035), then independent hardening (VF-028, VF-030)._
 
-| ID     | Title                                                                                               | Status  | Age |
-| ------ | --------------------------------------------------------------------------------------------------- | ------- | --- |
-| VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) — unblocks VF-023/VF-031 sign-off | backlog | 8d  |
-| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)                                            | backlog | 8d  |
-| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)                                            | backlog | 0d  |
-| VF-035 | Composite policy step-coverage bug (throws instead of Result)                                       | backlog | 0d  |
-| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)                                         | backlog | 1d  |
-| VF-030 | DI token identity (fn.name collision, Scoped→Transient)                                             | backlog | 0d  |
+| ID     | Title                                                         | Status  | Age |
+| ------ | ------------------------------------------------------------- | ------- | --- |
+| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)      | backlog | 8d  |
+| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)      | backlog | 0d  |
+| VF-035 | Composite policy step-coverage bug (throws instead of Result) | backlog | 0d  |
+| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)   | backlog | 1d  |
+| VF-030 | DI token identity (fn.name collision, Scoped→Transient)       | backlog | 0d  |
 
 ## P2 — Normal / Medium
 
@@ -152,13 +169,12 @@ clears, not a current priority._
 
 **Recommended next action**: (1) VS-013 juz-ide-api validation — still the
 v0.31.0 publication gate, **overdue since 2026-07-05**, human/cross-team action.
-(2) Pre-first-publish pipeline, in priority order: **VF-024** (API surface
-curation, 10h) unblocks library-api-guardian sign-off on **VF-023** and
-**VF-031** — all three touch the same pre-publish BC window and involve
-consumer-impacting design calls (VO deep-freeze, `EntityIdFactory` removal,
-enterprise barrel curation) worth a human review pass before implementation. (3)
-**VF-035** (composite-policy step-coverage bug, now filed) is a real production
-bug in the public policies API — schedule alongside the pre-publish work, no
-design review needed, just implementation. Full audit findings:
-`project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
+(2) **VF-024** shipped 2026-07-11 (API surface curation) — now unblocks
+library-api-guardian sign-off on **VF-023** and **VF-031**, which lead the
+pre-first-publish pipeline; both still involve consumer-impacting design calls
+(VO deep-freeze, further surface-diet removals) worth a human review pass before
+implementation. (3) **VF-035** (composite-policy step-coverage bug, now filed)
+is a real production bug in the public policies API — schedule alongside the
+pre-publish work, no design review needed, just implementation. Full audit
+findings: `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.
