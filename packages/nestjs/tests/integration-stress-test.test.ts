@@ -140,12 +140,14 @@ vi.mock('@vytches/ddd-events', async () => {
   };
 });
 
-vi.mock('@vytches/ddd-di', async () => {
+vi.mock('@vytches/ddd-di', async importOriginal => {
   // Define the mock factory inline
+  const actual = await importOriginal<typeof import('@vytches/ddd-di')>();
   const services = new Map<string, unknown>();
   const contexts = new Map<string, Map<string, unknown>>();
 
   return {
+    ...actual,
     ServiceLifetime: {
       Transient: 'transient',
       Singleton: 'singleton',

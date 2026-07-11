@@ -1,5 +1,11 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import {
+  BaseContainerAdapter,
+  ContainerServiceNotFoundError,
+  InvalidRegistrationError,
+  ServiceLifetime,
+} from '@vytches/ddd-di';
 import type {
   Constructor,
   IDependencyContainer,
@@ -7,37 +13,31 @@ import type {
   ServiceFactory,
   ServiceRegistrationOptions,
   ServiceToken,
-  ServiceLifetime,
 } from '@vytches/ddd-di';
 import type { ExtendedServiceRegistrationOptions } from '../types/extended';
 
 /**
  * NestJS Container Adapter
  * Bridges NestJS DI system with VytchesDDD service locator
+ *
+ * VF-030 D1/D2: token identity lives in the Map key itself (ADR-0034).
+ * String tokens key by VALUE; function/class and symbol tokens key by
+ * REFERENCE — two distinct classes that share a `.name` never collide, and
+ * `Symbol('X') !== Symbol('X')` are distinct registrations. Use `Symbol.for()`
+ * for tokens that must be shared across module instances (dual ESM/CJS).
  */
 @Injectable()
-export class NestJSContainerAdapter implements IDependencyContainer {
-  private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly instances = new Map<string, unknown>();
+export class NestJSContainerAdapter extends BaseContainerAdapter {
+  private readonly services = new Map<ServiceToken, ServiceDescriptor>();
+  private readonly singletonInstances = new Map<ServiceToken, unknown>();
+  private readonly scopedInstances = new Map<ServiceToken, unknown>();
   private moduleRef?: ModuleRef;
 
   constructor(@Optional() @Inject(ModuleRef) moduleRef?: ModuleRef) {
+    super();
     if (moduleRef) {
       this.moduleRef = moduleRef;
     }
-  }
-
-  /**
-   * Get string key from service token
-   */
-  private getTokenKey<T>(token: ServiceToken<T>): string {
-    if (typeof token === 'string') {
-      return token;
-    }
-    if (typeof token === 'symbol') {
-      return token.toString();
-    }
-    return token.name || token.toString();
   }
 
   /**
@@ -49,10 +49,12 @@ export class NestJSContainerAdapter implements IDependencyContainer {
 
   /**
    * Resolve a service by token
+   *
+   * @throws ContainerServiceNotFoundError when the token is not registered
+   * @throws InvalidRegistrationError when the registration has no implementation,
+   * factory, or instance
    */
   resolve<T>(token: ServiceToken<T>): T {
-    const key = this.getTokenKey(token);
-
     // First, try to resolve from NestJS container
     if (this.moduleRef) {
       try {
@@ -66,32 +68,41 @@ export class NestJSContainerAdapter implements IDependencyContainer {
       }
     }
 
-    // Then try our internal container
-    const descriptor = this.services.get(key);
+    // Then try our internal container — keyed by the token itself (VF-030 D1)
+    const descriptor = this.services.get(token);
     if (!descriptor) {
-      throw new Error(`Service '${key}' not found in container`);
+      throw new ContainerServiceNotFoundError(token);
     }
 
-    // Check if we have a cached instance (for singletons)
-    if (descriptor.lifetime === 'singleton' && this.instances.has(key)) {
-      return this.instances.get(key) as T;
+    // Check caches (singleton shared across scopes at creation time,
+    // scoped bounded to THIS adapter instance — VF-030 D5)
+    if (descriptor.lifetime === ServiceLifetime.Singleton && this.singletonInstances.has(token)) {
+      return this.singletonInstances.get(token) as T;
+    }
+    if (descriptor.lifetime === ServiceLifetime.Scoped && this.scopedInstances.has(token)) {
+      return this.scopedInstances.get(token) as T;
     }
 
     // Create new instance
     let instance: T;
-    if (descriptor.factory) {
-      instance = descriptor.factory(this) as T;
-    } else if (descriptor.instance) {
+    if (descriptor.instance !== undefined) {
       instance = descriptor.instance as T;
+    } else if (descriptor.factory) {
+      instance = descriptor.factory(this) as T;
     } else if (descriptor.implementation) {
       instance = this.createInstance(descriptor.implementation as Constructor<T>);
     } else {
-      throw new Error(`Cannot resolve service '${key}': no implementation provided`);
+      throw new InvalidRegistrationError(token, 'No implementation, factory, or instance provided');
     }
 
     // Cache singleton instances
-    if (descriptor.lifetime === 'singleton') {
-      this.instances.set(key, instance);
+    if (descriptor.lifetime === ServiceLifetime.Singleton) {
+      this.singletonInstances.set(token, instance);
+    }
+
+    // Cache scoped instances (same instance within this scope — VF-030 D5)
+    if (descriptor.lifetime === ServiceLifetime.Scoped) {
+      this.scopedInstances.set(token, instance);
     }
 
     return instance;
@@ -105,16 +116,16 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     implementation: Constructor<T>,
     options?: ServiceRegistrationOptions
   ): void {
-    const key = this.getTokenKey(token);
+    this.validateToken(token);
 
     const descriptor: ServiceDescriptor = {
-      token: key,
+      token, // VF-030 D8: store the REAL token, never a derived string key
       implementation,
-      lifetime: options?.lifetime || ('transient' as ServiceLifetime),
+      lifetime: options?.lifetime || ServiceLifetime.Transient,
       tags: options?.tags,
     };
 
-    this.services.set(key, descriptor);
+    this.services.set(token, descriptor);
 
     // If NestJS ModuleRef is available, try to register there too
     const extOptions = options as ExtendedServiceRegistrationOptions;
@@ -131,16 +142,16 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     factory: ServiceFactory<T>,
     options?: ServiceRegistrationOptions
   ): void {
-    const key = this.getTokenKey(token);
+    this.validateToken(token);
 
     const descriptor: ServiceDescriptor = {
-      token: key,
+      token,
       factory,
-      lifetime: options?.lifetime || ('transient' as ServiceLifetime),
+      lifetime: options?.lifetime || ServiceLifetime.Transient,
       tags: options?.tags,
     };
 
-    this.services.set(key, descriptor);
+    this.services.set(token, descriptor);
   }
 
   /**
@@ -151,27 +162,25 @@ export class NestJSContainerAdapter implements IDependencyContainer {
     instance: T,
     options?: ServiceRegistrationOptions
   ): void {
-    const key = this.getTokenKey(token);
+    this.validateToken(token);
 
     const descriptor: ServiceDescriptor = {
-      token: key,
+      token,
       instance,
-      lifetime: 'singleton' as ServiceLifetime, // Instances are always singleton
+      lifetime: ServiceLifetime.Singleton, // Instances are always singleton
       tags: options?.tags,
     };
 
-    this.services.set(key, descriptor);
-    this.instances.set(key, instance);
+    this.services.set(token, descriptor);
+    this.singletonInstances.set(token, instance);
   }
 
   /**
    * Check if a service is registered
    */
   isRegistered<T>(token: ServiceToken<T>): boolean {
-    const key = this.getTokenKey(token);
-
     // Check internal registry
-    if (this.services.has(key)) {
+    if (this.services.has(token)) {
       return true;
     }
 
@@ -196,30 +205,23 @@ export class NestJSContainerAdapter implements IDependencyContainer {
   }
 
   /**
-   * Get services by tag
+   * Create a scoped container.
+   *
+   * The new adapter instance IS the scope boundary (VF-030 D5): all
+   * registrations are visible in the scope, already-materialized singleton
+   * instances are shared, and the scope starts with a FRESH scoped-instance
+   * cache — a Scoped service resolves to a distinct instance per scope.
    */
-  getServicesByTag(tag: string): ServiceDescriptor[] {
-    return Array.from(this.services.values()).filter(
-      service => service.tags && service.tags.includes(tag)
-    );
-  }
-
-  /**
-   * Create a scoped container
-   */
-  createScope(_context?: string): IDependencyContainer {
-    // Create a new adapter with the same ModuleRef but separate registrations
+  override createScope(_context?: string): IDependencyContainer {
     const scopedAdapter = new NestJSContainerAdapter(this.moduleRef);
 
-    // Copy singleton services to the scoped container
-    this.services.forEach((descriptor, key) => {
-      if (descriptor.lifetime === 'singleton') {
-        scopedAdapter.services.set(key, descriptor);
-        if (this.instances.has(key)) {
-          scopedAdapter.instances.set(key, this.instances.get(key));
-        }
-      }
+    this.services.forEach((descriptor, token) => {
+      scopedAdapter.services.set(token, descriptor);
     });
+    this.singletonInstances.forEach((instance, token) => {
+      scopedAdapter.singletonInstances.set(token, instance);
+    });
+    // scopedInstances intentionally NOT copied — fresh scoped cache per scope
 
     return scopedAdapter;
   }
@@ -227,27 +229,29 @@ export class NestJSContainerAdapter implements IDependencyContainer {
   /**
    * Dispose of the container and clean up resources
    */
-  dispose(): void {
+  override dispose(): void {
     this.services.clear();
-    this.instances.clear();
+    this.singletonInstances.clear();
+    this.scopedInstances.clear();
   }
 
   /**
-   * Create an instance of a class with dependency injection
+   * Create an instance of a class with dependency injection.
+   *
+   * VF-030 D7: constructor dependencies resolve through the inherited
+   * throwing `resolveDependency()` — an unregistered dependency throws
+   * `ContainerServiceNotFoundError` and a resolution cycle throws
+   * `CircularDependencyError`; there is no silent zero-arg fallback.
    */
   private createInstance<T>(constructor: Constructor<T>): T {
     // Get constructor parameters
-    const paramTypes = Reflect.getMetadata('design:paramtypes', constructor) || [];
+    const paramTypes: Constructor<unknown>[] =
+      Reflect.getMetadata('design:paramtypes', constructor) || [];
 
-    // Resolve dependencies
-    const dependencies = paramTypes.map((paramType: Constructor<unknown>) => {
-      try {
-        return this.resolve(paramType);
-      } catch {
-        // If we can't resolve, try to create a new instance
-        return new paramType();
-      }
-    });
+    // Resolve dependencies — fail loudly on any unresolvable parameter
+    const dependencies = paramTypes.map(paramType =>
+      this.resolveDependency(paramType, constructor)
+    );
 
     // Create instance with resolved dependencies
     return new constructor(...dependencies);
@@ -272,11 +276,11 @@ export class NestJSContainerAdapter implements IDependencyContainer {
    */
   private getScope(lifetime?: ServiceLifetime): 'DEFAULT' | 'REQUEST' | 'TRANSIENT' {
     switch (lifetime) {
-      case 'singleton':
+      case ServiceLifetime.Singleton:
         return 'DEFAULT';
-      case 'scoped':
+      case ServiceLifetime.Scoped:
         return 'REQUEST';
-      case 'transient':
+      case ServiceLifetime.Transient:
         return 'TRANSIENT';
       default:
         return 'DEFAULT';
