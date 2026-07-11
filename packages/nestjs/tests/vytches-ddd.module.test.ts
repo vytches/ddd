@@ -1,7 +1,7 @@
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 

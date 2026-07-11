@@ -6,7 +6,7 @@
  * bounded context isolation and DDD principles.
  */
 
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import type { IDependencyContainer } from '../types';
 
 // Type alias for backward compatibility

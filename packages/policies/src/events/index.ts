@@ -10,8 +10,8 @@ export {
 } from './policy-evaluation-event';
 
 // Event bus and handlers
+// globalPolicyEventBus removed (VF-024, AC9 / SA-M11) — see CHANGELOG.md.
 export {
-  globalPolicyEventBus,
   PolicyEventBus,
   PolicyEventHandlers,
   type PolicyEventBusConfig,

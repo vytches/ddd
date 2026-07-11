@@ -4,7 +4,7 @@
 import type {} from 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { DefaultResilienceContext, ResiliencePolicyBuilder } from '@vytches/ddd-resilience';
 import { IQueryBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';

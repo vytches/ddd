@@ -1,6 +1,6 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
 import { LibUtils, safeRun } from '@vytches/ddd-utils';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
 import type { IOutboxRepository } from './outbox-repository.interface';

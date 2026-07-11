@@ -6,7 +6,7 @@ import type {
   IReplayResult,
 } from '@vytches/ddd-contracts';
 import { ProjectionError } from './projection-errors';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import type { IProjectionEngine, IProjectionStore } from './projection-interfaces';
 
 export interface IProjectionRebuildConfig extends IReplayConfig {

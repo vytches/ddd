@@ -36,6 +36,7 @@ export function createFoundationConfig(
       include: ['*.ts', '**/*.ts', '**/src/*.ts', '**/src/**/*.ts'],
       exclude: ['**/*.test.ts', '**/*.spec.ts'],
     },
+    additionalEntries: options.additionalEntries,
   });
 }
 
@@ -68,7 +69,10 @@ export function createPatternConfig(
   });
 }
 
-export function createArchitectureConfig(packagePath: string) {
+export function createArchitectureConfig(
+  packagePath: string,
+  options: Partial<PackageConfigOptions> = {}
+) {
   return createPackageConfig(packagePath, {
     packageType: 'architecture',
     bundleStrategy: 'externalize-workspace',
@@ -80,6 +84,7 @@ export function createArchitectureConfig(packagePath: string) {
       include: ['*.ts', '**/*.ts', '**/src/*.ts', '**/src/**/*.ts'],
       exclude: ['**/*.test.ts', '**/*.spec.ts'],
     },
+    additionalEntries: options.additionalEntries,
   });
 }
 

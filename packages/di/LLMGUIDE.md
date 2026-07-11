@@ -45,7 +45,7 @@ const userRepo = container.resolve<UserRepository>('UserRepository');
 | `ResolutionContext`             | interface | Diagnostic record of an in-flight resolution: `token`, `resolutionChain`, `context`, `timestamp`               |
 | `ServiceLifetime`               | enum      | `Transient`, `Singleton`, `Scoped`                                                                             |
 | `DIError`                       | class     | Base error for container failures                                                                              |
-| `ServiceNotFoundError`          | class     | Thrown when `resolve(token)` finds no registration                                                             |
+| `ContainerServiceNotFoundError` | class     | Thrown when `resolve(token)` finds no registration                                                             |
 | `CircularDependencyError`       | class     | Thrown when factory chain re-enters itself                                                                     |
 | `ServiceAlreadyRegisteredError` | class     | Thrown when registering a token that already exists in a given context                                         |
 | `InvalidRegistrationError`      | class     | Thrown when a registration call is malformed (e.g. bad token/implementation combination)                       |

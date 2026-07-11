@@ -1,6 +1,6 @@
 import type { IDependencyContainer } from '@vytches/ddd-di';
 import type { ICommandBus, IQueryBus } from '../abstracts';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { CommandBus, EnhancedCommandBus, EnhancedQueryBus, QueryBus } from '../implementations';
 import type { CQRSOptions } from './cqrs-options.interface';
 

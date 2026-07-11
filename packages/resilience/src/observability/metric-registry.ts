@@ -14,7 +14,7 @@ import type {
   TimerMetric,
 } from './metrics-interfaces';
 
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 export class DefaultMetricRegistry implements MetricRegistry {
   private collectors = new Map<string, MetricCollector>();

@@ -39,6 +39,20 @@ export interface PackageConfigOptions {
   /** Additional dependencies to force bundle */
   additionalBundles?: string[];
 
+  /**
+   * Additional named entry points to build alongside `src/index.ts`, keyed
+   * by the subpath name (e.g. `{ internal: 'src/internal.ts' }` builds
+   * `dist/internal.js` / `dist/internal.cjs` / `dist/internal.d.ts`, wired
+   * to a `./internal` entry in `package.json#exports`).
+   *
+   * VF-024 (AC4): used for genuinely-internal, cross-package-only symbols
+   * (e.g. `internalLogger`) that must remain reachable by sibling
+   * `@vytches/ddd-*` packages but should not appear in the package's public
+   * barrel. Node's `exports` field blocks any subpath not declared here, so
+   * this is the only way to expose a *narrower* surface than `.`.
+   */
+  additionalEntries?: Record<string, string>;
+
   /** Custom DTS configuration */
   dtsConfig?: {
     insertTypesEntry?: boolean;

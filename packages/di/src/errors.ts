@@ -13,7 +13,7 @@ export class DIError extends BaseError {
   }
 }
 
-export class ServiceNotFoundError extends DIError {
+export class ContainerServiceNotFoundError extends DIError {
   constructor(token: ServiceToken, context?: string) {
     const tokenString =
       typeof token === 'string'
@@ -26,7 +26,7 @@ export class ServiceNotFoundError extends DIError {
     const message = `Service '${tokenString}' not found${contextString}`;
 
     super(message);
-    this.name = 'ServiceNotFoundError';
+    this.name = 'ContainerServiceNotFoundError';
   }
 }
 

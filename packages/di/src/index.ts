@@ -33,7 +33,7 @@ export {
   DIError,
   InvalidRegistrationError,
   ServiceAlreadyRegisteredError,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
 } from './errors';
 
 // Service locator + main facade

@@ -6,7 +6,7 @@ import type { IEventBus, BaseEventBusOptions } from '@vytches/ddd-contracts';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type { IAuditEvent } from '@vytches/ddd-contracts';
 import type { IIntegrationEvent } from './integration/integration-event-interfaces';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 /**
  * Constructor type for class references

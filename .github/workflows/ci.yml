@@ -149,7 +149,11 @@ jobs:
         if: github.event_name == 'pull_request'
         run: |
           echo "🔍 Checking API surface for breaking changes..."
-          pnpm nx run-many --target=build --projects=@vytches/ddd-contracts,@vytches/ddd-events
+          pnpm nx run-many --target=build --projects=@vytches/ddd-contracts,@vytches/ddd-events,@vytches/ddd-enterprise
+          # fix:dts rewrites monorepo-relative `.d.ts` imports (e.g. `../../aggregates/src/index.ts`)
+          # to real package specifiers — required before api-extractor can analyze
+          # packages/enterprise/dist/index.d.ts (it re-exports from sibling packages).
+          pnpm run fix:dts
           api-extractor run --local --config packages/contracts/api-extractor.json 2>&1 || true
           api-extractor run --local --config packages/events/api-extractor.json 2>&1 || true
           if git diff --name-only | grep -q "api-report"; then
@@ -157,6 +161,18 @@ jobs:
             git diff packages/*/api-report/
           else
             echo "✅ API surface unchanged"
+          fi
+          # VF-024 (AC7): api-extractor is NOT advisory-only for enterprise —
+          # a failure here (crash, forgotten export, or unreviewed signature
+          # change with no api-report update) fails the build. contracts/events
+          # remain advisory (`|| true` above) until a follow-up task tightens them.
+          echo "🔍 Checking @vytches/ddd (enterprise) API surface (blocking)..."
+          api-extractor run --local --config packages/enterprise/api-extractor.json
+          if git diff --name-only | grep -q "packages/enterprise/api-report"; then
+            echo "⚠️ @vytches/ddd API surface changed! Review api-report/ddd.api.md diff carefully."
+            git diff packages/enterprise/api-report/
+          else
+            echo "✅ @vytches/ddd API surface unchanged"
           fi
 
       - name: Validate module boundaries

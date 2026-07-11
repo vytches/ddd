@@ -3,7 +3,7 @@
 // Reflect.defineMetadata typings — no runtime side effect (see README).
 import type {} from 'reflect-metadata';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
-import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches/ddd-contracts';
+import { EVENT_HANDLER_METADATA, EVENT_HANDLER_OPTIONS } from '@vytches/ddd-contracts/internal';
 import type { DIHandlerMetadata, EventHandlerOptions } from './di-types';
 
 // Re-export for compatibility

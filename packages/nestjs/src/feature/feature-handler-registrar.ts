@@ -11,7 +11,7 @@ import type { Module } from '@nestjs/core/injector/module';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import type { IEventBus } from '@vytches/ddd-contracts';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS @Optional() DI token
 import { VytchesExplorerService } from '../services/vytches-explorer.service';

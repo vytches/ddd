@@ -52,7 +52,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       // NestJS supports both strict and non-strict resolution
       return this.moduleRef.get(token, { strict: false });
     } catch (error) {
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
   }
 
@@ -399,7 +399,7 @@ export class AwilixContainerAdapter extends BaseContainerAdapter {
     try {
       return this.container.resolve(this.getTokenKey(token));
     } catch (error) {
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
   }
 
@@ -500,7 +500,7 @@ export class MyFrameworkAdapter extends BaseContainerAdapter {
     // Fallback to manual resolution
     const descriptor = this.services.get(tokenKey);
     if (!descriptor) {
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
 
     return this.createInstance<T>(descriptor);

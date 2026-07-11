@@ -1,10 +1,10 @@
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import {
   CircularDependencyError,
   ContainerDisposedError,
   InvalidRegistrationError,
   ServiceAlreadyRegisteredError,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
 } from '../errors';
 import type {
   Constructor,
@@ -43,7 +43,7 @@ export class SimpleContainer implements IDependencyContainer {
   }
 
   /**
-   * Resolve a service by token. Throws ServiceNotFoundError when absent.
+   * Resolve a service by token. Throws ContainerServiceNotFoundError when absent.
    */
   resolve<T>(token: ServiceToken<T>): T {
     this.ensureNotDisposed();
@@ -67,7 +67,7 @@ export class SimpleContainer implements IDependencyContainer {
 
   /**
    * D-3/A: Try to resolve a service. Returns undefined when absent (never throws
-   * ServiceNotFoundError), but still throws CircularDependencyError on cycles and
+   * ContainerServiceNotFoundError), but still throws CircularDependencyError on cycles and
    * still walks the parent scope.
    */
   tryResolve<T>(token: ServiceToken<T>): T | undefined {
@@ -257,7 +257,7 @@ export class SimpleContainer implements IDependencyContainer {
   }
 
   /**
-   * Internal resolution logic — throws ServiceNotFoundError when absent.
+   * Internal resolution logic — throws ContainerServiceNotFoundError when absent.
    */
   private resolveInternal<T>(token: ServiceToken<T>): T {
     const tokenKey = this.getTokenKey(token);
@@ -268,7 +268,7 @@ export class SimpleContainer implements IDependencyContainer {
       if (this.parentScope) {
         return this.parentScope.resolve<T>(token);
       }
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
 
     return this.createInstance<T>(tokenKey, descriptor as ServiceDescriptor<T>, token);

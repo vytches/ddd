@@ -8,7 +8,7 @@ import type {
 } from '@vytches/ddd-contracts';
 import { IEnhancedEventDispatcher } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from './unified-event-bus';
-import { internalLogger } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 /**
  * Repository-side event dispatcher — orchestrates middleware pipeline,
