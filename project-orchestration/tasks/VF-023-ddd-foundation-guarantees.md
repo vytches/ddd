@@ -17,6 +17,44 @@ package: '@vytches/ddd-value-objects', '@vytches/ddd-aggregates'
 findings: [F-C5, F-C6, F-H4, F-H5, F-M2, SA-M7, SA-M9, UX-C15, UX-C18]
 ```
 
+---
+
+## 🔒 Security Pre-Analysis
+
+**Granularity:** Feature TM (adapted for library context — no HTTP endpoints, no
+PII, no auth) **TM file:**
+[`docs/security/threat-models/TM-VF-023.md`](../../docs/security/threat-models/TM-VF-023.md)
+**Status:** DRAFT — pending Tech Lead sign-off **Date:** 2026-07-11
+
+**Findings summary** (z TM file):
+
+- 1 CRITICAL threat (DREAD 13) — `_internal_setState` public invariant-bypass
+  (F-H4) — see TM Sekcja 5, covered by AC5
+- 5 HIGH threats (DREAD 10-11) — silent event drop live+replay (F-M2/SA-M7,
+  AC6), non-atomic optimistic concurrency (SA-M9, AC9), version desync on
+  throw+retry (F-C6, AC4), `validate()` never invoked (F-C5, AC1), shallow
+  freeze + unreliable `equals()` (F-H5, AC2/AC3)
+- Mitigations integrated into scope: `value-objects/src/base-value-object.ts`,
+  `aggregates/src/aggregate-root.ts`,
+  `contracts/src/events/event-persistence-handler.interface.ts`,
+  `repositories/src/base-repository.ts`
+
+**PII categories:** none (pure domain-primitives library, no PII of its own)
+**Lawful basis (RODO Art. 6):** N/A **DPIA required:** NO (no PII processed by
+this scope)
+
+**Audit trail:** N/A — library has no its own audit/event-emission mechanism
+outside what AC6 fixes **Data residency:** N/A
+
+**Universal invariants reflected in scope:**
+
+- N/A — invariants table (userId in Zod schemas, `@Auth()`, rate limiting)
+  targets HTTP-application code; this task is a library-internal invariant fix.
+  See TM Section "Scoping note" for the adapted STRIDE/DREAD analysis used
+  instead.
+
+---
+
 ## Dlaczego
 
 Trzy wady w najbardziej fundamentalnych klasach biblioteki zamieniają gwarancje
