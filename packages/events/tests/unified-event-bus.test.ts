@@ -129,10 +129,10 @@ describe('UnifiedEventBus', () => {
       expect(allContextsHandler).toHaveBeenCalledTimes(3);
     });
 
-    it('should use subscribeToContext method', async () => {
+    it('should use subscribe with a context filter', async () => {
       const contextHandler = vi.fn();
 
-      eventBus.subscribeToContext('specific-context', TestDomainEvent, contextHandler);
+      eventBus.subscribe(TestDomainEvent, 'specific-context', contextHandler);
 
       await eventBus.publish(new TestDomainEvent({ id: 'test-1' }, 'specific-context'));
       await eventBus.publish(new TestDomainEvent({ id: 'test-2' }, 'other-context'));
@@ -385,7 +385,7 @@ describe('UnifiedEventBus', () => {
       // 100th handler via a different path still counts against the cap
       eventBus.registerHandler(TestDomainEvent, { handle: vi.fn() });
 
-      expect(() => eventBus.subscribeToContext('ctx', TestDomainEvent, () => undefined)).toThrow(
+      expect(() => eventBus.subscribe(TestDomainEvent, 'ctx', () => undefined)).toThrow(
         'Maximum handlers (100) exceeded for event "TestDomainEvent"'
       );
     });

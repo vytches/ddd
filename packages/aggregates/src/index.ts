@@ -20,7 +20,6 @@ export type {
   IAggregateCapability,
   IAggregateConstructorParams,
   IAggregateEventHandler,
-  IAggregateBuilder,
 } from './aggregate-interfaces';
 
 // Errors

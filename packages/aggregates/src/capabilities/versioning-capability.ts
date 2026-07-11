@@ -90,7 +90,20 @@ export class VersioningCapability
   }
 
   /**
-   * @param {IDomainEvent} event - Event to process with version handling
+   * Applies registered upcasters to bring `event` from its stored version up
+   * to the aggregate's current version, then invokes the matching handler.
+   *
+   * **Upcasting only activates if `event.metadata.targetVersion` is set.**
+   * This is NOT inferred automatically from registered upcasters or from
+   * any aggregate-level "current version" — the caller (typically your
+   * event-sourcing replay/load path) must explicitly stamp each historical
+   * event's metadata with `targetVersion` before calling this method. If
+   * `targetVersion` is absent, `currentVersion` falls back to `eventVersion`
+   * (i.e. no upcasting happens — the event is passed through unchanged even
+   * if upcasters are registered for it).
+   *
+   * @param {IDomainEvent} event - Event to process with version handling;
+   *   set `event.metadata.targetVersion` to enable upcasting
    * @param {Map<string, IAggregateEventHandler>} handlers - Map of event handlers
    */
   handleVersionedEvent(event: IDomainEvent, handlers: Map<string, IAggregateEventHandler>): void {

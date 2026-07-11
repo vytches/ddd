@@ -30,7 +30,6 @@ describe('Event Handler DI Integration', () => {
         context: 'TestContext',
         tags: ['test', 'event'],
         autoRegister: true,
-        priority: 100,
       })
       class TestEventHandlerWithDI extends TestEventHandler<TestEvent> {
         handle(event: TestEvent): void {
@@ -49,7 +48,6 @@ describe('Event Handler DI Integration', () => {
       expect(diMetadata.options.context).toBe('TestContext');
       expect(diMetadata.options.tags).toEqual(['test', 'event']);
       expect(diMetadata.options.autoRegister).toBe(true);
-      expect(diMetadata.options.priority).toBe(100);
     });
 
     it('should maintain backward compatibility for simple handler', () => {
@@ -122,7 +120,6 @@ describe('Event Handler DI Integration', () => {
         context: 'DiscoveryContext',
         tags: ['discoverable'],
         autoRegister: true,
-        priority: 200,
       })
       class DiscoverableEventHandler extends TestEventHandler<TestEvent> {
         handle(event: TestEvent): void {
@@ -146,7 +143,6 @@ describe('Event Handler DI Integration', () => {
       expect(handler?.metadata.lifetime).toBe('singleton');
       expect(handler?.metadata.context).toBe('DiscoveryContext');
       expect(handler?.metadata.tags).toEqual(['discoverable']);
-      expect(handler?.metadata.priority).toBe(200);
       expect(handler?.metadata.autoRegister).toBe(true);
     });
 
@@ -194,7 +190,6 @@ describe('Event Handler DI Integration', () => {
         context: 'CompleteContext',
         tags: ['complete', 'metadata', 'test'],
         autoRegister: true,
-        priority: 500,
         active: true,
         availableFrom: '1.0.0',
         customProperty: 'custom-value',
@@ -216,7 +211,6 @@ describe('Event Handler DI Integration', () => {
       expect(handler?.metadata.lifetime).toBe('scoped');
       expect(handler?.metadata.context).toBe('CompleteContext');
       expect(handler?.metadata.tags).toEqual(['complete', 'metadata', 'test']);
-      expect(handler?.metadata.priority).toBe(500);
       expect(handler?.metadata.active).toBe(true);
       expect(handler?.metadata.autoRegister).toBe(true);
       expect(handler?.metadata.availableFrom).toBe('1.0.0');

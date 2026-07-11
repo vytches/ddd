@@ -104,7 +104,6 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
               lifetime: diMetadata.options.lifetime || 'transient',
               context: diMetadata.options.context,
               tags: diMetadata.options.tags,
-              priority: diMetadata.options.priority,
               active: diMetadata.options.active !== false,
               autoRegister: diMetadata.options.autoRegister ?? true,
               registeredAt: diMetadata.registeredAt,

@@ -166,7 +166,6 @@ import { IACLAdapter } from '@vytches/ddd-acl';
 import { IActor } from '@vytches/ddd-domain-primitives';
 import { IAdvancedEventReplay } from '@vytches/ddd-contracts';
 import { IAdvancedEventStore } from '@vytches/ddd-contracts';
-import { IAggregateBuilder } from '@vytches/ddd-aggregates';
 import { IAggregateCapability } from '@vytches/ddd-contracts';
 import { IAggregateConstructorParams } from '@vytches/ddd-aggregates';
 import { IAggregateEventHandler } from '@vytches/ddd-aggregates';
@@ -766,8 +765,6 @@ export { IActor };
 export { IAdvancedEventReplay };
 
 export { IAdvancedEventStore };
-
-export { IAggregateBuilder };
 
 export { IAggregateCapability };
 

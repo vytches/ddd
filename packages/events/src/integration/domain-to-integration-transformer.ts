@@ -13,6 +13,14 @@ import { createIntegrationEvent } from './integration-event.utils';
  * @public
  * @stable
  * @since 0.22.0
+ *
+ * @remarks
+ * VF-031 (D-4): Part of the low-priority integration event bridge
+ * (`IntegrationEventProcessor` / `DomainToIntegrationTransformer` /
+ * `ContextRouter`). Kept because it is re-exported from the public
+ * `@vytches/ddd-enterprise` barrel, but the shape of this bridge may be
+ * refactored in a future major release. Treat as stable-but-narrow API
+ * surface, not a long-term architectural commitment.
  */
 export abstract class DomainToIntegrationTransformer<D = unknown, I = unknown>
   implements IDomainToIntegrationEventTransformer<IDomainEvent<D>, I>

@@ -38,6 +38,7 @@ exports[`@vytches/ddd-resilience public API surface > exports the documented set
   "TimeoutError",
   "TimeoutMetricCollector",
   "TimeoutStrategy",
+  "getResilienceConfig",
   "getResilienceMetrics",
 ]
 `;

@@ -6,6 +6,27 @@ Specification pattern for domain validation with composable sync and async
 predicates. Provides `BusinessRuleValidator` for fluent rule chains and the
 `Specification` factory for inline lambda specs without class boilerplate.
 
+### Two validation engines — both first-class, both permanent
+
+This package ships two independent, equally supported ways to define validation
+rules. Neither is a legacy path or a stepping stone to the other — pick per
+project/team preference, and mixing both across a codebase (or even within one)
+is fine:
+
+- **`RulesRegistry`** (Pattern 6) — the built-in default engine. Named,
+  composable rule builders (`required`, `email`, `range`, ...) attached to
+  `BusinessRuleValidator`. No external dependency; use this when you want
+  validation expressed directly in this library's own rule vocabulary.
+- **`BaseValidationAdapter`** (Pattern 7) — the external-validator path. Wraps a
+  third-party schema library (Zod, class-validator, etc.) so it implements
+  `IValidator<T>` and plugs into the same `Result<T, ValidationErrors>` contract
+  as everything else in this package. Use this when your team already
+  standardizes on a schema library elsewhere.
+
+Both produce the same `IValidator<T>` contract and the same
+`Result<T, ValidationErrors>` shape, so application code that consumes a
+validator never needs to know or care which engine produced it.
+
 ## Quick Start
 
 ```typescript

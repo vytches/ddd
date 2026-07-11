@@ -283,22 +283,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   }
 
   /**
-   * Subscribe to events for specific context(s)
-   */
-  subscribeToContext<T extends BaseEvent>(
-    contextId: string | string[] | undefined,
-    eventName: string | Constructor<T>,
-    handler: UnifiedEventHandler<T>
-  ): void {
-    const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
-    this.registerHandlerWithContext(
-      eventNameName,
-      handler as UnifiedEventHandler<BaseEvent>,
-      contextId
-    );
-  }
-
-  /**
    * Register a class-based handler
    */
   override registerHandler<T extends BaseEvent>(
@@ -405,7 +389,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
 
   /**
    * Register handler with context filtering. Single funnel for all
-   * registration paths (`subscribe`, `subscribeToContext`,
+   * registration paths (`subscribe`,
    * `registerHandler`, decorator auto-discovery) — enforces
    * `MAX_HANDLERS_PER_EVENT` here so no path can bypass the cap (UX-C9).
    */

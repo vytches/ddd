@@ -35,6 +35,24 @@ export interface PolicyEventBusMetrics {
   lastEventTime?: Date;
 }
 
+/**
+ * In-process event bus scoped to **policy-evaluation observability**
+ * (`POLICY_EVALUATED`, `POLICY_EVALUATION_ERROR`, etc) — publish/subscribe
+ * for logging, metrics, and alerting on business rule outcomes.
+ *
+ * This is a narrower, unrelated sibling to `UnifiedEventBus` from
+ * `@vytches/ddd-events`:
+ * - `PolicyEventBus`: policy-evaluation lifecycle only, local instance you
+ *   construct yourself (no global singleton), used for observability
+ *   (logging/metrics handlers), not domain state changes.
+ * - `UnifiedEventBus`: domain events and integration events emitted by
+ *   aggregates/bounded contexts, driving actual application behavior
+ *   (projections, sagas, cross-context communication).
+ *
+ * Do not use `PolicyEventBus` as a substitute for domain event publishing,
+ * and do not route domain events through it — it exists purely to observe
+ * policy evaluation, not to carry business state changes.
+ */
 export class PolicyEventBus {
   private readonly subscriptions = new Map<string, PolicyEventSubscription>();
   private readonly config: Required<PolicyEventBusConfig>;
