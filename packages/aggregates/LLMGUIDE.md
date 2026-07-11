@@ -74,7 +74,11 @@ order.commit(); // clear pending events after saving
 | `IAggregateRoot<TId>`                       | interface      | Full contract for aggregates                                                                                                                                                                                  |
 | `IAggregateCapability`                      | interface      | Base contract every capability implements: `attach(aggregate)` (required) + `detach?()` (optional). `SnapshotCapability`, `AuditCapability`, `VersioningCapability`, `EventSourcingCapability` all satisfy it |
 | `IAggregateEventHandler<T>`                 | interface      | Callable shape `(payload: T, metadata?) => void` — the handler function type registered via `registerEventHandler(type, fn)`                                                                                  |
-| `IAggregateBuilder<TId>`                    | interface      | Fluent contract implemented by `AggregateBuilder`: `withSnapshots()`, `withVersioning()`, `withEventSourcing()`, `withAudit()`, `withCustomCapability()`, `build()`                                           |
+
+> **BREAKING (v0.31.0):** `IAggregateBuilder<TId>` was removed — it was exported
+> but shape-incompatible with the concrete `AggregateBuilder` class. Use
+> `AggregateBuilder` directly for `withSnapshots()`, `withVersioning()`,
+> `withEventSourcing()`, `withAudit()`, `withCustomCapability()`, `build()`.
 
 ### `AggregateRoot` method reference
 

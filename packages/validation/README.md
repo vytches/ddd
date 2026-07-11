@@ -58,11 +58,23 @@ pnpm add @vytches/ddd-validation
 
 ### Rules registry
 
+Built-in default validation engine — express rules directly in this library's
+own vocabulary, no external dependency required.
+
 | Export          | Kind  | Description                  |
 | --------------- | ----- | ---------------------------- |
 | `RulesRegistry` | class | Registry for named rule sets |
 
 ### Adapters
+
+External-validator path — wrap a third-party schema library (Zod,
+class-validator, etc.) as an `IValidator<T>` for teams that already standardize
+on one elsewhere.
+
+`RulesRegistry` and `BaseValidationAdapter` are two equally first-class,
+permanent options, not a legacy/modern pair — pick whichever engine fits your
+team; both produce the same `IValidator<T>` / `Result<T, ValidationErrors>`
+contract.
 
 | Export                  | Kind  | Description                                              |
 | ----------------------- | ----- | -------------------------------------------------------- |

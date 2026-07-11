@@ -77,6 +77,16 @@ behaviors above:
   the subclass constructor body, because `validate()` now runs during `super()`,
   before that body executes.
 
+VF-031 — prepublish surface diet, second pass (pre-1.0 BC window; see
+`project-orchestration/tasks/VF-031-prepublish-surface-diet.md`):
+
+- **aggregates:** `IAggregateBuilder` removed. The interface's shape was
+  incompatible with the concrete builder implementations shipped in this
+  package, so it could not be implemented as declared; there is no drop-in
+  replacement export, since nothing in this library could have satisfied the old
+  contract. Consumers depending on `IAggregateBuilder` should type against the
+  concrete builder class(es) they actually construct instead.
+
 ### Added
 
 - **aggregates (AC6):**
@@ -118,6 +128,29 @@ BC window; see `project-orchestration/tasks/VF-024-prepublish-api-surface.md`):
 - **policies:** `globalPolicyEventBus` (a process-global, un-partitioned
   singleton instantiated at import time) removed from the public barrel
   (SA-M11). Construct your own instance instead: `new PolicyEventBus()`.
+
+VF-031 — prepublish surface diet, second pass (pre-1.0 BC window; see
+`project-orchestration/tasks/VF-031-prepublish-surface-diet.md`):
+
+- **resilience:** `getResilienceConfig(instance, methodName)` — new function
+  that reads back the decorator configuration attached to a
+  `@Resilience`/`@Timeout`/etc-decorated method. `getResilienceMetrics()` is now
+  `@deprecated` in favor of this accurately-named equivalent and simply
+  delegates to it; behavior is unchanged and both remain exported. Non-breaking,
+  additive.
+
+Internal cleanup (technically exported but with no known real consumers; removed
+as part of the same surface diet, not user-facing deprecations):
+
+- **events:** the audit subsystem (`Audible`, `AuditEvent`,
+  `AuditEventProcessor`, `CaptureState`, and the package's
+  `generic-event-persistence-handler.ts`) removed.
+- **events:** `subscribeToContext` and `EventHandlerOptions.priority` removed.
+- **acl:** `ACLDiscoveryPlugin` and its associated decorators removed. Use the
+  `@ACLAdapterFor` decorator from `@vytches/ddd-nestjs` instead.
+- **domain-services:** `DIDomainServiceMetadataRegistry` removed.
+- **aggregates:** duplicate capability interfaces and speculative
+  never-implemented capability interfaces (e.g. `ICachingCapability`) removed.
 
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 

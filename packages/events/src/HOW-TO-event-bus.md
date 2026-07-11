@@ -533,9 +533,6 @@ eventBus.subscribe(
 
 // Subscribe to all contexts
 eventBus.subscribe(SystemAlert, handler);
-
-// Alternative syntax
-eventBus.subscribeToContext('user-context', UserRegistered, handler);
 ```
 
 #### 2. Mixed Event Types

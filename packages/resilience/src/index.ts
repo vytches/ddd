@@ -67,6 +67,7 @@ export {
 export {
   Bulkhead as BulkheadDecorator,
   CircuitBreaker as CircuitBreakerDecorator,
+  getResilienceConfig,
   getResilienceMetrics,
   Resilience as ResilienceDecorator,
   Retry as RetryDecorator,

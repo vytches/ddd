@@ -15,7 +15,8 @@ complexity: medium
 estimated_time: 8h
 created_by: LIB-UX-AUDIT-2026-07-10
 created_at: 2026-07-10
-status: backlog
+status: done
+completed_at: 2026-07-11
 release_target:
   pre-first-public-publish (HARD window — every removal becomes a breaking
   change after publish; sibling of VF-024)
@@ -77,44 +78,55 @@ the primary downstream consumer's actual imports.
 
 ## Acceptance Criteria
 
-1. [ ] **events:** `audit/` + `integration/` subsystems, `subscribeToContext`,
+1. [x] **events:** `audit/` + `integration/` subsystems, `subscribeToContext`,
        inert `priority` option, `GenericEventPersistenceHandler` — each deleted
        or `@internal`-marked, decision recorded per item (default: delete; they
        are `@public @stable` by JSDoc only, unpublished).
-2. [ ] **acl:** `ACLDiscoveryPlugin` + decorators deleted (default), or wired
+2. [x] **acl:** `ACLDiscoveryPlugin` + decorators deleted (default), or wired
        for real with `reflect-metadata` declared as optional peer dependency —
        no phantom import either way.
 3. [ ] **nestjs:** ghost `src/types/index.ts` deleted **unless** VF-032 decides
        to wire `forRootAsync` against it — synchronize the decision with VF-032
-       AC1 before touching the file.
-4. [ ] **di/domain-services:** dead `DiscoveryRegistry` scaffolding and the
+       AC1 before touching the file. **DEFERRED to VF-032** (see D-6 and the
+       "AC3 status" note below) — not implemented in this task, by design.
+4. [x] **di/domain-services:** dead `DiscoveryRegistry` scaffolding and the
        write-only domain-service metadata registry either wired (mirroring how
        events/cqrs discovery plugins actually work) or removed; stop advertising
        auto-discovery for domain services until it exists.
-5. [ ] **aggregates:** duplicate capability-interface block deleted in favor of
+5. [x] **aggregates:** duplicate capability-interface block deleted in favor of
        `@vytches/ddd-contracts` canonical types (same treatment REL-009 gave
        `IAggregateSnapshot`); `IAggregateBuilder` export dropped or the real
        builder made to implement it; speculative unimplemented interfaces
        removed.
-6. [ ] **validation:** documented decision on the zero-consumer 60% —
+6. [x] **validation:** documented decision on the zero-consumer 60% —
        keep-and-fix (then VF-033 executes) or deprecate/`@internal`. The "bring
        your own zod" adapter story (`useExternal`/`BaseValidationAdapter`) stays
        either way (it is the honest zero-deps answer).
-7. [ ] **policies:** `PolicyEventBus` public status decided (fold into VF-024's
+7. [x] **policies:** `PolicyEventBus` public status decided (fold into VF-024's
        `globalPolicyEventBus` AC9 review); **resilience:**
        `getResilienceMetrics()` renamed/deprecated or wired to real per-instance
        state (pairs with VF-028 AC2's WeakMap).
-8. [ ] **UX-C13/C14:** fate of `VersioningCapability` (fix self-driving
+8. [x] **UX-C13/C14:** fate of `VersioningCapability` (fix self-driving
        upcasting vs `@internal` + doc warning) and `AuditCapability`'s
        monkey-patch (replace with a structural `onEventApplied` hook vs document
        the constraint) decided in the same pass — both currently have zero
        non-test consumers, so deletion/demotion is also on the table.
-9. [ ] Phantom dependencies removed: `validation`'s unused
+9. [x] Phantom dependencies removed: `validation`'s unused
        `ddd-domain-primitives` runtime dep; acl's `reflect-metadata` situation
        per AC2.
-10. [ ] Export/api-surface snapshot tests updated; every removal listed in
+10. [x] Export/api-surface snapshot tests updated; every removal listed in
         CHANGELOG; downstream-consumer import check performed before each
         deletion of an exported symbol.
+
+**AC3 status:** explicitly deferred to VF-032, not skipped. See D-6 in the
+analysis: VF-032 AC1 (`project-orchestration/tasks/VF-032-nestjs-fluency.md`,
+status backlog) requires deciding the shape of `forRootAsync` first, and that
+decision determines whether the ghost `nestjs/src/types/index.ts` is wired up or
+deleted. Neither task can resolve this independently — it is a circular
+dependency between the two tasks, not an oversight. The file is confirmed
+orphaned (`nestjs/src/index.ts` imports from `./types`, not `./types/index.ts`)
+so leaving it untouched does not block anything else in this task; `nestjs/` was
+correctly left entirely untouched in this pass.
 
 ## Out of scope
 
@@ -126,8 +138,66 @@ the primary downstream consumer's actual imports.
 - Registry duplicate/overwrite semantics — deferred `/analyze-ddd` decision
   (SA-H4/M10/L4).
 
+## Activity / Notes
+
+### 2026-07-11 — implemented on `refactor/VF-031-prepublish-surface-diet`, merged to develop (status: done)
+
+9 of 10 ACs done as DELETE/keep-and-document per the analysis's per-item
+decision table (D-1 through D-14 in
+`project-orchestration/analysis/VF-031.analysis.md`). AC3 (nestjs ghost
+`types/index.ts`) explicitly deferred to VF-032 per D-6 — a genuine circular
+task dependency, not scope creep or an oversight; `packages/nestjs/` was left
+completely untouched in this pass (confirmed via diff review before merge).
+
+Two open questions from the analysis were resolved by explicit user decision
+before implementation began:
+
+- **OQ-1 (validation):** `RulesRegistry` (+ `ValidationFacade`,
+  `SpecificationValidator`) and `BaseValidationAdapter`/`AdapterUtils` are
+  **both** permanent, first-class paths — the built-in zero-dependency engine
+  and the official "bring your own zod" extension point, respectively. Neither
+  is legacy. LLMGUIDE/README updated to present both as equally supported.
+- **OQ-2 (events/integration):** `IntegrationEventProcessor`,
+  `DomainToIntegrationTransformer`, `ContextRouter`, and the transformer
+  registry are **KEEP**, not DELETE, despite zero real logic consumers in this
+  repo — confirmed re-exported from `packages/enterprise/src/index.ts` (the
+  actual `@vytches/ddd` public barrel), so it is real, compiling, public surface
+  rather than a dead file. Kept conservatively per the synthesis recommendation,
+  with scope-narrowing JSDoc added instead of removal.
+
+Net removals: `packages/events/src/audit/` (entire subsystem, 5 files),
+`packages/events/src/generic-event-persistence-handler.ts`,
+`subscribeToContext`, `EventHandlerOptions.priority`,
+`packages/acl/src/di-integration/acl-discovery-plugin.ts` (+ its decorators),
+`packages/domain-services/src/di-types.ts`'s `DIDomainServiceMetadataRegistry`,
+the duplicate capability-interface block and several speculative unimplemented
+interfaces in `packages/aggregates/src/aggregate-interfaces.ts`, and the
+exported `IAggregateBuilder` (BREAKING — shape-incompatible with the real
+`AggregateBuilder`, no drop-in replacement). Net addition: `resilience`'s
+correctly-named `getResilienceConfig()`, with `getResilienceMetrics()` now
+`@deprecated` in its favor (non-breaking, delegates through).
+
+Verification before merge: fresh test + typecheck run, 8/8 directly-touched
+packages green (`@vytches/ddd-events`, `@vytches/ddd-acl`,
+`@vytches/ddd-aggregates`, `@vytches/ddd-domain-services`,
+`@vytches/ddd-enterprise`, `@vytches/ddd-policies`, `@vytches/ddd-resilience`,
+`@vytches/ddd-validation`). CHANGELOG.md carries 4 separate VF-031 entries
+(BREAKING CHANGES, Added, and two internal-cleanup notes) cross-referencing this
+task file. `packages/nestjs/` confirmed untouched (`git diff --stat` shows no
+nestjs files) — AC3/D-6 correctly deferred rather than silently dropped. No
+stray or unexpected files in the final diff (35 files changed, matching the
+per-package decision table).
+
+Pre-commit caught only a commit-message formatting issue (commitlint
+`body-max-line-length`/`footer-max-line-length`, 100-char limit) on the first
+commit attempt — no code or test regressions. Rewrapped the commit message and
+re-committed clean; all 16 cached/fresh `nx` test projects green on the second
+attempt.
+
 ## References
 
-- Analysis: `project-orchestration/analysis/LIB-UX-AUDIT-2026-07-10.analysis.md`
-  (theme T1 — full evidence table; UX-C13, UX-C14)
+- Analysis: `project-orchestration/analysis/VF-031.analysis.md` (D-1 through
+  D-14, OQ-1, OQ-2 — full per-item decision table and rationale)
 - VF-024 (pre-publish API surface curation) — sibling task, same release window.
+- VF-032 (nestjs fluency, status backlog) — owns the deferred AC3/D-6 decision
+  on `forRootAsync` shape and the ghost `types/index.ts` file.

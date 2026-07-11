@@ -19,6 +19,15 @@ export interface IContextRouter {
  *
  * @since 1.0.0
  * @public
+ *
+ * @remarks
+ * VF-031 (D-4): Part of the low-priority integration event bridge
+ * (`IntegrationEventProcessor` / `DomainToIntegrationTransformer` /
+ * `ContextRouter`). Kept because it is re-exported (transitively, via
+ * `DomainToIntegrationTransformer`) from the public `@vytches/ddd-enterprise`
+ * barrel, but the shape of this bridge may be refactored in a future major
+ * release. Treat as stable-but-narrow API surface, not a long-term
+ * architectural commitment.
  */
 export class ContextRouter implements IContextRouter {
   private readonly routingRules: Array<{

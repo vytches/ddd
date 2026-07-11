@@ -156,7 +156,6 @@ export type {
   AggregateWithEventSourcingCapability,
   AggregateWithSnapshotCapability,
   AggregateWithVersioningCapability,
-  IAggregateBuilder,
   IAggregateConstructorParams,
   IAggregateEventHandler,
   IAggregateRoot,

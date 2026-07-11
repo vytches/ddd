@@ -199,7 +199,16 @@ export const Timeout = createSimpleDecorator<TimeoutDecoratorConfig>(
   'timeout'
 );
 
-export function getResilienceMetrics(
+/**
+ * Reads back the resilience decorator configuration attached to a decorated
+ * method — the `resilienceConfig` set by `@Resilience`/`@Timeout`/etc, not
+ * live runtime metrics (no call counts, latencies, or open/closed state).
+ *
+ * @param instance - Object holding the decorated method
+ * @param methodName - Name of the decorated method
+ * @returns The decorator config plus class/method name for identification
+ */
+export function getResilienceConfig(
   instance: Record<string, unknown>,
   methodName: string
 ): {
@@ -214,12 +223,27 @@ export function getResilienceMetrics(
     throw new Error(`Method ${methodName} is not decorated with resilience patterns`);
   }
 
-  // In a real implementation, you'd maintain a registry of policy instances
-  // and return their metrics. For now, return the config.
   return {
     config,
-    // metrics would come from the actual policy instance
     className: instance.constructor.name,
     methodName,
   };
+}
+
+/**
+ * @deprecated This does NOT return runtime metrics (call counts, latencies,
+ * circuit state) — despite the name, it only returns the static decorator
+ * configuration. Use {@link getResilienceConfig} instead, which is named
+ * accurately for what it returns. Kept for backward compatibility; behavior
+ * is unchanged.
+ */
+export function getResilienceMetrics(
+  instance: Record<string, unknown>,
+  methodName: string
+): {
+  config: BaseResilienceDecoratorConfig;
+  className: string;
+  methodName: string;
+} {
+  return getResilienceConfig(instance, methodName);
 }
