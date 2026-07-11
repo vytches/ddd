@@ -90,14 +90,15 @@ as of this date). Age = days since created_at. Grouped by priority (P0 critical
 > `VF-026-ddd-lint-anti-pattern-rules.analysis.md`. All five source tasks moved
 > to `completed-tasks/`.
 >
-> **Not yet tasked — needs a task file:** `policy-builder.ts:538` /
-> `policy-group.ts:330` (`BuiltCompositePolicy`/`GroupCompositePolicy` >
-> `.createPolicyFromStep`) — composite/multi-step policy evaluation silently
-> throws instead of returning `Result` for real, reachable step-type
-> combinations (`shouldSatisfyAny()`, `.mustAsync()`, `.mustSatisfyRules()` used
-> together) — a genuine bug in the public policies API with zero test coverage
-> on the affected paths. Found during VF-026's triage, escalated but not yet
-> turned into a task — do this before publish.
+> **Filed (2026-07-11)**: **VF-035** — the composite-policy step-coverage bug
+> flagged above (`policy-builder.ts:538`/`policy-group.ts:330`) now has a task
+> file (P1, pre-publish). See P1 table below.
+
+> **Session boundary (2026-07-11)**: board reviewed and re-ordered by actual
+> work priority (not just chronological/creation order) ahead of a fresh
+> session. **VA-001** (`@vytches/ddd-agent`) deliberately set aside for later —
+> stays in `## Backlog` below P3, not a current priority; revisit after the
+> pre-publish pipeline (P1) is clear.
 
 ## P0 — Critical
 
@@ -105,13 +106,18 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-| ID     | Title                                                             | Status  | Age |
-| ------ | ----------------------------------------------------------------- | ------- | --- |
-| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)          | backlog | 8d  |
-| VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) | backlog | 8d  |
-| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)       | backlog | 1d  |
-| VF-030 | DI token identity (fn.name collision, Scoped→Transient)           | backlog | 0d  |
-| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)          | backlog | 0d  |
+_Ordered by actual work priority: pre-publish BC-window blockers first (VF-024
+unblocks sign-off on VF-023/VF-031), then the newly-filed real bug (VF-035),
+then independent hardening (VF-028, VF-030)._
+
+| ID     | Title                                                                                               | Status  | Age |
+| ------ | --------------------------------------------------------------------------------------------------- | ------- | --- |
+| VF-024 | Pre-publish API surface (enterprise barrel, collisions, removals) — unblocks VF-023/VF-031 sign-off | backlog | 8d  |
+| VF-023 | DDD foundation guarantees (VO validate, apply atomicity)                                            | backlog | 8d  |
+| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)                                            | backlog | 0d  |
+| VF-035 | Composite policy step-coverage bug (throws instead of Result)                                       | backlog | 0d  |
+| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)                                         | backlog | 1d  |
+| VF-030 | DI token identity (fn.name collision, Scoped→Transient)                                             | backlog | 0d  |
 
 ## P2 — Normal / Medium
 
@@ -135,20 +141,24 @@ _None._
 
 ## Backlog
 
+_Deliberately set aside (2026-07-11) — revisit after the P1 pre-publish pipeline
+clears, not a current priority._
+
 | ID     | Title                                          | Status  | Age |
 | ------ | ---------------------------------------------- | ------- | --- |
-| VA-001 | @vytches/ddd-agent — AI Agent DDD Boundary Pkg | backlog | 43d |
+| VA-001 | @vytches/ddd-agent — AI Agent DDD Boundary Pkg | backlog | 44d |
 
 ---
 
 **Recommended next action**: (1) VS-013 juz-ide-api validation — still the
 v0.31.0 publication gate, **overdue since 2026-07-05**, human/cross-team action.
-(2) Pre-first-publish pipeline: **VF-024** (API surface curation, 10h) unblocks
-library-api-guardian sign-off on **VF-023**/VF-031 — all three touch the same
-pre-publish BC window and involve consumer-impacting design calls (VO
-deep-freeze, `EntityIdFactory` removal, enterprise barrel curation) worth a
-human review pass before implementation. (3) File a task for the
-`policy-builder.ts:538`/`policy-group.ts:330` composite-policy bug (see banner
-above) before publish. Full audit findings:
+(2) Pre-first-publish pipeline, in priority order: **VF-024** (API surface
+curation, 10h) unblocks library-api-guardian sign-off on **VF-023** and
+**VF-031** — all three touch the same pre-publish BC window and involve
+consumer-impacting design calls (VO deep-freeze, `EntityIdFactory` removal,
+enterprise barrel curation) worth a human review pass before implementation. (3)
+**VF-035** (composite-policy step-coverage bug, now filed) is a real production
+bug in the public policies API — schedule alongside the pre-publish work, no
+design review needed, just implementation. Full audit findings:
 `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.
