@@ -129,7 +129,8 @@ vi.mock('@vytches/ddd-events', async () => ({
   }),
 }));
 
-vi.mock('@vytches/ddd-di', async () => ({
+vi.mock('@vytches/ddd-di', async importOriginal => ({
+  ...(await importOriginal<typeof import('@vytches/ddd-di')>()),
   SimpleContainer: vi.fn().mockImplementation(() => ({
     register: vi.fn().mockImplementation(async () => {
       await new Promise(resolve => setTimeout(resolve, 0.5 + Math.random()));

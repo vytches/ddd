@@ -338,10 +338,10 @@ describe('SimpleContainer', () => {
   });
 
   // ---------------------------------------------------------------------------
-  // D-2/B + OQ-6 — getTokenKey memoisation + anonymous-class stable keys
+  // VF-030 D1 — anonymous classes are distinct tokens (reference identity)
   // ---------------------------------------------------------------------------
-  describe('getTokenKey — anonymous class handling (OQ-6 contract)', () => {
-    it('two distinct anonymous classes get distinct token keys', () => {
+  describe('anonymous class tokens — reference identity (OQ-6 contract)', () => {
+    it('two distinct anonymous classes register and resolve independently', () => {
       const ClassA = makeAnonymousClass();
       const ClassB = makeAnonymousClass();
 
@@ -446,6 +446,150 @@ describe('SimpleContainer', () => {
       container.dispose();
 
       expect(disposed).toBe(true);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // VF-030 D1/D2 — token identity is reference-based, never name-based
+  // ---------------------------------------------------------------------------
+  describe('token identity — reference-based, never name-based (UX-C4 contract)', () => {
+    // Factory producing classes that all share the SAME .name ('UserRepository')
+    // but are distinct references — e.g. two bounded contexts each defining
+    // their own UserRepository.
+    function makeUserRepositoryClass(marker: string): new () => { marker: string } {
+      class UserRepository {
+        public readonly marker = marker;
+      }
+      return UserRepository;
+    }
+
+    it('two DIFFERENT classes both named "UserRepository" register independently', () => {
+      const AuthUserRepository = makeUserRepositoryClass('auth');
+      const BillingUserRepository = makeUserRepositoryClass('billing');
+
+      // Same .name, different references — must NOT collide
+      expect(AuthUserRepository.name).toBe(BillingUserRepository.name);
+      expect(AuthUserRepository).not.toBe(BillingUserRepository);
+
+      container.register(AuthUserRepository, AuthUserRepository, {
+        lifetime: ServiceLifetime.Singleton,
+      });
+      const [secondRegErr] = safeRun(() =>
+        container.register(BillingUserRepository, BillingUserRepository, {
+          lifetime: ServiceLifetime.Singleton,
+        })
+      );
+
+      expect(secondRegErr).toBeUndefined();
+    });
+
+    it('resolving one same-named class NEVER returns the other class instance', () => {
+      const AuthUserRepository = makeUserRepositoryClass('auth');
+      const BillingUserRepository = makeUserRepositoryClass('billing');
+
+      container.register(AuthUserRepository, AuthUserRepository, {
+        lifetime: ServiceLifetime.Singleton,
+      });
+      container.register(BillingUserRepository, BillingUserRepository, {
+        lifetime: ServiceLifetime.Singleton,
+      });
+
+      const auth = container.resolve(AuthUserRepository);
+      const billing = container.resolve(BillingUserRepository);
+
+      expect(auth).toBeInstanceOf(AuthUserRepository);
+      expect(billing).toBeInstanceOf(BillingUserRepository);
+      expect(auth).not.toBe(billing);
+      expect(auth.marker).toBe('auth');
+      expect(billing.marker).toBe('billing');
+      // Singleton caches are isolated per token reference
+      expect(container.resolve(AuthUserRepository)).toBe(auth);
+      expect(container.resolve(BillingUserRepository)).toBe(billing);
+    });
+
+    it('isRegistered distinguishes same-named classes by reference', () => {
+      const RegisteredRepo = makeUserRepositoryClass('registered');
+      const UnregisteredRepo = makeUserRepositoryClass('unregistered');
+
+      container.register(RegisteredRepo, RegisteredRepo);
+
+      expect(container.isRegistered(RegisteredRepo)).toBe(true);
+      expect(container.isRegistered(UnregisteredRepo)).toBe(false);
+    });
+
+    it('resolving an unregistered same-named class throws ContainerServiceNotFoundError (no .name fallback)', () => {
+      const RegisteredRepo = makeUserRepositoryClass('registered');
+      const UnregisteredRepo = makeUserRepositoryClass('unregistered');
+
+      container.register(RegisteredRepo, RegisteredRepo);
+
+      const [err] = safeRun(() => container.resolve(UnregisteredRepo));
+
+      expect(err).toBeInstanceOf(ContainerServiceNotFoundError);
+    });
+
+    it("Symbol('X') !== Symbol('X') — same-description symbols are isolated tokens", () => {
+      const tokenA = Symbol('X');
+      const tokenB = Symbol('X');
+
+      const instanceA = { source: 'A' };
+      const instanceB = { source: 'B' };
+
+      container.registerInstance(tokenA, instanceA);
+      const [secondRegErr] = safeRun(() => container.registerInstance(tokenB, instanceB));
+
+      expect(secondRegErr).toBeUndefined();
+      expect(container.resolve(tokenA)).toBe(instanceA);
+      expect(container.resolve(tokenB)).toBe(instanceB);
+
+      // A third same-description symbol is NOT registered
+      const [err] = safeRun(() => container.resolve(Symbol('X')));
+      expect(err).toBeInstanceOf(ContainerServiceNotFoundError);
+    });
+
+    it('Symbol.for() yields a shared token across lookups (documented cross-module pattern)', () => {
+      const instance = { shared: true };
+      container.registerInstance(Symbol.for('vf030.shared'), instance);
+
+      expect(container.resolve(Symbol.for('vf030.shared'))).toBe(instance);
+    });
+
+    it('string tokens keep VALUE identity', () => {
+      class TestService {}
+      container.register('StringToken', TestService, { lifetime: ServiceLifetime.Singleton });
+
+      // A structurally equal but freshly-created string still matches
+      const key = ['String', 'Token'].join('');
+      expect(container.resolve(key)).toBe(container.resolve('StringToken'));
+    });
+
+    it('scoped lifetime behavior is unchanged with class-reference tokens', () => {
+      class ScopedService {
+        public id = Math.random();
+      }
+
+      container.register(ScopedService, ScopedService, { lifetime: ServiceLifetime.Scoped });
+
+      const scope = container.createScope('scope-1');
+      const parentInstance = container.resolve(ScopedService);
+      const scopeInstance1 = scope.resolve(ScopedService);
+      const scopeInstance2 = scope.resolve(ScopedService);
+
+      // Same instance within a resolution context, cached per container
+      expect(parentInstance).toBe(container.resolve(ScopedService));
+      expect(scopeInstance1).toBe(scopeInstance2);
+    });
+
+    it('singleton lifetime behavior is unchanged with symbol tokens', () => {
+      const token = Symbol('singleton-service');
+
+      class SingletonService {
+        public id = Math.random();
+      }
+
+      container.register(token, SingletonService, { lifetime: ServiceLifetime.Singleton });
+
+      expect(container.resolve(token)).toBe(container.resolve(token));
     });
   });
 });

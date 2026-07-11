@@ -16,22 +16,19 @@ import type {
 } from '../types';
 import { ServiceLifetime } from '../types';
 
-// D-2/B + OQ-6: stable unique ids for anonymous function tokens (no name).
-// WeakMap keeps entries alive only as long as the class is alive.
-const anonymousTokenIds = new WeakMap<Function, string>();
-let anonymousTokenCounter = 0;
-
 export class SimpleContainer implements IDependencyContainer {
-  private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly singletonInstances = new Map<string, unknown>();
-  private readonly scopedInstances = new Map<string, unknown>();
+  // VF-030 D1: token identity lives in the Map key itself (ADR-0034).
+  // String tokens key by VALUE; function/class and symbol tokens key by
+  // REFERENCE — two distinct classes that share a .name never collide, and
+  // Symbol('X') !== Symbol('X') are distinct registrations. Use Symbol.for()
+  // for tokens that must be shared across module instances (dual ESM/CJS).
+  private readonly services = new Map<ServiceToken, ServiceDescriptor>();
+  private readonly singletonInstances = new Map<ServiceToken, unknown>();
+  private readonly scopedInstances = new Map<ServiceToken, unknown>();
 
   // D-2/C: Set for O(1) cycle detection; separate ordered array for DFS error message.
   private readonly resolutionChainSet = new Set<ServiceToken>();
   private readonly resolutionChainOrder: ServiceToken[] = [];
-
-  // D-2/B: per-instance cache for getTokenKey results.
-  private readonly tokenKeyCache = new Map<ServiceToken, string>();
 
   private disposed = false;
 
@@ -98,13 +95,11 @@ export class SimpleContainer implements IDependencyContainer {
   ): void {
     this.ensureNotDisposed();
 
-    const tokenKey = this.getTokenKey(token);
-
     if (!implementation) {
       throw new InvalidRegistrationError(token, 'Implementation cannot be null or undefined');
     }
 
-    if (this.services.has(tokenKey)) {
+    if (this.services.has(token)) {
       throw new ServiceAlreadyRegisteredError(token, options?.context);
     }
 
@@ -116,7 +111,7 @@ export class SimpleContainer implements IDependencyContainer {
       ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
-    this.services.set(tokenKey, descriptor);
+    this.services.set(token, descriptor);
   }
 
   /**
@@ -129,13 +124,11 @@ export class SimpleContainer implements IDependencyContainer {
   ): void {
     this.ensureNotDisposed();
 
-    const tokenKey = this.getTokenKey(token);
-
     if (!factory) {
       throw new InvalidRegistrationError(token, 'Factory cannot be null or undefined');
     }
 
-    if (this.services.has(tokenKey)) {
+    if (this.services.has(token)) {
       throw new ServiceAlreadyRegisteredError(token, options?.context);
     }
 
@@ -147,13 +140,13 @@ export class SimpleContainer implements IDependencyContainer {
       ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
-    this.services.set(tokenKey, descriptor);
+    this.services.set(token, descriptor);
   }
 
   /**
    * Register a service instance.
    *
-   * D-4: stores the instance only in services[key].instance; does NOT pre-populate
+   * D-4: stores the instance only in services[token].instance; does NOT pre-populate
    * singletonInstances. The singleton cache is populated on first resolve(), which
    * keeps getServices()/resolve() byte-for-byte identical to pre-D-4 behaviour.
    */
@@ -164,13 +157,11 @@ export class SimpleContainer implements IDependencyContainer {
   ): void {
     this.ensureNotDisposed();
 
-    const tokenKey = this.getTokenKey(token);
-
     if (instance === null || instance === undefined) {
       throw new InvalidRegistrationError(token, 'Instance cannot be null or undefined');
     }
 
-    if (this.services.has(tokenKey)) {
+    if (this.services.has(token)) {
       throw new ServiceAlreadyRegisteredError(token, options?.context);
     }
 
@@ -182,7 +173,7 @@ export class SimpleContainer implements IDependencyContainer {
       ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
-    this.services.set(tokenKey, descriptor);
+    this.services.set(token, descriptor);
     // D-4: do NOT also store in singletonInstances here.
     // resolveInternal will populate singletonInstances on first resolve.
   }
@@ -192,8 +183,7 @@ export class SimpleContainer implements IDependencyContainer {
    */
   isRegistered<T>(token: ServiceToken<T>): boolean {
     this.ensureNotDisposed();
-    const tokenKey = this.getTokenKey(token);
-    return this.services.has(tokenKey) || (this.parentScope?.isRegistered(token) ?? false);
+    return this.services.has(token) || (this.parentScope?.isRegistered(token) ?? false);
   }
 
   /**
@@ -260,8 +250,7 @@ export class SimpleContainer implements IDependencyContainer {
    * Internal resolution logic — throws ContainerServiceNotFoundError when absent.
    */
   private resolveInternal<T>(token: ServiceToken<T>): T {
-    const tokenKey = this.getTokenKey(token);
-    const descriptor = this.services.get(tokenKey);
+    const descriptor = this.services.get(token);
 
     if (!descriptor) {
       // Try parent scope if available
@@ -271,15 +260,14 @@ export class SimpleContainer implements IDependencyContainer {
       throw new ContainerServiceNotFoundError(token);
     }
 
-    return this.createInstance<T>(tokenKey, descriptor as ServiceDescriptor<T>, token);
+    return this.createInstance<T>(descriptor as ServiceDescriptor<T>, token);
   }
 
   /**
    * D-3/A: Like resolveInternal but returns undefined when absent instead of throwing.
    */
   private tryResolveInternal<T>(token: ServiceToken<T>): T | undefined {
-    const tokenKey = this.getTokenKey(token);
-    const descriptor = this.services.get(tokenKey);
+    const descriptor = this.services.get(token);
 
     if (!descriptor) {
       if (this.parentScope) {
@@ -288,21 +276,18 @@ export class SimpleContainer implements IDependencyContainer {
       return undefined;
     }
 
-    return this.createInstance<T>(tokenKey, descriptor as ServiceDescriptor<T>, token);
+    return this.createInstance<T>(descriptor as ServiceDescriptor<T>, token);
   }
 
   /**
    * Shared instance-creation logic used by both resolveInternal and tryResolveInternal.
    * Handles singleton/scoped caching, factory invocation, and constructor instantiation.
+   * Caches are keyed by the token itself (reference identity — VF-030 D1).
    */
-  private createInstance<T>(
-    tokenKey: string,
-    descriptor: ServiceDescriptor<T>,
-    token: ServiceToken<T>
-  ): T {
+  private createInstance<T>(descriptor: ServiceDescriptor<T>, token: ServiceToken<T>): T {
     // Check singleton cache
     if (descriptor.lifetime === ServiceLifetime.Singleton) {
-      const cachedInstance = this.singletonInstances.get(tokenKey);
+      const cachedInstance = this.singletonInstances.get(token);
       if (cachedInstance !== undefined) {
         return cachedInstance as T;
       }
@@ -310,7 +295,7 @@ export class SimpleContainer implements IDependencyContainer {
 
     // Check scoped cache
     if (descriptor.lifetime === ServiceLifetime.Scoped) {
-      const cachedInstance = this.scopedInstances.get(tokenKey);
+      const cachedInstance = this.scopedInstances.get(token);
       if (cachedInstance !== undefined) {
         return cachedInstance as T;
       }
@@ -331,62 +316,15 @@ export class SimpleContainer implements IDependencyContainer {
 
     // Cache singleton instances
     if (descriptor.lifetime === ServiceLifetime.Singleton) {
-      this.singletonInstances.set(tokenKey, instance);
+      this.singletonInstances.set(token, instance);
     }
 
     // Cache scoped instances
     if (descriptor.lifetime === ServiceLifetime.Scoped) {
-      this.scopedInstances.set(tokenKey, instance);
+      this.scopedInstances.set(token, instance);
     }
 
     return instance;
-  }
-
-  /**
-   * D-2/B + OQ-6: Get a consistent string key for a service token.
-   * - String tokens: returned as-is.
-   * - Symbol tokens: Symbol.toString().
-   * - Named function/class tokens: use the .name property.
-   * - Anonymous function/class tokens (name === ''): assign a stable unique id
-   *   via a module-level WeakMap so that two structurally identical but distinct
-   *   anonymous classes never collide.
-   * Results are memoised per container instance via tokenKeyCache.
-   */
-  private getTokenKey(token: ServiceToken): string {
-    // Fast path: check per-instance memoization cache.
-    // Map uses object identity for non-primitive keys, so function tokens are cached
-    // correctly without needing special handling here.
-    const cached = this.tokenKeyCache.get(token);
-    if (cached !== undefined) {
-      return cached;
-    }
-
-    let key: string;
-
-    if (typeof token === 'string') {
-      key = token;
-    } else if (typeof token === 'symbol') {
-      key = token.toString();
-    } else {
-      // Function / class token
-      const fn = token as Function;
-      const name = fn.name;
-
-      if (name) {
-        key = name;
-      } else {
-        // Anonymous function: assign a stable unique id via WeakMap.
-        let id = anonymousTokenIds.get(fn);
-        if (id === undefined) {
-          id = `__anon_${++anonymousTokenCounter}__`;
-          anonymousTokenIds.set(fn, id);
-        }
-        key = id;
-      }
-    }
-
-    this.tokenKeyCache.set(token, key);
-    return key;
   }
 
   /**

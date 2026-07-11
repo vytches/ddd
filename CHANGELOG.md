@@ -87,6 +87,44 @@ VF-031 — prepublish surface diet, second pass (pre-1.0 BC window; see
   contract. Consumers depending on `IAggregateBuilder` should type against the
   concrete builder class(es) they actually construct instead.
 
+VF-030 — DI token identity by reference (pre-1.0 BC window; see
+`docs/adr/0038-di-token-identity-by-reference.md` and
+`docs/security/threat-models/TM-VF-030.md`):
+
+- **di, nestjs:** container adapters' internal maps are now keyed by the
+  `ServiceToken` itself (reference identity for class/function and symbol
+  tokens, value identity for strings) instead of a string derived from the
+  token. No public signature changed, and **string-token behavior is unchanged**
+  — but two registrations that previously collided through their string
+  rendering (two classes sharing a `.name` across bounded contexts, or two
+  separate `Symbol('X')` calls both rendering as `"Symbol(X)"`) are now distinct
+  registrations. Code that accidentally relied on such collisions — registering
+  under one class/symbol and resolving with a different same-named one — will
+  now throw `ContainerServiceNotFoundError` instead of silently resolving the
+  wrong service. There is deliberately no `.name` fallback; for tokens shared
+  across bounded contexts or across dual ESM/CJS module graphs, declare them
+  with `Symbol.for('namespaced:key')` (see `packages/di/FRAMEWORK-ADAPTERS.md`).
+- **nestjs:** `NestJSContainerAdapter` now honors `ServiceLifetime.Scoped` — a
+  Scoped service resolves to the same instance within one scope (`createScope()`
+  starts a fresh scoped cache; materialized singletons are shared). Previously
+  Scoped was silently treated as Transient, producing a new instance on every
+  `resolve()`. Consumers that registered services as Scoped but depended on the
+  accidental fresh-instance-per-resolve behavior should register them as
+  Transient.
+- **nestjs:** failed constructor-dependency resolution in
+  `NestJSContainerAdapter` now throws `ContainerServiceNotFoundError` (naming
+  the owning service), and a constructor-dependency cycle throws
+  `CircularDependencyError` with the full resolution chain. Previously an
+  unresolvable dependency fell back to silently constructing it with zero
+  arguments (`new paramType()`), producing an uninitialized instance that failed
+  later and far from the cause.
+- **di:** `BaseContainerAdapter.getTokenKey()` is `@deprecated` and now a
+  display-only helper for error messages and logs — its string output is
+  intentionally lossy and must not be used as a lookup key. The `protected`
+  method remains available to adapter subclasses with an unchanged signature;
+  custom adapters keying their own maps with it should switch to keying by the
+  token itself (migration guide in `packages/di/FRAMEWORK-ADAPTERS.md`).
+
 ### Added
 
 - **aggregates (AC6):**
