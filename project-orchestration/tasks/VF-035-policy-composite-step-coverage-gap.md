@@ -90,6 +90,16 @@ the builder's public surface.
        composite mode returning `Result` correctly (AC3).
 6. [ ] Regression: full `@vytches/ddd-policies` test suite green; confirm no
        existing behavior for `specification`/`predicate` steps changed.
+7. [ ] `shouldSatisfyAny()` returns `IPolicyStepBuilder<T>` instead of
+       `IPolicyBuilder<T>` (interface + implementation), enabling
+       `.withCode()/.withMessage()/.withSeverity()` chaining on the `group-or`
+       step — as a SEPARATE commit within this task (API adjustment, not part of
+       the bug-fix commit). Verified non-breaking: every documented usage
+       (README, LLMGUIDE, ADR-0012) chains `.build()` directly, which the step
+       builder exposes; the `.shouldSatisfyAny().must()` shape exists nowhere.
+       Group-or tests (AC5) are written against the NEW signature. Optionality
+       (`isRequired: false` for group-or) stays out of scope. Decision trail:
+       VF-035.analysis.md frontmatter Q4 (2026-07-11).
 
 ## Out of scope
 

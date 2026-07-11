@@ -8,6 +8,7 @@ import {
 import type { IBusinessPolicy, PolicyRequest } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation, PolicyViolationSeverity } from '../core/models/policy-violation';
 import type { IPolicyGroup, IPolicyGroupStepBuilder } from './policy-builder.interface';
+import { assertNever } from './step-policy-factory';
 
 export class PolicyGroup<T> implements IPolicyGroup<T> {
   private steps: PolicyGroupStep<T>[] = [];
@@ -112,41 +113,7 @@ export class PolicyGroup<T> implements IPolicyGroup<T> {
     const stepDomain = 'group';
     const stepName = `${this.groupName || 'Group'} - Step`;
 
-    switch (step.type) {
-      case 'specification':
-        return SpecificationPolicy.fromSpecification(
-          stepId,
-          stepDomain,
-          stepName,
-          step.specification!,
-          step.errorCode,
-          step.errorMessage
-        );
-
-      case 'async-specification':
-        return AsyncSpecificationPolicy.fromAsyncSpecification(
-          stepId,
-          stepDomain,
-          stepName,
-          step.asyncSpecification!,
-          step.errorCode,
-          step.errorMessage
-        );
-
-      case 'predicate':
-        return new GroupPredicatePolicy(
-          stepId,
-          stepDomain,
-          stepName,
-          step.predicate!,
-          step.errorCode,
-          step.errorMessage,
-          step.severity
-        );
-
-      default:
-        throw new Error(`Unsupported step type in group: ${(step as { type?: string }).type}`);
-    }
+    return createGroupStepPolicy(step, stepId, stepDomain, stepName);
   }
 }
 
@@ -235,6 +202,55 @@ export interface PolicyGroupStep<T> {
   logicOperator?: 'AND' | 'OR';
 }
 
+/**
+ * Builds the concrete `IBusinessPolicy` for a single `PolicyGroupStep`,
+ * covering all 3 members of the union. Used by both `PolicyGroup`
+ * (single-step path) and `GroupCompositePolicy` (composite path) - callers
+ * supply the already-computed id/domain/name identity for their path.
+ */
+function createGroupStepPolicy<T>(
+  step: PolicyGroupStep<T>,
+  id: string,
+  domain: string,
+  name: string
+): IBusinessPolicy<T> {
+  switch (step.type) {
+    case 'specification':
+      return SpecificationPolicy.fromSpecification(
+        id,
+        domain,
+        name,
+        step.specification!,
+        step.errorCode,
+        step.errorMessage
+      );
+
+    case 'async-specification':
+      return AsyncSpecificationPolicy.fromAsyncSpecification(
+        id,
+        domain,
+        name,
+        step.asyncSpecification!,
+        step.errorCode,
+        step.errorMessage
+      );
+
+    case 'predicate':
+      return new GroupPredicatePolicy(
+        id,
+        domain,
+        name,
+        step.predicate!,
+        step.errorCode,
+        step.errorMessage,
+        step.severity
+      );
+
+    default:
+      return assertNever(step.type, 'createGroupStepPolicy');
+  }
+}
+
 // Helper policy implementations for groups
 
 class GroupPredicatePolicy<T> extends BaseBusinessPolicy<T> {
@@ -303,33 +319,6 @@ class GroupCompositePolicy<T> extends BaseBusinessPolicy<T> {
   private createPolicyFromStep(step: PolicyGroupStep<T>): IBusinessPolicy<T> {
     const stepId = `${this.id}_step_${this.steps.indexOf(step)}`;
 
-    switch (step.type) {
-      case 'specification':
-        return SpecificationPolicy.fromSpecification(
-          stepId,
-          this.domain,
-          `${this.name} - Step`,
-          step.specification!,
-          step.errorCode,
-          step.errorMessage
-        );
-
-      case 'predicate':
-        return new GroupPredicatePolicy(
-          stepId,
-          this.domain,
-          `${this.name} - Step`,
-          step.predicate!,
-          step.errorCode,
-          step.errorMessage,
-          step.severity
-        );
-
-      // Currently supports 'specification' and 'predicate' step types
-      default:
-        throw new Error(
-          `Unsupported step type: ${(step as { type: string }).type}. Supported: specification, predicate`
-        );
-    }
+    return createGroupStepPolicy(step, stepId, this.domain, `${this.name} - Step`);
   }
 }
