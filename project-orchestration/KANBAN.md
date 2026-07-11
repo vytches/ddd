@@ -1,8 +1,9 @@
 # KANBAN — @vytches/ddd
 
-_Last manually updated 2026-07-11 (VF-035 shipped, moved to completed-tasks/;
-tables current as of this date). Age = days since created_at. Grouped by
-priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
+_Last manually updated 2026-07-11 (VF-030 shipped — DI token identity by
+reference, commit `3f7fcff2`, moved to completed-tasks/; earlier same day:
+VF-035). Age = days since created_at. Grouped by priority (P0 critical · P1 high
+· P2 normal/medium · P3 low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -179,15 +180,14 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-_Ordered by actual work priority: VF-024, VF-023, VF-031, and VF-035
+_Ordered by actual work priority: VF-024, VF-023, VF-031, VF-035, and VF-030
 (pre-publish API surface, DDD foundation guarantees, surface diet, composite
-policy step-coverage bug) all shipped; independent hardening (VF-028, VF-030)
-leads now._
+policy step-coverage bug, DI token identity) all shipped; VF-028 is the last P1
+hardening item._
 
 | ID     | Title                                                       | Status  | Age |
 | ------ | ----------------------------------------------------------- | ------- | --- |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN) | backlog | 1d  |
-| VF-030 | DI token identity (fn.name collision, Scoped→Transient)     | backlog | 0d  |
 
 ## P2 — Normal / Medium
 
@@ -229,8 +229,10 @@ tag/release). (2) **VF-024**, **VF-023**, and **VF-031** all shipped 2026-07-11
 pre-first-publish pipeline's design-heavy work is now clear except VF-031's
 deferred AC3 (owned by VF-032). (3) **VF-035** shipped 2026-07-11 (composite
 policy step-coverage bug — the known real production bug in the public policies
-API is fixed; commits `a880b32b` + `63a07593`); next up in P1 is independent
-hardening: **VF-028** (resilience correctness), then **VF-030** (DI token
-identity). Full audit findings:
+API is fixed; commits `a880b32b` + `63a07593`). (4) **VF-030** shipped
+2026-07-11 (DI token identity by reference — UX-C4/UX-C5/UX-T2.1 fixed,
+ADR-0038, commit `3f7fcff2` on `refactor/VF-030-di-token-identity`, pending
+merge to develop); the last P1 hardening item is **VF-028** (resilience
+correctness). Full audit findings:
 `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.

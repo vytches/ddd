@@ -15,7 +15,8 @@ complexity: medium
 estimated_time: 6h
 created_by: LIB-UX-AUDIT-2026-07-10
 created_at: 2026-07-10
-status: backlog
+status: done
+completed_at: 2026-07-11
 release_target:
   pre-first-publish preferred (silent cross-context instance leakage; key-shape
   change is cheapest before publish)
@@ -97,3 +98,30 @@ findings: [UX-C4, UX-C5, UX-T2.1]
   the identical bug class, one layer up.
 - VP-006b (adapter hot path), VF-024 (error-name collision) — coordination
   points.
+
+## Completion note
+
+### 2026-07-11 — implemented on `refactor/VF-030-di-token-identity` (status: done)
+
+All 6 ACs shipped in commit `3f7fcff2` via the approved-analysis pipeline
+(`/analyze-ddd` → human approval → `/orchestrate-ddd`, all 5 units GO on first
+attempt, final security gate GO):
+
+- AC1/AC2: reference-identity keying (`Map<ServiceToken, …>`) in
+  SimpleContainer, BaseContainerAdapter, NestJSContainerAdapter; one internal
+  `describeToken()` util (display-only, not barrel-exported); the three
+  divergent `getTokenKey` copies removed — the protected base-adapter method
+  kept as a deprecated display-only wrapper (documented extension point). Bonus:
+  `Symbol('X')` toString-collision fixed for free.
+- AC3: NestJS adapter Scoped gets a real scoped-instance cache (`createScope()`
+  = boundary) — behavior change, in CHANGELOG.
+- AC4: adapter errors via `ContainerServiceNotFoundError` /
+  `InvalidRegistrationError` (VF-024 final names).
+- AC5: silent `new paramType()` fallback replaced with throwing
+  `resolveDependency` on the base adapter; `createInstance()` signature frozen
+  for VP-006b.
+- AC6: CHANGELOG BC notes; plus ADR-0038 (reference identity + `Symbol.for`
+  guidance), FRAMEWORK-ADAPTERS.md update, TM-VF-030 (ACCEPTED).
+
+Analysis: `project-orchestration/analysis/VF-030-di-token-identity.analysis.md`
+(Q1–Q5 all answered, approved 2026-07-11).
