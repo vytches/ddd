@@ -111,6 +111,21 @@ export interface IAggregateConstructorParams<TId = string> {
    * Leave undefined for "no limit" (preserves backward compatibility).
    */
   maxEvents?: number;
+  /**
+   * VF-023 (D-4, AC6, non-breaking addition): controls what happens when
+   * `apply()` (live) or `loadFromHistory()` (replay) processes an event for
+   * which no handler was registered via `registerEventHandler()`.
+   *
+   * - `"warn"` (default): the event is still recorded/replayed, but a
+   *   warning is logged via the library's internal logger. Preserves the
+   *   previous behavior's intent (missing handlers did not throw) without
+   *   silently swallowing the condition.
+   * - `"throw"`: fail fast instead — useful in tests or strict environments
+   *   where a missing handler indicates a real bug.
+   *
+   * Leave undefined for the default `"warn"` behavior (backward compatible).
+   */
+  onMissingHandler?: 'warn' | 'throw';
 }
 
 // ==========================================

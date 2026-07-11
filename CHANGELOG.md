@@ -7,6 +7,92 @@ All notable changes to this project will be documented in this file. See
 
 ### BREAKING CHANGES
 
+VF-023 — DDD foundation guarantees: value-object validation-during-construction,
+deep immutability, and aggregate event-application atomicity (pre-1.0 BC window;
+see `project-orchestration/tasks/VF-023-ddd-foundation-guarantees.md` and
+`docs/security/threat-models/TM-VF-023.md`):
+
+- **value-objects (AC1):** `BaseValueObject`'s constructor now calls
+  `this.validate(value)` and throws synchronously on failure, instead of relying
+  on every subclass to repeat that check after `super(value)`. Subclasses whose
+  `validate()` override reads other instance fields (rather than only the
+  `value` parameter) will now see `undefined` for those fields, because
+  `validate()` runs before the subclass constructor body executes (the
+  "undefined-during-`super()`" trap). Override the new
+  `protected getInvalidValueMessage(value: T): string` hook to customize the
+  thrown message; a subclass's own post-`super(value)` `throw` is no longer
+  reachable.
+- **value-objects (AC2, AC3, AC11):** `BaseValueObject` values are now
+  **deep**-frozen (`LibUtils.deepFreeze`), not shallow-frozen — nested
+  objects/arrays inside a VO's value are no longer mutable. `equals()` now uses
+  `LibUtils.deepEqual` instead of `JSON.stringify` comparison, fixing false
+  positives/negatives for `undefined`, `Date`, `Map`, `Set`, and `NaN` inside
+  nested structures.
+- **aggregates (AC11):** `AggregateRoot.getDomainEvents()` now returns
+  deep-frozen events (`LibUtils.deepFreeze`), matching the value-objects
+  immutability guarantee. Code that previously mutated events returned from
+  `getDomainEvents()` (a bug even before this change) will now throw in strict
+  mode instead of silently corrupting aggregate state.
+- **aggregates (AC4, F-C6 fix):** `apply()`'s `maxEvents` (REL-007) guard now
+  runs _before_ any state mutation. Previously the guard fired after `_version`
+  had already been incremented, so a caught `maxEvents` error left the
+  aggregate's version and event log permanently out of sync, and a subsequent
+  valid `apply()` call would skip a version number. Guard ordering is now
+  identical between `apply()` (live) and `loadFromHistory()` (replay).
+- **aggregates (AC5, CRITICAL F-H4):** `AggregateRoot._internal_setState` —
+  previously a plain method reachable via any `as unknown as {...}` cast — now
+  requires a module-private `unique symbol` token (`INTERNAL_STATE_TOKEN`,
+  exported only from `./core/aggregate-root`, never from the package's public
+  barrel) as its first parameter, and throws `TypeError` if the token doesn't
+  match. `SnapshotCapability` (the only legitimate caller) has been updated to
+  pass the token. Consumers cannot obtain this token and therefore cannot call
+  `_internal_setState` at all.
+
+#### Consumer Impact Checklist (VF-023)
+
+Before upgrading, run these greps against your codebase to self-audit for the
+behaviors above:
+
+- `grep -rn "\.getValue()\." src/` — find code that reads a nested field off a
+  VO's `getValue()` result and then assigns into it (or into an array method
+  like `.push()`/`.splice()`). These now throw `TypeError` under deep freeze
+  instead of silently mutating shared state.
+- `grep -rn "getDomainEvents()" src/` — find code (projectors, test helpers,
+  outbox processors) that mutates an event or its `payload` after reading it
+  from `getDomainEvents()`. Same deep-freeze consequence as above.
+- `grep -rn "_internal_setState" src/` — find any direct calls to this method.
+  Only `SnapshotCapability` inside `@vytches/ddd-aggregates` itself is a
+  legitimate caller; any application-level call will now fail to compile/throw
+  `TypeError`, since the required `INTERNAL_STATE_TOKEN` is not exported from
+  the public barrel.
+- Review every `BaseValueObject` subclass's `validate()` override: if it
+  previously returned `true`/no-op for values it should have rejected (a silent
+  bug pre-VF-023, since nothing enforced the subclass calling `validate()` at
+  all), construction will now throw at `new Xyz(...)` time instead of allowing
+  an invalid object to exist. Search with
+  `grep -rn "extends BaseValueObject" src/` and manually review each
+  `validate()` body.
+- Review any `validate()` override that reads `this.<otherField>` instead of
+  only its `value` parameter — it will now see `undefined` for fields set up in
+  the subclass constructor body, because `validate()` now runs during `super()`,
+  before that body executes.
+
+### Added
+
+- **aggregates (AC6):**
+  `IAggregateConstructorParams.onMissingHandler?: 'warn' | 'throw'` — new
+  optional constructor parameter controlling what happens when
+  `apply()`/`loadFromHistory()` encounters an event with no registered handler.
+  Defaults to `'warn'` (previous behavior, unchanged — a message is logged and
+  the event is recorded but state is not updated). Pass `'throw'` for tests or
+  strict environments where a missing handler should fail fast instead.
+  Non-breaking, additive.
+- **aggregates (AC10):** `AggregateRoot.equals(other)` — identity-based
+  equality, mirroring `Entity.equals()`. Compares by id
+  (`this.getId().equals(other.getId())`); attribute/version differences are
+  ignored. `AggregateRoot` does not extend `Entity`, so this was previously
+  unavailable on aggregates. Non-breaking, additive.
+
 VF-024 — public API surface curation ahead of the first public publish (pre-1.0
 BC window; see `project-orchestration/tasks/VF-024-prepublish-api-surface.md`):
 

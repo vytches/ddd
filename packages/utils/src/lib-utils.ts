@@ -330,4 +330,55 @@ export class LibUtils {
 
     return true;
   }
+
+  /**
+   * Recursively freezes an object graph in place, returning the same
+   * reference. Used by `BaseValueObject` (VF-023 D-3) and `AggregateRoot`
+   * to enforce immutability beyond the shallow `Object.freeze()` — without
+   * a deep freeze, nested objects/arrays inside a "frozen" value object or
+   * a returned domain-events array remain mutable, defeating the guarantee.
+   *
+   * - Primitives and `null` are returned unchanged (already immutable).
+   * - Cycles are tracked via a `WeakSet` so self-referential structures
+   *   terminate instead of recursing forever.
+   * - `Date`/`RegExp` instances are frozen at the top level only — they
+   *   have no meaningful own-enumerable-property graph to recurse into.
+   * - `Map`/`Set` values are recursively frozen; the collections
+   *   themselves are frozen via `Object.freeze`, which does not block
+   *   `.set()`/`.add()`/`.delete()` (those mutate internal slots, not own
+   *   properties) — callers needing a truly immutable Map/Set should wrap
+   *   access, this only guarantees the *contained* values are deep-frozen.
+   */
+  static deepFreeze<T>(obj: T, seen = new WeakSet<object>()): T {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    const target = obj as unknown as object;
+
+    if (seen.has(target) || Object.isFrozen(target)) {
+      return obj;
+    }
+    seen.add(target);
+
+    if (Array.isArray(target)) {
+      for (const item of target) {
+        this.deepFreeze(item, seen);
+      }
+    } else if (target instanceof Map) {
+      for (const value of target.values()) {
+        this.deepFreeze(value, seen);
+      }
+    } else if (target instanceof Set) {
+      for (const value of target) {
+        this.deepFreeze(value, seen);
+      }
+    } else if (!(target instanceof Date) && !(target instanceof RegExp)) {
+      for (const key of Object.keys(target as Record<string, unknown>)) {
+        this.deepFreeze((target as Record<string, unknown>)[key], seen);
+      }
+    }
+
+    return Object.freeze(obj);
+  }
 }
