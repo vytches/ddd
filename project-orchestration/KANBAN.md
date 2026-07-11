@@ -1,6 +1,6 @@
 # KANBAN — @vytches/ddd
 
-_Last manually updated 2026-07-11 (VF-023 shipped, moved to completed-tasks/;
+_Last manually updated 2026-07-11 (VF-031 shipped, moved to completed-tasks/;
 tables current as of this date). Age = days since created_at. Grouped by
 priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
@@ -142,19 +142,40 @@ priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > merge to `develop` per explicit authorization. Moved to `completed-tasks/`.
 > **Unblocks VF-031**, next in the pre-first-publish sequence.
 
+> **Shipped (2026-07-11)**: **VF-031** done — pre-publish API surface diet, 9 of
+> 10 acceptance criteria (AC3 explicitly **deferred to VF-032**: nestjs's ghost
+> `types/index.ts` is circularly gated on VF-032 AC1's `forRootAsync` shape
+> decision, so `packages/nestjs/` was correctly left untouched). Removed:
+> `events`' entire `audit/` subsystem, `subscribeToContext`, inert
+> `EventHandlerOptions.priority`, `GenericEventPersistenceHandler`; `acl`'s
+> `ACLDiscoveryPlugin` + decorators (nestjs `@ACLAdapterFor` is the working
+> alternative); `domain-services`' write-only `DIDomainServiceMetadataRegistry`;
+> `aggregates`' duplicate capability-interface block, speculative
+> never-implemented interfaces, and the exported `IAggregateBuilder`
+> (**BREAKING** — shape-incompatible with the real builder, no drop-in
+> replacement). Added: `resilience`'s correctly-named `getResilienceConfig()`,
+> with `getResilienceMetrics()` now `@deprecated` in its favor (non-breaking).
+> Two open questions resolved by explicit user decision: **OQ-1** — validation's
+> `RulesRegistry` and `BaseValidationAdapter` are both permanent, equally
+> first-class paths (not legacy vs. current); **OQ-2** — `events/integration`
+> pipeline **KEEP**, not delete (real, re-exported public surface from the
+> `enterprise` barrel, despite zero in-repo logic consumers), with
+> scope-narrowing JSDoc added instead. Verified: fresh test + typecheck green
+> across all 8 directly-touched packages; CHANGELOG.md carries 4 VF-031 entries.
+> Moved to `completed-tasks/`.
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-_Ordered by actual work priority: VF-024 and VF-023 (pre-publish API surface,
-DDD foundation guarantees) shipped, unblocking VF-031, which now leads; then the
-newly-filed real bug (VF-035), then independent hardening (VF-028, VF-030)._
+_Ordered by actual work priority: VF-024, VF-023, and VF-031 (pre-publish API
+surface, DDD foundation guarantees, surface diet) shipped; the newly-filed real
+bug (VF-035) now leads, then independent hardening (VF-028, VF-030)._
 
 | ID     | Title                                                         | Status  | Age |
 | ------ | ------------------------------------------------------------- | ------- | --- |
-| VF-031 | Pre-publish API surface diet (zero-consumer scaffolding)      | backlog | 0d  |
 | VF-035 | Composite policy step-coverage bug (throws instead of Result) | backlog | 0d  |
 | VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)   | backlog | 1d  |
 | VF-030 | DI token identity (fn.name collision, Scoped→Transient)       | backlog | 0d  |
@@ -192,14 +213,14 @@ clears, not a current priority._
 
 **Recommended next action**: (1) VS-013 juz-ide-api validation — still the
 v0.31.0 publication gate, **overdue since 2026-07-05**, human/cross-team action;
-also now the gate for AC8 of the just-shipped VF-023 (external validation
-against the 237+ aggregate consumer, deferred to manual sign-off before any npm
-tag/release). (2) **VF-024** and **VF-023** shipped 2026-07-11 (API surface
-curation; DDD foundation guarantees) — now unblock **VF-031**, which leads the
-pre-first-publish pipeline; it still involves consumer-impacting design calls
-(further surface-diet removals) worth a human review pass before implementation.
-(3) **VF-035** (composite-policy step-coverage bug, now filed) is a real
-production bug in the public policies API — schedule alongside the pre-publish
-work, no design review needed, just implementation. Full audit findings:
+also now the gate for AC8 of the shipped VF-023 (external validation against the
+237+ aggregate consumer, deferred to manual sign-off before any npm
+tag/release). (2) **VF-024**, **VF-023**, and **VF-031** all shipped 2026-07-11
+(API surface curation; DDD foundation guarantees; surface diet) — the
+pre-first-publish pipeline's design-heavy work is now clear except VF-031's
+deferred AC3 (owned by VF-032). (3) **VF-035** (composite-policy step-coverage
+bug, filed 2026-07-11) is a real production bug in the public policies API and
+is the recommended next task to pick up — no design review needed, just
+implementation, and it's already leading the P1 table. Full audit findings:
 `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.
