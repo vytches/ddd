@@ -6,3 +6,6 @@
 - [VB-003 F-M5/D-3 unit verdict](project_vb003_fm5_verdict.md) — pass 1 GO:
   BusRegistrationLedger + real configureContext() implemented correctly, real
   behavioral tests, 215/215 green
+- [VP-006b adapter-core verdict](project_vp006b_adaptercore_verdict.md) — GO:
+  registry-first resolve, lazy paramtypes cache, resolveDependency override all
+  match approved decisions, no packages/di edits, 232/232 green
