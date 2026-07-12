@@ -1,9 +1,9 @@
 # KANBAN — @vytches/ddd
 
-_Last manually updated 2026-07-11 (VF-030 shipped — DI token identity by
-reference, commit `3f7fcff2`, moved to completed-tasks/; earlier same day:
-VF-035). Age = days since created_at. Grouped by priority (P0 critical · P1 high
-· P2 normal/medium · P3 low · backlog)._
+_Last updated 2026-07-12 by `/pulse` (VP-006b code merged to `develop`
+`cf4029dd`, but task file still `backlog` — flagged for `/task-tidy`, not moved
+by this pulse). Age = days since created_at. Grouped by priority (P0 critical ·
+P1 high · P2 normal/medium · P3 low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -191,19 +191,19 @@ hardening item._
 
 ## P2 — Normal / Medium
 
-| ID      | Title                                                             | Status  | Age |
-| ------- | ----------------------------------------------------------------- | ------- | --- |
-| VD-004  | Interactive Documentation System                                  | backlog | 56d |
-| VF-002  | Strategic Design Documentation                                    | backlog | 56d |
-| VP-006b | NestJSContainerAdapter resolve/cold-start optimization            | backlog | 3d  |
-| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 1d  |
-| VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog | 1d  |
-| VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog | 1d  |
-| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
-| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
-| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 0d  |
-| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 0d  |
-| VF-033  | Validation hardening & one validation story                       | backlog | 0d  |
+| ID      | Title                                                             | Status                                                                | Age |
+| ------- | ----------------------------------------------------------------- | --------------------------------------------------------------------- | --- |
+| VD-004  | Interactive Documentation System                                  | backlog                                                               | 56d |
+| VF-002  | Strategic Design Documentation                                    | backlog                                                               | 56d |
+| VP-006b | NestJSContainerAdapter resolve/cold-start optimization            | **merged** `cf4029dd` (2026-07-12), file pending `/task-tidy` archive | 3d  |
+| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog                                                               | 1d  |
+| VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog                                                               | 1d  |
+| VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog                                                               | 1d  |
+| VT-006  | Policies test coverage + testing pkg hardening                    | backlog                                                               | 1d  |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog                                                               | 0d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog                                                               | 0d  |
+| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog                                                               | 0d  |
+| VF-033  | Validation hardening & one validation story                       | backlog                                                               | 0d  |
 
 ## P3 — Low
 
@@ -220,19 +220,17 @@ clears, not a current priority._
 
 ---
 
-**Recommended next action**: (1) VS-013 juz-ide-api validation — still the
-v0.31.0 publication gate, **overdue since 2026-07-05**, human/cross-team action;
-also now the gate for AC8 of the shipped VF-023 (external validation against the
-237+ aggregate consumer, deferred to manual sign-off before any npm
-tag/release). (2) **VF-024**, **VF-023**, and **VF-031** all shipped 2026-07-11
-(API surface curation; DDD foundation guarantees; surface diet) — the
-pre-first-publish pipeline's design-heavy work is now clear except VF-031's
-deferred AC3 (owned by VF-032). (3) **VF-035** shipped 2026-07-11 (composite
-policy step-coverage bug — the known real production bug in the public policies
-API is fixed; commits `a880b32b` + `63a07593`). (4) **VF-030** shipped
-2026-07-11 (DI token identity by reference — UX-C4/UX-C5/UX-T2.1 fixed,
-ADR-0038, commit `3f7fcff2` on `refactor/VF-030-di-token-identity`, pending
-merge to develop); the last P1 hardening item is **VF-028** (resilience
-correctness). Full audit findings:
+**`/pulse` sync (2026-07-12)**: corrected a stale framing — VS-013 (app-logging
+removal) closed **2026-06-05**, and VS-006/VS-008 are also `done`. The only open
+item is the owner's manual juz-ide-api sign-off, **deliberately deferred by
+prior authorization, not overdue** (no deadline was ever set). **VP-006b**
+merged to `develop` 2026-07-12 (`cf4029dd`) — task file needs `/task-tidy`
+archival, flagged above.
+
+**Recommended next action**: (1) **VF-028** (resilience correctness, 8h) is now
+the only open P1 — clears the hardening backlog entirely. (2) Run `/task-tidy`
+to archive VP-006b. (3) When ready to cut the release: run the juz-ide-api
+manual validation (237+ aggregates, 16K tests), then tag/publish v0.31.0 — no
+other code work blocks it. Full audit findings:
 `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.
