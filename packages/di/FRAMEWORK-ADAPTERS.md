@@ -208,6 +208,28 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
 }
 ```
 
+### Caveat: auto-discovery must not target a ModuleRef-holding adapter
+
+The shipped `NestJSContainerAdapter` (in `@vytches/ddd-nestjs`) resolves
+**registry-first** since VP-006b: a token registered on the adapter itself wins
+over the NestJS container, and `ModuleRef` is only the fallback for tokens the
+adapter does not own (ADR-0014 — VytchesDDD as primary container).
+
+Because of that precedence, do **NOT** point handler/service auto-discovery (any
+`discoverAndRegisterHandlers`-style routine that registers bare class tokens as
+Transient) at a container adapter that ALSO holds a `ModuleRef`. Registry-first
+resolution would then construct dependency-less Transient instances from those
+bare class registrations, **shadowing the framework's fully-injected
+singletons**. Keep auto-discovery on a dedicated container (e.g. a
+`SimpleContainer`), or register the live framework instances via
+`registerInstance()` instead of class tokens.
+
+As a safety net, in non-production environments (`NODE_ENV !== 'production'`)
+the adapter logs a one-time-per-token warning when it detects a divergent dual
+registration — the same token resolvable in both the internal registry and the
+NestJS container with different instances. Fix the warning by dropping one of
+the two registrations.
+
 ### NestJS Module Setup
 
 ```typescript

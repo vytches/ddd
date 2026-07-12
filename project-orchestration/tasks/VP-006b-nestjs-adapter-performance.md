@@ -52,13 +52,28 @@ sibling task in `@vytches/nestjs`.
 
 ## Acceptance Criteria
 
-1. [ ] Check adapter's own registry BEFORE `moduleRef.get`; avoid throw+catch on
-       the hot path (no exception-driven control flow per resolution).
-2. [ ] Resolve `design:paramtypes` reflection ONCE at registration time and
-       cache a ready-to-call factory; resolve hot path performs no
-       `Reflect.getMetadata`.
-3. [ ] Remove/serialize the silent `new paramType()` fallback (explicit, logged,
-       or removed) — no accidental instance construction.
+> AC1 and AC2 reworded per the approved analysis
+> (`project-orchestration/analysis/VP-006b-nestjs-adapter-performance.analysis.md`,
+> section "AC rewording", OQ-1/OQ-5 approved 2026-07-11).
+
+1. [ ] `resolve()` checks the adapter's own registry first and falls back to
+       `moduleRef.get` on an internal miss; no exception-driven control flow for
+       internally-registered tokens. Precedence for dual-registered tokens
+       becomes internal-wins (ADR-0014 alignment) — covered by a new explicit
+       precedence test and a CHANGELOG note.
+2. [ ] Cache `design:paramtypes` lazily, once per constructor, on first
+       `createInstance()` (module-level
+       `WeakMap<Constructor, readonly    Constructor[]>`, empty-array results
+       cached too). After first materialization of a constructor, no further
+       `Reflect.getMetadata` calls occur for it;
+       `registerFactory`/`registerInstance` paths are unaffected.
+3. [x] Remove/serialize the silent `new paramType()` fallback (explicit, logged,
+       or removed) — no accidental instance construction. **Satisfied by VF-030
+       (ADR-0038, merged 2026-07-11)**: `createInstance()` resolves constructor
+       dependencies through the inherited throwing `resolveDependency()`
+       (`ContainerServiceNotFoundError` naming the owning service,
+       `CircularDependencyError` with the full chain). Verify-only in VP-006b —
+       done (existing ghost-instance + `CircularDependencyError` tests pin it).
 4. [ ] `createScope()` no longer duplicates the full singleton descriptor set
        per scope (share by reference / lazy view).
 5. [ ] Consumer-side regression measurement (in `juz-ide-api` or a
@@ -67,6 +82,35 @@ sibling task in `@vytches/nestjs`.
 6. [ ] Backward-compat: adapter public behavior preserved (resolution results,
        error types, scope semantics). Assess `@vytches/nestjs` surface
        separately from the `@vytches/ddd-di` snapshot.
+
+## OQ-4 audit result
+
+Divergent dual registration of handler classes exists on the GLOBAL
+`SimpleContainer` path (`discoverAndRegisterHandlers` registers Transient class
+tokens while NestJS holds fully-injected singletons), but resolution never
+traverses `NestJSContainerAdapter` — off-surface for VP-006b. Escalation
+resolved per analysis OQ-1/OQ-4 POST-AUDIT RESOLUTION: proceed with Option A +
+dev-only divergence guard + MINOR classification.
+
+## AC4 measurement outcome
+
+AC4 measurement (read-only) on `perf/VP-006b-nestjs-adapter` via the delivered
+bench: `NODE_OPTIONS='--expose-gc' pnpm --filter @vytches/ddd-nestjs bench`
+(`vitest.bench.config.ts`, `benchmarks/memory.bench.ts`; GC-hinted heap deltas,
+singletons pre-materialized, all 1000 scopes kept live). Two full runs, results
+stable to 0.01 KB.
+
+Raw numbers, `createScope()`×1000, median across samples:
+
+- N=100: retained 7.62 KB/scope, mean 0.0040 ms/scope
+- N=500: retained 28.62 KB/scope, mean 0.0180 ms/scope
+- N=1000: retained 56.62 KB/scope, mean 0.0507 ms/scope
+
+Verdict: retained heap at N=1000 (56.62 KB/scope) exceeds the 50 KB materiality
+threshold (`benchmarks/baseline.json`, `slos.scope`), so the win is MATERIAL —
+copy-on-write implemented per OQ-2 variant (a), preserving the VF-030 D5
+snapshot semantics (post-COW re-run: `createScope()` mean ≈ 0.0076 ms/scope at
+N=1000, `benchmarks/results.json`).
 
 ## Out of scope
 

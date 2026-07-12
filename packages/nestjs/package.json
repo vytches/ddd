@@ -25,6 +25,7 @@
     "dev": "vite build --watch",
     "test": "vitest run",
     "test:watch": "vitest watch",
+    "bench": "vitest bench --config vitest.bench.config.ts && node benchmarks/archive-results.mjs",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
     "clean": "rm -rf dist"
