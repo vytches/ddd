@@ -2,6 +2,8 @@ import type { ModuleRef } from '@nestjs/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NestJSContainerAdapter } from '../src/adapters/nestjs-container.adapter';
 import { safeRun } from '@vytches/ddd-utils';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Required for spying on the internal diagnostics seam
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for testing
 import {
   CircularDependencyError,
@@ -134,6 +136,16 @@ describe('NestJSContainerAdapter', () => {
       expect(mockModuleRef.get).toHaveBeenCalledWith('nestService', { strict: false });
     });
 
+    it('should prefer the INTERNAL registration when a token is registered in both containers (VP-006b registry-first)', () => {
+      const internalInstance = { source: 'internal' };
+      const nestInstance = { source: 'nest' };
+      mockModuleRef.get.mockReturnValue(nestInstance);
+
+      adapter.registerInstance('dualService', internalInstance);
+
+      expect(adapter.resolve('dualService')).toBe(internalInstance);
+    });
+
     it('should resolve from internal container if not in NestJS', () => {
       mockModuleRef.get.mockImplementation(() => {
         throw new Error('Not found');
@@ -226,6 +238,103 @@ describe('NestJSContainerAdapter', () => {
       // Restore original
       Reflect.getMetadata = originalGetMetadata;
     });
+
+    it('should read design:paramtypes only ONCE per implementation across resolves (VP-006b lazy cache)', () => {
+      class CachedDependency {
+        value = 'dep';
+      }
+      class CachedMainService {
+        constructor(public dep: CachedDependency) {}
+      }
+
+      // Both default (Transient) — createInstance runs on EVERY resolve,
+      // yet the reflection read must happen only on the first one.
+      adapter.register(CachedDependency, CachedDependency);
+      adapter.register(
+        'cachedMain',
+        CachedMainService as new (...args: unknown[]) => CachedMainService
+      );
+
+      const originalGetMetadata = Reflect.getMetadata;
+      const getMetadataSpy = vi.fn((key, target) => {
+        if (key === 'design:paramtypes' && target === CachedMainService) {
+          return [CachedDependency];
+        }
+        return originalGetMetadata(key, target);
+      });
+      Reflect.getMetadata = getMetadataSpy;
+
+      try {
+        const first = adapter.resolve<CachedMainService>('cachedMain');
+        const second = adapter.resolve<CachedMainService>('cachedMain');
+
+        // Transient: two distinct instantiations actually happened
+        expect(first).not.toBe(second);
+        expect(first.dep).toBeInstanceOf(CachedDependency);
+        expect(second.dep).toBeInstanceOf(CachedDependency);
+
+        const mainReads = getMetadataSpy.mock.calls.filter(
+          ([key, target]) => key === 'design:paramtypes' && target === CachedMainService
+        );
+        expect(mainReads).toHaveLength(1);
+
+        // Empty metadata (undefined -> []) is cached too — the dependency
+        // was instantiated twice but read only once.
+        const depReads = getMetadataSpy.mock.calls.filter(
+          ([key, target]) => key === 'design:paramtypes' && target === CachedDependency
+        );
+        expect(depReads).toHaveLength(1);
+      } finally {
+        Reflect.getMetadata = originalGetMetadata;
+      }
+    });
+  });
+
+  describe('dual-registration divergence guard (VP-006b)', () => {
+    it('should warn exactly ONCE per token when internal and NestJS registrations diverge', () => {
+      const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+
+      try {
+        const internalInstance = { source: 'internal' };
+        mockModuleRef.get.mockReturnValue({ source: 'nest' });
+
+        adapter.registerInstance('divergentService', internalInstance);
+
+        // Registry-first: internal wins on every resolve, warn fires once
+        expect(adapter.resolve('divergentService')).toBe(internalInstance);
+        expect(adapter.resolve('divergentService')).toBe(internalInstance);
+        expect(adapter.resolve('divergentService')).toBe(internalInstance);
+
+        expect(warnSpy).toHaveBeenCalledTimes(1);
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
+
+    it('should never throw and never warn when the NestJS probe fails or returns the same instance', () => {
+      const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+
+      try {
+        // Probe throws — token only known internally
+        mockModuleRef.get.mockImplementation(() => {
+          throw new Error('Not found');
+        });
+        const internalOnly = { source: 'internal-only' };
+        adapter.registerInstance('internalOnlyService', internalOnly);
+        expect(adapter.resolve('internalOnlyService')).toBe(internalOnly);
+
+        // Probe returns the SAME instance — dual-registered but convergent
+        const shared = { source: 'shared' };
+        mockModuleRef.get.mockReset();
+        mockModuleRef.get.mockReturnValue(shared);
+        adapter.registerInstance('sharedService', shared);
+        expect(adapter.resolve('sharedService')).toBe(shared);
+
+        expect(warnSpy).not.toHaveBeenCalled();
+      } finally {
+        warnSpy.mockRestore();
+      }
+    });
   });
 
   describe('isRegistered', () => {
@@ -311,6 +420,91 @@ describe('NestJSContainerAdapter', () => {
 
       expect(resolved).toBe(instance);
     });
+
+    describe('copy-on-write snapshot semantics (VP-006b OQ-2 / VF-030 D5)', () => {
+      // Adapters without ModuleRef so isRegistered/resolve exercise ONLY the
+      // internal reference-keyed maps, never the NestJS fallback.
+      let parent: NestJSContainerAdapter;
+
+      beforeEach(() => {
+        parent = new NestJSContainerAdapter();
+      });
+
+      it('parent registrations made AFTER scope creation are invisible in the scope', () => {
+        parent.registerInstance('before', { value: 'before' });
+
+        const scope = parent.createScope('request');
+        parent.registerInstance('after', { value: 'after' });
+
+        expect(scope.isRegistered('before')).toBe(true);
+        expect(scope.isRegistered('after')).toBe(false);
+        expect(scope.getServices().map(s => s.token)).toEqual(['before']);
+
+        // Parent sees both
+        expect(parent.getServices()).toHaveLength(2);
+        expect(parent.resolve<{ value: string }>('after').value).toBe('after');
+      });
+
+      it('scope registrations do not leak into the parent or a sibling scope', () => {
+        parent.registerInstance('shared', { value: 'shared' });
+
+        const scopeA = parent.createScope('a');
+        const scopeB = parent.createScope('b');
+
+        scopeA.registerInstance('scope-a-only', { value: 'a' });
+
+        expect(scopeA.isRegistered('scope-a-only')).toBe(true);
+        expect(parent.isRegistered('scope-a-only')).toBe(false);
+        expect(scopeB.isRegistered('scope-a-only')).toBe(false);
+        expect(parent.getServices()).toHaveLength(1);
+        expect(scopeB.getServices()).toHaveLength(1);
+      });
+
+      it('singleton materialized in the parent AFTER scope creation is not shared with the scope', () => {
+        class LateSingleton {}
+        parent.register(LateSingleton, LateSingleton, {
+          lifetime: ServiceLifetime.Singleton,
+        });
+
+        const scope = parent.createScope('request');
+        const parentInstance = parent.resolve(LateSingleton);
+        const scopeInstance = scope.resolve(LateSingleton);
+
+        // Materialized-singleton set is snapshotted at creation time — the
+        // parent's later materialization stays on the parent's side.
+        expect(scopeInstance).not.toBe(parentInstance);
+        expect(scope.resolve(LateSingleton)).toBe(scopeInstance);
+        expect(parent.resolve(LateSingleton)).toBe(parentInstance);
+      });
+
+      it('singleton materialized in a scope does not leak into the parent', () => {
+        class ScopeFirstSingleton {}
+        parent.register(ScopeFirstSingleton, ScopeFirstSingleton, {
+          lifetime: ServiceLifetime.Singleton,
+        });
+
+        const scope = parent.createScope('request');
+        const scopeInstance = scope.resolve(ScopeFirstSingleton);
+        const parentInstance = parent.resolve(ScopeFirstSingleton);
+
+        expect(parentInstance).not.toBe(scopeInstance);
+        expect(parent.resolve(ScopeFirstSingleton)).toBe(parentInstance);
+        expect(scope.resolve(ScopeFirstSingleton)).toBe(scopeInstance);
+      });
+
+      it('parent.dispose() does not clear a live scope snapshot', () => {
+        const instance = { value: 'survivor' };
+        parent.registerInstance('survivor', instance);
+
+        const scope = parent.createScope('request');
+        parent.dispose();
+
+        expect(parent.getServices()).toHaveLength(0);
+        expect(scope.isRegistered('survivor')).toBe(true);
+        expect(scope.resolve('survivor')).toBe(instance);
+        expect(scope.getServices()).toHaveLength(1);
+      });
+    });
   });
 
   describe('dispose', () => {
@@ -327,6 +521,43 @@ describe('NestJSContainerAdapter', () => {
       expect(adapter.getServices()).toHaveLength(0);
       expect(adapter.isRegistered('service1')).toBe(false);
       expect(adapter.isRegistered('service2')).toBe(false);
+    });
+
+    it('scope.dispose() does not clear parent maps', () => {
+      // Adapter without ModuleRef so assertions exercise ONLY the internal
+      // reference-keyed maps (VF-030 D5 scope semantics, VP-006b OQ-2).
+      const parent = new NestJSContainerAdapter();
+
+      const singletonInstance = { value: 'materialized-singleton' };
+      parent.registerInstance('singleton', singletonInstance, {
+        lifetime: ServiceLifetime.Singleton,
+      });
+
+      class ScopedService {}
+      parent.register(ScopedService, ScopedService, {
+        lifetime: ServiceLifetime.Scoped,
+      });
+
+      // Materialize the parent's scoped cache too
+      const parentScopedInstance = parent.resolve(ScopedService);
+
+      const scope = parent.createScope('request');
+      expect(scope.resolve('singleton')).toBe(singletonInstance);
+      scope.resolve(ScopedService);
+
+      expect(scope.dispose).toBeDefined();
+      scope.dispose?.();
+
+      // Parent services map survives
+      expect(parent.getServices()).toHaveLength(2);
+      expect(parent.isRegistered('singleton')).toBe(true);
+      expect(parent.isRegistered(ScopedService)).toBe(true);
+
+      // Parent singletonInstances map survives — same materialized instance
+      expect(parent.resolve('singleton')).toBe(singletonInstance);
+
+      // Parent scopedInstances cache survives — same instance as before
+      expect(parent.resolve(ScopedService)).toBe(parentScopedInstance);
     });
   });
 

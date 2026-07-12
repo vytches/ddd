@@ -1,7 +1,9 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import {
   BaseContainerAdapter,
+  CircularDependencyError,
   ContainerServiceNotFoundError,
   InvalidRegistrationError,
   ServiceLifetime,
@@ -17,6 +19,23 @@ import type {
 import type { ExtendedServiceRegistrationOptions } from '../types/extended';
 
 /**
+ * Sentinel returned by the internal miss-tolerant resolution path when a
+ * token is found neither in the internal registry nor in the NestJS
+ * container. Module-private — never leaves this file.
+ */
+const NOT_RESOLVED: unique symbol = Symbol('vytches.ddd.nestjs.not-resolved');
+
+/**
+ * Lazy-once reflection cache (VP-006b / D-1): `design:paramtypes` is read via
+ * `Reflect.getMetadata` exactly ONCE per constructor — on the FIRST
+ * instantiation, never at `register()` time — and reused for every later
+ * instantiation. Empty results are cached as empty arrays.
+ * Paramtypes metadata is immutable after class definition, so there is no
+ * invalidation; the WeakMap lets constructors be garbage-collected.
+ */
+const paramTypesCache = new WeakMap<Constructor<unknown>, readonly Constructor<unknown>[]>();
+
+/**
  * NestJS Container Adapter
  * Bridges NestJS DI system with VytchesDDD service locator
  *
@@ -28,10 +47,35 @@ import type { ExtendedServiceRegistrationOptions } from '../types/extended';
  */
 @Injectable()
 export class NestJSContainerAdapter extends BaseContainerAdapter {
-  private readonly services = new Map<ServiceToken, ServiceDescriptor>();
-  private readonly singletonInstances = new Map<ServiceToken, unknown>();
+  /**
+   * VP-006b (OQ-2) copy-on-write: `services` and `singletonInstances` may be
+   * SHARED by reference with adapters created via {@link createScope}. The
+   * matching `*Shared` flag marks a map as potentially backing another
+   * adapter's snapshot; every mutation path forks the map first (see
+   * {@link forkServicesIfShared} / {@link forkSingletonInstancesIfShared}),
+   * so a mutation on one side never leaks into the other side's snapshot.
+   * `scopedInstances` is always adapter-private and never shared (VF-030 D5).
+   */
+  private services = new Map<ServiceToken, ServiceDescriptor>();
+  private servicesShared = false;
+  private singletonInstances = new Map<ServiceToken, unknown>();
+  private singletonInstancesShared = false;
   private readonly scopedInstances = new Map<ServiceToken, unknown>();
   private moduleRef?: ModuleRef;
+
+  /**
+   * Tokens currently being resolved through {@link resolveDependency}.
+   * Kept locally because the base class stack is private (VP-006b / D-3);
+   * error type and chain semantics are identical to the base implementation.
+   */
+  private readonly resolutionChain: ServiceToken[] = [];
+
+  /**
+   * Tokens already probed by the dev-only dual-registration divergence
+   * guard — each token is probed against the NestJS container at most once
+   * per adapter instance (VP-006b / OQ-4 post-audit condition).
+   */
+  private readonly divergenceProbedTokens = new Set<ServiceToken>();
 
   constructor(@Optional() @Inject(ModuleRef) moduleRef?: ModuleRef) {
     super();
@@ -48,32 +92,65 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
   }
 
   /**
-   * Resolve a service by token
+   * Resolve a service by token.
+   *
+   * VP-006b (OQ-1/A) — REGISTRY-FIRST with ModuleRef fallback: tokens
+   * registered on this adapter resolve internally (caches/lifetimes as
+   * before) without touching `ModuleRef.get`; only tokens the adapter does
+   * NOT own fall back to the NestJS container, exactly as before. For a
+   * token registered in BOTH containers the INTERNAL registration now wins
+   * (behavior change — see CHANGELOG); a dev-only guard warns once per
+   * token when the two would diverge.
    *
    * @throws ContainerServiceNotFoundError when the token is not registered
    * @throws InvalidRegistrationError when the registration has no implementation,
    * factory, or instance
    */
   resolve<T>(token: ServiceToken<T>): T {
-    // First, try to resolve from NestJS container
+    const result = this.resolveOrMiss(token);
+    if (result === NOT_RESOLVED) {
+      throw new ContainerServiceNotFoundError(token);
+    }
+    return result;
+  }
+
+  /**
+   * Single-pass resolution shared by {@link resolve} and
+   * {@link resolveDependency}: internal registry first, then the NestJS
+   * container. Returns the {@link NOT_RESOLVED} sentinel instead of throwing
+   * on a miss so each caller can raise `ContainerServiceNotFoundError` with
+   * its own context (plain vs. owner-scoped) without a double lookup.
+   */
+  private resolveOrMiss<T>(token: ServiceToken<T>): T | typeof NOT_RESOLVED {
+    // Internal container first — keyed by the token itself (VF-030 D1)
+    const descriptor = this.services.get(token);
+    if (descriptor) {
+      const instance = this.resolveInternal<T>(token, descriptor);
+      this.warnOnDualRegistrationDivergence(token, instance);
+      return instance;
+    }
+
+    // Fallback: NestJS DI for tokens the adapter does not own
     if (this.moduleRef) {
       try {
-        // Try to get from NestJS DI
         const nestInstance = this.moduleRef.get(token as ServiceToken<T>, { strict: false });
         if (nestInstance) {
           return nestInstance as T;
         }
       } catch {
-        // Continue to internal resolution
+        // Not found in NestJS either — fall through to the sentinel
       }
     }
 
-    // Then try our internal container — keyed by the token itself (VF-030 D1)
-    const descriptor = this.services.get(token);
-    if (!descriptor) {
-      throw new ContainerServiceNotFoundError(token);
-    }
+    return NOT_RESOLVED;
+  }
 
+  /**
+   * Resolve a token that IS present in the internal registry, honoring
+   * lifetime caches (VF-030 D5) — byte-for-byte the pre-VP-006b internal
+   * branch of `resolve()`.
+   */
+  private resolveInternal<T>(token: ServiceToken<T>, descriptor: ServiceDescriptor): T {
     // Check caches (singleton shared across scopes at creation time,
     // scoped bounded to THIS adapter instance — VF-030 D5)
     if (descriptor.lifetime === ServiceLifetime.Singleton && this.singletonInstances.has(token)) {
@@ -95,8 +172,10 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       throw new InvalidRegistrationError(token, 'No implementation, factory, or instance provided');
     }
 
-    // Cache singleton instances
+    // Cache singleton instances (fork first — a singleton materialized
+    // AFTER a scope split must stay invisible to the other side's snapshot)
     if (descriptor.lifetime === ServiceLifetime.Singleton) {
+      this.forkSingletonInstancesIfShared();
       this.singletonInstances.set(token, instance);
     }
 
@@ -106,6 +185,43 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
     }
 
     return instance;
+  }
+
+  /**
+   * Dev-only dual-registration divergence guard (VP-006b post-audit
+   * condition): on the FIRST internal-registry hit for a token, probe the
+   * NestJS container once; if NestJS would have produced a DIFFERENT
+   * instance, warn (once per token per adapter instance) that registry-first
+   * resolution changed which instance wins. Never throws; entirely skipped
+   * when NODE_ENV === 'production', so the production hot path pays only
+   * the env check.
+   */
+  private warnOnDualRegistrationDivergence(token: ServiceToken, internalInstance: unknown): void {
+    if (process.env.NODE_ENV === 'production') {
+      return;
+    }
+    if (!this.moduleRef || this.divergenceProbedTokens.has(token)) {
+      return;
+    }
+    this.divergenceProbedTokens.add(token);
+
+    try {
+      const nestInstance = this.moduleRef.get(token as ServiceToken, { strict: false });
+      if (
+        nestInstance !== undefined &&
+        nestInstance !== null &&
+        nestInstance !== internalInstance
+      ) {
+        internalLogger.warn(
+          'NestJSContainerAdapter: token is registered in BOTH the internal registry and the ' +
+            'NestJS container with different instances; registry-first resolution (VP-006b) ' +
+            'returns the INTERNAL registration. Remove one of the two registrations.',
+          { token: this.getTokenKey(token) }
+        );
+      }
+    } catch {
+      // Token is not resolvable through NestJS — no dual registration.
+    }
   }
 
   /**
@@ -125,6 +241,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
+    this.forkServicesIfShared();
     this.services.set(token, descriptor);
 
     // If NestJS ModuleRef is available, try to register there too
@@ -151,6 +268,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
+    this.forkServicesIfShared();
     this.services.set(token, descriptor);
   }
 
@@ -171,7 +289,9 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
+    this.forkServicesIfShared();
     this.services.set(token, descriptor);
+    this.forkSingletonInstancesIfShared();
     this.singletonInstances.set(token, instance);
   }
 
@@ -207,32 +327,78 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
   /**
    * Create a scoped container.
    *
-   * The new adapter instance IS the scope boundary (VF-030 D5): all
-   * registrations are visible in the scope, already-materialized singleton
-   * instances are shared, and the scope starts with a FRESH scoped-instance
-   * cache — a Scoped service resolves to a distinct instance per scope.
+   * The new adapter instance IS the scope boundary (VF-030 D5): the scope
+   * sees a SNAPSHOT of the parent's registrations and materialized singleton
+   * instances as of creation time — registrations added to the parent AFTER
+   * this call are invisible in the scope (and vice versa) — and the scope
+   * starts with a FRESH scoped-instance cache, so a Scoped service resolves
+   * to a distinct instance per scope.
+   *
+   * VP-006b (OQ-2, measured MATERIAL — 56.62 KB retained per live scope at
+   * N=1000 registered services under the previous eager dual-Map copy): the
+   * snapshot is COPY-ON-WRITE. This call is O(1) — parent and scope share
+   * the `services` and `singletonInstances` maps by REFERENCE, and the
+   * first mutation on either side (a new registration, or materializing a
+   * not-yet-cached singleton) forks the mutating side's map, leaving the
+   * other side's snapshot untouched. `dispose()` drops map references
+   * instead of clearing shared maps, so disposing a scope never clears the
+   * parent's maps (and disposing the parent never clears a live scope's
+   * snapshot).
    */
   override createScope(_context?: string): IDependencyContainer {
     const scopedAdapter = new NestJSContainerAdapter(this.moduleRef);
 
-    this.services.forEach((descriptor, token) => {
-      scopedAdapter.services.set(token, descriptor);
-    });
-    this.singletonInstances.forEach((instance, token) => {
-      scopedAdapter.singletonInstances.set(token, instance);
-    });
-    // scopedInstances intentionally NOT copied — fresh scoped cache per scope
+    // Share by reference; the *Shared flags arm the write barriers on BOTH
+    // sides. scopedInstances is intentionally NOT shared — fresh scoped
+    // cache per scope (VF-030 D5).
+    this.servicesShared = true;
+    this.singletonInstancesShared = true;
+    scopedAdapter.services = this.services;
+    scopedAdapter.servicesShared = true;
+    scopedAdapter.singletonInstances = this.singletonInstances;
+    scopedAdapter.singletonInstancesShared = true;
 
     return scopedAdapter;
   }
 
   /**
-   * Dispose of the container and clean up resources
+   * Dispose of the container and clean up resources.
+   *
+   * Copy-on-write safe (VP-006b): the shared `services` /
+   * `singletonInstances` maps are never `clear()`ed — this adapter merely
+   * drops its references — so disposing a scope leaves the parent's maps
+   * (and any sibling scope's snapshot) fully intact, and vice versa.
    */
   override dispose(): void {
-    this.services.clear();
-    this.singletonInstances.clear();
+    this.services = new Map();
+    this.servicesShared = false;
+    this.singletonInstances = new Map();
+    this.singletonInstancesShared = false;
     this.scopedInstances.clear();
+  }
+
+  /**
+   * Write barrier for the copy-on-write `services` map (VP-006b / OQ-2):
+   * if the map may back another adapter's snapshot, replace it with a
+   * private shallow copy before mutating. Descriptors themselves are never
+   * mutated, so a shallow copy is sufficient.
+   */
+  private forkServicesIfShared(): void {
+    if (this.servicesShared) {
+      this.services = new Map(this.services);
+      this.servicesShared = false;
+    }
+  }
+
+  /**
+   * Write barrier for the copy-on-write `singletonInstances` map
+   * (VP-006b / OQ-2) — see {@link forkServicesIfShared}.
+   */
+  private forkSingletonInstancesIfShared(): void {
+    if (this.singletonInstancesShared) {
+      this.singletonInstances = new Map(this.singletonInstances);
+      this.singletonInstancesShared = false;
+    }
   }
 
   /**
@@ -244,9 +410,17 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
    * `CircularDependencyError`; there is no silent zero-arg fallback.
    */
   private createInstance<T>(constructor: Constructor<T>): T {
-    // Get constructor parameters
-    const paramTypes: Constructor<unknown>[] =
-      Reflect.getMetadata('design:paramtypes', constructor) || [];
+    // Get constructor parameters — lazy-once per constructor (VP-006b D-1):
+    // the FIRST instantiation reads Reflect metadata, later ones hit the
+    // module-level WeakMap (empty results are cached too).
+    let paramTypes = paramTypesCache.get(constructor as Constructor<unknown>);
+    if (paramTypes === undefined) {
+      paramTypes =
+        (Reflect.getMetadata('design:paramtypes', constructor) as
+          | Constructor<unknown>[]
+          | undefined) || [];
+      paramTypesCache.set(constructor as Constructor<unknown>, paramTypes);
+    }
 
     // Resolve dependencies — fail loudly on any unresolvable parameter
     const dependencies = paramTypes.map(paramType =>
@@ -255,6 +429,40 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
 
     // Create instance with resolved dependencies
     return new constructor(...dependencies);
+  }
+
+  /**
+   * Resolve a constructor dependency of `ownerToken` in a SINGLE pass
+   * (VP-006b / OQ-3), overriding the base `isRegistered()` + `resolve()`
+   * double lookup.
+   *
+   * Semantics are identical to the base implementation: an unregistered
+   * dependency throws `ContainerServiceNotFoundError` with the owning
+   * service as context (display string via the inherited `getTokenKey`),
+   * and a resolution cycle throws `CircularDependencyError` with the full
+   * chain. `CircularDependencyError` (and any other error from nested
+   * resolution, e.g. `InvalidRegistrationError` or an owner-scoped
+   * not-found from a deeper level) is NEVER swallowed or re-wrapped —
+   * only THIS level's miss gets THIS owner's context.
+   *
+   * @throws ContainerServiceNotFoundError when the dependency is not registered
+   * @throws CircularDependencyError when a resolution cycle is detected
+   */
+  protected override resolveDependency<T>(param: ServiceToken<T>, ownerToken: ServiceToken): T {
+    if (this.resolutionChain.includes(param)) {
+      throw new CircularDependencyError([...this.resolutionChain, param]);
+    }
+
+    this.resolutionChain.push(param);
+    try {
+      const result = this.resolveOrMiss(param);
+      if (result === NOT_RESOLVED) {
+        throw new ContainerServiceNotFoundError(param, this.getTokenKey(ownerToken));
+      }
+      return result;
+    } finally {
+      this.resolutionChain.pop();
+    }
   }
 
   /**

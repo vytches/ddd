@@ -190,6 +190,50 @@ as part of the same surface diet, not user-facing deprecations):
 - **aggregates:** duplicate capability interfaces and speculative
   never-implemented capability interfaces (e.g. `ICachingCapability`) removed.
 
+### Changed
+
+VP-006b — `NestJSContainerAdapter` resolve / cold-start / scope performance
+(MINOR-worthy; see
+`project-orchestration/tasks/VP-006b-nestjs-adapter-performance.md`):
+
+- **nestjs:** **BEHAVIOR CHANGE**: `NestJSContainerAdapter.resolve()` now checks
+  the internal VytchesDDD registry before falling back to `ModuleRef` (aligns
+  with ADR-0014, VytchesDDD as primary container). Only affects tokens
+  registered in BOTH places with DIVERGENT instances — the internal instance now
+  wins where NestJS's previously did. If you dual-register, either drop the
+  internal registration or call `moduleRef.get()` directly for the NestJS
+  instance. In non-production environments the adapter logs a one-time warning
+  when it detects such a divergent dual registration.
+
+### Performance Improvements
+
+- **nestjs:** `NestJSContainerAdapter` caches `design:paramtypes` lazily, once
+  per constructor, on first instantiation (module-level
+  `WeakMap<Constructor, readonly Constructor[]>`; empty results cached too).
+  After a constructor's first materialization no further `Reflect.getMetadata`
+  calls occur for it. No behavior change — `registerFactory`/`registerInstance`
+  paths are unaffected.
+- **nestjs:** constructor-dependency resolution is now a SINGLE pass
+  (`resolveDependency` override replacing the base `isRegistered()` +
+  `resolve()` double lookup — previously up to two `ModuleRef.get` calls per
+  NestJS-side constructor parameter plus one swallowed throw per internal
+  parameter). Error contract unchanged: `ContainerServiceNotFoundError` naming
+  the owning service, `CircularDependencyError` with the full resolution chain,
+  `InvalidRegistrationError` — same types, messages, and timing.
+- **nestjs:** `createScope()` is now O(1) copy-on-write instead of eagerly
+  copying the full descriptor + singleton maps per scope. Measurement (AC4,
+  GC-hinted heap deltas, 1000 live scopes): the eager copy retained 56.62 KB per
+  live scope at N=1000 registered services — above the 50 KB materiality
+  threshold — hence copy-on-write; snapshot semantics (VF-030 D5) are preserved
+  exactly, and `dispose()` of a scope never clears the parent's maps (covered by
+  new tests).
+- **nestjs:** dev-only benchmarks added (`benchmarks/`,
+  `vitest.bench.config.ts`, `pnpm --filter @vytches/ddd-nestjs bench`) with
+  count-based SLOs (`benchmarks/baseline.json`: zero `ModuleRef.get` calls /
+  throws on the production hot path for internally-owned tokens, one
+  `Reflect.getMetadata` per constructor) plus heap/timing metrics. Not part of
+  the published package (`files` whitelist).
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 ### Bug Fixes
