@@ -71,7 +71,7 @@ import { DomainEvent, UnifiedEventBus } from '@vytches/ddd-events';
 
 class OrderPlaced extends DomainEvent<{ orderId: string; total: number }> {
   constructor(payload: { orderId: string; total: number }) {
-    super('OrderPlaced', payload, { version: 1, source: 'OrderContext' });
+    super(payload, { version: 1, source: 'OrderContext' });
   }
 }
 
@@ -109,7 +109,7 @@ class OrderCreatedIntegrationEvent extends IntegrationEvent<{
   orderId: string;
 }> {
   constructor(orderId: string) {
-    super('OrderCreated', { orderId }, { source: 'OrderContext' });
+    super({ orderId }, { source: 'OrderContext' });
   }
 }
 

@@ -226,6 +226,22 @@ jobs:
           fi
           echo "✅ example-matrix --check passed (see header comment above: this is additional to, not a substitute for, the L1/L2/L3 vitest --coverage gate)."
 
+      # VD-005 (AC11): docs compile gate (tools/docs-compile-gate) —
+      # type-checks TypeScript code fences in README.md/LLMGUIDE.md against
+      # the REAL package source (via tsconfig.base.json's @vytches/ddd-*
+      # path map), catching the exact drift class fixed by VD-005's "Code &
+      # Snippets" layer (wrong constructor argument order, methods that
+      # don't exist, renamed config fields) before it lands again. v1 is
+      # OPT-IN (D-2): only fences carrying the `compile-check` marker
+      # (```ts compile-check) are ever checked — plain fences are left
+      # alone, so this can never fail on pre-existing, unmarked docs. See
+      # tools/docs-compile-gate/README.md for the marker convention.
+      - name: Check docs compile gate (VD-005 AC11)
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "🔍 Type-checking \`compile-check\`-marked fences in README.md/LLMGUIDE.md..."
+          pnpm docs-compile-gate:check
+
       - name: Check if quality gates needed
         id: check_gates
         run: |

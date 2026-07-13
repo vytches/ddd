@@ -1,7 +1,12 @@
 # Enhanced Metadata System V2 - YAML-Only Cleanup Status
 
+> **status: abandoned/superseded** — Tracks progress on a YAML-based
+> JSDoc-injection pipeline that was never completed and does not exist on disk
+> (zero YAML config files). JSDoc in this repo is written inline in TypeScript
+> source. Kept for historical reference only.
+
 **Date**: 2025-08-09  
-**Status**: PARTIAL CLEANUP COMPLETED  
+**Status**: PARTIAL CLEANUP COMPLETED (never finished — see notice above)  
 **Scope**: Transition from inline JSDoc markers to pure YAML configuration
 
 ## Executive Summary

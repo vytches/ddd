@@ -27,6 +27,14 @@ SEC-RESILIENCE-001 (MEDIUM), SEC-MESSAGING-001 (MEDIUM), SEC-VALUEOBJECTS-001
 
 ---
 
+> **HISTORYCZNE / SUPERSEDED (2026-07-12, VD-005):** Pakiet
+> `@vytches/ddd-logging`, którego dotyczą poniższe cztery findingi
+> (SEC-LOGGING-001…004), został usunięty z repozytorium w zadaniu VS-013
+> (`refactor: replace application-logging layer with internal-only diagnostics`,
+> commit `fa316eaf`). Sekcja poniżej zachowana jest jako historyczny zapis
+> audytu — nie opisuje już aktualnego kodu i nie wymaga dalszych działań
+> naprawczych.
+
 ### SEC-LOGGING-002 — CQRS decorators: `includePayload: true` loguje cały obiekt bez maskowania
 
 **Pakiet:** `@vytches/ddd-logging`  

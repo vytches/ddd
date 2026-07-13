@@ -34,9 +34,9 @@ await breaker.execute(() => paymentApi.charge(order));
 // 2. Composed policy: timeout → retry → circuit breaker → bulkhead
 const policy = new ResiliencePolicyBuilder()
   .withTimeout(5_000)
-  .withRetry({ maxAttempts: 3, baseDelayMs: 100 })
+  .withRetry({ maxAttempts: 3, baseDelay: 100 })
   .withCircuitBreaker({ failureThreshold: 5 })
-  .withBulkhead({ maxConcurrent: 10, maxQueue: 50 })
+  .withBulkhead({ maxConcurrency: 10, queueCapacity: 50 })
   .build();
 
 const result = await policy.execute(() => externalService.call(payload));
@@ -72,8 +72,8 @@ const result = await policy.execute(() => externalService.call(payload));
 | -------------------------------- | --------- | ------------------------------------------------------ |
 | `RetryDecorator(opts?)`          | decorator | `@RetryDecorator({ maxAttempts: 3 })` on a method      |
 | `CircuitBreakerDecorator(opts?)` | decorator | `@CircuitBreakerDecorator({ name, failureThreshold })` |
-| `BulkheadDecorator(opts?)`       | decorator | `@BulkheadDecorator({ maxConcurrent: 10 })`            |
-| `TimeoutDecorator(opts?)`        | decorator | `@TimeoutDecorator({ ms: 2000 })`                      |
+| `BulkheadDecorator(opts?)`       | decorator | `@BulkheadDecorator({ maxConcurrency: 10 })`           |
+| `TimeoutDecorator(opts?)`        | decorator | `@TimeoutDecorator({ timeout: 2000 })`                 |
 | `ResilienceDecorator(opts?)`     | decorator | Composite — apply all four with one decorator          |
 | `getResilienceMetrics(target)`   | function  | Read accumulated metrics from a decorated class        |
 | `RetryDecoratorConfig`           | type      | Decorator options                                      |
@@ -125,8 +125,8 @@ import {
 
 class PaymentService {
   @ResilienceDecorator({
-    timeout: { ms: 2000 },
-    retry: { maxAttempts: 3, baseDelayMs: 100 },
+    timeout: 2000,
+    retry: { maxAttempts: 3, baseDelay: 100 },
     circuitBreaker: { name: 'payments', failureThreshold: 5 },
   })
   async charge(orderId: string, amount: number): Promise<void> {

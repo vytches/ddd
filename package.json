@@ -85,6 +85,7 @@
     "ddd:lint": "tsx tools/ddd-lint/src/cli.ts packages",
     "example-matrix:check": "tsx tools/example-matrix/src/cli.ts --check",
     "example-matrix:generate": "tsx tools/example-matrix/src/cli.ts",
+    "docs-compile-gate:check": "tsx tools/docs-compile-gate/src/cli.ts --check",
     "// === QUALITY GATES ===": "",
     "quality": "node scripts/quality-gates/quality-gates.js",
     "quality:ci": "node scripts/quality-gates/quality-gates.js --ci --parallel",
