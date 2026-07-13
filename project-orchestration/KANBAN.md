@@ -1,9 +1,11 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-07-12 by `/pulse` (VP-006b code merged to `develop`
-`cf4029dd`, but task file still `backlog` — flagged for `/task-tidy`, not moved
-by this pulse). Age = days since created_at. Grouped by priority (P0 critical ·
-P1 high · P2 normal/medium · P3 low · backlog)._
+_Last updated 2026-07-13 (VD-005 shipped — docs truth cleanup + new
+`tools/docs-compile-gate` CI tool, all 11 ACs done, moved to `completed-tasks/`,
+merged to `develop`). VP-006b code merged to `develop` `cf4029dd` (2026-07-12),
+task file still `backlog` — still flagged for `/task-tidy`. Age = days since
+created_at. Grouped by priority (P0 critical · P1 high · P2 normal/medium · P3
+low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -198,7 +200,6 @@ hardening item._
 | VP-006b | NestJSContainerAdapter resolve/cold-start optimization            | **merged** `cf4029dd` (2026-07-12), file pending `/task-tidy` archive | 3d  |
 | VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog                                                               | 1d  |
 | VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog                                                               | 1d  |
-| VD-005  | Docs truth cleanup (docs/README, ADR index, quickstarts, JSDoc)   | backlog                                                               | 1d  |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog                                                               | 1d  |
 | VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog                                                               | 0d  |
 | VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog                                                               | 0d  |

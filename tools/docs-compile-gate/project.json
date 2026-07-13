@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches/docs-compile-gate",
+  "projectType": "application",
+  "sourceRoot": "tools/docs-compile-gate/src",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run tools/docs-compile-gate/tests --config tools/docs-compile-gate/vitest.config.mts --reporter=verbose"
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project tools/docs-compile-gate/tsconfig.json"
+      }
+    }
+  },
+  "tags": ["scope:tool", "type:cli"]
+}

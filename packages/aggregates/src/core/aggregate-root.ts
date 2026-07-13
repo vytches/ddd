@@ -196,6 +196,9 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
+   * The version increments by one each time `apply()` successfully records a
+   * domain event; compare it against the persisted version to detect
+   * concurrent modification (optimistic locking).
    *
    * @returns {number} Current version number for optimistic locking
    */
@@ -204,6 +207,9 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
+   * The version this aggregate had when it was loaded (or as of the last
+   * `commit()`), letting callers work out how many events have been applied
+   * since without recomputing from the event log.
    *
    * @returns {number} Initial version when aggregate was loaded
    */
@@ -212,6 +218,9 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   }
 
   /**
+   * Whether this aggregate has recorded domain events since its last
+   * `commit()` — use it to decide whether persistence/dispatch work is
+   * needed at all.
    *
    * @returns {boolean} True if aggregate has uncommitted domain events
    */
@@ -263,6 +272,19 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
    * @param {string | IDomainEvent<P>} eventTypeOrEvent - Event type string or complete event object
    * @param {P} payload - Event payload data
    * @param {Partial<IEventMetadata>} metadata - Optional event metadata
+   * @throws {Error} when the aggregate's configured maxEvents limit would be exceeded
+   * @example Hitting the maxEvents guard
+   * ```typescript
+   * class Order extends AggregateRoot<string> {
+   *   record(customerId: string, amount: number): void {
+   *     this.apply('OrderCreated', { customerId, amount });
+   *   }
+   * }
+   *
+   * const order = new Order({ id: EntityId.create(), version: 0, maxEvents: 1 });
+   * order.record('c-1', 100); // ok, 1 event recorded
+   * order.record('c-1', 100); // throws: maxEvents limit of 1 exceeded
+   * ```
    */
   protected apply<P = unknown>(
     eventTypeOrEvent: string | IDomainEvent<P>,

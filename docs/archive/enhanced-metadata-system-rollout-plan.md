@@ -1,5 +1,10 @@
 # Enhanced Metadata System V2 - Rollout Plan
 
+> **status: abandoned/superseded** — This 12-week rollout plan for a YAML-based
+> JSDoc pipeline was never executed. There are zero YAML config files on disk
+> and no vite plugin for JSDoc injection; JSDoc is written inline in TypeScript
+> source instead. Kept for historical reference only.
+
 ## Executive Summary
 
 This document outlines the comprehensive rollout strategy for implementing the

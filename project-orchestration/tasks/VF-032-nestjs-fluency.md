@@ -81,6 +81,9 @@ real e2e coverage), but it is not "natural, fluent, efficient":
 6. [ ] Golden-path docs updated to the final recommended pattern; nonexistent
        `forRoot({ autoRegister })` removed from `README_SIMPLE_INTEGRATION.md`
        (doc-drift umbrella: VD-005 AC10).
+   > Note (2026-07-12): the `autoRegister` reference itself was already removed
+   > under VD-005 AC10d. This AC's remaining scope is only the
+   > `forRootAsync`/`forFeature` design work above (items 1-3).
 7. [ ] One runnable end-to-end example under `examples/`: aggregate → command
        handler → repository (with an in-memory persistence handler) →
        per-context event bus → event handler, wired via `forFeature()`.

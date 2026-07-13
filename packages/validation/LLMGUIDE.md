@@ -376,7 +376,6 @@ validators prefix error property paths automatically (e.g., `address.zip`).
 - `@vytches/ddd-contracts` — `ISpecification`, `IAsyncSpecification`,
   `IValidator`, `IValidationRule`
 - `@vytches/ddd-utils` — `Result<T, E>`
-- `@vytches/ddd-logging` — structured logger
 
 Packages that depend on `@vytches/ddd-validation`:
 

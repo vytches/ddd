@@ -24,11 +24,10 @@ import { VytchesDDDModule } from '@vytches/ddd-nestjs';
 
 @Module({
   imports: [
-    // ✅ Simple setup - everything configured automatically
-    VytchesDDDModule.forRoot({
-      // Auto-configured providers with sensible defaults
-      autoRegister: true, // Automatically discovers and registers handlers
-    }),
+    // ✅ Simple setup - everything configured automatically.
+    // Handler auto-discovery is on by default (autoDiscovery.enabled: true),
+    // so no options are required for the minimal working form.
+    VytchesDDDModule.forRoot(),
   ],
   controllers: [],
   providers: [], // Your handlers will be auto-discovered

@@ -1,8 +1,15 @@
 # Enhanced Metadata System V2 - YAML-Only Documentation
 
+> **status: abandoned/superseded** — This document describes a YAML-based
+> JSDoc-injection pipeline that was never built: there are zero YAML config
+> files on disk, no vite plugin, and no `docs/examples/domain/` directory. JSDoc
+> in this repo is written inline in TypeScript source. Kept for historical
+> reference only; do not follow the instructions below.
+
 **Version**: 6.0.0  
 **Last Updated**: 2025-08-09  
-**Status**: YAML-ONLY SYSTEM OPERATIONAL  
+**Status**: YAML-ONLY SYSTEM OPERATIONAL (claimed; never implemented — see
+notice above)  
 **Scope**: Pure YAML Hierarchical Configuration with TypeScript AST Processing
 
 ## Executive Summary
