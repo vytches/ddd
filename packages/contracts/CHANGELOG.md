@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0) (2026-07-18)
+
+### Bug Fixes
+
+- **contracts:** replace Math.random UUID/id generation with crypto.randomUUID
+  ([3798355](https://github.com/vytches/ddd/commit/37983557fa99edde6f60b7662a874b2ae683e078))
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Features
+
+- **contracts:** add configureDiagnostics public control API (VS-014)
+  ([68d90f6](https://github.com/vytches/ddd/commit/68d90f605697e740c6773ee5c3b352ecd080df34))
+
+### BREAKING CHANGES
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-contracts

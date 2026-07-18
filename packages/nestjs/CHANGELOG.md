@@ -3,6 +3,68 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0) (2026-07-18)
+
+### Bug Fixes
+
+- **config:** include benchmarks/ in nestjs and di tsconfig for type-check
+  coverage
+  ([b0d6884](https://github.com/vytches/ddd/commit/b0d6884e24947c6d83fcc40fdf61879c03cdf4e5))
+- **di:** key DI tokens by reference identity, fix adapter lifetime and errors
+  (VF-030)
+  ([3f7fcff](https://github.com/vytches/ddd/commit/3f7fcff28162db78b4e70334e0079549f751b476))
+- **nestjs:** repair forFeature() DI wiring so bounded-context handlers stay
+  local (VB-003)
+  ([ddbedb6](https://github.com/vytches/ddd/commit/ddbedb6c17e60f8266bf561011df245454db77af))
+- **nestjs:** resolve importing consumer module in feature handler registrar
+  ([efda71f](https://github.com/vytches/ddd/commit/efda71f44c3f056fe06080c0895aa321d6d6af38)),
+  closes [#1](https://github.com/vytches/ddd/issues/1)
+- **nestjs:** surface failed handler registrations and reset buses on destroy
+  (VS-003)
+  ([7460d72](https://github.com/vytches/ddd/commit/7460d729eb1be7d0ceb831bee60dc00cdf56dc06))
+- **nestjs:** switch VytchesExplorerService injection to Symbol.for DI tokens
+  (VP-009 Bug [#3](https://github.com/vytches/ddd/issues/3))
+  ([02adf26](https://github.com/vytches/ddd/commit/02adf2653c19cedba7d3963bd38901381e3c5c57))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Features
+
+- **config:** add ddd-005 deep-import-instead-of-barrel lint rule
+  ([ee6c817](https://github.com/vytches/ddd/commit/ee6c8170e4700351e9d2ae4b4ccbb36af054c454))
+- **nestjs:** add GLOBAL_COMMAND_BUS / GLOBAL_QUERY_BUS tokens for cross-context
+  ACL (VP-009 Bug [#2](https://github.com/vytches/ddd/issues/2))
+  ([0b47e4d](https://github.com/vytches/ddd/commit/0b47e4d16b54dc696194a25860d81d9c1f02070f))
+- **nestjs:** opt-in strict handler registration (fail-fast on bootstrap)
+  ([bd320b5](https://github.com/vytches/ddd/commit/bd320b57b7641a82755d714bea0f6399e50026f3))
+- **nestjs:** warn when injected bus does not implement reset()
+  ([747c87b](https://github.com/vytches/ddd/commit/747c87b510b5f03e453b75dafb328e36a0efdc7a)),
+  closes [#3](https://github.com/vytches/ddd/issues/3)
+
+### Performance Improvements
+
+- **nestjs:** registry-first resolve, lazy paramtypes cache, COW scopes
+  (VP-006b)
+  ([9b56a71](https://github.com/vytches/ddd/commit/9b56a71ad7779f6626c35192d60c4eea3a51b8c3))
+
+### BREAKING CHANGES
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-nestjs

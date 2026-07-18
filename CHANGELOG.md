@@ -3,6 +3,160 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0) (2026-07-18)
+
+### Bug Fixes
+
+- adding configuration to claude
+  ([eecfd38](https://github.com/vytches/ddd/commit/eecfd38de9cca24e92900fde9f0a9a767fe3b3f4))
+- **config:** fix ddd-lint no-throw-in-domain path matching, wire CI, triage
+  findings
+  ([a5ac3e9](https://github.com/vytches/ddd/commit/a5ac3e9e101b4eb8b32e56edb4272e8498f2d8c4))
+- **config:** include benchmarks/ in nestjs and di tsconfig for type-check
+  coverage
+  ([b0d6884](https://github.com/vytches/ddd/commit/b0d6884e24947c6d83fcc40fdf61879c03cdf4e5))
+- **contracts:** replace Math.random UUID/id generation with crypto.randomUUID
+  ([3798355](https://github.com/vytches/ddd/commit/37983557fa99edde6f60b7662a874b2ae683e078))
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **core:** stop errors from leaking data through JSON.stringify
+  ([870b012](https://github.com/vytches/ddd/commit/870b01245f614735588ecd99a032ba4cc03a357e))
+- **cqrs:** evict stale handler factories and add bus reset (VS-003)
+  ([550f865](https://github.com/vytches/ddd/commit/550f8654472260140d67a2f15876691f1f1f6348))
+- **cqrs:** make CQRS execution logging opt-in, sanitize logged errors
+  ([5f58796](https://github.com/vytches/ddd/commit/5f587964c1aa2b00adaf662742b18fda7dbd9315))
+- **cqrs:** unref cache timers and align command enableCache default to false
+  (vp-010)
+  ([56068b7](https://github.com/vytches/ddd/commit/56068b73a39a20d8c18aa7be6cd676639ea1cce5))
+- **deps:** bump vulnerable transitive dependencies (22 advisories)
+  ([f397bb4](https://github.com/vytches/ddd/commit/f397bb4cfdb54da2283d44414a8fa1b2259ad228))
+- **di:** key DI tokens by reference identity, fix adapter lifetime and errors
+  (VF-030)
+  ([3f7fcff](https://github.com/vytches/ddd/commit/3f7fcff28162db78b4e70334e0079549f751b476))
+- **events:** unify bus error semantics, registries, unsubscribe identity,
+  handler cap
+  ([b77e510](https://github.com/vytches/ddd/commit/b77e5102e0cb9ca9cb9e159549329f17eca2e106))
+- **logging:** DataMasker isSensitiveKey — mask plural-form keys (passwords,
+  apiTokens)
+  ([69e7ead](https://github.com/vytches/ddd/commit/69e7ead1904ec4f9d2b25856dd45156f5adcc2d2))
+- **logging:** VS-001 — automatic PII masking for CQRS payload decorators
+  ([31a25d2](https://github.com/vytches/ddd/commit/31a25d2636d83ebaa2a6c61b0ff6dc4d208b92fd))
+- **logging:** VS-002 — PII masking for ConsoleProvider and DefaultLogger
+  defaults
+  ([93191a3](https://github.com/vytches/ddd/commit/93191a329120db48e1135e0d818cf6c7387a61ff))
+- **logging:** VS-004 — DataMasker regex pattern validation (ReDoS protection)
+  ([981fd66](https://github.com/vytches/ddd/commit/981fd66db5095d3e6a59a25f937038ab63b6dc9c))
+- **messaging,resilience:** outbox atomic-claim contract + timer/listener leak
+  fixes (VB-004)
+  ([463beb2](https://github.com/vytches/ddd/commit/463beb23e32c8ead6b70e12612261ff473442238))
+- **messaging:** preserve outbox stack trace + widen LoggingMiddleware logger
+  type (VS-015)
+  ([f11f6f9](https://github.com/vytches/ddd/commit/f11f6f96427a9b41910a5c5249fbc1c541201055))
+- **messaging:** warn when OutboxProcessor default handler is replaced (VS-007,
+  SEC-MESSAGING-001)
+  ([54ac0fe](https://github.com/vytches/ddd/commit/54ac0fef5e1350110dd56063db560895dc810f93))
+- **nestjs:** repair forFeature() DI wiring so bounded-context handlers stay
+  local (VB-003)
+  ([ddbedb6](https://github.com/vytches/ddd/commit/ddbedb6c17e60f8266bf561011df245454db77af))
+- **nestjs:** resolve importing consumer module in feature handler registrar
+  ([efda71f](https://github.com/vytches/ddd/commit/efda71f44c3f056fe06080c0895aa321d6d6af38)),
+  closes [#1](https://github.com/vytches/ddd/issues/1)
+- **nestjs:** surface failed handler registrations and reset buses on destroy
+  (VS-003)
+  ([7460d72](https://github.com/vytches/ddd/commit/7460d729eb1be7d0ceb831bee60dc00cdf56dc06))
+- **nestjs:** switch VytchesExplorerService injection to Symbol.for DI tokens
+  (VP-009 Bug [#3](https://github.com/vytches/ddd/issues/3))
+  ([02adf26](https://github.com/vytches/ddd/commit/02adf2653c19cedba7d3963bd38901381e3c5c57))
+- **policies:** cover all step-type union members in policy evaluators (VF-035)
+  ([a880b32](https://github.com/vytches/ddd/commit/a880b32b384b99fc07109532a4e5dba8262fec6b))
+- **policies:** replace 32-bit djb2 cache key hash with sha-256 (VS-005)
+  ([689738b](https://github.com/vytches/ddd/commit/689738b396c06bc695ca75fbc4671231fb8f5529))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+- **resilience:** block CSV formula injection in CsvMetricExporter (VS-006)
+  ([46fd54e](https://github.com/vytches/ddd/commit/46fd54e2955a7df671eebe03e42c6f7dadfa40f8))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+- **config:** trim dead and aspirational public API surface (VF-031)
+  ([27e0055](https://github.com/vytches/ddd/commit/27e005513894b0b0a17d966a1051b9746df21461))
+
+### Features
+
+- **cli:** add example-matrix coverage generator + CI enforcement (VD-006a)
+  ([ff985aa](https://github.com/vytches/ddd/commit/ff985aa9176075b4faf28a10799ebf705359a420))
+- **config:** add ddd-005 deep-import-instead-of-barrel lint rule
+  ([ee6c817](https://github.com/vytches/ddd/commit/ee6c8170e4700351e9d2ae4b4ccbb36af054c454))
+- **contracts:** add configureDiagnostics public control API (VS-014)
+  ([68d90f6](https://github.com/vytches/ddd/commit/68d90f605697e740c6773ee5c3b352ecd080df34))
+- **cqrs:** add IDisposableBus interface and export from package
+  ([00ada97](https://github.com/vytches/ddd/commit/00ada97a1d6f104e972de1a3a33a511520ba6f48))
+- **cqrs:** export Symbol.for DI tokens to fix dual-package hazard (VP-009 Bug
+  [#3](https://github.com/vytches/ddd/issues/3))
+  ([a985fa8](https://github.com/vytches/ddd/commit/a985fa8301c711d063820c72f55aab76f1ba1331))
+- env-var suppression for EntityIdFactory deprecation warn (VS-008)
+  ([6428850](https://github.com/vytches/ddd/commit/6428850dc6cc21de166fe54e394310cb1591cd3b))
+- **nestjs:** add GLOBAL_COMMAND_BUS / GLOBAL_QUERY_BUS tokens for cross-context
+  ACL (VP-009 Bug [#2](https://github.com/vytches/ddd/issues/2))
+  ([0b47e4d](https://github.com/vytches/ddd/commit/0b47e4d16b54dc696194a25860d81d9c1f02070f))
+- **nestjs:** opt-in strict handler registration (fail-fast on bootstrap)
+  ([bd320b5](https://github.com/vytches/ddd/commit/bd320b57b7641a82755d714bea0f6399e50026f3))
+- **nestjs:** warn when injected bus does not implement reset()
+  ([747c87b](https://github.com/vytches/ddd/commit/747c87b510b5f03e453b75dafb328e36a0efdc7a)),
+  closes [#3](https://github.com/vytches/ddd/issues/3)
+- **policies:** shouldSatisfyAny returns IPolicyStepBuilder (VF-035 AC7)
+  ([63a0759](https://github.com/vytches/ddd/commit/63a075939e1640c36c3b05ab55128ad6325068ac))
+
+### Performance Improvements
+
+- **di:** internal resolve/memory optimizations + dev-only bench (VP-006)
+  ([38f7f54](https://github.com/vytches/ddd/commit/38f7f5431d4f9613491ea4c3014e9f60809b8516))
+- **nestjs:** registry-first resolve, lazy paramtypes cache, COW scopes
+  (VP-006b)
+  ([9b56a71](https://github.com/vytches/ddd/commit/9b56a71ad7779f6626c35192d60c4eea3a51b8c3))
+
+### Reverts
+
+- drop unrelated statusline config accidentally auto-committed
+  ([735be17](https://github.com/vytches/ddd/commit/735be1715735c7c80ae168240c6cff34c21dd422))
+
+### BREAKING CHANGES
+
+- **config:** AggregateRoot's IAggregateBuilder interface removed (was exported
+  but shape-incompatible with the real builder). Several other
+  technically-exported- but-unreachable symbols removed (events/audit,
+  subscribeToContext, ACLDiscoveryPlugin, DIDomainServiceMetadataRegistry,
+  duplicate/speculative aggregate interfaces) - see CHANGELOG.md for full list
+  and migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **events:** BaseEventBus DI machinery removed - the useDI constructor
+  parameter, registerHandlerFactory() and discoverHandlers() are gone; default
+  error semantics now runs all handlers and throws AggregatedEventHandlerError
+  instead of rethrowing the first failure mid-loop.
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [Unreleased]
 
 ### BREAKING CHANGES

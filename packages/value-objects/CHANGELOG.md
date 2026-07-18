@@ -3,6 +3,49 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0) (2026-07-18)
+
+### Bug Fixes
+
+- **config:** fix ddd-lint no-throw-in-domain path matching, wire CI, triage
+  findings
+  ([a5ac3e9](https://github.com/vytches/ddd/commit/a5ac3e9e101b4eb8b32e56edb4272e8498f2d8c4))
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Features
+
+- env-var suppression for EntityIdFactory deprecation warn (VS-008)
+  ([6428850](https://github.com/vytches/ddd/commit/6428850dc6cc21de166fe54e394310cb1591cd3b))
+
+### BREAKING CHANGES
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-value-objects

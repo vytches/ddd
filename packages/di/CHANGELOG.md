@@ -3,6 +3,45 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0) (2026-07-18)
+
+### Bug Fixes
+
+- **config:** include benchmarks/ in nestjs and di tsconfig for type-check
+  coverage
+  ([b0d6884](https://github.com/vytches/ddd/commit/b0d6884e24947c6d83fcc40fdf61879c03cdf4e5))
+- **di:** key DI tokens by reference identity, fix adapter lifetime and errors
+  (VF-030)
+  ([3f7fcff](https://github.com/vytches/ddd/commit/3f7fcff28162db78b4e70334e0079549f751b476))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Performance Improvements
+
+- **di:** internal resolve/memory optimizations + dev-only bench (VP-006)
+  ([38f7f54](https://github.com/vytches/ddd/commit/38f7f5431d4f9613491ea4c3014e9f60809b8516))
+- **nestjs:** registry-first resolve, lazy paramtypes cache, COW scopes
+  (VP-006b)
+  ([9b56a71](https://github.com/vytches/ddd/commit/9b56a71ad7779f6626c35192d60c4eea3a51b8c3))
+
+### BREAKING CHANGES
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-di
