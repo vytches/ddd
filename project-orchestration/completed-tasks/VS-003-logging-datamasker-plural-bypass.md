@@ -4,7 +4,9 @@
 
 ```yaml
 task_id: VS-003
-title: "logging: DataMasker isSensitiveKey — fix missed plurals (passwords, apiTokens)"
+title:
+  'logging: DataMasker isSensitiveKey — fix missed plurals (passwords,
+  apiTokens)'
 type: bug
 priority: high
 complexity: simple
@@ -38,7 +40,10 @@ is too broad and causes dangerous false-negatives:
 
 ```typescript
 // data-masker.ts:112
-return lowerKey.includes(lowerSensitiveKey) && !lowerKey.endsWith(`${lowerSensitiveKey}s`);
+return (
+  lowerKey.includes(lowerSensitiveKey) &&
+  !lowerKey.endsWith(`${lowerSensitiveKey}s`)
+);
 
 // Examples:
 // sensitiveKeys: ['password', 'token']
@@ -50,18 +55,20 @@ return lowerKey.includes(lowerSensitiveKey) && !lowerKey.endsWith(`${lowerSensit
 ```
 
 Consumers configure DataMasker believing that `sensitiveKeys: ['password']` will
-protect ALL fields containing the word "password" — including plurals. This creates
-a false sense of security.
+protect ALL fields containing the word "password" — including plurals. This
+creates a false sense of security.
 
 ### Expected Business Value
 
-- [x] `passwords`, `apiTokens`, `userSecrets` etc. are masked when the corresponding key is in `sensitiveKeys`
+- [x] `passwords`, `apiTokens`, `userSecrets` etc. are masked when the
+      corresponding key is in `sensitiveKeys`
 - [x] Zero false-negatives for common PII field names
 - [x] Consumers can trust their DataMasker configuration
 
 ### Success Metrics
 
-- Test: `{ passwords: "x", apiTokens: "y" }` with `sensitiveKeys: ['password', 'token']` → both masked
+- Test: `{ passwords: "x", apiTokens: "y" }` with
+  `sensitiveKeys: ['password', 'token']` → both masked
 
 ## Technical Context
 
@@ -77,13 +84,14 @@ private isSensitiveKey(key: string): boolean {
 }
 ```
 
-The `!endsWith(s)` rule excludes both genuine false-positives (e.g. "counts") and
-important PII keys (e.g. "passwords", "apiTokens").
+The `!endsWith(s)` rule excludes both genuine false-positives (e.g. "counts")
+and important PII keys (e.g. "passwords", "apiTokens").
 
 ### Desired State
 
-Remove the exclusion rule. If a consumer wants to exclude a specific key from masking,
-they should simply not add it to `sensitiveKeys` — that is explicit configuration, not magic.
+Remove the exclusion rule. If a consumer wants to exclude a specific key from
+masking, they should simply not add it to `sensitiveKeys` — that is explicit
+configuration, not magic.
 
 ```typescript
 private isSensitiveKey(key: string): boolean {
@@ -96,14 +104,15 @@ private isSensitiveKey(key: string): boolean {
 
 ### Technical Constraints
 
-- This is a behaviour change (plural keys will now be masked) — considered a bugfix,
-  not a breaking change, because plural PII SHOULD be masked.
+- This is a behaviour change (plural keys will now be masked) — considered a
+  bugfix, not a breaking change, because plural PII SHOULD be masked.
 
 ## Requirements & Acceptance Criteria
 
 ### Functional Requirements
 
-- [x] Plural-form keys (`passwords`, `apiTokens`, `userSecrets`) are masked when the corresponding singular is in `sensitiveKeys`
+- [x] Plural-form keys (`passwords`, `apiTokens`, `userSecrets`) are masked when
+      the corresponding singular is in `sensitiveKeys`
 - [x] Behaviour for singular keys is unchanged
 - [x] Substring matching still works (`userPassword` matches `password`)
 
@@ -116,7 +125,8 @@ private isSensitiveKey(key: string): boolean {
 
 - [x] `endsWith` exclusion rule removed
 - [x] New tests green (3 new tests in data-masker.test.ts)
-- [x] Existing tests green (1 updated: `tokens` key → `authItems` — old test relied on plural-skip bug)
+- [x] Existing tests green (1 updated: `tokens` key → `authItems` — old test
+      relied on plural-skip bug)
 - [x] SEC-LOGGING-004 marked as resolved
 
 ## Agent Assignments
@@ -134,7 +144,8 @@ supporting_agents: []
 - **Tasks**:
   - [x] Remove `!lowerKey.endsWith(...)` from `isSensitiveKey`
   - [x] Add tests: `passwords`, `apiTokens`, `userSecrets`, `accessTokens`
-  - [x] Check whether any existing tests need updating (1 updated — `tokens` key renamed to `authItems`)
+  - [x] Check whether any existing tests need updating (1 updated — `tokens` key
+        renamed to `authItems`)
 - **Output**: `data-masker.ts` + tests
 
 ## Progress Tracking
@@ -150,12 +161,12 @@ last_updated: 2026-05-28
 
 ### Activity Log
 
-| Date       | Agent          | Action                           | Result                        |
-| ---------- | -------------- | -------------------------------- | ----------------------------- |
-| 2026-05-26 | sec-audit      | Finding detected                 | SEC-LOGGING-004               |
-| 2026-05-26 | human          | Task created                     | VS-003 planned                |
-| 2026-05-28 | library-expert | Removed `!endsWith` exclusion    | isSensitiveKey fixed          |
-| 2026-05-28 | library-expert | Added 3 new tests, updated 1     | 95/95 green, tsc clean        |
+| Date       | Agent          | Action                        | Result                 |
+| ---------- | -------------- | ----------------------------- | ---------------------- |
+| 2026-05-26 | sec-audit      | Finding detected              | SEC-LOGGING-004        |
+| 2026-05-26 | human          | Task created                  | VS-003 planned         |
+| 2026-05-28 | library-expert | Removed `!endsWith` exclusion | isSensitiveKey fixed   |
+| 2026-05-28 | library-expert | Added 3 new tests, updated 1  | 95/95 green, tsc clean |
 
 ## Code References
 
@@ -173,9 +184,9 @@ packages:
 
 ### Technical Risks
 
-| Risk                             | Probability | Impact | Mitigation                      |
-| -------------------------------- | ----------- | ------ | ------------------------------- |
-| Consumer relied on plural-skip   | Very Low    | Low    | This was a bug — correct behaviour |
+| Risk                           | Probability | Impact | Mitigation                         |
+| ------------------------------ | ----------- | ------ | ---------------------------------- |
+| Consumer relied on plural-skip | Very Low    | Low    | This was a bug — correct behaviour |
 
 ## Testing Strategy
 
@@ -185,7 +196,8 @@ packages:
 - [x] `sensitiveKeys: ['token']`, key `apiTokens` → masked
 - [x] `sensitiveKeys: ['token']`, key `accessTokens` → masked
 - [x] `sensitiveKeys: ['password']`, key `password` → still masked (unchanged)
-- [x] `sensitiveKeys: ['password']`, key `userPassword` → still masked (unchanged)
+- [x] `sensitiveKeys: ['password']`, key `userPassword` → still masked
+      (unchanged)
 
 ## Links & References
 

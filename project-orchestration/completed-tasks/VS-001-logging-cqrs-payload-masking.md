@@ -4,7 +4,8 @@ c# Task: CQRS decorators — PII masking for `includePayload`
 
 ```yaml
 task_id: VS-001
-title: "logging: CQRS decorators — automatic PII masking when includePayload: true"
+title:
+  'logging: CQRS decorators — automatic PII masking when includePayload: true'
 type: bug
 priority: critical
 complexity: simple
@@ -33,8 +34,8 @@ patterns:
 ### Why This Task Exists
 
 Security audit (2026-05-26) identified a CRITICAL finding: the `@LogCommands`,
-`@LogQueries`, and `@LogCQRS` decorators with `includePayload: true` log the full
-command/query object with no masking applied.
+`@LogQueries`, and `@LogCQRS` decorators with `includePayload: true` log the
+full command/query object with no masking applied.
 
 Example of the exposure:
 
@@ -52,14 +53,17 @@ production logs. DREAD score 13 — highest finding in this audit.
 
 ### Expected Business Value
 
-- [ ] Consumers can safely use `includePayload: true` without risking PII leakage
+- [ ] Consumers can safely use `includePayload: true` without risking PII
+      leakage
 - [ ] GDPR compliance — personal data does not appear in logs
-- [ ] Zero breaking change — `maskSensitiveData` flag already exists in the interface but is unused
+- [ ] Zero breaking change — `maskSensitiveData` flag already exists in the
+      interface but is unused
 
 ### Success Metrics
 
 - No PII in logs when `maskSensitiveData: true` (verified by test)
-- Backward-compatible: `{ includePayload: true }` without `maskSensitiveData` retains current behaviour
+- Backward-compatible: `{ includePayload: true }` without `maskSensitiveData`
+  retains current behaviour
 - JSDoc contains explicit security warning
 
 ## Technical Context
@@ -67,20 +71,21 @@ production logs. DREAD score 13 — highest finding in this audit.
 ### Current State
 
 `cqrs-decorators.ts:92–93`:
+
 ```typescript
 if (options.includePayload && commandOrQuery) {
-  logData.payload = commandOrQuery;  // no masking applied
+  logData.payload = commandOrQuery; // no masking applied
 }
 ```
 
-`maskSensitiveData?: boolean` is defined in `CQRSLoggingOptions` but is never used
-when logging the payload.
+`maskSensitiveData?: boolean` is defined in `CQRSLoggingOptions` but is never
+used when logging the payload.
 
 ### Desired State
 
-When `maskSensitiveData: true`, the payload is run through `DataMasker` before being
-added to `logData`. When `maskSensitiveData` is not set, behaviour is unchanged
-(backward-compatible).
+When `maskSensitiveData: true`, the payload is run through `DataMasker` before
+being added to `logData`. When `maskSensitiveData` is not set, behaviour is
+unchanged (backward-compatible).
 
 ### Technical Constraints
 
@@ -92,16 +97,21 @@ added to `logData`. When `maskSensitiveData` is not set, behaviour is unchanged
 
 ### Functional Requirements
 
-- [ ] When `maskSensitiveData: true` — payload is masked through `DataMasker` before logging
-- [ ] `DataMasker` uses default patterns (email, SSN, card, phone) + `sensitiveKeys` from options
+- [ ] When `maskSensitiveData: true` — payload is masked through `DataMasker`
+      before logging
+- [ ] `DataMasker` uses default patterns (email, SSN, card, phone) +
+      `sensitiveKeys` from options
 - [ ] When `maskSensitiveData: false` (default) — behaviour unchanged
-- [ ] Optional `sensitiveFields?: string[]` forwarded to `DataMasker.sensitiveKeys`
+- [ ] Optional `sensitiveFields?: string[]` forwarded to
+      `DataMasker.sensitiveKeys`
 
 ### Non-Functional Requirements
 
 - [ ] Security: PII does not appear in logs when `maskSensitiveData: true`
-- [ ] Testing: tests for payload with email/password/token under both flag states
-- [ ] Documentation: JSDoc warning "includePayload: true exposes all command fields — use maskSensitiveData: true for PII"
+- [ ] Testing: tests for payload with email/password/token under both flag
+      states
+- [ ] Documentation: JSDoc warning "includePayload: true exposes all command
+      fields — use maskSensitiveData: true for PII"
 
 ### Definition of Done
 
@@ -126,16 +136,19 @@ supporting_agents:
 
 - **Agent**: library-expert
 - **Tasks**:
-  - [ ] Add `DataMasker` instantiation in `createLoggingWrapper` when `maskSensitiveData: true`
+  - [ ] Add `DataMasker` instantiation in `createLoggingWrapper` when
+        `maskSensitiveData: true`
   - [ ] Use `masker.maskData(commandOrQuery)` instead of raw `commandOrQuery`
-  - [ ] Add optional `sensitiveFields?: string[]` to `CQRSLoggingOptions` (backward-compat)
+  - [ ] Add optional `sensitiveFields?: string[]` to `CQRSLoggingOptions`
+        (backward-compat)
 - **Output**: modified `cqrs-decorators.ts`
 
 ### Phase 2: Tests and documentation
 
 - **Agent**: library-expert
 - **Tasks**:
-  - [ ] Test: payload with `password`, `email`, `token` → masked when `maskSensitiveData: true`
+  - [ ] Test: payload with `password`, `email`, `token` → masked when
+        `maskSensitiveData: true`
   - [ ] Test: same payload without the flag → unmasked (backward-compat)
   - [ ] Update JSDoc
 - **Output**: tests + docs
@@ -153,12 +166,12 @@ last_updated: 2026-05-28
 
 ### Activity Log
 
-| Date       | Agent     | Action                      | Result                          |
-| ---------- | --------- | --------------------------- | ------------------------------- |
-| 2026-05-26 | sec-audit | Finding detected            | SEC-LOGGING-002                 |
-| 2026-05-26 | human     | Task created                | VS-001 planned                  |
-| 2026-05-27 | human     | Masking implemented         | commit 31a25d26                 |
-| 2026-05-28 | /pulse    | Status drift detected       | planned → review                |
+| Date       | Agent     | Action                                        | Result             |
+| ---------- | --------- | --------------------------------------------- | ------------------ |
+| 2026-05-26 | sec-audit | Finding detected                              | SEC-LOGGING-002    |
+| 2026-05-26 | human     | Task created                                  | VS-001 planned     |
+| 2026-05-27 | human     | Masking implemented                           | commit 31a25d26    |
+| 2026-05-28 | /pulse    | Status drift detected                         | planned → review   |
 | 2026-05-28 | claude    | Verified: 100/100 tests pass, JSDoc + DoD met | review → completed |
 
 ## Code References
@@ -177,18 +190,20 @@ packages:
 
 ### Technical Risks
 
-| Risk                        | Probability | Impact | Mitigation                        |
-| --------------------------- | ----------- | ------ | --------------------------------- |
-| Breaking API change         | Low         | High   | maskSensitiveData defaults to false |
-| DataMasker overhead on hot path | Low     | Low    | DataMasker is lightweight, lazy init |
+| Risk                            | Probability | Impact | Mitigation                           |
+| ------------------------------- | ----------- | ------ | ------------------------------------ |
+| Breaking API change             | Low         | High   | maskSensitiveData defaults to false  |
+| DataMasker overhead on hot path | Low         | Low    | DataMasker is lightweight, lazy init |
 
 ## Testing Strategy
 
 ### Unit Tests
 
-- [ ] `{ includePayload: true, maskSensitiveData: true }` — email/password in payload → `[MASKED]`
+- [ ] `{ includePayload: true, maskSensitiveData: true }` — email/password in
+      payload → `[MASKED]`
 - [ ] `{ includePayload: true, maskSensitiveData: false }` — payload unmasked
-- [ ] `{ includePayload: true }` (no maskSensitiveData) — backward-compat, unmasked
+- [ ] `{ includePayload: true }` (no maskSensitiveData) — backward-compat,
+      unmasked
 - [ ] `sensitiveFields: ['password', 'token']` → those fields masked
 
 ## Links & References

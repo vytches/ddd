@@ -112,8 +112,7 @@ export default defineConfig({
       },
       {
         find: '@vytches/ddd-domain-primitives',
-        replacement: new URL('./packages/domain-primitives/src/index.ts', import.meta.url)
-          .pathname,
+        replacement: new URL('./packages/domain-primitives/src/index.ts', import.meta.url).pathname,
       },
       {
         find: '@vytches/ddd-value-objects',
@@ -197,8 +196,7 @@ export default defineConfig({
       },
       {
         find: '@vytches/ddd-process-managers',
-        replacement: new URL('./packages/process-managers/src/index.ts', import.meta.url)
-          .pathname,
+        replacement: new URL('./packages/process-managers/src/index.ts', import.meta.url).pathname,
       },
     ],
   },

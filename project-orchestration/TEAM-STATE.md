@@ -1,6 +1,6 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-07-12 by `/pulse`_ _Updated by `/pulse`. Read-only for humans —
+_Last sync: 2026-07-13 by `/pulse`_ _Updated by `/pulse`. Read-only for humans —
 agents write here._
 
 ---
@@ -20,10 +20,13 @@ as a standing pre-release checklist item, not a red alert.
 (SEC-AUDIT-2026-07-09, LIB-UX-AUDIT-2026-07-10) plus the pre-first-publish
 pipeline itself, largely shipped in a 2026-07-10/11 concentrated push:
 
-- **Pre-first-publish pipeline: DONE.** VF-024 (API surface curation), VF-023
-  (DDD foundation guarantees — VO/AggregateRoot always-valid, **BREAKING
-  CHANGE**), VF-031 (surface diet), VB-004 (outbox atomic claim) all shipped and
-  archived. Only **VD-005** (docs truth cleanup) remains open from this batch.
+- **Pre-first-publish pipeline: 100% DONE.** VF-024 (API surface curation),
+  VF-023 (DDD foundation guarantees — VO/AggregateRoot always-valid, **BREAKING
+  CHANGE**), VF-031 (surface diet), VB-004 (outbox atomic claim), and now
+  **VD-005** (docs truth cleanup + new `tools/docs-compile-gate` CI tool,
+  shipped 2026-07-13 via `/orchestrate-ddd`, independently re-verified with a
+  full `pnpm build` + full `pnpm test` — not just the workflow's own GO) — all
+  shipped and archived. Nothing left open in this batch.
 - **Security audit findings**: VS-016 (crypto-random IDs, P0 cleared), VS-017
   (error serialization leakage), VS-018 (CQRS logging opt-in) — all done.
 - **UX audit findings**: VF-026 (ddd-lint fixes + `ddd-005` rule), VF-029
@@ -50,14 +53,13 @@ state, HALF_OPEN probe gate).
    needed only when ready to cut the release: run `build && test` on the 237+
    aggregate / 16K test consumer, then tag/publish. No deadline was ever set —
    do not treat this as slipping.
-2. **Metadata drift: VP-006b merged to `develop` 2026-07-12 (`cf4029dd`) but
-   task file still shows `status: backlog`** — run `/task-tidy` to move it to
-   `completed-tasks/` and unblock a clean read of the active board next pulse.
-3. **VF-028 is the last open P1** (resilience correctness — jitter wiring,
-   per-instance decorator state, HALF_OPEN probe gate, 8h). Everything else in
-   the pre-first-publish pipeline (VF-023/VF-024/VF-031/VB-004) and the two
-   audit batches (SEC-AUDIT, LIB-UX-AUDIT) are done — only VD-005 (docs cleanup)
-   and the P2/P3 backlog remain besides VF-028.
+2. **Metadata drift: VP-006b still `status: backlog`, 2nd consecutive pulse
+   unresolved** (merged to `develop` 2026-07-12, `cf4029dd`) — run `/task-tidy`
+   to move it to `completed-tasks/`.
+3. **VF-028 is the only open P1** (resilience correctness — jitter wiring,
+   per-instance decorator state, HALF_OPEN probe gate, 8h). Pre-first-publish
+   pipeline is now 100% shipped (VD-005 closed 2026-07-13) — only VF-028 and the
+   P2/P3 backlog remain.
 
 ---
 
@@ -69,44 +71,35 @@ _N/A — this is a library project, no mobile UI._
 
 ## ⚙️ Technical Pulse
 
-<!-- Updated by @tech-lead on 2026-07-12 -->
+<!-- Updated by @tech-lead on 2026-07-13 -->
 
-**Status**: 🟢 Green | **Velocity**: Sustained/high — pre-first-publish pipeline
-cleared + two full audits (security, UX) landed in the 9 days since last pulse |
-**Debt**: 🟢 LOW (0 major, 0 minor)
+**Status**: 🟢 Green | **Velocity**: Sustained high — VD-005 shipped, closing
+the pre-first-publish pipeline 100% | **Debt**: 🟢 LOW (0 major, 0 minor)
 
-**Just landed (2026-07-05 → 2026-07-12)**, superseding the 2026-07-03 backlog
-list below:
+**Just landed (2026-07-13)**: **VD-005 DONE** — docs truth cleanup (10 ACs:
+docs/README rewrite, dead-doc archival, ADR index regen, quickstart Result<T,E>
+reconciliation, AggregateRoot JSDoc, SECURITY-AUDIT/eslintrc cleanup) plus a new
+**`tools/docs-compile-gate`** CI tool (AC11 — opt-in marker, type-checks fenced
+code examples in README/LLMGUIDE, 29/29 own tests including a
+deliberately-broken-fence fixture). Implemented via `/orchestrate-ddd` (4-layer
+workflow, all GO), then independently re-verified before merge: full
+`pnpm build` (exit 0) + full `pnpm test` (all 25 test-bearing projects green),
+not just the workflow's self-reported verdict. Merged to `develop` `603580bd`.
+**Pre-first-publish pipeline (VF-024/VF-023/VF-031/VB-004/VD-005) is now fully
+closed — nothing left in this batch.**
 
-- **Pre-first-publish pipeline DONE**: VF-024 (API surface curation, 10 ACs),
-  VF-023 (DDD foundation guarantees, 11 ACs, **BREAKING CHANGE**), VF-031
-  (surface diet, 9/10 ACs — AC3 deferred to VF-032), VB-004 (outbox atomic
-  claim) all shipped and archived. Only VD-005 (docs cleanup) remains open.
-- **SEC-AUDIT-2026-07-09 findings**: VS-016 (crypto-random IDs, P0 cleared),
-  VS-017 (error serialization leakage), VS-018 (CQRS logging opt-in) — done.
-- **LIB-UX-AUDIT-2026-07-10 findings**: VF-026 (ddd-lint fixes + new `ddd-005`
-  rule), VF-029 (EventBus integrity), VF-030 (DI token identity by reference,
-  `ADR-0038`) — done. VF-032/VF-033 spawned, still open (P2).
-- **VF-035** (composite-policy step-coverage bug — real production bug, all 3
-  `createPolicyFromStep` switches now exhaustive) — done, commits `a880b32b` +
-  `63a07593`.
-- **VD-006a** (example-matrix generator + CI enforcement) — done, unblocked
-  VD-006b (now active R&D).
-
-**Metadata drift**: **VP-006b** (NestJS adapter perf — registry-first resolve,
-lazy paramtypes cache, COW scopes) merged to `develop` **2026-07-12**
-(`cf4029dd`) but its task file still reads `status: backlog` — run `/task-tidy`
-to archive it. This is the only board/reality mismatch found.
+**Metadata drift (2nd consecutive pulse unresolved)**: **VP-006b** (NestJS
+adapter perf) merged to `develop` **2026-07-12** (`cf4029dd`) but its task file
+still reads `status: backlog` — run `/task-tidy` to archive it.
 
 **Active backlog** (16 task files, 0 blocked, 0 stale >14d):
 
-- **P1**: VF-028 (8h, resilience correctness — last hardening item before the
-  pipeline is fully clear)
-- **P2**: VD-005 (8h, docs cleanup), VF-025 (14h, event-bus hardening), VP-012
-  (6h, hotpath perf), VT-006 (10h, policies coverage), VD-006b (10h R&D,
-  unblocked), VF-034 (4h, dead-code CI check), VF-032 (14h, NestJS fluency),
-  VF-033 (6h, validation hardening, gated on VF-031's AC3 handoff — not a deep
-  blocker), VP-006c (6h, unblocked by VP-006b)
+- **P1**: VF-028 (8h, resilience correctness — the only open P1, last hardening
+  item)
+- **P2**: VF-025 (14h, event-bus hardening), VP-012 (6h, hotpath perf), VT-006
+  (10h, policies coverage), VD-006b (10h R&D, unblocked), VF-034 (4h, dead-code
+  CI check), VF-032 (14h, NestJS fluency), VF-033 (6h, validation hardening),
+  VP-006c (6h, unblocked by VP-006b), VF-027 (1h)
 - **Deliberately deferred, not stale**: VA-001 (44d, set aside 2026-07-11 until
   the P1 pipeline clears), VD-004 (56d), VF-002 (56d) — opportunistic
   post-v0.31.0.
@@ -116,8 +109,8 @@ to archive it. This is the only board/reality mismatch found.
 **Debt**: 0 major, 0 minor.
 
 **Critical path**: (1) juz-ide-api manual validation → tag/publish v0.31.0 —
-owner action, no outstanding code. (2) VF-028 clears the last P1. (3) VD-005
-closes the pre-first-publish batch entirely.
+owner action, zero outstanding code, no deadline set. (2) VF-028 clears the last
+P1 — the only thing standing between now and a fully clean backlog.
 
 **Coverage**: 69.29% (stable, VT-002..005 series 2026-05-10). VT-006 is
 enrichment, not recovery.
@@ -126,32 +119,27 @@ enrichment, not recovery.
 
 ## 💼 Business Pulse
 
-<!-- Updated by @product-owner on 2026-07-12 -->
+<!-- Updated by @product-owner on 2026-07-13 -->
 
 **Next milestone**: v0.31.0 (security hardening + DX polish) — **code scope is
-100% complete**. Gap to publish is now purely the owner's manual juz-ide-api
-sign-off (deliberately deferred by prior explicit authorization, not overdue —
-correcting the 2026-07-03 pulse, which mistook the still-open external
-validation for a stalled internal task). No deadline was ever set for it.
+100% complete**, pre-first-publish pipeline now fully closed with VD-005's
+completion. Gap to publish is purely the owner's manual juz-ide-api sign-off
+(deliberately deferred by prior explicit authorization, no deadline set) —
+"ready when you are," not overdue.
 
-**Pre-first-publish pipeline: DONE** (VD-005 excepted). VF-023 (DDD foundation
-guarantees, **BREAKING CHANGE**), VF-024 (API surface curation), VF-031 (surface
-diet), VB-004 (outbox atomic claim) all shipped 2026-07-03→11. This closes out
-the ~30-44h estimated 2026-07-03 — actual turned out well-scoped, no overruns
-reported.
+**VD-005 shipped 2026-07-13**: docs truth cleanup + new
+`tools/docs-compile-gate` CI tool — a real production-safety improvement
+(catches non-compiling README/LLMGUIDE code examples before they reach
+consumers), not just housekeeping. Full build + full test suite independently
+re-verified green before merge. This was the last item in the pre-first-publish
+batch — nothing outstanding in that pipeline now.
 
-**Two full audits landed since 2026-07-03**: SEC-AUDIT-2026-07-09 (3 findings,
-all closed: VS-016/017/018) and LIB-UX-AUDIT-2026-07-10 (5 findings, 3 closed:
-VF-026/029/030, 2 still open as P2: VF-032/033). No audit finding is currently
-blocking release — VF-028 (resilience correctness) is the last P1, unrelated to
-the publish gate.
-
-**Status drift (housekeeping only)**: VP-006b (NestJS adapter perf) merged to
+**Status drift (2nd consecutive pulse, housekeeping only)**: VP-006b merged to
 `develop` 2026-07-12 but task file still `backlog` — flag for `/task-tidy`, no
 business impact.
 
-**Segment coverage**: unchanged from 2026-07-03. Production/scaling teams ~70%
-served. First-time DDD adopters ~30% (VF-001 MVP shipped; VF-002 still deferred,
+**Segment coverage**: unchanged. Production/scaling teams ~70% served.
+First-time DDD adopters ~30% (VF-001 MVP shipped; VF-002 still deferred,
 opportunistic post-release). AI-agent integrators 0% (VA-001 deliberately set
 aside 2026-07-11 until the P1 pipeline clears — correct call, no demand signal
 yet).
@@ -159,14 +147,15 @@ yet).
 **Cut candidate if capacity tightens**: VD-004 (interactive docs, 20h,
 opportunistic post-release) — unchanged recommendation.
 
-**Validate this week**: no publication deadline is currently set; the
-juz-ide-api sign-off happens whenever the owner is ready to cut the release —
-frame as "ready when you are," not "overdue."
+**Validate this week**: no publication deadline is set; juz-ide-api sign-off
+happens whenever the owner is ready to cut the release.
 
 **Actions this week**:
 
-1. Run `/task-tidy` to archive VP-006b (pure housekeeping).
-2. Ship VF-028 (8h) to fully clear the P1 backlog.
+1. Run `/task-tidy` to archive VP-006b (pure housekeeping, now overdue across 2
+   pulses).
+2. Ship VF-028 (8h) — the only remaining P1, clears the hardening backlog
+   entirely.
 3. When ready to publish: run juz-ide-api manual validation, then tag v0.31.0.
 
 ---
@@ -174,6 +163,24 @@ frame as "ready when you are," not "overdue."
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-07-13] @pulse: VD-005 shipped today (docs truth cleanup + new
+`tools/docs-compile-gate` CI tool) — implemented via `/analyze-ddd` →
+`/orchestrate-ddd` (4-layer workflow, all GO), then independently re-verified
+with a full `pnpm build` + full `pnpm test` before merge (not just trusting the
+workflow's own verdict). Pre-first-publish pipeline is now **100% closed** —
+nothing left in that batch. Human explicitly declined to split the task into
+VD-005a/VD-005b despite both panel agents (architect, library-quality-verifier)
+recommending it during `/analyze-ddd`, since release timing wasn't a constraint.
+Health: 🟢 GREEN. VP-006b metadata drift is now 2 consecutive pulses unresolved
+— genuinely due for `/task-tidy`.
+
+[2026-07-13] @tech-lead: 🟢 GREEN. 0 blocked, 0 stale, 0 debt. VF-028 is now the
+_only_ open P1 in the entire backlog.
+
+[2026-07-13] @product-owner: Milestone code-complete in full (VD-005 closed the
+last pre-publish gap). Segment coverage and cut-candidate recommendation
+unchanged from prior pulses. No new business risk surfaced.
 
 [2026-07-12] @pulse: 9-day sync gap. Corrected a material framing error carried
 by the 2026-07-03 pulse: VS-013/VS-006/VS-008 were already `done` (VS-013 merged
