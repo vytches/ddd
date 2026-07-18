@@ -1,6 +1,7 @@
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { internalLogger } from '@vytches/ddd-contracts/internal';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- @vytches/ddd-di is a real static dependency here (base class, thrown error types, ServiceLifetime enum), not lazy-loaded
 import {
   BaseContainerAdapter,
   CircularDependencyError,

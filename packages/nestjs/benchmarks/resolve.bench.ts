@@ -26,6 +26,7 @@
 import 'reflect-metadata';
 import type { ModuleRef } from '@nestjs/core';
 import { bench, describe } from 'vitest';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- ServiceLifetime enum value required at runtime, not lazy-loaded
 import { ServiceLifetime } from '@vytches/ddd-di';
 import { NestJSContainerAdapter } from '../src/adapters/nestjs-container.adapter';
 import { CountingModuleRef } from './fixtures/counting-module-ref';

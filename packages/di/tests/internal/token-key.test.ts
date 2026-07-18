@@ -35,6 +35,7 @@ describe('describeToken (internal display helper)', () => {
     });
 
     it('renders a named function via its name', () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       function makeService(): void {}
       expect(describeToken(makeService as unknown as ServiceToken)).toBe('makeService');
     });
@@ -63,6 +64,7 @@ describe('describeToken (internal display helper)', () => {
 
   describe('never throws (degenerate inputs)', () => {
     it('handles a function whose name getter throws', () => {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const hostile = (): void => {};
       Object.defineProperty(hostile, 'name', {
         get() {

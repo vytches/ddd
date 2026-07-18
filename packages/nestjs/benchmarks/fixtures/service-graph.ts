@@ -21,7 +21,7 @@
 import 'reflect-metadata';
 import type { ModuleRef } from '@nestjs/core';
 import type { Constructor } from '@vytches/ddd-di';
-import { ServiceLifetime } from '@vytches/ddd-di';
+import type { ServiceLifetime } from '@vytches/ddd-di';
 import { NestJSContainerAdapter } from '../../src/adapters/nestjs-container.adapter';
 import { CountingModuleRef } from './counting-module-ref';
 

@@ -4,7 +4,9 @@ import { DiscoveryService, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import type { Constructor } from '@vytches/ddd-di';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
-import { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
+import type { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
+import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { EVENT_HANDLER_METADATA, internalLogger } from '@vytches/ddd-contracts/internal';
 import type { HandlerInfo, VytchesContextOptions } from '../types';

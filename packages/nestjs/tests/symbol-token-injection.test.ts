@@ -12,6 +12,7 @@ import 'reflect-metadata';
 import { describe, it, expect } from 'vitest';
 import { Test } from '@nestjs/testing';
 import { Inject, Injectable } from '@nestjs/common';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
 import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';

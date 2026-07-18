@@ -26,6 +26,7 @@
 import 'reflect-metadata';
 import { bench, describe } from 'vitest';
 import type { IDependencyContainer } from '@vytches/ddd-di';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- ServiceLifetime enum value required at runtime, not lazy-loaded
 import { ServiceLifetime } from '@vytches/ddd-di';
 import { buildServiceGraph, heapUsedKB, withNodeEnv } from './fixtures/service-graph';
 
