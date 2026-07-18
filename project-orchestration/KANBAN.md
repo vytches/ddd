@@ -1,11 +1,14 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-07-13 (VD-005 shipped — docs truth cleanup + new
+_Last updated 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was
+stuck at `status: backlog` with unchecked ACs despite merge to `develop`
+`cf4029dd` 2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to
+`done`, ACs checked against git history, file moved to `completed-tasks/`).
+Prior: 2026-07-13 by `/pulse` (VD-005 shipped — docs truth cleanup + new
 `tools/docs-compile-gate` CI tool, all 11 ACs done, moved to `completed-tasks/`,
-merged to `develop`). VP-006b code merged to `develop` `cf4029dd` (2026-07-12),
-task file still `backlog` — still flagged for `/task-tidy`. Age = days since
-created_at. Grouped by priority (P0 critical · P1 high · P2 normal/medium · P3
-low · backlog)._
+merged to `develop`). VF-028 is now the only open P1 in the entire backlog. Age
+= days since created_at. Grouped by priority (P0 critical · P1 high · P2
+normal/medium · P3 low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -193,18 +196,17 @@ hardening item._
 
 ## P2 — Normal / Medium
 
-| ID      | Title                                                             | Status                                                                | Age |
-| ------- | ----------------------------------------------------------------- | --------------------------------------------------------------------- | --- |
-| VD-004  | Interactive Documentation System                                  | backlog                                                               | 56d |
-| VF-002  | Strategic Design Documentation                                    | backlog                                                               | 56d |
-| VP-006b | NestJSContainerAdapter resolve/cold-start optimization            | **merged** `cf4029dd` (2026-07-12), file pending `/task-tidy` archive | 3d  |
-| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog                                                               | 1d  |
-| VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog                                                               | 1d  |
-| VT-006  | Policies test coverage + testing pkg hardening                    | backlog                                                               | 1d  |
-| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog                                                               | 0d  |
-| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog                                                               | 0d  |
-| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog                                                               | 0d  |
-| VF-033  | Validation hardening & one validation story                       | backlog                                                               | 0d  |
+| ID      | Title                                                             | Status  | Age |
+| ------- | ----------------------------------------------------------------- | ------- | --- |
+| VD-004  | Interactive Documentation System                                  | backlog | 56d |
+| VF-002  | Strategic Design Documentation                                    | backlog | 56d |
+| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 1d  |
+| VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog | 1d  |
+| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 0d  |
+| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 0d  |
+| VF-033  | Validation hardening & one validation story                       | backlog | 0d  |
 
 ## P3 — Low
 
@@ -225,13 +227,15 @@ clears, not a current priority._
 removal) closed **2026-06-05**, and VS-006/VS-008 are also `done`. The only open
 item is the owner's manual juz-ide-api sign-off, **deliberately deferred by
 prior authorization, not overdue** (no deadline was ever set). **VP-006b**
-merged to `develop` 2026-07-12 (`cf4029dd`) — task file needs `/task-tidy`
+merged to `develop` 2026-07-12 (`cf4029dd`) — task file needed `/task-tidy`
 archival, flagged above.
 
+**`/task-tidy` sync (2026-07-18)**: **VP-006b** reconciled and archived to
+`completed-tasks/` — see updated header note above.
+
 **Recommended next action**: (1) **VF-028** (resilience correctness, 8h) is now
-the only open P1 — clears the hardening backlog entirely. (2) Run `/task-tidy`
-to archive VP-006b. (3) When ready to cut the release: run the juz-ide-api
-manual validation (237+ aggregates, 16K tests), then tag/publish v0.31.0 — no
-other code work blocks it. Full audit findings:
+the only open P1 — clears the hardening backlog entirely. (2) When ready to cut
+the release: run the juz-ide-api manual validation (237+ aggregates, 16K tests),
+then tag/publish v0.31.0 — no other code work blocks it. Full audit findings:
 `project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
 `SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.
