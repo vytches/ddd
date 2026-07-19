@@ -1,13 +1,18 @@
 {
-  "generatedAt": "2026-07-04T13:12:14.092Z",
+  "generatedAt": "2026-07-19T11:16:37.778Z",
   "cells": [
     {
       "name": "aggregate-plus-specification",
       "level": "quick-start",
-      "packages": ["@vytches/ddd-aggregates", "@vytches/ddd-validation"],
+      "packages": [
+        "@vytches/ddd-aggregates",
+        "@vytches/ddd-validation"
+      ],
       "status": "VERIFIED",
       "file": "examples/quickstart/src/domain/order.aggregate.ts",
-      "testedBy": ["examples/quickstart/tests/order.aggregate.test.ts"],
+      "testedBy": [
+        "examples/quickstart/tests/order.aggregate.test.ts"
+      ],
       "description": "Order aggregate whose state-transition guards (canBePlaced, canBeCancelled) are composed Specification instances from order.specs.ts, imported and combined inside the aggregate itself."
     },
     {
@@ -22,40 +27,60 @@
       ],
       "status": "VERIFIED",
       "file": "examples/quickstart/src/domain/order.aggregate.ts",
-      "testedBy": ["examples/quickstart/tests/order.aggregate.test.ts"],
+      "testedBy": [
+        "examples/quickstart/tests/order.aggregate.test.ts"
+      ],
       "description": "The full transitive combination pulled in by order.aggregate.ts via same-example relative imports: Money (value-objects), the domain events it raises (events), and its Specification guards (validation)."
     },
     {
       "name": "policy-plus-specification",
       "level": "quick-start",
-      "packages": ["@vytches/ddd-policies", "@vytches/ddd-validation"],
+      "packages": [
+        "@vytches/ddd-policies",
+        "@vytches/ddd-validation"
+      ],
       "status": "VERIFIED",
       "file": "examples/policies/src/02-reusable-specification.ts",
-      "testedBy": ["examples/policies/tests/policies-examples.test.ts"],
+      "testedBy": [
+        "examples/policies/tests/policies-examples.test.ts"
+      ],
       "description": "A reusable, class-based Specification (MinimumAgeSpecification) composed with .and()/.or()/.not() and reused inside a PolicyBuilder policy — the \".2\" pattern in the policies package's own docs."
     },
     {
       "name": "domain-service-composition",
       "level": "intermediate",
-      "packages": ["@vytches/ddd-domain-services", "@vytches/ddd-events", "@vytches/ddd-utils"],
+      "packages": [
+        "@vytches/ddd-domain-services",
+        "@vytches/ddd-events",
+        "@vytches/ddd-utils"
+      ],
       "status": "VERIFIED",
       "file": "examples/domain-services/src/05-service-composition.ts",
-      "testedBy": ["examples/domain-services/tests/domain-services-examples.test.ts"],
+      "testedBy": [
+        "examples/domain-services/tests/domain-services-examples.test.ts"
+      ],
       "description": "CheckoutService composes pricing, inventory reservation, and payment orchestration domain services, with rollback-on-decline semantics."
     },
     {
       "name": "domain-service-event-publishing",
       "level": "quick-start",
-      "packages": ["@vytches/ddd-domain-services", "@vytches/ddd-events"],
+      "packages": [
+        "@vytches/ddd-domain-services",
+        "@vytches/ddd-events"
+      ],
       "status": "VERIFIED",
       "file": "examples/domain-services/src/02-payment-orchestration.ts",
-      "testedBy": ["examples/domain-services/tests/domain-services-examples.test.ts"],
+      "testedBy": [
+        "examples/domain-services/tests/domain-services-examples.test.ts"
+      ],
       "description": "EventAwareDomainService publishing PaymentAuthorized/PaymentDeclined domain events through a caller-supplied event bus."
     },
     {
       "name": "domain-service-unit-of-work-aware",
       "level": "quick-start",
-      "packages": ["@vytches/ddd-domain-services"],
+      "packages": [
+        "@vytches/ddd-domain-services"
+      ],
       "status": "EXAMPLE_ONLY",
       "file": "examples/domain-services/src/04-user-registration.ts",
       "testedBy": [],
@@ -65,7 +90,10 @@
     {
       "name": "domain-service-plus-policy",
       "level": "intermediate",
-      "packages": ["@vytches/ddd-domain-services", "@vytches/ddd-policies"],
+      "packages": [
+        "@vytches/ddd-domain-services",
+        "@vytches/ddd-policies"
+      ],
       "status": "DECLARED_MISSING",
       "file": null,
       "testedBy": [],
@@ -75,7 +103,10 @@
     {
       "name": "cqrs-plus-resilience-decorator",
       "level": "advanced",
-      "packages": ["@vytches/ddd-cqrs", "@vytches/ddd-resilience"],
+      "packages": [
+        "@vytches/ddd-cqrs",
+        "@vytches/ddd-resilience"
+      ],
       "status": "DECLARED_MISSING",
       "file": null,
       "testedBy": [],
@@ -85,7 +116,10 @@
     {
       "name": "cqrs-plus-resilience-functional",
       "level": "advanced",
-      "packages": ["@vytches/ddd-cqrs", "@vytches/ddd-resilience"],
+      "packages": [
+        "@vytches/ddd-cqrs",
+        "@vytches/ddd-resilience"
+      ],
       "status": "DECLARED_MISSING",
       "file": null,
       "testedBy": [],
@@ -95,7 +129,10 @@
     {
       "name": "cqrs-plus-specification-validator",
       "level": "intermediate",
-      "packages": ["@vytches/ddd-cqrs", "@vytches/ddd-validation"],
+      "packages": [
+        "@vytches/ddd-cqrs",
+        "@vytches/ddd-validation"
+      ],
       "status": "DECLARED_MISSING",
       "file": null,
       "testedBy": [],
@@ -105,7 +142,10 @@
     {
       "name": "unit-of-work-transactional",
       "level": "advanced",
-      "packages": ["@vytches/ddd-domain-services", "@vytches/ddd-repositories"],
+      "packages": [
+        "@vytches/ddd-domain-services",
+        "@vytches/ddd-repositories"
+      ],
       "status": "DECLARED_MISSING",
       "file": null,
       "testedBy": [],
@@ -117,23 +157,38 @@
     {
       "file": "examples/domain-services/src/01-order-processing.ts",
       "exampleDir": "domain-services",
-      "packages": ["@vytches/ddd-domain-services", "@vytches/ddd-utils"],
+      "packages": [
+        "@vytches/ddd-domain-services",
+        "@vytches/ddd-utils"
+      ],
       "status": "VERIFIED",
-      "testedBy": ["examples/domain-services/tests/domain-services-examples.test.ts"]
+      "testedBy": [
+        "examples/domain-services/tests/domain-services-examples.test.ts"
+      ]
     },
     {
       "file": "examples/domain-services/src/03-inventory-management.ts",
       "exampleDir": "domain-services",
-      "packages": ["@vytches/ddd-domain-services", "@vytches/ddd-utils"],
+      "packages": [
+        "@vytches/ddd-domain-services",
+        "@vytches/ddd-utils"
+      ],
       "status": "VERIFIED",
-      "testedBy": ["examples/domain-services/tests/domain-services-examples.test.ts"]
+      "testedBy": [
+        "examples/domain-services/tests/domain-services-examples.test.ts"
+      ]
     },
     {
       "file": "examples/domain-services/src/06-transaction-rollback.ts",
       "exampleDir": "domain-services",
-      "packages": ["@vytches/ddd-domain-services", "@vytches/ddd-utils"],
+      "packages": [
+        "@vytches/ddd-domain-services",
+        "@vytches/ddd-utils"
+      ],
       "status": "VERIFIED",
-      "testedBy": ["examples/domain-services/tests/domain-services-examples.test.ts"]
+      "testedBy": [
+        "examples/domain-services/tests/domain-services-examples.test.ts"
+      ]
     },
     {
       "file": "examples/domain-services/src/07-testing-domain-services.ts",
@@ -145,14 +200,21 @@
         "@vytches/ddd-utils"
       ],
       "status": "VERIFIED",
-      "testedBy": ["examples/domain-services/tests/domain-services-examples.test.ts"]
+      "testedBy": [
+        "examples/domain-services/tests/domain-services-examples.test.ts"
+      ]
     },
     {
       "file": "examples/policies/src/04-conditional-policy.ts",
       "exampleDir": "policies",
-      "packages": ["@vytches/ddd-policies", "@vytches/ddd-validation"],
+      "packages": [
+        "@vytches/ddd-policies",
+        "@vytches/ddd-validation"
+      ],
       "status": "VERIFIED",
-      "testedBy": ["examples/policies/tests/policies-examples.test.ts"]
+      "testedBy": [
+        "examples/policies/tests/policies-examples.test.ts"
+      ]
     },
     {
       "file": "examples/quickstart/src/application/create-order.command.ts",
@@ -165,7 +227,9 @@
         "@vytches/ddd-value-objects"
       ],
       "status": "VERIFIED",
-      "testedBy": ["examples/quickstart/tests/order.integration.test.ts"]
+      "testedBy": [
+        "examples/quickstart/tests/order.integration.test.ts"
+      ]
     },
     {
       "file": "examples/quickstart/src/application/get-order.query.ts",
@@ -178,7 +242,9 @@
         "@vytches/ddd-value-objects"
       ],
       "status": "VERIFIED",
-      "testedBy": ["examples/quickstart/tests/order.integration.test.ts"]
+      "testedBy": [
+        "examples/quickstart/tests/order.integration.test.ts"
+      ]
     },
     {
       "file": "examples/quickstart/src/application/place-order.command.ts",
@@ -191,7 +257,9 @@
         "@vytches/ddd-value-objects"
       ],
       "status": "VERIFIED",
-      "testedBy": ["examples/quickstart/tests/order.integration.test.ts"]
+      "testedBy": [
+        "examples/quickstart/tests/order.integration.test.ts"
+      ]
     },
     {
       "file": "examples/quickstart/src/infrastructure/in-memory-order.repository.ts",
@@ -204,7 +272,9 @@
         "@vytches/ddd-value-objects"
       ],
       "status": "VERIFIED",
-      "testedBy": ["examples/quickstart/tests/order.integration.test.ts"]
+      "testedBy": [
+        "examples/quickstart/tests/order.integration.test.ts"
+      ]
     }
   ]
 }
