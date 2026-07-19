@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### BREAKING CHANGES
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-repositories

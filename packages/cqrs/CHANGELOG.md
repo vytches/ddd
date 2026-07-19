@@ -3,6 +3,49 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **cqrs:** evict stale handler factories and add bus reset (VS-003)
+  ([550f865](https://github.com/vytches/ddd/commit/550f8654472260140d67a2f15876691f1f1f6348))
+- **cqrs:** make CQRS execution logging opt-in, sanitize logged errors
+  ([5f58796](https://github.com/vytches/ddd/commit/5f587964c1aa2b00adaf662742b18fda7dbd9315))
+- **cqrs:** unref cache timers and align command enableCache default to false
+  (vp-010)
+  ([56068b7](https://github.com/vytches/ddd/commit/56068b73a39a20d8c18aa7be6cd676639ea1cce5))
+- **messaging:** preserve outbox stack trace + widen LoggingMiddleware logger
+  type (VS-015)
+  ([f11f6f9](https://github.com/vytches/ddd/commit/f11f6f96427a9b41910a5c5249fbc1c541201055))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Features
+
+- **cqrs:** add IDisposableBus interface and export from package
+  ([00ada97](https://github.com/vytches/ddd/commit/00ada97a1d6f104e972de1a3a33a511520ba6f48))
+- **cqrs:** export Symbol.for DI tokens to fix dual-package hazard (VP-009 Bug
+  [#3](https://github.com/vytches/ddd/issues/3))
+  ([a985fa8](https://github.com/vytches/ddd/commit/a985fa8301c711d063820c72f55aab76f1ba1331))
+
+### BREAKING CHANGES
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-cqrs
