@@ -1,12 +1,8 @@
 import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
 import type { Result } from '@vytches/ddd-utils';
-import {
-  AsyncSpecificationPolicy,
-  BaseBusinessPolicy,
-  SpecificationPolicy,
-} from '../core/base/base-business-policy';
+import { BaseBusinessPolicy } from '../core/base/base-business-policy';
 import type { IBusinessPolicy, PolicyRequest } from '../core/interfaces/business-policy.interface';
-import type { PolicyViolation, PolicyViolationSeverity } from '../core/models/policy-violation';
+import type { PolicyViolation } from '../core/models/policy-violation';
 import { ConditionalPolicyBuilder } from './conditional-policy-builder';
 import type { PolicyBuildStep } from './policy-builder-types';
 import type {
@@ -17,6 +13,7 @@ import type {
   PolicyBuilderConfig,
 } from './policy-builder.interface';
 import { PolicyStepBuilder } from './policy-step-builder';
+import { computeErrorCode, createStepPolicy } from './step-policy-factory';
 
 export class PolicyBuilder<T> implements IPolicyBuilder<T> {
   private id?: string;
@@ -196,7 +193,7 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
   /**
    * Define complex OR group logic - at least one group must pass
    */
-  public shouldSatisfyAny(...groups: IPolicyGroup<T>[]): IPolicyBuilder<T> {
+  public shouldSatisfyAny(...groups: IPolicyGroup<T>[]): IPolicyStepBuilder<T> {
     const step: PolicyBuildStep<T> = {
       type: 'group-or',
       groups,
@@ -207,7 +204,7 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
     };
 
     this.steps.push(step);
-    return this;
+    return new PolicyStepBuilder(this, step);
   }
 
   /**
@@ -288,66 +285,9 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
     const policyId = this.id!;
     const policyDomain = this.domain || this.config.defaultDomain!;
     const policyName = this.name!;
+    const unsupportedStepErrorCode = this.generateErrorCode('UNSUPPORTED_STEP_TYPE');
 
-    switch (step.type) {
-      case 'specification':
-        return SpecificationPolicy.fromSpecification(
-          policyId,
-          policyDomain,
-          policyName,
-          step.specification!,
-          step.errorCode,
-          step.errorMessage
-        );
-
-      case 'async-specification':
-        return AsyncSpecificationPolicy.fromAsyncSpecification(
-          policyId,
-          policyDomain,
-          policyName,
-          step.asyncSpecification!,
-          step.errorCode,
-          step.errorMessage
-        );
-
-      case 'predicate':
-        return new PredicatePolicy(
-          policyId,
-          policyDomain,
-          policyName,
-          step.predicate!,
-          step.errorCode,
-          step.errorMessage,
-          step.severity
-        );
-
-      case 'async-predicate':
-        return new AsyncPredicatePolicy(
-          policyId,
-          policyDomain,
-          policyName,
-          step.asyncPredicate!,
-          step.errorCode,
-          step.errorMessage,
-          step.severity
-        );
-
-      case 'rules':
-        return new RulesPolicy(
-          policyId,
-          policyDomain,
-          policyName,
-          step.rulesBuilder!,
-          step.errorCode,
-          step.errorMessage,
-          step.severity
-        );
-
-      default:
-        throw new Error(
-          `Unsupported step type for single policy: ${(step as { type: string }).type}`
-        );
-    }
+    return createStepPolicy(step, policyId, policyDomain, policyName, unsupportedStepErrorCode);
   }
 
   private createCompositePolicy(): IBusinessPolicy<T> {
@@ -362,123 +302,6 @@ export class PolicyBuilder<T> implements IPolicyBuilder<T> {
 }
 
 // Helper policy implementations
-
-class PredicatePolicy<T> extends BaseBusinessPolicy<T> {
-  constructor(
-    id: string,
-    domain: string,
-    name: string,
-    private readonly predicate: (entity: T, context?: unknown) => boolean,
-    private readonly errorCode: string,
-    private readonly errorMessage: string,
-    private readonly severity: PolicyViolationSeverity
-  ) {
-    super(id, domain, name);
-  }
-
-  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
-    try {
-      const satisfied = this.predicate(request.entity, request.context);
-
-      if (satisfied) {
-        return this.success(request.entity);
-      }
-
-      const violation = this.createViolation(this.errorCode, this.errorMessage, this.severity, {
-        context: request.context,
-      });
-
-      return this.failure(violation);
-    } catch (error) {
-      const violation = this.createViolation(
-        'PREDICATE_ERROR',
-        `Predicate evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'ERROR',
-        { context: request.context, details: { originalError: error } }
-      );
-
-      return this.failure(violation);
-    }
-  }
-}
-
-class AsyncPredicatePolicy<T> extends BaseBusinessPolicy<T> {
-  constructor(
-    id: string,
-    domain: string,
-    name: string,
-    private readonly predicate: (entity: T, context?: unknown) => Promise<boolean>,
-    private readonly errorCode: string,
-    private readonly errorMessage: string,
-    private readonly severity: PolicyViolationSeverity
-  ) {
-    super(id, domain, name);
-  }
-
-  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
-    try {
-      const satisfied = await this.predicate(request.entity, request.context);
-
-      if (satisfied) {
-        return this.success(request.entity);
-      }
-
-      const violation = this.createViolation(this.errorCode, this.errorMessage, this.severity, {
-        context: request.context,
-      });
-
-      return this.failure(violation);
-    } catch (error) {
-      const violation = this.createViolation(
-        'ASYNC_PREDICATE_ERROR',
-        `Async predicate evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'ERROR',
-        { context: request.context, details: { originalError: error } }
-      );
-
-      return this.failure(violation);
-    }
-  }
-}
-
-class RulesPolicy<T> extends BaseBusinessPolicy<T> {
-  constructor(
-    id: string,
-    domain: string,
-    name: string,
-    private readonly rulesBuilder: (entity: T) => boolean,
-    private readonly errorCode: string,
-    private readonly errorMessage: string,
-    private readonly severity: PolicyViolationSeverity
-  ) {
-    super(id, domain, name);
-  }
-
-  public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
-    try {
-      const satisfied = this.rulesBuilder(request.entity);
-
-      if (satisfied) {
-        return this.success(request.entity);
-      }
-
-      const violation = this.createViolation(this.errorCode, this.errorMessage, this.severity, {
-        context: request.context,
-      });
-
-      return this.failure(violation);
-    } catch (error) {
-      const violation = this.createViolation(
-        'RULES_ERROR',
-        `Rules evaluation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        'ERROR',
-        { context: request.context, details: { originalError: error } }
-      );
-
-      return this.failure(violation);
-    }
-  }
-}
 
 class BuiltCompositePolicy<T> extends BaseBusinessPolicy<T> {
   constructor(
@@ -509,35 +332,17 @@ class BuiltCompositePolicy<T> extends BaseBusinessPolicy<T> {
 
   private createPolicyFromStep(step: PolicyBuildStep<T>): IBusinessPolicy<T> {
     const stepId = `${this.id}_step_${this.steps.indexOf(step)}`;
+    const unsupportedStepErrorCode = computeErrorCode(
+      this.config.defaultErrorCodePrefix,
+      'UNSUPPORTED_STEP_TYPE'
+    );
 
-    switch (step.type) {
-      case 'specification':
-        return SpecificationPolicy.fromSpecification(
-          stepId,
-          this.domain,
-          `${this.name} - Step`,
-          step.specification!,
-          step.errorCode,
-          step.errorMessage
-        );
-
-      case 'predicate':
-        return new PredicatePolicy(
-          stepId,
-          this.domain,
-          `${this.name} - Step`,
-          step.predicate!,
-          step.errorCode,
-          step.errorMessage,
-          step.severity
-        );
-
-      // Currently supports 'specification' and 'predicate' step types
-      // Additional step types can be added as needed
-      default:
-        throw new Error(
-          `Unsupported step type: ${(step as { type: string }).type}. Supported: specification, predicate`
-        );
-    }
+    return createStepPolicy(
+      step,
+      stepId,
+      this.domain,
+      `${this.name} - Step`,
+      unsupportedStepErrorCode
+    );
   }
 }

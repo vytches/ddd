@@ -2,7 +2,13 @@ import type { MockedFunction } from 'vitest';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
 import { CQRSExecutionContext, LoggingMiddleware } from '../../src';
-import type { ICommand, ICommandHandler, IQuery, IQueryHandler } from '../../src';
+import type {
+  ICommand,
+  ICommandHandler,
+  IQuery,
+  IQueryHandler,
+  IMiddlewareLogger,
+} from '../../src';
 
 describe('LoggingMiddleware', () => {
   class TestCommand implements ICommand {
@@ -147,6 +153,42 @@ describe('LoggingMiddleware', () => {
         );
       });
 
+      it('sanitizes control characters embedded in the error message (VS-018)', async () => {
+        const command = new TestCommand('test-data');
+        const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');
+        const error = new Error('line1\nline2\rline3');
+
+        nextFunction.mockRejectedValue(error);
+
+        const [middlewareError] = await safeRun(() => middleware.handle(context, nextFunction));
+        expect(middlewareError).toBe(error);
+
+        const logCall = mockLogger.log.mock.calls[1]?.[0] as string;
+        expect(logCall).not.toMatch(/[\n\r]/);
+        expect(logCall).toContain('line1 line2 line3');
+      });
+
+      it('logs a non-Error thrown value without crashing (VS-018)', async () => {
+        const command = new TestCommand('test-data');
+        const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');
+
+        nextFunction.mockRejectedValue('a plain string rejection');
+
+        // safeRun wraps non-Error rejections into an Error — but the
+        // middleware's own catch sees the raw string first (before safeRun
+        // repackages it), which is what this test actually verifies via the
+        // logged message below.
+        const [middlewareError] = await safeRun(() => middleware.handle(context, nextFunction));
+        expect(middlewareError?.message).toBe('a plain string rejection');
+
+        expect(mockLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.stringMatching(
+            /^\[CQRS\] command TestCommand failed after \d+ms: UnknownError: a plain string rejection$/
+          )
+        );
+      });
+
       it('should measure execution time for failed operations', async () => {
         const command = new TestCommand('test-data');
         const context = new CQRSExecutionContext(command, mockCommandHandler, 'command');
@@ -281,5 +323,39 @@ describe('LoggingMiddleware', () => {
         expect(mockLogger.log).toHaveBeenCalledTimes(4); // 2 start + 2 completion logs
       });
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// VS-015 Issue 2 — IMiddlewareLogger widening: compile-time type safety guard
+// ---------------------------------------------------------------------------
+// These tests exercise the TYPE-LEVEL contract of IMiddlewareLogger.
+// If any assignment here fails to compile, the widening has regressed.
+// Runtime: all pass trivially — the value is never used at runtime.
+describe('IMiddlewareLogger type widening (VS-015)', () => {
+  it('narrow { log: (m: string) => void } is assignable to IMiddlewareLogger', () => {
+    // A plain single-param log function must still satisfy the widened interface.
+    // This was the ORIGINAL constructor type — backward-compat guard.
+    const narrowLogger: IMiddlewareLogger = { log: vi.fn() };
+    expect(new LoggingMiddleware(narrowLogger)).toBeInstanceOf(LoggingMiddleware);
+  });
+
+  it('variadic { log: (m: string, ...args: unknown[]) => void } is assignable to IMiddlewareLogger', () => {
+    // The new canonical form — extra args accepted.
+    const variadicLogger: IMiddlewareLogger = { log: vi.fn() };
+    expect(new LoggingMiddleware(variadicLogger)).toBeInstanceOf(LoggingMiddleware);
+  });
+
+  it('console is assignable to IMiddlewareLogger (default fallback guard)', () => {
+    // LoggingMiddleware falls back to console when no logger is passed.
+    // Ensure console still satisfies the interface.
+    const consoleLogger: IMiddlewareLogger = console;
+    expect(new LoggingMiddleware(consoleLogger)).toBeInstanceOf(LoggingMiddleware);
+  });
+
+  it('LoggingMiddleware constructor accepts no argument (console default path)', () => {
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    expect(new LoggingMiddleware()).toBeInstanceOf(LoggingMiddleware);
+    consoleSpy.mockRestore();
   });
 });

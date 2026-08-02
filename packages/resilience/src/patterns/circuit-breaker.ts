@@ -64,6 +64,10 @@ export class CircuitBreaker {
     } catch (error) {
       this.onFailure();
       throw error;
+    } finally {
+      // VB-004: withTimeout() forks a context holding a timer + a parent
+      // abort listener; dispose() releases both once this attempt settles.
+      operationContext.dispose?.();
     }
   }
 

@@ -110,10 +110,11 @@ export type {
   PolicyExecutionMetrics,
 } from './events';
 
+// globalPolicyEventBus removed (VF-024, AC9 / SA-M11) — construct your own
+// `new PolicyEventBus(...)` instance. See CHANGELOG.md.
 export {
   EventDrivenPolicy,
   EventDrivenPolicyFactory,
-  globalPolicyEventBus,
   PolicyEventBuilder,
   PolicyEventBus,
   PolicyEventHandlers,

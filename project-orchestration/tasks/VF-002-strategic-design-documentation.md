@@ -12,8 +12,11 @@ estimated_time: 20h
 created_by: human (work-items archive 2026-03-31)
 created_at: 2026-03-31
 migrated_at: 2026-05-08
-status: planned
-release_target: post-v0.25
+updated_at:
+  2026-07-02 (planned → backlog per product-owner review — opportunistic
+  post-release, 55d idle)
+status: backlog
+release_target: post-v0.25 (opportunistic)
 priority_score: 78/100
 depends_on:
   - VD-001 (Enhanced Metadata System) — historical, may not apply post-pivot

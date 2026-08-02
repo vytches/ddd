@@ -1,0 +1,10 @@
+export type { CodeFence, FenceDiagnostic } from './types.js';
+export { extractFences, extractFencesFromFile, COMPILE_CHECK_MARKER } from './extractor.js';
+export { checkFences } from './checker.js';
+export type { CheckerOptions, CheckResult } from './checker.js';
+export { loadRepoCompilerOptions } from './compiler-options.js';
+export { findDocFiles } from './discovery.js';
+export { formatReport } from './report.js';
+export type { RunResult } from './report.js';
+export { run, main } from './cli.js';
+export type { RunOptions } from './cli.js';

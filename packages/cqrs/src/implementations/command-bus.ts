@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
-import { Logger } from '@vytches/ddd-logging';
 import { MiddlewarePipelineExecutor, Result } from '@vytches/ddd-utils';
-import 'reflect-metadata';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 import { ICommandBus } from '../abstracts';
 import { CQRSConfigurationError, HandlerNotFoundError } from '../errors';
@@ -69,7 +71,6 @@ import type { ICqrsValidatable } from '../validation';
  * @since 0.1.0
  */
 export class CommandBus extends ICommandBus {
-  private readonly logger = Logger.forContext('CommandBus');
   private middlewares: ICQRSMiddleware[] = [];
   private handlers: Map<
     Function | string,
@@ -106,8 +107,8 @@ export class CommandBus extends ICommandBus {
     // This method is kept for backward compatibility but does nothing
     // Suppress deprecation warnings in CI to avoid stderr confusion
     if (!process.env.CI) {
-      this.logger.warn(
-        'CommandBus.discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
+      internalLogger.warn(
+        'CommandBus: discoverHandlers() is deprecated. Handler discovery is now automatic through DI container.'
       );
     }
   }

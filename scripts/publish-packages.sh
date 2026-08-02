@@ -56,12 +56,17 @@ for pkg in packages/*/; do
     PUBLISHED=$((PUBLISHED + 1))
   else
     echo "📦 Publishing $name@$version${DIST_TAG:+ (dist-tag: ${DIST_TAG#--tag })}..."
-    if (cd "$pkg" && pnpm publish --registry="$REGISTRY" --no-git-checks $DIST_TAG 2>&1); then
+    publish_output=$(cd "$pkg" && pnpm publish --registry="$REGISTRY" --no-git-checks $DIST_TAG 2>&1) && publish_status=0 || publish_status=$?
+    echo "$publish_output"
+    if [ "$publish_status" -eq 0 ]; then
       echo "   ✅ $name@$version published"
       PUBLISHED=$((PUBLISHED + 1))
-    else
-      echo "   ⚠️  $name@$version skipped (already exists or error)"
+    elif echo "$publish_output" | grep -qiE 'you cannot publish over the previously published version|previously published versions|EPUBLISHCONFLICT'; then
+      echo "   ⏭️  $name@$version skipped (already published)"
       SKIPPED=$((SKIPPED + 1))
+    else
+      echo "   ❌ $name@$version FAILED to publish"
+      FAILED=$((FAILED + 1))
     fi
   fi
 done
@@ -71,4 +76,9 @@ echo "📊 Results: $PUBLISHED published, $SKIPPED skipped, $FAILED failed"
 
 if [ "$DRY_RUN" = "true" ]; then
   echo "ℹ️  This was a dry run. Remove DRY_RUN=true to actually publish."
+fi
+
+if [ "$FAILED" -gt 0 ]; then
+  echo "❌ $FAILED package(s) failed to publish — failing the job."
+  exit 1
 fi

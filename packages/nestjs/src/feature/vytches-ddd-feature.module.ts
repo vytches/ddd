@@ -1,6 +1,5 @@
 import { Module, type DynamicModule } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { ModulesContainer } from '@nestjs/core/injector/modules-container.js';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
 import { CommandBus, QueryBus, ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import type { IEventBus } from '@vytches/ddd-contracts';
@@ -71,8 +70,14 @@ export class VytchesDDDFeatureModule {
           provide: LOCAL_EVENT_BUS,
           useFactory: (): IEventBus => new UnifiedEventBus(),
         },
-        // ModulesContainer is provided by NestJS InternalCoreModule (global)
-        ModulesContainer,
+        // NOTE: ModulesContainer is intentionally NOT listed here. It is a global
+        // provider from NestJS's InternalCoreModule, injectable in any module
+        // without being declared. Adding a bare `ModulesContainer` class here is
+        // shorthand for `{ provide: ModulesContainer, useClass: ModulesContainer }`,
+        // which SHADOWS the global singleton with a fresh, empty instance scoped to
+        // this module — breaking FeatureHandlerRegistrar.findOwnModule() (F-C4,
+        // TM-VB-003-001, DREAD 14: cross-context handler/event leakage). Do not
+        // re-add it.
         // Registrar that wires handlers into the local buses on module init
         FeatureHandlerRegistrar,
         // Dispatcher that routes DomainEvents → LOCAL_EVENT_BUS, IntegrationEvents → IEventBus

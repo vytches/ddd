@@ -244,10 +244,15 @@ export class CsvMetricExporter implements MetricExporter {
   }
 
   private escapeCsv(value: string): string {
-    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-      return `"${value.replace(/"/g, '""')}"`;
-    }
-    return value;
+    // SEC-RESILIENCE-001: leading =, +, -, @, |, % may execute as a formula
+    // when the CSV is opened in Excel/Google Sheets (OWASP CSV Injection)
+    const needsQuote =
+      value.includes(',') ||
+      value.includes('"') ||
+      value.includes('\n') ||
+      value.includes('\r') ||
+      /^[=+\-@|%]/.test(value);
+    return needsQuote ? `"${value.replace(/"/g, '""')}"` : value;
   }
 }
 

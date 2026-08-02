@@ -3,7 +3,7 @@ import type { IAggregateWithEvents, IDomainEvent } from '@vytches/ddd-contracts'
 import { IEventDispatcher } from '@vytches/ddd-contracts';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { IntegrationEvent } from '@vytches/ddd-events';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { LOCAL_EVENT_BUS } from '../constants';
 
 /**
@@ -43,8 +43,6 @@ import { LOCAL_EVENT_BUS } from '../constants';
  */
 @Injectable()
 export class ContextAwareEventDispatcher extends IEventDispatcher {
-  private readonly logger = Logger.forContext('ContextAwareEventDispatcher');
-
   constructor(
     @Optional() @Inject(IEventBus) private readonly integrationBus: IEventBus | undefined,
     @Optional() @Inject(LOCAL_EVENT_BUS) private readonly localBus: IEventBus | undefined
@@ -60,8 +58,8 @@ export class ContextAwareEventDispatcher extends IEventDispatcher {
       await this.dispatchEvents(...events);
       aggregate.commit();
     } catch (error) {
-      this.logger.error(
-        'Failed to dispatch aggregate events',
+      internalLogger.error(
+        'ContextAwareEventDispatcher: Failed to dispatch aggregate events',
         error instanceof Error ? error : undefined,
         {
           aggregateType: aggregate.constructor.name,
@@ -76,17 +74,23 @@ export class ContextAwareEventDispatcher extends IEventDispatcher {
   async dispatchEvent(event: IDomainEvent): Promise<void> {
     if (event instanceof IntegrationEvent) {
       if (!this.integrationBus) {
-        this.logger.warn('No global IEventBus provided — IntegrationEvent dropped', {
-          eventName: event.eventName,
-        });
+        internalLogger.warn(
+          'ContextAwareEventDispatcher: No global IEventBus provided — IntegrationEvent dropped',
+          {
+            eventName: event.eventName,
+          }
+        );
         return;
       }
       await this.integrationBus.publish(event);
     } else {
       if (!this.localBus) {
-        this.logger.warn('No LOCAL_EVENT_BUS provided — DomainEvent dropped', {
-          eventName: event.eventName,
-        });
+        internalLogger.warn(
+          'ContextAwareEventDispatcher: No LOCAL_EVENT_BUS provided — DomainEvent dropped',
+          {
+            eventName: event.eventName,
+          }
+        );
         return;
       }
       await this.localBus.publish(event);

@@ -181,7 +181,11 @@ class OrderLine extends Entity<string> {
 | `IAggregateCapability`             | interface | Base capability contract                   |
 | `IAggregateConstructorParams<TId>` | interface | Constructor parameter shape for aggregates |
 | `IAggregateEventHandler`           | interface | Event handler registration contract        |
-| `IAggregateBuilder`                | interface | Builder contract                           |
+
+> **BREAKING (v0.31.0):** `IAggregateBuilder` was removed. It was
+> shape-incompatible with the concrete `AggregateBuilder` class (a broken public
+> interface is worse than none). Use the `AggregateBuilder` class directly for
+> the builder's fluent contract.
 
 ### Utility Types
 

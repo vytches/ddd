@@ -99,6 +99,8 @@ vi.mock('@vytches/ddd-cqrs', () => {
     QueryBus: mockBus,
     EnhancedCommandBus: mockBus,
     EnhancedQueryBus: mockBus,
+    COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+    QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
   };
 });
 
@@ -127,7 +129,8 @@ vi.mock('@vytches/ddd-events', async () => ({
   }),
 }));
 
-vi.mock('@vytches/ddd-di', async () => ({
+vi.mock('@vytches/ddd-di', async importOriginal => ({
+  ...(await importOriginal<typeof import('@vytches/ddd-di')>()),
   SimpleContainer: vi.fn().mockImplementation(() => ({
     register: vi.fn().mockImplementation(async () => {
       await new Promise(resolve => setTimeout(resolve, 0.5 + Math.random()));
@@ -211,19 +214,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
     it('should initialize single context module within performance targets', async () => {
       const { result, duration } = await measureTime(async () => {
         const testModule = await Test.createTestingModule({
-          imports: [
-            VytchesDDDModule.forContext('PerformanceTest', {
-              bridgeToNestJS: true,
-              performance: {
-                performanceTarget: 100,
-                performanceMode: 'production',
-                autoOptimize: true,
-              },
-              handlers: {
-                include: ['*Handler'],
-              },
-            }),
-          ],
+          imports: [VytchesDDDModule.forContext('PerformanceTest', {})],
           providers: [FastCommandHandler, MediumComplexityHandler],
         }).compile();
 
@@ -246,20 +237,13 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
       const contexts: Record<string, any> = {};
 
       for (let i = 1; i <= contextCount; i++) {
-        contexts[`Context${i}`] = {
-          bridgeToNestJS: true,
-          performance: {
-            performanceTarget: 100,
-            autoOptimize: true,
-          },
-        };
+        contexts[`Context${i}`] = {};
       }
 
       const { result, duration } = await measureTime(async () => {
         const testModule = await Test.createTestingModule({
           imports: [
             VytchesDDDModule.forContexts({
-              globalBridgeToNestJS: true,
               contexts,
             }),
           ],
@@ -316,15 +300,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
   describe('Handler Discovery Performance', () => {
     beforeEach(async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('DiscoveryPerfTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 50,
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('DiscoveryPerfTest', {})],
         providers: [FastCommandHandler, MediumComplexityHandler, SlowCommandHandler],
       }).compile();
 
@@ -398,10 +374,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
       // Utwórz wiele kontekstów
       const contexts: Record<string, any> = {};
       for (let i = 1; i <= 10; i++) {
-        contexts[`MemoryTest${i}`] = {
-          bridgeToNestJS: true,
-          performance: { performanceTarget: 100 },
-        };
+        contexts[`MemoryTest${i}`] = {};
       }
 
       const testModule = await Test.createTestingModule({
@@ -449,15 +422,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
 
     it('should handle concurrent operations efficiently', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('ConcurrentTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 100,
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('ConcurrentTest', {})],
         providers: [FastCommandHandler, MediumComplexityHandler],
       }).compile();
 
@@ -490,21 +455,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
   describe('Performance Monitoring and Metrics', () => {
     it('should collect accurate performance metrics', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('MetricsTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 80,
-              autoOptimize: true,
-              performanceMode: 'production',
-            },
-            monitoring: {
-              enabled: true,
-              warnAt: 60,
-              errorAt: 100,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('MetricsTest', {})],
         providers: [FastCommandHandler, MediumComplexityHandler],
       }).compile();
 
@@ -524,19 +475,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
     it('should trigger performance warnings and optimizations', async () => {
       // Test performance monitoring without complex mocking
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('SlowContext', {
-            performance: {
-              performanceTarget: 100, // Lower target
-              autoOptimize: true,
-            },
-            monitoring: {
-              enabled: true,
-              warnAt: 80,
-              errorAt: 150,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('SlowContext', {})],
         providers: [SlowCommandHandler],
       }).compile();
 
@@ -574,12 +513,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
 
         const { duration } = await measureTime(async () => {
           const testModule = await Test.createTestingModule({
-            imports: [
-              VytchesDDDModule.forContext(`ScaleTest${count}`, {
-                bridgeToNestJS: true,
-                performance: { autoOptimize: true },
-              }),
-            ],
+            imports: [VytchesDDDModule.forContext(`ScaleTest${count}`, {})],
             providers,
           }).compile();
 
@@ -615,10 +549,7 @@ describe('VytchesDDDModule - Performance Benchmarks', () => {
       for (const contextCount of contextCounts) {
         const contexts: Record<string, any> = {};
         for (let i = 1; i <= contextCount; i++) {
-          contexts[`BigScale${i}`] = {
-            bridgeToNestJS: true,
-            performance: { performanceTarget: 100 },
-          };
+          contexts[`BigScale${i}`] = {};
         }
 
         const { duration } = await measureTime(async () => {

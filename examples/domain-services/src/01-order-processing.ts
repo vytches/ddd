@@ -13,6 +13,11 @@
  * `Result<T>` return type for error-as-value.
  */
 
+// `@DomainService` (used below) relies on decorator metadata. `domain-services`
+// declares `reflect-metadata` as a peerDependency (F-C3, VB-002) rather than
+// importing it itself, so — like any real consumer using the decorator — this
+// example must load the polyfill once before the decorator runs.
+import 'reflect-metadata';
 import { AsyncDomainService, DomainService } from '@vytches/ddd-domain-services';
 import { Result } from '@vytches/ddd-utils';
 

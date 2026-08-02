@@ -230,17 +230,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
   describe('Real NestJS Container Integration', () => {
     beforeEach(async () => {
       module = await Test.createTestingModule({
-        imports: [
-          TestBusinessModule,
-          VytchesDDDModule.forContext('EnterpriseTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 200,
-              performanceMode: 'production',
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [TestBusinessModule, VytchesDDDModule.forContext('EnterpriseTest', {})],
       }).compile();
 
       app = module.createNestApplication();
@@ -265,7 +255,10 @@ describe('Realistic Enterprise NestJS Integration', () => {
 
       expect(user.name).toBe('John Doe');
       expect(user.email).toBe('john@example.com');
-      expect(userCreationTime).toBeGreaterThan(2); // Real async operation took time
+      // VS-010 (2026-05-29): removed flaky lower bound (was >2ms). Removing the
+      // internal application-logging overhead made the op faster; faster execution
+      // is never a real failure. The result assertions above prove the op ran.
+      expect(userCreationTime).toBeGreaterThanOrEqual(0);
       expect(userCreationTime).toBeLessThan(50); // But reasonable
 
       // Test service dependency injection
@@ -337,15 +330,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
       const serviceClasses = createRealisticServiceClasses(200);
 
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('LargeScaleTest', {
-            bridgeToNestJS: true,
-            performance: {
-              performanceTarget: 1000,
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('LargeScaleTest', {})],
         providers: serviceClasses,
       }).compile();
 
@@ -420,11 +405,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
         const serviceClasses = createRealisticServiceClasses(count);
 
         const testModule = await Test.createTestingModule({
-          imports: [
-            VytchesDDDModule.forContext(`ScaleTest${count}`, {
-              performance: { autoOptimize: true },
-            }),
-          ],
+          imports: [VytchesDDDModule.forContext(`ScaleTest${count}`, {})],
           providers: serviceClasses,
         }).compile();
 
@@ -496,12 +477,7 @@ describe('Realistic Enterprise NestJS Integration', () => {
   describe('Enterprise Error Handling', () => {
     beforeEach(async () => {
       module = await Test.createTestingModule({
-        imports: [
-          TestBusinessModule,
-          VytchesDDDModule.forContext('ErrorTest', {
-            bridgeToNestJS: true,
-          }),
-        ],
+        imports: [TestBusinessModule, VytchesDDDModule.forContext('ErrorTest', {})],
       }).compile();
 
       app = module.createNestApplication();

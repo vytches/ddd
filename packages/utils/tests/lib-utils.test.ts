@@ -1,16 +1,22 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validate } from 'uuid';
 import { LibUtils, safeRun } from '../src';
-
-// Mock for uuid
-vi.mock('uuid', () => ({
-  v4: () => '123e4567-e89b-12d3-a456-426614174000',
-  validate: vi.fn(),
-}));
 
 describe('LibUtils', () => {
   describe('getUUID', () => {
+    // F-M7 (VB-002): LibUtils.getUUID() now calls globalThis.crypto.randomUUID()
+    // directly (no more vendored `uuid` package) — mock the platform API
+    // instead of a module import.
+    beforeEach(() => {
+      vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(
+        '123e4567-e89b-12d3-a456-426614174000'
+      );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
     it('should handle unusual input cases', () => {
       // Arrange & Act
       const result1 = LibUtils.getUUID(null as any);
@@ -538,34 +544,44 @@ describe('LibUtils', () => {
   });
 
   describe('isValidUUID', () => {
-    beforeEach(() => {
-      (validate as any).mockReset();
+    // F-M7 (VB-002): isValidUUID() is now a self-contained regex check (no
+    // more vendored `uuid` package) — test it directly against real strings
+    // instead of mocking a `validate()` import.
+    it('returns true for a valid v4 UUID', () => {
+      expect(LibUtils.isValidUUID('123e4567-e89b-42d3-a456-426614174000')).toBe(true);
     });
 
-    it('should use uuid validate function to check UUID validity', () => {
-      // Arrange
-      const validUuid = '123e4567-e89b-12d3-a456-426614174000';
-      (validate as any).mockReturnValue(true);
-
-      // Act
-      const result = LibUtils.isValidUUID(validUuid);
-
-      // Assert
-      expect(validate).toHaveBeenCalledWith(validUuid);
-      expect(result).toBe(true);
+    it('returns true for the nil UUID', () => {
+      expect(LibUtils.isValidUUID('00000000-0000-0000-0000-000000000000')).toBe(true);
     });
 
-    it('should return false for invalid UUID', () => {
-      // Arrange
-      const invalidUuid = 'not-a-uuid';
-      (validate as any).mockReturnValue(false);
+    // Parity with the `uuid` npm package's `validate()` (v10+, e.g. v11.1.0's
+    // regex.js): the max UUID is a second special case alongside the nil
+    // UUID, added in the same release that widened the version nibble.
+    it('returns true for the max UUID', () => {
+      expect(LibUtils.isValidUUID('ffffffff-ffff-ffff-ffff-ffffffffffff')).toBe(true);
+    });
 
-      // Act
-      const result = LibUtils.isValidUUID(invalidUuid);
+    // Parity with `uuid`'s `validate()`, which is case-insensitive.
+    it('returns true for an uppercase UUID', () => {
+      expect(LibUtils.isValidUUID('550E8400-E29B-41D4-A716-446655440000')).toBe(true);
+    });
 
-      // Assert
-      expect(validate).toHaveBeenCalledWith(invalidUuid);
-      expect(result).toBe(false);
+    it('returns false for a malformed string', () => {
+      expect(LibUtils.isValidUUID('not-a-uuid')).toBe(false);
+    });
+
+    // Parity with `uuid`'s `validate()` (v10+): the version nibble range was
+    // widened from 1-5 to 1-8 to admit the newer RFC 9562 UUID versions
+    // (v6/v7/v8). Versions 6-8 must validate as true, not false.
+    it.each([1, 2, 3, 4, 5, 6, 7, 8])('returns true for a version %i UUID', version => {
+      expect(LibUtils.isValidUUID(`123e4567-e89b-${version}2d3-a456-426614174000`)).toBe(true);
+    });
+
+    it('returns false for a UUID with an invalid version nibble', () => {
+      // '9' is outside the accepted 1-8 range (0 is only valid as part of the
+      // nil UUID special case, not as a standalone version nibble).
+      expect(LibUtils.isValidUUID('123e4567-e89b-92d3-a456-426614174000')).toBe(false);
     });
   });
 
@@ -931,6 +947,26 @@ describe('LibUtils', () => {
       // Act & Assert
       expect(LibUtils.deepEqual(complex1, complex2)).toBe(true);
       expect(LibUtils.deepEqual(complex1, complex3)).toBe(false);
+    });
+  });
+
+  describe('sanitizeLogMessage (VS-018)', () => {
+    it('strips embedded newlines and carriage returns (log-injection guard)', () => {
+      expect(LibUtils.sanitizeLogMessage('line1\nline2\rline3')).toBe('line1 line2 line3');
+    });
+
+    it('strips other C0 control characters and DEL', () => {
+      expect(LibUtils.sanitizeLogMessage('a\x00b\x1fc\x7fd')).toBe('a b c d');
+    });
+
+    it('leaves ordinary text untouched', () => {
+      expect(LibUtils.sanitizeLogMessage('Invalid email: user@example.com')).toBe(
+        'Invalid email: user@example.com'
+      );
+    });
+
+    it('handles an empty string', () => {
+      expect(LibUtils.sanitizeLogMessage('')).toBe('');
     });
   });
 });

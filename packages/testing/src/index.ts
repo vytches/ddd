@@ -26,7 +26,20 @@ export {
 } from './core';
 
 // Phase 2: DDD Seeder Framework - Domain-aware test data generation
-export * from './seeder';
+// VF-024 (AC6): explicit named exports (was `export *`) — mirrors the
+// curation already done inside seeder/index.ts itself (VP-005).
+export {
+  AggregateFactory,
+  AggregateSeeder,
+  AIEnhancedSeeder,
+  DomainSeeder,
+  EntityIdGenerator,
+  EventSourcedSeeder,
+  GeographicSeeder,
+  ScenarioSeeder,
+  StreamingSeeder,
+  ValueObjectBuilder,
+} from './seeder';
 
 // Phase 3: GWT Aggregate Testing - Given-When-Then fluent API
 export { Test, GWTAssertionError, matching, eventsMatch, eventArraysMatch } from './gwt';

@@ -13,6 +13,86 @@ with popular dependency injection frameworks.
 
 ---
 
+## Token Identity (Read This Before Writing an Adapter)
+
+Since VF-030 (see ADR-0038), token identity is the **token reference itself** —
+never a derived string:
+
+- Adapter-internal maps are keyed by `ServiceToken` directly:
+  `Map<ServiceToken, ServiceDescriptor>`. Function/class and symbol tokens key
+  by reference; string tokens key by value.
+- Two classes that share a `.name` (a normal outcome of per-bounded-context
+  Ubiquitous Language) are **distinct** registrations.
+- `Symbol('X')` and `Symbol('X')` are **distinct** registrations — they no
+  longer collide via their `"Symbol(X)"` string rendering.
+- There is **no** `.name` fallback on lookup miss. An unregistered token throws
+  `ContainerServiceNotFoundError`.
+
+### `getTokenKey()` is deprecated — display only
+
+`BaseContainerAdapter.getTokenKey(token)` used to be the map key. It is now
+**deprecated** and kept only as a human-readable display helper (error messages,
+logs); its output is intentionally lossy and MUST NOT be used as a lookup key.
+
+**Migration for existing custom adapters:**
+
+```typescript
+// BEFORE (collision-prone — do not do this anymore)
+private readonly services = new Map<string, ServiceDescriptor>();
+this.services.set(this.getTokenKey(token), descriptor);
+const descriptor = this.services.get(this.getTokenKey(token));
+
+// AFTER (reference identity — VF-030)
+private readonly services = new Map<ServiceToken, ServiceDescriptor>();
+this.services.set(token, descriptor);
+const descriptor = this.services.get(token);
+
+// getTokenKey() remains fine for DISPLAY:
+throw new Error(`Failed while resolving ${this.getTokenKey(token)}`);
+```
+
+No public signature changed — `getTokenKey()` still exists and still returns a
+string — but any adapter using it as a map key inherits the collision bug that
+VF-030 removed from the built-in adapters.
+
+### Recipe: `Symbol.for()` for cross-context and dual-format tokens
+
+Reference identity requires the registering and resolving sides to see the
+**same token object**. Two situations break that — and both have the same fix:
+
+1. **Dual ESM/CJS double-load**: in mixed module graphs (Vitest, apps that reach
+   a dual-format package via both `import` and `require`), the package can load
+   twice, so `export const CACHE = Symbol('CACHE')` (or a class used as its own
+   token) exists as two distinct references.
+2. **Tokens intentionally shared across bounded contexts** (platform-wide clock,
+   ID generator, …).
+
+Declare such tokens with `Symbol.for()` — the process-wide global symbol
+registry returns the same symbol for the same key, across module-graph copies
+and realms:
+
+```typescript
+// tokens.ts — shared token, stable across ESM/CJS double-load
+export const CLOCK_TOKEN = Symbol.for('myapp:platform:clock');
+
+// context A
+container.registerInstance(CLOCK_TOKEN, systemClock);
+
+// context B (even if it loaded the package through a different format)
+const clock = container.resolve(Symbol.for('myapp:platform:clock'));
+```
+
+Always namespace the key (`'org:context:service'`) — the registry is
+process-global. Use plain `Symbol('X')` only when you _want_ private,
+unshareable identity.
+
+**Caveat:** reference identity holds within one process/realm. It does not
+survive process boundaries, `vm` realms (except `Symbol.for()`, whose registry
+is shared across realms in one process), or serialization. For cross-process
+contracts, use explicit string tokens at the boundary.
+
+---
+
 ## NestJS Integration
 
 ### Installation
@@ -38,7 +118,12 @@ import {
 
 @Injectable()
 export class NestJSContainerAdapter extends BaseContainerAdapter {
-  private readonly serviceDescriptors = new Map<string, ServiceDescriptor>();
+  // VF-030: keyed by the token itself (reference identity), never by a
+  // derived string — see "Token Identity" above.
+  private readonly serviceDescriptors = new Map<
+    ServiceToken,
+    ServiceDescriptor
+  >();
 
   constructor(private readonly moduleRef: ModuleRef) {
     super();
@@ -46,13 +131,12 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
 
   resolve<T>(token: ServiceToken<T>): T {
     this.validateToken(token);
-    const tokenKey = this.getTokenKey(token);
 
     try {
       // NestJS supports both strict and non-strict resolution
       return this.moduleRef.get(token, { strict: false });
     } catch (error) {
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
   }
 
@@ -72,7 +156,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
-    this.serviceDescriptors.set(this.getTokenKey(token), descriptor);
+    this.serviceDescriptors.set(token, descriptor);
   }
 
   registerFactory<T>(
@@ -89,7 +173,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
-    this.serviceDescriptors.set(this.getTokenKey(token), descriptor);
+    this.serviceDescriptors.set(token, descriptor);
   }
 
   registerInstance<T>(
@@ -106,7 +190,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
-    this.serviceDescriptors.set(this.getTokenKey(token), descriptor);
+    this.serviceDescriptors.set(token, descriptor);
   }
 
   isRegistered<T>(token: ServiceToken<T>): boolean {
@@ -123,6 +207,28 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
   }
 }
 ```
+
+### Caveat: auto-discovery must not target a ModuleRef-holding adapter
+
+The shipped `NestJSContainerAdapter` (in `@vytches/ddd-nestjs`) resolves
+**registry-first** since VP-006b: a token registered on the adapter itself wins
+over the NestJS container, and `ModuleRef` is only the fallback for tokens the
+adapter does not own (ADR-0014 — VytchesDDD as primary container).
+
+Because of that precedence, do **NOT** point handler/service auto-discovery (any
+`discoverAndRegisterHandlers`-style routine that registers bare class tokens as
+Transient) at a container adapter that ALSO holds a `ModuleRef`. Registry-first
+resolution would then construct dependency-less Transient instances from those
+bare class registrations, **shadowing the framework's fully-injected
+singletons**. Keep auto-discovery on a dedicated container (e.g. a
+`SimpleContainer`), or register the live framework instances via
+`registerInstance()` instead of class tokens.
+
+As a safety net, in non-production environments (`NODE_ENV !== 'production'`)
+the adapter logs a one-time-per-token warning when it detects a divergent dual
+registration — the same token resolvable in both the internal registry and the
+NestJS container with different instances. Fix the warning by dropping one of
+the two registrations.
 
 ### NestJS Module Setup
 
@@ -387,19 +493,38 @@ import { BaseContainerAdapter } from '@vytches/ddd-di';
 import { AwilixContainer } from 'awilix';
 
 export class AwilixContainerAdapter extends BaseContainerAdapter {
-  private readonly serviceDescriptors = new Map<string, ServiceDescriptor>();
+  // VF-030: the adapter's OWN descriptor map is reference-keyed.
+  private readonly serviceDescriptors = new Map<
+    ServiceToken,
+    ServiceDescriptor
+  >();
 
   constructor(private readonly container: AwilixContainer) {
     super();
+  }
+
+  // NOTE: Awilix's native registry is string-keyed — the framework itself
+  // requires a string name. Deriving that name from a class/symbol token
+  // reintroduces the `.name` collision on the FRAMEWORK side, so prefer
+  // explicit STRING tokens with Awilix; the derivation below is a
+  // convenience for the single-context case only.
+  private toAwilixName(token: ServiceToken): string {
+    if (typeof token !== 'string') {
+      throw new InvalidRegistrationError(
+        this.getTokenKey(token), // display-only rendering
+        'AwilixContainerAdapter requires string tokens (Awilix registry is string-keyed)'
+      );
+    }
+    return token;
   }
 
   resolve<T>(token: ServiceToken<T>): T {
     this.validateToken(token);
 
     try {
-      return this.container.resolve(this.getTokenKey(token));
+      return this.container.resolve(this.toAwilixName(token));
     } catch (error) {
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
   }
 
@@ -408,16 +533,16 @@ export class AwilixContainerAdapter extends BaseContainerAdapter {
     implementation: Constructor<T>,
     options?: ServiceRegistrationOptions
   ): void {
-    const tokenKey = this.getTokenKey(token);
+    const awilixName = this.toAwilixName(token);
     const lifetime = options?.lifetime || ServiceLifetime.Transient;
 
     const registration = {
-      [tokenKey]: this.mapLifetime(lifetime, implementation),
+      [awilixName]: this.mapLifetime(lifetime, implementation),
     };
 
     this.container.register(registration);
 
-    // Store descriptor
+    // Store descriptor — keyed by the token itself (VF-030)
     const descriptor: ServiceDescriptor<T> = {
       token,
       implementation,
@@ -426,7 +551,7 @@ export class AwilixContainerAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
-    this.serviceDescriptors.set(tokenKey, descriptor);
+    this.serviceDescriptors.set(token, descriptor);
   }
 
   private mapLifetime(lifetime: ServiceLifetime, implementation: Constructor) {
@@ -481,8 +606,10 @@ VytchesDDD.configure(adapter);
 import { BaseContainerAdapter } from '@vytches/ddd-di';
 
 export class MyFrameworkAdapter extends BaseContainerAdapter {
-  private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly instances = new Map<string, any>();
+  // VF-030: reference-keyed maps — the token IS the key.
+  // Never key by getTokenKey() (deprecated, display-only).
+  private readonly services = new Map<ServiceToken, ServiceDescriptor>();
+  private readonly instances = new Map<ServiceToken, any>();
 
   constructor(private readonly myContainer: MyContainer) {
     super();
@@ -490,17 +617,16 @@ export class MyFrameworkAdapter extends BaseContainerAdapter {
 
   resolve<T>(token: ServiceToken<T>): T {
     this.validateToken(token);
-    const tokenKey = this.getTokenKey(token);
 
     // Try framework's native resolution first
-    if (this.myContainer.has(tokenKey)) {
-      return this.myContainer.get<T>(tokenKey);
+    if (this.myContainer.has(token)) {
+      return this.myContainer.get<T>(token);
     }
 
-    // Fallback to manual resolution
-    const descriptor = this.services.get(tokenKey);
+    // Fallback to manual resolution — keyed by the token itself
+    const descriptor = this.services.get(token);
     if (!descriptor) {
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
 
     return this.createInstance<T>(descriptor);
@@ -511,12 +637,13 @@ export class MyFrameworkAdapter extends BaseContainerAdapter {
     implementation: Constructor<T>,
     options?: ServiceRegistrationOptions
   ): void {
-    const tokenKey = this.getTokenKey(token);
+    // Register with your framework (pass the token through unchanged if the
+    // framework supports arbitrary token types; only stringify — losing
+    // identity — when the framework's registry is string-only, and prefer
+    // string tokens in that case)
+    this.myContainer.bind(token, implementation);
 
-    // Register with your framework
-    this.myContainer.bind(tokenKey, implementation);
-
-    // Store descriptor for metadata
+    // Store descriptor for metadata — keyed by the token itself (VF-030)
     const descriptor: ServiceDescriptor<T> = {
       token,
       implementation,
@@ -525,7 +652,7 @@ export class MyFrameworkAdapter extends BaseContainerAdapter {
       tags: options?.tags,
     };
 
-    this.services.set(tokenKey, descriptor);
+    this.services.set(token, descriptor);
   }
 
   private createInstance<T>(descriptor: ServiceDescriptor<T>): T {

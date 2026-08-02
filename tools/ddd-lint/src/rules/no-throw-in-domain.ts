@@ -67,6 +67,25 @@ export const noThrowInDomain: LintRule = {
   },
 };
 
+// SA-M1 (SEC-AUDIT-2026-07-09) / VF-026: these must be matched as whole path
+// *segments*, not raw substrings. `normalized.includes('/aggregates/')`
+// requires a leading slash — but the real CLI entry point
+// (`runLint({ root: 'packages' })`) produces paths relative to that root,
+// so a file at `packages/aggregates/src/x.ts` becomes `aggregates/src/x.ts`
+// with NO leading slash before "aggregates". That silently made this rule a
+// no-op for every domain folder that happens to be the first path segment —
+// verified: 0 findings via the wired `pnpm ddd:lint` vs 100+ when scanned
+// from the repo root (where every domain folder has a preceding `packages/`
+// segment). Splitting into segments and comparing exactly closes this gap
+// regardless of where the scan root is.
+const DOMAIN_SEGMENTS = new Set([
+  'domain',
+  'aggregates',
+  'value-objects',
+  'specifications',
+  'policies',
+]);
+
 function isDomainFile(filePath: string): boolean {
   const normalized = filePath.replace(/\\/g, '/');
 
@@ -77,11 +96,6 @@ function isDomainFile(filePath: string): boolean {
   if (normalized.endsWith('.test.ts') || normalized.endsWith('.spec.ts')) return false;
   if (normalized.endsWith('.test.tsx') || normalized.endsWith('.spec.tsx')) return false;
 
-  return (
-    normalized.includes('/domain/') ||
-    normalized.includes('/aggregates/') ||
-    normalized.includes('/value-objects/') ||
-    normalized.includes('/specifications/') ||
-    normalized.includes('/policies/')
-  );
+  const segments = normalized.split('/');
+  return segments.some(segment => DOMAIN_SEGMENTS.has(segment));
 }

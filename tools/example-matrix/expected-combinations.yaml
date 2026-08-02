@@ -1,0 +1,175 @@
+# VD-006a — expected-combinations.yaml
+#
+# The ONE hand-maintained manifest in the example coverage matrix mechanism
+# (decision D-4, project-orchestration/analysis/
+# VD-006-example-coverage-matrix.analysis.md). Everything else the generator
+# produces (matrix.json, docs/COVERAGE-MATRIX.md) is fully generated from
+# this file plus actual repo state — never hand-edit those.
+#
+# This matrix is an ADDITIONAL report alongside the existing L1/L2/L3
+# test-pyramid coverage gate (vitest --coverage) — a VERIFIED cell here means
+# "a real example file exists and a passing test imports it", NOT "this
+# package has adequate unit test coverage". Do not conflate the two.
+#
+# Each entry:
+#   name          stable slug, used as the matrix row key
+#   level         quick-start | intermediate | advanced — the ONLY place the
+#                 difficulty dimension is recorded (OQ-3); examples/<pkg>/
+#                 src/NN-name.ts numbering itself is NOT restructured.
+#   packages      @vytches/* package specifiers this combination is expected
+#                 to use together (order-independent, compared as a set)
+#   file          repo-relative path to the example file implementing this
+#                 combination, or `null` if none exists yet
+#                 (-> DECLARED_MISSING until someone authors it)
+#   planned       optional boolean, default false. Set `true` for KNOWN,
+#                 intentional future work declared here for visibility
+#                 (D-4's baseline list) but not yet authored/wired to a
+#                 test — `--check` reports its DECLARED_MISSING/
+#                 EXAMPLE_ONLY status as a SOFT warning, not a hard
+#                 failure. Do NOT set this on a combination that used to
+#                 work and regressed — that must stay a hard failure.
+#   description   optional, human-readable context
+
+combinations:
+  # --- AC1 baseline list, already verified in existing examples ---
+
+  - name: aggregate-plus-specification
+    level: quick-start
+    packages:
+      - '@vytches/ddd-aggregates'
+      - '@vytches/ddd-validation'
+    file: examples/quickstart/src/domain/order.aggregate.ts
+    description: >-
+      Order aggregate whose state-transition guards (canBePlaced,
+      canBeCancelled) are composed Specification instances from
+      order.specs.ts, imported and combined inside the aggregate itself.
+
+  - name: aggregate-plus-value-objects-plus-events
+    level: quick-start
+    packages:
+      - '@vytches/ddd-aggregates'
+      - '@vytches/ddd-contracts'
+      - '@vytches/ddd-events'
+      - '@vytches/ddd-validation'
+      - '@vytches/ddd-value-objects'
+    file: examples/quickstart/src/domain/order.aggregate.ts
+    description: >-
+      The full transitive combination pulled in by order.aggregate.ts via
+      same-example relative imports: Money (value-objects), the domain
+      events it raises (events), and its Specification guards (validation).
+
+  - name: policy-plus-specification
+    level: quick-start
+    packages:
+      - '@vytches/ddd-policies'
+      - '@vytches/ddd-validation'
+    file: examples/policies/src/02-reusable-specification.ts
+    description: >-
+      A reusable, class-based Specification (MinimumAgeSpecification)
+      composed with .and()/.or()/.not() and reused inside a PolicyBuilder
+      policy — the ".2" pattern in the policies package's own docs.
+
+  - name: domain-service-composition
+    level: intermediate
+    packages:
+      - '@vytches/ddd-domain-services'
+      - '@vytches/ddd-events'
+      - '@vytches/ddd-utils'
+    file: examples/domain-services/src/05-service-composition.ts
+    description: >-
+      CheckoutService composes pricing, inventory reservation, and payment
+      orchestration domain services, with rollback-on-decline semantics.
+
+  - name: domain-service-event-publishing
+    level: quick-start
+    packages:
+      - '@vytches/ddd-domain-services'
+      - '@vytches/ddd-events'
+    file: examples/domain-services/src/02-payment-orchestration.ts
+    description: >-
+      EventAwareDomainService publishing PaymentAuthorized/PaymentDeclined
+      domain events through a caller-supplied event bus.
+
+  - name: domain-service-unit-of-work-aware
+    level: quick-start
+    packages:
+      - '@vytches/ddd-domain-services'
+    file: examples/domain-services/src/04-user-registration.ts
+    planned: true
+    description: >-
+      UnitOfWorkAwareDomainService with executeInTransaction() spanning
+      multiple aggregates. NOTE (2026-07-04): this file exists but no test
+      file currently imports it — expect this cell to classify as
+      EXAMPLE_ONLY, not VERIFIED, until domain-services-examples.test.ts is
+      extended to cover Example 4.
+
+  # --- AC1 baseline list, not yet implemented (DECLARED_MISSING today) ---
+
+  - name: domain-service-plus-policy
+    level: intermediate
+    packages:
+      - '@vytches/ddd-domain-services'
+      - '@vytches/ddd-policies'
+    file: null
+    planned: true
+    description: >-
+      A domain service consulting an IBusinessPolicy (from
+      @vytches/ddd-policies) as part of its orchestration logic — no example
+      combines these two packages today.
+
+  - name: cqrs-plus-resilience-decorator
+    level: advanced
+    packages:
+      - '@vytches/ddd-cqrs'
+      - '@vytches/ddd-resilience'
+    file: null
+    planned: true
+    description: >-
+      A @CommandHandler wrapped with a resilience CircuitBreaker/Retry
+      decorator (decorator-based composition). Requires authoring a new
+      examples/cqrs-resilience/ directory — see VD-006's analysis
+      decisions_meta note; this is real new-example authoring work, folded
+      into a separate task, not VD-006a itself.
+
+  - name: cqrs-plus-resilience-functional
+    level: advanced
+    packages:
+      - '@vytches/ddd-cqrs'
+      - '@vytches/ddd-resilience'
+    file: null
+    planned: true
+    description: >-
+      The same CQRS + resilience combination expressed via the functional
+      composition API instead of decorators, to prove both integration
+      styles work. Same authoring dependency as
+      cqrs-plus-resilience-decorator.
+
+  - name: cqrs-plus-specification-validator
+    level: intermediate
+    packages:
+      - '@vytches/ddd-cqrs'
+      - '@vytches/ddd-validation'
+    file: null
+    planned: true
+    description: >-
+      A command handler validating its input command against a
+      Specification/CompositeSpecification before executing — quickstart's
+      command handlers (create/place-order) currently do inline validation,
+      not Specification-based.
+
+  - name: unit-of-work-transactional
+    level: advanced
+    packages:
+      - '@vytches/ddd-domain-services'
+      - '@vytches/ddd-repositories'
+    file: null
+    planned: true
+    description: >-
+      A REAL transactional Unit of Work spanning multiple repositories,
+      committing or rolling back atomically. domain-services/
+      06-transaction-rollback.ts exercises TransferService's input-validation
+      failure paths only — its own test file explicitly documents that it
+      does NOT set a real Unit of Work ("executeInTransaction requires a
+      real UoW set on the service"), so the full transactional round-trip
+      is intentionally left DECLARED_MISSING rather than mis-marked
+      VERIFIED.

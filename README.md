@@ -216,6 +216,61 @@ Recommended adoption is **staged**: informational → blocking-soon → blocking
 Hard-gating from day one on a not-yet-clean baseline trains developers to ignore
 the tool.
 
+## Controlling library diagnostics
+
+`@vytches/ddd` emits its **own** internal diagnostics — misconfiguration
+warnings, "no handler found", unexpected failures. These are library-internal
+signals (metadata only: handler names, error messages, counts), **not** an
+application logging layer. By default they go to `console` at the `warn` level.
+
+Call `configureDiagnostics` once at startup to silence that output or route it
+to your own logger — no monkey-patching of `console` required:
+
+```ts
+import { configureDiagnostics } from '@vytches/ddd';
+
+// Silence everything (e.g. in test suites):
+configureDiagnostics({ level: 'silent' });
+
+// Or only let errors through:
+configureDiagnostics({ level: 'error' });
+```
+
+To redirect diagnostics into your existing logger, implement a
+`DiagnosticsSink`. The sink is an **interface** — the library ships no logging
+dependency, so you plug in whatever you already use (Pino, Winston, NestJS
+`Logger`, …). Example with Pino (a consumer dependency, never the library's):
+
+```ts
+import { configureDiagnostics } from '@vytches/ddd';
+import pino from 'pino';
+
+const logger = pino();
+
+configureDiagnostics({
+  sink: {
+    warn: (message, context) => logger.warn(context, message),
+    error: (message, error, context) =>
+      logger.error({ ...context, err: error }, message),
+  },
+});
+```
+
+**Sink contract** — your implementation:
+
+- may be called **synchronously** inside library operations, so it must not
+  block;
+- **must not throw** — a throwing sink is caught and reported once to `console`,
+  never re-thrown into the library;
+- receives **metadata only**; treat the `Error` and `context` as potentially
+  sensitive (avoid forwarding them verbatim to untrusted transports);
+- **must not call back** into `@vytches/ddd` (e.g. via its own logger) — that
+  risks reentrancy.
+
+Levels: `'silent'` (nothing) → `'error'` (errors only) → `'warn'` (errors +
+warnings, the default). `configureDiagnostics` is a process-global setting; last
+writer wins.
+
 ## Status
 
 **v0.25.0-beta.1** — first public release on npmjs.org. Library has been in

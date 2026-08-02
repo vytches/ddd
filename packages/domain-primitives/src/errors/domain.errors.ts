@@ -56,6 +56,42 @@ export abstract class IDomainError extends BaseError implements DomainErrorOptio
   private static generateTimestamp(): Date {
     return new Date();
   }
+
+  /**
+   * Canonical JSON shape for every `IDomainError` subclass. VS-017 (SA-H6):
+   * without this override, `JSON.stringify()` uses default enumerable-own-
+   * property serialization, which drops `message` (a non-enumerable
+   * inherited `Error.prototype` property) while keeping whatever a subclass
+   * happens to attach as its own enumerable fields (including `stack` via
+   * some engines, and any subclass-specific properties like a raw model
+   * payload) — a silent, growing leak surface.
+   *
+   * This is a deliberate WHITELIST, not a blacklist: only these five fields
+   * are ever serialized, regardless of what a subclass adds as its own
+   * instance properties (e.g. `ACLError.contextName`/`operation` are
+   * intentionally NOT included here — a subclass that wants extra fields in
+   * its JSON output must override `toJSON()` explicitly and opt those
+   * specific fields in). `data` is the one extensibility point: it is
+   * still a serialization boundary — factories must never put a raw
+   * domain/external model object into `data` (see
+   * `TranslationError`/`BaseModelTranslator` for the precedent this
+   * guards against).
+   */
+  toJSON(): {
+    name: string;
+    code: ErrorCode;
+    message: string;
+    timestamp?: Date | undefined;
+    data?: unknown;
+  } {
+    return {
+      name: this.name,
+      code: this.code,
+      message: this.message,
+      timestamp: this.timestamp,
+      data: this.data,
+    };
+  }
 }
 
 export class MissingValueError extends IDomainError {

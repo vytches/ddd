@@ -11,36 +11,31 @@ complexity: expert
 estimated_time: unknown (requires real-world validation first)
 created_at: 2026-05-20
 migrated_at: 2026-05-22
+reviewed_at:
+  2026-07-02 (round 3 — five-agent verification panel; file restructured)
 status: backlog
 release_target: post-v0.27 (after production validation in a consuming project)
 priority_score: 40/100
+demand_signal:
+  'juz-ide-api scoping AI integration — expect attention ~2026-08/09'
+analysis: project-orchestration/analysis/VA-001-ai-agent-package-proposal.analysis.md
+threat_model: docs/security/threat-models/TM-VA-001.md
 ```
 
-> **Status**: CONCEPT — interfaces and patterns designed, not yet validated in
-> production. **Decision**: Do NOT implement until patterns are proven stable in
-> at least one production DDD project. **Category**: New Package (optional
-> ecosystem extension) **Priority**: Future (not blocking any current work)
-
----
-
-## Summary
-
-This is a concept proposal for `@vytches/ddd-agent` — a library package that
-provides interfaces and patterns for integrating AI agents into DDD-based
-systems **without violating DDD boundaries**.
-
-The core idea: AI becomes a **third driving adapter** (alongside HTTP and CLI),
-fully aware of DDD boundaries. No handler needs to know that AI exists.
-Authorization, audit trail, and domain integrity are preserved.
-
-This document captures the design rationale and proposed API surface for future
-consideration. It is **not a committed roadmap item**.
+> **Status**: CONCEPT po trzech rundach recenzji (2026-06-12 pięciu agentów;
+> 2026-06-30/07-01 panel analityczny D1–D13, status `approved`; 2026-07-02 panel
+> weryfikacyjny pięciu agentów, D14–D19 + rewizje). **Decyzja**: implementacja
+> NIE startuje przed spełnieniem Entry Conditions (walidacja produkcyjna w
+> juz-ide-api, ~2026-08/09). **Dla implementera**: sekcja _§ v0.1 Target
+> Specification_ poniżej jest jedynym źródłem prawdy. Historia i uzasadnienia —
+> _§ Decision Log_ na dole oraz plik analizy (decyzje D1–D19). Poprzednie wersje
+> tego pliku (oryginalny koncept + warstwy korekt) — w git history.
 
 ---
 
 ## Problem Statement
 
-When an LLM (Claude, GPT-4, Gemini) needs to invoke a domain action in a DDD
+When an LLM (Claude, GPT, Gemini) needs to invoke a domain action in a DDD
 system:
 
 ```
@@ -56,142 +51,59 @@ Common approaches all have issues:
 | LLM has its own auth logic copy | Desynchronization with real auth rules                                |
 | Auto-discovery of all handlers  | Every new handler = automatically AI-accessible = security regression |
 
-None of these are acceptable. The solution is a dedicated boundary layer.
+None of these are acceptable. The solution is a dedicated boundary layer: **AI
+as a third driving adapter** (alongside HTTP and CLI), fully aware of DDD
+boundaries. No handler needs to know that AI exists. Authorization, audit trail,
+and domain integrity are preserved.
 
 ---
 
-## Proposed Package: `@vytches/ddd-agent`
+## § v0.1 Target Specification (source of truth, 2026-07-02)
 
-### Design principle
+### Design principles
 
-The package provides **interfaces and patterns only**, not domain
-implementations. Zero dependencies on specific LLM providers (OpenAI,
-Anthropic). Zero business logic. Only "how AI should communicate with a DDD
-system."
+- **Interfaces and patterns only** — zero domain implementations, zero business
+  logic.
+- **Zero external dependencies** — no zod, no LLM-provider SDKs, no LangChain,
+  no NestJS in core (enforced structurally, see Guardrails).
+- **Fail-closed by default** — every security-relevant seam refuses when
+  unconfigured.
+- **Registry-first, manual registration** — auto-discovery is explicitly
+  rejected (security regression: every new handler would become AI-accessible).
+  This is a feature, not a DX gap — document it as such.
 
-> **Note on naming**: `@vytches/ddd-agent` is preferred over `@vytches/ddd-ai`
-> because "agent" more precisely describes the DDD↔AI boundary role.
+### Dependency graph (acyclic — verified)
 
----
-
-### Proposed Components
-
-#### 1. `IAICommandDispatcher` — transport abstraction
-
-```typescript
-export interface IAICommandDispatcher {
-  dispatch<T>(
-    command: object,
-    context: AIDispatchContext
-  ): Promise<Result<T, AIDispatchError>>;
-}
-
-export interface AIDispatchContext {
-  userId: string;
-  sessionId: string;
-  workflowName?: string;
-  stepName?: string;
-}
+```
+@vytches/ddd-agent
+  peerDependencies:
+    @vytches/ddd-contracts          ← Result<T>, IValidator<T>
+    @vytches/ddd-domain-primitives  ← IActor, DefaultActorType ('ai_agent'), IAIActor
+    @vytches/ddd-cqrs               ← ICommandBus
+    @vytches/ddd-events             ← IntegrationEvent<T> (dopiero v0.2+)
+  devDependencies:
+    @vytches/ddd-testing            ← test utilities
+    @vytches/ddd-validation         ← WYŁĄCZNIE przykłady/testy referencyjne
 ```
 
-In a monolith: `InProcessAICommandDispatcher` calls CommandBus locally. The
-interface design is transport-agnostic — consuming projects provide their own
-implementations for different transport mechanisms. **The interface stays the
-same** — swap implementations without changing the AI layer.
+> **Uwaga (korekta D1, 2026-07-02)**: `IValidator<T>` pochodzi z
+> `@vytches/ddd-contracts`
+> (`packages/contracts/src/validation/validator.interfaces.ts`) —
+> `@vytches/ddd-validation` NIE jest peer dependency i nie może nią zostać.
 
-#### 2. `AIRequestContextExtension` — extension for RequestContext
+### Core types — final shapes
 
-Two new fields for the existing `RequestContext` from `@vytches/ddd-nestjs`:
-
-```typescript
-export interface AIRequestContextExtension {
-  actorType: 'user' | 'ai_agent' | 'system';
-  aiSessionId?: string; // only when actorType='ai_agent'
-}
-```
-
-Every integration event automatically carries "was this done by a human or an
-agent" without modifying handlers or aggregates.
-
-#### 3. `AIToolDefinition` — contract for what an agent can invoke
+**Write tiers + default limits** (as const, tree-shakeable):
 
 ```typescript
-export interface AIToolDefinition<TParams = unknown> {
-  name: string;
-  description: string;
-  inputSchema: ZodSchema<TParams>;
-  commandClass: new (params: TParams) => object;
-  requiredPermission?: { action: string; subject: string };
-  writeTier: AIWriteTier;
-}
-```
-
-`writeTier` drives rate limiting. `requiredPermission` is checked before
-dispatch. `commandClass` is the bridge to existing CQRS.
-
-#### 4. `AIErrorTranslator` — abstract base class
-
-```typescript
-export abstract class AIErrorTranslator<TError = Error> {
-  abstract translate(error: TError): AIErrorResponse;
-
-  protected categoryFallback(error: TError): AIErrorResponse {
-    return {
-      userMessage: 'Unable to complete the action. Please try again.',
-      retryable: false,
-      leaked: false,
-    };
-  }
-}
-
-export interface AIErrorResponse {
-  userMessage: string; // human-readable, for the end user
-  retryable: boolean; // should the LLM retry?
-  leaked: false; // always false — guarantees no PII leakage
-}
-```
-
-Each consuming project implements its own
-`ProjectAIErrorTranslator extends AIErrorTranslator` mapping its own error codes
-to human-readable messages.
-
-#### 5. `AIWorkflowStepTraced` — base integration event
-
-```typescript
-export interface AIWorkflowStepTracedPayload {
-  traceId: string; // = workflowId, links all steps
-  sessionId: string;
-  userId: string;
-  workflowName: string;
-  stepName: string;
-  stepIndex: number;
-  durationMs: number;
-  status: 'ok' | 'domain_error' | 'system_error';
-  errorCode?: string; // never message — GDPR
-  tokensIn?: number;
-  tokensOut?: number;
-  costUsd?: number;
-  inputShape: string; // "CommandName{field1,field2}" — no values
-  actorType: 'user' | 'ai_agent' | 'system';
-  aiSessionId?: string;
-  timestamp: string;
-}
-```
-
-Consuming projects emit
-`class MyWorkflowStepTraced extends BaseIntegrationEvent<AIWorkflowStepTracedPayload>`.
-Self-hosted LLM tracing — full observability without external tooling.
-
-#### 6. `AIWriteTier` — enum + default rate limits
-
-```typescript
-export enum AIWriteTier {
-  READ = 'READ',
-  WRITE_LOW = 'WRITE_LOW',
-  WRITE_MEDIUM = 'WRITE_MEDIUM',
-  WRITE_HIGH = 'WRITE_HIGH',
-  WRITE_DESTRUCTIVE = 'WRITE_DESTRUCTIVE',
-}
+export const AIWriteTier = {
+  READ: 'READ',
+  WRITE_LOW: 'WRITE_LOW',
+  WRITE_MEDIUM: 'WRITE_MEDIUM',
+  WRITE_HIGH: 'WRITE_HIGH',
+  WRITE_DESTRUCTIVE: 'WRITE_DESTRUCTIVE',
+} as const;
+export type AIWriteTier = (typeof AIWriteTier)[keyof typeof AIWriteTier];
 
 export const AI_DEFAULT_RATE_LIMITS: Record<AIWriteTier, number> = {
   [AIWriteTier.READ]: 100, // per minute
@@ -202,191 +114,392 @@ export const AI_DEFAULT_RATE_LIMITS: Record<AIWriteTier, number> = {
 };
 ```
 
-Projects may override limits via configuration. Defaults are conservative.
-
-#### 7. Test utilities (`@vytches/ddd-agent/testing`)
+**Permission — dyskryminowany union pola (OQ2 rev., exhaustiveness-checking)**:
 
 ```typescript
-export class MockAICommandDispatcher implements IAICommandDispatcher {
-  private calls: { command: object; context: AIDispatchContext }[] = [];
+export type AIToolPermission =
+  | { readonly kind: 'PUBLIC_NO_AUTH' } // świadoma, recenzowalna decyzja — nigdy default
+  | {
+      readonly kind: 'REQUIRED';
+      readonly action: string;
+      readonly subject: string;
+    };
+// dispatcher: switch (permission.kind) { ... default: assertNever(permission) }
+// → trzeci wariant w v0.2 (np. REQUIRES_MFA) = compile error, nie cichy fail-open
+```
 
-  async dispatch<T>(
-    command: object,
+**Tool definition — readonly, deklaratywny, z `toCommand` (D15)**:
+
+```typescript
+export interface AIToolDefinition<
+  TParams = unknown,
+  TCommand extends object = object,
+> {
+  readonly name: string;
+  readonly description: string;
+  /** Walidacja SYNTAKTYCZNA nieufnego inputu LLM na granicy (DTO-parsing).
+   *  NIE zastępuje walidacji domenowej — niezmienniki nadal egzekwują VO/agregaty. */
+  readonly inputSchema: IValidator<TParams>; // type-only import z @vytches/ddd-contracts
+  /** Mapowanie AI→Command jako zwykła funkcja — Command pozostaje czysty od
+   *  słownictwa adaptera (zastępuje static fromAI() / AICallableClass, D15). */
+  readonly toCommand: (params: TParams) => TCommand;
+  readonly requiredPermission: AIToolPermission; // obowiązkowe (D3)
+  readonly writeTier: AIWriteTier;
+  readonly examples?: ReadonlyArray<{
+    readonly input: TParams;
+    readonly description: string;
+  }>;
+}
+```
+
+**Dispatcher — port + fabryka (D14 + OQ3 rev.)**:
+
+```typescript
+export interface AIDispatchContext {
+  readonly userId: string;
+  readonly sessionId: string;
+  readonly workflowName?: string;
+  readonly stepName?: string;
+}
+
+export interface IAICommandDispatcher {
+  dispatch<T>(
+    toolName: string,
+    rawParams: unknown,
     context: AIDispatchContext
-  ): Promise<Result<T>> {
-    this.calls.push({ command, context });
-    return Result.ok(undefined as T);
-  }
-
-  assertDispatched(commandClass: new (...args: any[]) => object): void {
-    /* ... */
-  }
-  assertNotDispatched(): void {
-    /* ... */
-  }
-  getCallCount(): number {
-    /* ... */
-  }
+  ): Promise<Result<T, AIDispatchError>>;
 }
+
+/** Kolejność 5 kroków zaszyta WEWNĄTRZ — nienadpisywalna (TM-VA-001-D1).
+ *  Rozszerzenia przez dekorację całego dispatchera, nie subclassing. */
+export function createAICommandDispatcher(deps: {
+  registry: IAIToolRegistry;
+  rateLimiter: IAIRateLimiter;
+  permissionChecker: IPermissionChecker;
+  commandBus: ICommandBus;
+  errorTranslator: AIErrorTranslator;
+}): IAICommandDispatcher;
 ```
 
----
-
-### Dispatcher Pipeline
-
-```
-LLM → dispatch('create_job', rawParams)
-       1. checkWriteTier(tier, userId)       ← rate limit
-       2. checkPermission(permission, actor)  ← authorization check
-       3. schema.parse(rawParams)             ← Zod, throws on invalid data
-       4. CommandClass.fromAI(parsedParams)   ← only clean data reaches Command
-       5. commandBus.execute(command)         ← handler has no knowledge of AI
-```
-
-The LLM has no access to CommandBus — the only path is through the dispatcher.
-Steps 1-3 cannot be bypassed.
-
----
-
-### Decorator Style (alternative to registry)
-
-For projects that prefer decorator-based discovery:
+**Registry — constructed-immutable (OQ4 rev.)**:
 
 ```typescript
-@AITool({
-  description: 'Creates a new job request',
-  tier: AIWriteTier.WRITE_MEDIUM,
-  permission: { action: 'create', subject: 'Job' },
-  schema: z.object({
-    title: z.string().min(2).max(100).describe('Job title'),
-    budget: z.number().int().min(10).describe('Budget in base currency'),
-  }),
-})
-export class CreateJobCommand {
-  static fromAI(params: z.infer<typeof schema>): CreateJobCommand {
-    return new CreateJobCommand(params.title, params.budget);
-  }
+export interface IAIToolRegistry {
+  get(name: string): AIToolDefinition | undefined; // O(1), hot path per dispatch
+  list(): readonly AIToolDefinition[]; // zmemoizowana, zamrożona
 }
+
+/** Kolizja nazw = jawny błąd przy bootstrapie (nie cichy overwrite). */
+export function createAIToolRegistry(
+  tools: readonly AIToolDefinition[]
+): Result<IAIToolRegistry, AIToolRegistrationError>;
 ```
 
-The library could offer both decorator-based and registry-based discovery, with
-documentation on trade-offs.
+> **Guardrail**: registry jest WYŁĄCZNIE źródłem metadanych (budowa
+> `tools/list`, resolve nazwy→definicji). Nigdy mechanizmem resolvingu
+> zależności/serwisów — to byłby dryf w service locator.
+
+**Seams wstrzykiwane przez konsumenta**:
+
+```typescript
+export interface IPermissionChecker {
+  can(
+    actor: IActor,
+    permission: { action: string; subject: string }
+  ): Promise<boolean>;
+}
+
+export interface IAIRateLimiter {
+  checkAndConsume(userId: string, tier: AIWriteTier): Promise<boolean>;
+}
+// Implementacje (Redis/Valkey, RBAC/ABAC engine) żyją u konsumenta.
+// Dispatcher fail-closed: odmawia konstrukcji bez IPermissionChecker,
+// jeśli jakikolwiek zarejestrowany tool ma permission.kind === 'REQUIRED' (D3).
+```
+
+**Error boundary (D4, D7, D18)**:
+
+```typescript
+export abstract class AIErrorTranslator<TError = Error> {
+  abstract translate(error: TError): AIErrorResponse;
+}
+
+export interface AIErrorResponse {
+  readonly userMessage: string;
+  readonly category:
+    | 'validation_error'
+    | 'permission_denied'
+    | 'rate_limited'
+    | 'internal_error';
+  readonly retryable: boolean;
+  readonly leaked: false; // gwarancja typu; weryfikacja runtime: assertNoLeakage
+}
+// v0.1 dostarcza domyślną konserwatywną implementację (nigdy error.message,
+// ale Z taksonomią kategorii — LLM musi wiedzieć czy retry ma sens, D18)
+// + test helper assertNoLeakage(translator, sampleErrors) w /testing (D7).
+```
+
+**Actor (D5 + D19)** — zmiany w `@vytches/ddd-domain-primitives`, nie w tym
+pakiecie: `DefaultActorType` + `'ai_agent'` (additive) oraz typowany,
+dyskryminowany
+`IAIActor extends IActor { type: 'ai_agent'; aiSessionId: string; modelId?: string }`.
+Dispatcher konstruuje `IAIActor` deterministycznie z `AIDispatchContext` — nigdy
+nie przyjmuje actora od wywołującego (anti-spoofing, TM-VA-001-R1).
+
+**Testing (`@vytches/ddd-agent/testing`)**: `MockAICommandDispatcher` (kontrakt
+zgodny z D14: `assertDispatched(toolName)`), `assertNoLeakage`.
+
+### Dispatcher pipeline (kolejność wymuszona przez fabrykę)
+
+```
+LLM → dispatch(toolName, rawParams, context)
+       0. registry.get(toolName)                        ← unknown tool = jawny błąd
+       1. rateLimiter.checkAndConsume(userId, tier)      ← rate limit
+       2. permissionChecker.can(actor, permission)       ← type-level RBAC (fail-closed)
+       3. inputSchema.validate(rawParams)                ← Result, nie throw (D4)
+       4. tool.toCommand(validated)                      ← tylko czyste dane do Command
+       5. commandBus.execute(command)                    ← handler nie wie o AI
+   Wszystkie kroki objęte JEDNYM error boundary → AIErrorTranslator (D4).
+   LLM nigdy nie widzi stack trace / internals (TM-VA-001-I1).
+```
+
+> **Rezydualna odpowiedzialność handlera (D17)**: krok 2 to RBAC na poziomie
+> TYPU. Autoryzacja instance-level (ABAC — „czy TEN actor może edytować TĘ
+> encję") strukturalnie nie może zajść w dispatcherze (brak sparsowanych danych
+> przed krokiem 3). Handler MUSI ją nadal egzekwować (defense-in-depth).
+
+### Deferred to v0.2+
+
+- **`AIToolCallRecord`** (preferowana nazwa, OQ7 rev.; dawniej
+  `AIWorkflowStepTracedPayload`) — kontrakt call-logu (kto/co/kiedy/wynik),
+  provider-neutral z definicji (normalizacja formatu providera dzieje się PRZED
+  dispatcherem), interfejs bez storage (D13). Highest churn risk — freeze last,
+  po danych produkcyjnych z juz-ide-api. Notatki: `durationMs` z
+  `performance.now()`; emisja tania przy braku subskrybenta; `costMicroUsd`
+  (integer), nie float.
+- Introspekcja schema / `toGenericToolSchema()` (D2) — wymaga wcześniej
+  publicznego dostępu do `schema` w `ddd-validation` (dziś `protected`).
+- `IAIWorkflow` (interface only, jeśli w ogóle) — orkiestracja jest
+  out-of-scope.
+- `@vytches/ddd-agent-nestjs` — osobny pakiet (nie subpath); dekorator `@AITool`
+  tylko tam. Nigdy importowany zwrotnie przez `@vytches/ddd-nestjs` (cykl!).
+
+### Zmiany zależne w innych pakietach (przed cięciem v0.1)
+
+| Pakiet                  | Zmiana                                                                                           | Powód                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------ | ------------------------ |
+| `ddd-domain-primitives` | `DefaultActorType` + `'ai_agent'`; `IAIActor`                                                    | D5                       |
+| `ddd-domain-primitives` | Naprawa dryfu docs: kod ma 7 wartości, `LLMGUIDE.md` i `README.md` dokumentują sprzeczne zestawy | D19 — razem z D5, nie po |
+| `ddd-validation`        | Publiczny dostęp do `schema` (`BaseValidationAdapter.schema` jest `protected`)                   | D2 (v0.2+)               |
+
+### Structural guardrails (część definicji ukończenia, D16)
+
+- `.eslintrc.json`: wpis `scope:agent` (tag `layer:integration`, wzorem `acl`) w
+  `depConstraints` —
+  `onlyDependOnLibsWithTags: [scope:contracts, scope:domain-primitives, scope:cqrs, scope:events, scope:testing]`.
+- `no-restricted-imports` w `packages/agent`: `zod`, `langchain*`, `openai`,
+  `@anthropic-ai/*` (dependency-creep pojawił się już 2×: zod 2026-06-12,
+  LangChain 2026-07-01).
+- Testy `expect-type`: exhaustiveness `AIToolPermission`, kształt `toCommand`,
+  `readonly` pól `AIToolDefinition` — przed zamrożeniem v0.1.
+
+### Documentation commitments (v0.1)
+
+1. Quickstart z **wklejalnym inline** `ZodAdapter` (kopia recepty z
+   `HOW-TO-validation.md` §10) — nie sam odnośnik.
+2. Minimalny „first successful `dispatch()`" ze stubami rate-limitera i
+   permission-checkera (cel: 15 minut do produktywności).
+3. Jawna nota: manualna rejestracja to **cecha bezpieczeństwa**, nie brak DX.
+4. Nota ABAC (D17) przy dokumentacji pipeline'u.
+5. Strona „Writing Good AI Tool Descriptions" (`description`/`examples` trafiają
+   do kontekstu LLM i decydują o trafności wyboru narzędzia).
+6. Sekcja Provider & Framework Recipes (niżej) jako wersja robocza strony docs.
+
+---
+
+## Provider & Framework Recipes (docs-only — draft przyszłej strony)
+
+Zasada: biblioteka NIGDY nie zależy od providera/frameworka. Każda integracja to
+przepis w dokumentacji z wklejalnym snippetem (OQ6):
+
+- **Walidacja (zod / valibot / arktype)** — adapter do `IValidator<T>`;
+  rekomendowany wzorzec: `BaseValidationAdapter` z `ddd-validation` (istniejący
+  `ZodAdapter` z `HOW-TO-validation.md`).
+- **Tool schema (MCP `tools/list` / Anthropic `input_schema` / OpenAI
+  `parameters`)** — przez hook introspekcji schema (D2, v0.2+) +
+  `zod.toJSONSchema()` po stronie konsumenta.
+- **LangChain** — konsument buduje własny `StructuredTool` z
+  `AIToolDefinition.{name, description, examples}` + JSON Schema (D10).
+- **LangSmith** — tracing jednokierunkowy (consumer → LangSmith, nigdy
+  odwrotnie): widok „co LLM robił" za darmo przez `LANGCHAIN_TRACING_V2`; widok
+  domenowy przez subskrypcję na `IntegrationEvent<AIToolCallRecord>` (v0.2+) i
+  własny eksporter (D12).
+- **Topologia** — domyślnie in-process: pętla orkiestracji w TYM SAMYM procesie
+  co `CommandBus`, `InProcessAICommandDispatcher` woła `commandBus.execute()`
+  jako zwykłą funkcję, zero HTTP. `RemoteAICommandDispatcher` (HTTP/gRPC)
+  dopiero przy świadomym wydzieleniu AI-gateway — decyzja topologii konsumenta
+  (D11).
+
+---
+
+## Consumer feedback — juz-ide-api, pre-implementation (2026-07-09)
+
+> Zebrane podczas projektowania TS-SEC-ONBEHALF-001 (ExecutionActor + onBehalf
+> dla admin/CS — konsumencka strona kontraktu actor/subject, w którą wepnie się
+> dispatcher). Status: **kandydaci na decyzje D20-D22 do następnego panelu** —
+> nie zmieniają zamrożonych decyzji D1-D19, wskazują luki spec-u wykryte na
+> realnym konsumencie (dokładnie to, czego wymaga Entry Condition #3).
+
+- **D20 (kandydat, LUKA v0.1): execution-context propagation seam.** In-process
+  dispatch wykonuje `commandBus.execute()` POZA request scope — a w juz-ide-api
+  (i każdym konsumencie na nestjs-cls) handlery czytają tożsamość z CLS
+  (`RequestContextService`), nie z komendy. Bez ustanowienia kontekstu wokół
+  kroków 4-5 pipeline'u krok 5 failuje (handler nie zna userId) albo — gorzej —
+  wykona się na resztkowym kontekście innego żądania (leak między requestami).
+  Propozycja: opcjonalny seam w deps fabryki, np.
+  `contextBinder?: <T>(actor: IAIActor, ctx: AIDispatchContext, fn: () => Promise<T>) => Promise<T>`,
+  wywoływany przez dispatcher wokół kroków 4-5; konsument binduje w nim swój CLS
+  (executionActor + onBehalfOfUserId). Minimum absolutne, jeśli seam odpada:
+  jawna dokumentacja "konsument MUSI opakować dispatch własnym context-scope" +
+  przykład w recipe.
+- **D21 (kandydat, doc-note przy pipeline): semantyka
+  `IPermissionChecker.can(actor, ...)`.** Uprawnienia muszą być rozstrzygane
+  względem grantów UŻYTKOWNIKA z `context.userId` (subject), nie tożsamości
+  `ai_agent` — invariant "AI ma te same uprawnienia co user" (juz-ide-api
+  canvas-domain.md §2/§7). Bez tej noty naturalną (błędną) implementacją
+  konsumenta jest globalne "co może ai_agent" = fail-open ponad uprawnienia
+  konkretnego usera. Nota powinna stać obok istniejącej noty ABAC (D17).
+- **D22 (kandydat, v0.2+/domain-primitives): standard delegacji.** juz-ide-api
+  wprowadza po swojej stronie `ExecutionActor` (na `IActor`) +
+  `onBehalfOfUserId` w request context — jeden kontrakt dla CS (nagłówek +
+  guard) i AI (dispatcher). Po walidacji produkcyjnej rozważyć w
+  `ddd-domain-primitives` standardowy kształt delegacji
+  (`IDelegatedActor extends IActor { onBehalfOf: { type, id } }` lub
+  udokumentowana konwencja `metadata.onBehalfOf`) — ten sam gate co Entry
+  Condition #1, nie wcześniej.
+- **D23 (kandydat, doc-note przy D18/D21): hot path permission-checkera +
+  taksonomia fail-closed infra.** Feedback z rewizji TS-SEC-ONBEHALF-001 (D8:
+  synchroniczny access-log onBehalf, fail-closed przed disclosure). (a)
+  `IPermissionChecker.can()` jest na hot path — wołany per dispatch; przy
+  limitach rzędu ~20 tool calls/turn naturalna (błędna) implementacja konsumenta
+  to lookup DB per call. Doc-note obok D21: konsument POWINIEN cache'ować granty
+  subjecta w scope sesji/requestu (z inwalidacją) — kalibracja "wolumen znikomy"
+  z flow CS nie przenosi się na AI. (b) Konsumenckie seamy fail-closed (audyt /
+  access-log niedostępny → odmowa PRZED wykonaniem, wzorzec break-the-glass)
+  muszą mieć jasną reprezentację w domyślnym `AIErrorTranslator`: kategoria
+  `internal_error` z `retryable: false` w obrębie tury — inaczej pętla LLM
+  ponawia wywołanie, które z definicji nie przejdzie, i pali limit tool calls.
+- **D24 (kandydat, priorytet D2): MCP jako drugi adapter wymaga introspekcji
+  schema w v0.1.** Ustalenie architektoniczne juz-ide-api (sesja 2026-07-09):
+  MCP = cienki adapter prezentacyjny nad `IAICommandDispatcher` dla hostów
+  agenta POZA procesem (konsola CS/admin w Claude Desktop; później publiczny
+  remote MCP per audiencja user/CS/B2G — NIGDY per bounded context, nigdy jako
+  wewnętrzny RPC, nigdy dynamiczne konsumowanie obcych `tools/list`).
+  Konsekwencje dla spec: (a) budowa `tools/list` wymaga introspekcji schema — D2
+  (`toGenericToolSchema()`, publiczny dostęp do `schema` w ddd-validation)
+  powinno wejść do v0.1, nie v0.2+; (b) kandydatem na przepis end-to-end z Entry
+  Condition #3 jest wewnętrzny serwer `mcp-cs-admin` nad ExecutionActor/onBehalf
+  (waliduje registry → permission → access-log → audit → mapowanie
+  AIToolDefinition↔tools/list jednym małym wdrożeniem wewnętrznym).
 
 ---
 
 ## What the Package Does NOT Contain
 
-| Component                                   | Why it stays out                              |
-| ------------------------------------------- | --------------------------------------------- |
-| Concrete AI workflows                       | Domain-specific — each project builds its own |
-| AISession aggregate                         | A product concern, not a library              |
-| OpenAI/Anthropic clients                    | LLM provider is not a DDD concern             |
-| BudgetTracker                               | Infrastructure concern                        |
-| Workflow registries with concrete workflows | Domain-specific whitelists                    |
-| Intent identification logic                 | LLM call — outside DDD boundary               |
+| Component                                  | Why it stays out                            |
+| ------------------------------------------ | ------------------------------------------- |
+| Concrete AI workflows / `AIWorkflowEngine` | Orkiestracja jest project-specific          |
+| AISession aggregate                        | A product concern, not a library            |
+| OpenAI/Anthropic/LangChain clients         | LLM provider is not a DDD concern           |
+| BudgetTracker                              | Infrastructure concern                      |
+| Rate-limiter / permission-checker impls    | Infrastructure — library ships seams only   |
+| Call-log storage / query API               | Konsument buduje read-model z eventów (D13) |
+| Intent identification logic                | LLM call — outside DDD boundary             |
 
 ---
 
-## Proposed Package Dependencies
+## Entry Conditions before implementation (consensus — unchanged)
 
-```
-@vytches/ddd-agent
-  peerDependencies:
-    @vytches/ddd-core        ← Result<T>, base classes
-    @vytches/ddd-cqrs        ← CommandBus, QueryBus interfaces
-    @vytches/ddd-events      ← BaseIntegrationEvent
-    zod                      ← AIToolDefinition schema validation
-  devDependencies:
-    @vytches/ddd-testing     ← for MockAICommandDispatcher
-```
+Implementation stays **deferred**; the trigger is concrete:
 
-Zero dependency on NestJS — core package is framework-agnostic. Optional
-subpackage `@vytches/ddd-agent/nestjs` for NestJS-specific utilities.
-
----
-
-## Arguments For Extraction
-
-**1. The problem is fundamental and repeatable** Every project using
-@vytches/ddd that wants AI faces the same question: "how should the LLM invoke
-handlers without breaking authorization and audit trail?" Without
-`@vytches/ddd-agent`, each project solves this independently, often incorrectly.
-
-**2. The interfaces are genuinely generic** `IAICommandDispatcher`,
-`AIToolDefinition`, `AIErrorTranslator` — none of them contain anything
-project-specific. These are pure DDD-AI boundary abstractions.
-
-**3. Transport abstraction is a key microservices enabler** The
-`IAICommandDispatcher` interface is the single change that makes an AI layer in
-a monolith not require a rewrite when migrating to microservices.
-
-**4. `actorType` / `aiSessionId` in RequestContext is a cross-cutting concern**
-Every audit log, every tracing system, every security monitor wants to know "was
-this a human or a bot?" Without standardization in @vytches, each project does
-this differently, making shared tooling impossible.
+1. **Production validation** — juz-ide-api runs the AI boundary in production
+   for 2-3 months and the core interfaces (`IAICommandDispatcher`,
+   `AIToolDefinition`, `actorType`) prove stable. _(Primary trigger — likely
+   ~2026-08/09.)_
+2. **Core quality green first** — current project priority (JSDoc, ts-paths,
+   flaky test) must not be displaced. VA-001 does not jump the queue.
+3. **Pre-implementation step** — extract the patterns from juz-ide-api's real
+   usage and diff against _§ v0.1 Target Specification_ before cutting v0.1.
+   Build one end-to-end recipe (1 command + AIToolDefinition + InProcess
+   dispatcher + L1 mock test + L2 actorType assertion) **in juz-ide-api** first.
+   Include a fresh look at the then-current MCP spec (does `AIToolDefinition`
+   still map 1:1 to `tools/list`).
+4. **Guardrails in place** — ESLint `scope:agent` + `no-restricted-imports`
+   (D16) land with the package skeleton, not after.
 
 ---
 
-## Arguments Against / Risks
+## § Decision Log / Design History
 
-**1. Too early — patterns not production-validated** All patterns described here
-are designed, not battle-tested. Extraction before validation risks breaking
-changes in v0.1, v0.2, v0.3 that affect all consuming projects.
+Pełne wersje historyczne — git history tego pliku. Pełne uzasadnienia decyzji —
+`project-orchestration/analysis/VA-001-ai-agent-package-proposal.analysis.md`.
 
-**Mitigation**: Wait until patterns are proven stable in at least one production
-DDD project for 2-3 months. Only then extract.
+**2026-05-20 — oryginalny koncept.** AI jako trzeci driving adapter; szkice API
+pisane „z głowy" — odwoływały się do 3 nieistniejących symboli
+(`@vytches/ddd-core`, `BaseIntegrationEvent`, `RequestContext`) i zakładały peer
+dep na `zod`.
 
-**2. Maintenance overhead of a new package** Every new package = changelog,
-semver, backward compatibility, documentation, tests.
+**2026-06-12 — recenzja #1 (5 agentów: api-guardian, library-expert,
+developer-experience, performance-optimizer, product-owner).** Werdykt: kierunek
+słuszny, spec skorygowana. Kluczowe korekty: (1) `ddd-core`→`ddd-contracts`+
+`ddd-domain-primitives`; (2) `BaseIntegrationEvent`→`IntegrationEvent<T>`; (3)
+`RequestContext` nie istnieje → rozszerzenie `DefaultActorType`; (4) zod OUT →
+własna abstrakcja walidacji; (5) rate-limiting jako interfejs + stałe, nie
+implementacja in-memory; (6) `as const` zamiast `enum`; (7) provider tool-schema
+converters → docs-only; (8) registry-first, dekorator tylko w przyszłym
+subpakiecie nestjs; (9) `fromAI` przez constraint typu. Ustalono zakres v0.1 i
+entry conditions.
 
-**Mitigation**: Start small — v0.1 with 3-4 interfaces and 1 abstract class. Do
-not attempt a full package immediately.
+**2026-06-30/07-01 — analiza #2 (panel: security-audit/threat-model,
+backend-technology-expert/external research, ddd-patterns-expert,
+performance-optimizer, architecture-guardian).** Decyzje D1–D13, status
+`approved`. Najważniejsze: D1 reuse `IValidator<T>` zamiast bespoke
+`SchemaValidator<T>` (type-erasure blokował budowę `tools/list`); D3
+`requiredPermission` obowiązkowe, fail-closed (TM-VA-001-E1, HIGH); D4 cały
+pipeline za `AIErrorTranslator` (TM-VA-001-I1, HIGH — wyciek internals do
+kontekstu promptu); D5 typowany `IAIActor`; D9 nazwa `@vytches/ddd-agent`
+potwierdzona; D10-D12 LangChain/LangSmith docs-only, topologia in-process; D13
+call-log jako kontrakt bez storage. Rozstrzygnięto OQ1-OQ7.
 
-**3. Risk of "God Package" — AI is a broad domain** If `@vytches/ddd-agent`
-contains too much, it becomes a monolith inside the monorepo.
+**2026-07-02 — weryfikacja #3 (panel: library-api-guardian,
+architecture-guardian, performance-optimizer, developer-experience,
+ddd-compliance-guardian).** Kierunek i 10/13 decyzji potwierdzone; korekty i
+rewizje:
 
-**Mitigation**: Hard rule — only interfaces and patterns, zero domain
-implementations and zero LLM provider code. If something requires importing
-OpenAI/Anthropic, it does not belong in the package.
+- **Korekta faktu w D1**: `IValidator<T>` żyje w `@vytches/ddd-contracts`, nie w
+  `ddd-validation` — nowy peerDependency zbędny.
+- **OQ2 → `AIToolPermission` kind-union** zamiast sentinel-stringa
+  (exhaustiveness; trzeci wariant = compile error, nie cichy fail-open).
+- **OQ3 → fabryka `createAICommandDispatcher`** zamiast abstract class (subclass
+  mógłby nadpisać krok pipeline'u; protected sygnatury = najdroższa ewolucja
+  API).
+- **OQ4 → registry constructed-immutable** z `get(name)` O(1) i kolizją nazw
+  jako błędem konstrukcji; `readonly` na polach `AIToolDefinition`.
+- **OQ5 → restrukturyzacja tego pliku** (wykonana) zamiast czwartej warstwy
+  korekt — pole `inputSchema` przeszło już 3 typy w jednym dokumencie.
+- **OQ7 → nazwa `AIToolCallRecord`** zapisana jako preferowana już teraz;
+  kształt pól nadal v0.2+.
+- **D14**: rozstrzygnięta niespójność sygnatury —
+  `dispatch(toolName, rawParams, context)` (spójne z D13; dispatcher wykonuje
+  kroki 3-4, nie może dostawać gotowej komendy).
+- **D15**: `AIToolDefinition.toCommand` zamiast
+  `static fromAI()`/`AICallableClass` — Command czysty od słownictwa adaptera
+  (propose_adr).
+- **D16–D19**: guardraile ESLint; luka ABAC udokumentowana; taksonomia kategorii
+  w domyślnym `AIErrorTranslator`; naprawa dryfu docs `DefaultActorType` razem z
+  D5.
 
 ---
 
-## Open Questions
-
-1. **Naming**: `@vytches/ddd-agent` vs `@vytches/ddd-ai` vs
-   `@vytches/ddd-ai-boundary`?
-2. **Framework agnostic?**: Does `@vytches/ddd-agent/nestjs` subpackage make
-   sense, or should NestJS integration stay in consumer projects?
-3. **Workflow engine**: Should `AIWorkflowEngine` be a separate concept in this
-   package, or left entirely to consuming projects?
-4. **Decorator vs registry**: Offer both discovery styles, or pick one?
-5. **Rate limiting in library**: Does `AIWriteTier` with default limits make
-   sense in the library, or is it always project-specific?
-6. Should `static fromAI()` be enforced by an interface (`IAICallable`) or
-   remain a convention?
-7. Should `AIToolRegistry.toAnthropicTools()` / `toOpenAITools()` live in the
-   library, or be left to consuming projects?
-
----
-
-## Implementation Timeline (hypothetical)
-
-```
-When patterns are validated in production (~2-3 months of real usage):
-  → Verify IAICommandDispatcher, AIToolDefinition, actorType are stable
-  → If stable: extract as @vytches/ddd-agent v0.1
-  → v0.1 scope: interfaces only + AIErrorTranslator base + MockAICommandDispatcher
-
-After further validation (~5-6 months total):
-  → If AIWorkflowStepTraced shape is stable: add to v0.2
-  → If AIWriteTier enum is validated: add rate limit defaults
-  → v0.2 scope: + tracing event + rate limit tiers
-
-Later (optional):
-  → @vytches/ddd-agent/nestjs subpackage with NestJS utilities
-  → @vytches/ddd-agent/testing with full mock utilities
-```
-
----
-
-_Concept created: 2026-05-20_ _Migrated to project-orchestration: 2026-05-22_
+_Concept created: 2026-05-20 · Migrated: 2026-05-22 · Restructured per OQ5:
+2026-07-02_

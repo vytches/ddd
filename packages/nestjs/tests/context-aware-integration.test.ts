@@ -39,6 +39,8 @@ vi.mock('@vytches/ddd-cqrs', () => {
     QueryBus: mockBus,
     EnhancedCommandBus: mockBus,
     EnhancedQueryBus: mockBus,
+    COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+    QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
   };
 });
 
@@ -49,7 +51,8 @@ vi.mock('@vytches/ddd-events', async () => ({
   })),
 }));
 
-vi.mock('@vytches/ddd-di', async () => ({
+vi.mock('@vytches/ddd-di', async importOriginal => ({
+  ...(await importOriginal<typeof import('@vytches/ddd-di')>()),
   SimpleContainer: vi.fn().mockImplementation(() => ({
     register: vi.fn(),
     resolve: vi.fn(),
@@ -102,14 +105,9 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
   });
 
   describe('forContext', () => {
-    it('should create context-specific module with bridgeToNestJS disabled', async () => {
+    it('should create context-specific module', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('UserManagement', {
-            bridgeToNestJS: false,
-            performance: { performanceTarget: 100 },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('UserManagement', {})],
       }).compile();
 
       expect(module).toBeDefined();
@@ -124,21 +122,9 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
       expect(baseExplorer).toBeDefined();
     });
 
-    it('should create context-specific module with bridgeToNestJS enabled', async () => {
+    it('should store context configuration', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('OrderProcessing', {
-            bridgeToNestJS: true,
-            handlers: {
-              include: ['*CommandHandler', '*QueryHandler'],
-              prefix: 'Order',
-            },
-            performance: {
-              performanceMode: 'production',
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('OrderProcessing', {})],
       }).compile();
 
       expect(module).toBeDefined();
@@ -152,7 +138,6 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
       const contextConfig = explorer.getContextConfiguration();
       expect(contextConfig).toBeDefined();
       expect(contextConfig?.context).toBe('OrderProcessing');
-      expect(contextConfig?.bridgeToNestJS).toBe(true);
     });
 
     it('should support context with custom providers', async () => {
@@ -165,7 +150,6 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
         imports: [
           VytchesDDDModule.forContext('UserManagement', {
             providers: [customProvider],
-            performance: { performanceTarget: 150 },
           }),
         ],
       }).compile();
@@ -181,20 +165,9 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
       expect(explorer).toBeDefined();
     });
 
-    it('should configure context with proper performance settings', async () => {
-      const performanceConfig = {
-        performanceMode: 'enterprise' as const,
-        autoOptimize: true,
-        performanceTarget: 75,
-      };
-
+    it('should configure context', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('HighPerformanceContext', {
-            bridgeToNestJS: true,
-            performance: performanceConfig,
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('HighPerformanceContext', {})],
       }).compile();
 
       expect(module).toBeDefined();
@@ -206,7 +179,6 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
       const contextConfig = explorer.getContextConfiguration();
       expect(contextConfig).toBeDefined();
       expect(contextConfig?.context).toBe('HighPerformanceContext');
-      expect(contextConfig?.bridgeToNestJS).toBe(true);
     });
   });
 
@@ -215,16 +187,9 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
       module = await Test.createTestingModule({
         imports: [
           VytchesDDDModule.forContexts({
-            globalBridgeToNestJS: true,
-            enableContexts: true,
             contexts: {
-              UserManagement: {
-                performance: { performanceTarget: 100 },
-              },
-              OrderProcessing: {
-                bridgeToNestJS: false,
-                handlers: { include: ['*Order*'] },
-              },
+              UserManagement: {},
+              OrderProcessing: {},
             },
           }),
         ],
@@ -250,8 +215,6 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
       module = await Test.createTestingModule({
         imports: [
           VytchesDDDModule.forContexts({
-            globalBridgeToNestJS: false,
-            enableContexts: true,
             contexts: {},
           }),
         ],
@@ -264,18 +227,8 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
 
   describe('Context Configuration', () => {
     it('should configure explorer service with context options', async () => {
-      const contextOptions = {
-        bridgeToNestJS: true,
-        handlers: {
-          include: ['*Handler'],
-          exclude: ['*TestHandler'],
-          prefix: 'User',
-        },
-        performance: { performanceTarget: 100 },
-      };
-
       module = await Test.createTestingModule({
-        imports: [VytchesDDDModule.forContext('UserManagement', contextOptions)],
+        imports: [VytchesDDDModule.forContext('UserManagement', {})],
       }).compile();
 
       const explorer = module.get(`VytchesExplorerService_UserManagement`);
@@ -283,21 +236,13 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
 
       expect(config).toBeDefined();
       expect(config?.context).toBe('UserManagement');
-      expect(config?.bridgeToNestJS).toBe(true);
-      expect(config?.handlers?.include).toEqual(['*Handler']);
-      expect(config?.handlers?.exclude).toEqual(['*TestHandler']);
-      expect(config?.handlers?.prefix).toBe('User');
     });
   });
 
   describe('Handler Discovery', () => {
     it('should discover context-specific handlers', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('TestContext', {
-            bridgeToNestJS: true,
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('TestContext', {})],
       }).compile();
 
       const explorer = module.get(`VytchesExplorerService_TestContext`);
@@ -322,15 +267,7 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
     it('should handle context configuration errors gracefully', async () => {
       // This should not throw during module creation
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('InvalidContext', {
-            bridgeToNestJS: true,
-            handlers: {
-              include: ['*Invalid*'],
-              exclude: [],
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('InvalidContext', {})],
       }).compile();
 
       expect(module).toBeDefined();
@@ -344,25 +281,9 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
   });
 
   describe('Performance Integration', () => {
-    it('should apply context-specific performance settings', async () => {
-      const performanceOptions = {
-        performanceMode: 'production' as const,
-        autoOptimize: true,
-        performanceTarget: 50,
-        contexts: ['HighPerformanceContext'],
-      };
-
+    it('should apply context configuration', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('HighPerformanceContext', {
-            performance: performanceOptions,
-            monitoring: {
-              enabled: true,
-              warnAt: 40,
-              errorAt: 80,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('HighPerformanceContext', {})],
       }).compile();
 
       expect(module).toBeDefined();
@@ -370,7 +291,6 @@ describe('VytchesDDDModule - Context-Aware Integration', () => {
       const explorer = module.get(`VytchesExplorerService_HighPerformanceContext`);
       expect(explorer).toBeInstanceOf(VytchesExplorerService);
 
-      // Should have performance configuration applied
       const config = explorer.getContextConfiguration();
       expect(config?.context).toBe('HighPerformanceContext');
     });

@@ -73,7 +73,7 @@ export interface IPolicyBuilder<T> {
   /**
    * Define complex OR group logic - at least one group must pass
    */
-  shouldSatisfyAny(...groups: IPolicyGroup<T>[]): IPolicyBuilder<T>;
+  shouldSatisfyAny(...groups: IPolicyGroup<T>[]): IPolicyStepBuilder<T>;
 
   /**
    * Add conditional logic to the policy

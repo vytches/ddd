@@ -15,7 +15,6 @@
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
     "@vytches/ddd-events": "workspace:*",
-    "@vytches/ddd-logging": "workspace:*",
     "@vytches/ddd-testing": "workspace:*",
     "@vytches/ddd-utils": "workspace:*",
     "@vytches/ddd-validation": "workspace:*",
@@ -23,6 +22,6 @@
   },
   "devDependencies": {
     "typescript": "^5.8.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.1.0"
   }
 }

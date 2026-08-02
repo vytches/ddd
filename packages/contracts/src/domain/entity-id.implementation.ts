@@ -143,13 +143,12 @@ export class EntityId<T = string> implements IEntityId<T> {
    * ```
    */
   static create(): EntityId<string> {
-    // Simple UUID generation without external dependencies
-    const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-      const r = (Math.random() * 16) | 0;
-      const v = c === 'x' ? r : (r & 0x3) | 0x8;
-      return v.toString(16);
-    });
-    return new EntityId(uuid, 'uuid');
+    // `globalThis.crypto.randomUUID()` — Node >= 19 (engines.node >= 22.19.0
+    // guarantees it here), all modern browsers, Cloudflare Workers/Deno/Bun.
+    // Using globalThis (not `node:crypto`) avoids Vite externalizing the
+    // import for browser-compat builds. Same pattern as
+    // `domain-event-utils.ts`'s `generateEventId()` in this package.
+    return new EntityId(globalThis.crypto.randomUUID(), 'uuid');
   }
 
   /**

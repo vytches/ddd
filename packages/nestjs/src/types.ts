@@ -12,11 +12,13 @@ export type { HandlerInfo };
  * @example
  * ```typescript
  * // VytchesExplorerService automatically injects ICommandBus and IQueryBus
- * // if they are provided in the module:
+ * // if they are provided in the module. Prefer useFactory/useClass over
+ * // useValue so each module owns its bus instance (a useValue bus is a
+ * // process-global singleton that leaks stale handlers across modules):
  * @Module({
  *   providers: [
- *     { provide: ICommandBus, useValue: new EnhancedCommandBus(container) },
- *     { provide: IQueryBus, useValue: new EnhancedQueryBus(container) },
+ *     { provide: ICommandBus, useFactory: () => new EnhancedCommandBus(container) },
+ *     { provide: IQueryBus, useFactory: () => new EnhancedQueryBus(container) },
  *   ]
  * })
  * ```
@@ -88,61 +90,11 @@ export interface VytchesDDDModuleOptions {
   isGlobal?: boolean;
 
   /**
-   * Bridge to NestJS DI container
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  bridgeToNestJS?: boolean;
-
-  /**
-   * Performance configuration
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  performance?: {
-    performanceTarget?: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-
-  /**
-   * Handler configuration
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  handlers?: {
-    include?: string[];
-    exclude?: string[];
-    prefix?: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-
-  /**
-   * Contexts configuration for multi-context scenarios
-   * @deprecated Legacy option from VP-012, kept for test compatibility
+   * Contexts configuration for multi-context scenarios.
+   * Read by forContexts() to derive per-context providers.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contexts?: string[] | Record<string, any>;
-
-  /**
-   * Monitoring configuration
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  monitoring?: {
-    enabled?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  };
-
-  /**
-   * Global bridge to NestJS configuration (used in forContexts)
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  globalBridgeToNestJS?: boolean;
-
-  /**
-   * Enable contexts flag
-   * @deprecated Legacy option from VP-012, kept for test compatibility
-   */
-  enableContexts?: boolean;
 }
 
 /**
@@ -194,6 +146,16 @@ export interface VytchesContextOptions {
      */
     exports?: ModuleMetadata['exports'];
   };
+
+  /**
+   * When true, a failure to register any discovered handler aborts bootstrap
+   * (the error is rethrown) instead of being logged and skipped. Use to fail
+   * fast on DI misconfiguration rather than discovering it as an opaque runtime
+   * 500 — particularly valuable for auth/permission handlers.
+   *
+   * @default false
+   */
+  strictHandlerRegistration?: boolean;
 }
 
 /**

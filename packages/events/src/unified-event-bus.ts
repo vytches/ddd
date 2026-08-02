@@ -1,10 +1,12 @@
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import { BaseEventBus } from './base-event-bus';
 import type { IEventBus, BaseEventBusOptions } from '@vytches/ddd-contracts';
 import type { IDomainEvent } from '@vytches/ddd-contracts';
 import type { IAuditEvent } from '@vytches/ddd-contracts';
 import type { IIntegrationEvent } from './integration/integration-event-interfaces';
-import { Logger } from '@vytches/ddd-logging';
-import 'reflect-metadata';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 /**
  * Constructor type for class references
@@ -106,14 +108,18 @@ interface HandlerEntry {
 export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBus<BaseEvent> {
   private readonly handlerRegistry = new Map<string, HandlerEntry[]>();
 
+  /**
+   * Identity mapping for class-based handlers (UX-C8): original handler
+   * object → (event name → wrapper function). Lets `unsubscribe` remove
+   * exactly the requested handler instead of matching wrappers textually.
+   */
+  private readonly classHandlerWrappers = new Map<
+    object,
+    Map<string, UnifiedEventHandler<BaseEvent>>
+  >();
+
   constructor(options?: BaseEventBusOptions) {
     super(options);
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.info('UnifiedEventBus initialized', {
-      enableLogging: options?.enableLogging ?? true,
-      middlewareCount: options?.middlewares?.length ?? 0,
-    });
-
     // Auto-register discovered handlers on initialization
     this.autoRegisterHandlers();
   }
@@ -139,18 +145,10 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
           for (const handlerInfo of handlers) {
             this.registerDiscoveredHandler(handlerInfo);
           }
-
-          const logger = Logger.forContext('UnifiedEventBus');
-          logger.info('Auto-registered DI handlers', {
-            handlerCount: handlers.length,
-          });
         }
       }
-    } catch (error) {
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('DI auto-registration not available', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+    } catch {
+      // DI auto-registration not available — silent, not an error
     }
   }
 
@@ -163,8 +161,7 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       const eventContext = Reflect.getMetadata('event:context', handlerInfo.handler);
 
       if (!eventName) {
-        const logger = Logger.forContext('UnifiedEventBus');
-        logger.warn('Handler without event type metadata', {
+        internalLogger.warn('UnifiedEventBus: handler without event type metadata', {
           handlerName: handlerInfo.handler.name,
         });
         return;
@@ -185,35 +182,29 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
           if (handlerInstance && typeof handlerInstance.handle === 'function') {
             await handlerInstance.handle(event);
           } else {
-            const logger = Logger.forContext('UnifiedEventBus');
-            logger.error('Invalid handler instance', undefined, {
+            internalLogger.error('UnifiedEventBus: invalid handler instance', undefined, {
               handlerName: handlerInfo.handler.name,
               hasHandleMethod: !!(handlerInstance && typeof handlerInstance.handle === 'function'),
             });
           }
         } catch (error) {
-          const logger = Logger.forContext('UnifiedEventBus');
-          logger.error('Handler execution failed', error instanceof Error ? error : undefined, {
-            handlerName: handlerInfo.handler.name,
-            errorMessage: error instanceof Error ? error.message : String(error),
-          });
+          internalLogger.error(
+            'UnifiedEventBus: handler execution failed',
+            error instanceof Error ? error : undefined,
+            {
+              handlerName: handlerInfo.handler.name,
+              errorMessage: error instanceof Error ? error.message : String(error),
+            }
+          );
           throw error;
         }
       };
 
       // Register with context awareness
       this.registerHandlerWithContext(eventName.name, handlerFactory, eventContext);
-
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('Registered DI handler', {
-        eventName: eventName.name,
-        handlerName: handlerInfo.handler.name,
-        context: eventContext,
-      });
     } catch (error) {
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.error(
-        'Failed to register discovered handler',
+      internalLogger.error(
+        'UnifiedEventBus: failed to register discovered handler',
         error instanceof Error ? error : undefined,
         {
           handlerName: handlerInfo.handler?.name || 'unknown',
@@ -227,13 +218,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * Publish an event with automatic routing to appropriate handlers
    */
   override async publish(event: BaseEvent): Promise<void> {
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Publishing event', {
-      eventName: event.eventName,
-      contextId: (event as EventWithMetadata).metadata?.contextId,
-      hasPayload: !!(event as { payload?: unknown }).payload,
-    });
-
     // Get context-aware handlers
     const handlers = this.getHandlersForEvent(event);
 
@@ -252,22 +236,11 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     const events = aggregate.getDomainEvents();
     if (events.length === 0) return;
 
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Publishing aggregate events', {
-      eventCount: events.length,
-      aggregateType: aggregate.constructor.name,
-    });
-
     // Use publishMany for optimized batch processing
     await this.publishMany(events);
 
     // Clear events from aggregate after successful publishing
     aggregate.commit();
-
-    logger.debug('Aggregate events published and cleared', {
-      eventCount: events.length,
-      aggregateType: aggregate.constructor.name,
-    });
   }
 
   /**
@@ -307,36 +280,6 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       actualHandler as UnifiedEventHandler<BaseEvent>,
       contexts
     );
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Subscribed to event', {
-      eventName: eventNameName,
-      contexts,
-      handlerName: actualHandler.name || 'anonymous',
-    });
-  }
-
-  /**
-   * Subscribe to events for specific context(s)
-   */
-  subscribeToContext<T extends BaseEvent>(
-    contextId: string | string[] | undefined,
-    eventName: string | Constructor<T>,
-    handler: UnifiedEventHandler<T>
-  ): void {
-    const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
-    this.registerHandlerWithContext(
-      eventNameName,
-      handler as UnifiedEventHandler<BaseEvent>,
-      contextId
-    );
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Subscribed with context filter', {
-      eventName: eventNameName,
-      contexts: contextId,
-      handlerName: handler.name || 'anonymous',
-    });
   }
 
   /**
@@ -349,17 +292,21 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
     const handlerFunction: UnifiedEventHandler<BaseEvent> = event => handler.handle(event as T);
 
-    this.registerHandlerWithContext(eventNameName, handlerFunction, undefined);
+    // Track wrapper by identity so unsubscribe(eventName, handler) can
+    // remove exactly this registration (UX-C8).
+    const wrappersByEvent =
+      this.classHandlerWrappers.get(handler) ?? new Map<string, UnifiedEventHandler<BaseEvent>>();
+    wrappersByEvent.set(eventNameName, handlerFunction);
+    this.classHandlerWrappers.set(handler, wrappersByEvent);
 
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Registered class-based handler', {
-      eventName: eventNameName,
-      handlerClass: handler.constructor.name,
-    });
+    this.registerHandlerWithContext(eventNameName, handlerFunction, undefined);
   }
 
   /**
-   * Unsubscribe from events
+   * Unsubscribe from events. Class-based handlers are removed by identity —
+   * the exact wrapper created for this handler at registration time is
+   * looked up in an identity map, so two textually identical class handlers
+   * on the same event never collide (UX-C8).
    */
   override unsubscribe(
     eventName: string | Constructor<BaseEvent>,
@@ -372,59 +319,45 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       return;
     }
 
-    let targetHandler: UnifiedEventHandler<BaseEvent>;
+    let targetHandler: UnifiedEventHandler<BaseEvent> | undefined;
 
     if (typeof handler === 'function') {
       targetHandler = handler;
     } else {
-      // For class-based handlers, find by the original handler reference
-      // We need to find the wrapper function that calls handler.handle()
-      const index = handlers.findIndex(entry => {
-        // Check if this entry's handler is a wrapper for the class handler
-        return entry.handler.toString().includes('handler.handle(event)');
-      });
+      // Class-based handler: resolve its wrapper via the identity map
+      const wrappersByEvent = this.classHandlerWrappers.get(handler);
+      targetHandler = wrappersByEvent?.get(eventNameName);
 
-      if (index !== -1) {
-        handlers.splice(index, 1);
-        const logger = Logger.forContext('UnifiedEventBus');
-        logger.debug('Unsubscribed class-based handler from event', {
-          eventName: eventNameName,
-          remainingHandlers: handlers.length,
-        });
+      if (wrappersByEvent) {
+        wrappersByEvent.delete(eventNameName);
+        if (wrappersByEvent.size === 0) {
+          this.classHandlerWrappers.delete(handler);
+        }
       }
+    }
+
+    if (!targetHandler) {
       return;
     }
 
     const index = handlers.findIndex(entry => entry.handler === targetHandler);
-    if (index !== -1) {
-      handlers.splice(index, 1);
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('Unsubscribed from event', {
-        eventName: eventNameName,
-        remainingHandlers: handlers.length,
-      });
+    if (index === -1) {
+      return;
+    }
+
+    const remaining = [...handlers.slice(0, index), ...handlers.slice(index + 1)];
+    if (remaining.length === 0) {
+      // Clean up empty keys (parity with BaseEventBus.unsubscribe)
+      this.handlerRegistry.delete(eventNameName);
+    } else {
+      this.handlerRegistry.set(eventNameName, remaining);
     }
   }
 
-  /**
-   * Publish multiple events
-   */
-  override async publishMany(events: Array<BaseEvent>): Promise<void> {
-    if (events.length === 0) return;
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Publishing multiple events', {
-      eventCount: events.length,
-      eventNames: events.map(e => e.eventName),
-    });
-
-    // Process all events concurrently for better performance
-    await Promise.all(events.map(event => this.publish(event)));
-
-    logger.debug('Batch publishing completed', {
-      eventCount: events.length,
-    });
-  }
+  // publishMany is inherited from BaseEventBus: parallel Promise.all by
+  // default (no cross-event ordering), opt-in `{ sequential: true }` for
+  // strict array-order processing. It dispatches through this.publish, so
+  // context filtering and unified error semantics apply per event.
 
   /**
    * Get handlers for a specific event with context filtering
@@ -455,7 +388,10 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   }
 
   /**
-   * Register handler with context filtering
+   * Register handler with context filtering. Single funnel for all
+   * registration paths (`subscribe`,
+   * `registerHandler`, decorator auto-discovery) — enforces
+   * `MAX_HANDLERS_PER_EVENT` here so no path can bypass the cap (UX-C9).
    */
   private registerHandlerWithContext(
     eventName: string,
@@ -463,8 +399,44 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
     contexts?: string | string[]
   ): void {
     const handlers = this.handlerRegistry.get(eventName) || [];
-    handlers.push({ handler, contexts });
-    this.handlerRegistry.set(eventName, handlers);
+    this.assertHandlerCapacity(handlers.length, eventName);
+    this.handlerRegistry.set(eventName, [...handlers, { handler, contexts }]);
+  }
+
+  /**
+   * Gets the registered handlers for a specific event type. Operates on
+   * this bus's own registry (not the inherited `BaseEventBus` store, which
+   * `UnifiedEventBus` does not use). Returns a snapshot `Set` of the
+   * registered handler functions; class-based handlers appear as their
+   * wrapper functions. Useful for testing and debugging.
+   */
+  override getHandlers(
+    eventName: string | Constructor<BaseEvent>
+  ): Set<UnifiedEventHandler<BaseEvent>> | undefined {
+    const eventNameName = typeof eventName === 'string' ? eventName : eventName.name;
+    const entries = this.handlerRegistry.get(eventNameName);
+    if (!entries || entries.length === 0) {
+      return undefined;
+    }
+    return new Set(entries.map(entry => entry.handler));
+  }
+
+  /**
+   * Gets all event types with at least one registered handler. Operates on
+   * this bus's own registry.
+   */
+  override getRegisteredEventTypes(): string[] {
+    return Array.from(this.handlerRegistry.keys());
+  }
+
+  /**
+   * Clears all registered handlers (including context-scoped ones and the
+   * class-handler identity map). Useful for testing.
+   */
+  override clearHandlers(): void {
+    super.clearHandlers();
+    this.handlerRegistry.clear();
+    this.classHandlerWrappers.clear();
   }
 
   /**
@@ -495,32 +467,26 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   }
 
   /**
-   * Execute handlers for an event (overrides base class)
+   * Execute handlers for an event (overrides base class).
+   *
+   * Shares the unified run-all error semantics with {@link BaseEventBus}
+   * (UX-C2): every handler runs to completion, failures are collected, and
+   * only after the full fan-out are they surfaced via
+   * {@link BaseEventBus.handleErrors} — routed to `options.onError` when
+   * configured (publish resolves), otherwise thrown as a single
+   * {@link AggregatedEventHandlerError}.
    */
   protected async executeHandlers(
     event: BaseEvent,
     handlers: UnifiedEventHandler<BaseEvent>[]
   ): Promise<void> {
     if (handlers.length === 0) {
-      const logger = Logger.forContext('UnifiedEventBus');
-      logger.debug('No handlers found for event', {
-        eventName: event.eventName,
-        contextId: (event as EventWithMetadata).metadata?.contextId,
-      });
       return;
     }
-
-    const logger = Logger.forContext('UnifiedEventBus');
-    logger.debug('Executing handlers', {
-      eventName: event.eventName,
-      handlerCount: handlers.length,
-      contextId: (event as EventWithMetadata).metadata?.contextId,
-    });
 
     // Apply middleware if available
     const executeWithMiddleware = this.buildMiddlewarePipeline(handlers);
 
-    let hasErrors = false;
     const errors: Error[] = [];
 
     // Execute all handlers concurrently
@@ -528,29 +494,20 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
       try {
         await executeWithMiddleware(event, handler);
       } catch (error) {
-        hasErrors = true;
         const errorObj = error instanceof Error ? error : new Error(String(error));
         errors.push(errorObj);
 
-        const logger = Logger.forContext('UnifiedEventBus');
-        logger.error('Handler execution failed', errorObj, {
+        internalLogger.error('UnifiedEventBus: handler execution failed', errorObj, {
           eventName: event.eventName,
           handlerName: handler.name || 'anonymous',
         });
-
-        // Call error handler if available
-        if (this.options?.onError) {
-          this.options.onError(errorObj, event.eventName);
-        }
       }
     });
 
     await Promise.all(promises);
 
-    // Always throw first error if any occurred (even if onError handler exists)
-    // The onError handler is for logging/notification, not for swallowing errors
-    if (hasErrors && errors.length > 0) {
-      throw errors[0];
+    if (errors.length > 0) {
+      this.handleErrors(errors, event.eventName);
     }
   }
 

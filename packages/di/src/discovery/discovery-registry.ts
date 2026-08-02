@@ -6,7 +6,7 @@
  * bounded context isolation and DDD principles.
  */
 
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import type { IDependencyContainer } from '../types';
 
 // Type alias for backward compatibility
@@ -116,7 +116,6 @@ export interface DiscoveryRegistryConfig {
  * Central registry for coordinating discovery across packages
  */
 export class DiscoveryRegistry {
-  private readonly logger = Logger.forContext('DiscoveryRegistry');
   private readonly plugins = new Map<string, IDiscoveryPlugin>();
   private readonly contextPlugins = new Map<string, Set<IDiscoveryPlugin>>();
   private readonly discoveryResults = new Map<string, DiscoveryResult[]>();
@@ -128,19 +127,10 @@ export class DiscoveryRegistry {
    */
   registerPlugin(plugin: IDiscoveryPlugin): void {
     if (!plugin.isAvailable()) {
-      if (this.config.debug) {
-        this.logger.debug('Plugin not available (package not installed)', {
-          pluginName: plugin.name,
-        });
-      }
       return;
     }
 
     this.plugins.set(plugin.name, plugin);
-
-    if (this.config.debug) {
-      this.logger.debug('Registered discovery plugin', { pluginName: plugin.name });
-    }
   }
 
   /**
@@ -178,7 +168,7 @@ export class DiscoveryRegistry {
         if (result.status === 'fulfilled') {
           results.push(result.value);
         } else if (this.config.debug) {
-          this.logger.error('Discovery failed for plugin', undefined, {
+          internalLogger.error('DiscoveryRegistry: discovery failed for plugin', undefined, {
             error: String(result.reason),
           });
         }
@@ -191,8 +181,8 @@ export class DiscoveryRegistry {
           results.push(result);
         } catch (error) {
           if (this.config.debug) {
-            this.logger.error(
-              `Discovery failed for plugin ${plugin.name}`,
+            internalLogger.error(
+              `DiscoveryRegistry: discovery failed for plugin ${plugin.name}`,
               error instanceof Error ? error : undefined,
               { error: String(error) }
             );
@@ -291,7 +281,7 @@ export class DiscoveryRegistry {
       const validation = this.plugins.get(result.pluginName)?.validate(result);
 
       if (validation && !validation.valid) {
-        this.logger.warn('Validation failed for plugin', {
+        internalLogger.warn('DiscoveryRegistry: validation failed for plugin', {
           pluginName: result.pluginName,
           contextName,
           errors: validation.errors,
@@ -308,10 +298,13 @@ export class DiscoveryRegistry {
           for (const dep of deps) {
             const depContext = this.extractContextFromDependency(dep);
             if (depContext && !allowedContexts.includes(depContext)) {
-              this.logger.warn('Context references another context not in access matrix', {
-                contextName,
-                referencedContext: depContext,
-              });
+              internalLogger.warn(
+                'DiscoveryRegistry: context references another context not in access matrix',
+                {
+                  contextName,
+                  referencedContext: depContext,
+                }
+              );
             }
           }
         }

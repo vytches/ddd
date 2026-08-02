@@ -8,7 +8,7 @@ import {
 import { BaseBusinessPolicy } from '../../src/core/base/base-business-policy';
 import type { PolicyViolation } from '../../src/core/models/policy-violation';
 import { PolicyContextBuilder } from '../../src/utils/policy-context-builder';
-import type { PolicyRequest } from '../../src/core/interfaces';
+import type { IBusinessPolicy, PolicyRequest } from '../../src/core/interfaces';
 
 // Test policy that tracks call count
 class TestPolicy extends BaseBusinessPolicy<{ value: number }> {
@@ -397,6 +397,183 @@ describe('CachedPolicy', () => {
 
       // Should still be only one execution due to caching
       expect(testPolicy.callCount).toBe(1);
+    });
+  });
+
+  // VS-005: SHA-256 hash, PII masking, LRU O(1)
+  // Use a separate policy typed to `unknown` so test entities are not
+  // constrained to `{ value: number }`.
+  describe('VS-005: SHA-256 cache key hash', () => {
+    let vs005Policy: TestPolicy;
+    let vs005Cached: PolicyCachingBehavior<unknown>;
+
+    beforeEach(() => {
+      vs005Policy = new TestPolicy();
+      // Cast to unknown so arbitrary entity shapes are accepted
+      vs005Cached = PolicyCachingBehavior.create(
+        vs005Policy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000, maxSize: 1200 }
+      );
+    });
+
+    // 1000 unique entities -> 1000 unique keys (zero collisions)
+    it('should produce zero collisions for 1000 distinct entities', async () => {
+      const entities = Array.from({ length: 1000 }, (_, i) => ({
+        id: `entity-${i}`,
+        value: i,
+        name: `Entity number ${i}`,
+      }));
+
+      for (const entity of entities) {
+        await vs005Cached.check({ entity, context: policyContext });
+      }
+
+      // If there were any collisions, some cache misses would reuse slots
+      // and getCacheSize() would be < 1000
+      expect(vs005Cached.getCacheSize()).toBe(1000);
+    });
+
+    // Determinism: same entity -> same key
+    it('should produce deterministic keys (same entity = same key, no re-execution)', async () => {
+      const policy = PolicyCachingBehavior.create(
+        vs005Policy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000 }
+      );
+      const entity = { id: 'abc', payload: 'hello world' };
+
+      await policy.check({ entity, context: policyContext });
+      await policy.check({ entity, context: policyContext });
+      await policy.check({ entity, context: policyContext });
+
+      // Deterministic key means all three hits resolve to same slot
+      expect(vs005Policy.callCount).toBe(1);
+      expect(policy.getCacheSize()).toBe(1);
+    });
+
+    // F4: default key must NOT expose raw userId/tenantId; context isolation verified behaviourally
+    it('should NOT share cache across different users (F4 PII context isolation)', async () => {
+      const policy = PolicyCachingBehavior.create(
+        vs005Policy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000 }
+      );
+
+      const sensitiveContext = PolicyContextBuilder.forUser('user-SENSITIVE-PII-12345')
+        .withTenantId('tenant-SENSITIVE-PII-67890')
+        .withEnvironment('production')
+        .build();
+
+      await policy.check({ entity: { value: 1 }, context: sensitiveContext });
+
+      // Same user, same entity — must be a cache hit
+      const hitResult = await policy.check({ entity: { value: 1 }, context: sensitiveContext });
+      expect(vs005Policy.callCount).toBe(1);
+      expect(hitResult.isSuccess).toBe(true);
+
+      // Different user, same entity — must be a cache miss (different context hash)
+      const otherContext = PolicyContextBuilder.forUser('user-OTHER-99999')
+        .withTenantId('tenant-SENSITIVE-PII-67890')
+        .withEnvironment('production')
+        .build();
+      await policy.check({ entity: { value: 1 }, context: otherContext });
+      expect(vs005Policy.callCount).toBe(2);
+    });
+
+    // keyGenerator override still works (regression for AR-2 / R5)
+    it('should use keyGenerator override instead of SHA-256 default (regression R5)', async () => {
+      const generatorCalls: string[] = [];
+
+      const policy = PolicyCachingBehavior.create(
+        vs005Policy as unknown as IBusinessPolicy<unknown>,
+        {
+          ttl: 60000,
+          keyGenerator: req => {
+            const key = `override:${(req.entity as { value: number }).value}`;
+            generatorCalls.push(key);
+            return key;
+          },
+        }
+      );
+
+      await policy.check({ entity: { value: 7 }, context: policyContext });
+      await policy.check({ entity: { value: 7 }, context: policyContext }); // cache hit
+
+      expect(generatorCalls.length).toBe(2); // called on every check()
+      expect(generatorCalls[0]).toBe('override:7');
+      expect(vs005Policy.callCount).toBe(1); // but inner policy called only once
+    });
+  });
+
+  describe('VS-005: LRU O(1) eviction (F3)', () => {
+    it('should evict the least recently used entry on overflow', async () => {
+      const policy = PolicyCachingBehavior.create(testPolicy, {
+        ttl: 60000,
+        maxSize: 3,
+      });
+
+      // Insert A, B, C
+      await policy.check({ entity: { value: 1 }, context: policyContext }); // A
+      await policy.check({ entity: { value: 2 }, context: policyContext }); // B
+      await policy.check({ entity: { value: 3 }, context: policyContext }); // C
+      expect(policy.getCacheSize()).toBe(3);
+
+      // Access A again to make it recently used (B is now LRU)
+      await policy.check({ entity: { value: 1 }, context: policyContext }); // hit A
+      expect(testPolicy.callCount).toBe(3); // no new call
+
+      // Insert D — should evict B (LRU), not A (recently hit)
+      await policy.check({ entity: { value: 4 }, context: policyContext }); // D
+      expect(policy.getCacheSize()).toBe(3);
+
+      const metrics = policy.getCacheMetrics();
+      expect(metrics.evictions).toBe(1);
+
+      // B was evicted — re-check triggers inner policy again
+      const callsBefore = testPolicy.callCount;
+      await policy.check({ entity: { value: 2 }, context: policyContext });
+      expect(testPolicy.callCount).toBe(callsBefore + 1);
+    });
+
+    it('should refresh LRU position on cache hit', async () => {
+      const policy = PolicyCachingBehavior.create(testPolicy, {
+        ttl: 60000,
+        maxSize: 2,
+      });
+
+      await policy.check({ entity: { value: 10 }, context: policyContext }); // A (LRU)
+      await policy.check({ entity: { value: 20 }, context: policyContext }); // B (MRU)
+
+      // Hit A — now A is MRU, B is LRU
+      await policy.check({ entity: { value: 10 }, context: policyContext });
+
+      // Insert C — should evict B, not A
+      await policy.check({ entity: { value: 30 }, context: policyContext }); // C
+
+      // A should still be cached (not evicted)
+      const callsBefore = testPolicy.callCount;
+      await policy.check({ entity: { value: 10 }, context: policyContext });
+      expect(testPolicy.callCount).toBe(callsBefore); // A hit — not evicted
+
+      // B should be evicted (miss -> new call)
+      await policy.check({ entity: { value: 20 }, context: policyContext });
+      expect(testPolicy.callCount).toBe(callsBefore + 1);
+    });
+
+    it('should maintain correct metrics through LRU evictions', async () => {
+      const policy = PolicyCachingBehavior.create(testPolicy, {
+        ttl: 60000,
+        maxSize: 2,
+      });
+
+      await policy.check({ entity: { value: 1 }, context: policyContext }); // miss
+      await policy.check({ entity: { value: 2 }, context: policyContext }); // miss
+      await policy.check({ entity: { value: 1 }, context: policyContext }); // hit
+      await policy.check({ entity: { value: 3 }, context: policyContext }); // miss + evict value:2
+
+      const metrics = policy.getCacheMetrics();
+      expect(metrics.hits).toBe(1);
+      expect(metrics.misses).toBe(3);
+      expect(metrics.evictions).toBe(1);
+      expect(metrics.entries).toBe(2);
     });
   });
 });

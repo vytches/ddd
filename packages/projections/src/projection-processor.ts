@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { IDomainEvent, IEventProcessor } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
 import { LibUtils } from '@vytches/ddd-utils';
 
 import type { IProjectionEngine } from './projection-interfaces';
 import type { ProjectionEngineRegistry } from './projection-registry';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 export class ProjectionProcessor implements IEventProcessor {
-  private logger = Logger.create('ProjectionProcessor');
-
   constructor(private readonly engineRegistry: ProjectionEngineRegistry) {}
 
   /**
@@ -43,8 +41,8 @@ export class ProjectionProcessor implements IEventProcessor {
     try {
       await engine.processEvent(event);
     } catch (error) {
-      this.logger.error(
-        `Error processing event ${event.eventName} in projection ${engine.getProjectionName()}`,
+      internalLogger.error(
+        `ProjectionProcessor: error processing event ${event.eventName} in projection ${engine.getProjectionName()}`,
         error as Error
       );
       // Could add configurable error handling strategy

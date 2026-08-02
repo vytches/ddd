@@ -79,7 +79,7 @@ class ItemAdded extends DomainEvent<ItemAddedPayload> {
 ## 2. Create a Value Object
 
 ```typescript
-import { BaseValueObject } from '@vytches/ddd';
+import { BaseValueObject, Result } from '@vytches/ddd';
 
 interface MoneyProps {
   readonly amount: number;
@@ -87,14 +87,16 @@ interface MoneyProps {
 }
 
 class Money extends BaseValueObject<MoneyProps> {
-  static create(amount: number, currency: string): Money {
+  static create(amount: number, currency: string): Result<Money, Error> {
     if (amount < 0 || !currency) {
-      throw new Error(`Invalid money: amount=${amount}, currency=${currency}`);
+      return Result.fail(
+        new Error(`Invalid money: amount=${amount}, currency=${currency}`)
+      );
     }
-    return new Money({ amount, currency });
+    return Result.ok(new Money({ amount, currency }));
   }
 
-  add(other: Money): Money {
+  add(other: Money): Result<Money, Error> {
     return Money.create(
       this.getValue().amount + other.getValue().amount,
       this.getValue().currency
@@ -130,7 +132,7 @@ const canBePlaced = hasItems.and(isNotPlaced);
 ## 4. Build the Aggregate
 
 ```typescript
-import { AggregateRoot, EntityId } from '@vytches/ddd';
+import { AggregateRoot, EntityId, Result } from '@vytches/ddd';
 
 class Order extends AggregateRoot<string> {
   private customerId = '';
@@ -151,23 +153,36 @@ class Order extends AggregateRoot<string> {
     });
   }
 
-  // Commands emit events — never mutate state directly
-  create(customerId: string): void {
+  // Commands return Result<void, Error> — never throw, never mutate state directly
+  create(customerId: string): Result<void, Error> {
+    if (!customerId) return Result.fail(new Error('customerId required'));
     this.apply(new OrderCreated({ customerId }));
+    return Result.empty();
   }
 
-  addItem(sku: string, name: string, price: number, qty: number): void {
-    Money.create(price, 'USD'); // throws on invalid
+  addItem(
+    sku: string,
+    name: string,
+    price: number,
+    qty: number
+  ): Result<void, Error> {
+    const money = Money.create(price, 'USD');
+    if (money.isFailure) return Result.fail(money.error);
+
     this.apply(new ItemAdded({ sku, name, price, qty }));
+    return Result.empty();
   }
 
-  place(): void {
+  place(): Result<void, Error> {
     if (
       !canBePlaced.isSatisfiedBy({ items: this.items, placed: this.placed })
     ) {
-      throw new Error('Cannot place order — empty cart or already placed');
+      return Result.fail(
+        new Error('Cannot place order — empty cart or already placed')
+      );
     }
     // emit OrderPlaced event...
+    return Result.empty();
   }
 }
 ```
@@ -178,7 +193,11 @@ class Order extends AggregateRoot<string> {
 const order = new Order();
 order.create('customer-1');
 order.addItem('SKU-001', 'Widget', 29.99, 2);
-order.place();
+
+const placeResult = order.place();
+if (placeResult.isFailure) {
+  console.error(placeResult.error.message);
+}
 
 // Retrieve uncommitted events for persistence
 const events = order.getDomainEvents();

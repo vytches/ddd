@@ -9,4 +9,10 @@
 // flags it as a cycle anyway. Suppressed locally with rationale.
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import { createFoundationConfig } from '../utils/build-configs';
-export default createFoundationConfig(__dirname);
+// VF-024 (AC4): `internal` is a second build entry backing the
+// `@vytches/ddd-contracts/internal` subpath export — cross-package-only
+// symbols (internalLogger, EVENT_HANDLER_METADATA/OPTIONS) that must stay
+// out of the public `.` barrel. See src/internal.ts.
+export default createFoundationConfig(__dirname, {
+  additionalEntries: { internal: 'src/internal.ts' },
+});

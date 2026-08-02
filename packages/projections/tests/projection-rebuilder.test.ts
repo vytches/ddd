@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
 import { ProjectionRebuilder } from '../src/projection-rebuilder';
-import { Logger } from '@vytches/ddd-logging';
 
 describe('ProjectionRebuilder', () => {
   let eventStore: any;
@@ -32,21 +31,6 @@ describe('ProjectionRebuilder', () => {
   };
 
   beforeEach(() => {
-    // Mock logger to prevent stderr output in CI
-    vi.spyOn(Logger, 'forContext').mockReturnValue({
-      info: vi.fn(),
-      error: vi.fn(),
-      warn: vi.fn(),
-      debug: vi.fn(),
-      trace: vi.fn(),
-      withCorrelationId: vi.fn().mockReturnThis(),
-      withUserId: vi.fn().mockReturnThis(),
-      withTenantId: vi.fn().mockReturnThis(),
-      withRequestId: vi.fn().mockReturnThis(),
-      withSessionId: vi.fn().mockReturnThis(),
-      withContext: vi.fn().mockReturnThis(),
-    } as any);
-
     // Mock event replay
     eventReplay = {
       replayFromStream: vi.fn().mockResolvedValue(mockReplayResult),

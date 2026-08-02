@@ -1,42 +1,23 @@
-import {
-  EntityId as BaseEntityId,
-  type IEntityIdFactory,
-  type IdType,
-} from '@vytches/ddd-contracts';
+// ddd-lint-disable no-throw-in-domain
+// Reason: throwing factory methods (fromUUID/fromInteger/fromBigInt/fromText)
+// are intentionally kept for backward compatibility. Result-based variants
+// (tryFromUUID/tryFromInteger/tryFromBigInt/tryFromText) live alongside each
+// on EntityId in this same file for new code that prefers Result<T, E>. Per
+// the library design decision in README ("throwing reserved for true
+// programmer errors"), passing malformed primitives to a factory is a
+// programmer error, not a domain error — identical rationale to
+// `@vytches/ddd-contracts/entity-id.implementation.ts`, this package's base
+// class. The remaining throw in `validate()` is an exhaustive switch over
+// the closed IdType union (uuid|integer|bigint|text) — an unreachable
+// default, not a domain-validation throw. Confirmed during VF-026
+// (SEC-AUDIT-2026-07-09 SA-M1) triage.
+//
+// VF-024 (AC3): the deprecated `EntityIdFactory` wrapper class (runtime-warn
+// since REL-005) was removed here pre-1.0 — see CHANGELOG.md. Use the
+// `EntityId` static factory methods directly instead.
+import { EntityId as BaseEntityId, type IdType } from '@vytches/ddd-contracts';
 import { InvalidParameterError, MissingValueError } from '@vytches/ddd-domain-primitives';
 import { LibUtils, Result } from '@vytches/ddd-utils';
-
-/**
- * Tracks deprecation warnings so each deprecated method warns at most once
- * per process (otherwise tight loops would flood logs).
- *
- * @internal
- */
-const _entityIdFactoryWarned = new Set<string>();
-
-/**
- * Emit a one-time deprecation warning for an EntityIdFactory call site.
- *
- * Why a runtime warning (not just JSDoc): TypeScript's `@deprecated` is a
- * compile-time hint — consumers using `tsc` without `--strict` or those who
- * ignore IDE squiggles never see it. A console.warn at first call ensures
- * the message reaches everyone running the code.
- *
- * REL-005 (2026-05-08): EntityIdFactory will be removed in v1.0.0. Until
- * then this warning fires once per method per process.
- *
- * @internal
- */
-function warnEntityIdFactoryDeprecation(method: string, replacement: string): void {
-  if (_entityIdFactoryWarned.has(method)) return;
-  _entityIdFactoryWarned.add(method);
-  // eslint-disable-next-line no-console
-  console.warn(
-    `[@vytches/ddd-value-objects] EntityIdFactory.${method}() is deprecated and will be removed in v1.0.0. ` +
-      `Use ${replacement} instead. ` +
-      `See https://github.com/vytches/ddd/blob/main/CHANGELOG.md for migration details.`
-  );
-}
 
 export class EntityId<T = string> extends BaseEntityId<T> {
   constructor(value: T, type: IdType) {
@@ -190,115 +171,5 @@ export class EntityId<T = string> extends BaseEntityId<T> {
       );
     }
     return Result.ok(new EntityId(value, 'text'));
-  }
-}
-
-/**
- * @deprecated Use EntityId static methods directly instead. This class will be removed in the next major version.
- * @example
- * ```typescript
- * // Before (deprecated):
- * const id = EntityIdFactory.createWithRandomUUID();
- *
- * // After (recommended):
- * const id = EntityId.create();
- * ```
- */
-export class EntityIdFactory implements IEntityIdFactory {
-  /**
-   * @deprecated Use EntityId.create() instead. Will be removed in v1.0.0.
-   */
-  static createWithRandomUUID(): EntityId<string> {
-    warnEntityIdFactoryDeprecation('createWithRandomUUID', 'EntityId.create()');
-    return EntityId.create();
-  }
-
-  /**
-   * @deprecated Use EntityId.fromUUID() instead. Will be removed in v1.0.0.
-   * @throws {MissingValueError} if value is empty
-   * @throws {InvalidParameterError} if value is empty
-   */
-  static fromUUID(value: string): EntityId<string> {
-    warnEntityIdFactoryDeprecation('fromUUID', 'EntityId.fromUUID()');
-    if (!LibUtils.hasValue(value)) {
-      throw MissingValueError.withValue('entity identifier');
-    }
-
-    if (!LibUtils.isValidUUID(value)) {
-      throw InvalidParameterError.withParameter('entity identifier');
-    }
-
-    return new EntityId(value, 'uuid');
-  }
-
-  /**
-   * @deprecated Use EntityId.fromInteger() instead. Will be removed in v1.0.0.
-   * @throws {InvalidParameterError} if value is empty
-   */
-  static fromInteger(value: number): EntityId<string> {
-    warnEntityIdFactoryDeprecation('fromInteger', 'EntityId.fromInteger()');
-    if (!LibUtils.isValidInteger(value)) {
-      throw InvalidParameterError.withParameter('entity identifier must be a non-negative integer');
-    }
-
-    return new EntityId(value.toString(), 'integer');
-  }
-
-  /**
-   * @deprecated Use EntityId.fromBigInt() instead. Will be removed in v1.0.0.
-   * @throws {InvalidParameterError} if value is empty
-   */
-  static fromBigInt(value: string | bigint): EntityId<string> {
-    warnEntityIdFactoryDeprecation('fromBigInt', 'EntityId.fromBigInt()');
-    const stringValue = LibUtils.normalizeIdToString(value);
-
-    if (!LibUtils.isValidBigInt(stringValue)) {
-      throw InvalidParameterError.withParameter('entity identifier must be a valid bigint');
-    }
-
-    return new EntityId(stringValue, 'bigint');
-  }
-
-  /**
-   * @deprecated Use EntityId.fromText() instead. Will be removed in v1.0.0.
-   * @throws {MissingValueError} if value is empty
-   * @throws {InvalidParameterError} if value is empty
-   */
-  static fromText(value: string): EntityId<string> {
-    warnEntityIdFactoryDeprecation('fromText', 'EntityId.fromText()');
-    if (!LibUtils.hasValue(value)) {
-      throw MissingValueError.withValue('entity identifier');
-    }
-
-    if (!LibUtils.isValidTextId(value)) {
-      throw InvalidParameterError.withParameter('entity identifier contains invalid characters');
-    }
-
-    return new EntityId(value, 'text');
-  }
-
-  /** @deprecated Use EntityId.create() instead */
-  createWithRandomUUID(): EntityId<string> {
-    return EntityId.create();
-  }
-
-  /** @deprecated Use EntityId.fromUUID() instead */
-  fromUUID(value: string): EntityId<string> {
-    return EntityIdFactory.fromUUID(value);
-  }
-
-  /** @deprecated Use EntityId.fromInteger() instead */
-  fromInteger(value: number): EntityId<string> {
-    return EntityIdFactory.fromInteger(value);
-  }
-
-  /** @deprecated Use EntityId.fromBigInt() instead */
-  fromBigInt(value: string | bigint): EntityId<string> {
-    return EntityIdFactory.fromBigInt(value);
-  }
-
-  /** @deprecated Use EntityId.fromText() instead */
-  fromText(value: string): EntityId<string> {
-    return EntityIdFactory.fromText(value);
   }
 }

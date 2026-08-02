@@ -1,3 +1,4 @@
+import { LibUtils } from '@vytches/ddd-utils';
 import type { Result } from '@vytches/ddd-utils';
 import type { PolicyContext } from '../core/interfaces';
 import type { PolicyViolation } from '../core/models/policy-violation';
@@ -142,7 +143,7 @@ export class PolicyEventBuilder<T> {
    * Generate a unique execution ID
    */
   private static generateExecutionId(): string {
-    return `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `exec_${LibUtils.getUUID()}`;
   }
 }
 

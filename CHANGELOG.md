@@ -3,6 +3,391 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- adding configuration to claude
+  ([eecfd38](https://github.com/vytches/ddd/commit/eecfd38de9cca24e92900fde9f0a9a767fe3b3f4))
+- **config:** fix ddd-lint no-throw-in-domain path matching, wire CI, triage
+  findings
+  ([a5ac3e9](https://github.com/vytches/ddd/commit/a5ac3e9e101b4eb8b32e56edb4272e8498f2d8c4))
+- **config:** include benchmarks/ in nestjs and di tsconfig for type-check
+  coverage
+  ([b0d6884](https://github.com/vytches/ddd/commit/b0d6884e24947c6d83fcc40fdf61879c03cdf4e5))
+- **contracts:** replace Math.random UUID/id generation with crypto.randomUUID
+  ([3798355](https://github.com/vytches/ddd/commit/37983557fa99edde6f60b7662a874b2ae683e078))
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **core:** stop errors from leaking data through JSON.stringify
+  ([870b012](https://github.com/vytches/ddd/commit/870b01245f614735588ecd99a032ba4cc03a357e))
+- **cqrs:** evict stale handler factories and add bus reset (VS-003)
+  ([550f865](https://github.com/vytches/ddd/commit/550f8654472260140d67a2f15876691f1f1f6348))
+- **cqrs:** make CQRS execution logging opt-in, sanitize logged errors
+  ([5f58796](https://github.com/vytches/ddd/commit/5f587964c1aa2b00adaf662742b18fda7dbd9315))
+- **cqrs:** unref cache timers and align command enableCache default to false
+  (vp-010)
+  ([56068b7](https://github.com/vytches/ddd/commit/56068b73a39a20d8c18aa7be6cd676639ea1cce5))
+- **deps:** bump vulnerable transitive dependencies (22 advisories)
+  ([f397bb4](https://github.com/vytches/ddd/commit/f397bb4cfdb54da2283d44414a8fa1b2259ad228))
+- **di:** key DI tokens by reference identity, fix adapter lifetime and errors
+  (VF-030)
+  ([3f7fcff](https://github.com/vytches/ddd/commit/3f7fcff28162db78b4e70334e0079549f751b476))
+- **events:** unify bus error semantics, registries, unsubscribe identity,
+  handler cap
+  ([b77e510](https://github.com/vytches/ddd/commit/b77e5102e0cb9ca9cb9e159549329f17eca2e106))
+- **logging:** DataMasker isSensitiveKey — mask plural-form keys (passwords,
+  apiTokens)
+  ([69e7ead](https://github.com/vytches/ddd/commit/69e7ead1904ec4f9d2b25856dd45156f5adcc2d2))
+- **logging:** VS-001 — automatic PII masking for CQRS payload decorators
+  ([31a25d2](https://github.com/vytches/ddd/commit/31a25d2636d83ebaa2a6c61b0ff6dc4d208b92fd))
+- **logging:** VS-002 — PII masking for ConsoleProvider and DefaultLogger
+  defaults
+  ([93191a3](https://github.com/vytches/ddd/commit/93191a329120db48e1135e0d818cf6c7387a61ff))
+- **logging:** VS-004 — DataMasker regex pattern validation (ReDoS protection)
+  ([981fd66](https://github.com/vytches/ddd/commit/981fd66db5095d3e6a59a25f937038ab63b6dc9c))
+- **messaging,resilience:** outbox atomic-claim contract + timer/listener leak
+  fixes (VB-004)
+  ([463beb2](https://github.com/vytches/ddd/commit/463beb23e32c8ead6b70e12612261ff473442238))
+- **messaging:** preserve outbox stack trace + widen LoggingMiddleware logger
+  type (VS-015)
+  ([f11f6f9](https://github.com/vytches/ddd/commit/f11f6f96427a9b41910a5c5249fbc1c541201055))
+- **messaging:** warn when OutboxProcessor default handler is replaced (VS-007,
+  SEC-MESSAGING-001)
+  ([54ac0fe](https://github.com/vytches/ddd/commit/54ac0fef5e1350110dd56063db560895dc810f93))
+- **nestjs:** repair forFeature() DI wiring so bounded-context handlers stay
+  local (VB-003)
+  ([ddbedb6](https://github.com/vytches/ddd/commit/ddbedb6c17e60f8266bf561011df245454db77af))
+- **nestjs:** resolve importing consumer module in feature handler registrar
+  ([efda71f](https://github.com/vytches/ddd/commit/efda71f44c3f056fe06080c0895aa321d6d6af38)),
+  closes [#1](https://github.com/vytches/ddd/issues/1)
+- **nestjs:** surface failed handler registrations and reset buses on destroy
+  (VS-003)
+  ([7460d72](https://github.com/vytches/ddd/commit/7460d729eb1be7d0ceb831bee60dc00cdf56dc06))
+- **nestjs:** switch VytchesExplorerService injection to Symbol.for DI tokens
+  (VP-009 Bug [#3](https://github.com/vytches/ddd/issues/3))
+  ([02adf26](https://github.com/vytches/ddd/commit/02adf2653c19cedba7d3963bd38901381e3c5c57))
+- **policies:** cover all step-type union members in policy evaluators (VF-035)
+  ([a880b32](https://github.com/vytches/ddd/commit/a880b32b384b99fc07109532a4e5dba8262fec6b))
+- **policies:** replace 32-bit djb2 cache key hash with sha-256 (VS-005)
+  ([689738b](https://github.com/vytches/ddd/commit/689738b396c06bc695ca75fbc4671231fb8f5529))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+- **resilience:** block CSV formula injection in CsvMetricExporter (VS-006)
+  ([46fd54e](https://github.com/vytches/ddd/commit/46fd54e2955a7df671eebe03e42c6f7dadfa40f8))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+- **config:** trim dead and aspirational public API surface (VF-031)
+  ([27e0055](https://github.com/vytches/ddd/commit/27e005513894b0b0a17d966a1051b9746df21461))
+
+### Features
+
+- **cli:** add example-matrix coverage generator + CI enforcement (VD-006a)
+  ([ff985aa](https://github.com/vytches/ddd/commit/ff985aa9176075b4faf28a10799ebf705359a420))
+- **config:** add ddd-005 deep-import-instead-of-barrel lint rule
+  ([ee6c817](https://github.com/vytches/ddd/commit/ee6c8170e4700351e9d2ae4b4ccbb36af054c454))
+- **contracts:** add configureDiagnostics public control API (VS-014)
+  ([68d90f6](https://github.com/vytches/ddd/commit/68d90f605697e740c6773ee5c3b352ecd080df34))
+- **cqrs:** add IDisposableBus interface and export from package
+  ([00ada97](https://github.com/vytches/ddd/commit/00ada97a1d6f104e972de1a3a33a511520ba6f48))
+- **cqrs:** export Symbol.for DI tokens to fix dual-package hazard (VP-009 Bug
+  [#3](https://github.com/vytches/ddd/issues/3))
+  ([a985fa8](https://github.com/vytches/ddd/commit/a985fa8301c711d063820c72f55aab76f1ba1331))
+- env-var suppression for EntityIdFactory deprecation warn (VS-008)
+  ([6428850](https://github.com/vytches/ddd/commit/6428850dc6cc21de166fe54e394310cb1591cd3b))
+- **nestjs:** add GLOBAL_COMMAND_BUS / GLOBAL_QUERY_BUS tokens for cross-context
+  ACL (VP-009 Bug [#2](https://github.com/vytches/ddd/issues/2))
+  ([0b47e4d](https://github.com/vytches/ddd/commit/0b47e4d16b54dc696194a25860d81d9c1f02070f))
+- **nestjs:** opt-in strict handler registration (fail-fast on bootstrap)
+  ([bd320b5](https://github.com/vytches/ddd/commit/bd320b57b7641a82755d714bea0f6399e50026f3))
+- **nestjs:** warn when injected bus does not implement reset()
+  ([747c87b](https://github.com/vytches/ddd/commit/747c87b510b5f03e453b75dafb328e36a0efdc7a)),
+  closes [#3](https://github.com/vytches/ddd/issues/3)
+- **policies:** shouldSatisfyAny returns IPolicyStepBuilder (VF-035 AC7)
+  ([63a0759](https://github.com/vytches/ddd/commit/63a075939e1640c36c3b05ab55128ad6325068ac))
+
+### Performance Improvements
+
+- **di:** internal resolve/memory optimizations + dev-only bench (VP-006)
+  ([38f7f54](https://github.com/vytches/ddd/commit/38f7f5431d4f9613491ea4c3014e9f60809b8516))
+- **nestjs:** registry-first resolve, lazy paramtypes cache, COW scopes
+  (VP-006b)
+  ([9b56a71](https://github.com/vytches/ddd/commit/9b56a71ad7779f6626c35192d60c4eea3a51b8c3))
+
+### Reverts
+
+- drop unrelated statusline config accidentally auto-committed
+  ([735be17](https://github.com/vytches/ddd/commit/735be1715735c7c80ae168240c6cff34c21dd422))
+
+### BREAKING CHANGES
+
+- **config:** AggregateRoot's IAggregateBuilder interface removed (was exported
+  but shape-incompatible with the real builder). Several other
+  technically-exported- but-unreachable symbols removed (events/audit,
+  subscribeToContext, ACLDiscoveryPlugin, DIDomainServiceMetadataRegistry,
+  duplicate/speculative aggregate interfaces) - see CHANGELOG.md for full list
+  and migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **events:** BaseEventBus DI machinery removed - the useDI constructor
+  parameter, registerHandlerFactory() and discoverHandlers() are gone; default
+  error semantics now runs all handlers and throws AggregatedEventHandlerError
+  instead of rethrowing the first failure mid-loop.
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [Unreleased]
+
+### BREAKING CHANGES
+
+VF-023 — DDD foundation guarantees: value-object validation-during-construction,
+deep immutability, and aggregate event-application atomicity (pre-1.0 BC window;
+see `project-orchestration/tasks/VF-023-ddd-foundation-guarantees.md` and
+`docs/security/threat-models/TM-VF-023.md`):
+
+- **value-objects (AC1):** `BaseValueObject`'s constructor now calls
+  `this.validate(value)` and throws synchronously on failure, instead of relying
+  on every subclass to repeat that check after `super(value)`. Subclasses whose
+  `validate()` override reads other instance fields (rather than only the
+  `value` parameter) will now see `undefined` for those fields, because
+  `validate()` runs before the subclass constructor body executes (the
+  "undefined-during-`super()`" trap). Override the new
+  `protected getInvalidValueMessage(value: T): string` hook to customize the
+  thrown message; a subclass's own post-`super(value)` `throw` is no longer
+  reachable.
+- **value-objects (AC2, AC3, AC11):** `BaseValueObject` values are now
+  **deep**-frozen (`LibUtils.deepFreeze`), not shallow-frozen — nested
+  objects/arrays inside a VO's value are no longer mutable. `equals()` now uses
+  `LibUtils.deepEqual` instead of `JSON.stringify` comparison, fixing false
+  positives/negatives for `undefined`, `Date`, `Map`, `Set`, and `NaN` inside
+  nested structures.
+- **aggregates (AC11):** `AggregateRoot.getDomainEvents()` now returns
+  deep-frozen events (`LibUtils.deepFreeze`), matching the value-objects
+  immutability guarantee. Code that previously mutated events returned from
+  `getDomainEvents()` (a bug even before this change) will now throw in strict
+  mode instead of silently corrupting aggregate state.
+- **aggregates (AC4, F-C6 fix):** `apply()`'s `maxEvents` (REL-007) guard now
+  runs _before_ any state mutation. Previously the guard fired after `_version`
+  had already been incremented, so a caught `maxEvents` error left the
+  aggregate's version and event log permanently out of sync, and a subsequent
+  valid `apply()` call would skip a version number. Guard ordering is now
+  identical between `apply()` (live) and `loadFromHistory()` (replay).
+- **aggregates (AC5, CRITICAL F-H4):** `AggregateRoot._internal_setState` —
+  previously a plain method reachable via any `as unknown as {...}` cast — now
+  requires a module-private `unique symbol` token (`INTERNAL_STATE_TOKEN`,
+  exported only from `./core/aggregate-root`, never from the package's public
+  barrel) as its first parameter, and throws `TypeError` if the token doesn't
+  match. `SnapshotCapability` (the only legitimate caller) has been updated to
+  pass the token. Consumers cannot obtain this token and therefore cannot call
+  `_internal_setState` at all.
+
+#### Consumer Impact Checklist (VF-023)
+
+Before upgrading, run these greps against your codebase to self-audit for the
+behaviors above:
+
+- `grep -rn "\.getValue()\." src/` — find code that reads a nested field off a
+  VO's `getValue()` result and then assigns into it (or into an array method
+  like `.push()`/`.splice()`). These now throw `TypeError` under deep freeze
+  instead of silently mutating shared state.
+- `grep -rn "getDomainEvents()" src/` — find code (projectors, test helpers,
+  outbox processors) that mutates an event or its `payload` after reading it
+  from `getDomainEvents()`. Same deep-freeze consequence as above.
+- `grep -rn "_internal_setState" src/` — find any direct calls to this method.
+  Only `SnapshotCapability` inside `@vytches/ddd-aggregates` itself is a
+  legitimate caller; any application-level call will now fail to compile/throw
+  `TypeError`, since the required `INTERNAL_STATE_TOKEN` is not exported from
+  the public barrel.
+- Review every `BaseValueObject` subclass's `validate()` override: if it
+  previously returned `true`/no-op for values it should have rejected (a silent
+  bug pre-VF-023, since nothing enforced the subclass calling `validate()` at
+  all), construction will now throw at `new Xyz(...)` time instead of allowing
+  an invalid object to exist. Search with
+  `grep -rn "extends BaseValueObject" src/` and manually review each
+  `validate()` body.
+- Review any `validate()` override that reads `this.<otherField>` instead of
+  only its `value` parameter — it will now see `undefined` for fields set up in
+  the subclass constructor body, because `validate()` now runs during `super()`,
+  before that body executes.
+
+VF-031 — prepublish surface diet, second pass (pre-1.0 BC window; see
+`project-orchestration/tasks/VF-031-prepublish-surface-diet.md`):
+
+- **aggregates:** `IAggregateBuilder` removed. The interface's shape was
+  incompatible with the concrete builder implementations shipped in this
+  package, so it could not be implemented as declared; there is no drop-in
+  replacement export, since nothing in this library could have satisfied the old
+  contract. Consumers depending on `IAggregateBuilder` should type against the
+  concrete builder class(es) they actually construct instead.
+
+VF-030 — DI token identity by reference (pre-1.0 BC window; see
+`docs/adr/0038-di-token-identity-by-reference.md` and
+`docs/security/threat-models/TM-VF-030.md`):
+
+- **di, nestjs:** container adapters' internal maps are now keyed by the
+  `ServiceToken` itself (reference identity for class/function and symbol
+  tokens, value identity for strings) instead of a string derived from the
+  token. No public signature changed, and **string-token behavior is unchanged**
+  — but two registrations that previously collided through their string
+  rendering (two classes sharing a `.name` across bounded contexts, or two
+  separate `Symbol('X')` calls both rendering as `"Symbol(X)"`) are now distinct
+  registrations. Code that accidentally relied on such collisions — registering
+  under one class/symbol and resolving with a different same-named one — will
+  now throw `ContainerServiceNotFoundError` instead of silently resolving the
+  wrong service. There is deliberately no `.name` fallback; for tokens shared
+  across bounded contexts or across dual ESM/CJS module graphs, declare them
+  with `Symbol.for('namespaced:key')` (see `packages/di/FRAMEWORK-ADAPTERS.md`).
+- **nestjs:** `NestJSContainerAdapter` now honors `ServiceLifetime.Scoped` — a
+  Scoped service resolves to the same instance within one scope (`createScope()`
+  starts a fresh scoped cache; materialized singletons are shared). Previously
+  Scoped was silently treated as Transient, producing a new instance on every
+  `resolve()`. Consumers that registered services as Scoped but depended on the
+  accidental fresh-instance-per-resolve behavior should register them as
+  Transient.
+- **nestjs:** failed constructor-dependency resolution in
+  `NestJSContainerAdapter` now throws `ContainerServiceNotFoundError` (naming
+  the owning service), and a constructor-dependency cycle throws
+  `CircularDependencyError` with the full resolution chain. Previously an
+  unresolvable dependency fell back to silently constructing it with zero
+  arguments (`new paramType()`), producing an uninitialized instance that failed
+  later and far from the cause.
+- **di:** `BaseContainerAdapter.getTokenKey()` is `@deprecated` and now a
+  display-only helper for error messages and logs — its string output is
+  intentionally lossy and must not be used as a lookup key. The `protected`
+  method remains available to adapter subclasses with an unchanged signature;
+  custom adapters keying their own maps with it should switch to keying by the
+  token itself (migration guide in `packages/di/FRAMEWORK-ADAPTERS.md`).
+
+### Added
+
+- **aggregates (AC6):**
+  `IAggregateConstructorParams.onMissingHandler?: 'warn' | 'throw'` — new
+  optional constructor parameter controlling what happens when
+  `apply()`/`loadFromHistory()` encounters an event with no registered handler.
+  Defaults to `'warn'` (previous behavior, unchanged — a message is logged and
+  the event is recorded but state is not updated). Pass `'throw'` for tests or
+  strict environments where a missing handler should fail fast instead.
+  Non-breaking, additive.
+- **aggregates (AC10):** `AggregateRoot.equals(other)` — identity-based
+  equality, mirroring `Entity.equals()`. Compares by id
+  (`this.getId().equals(other.getId())`); attribute/version differences are
+  ignored. `AggregateRoot` does not extend `Entity`, so this was previously
+  unavailable on aggregates. Non-breaking, additive.
+
+VF-024 — public API surface curation ahead of the first public publish (pre-1.0
+BC window; see `project-orchestration/tasks/VF-024-prepublish-api-surface.md`):
+
+- **di:** `ServiceNotFoundError` renamed to `ContainerServiceNotFoundError` to
+  resolve a silent name collision with `@vytches/ddd-domain-services`'
+  `ServiceNotFoundError` (the two used to be indistinguishable via `instanceof`
+  when both were in scope). Update any `instanceof ServiceNotFoundError` checks
+  against DI container errors to `ContainerServiceNotFoundError`.
+- **value-objects:** `EntityIdFactory` (deprecated, runtime-warned) removed. Use
+  `EntityId.create()` / `EntityId.createWithRandomUUID()` /
+  `EntityId.fromUUID()` / `EntityId.fromInteger()` / `EntityId.fromBigInt()` /
+  `EntityId.fromText()` instead, depending on the identifier shape.
+- **contracts, events:** `internalLogger`, `EVENT_HANDLER_METADATA`,
+  `EVENT_HANDLER_OPTIONS` (contracts) and `CUSTOM_MIDDLEWARE_SYMBOL` (events)
+  removed from the public `.` barrel — they were never meant to be public API.
+  They remain available to sibling `@vytches/ddd-*` packages only, via the
+  `@vytches/ddd-contracts/internal` and `@vytches/ddd-events/internal` subpaths,
+  which carry no semver stability guarantee for external consumers.
+- **enterprise:** `BaseEntityId` (the `@vytches/ddd-contracts` `EntityId`
+  re-exported under an alias to avoid colliding with the
+  `@vytches/ddd-value-objects` `EntityId`) renamed to `ContractsEntityId` for
+  clarity.
+- **policies:** `globalPolicyEventBus` (a process-global, un-partitioned
+  singleton instantiated at import time) removed from the public barrel
+  (SA-M11). Construct your own instance instead: `new PolicyEventBus()`.
+
+VF-031 — prepublish surface diet, second pass (pre-1.0 BC window; see
+`project-orchestration/tasks/VF-031-prepublish-surface-diet.md`):
+
+- **resilience:** `getResilienceConfig(instance, methodName)` — new function
+  that reads back the decorator configuration attached to a
+  `@Resilience`/`@Timeout`/etc-decorated method. `getResilienceMetrics()` is now
+  `@deprecated` in favor of this accurately-named equivalent and simply
+  delegates to it; behavior is unchanged and both remain exported. Non-breaking,
+  additive.
+
+Internal cleanup (technically exported but with no known real consumers; removed
+as part of the same surface diet, not user-facing deprecations):
+
+- **events:** the audit subsystem (`Audible`, `AuditEvent`,
+  `AuditEventProcessor`, `CaptureState`, and the package's
+  `generic-event-persistence-handler.ts`) removed.
+- **events:** `subscribeToContext` and `EventHandlerOptions.priority` removed.
+- **acl:** `ACLDiscoveryPlugin` and its associated decorators removed. Use the
+  `@ACLAdapterFor` decorator from `@vytches/ddd-nestjs` instead.
+- **domain-services:** `DIDomainServiceMetadataRegistry` removed.
+- **aggregates:** duplicate capability interfaces and speculative
+  never-implemented capability interfaces (e.g. `ICachingCapability`) removed.
+
+### Changed
+
+VP-006b — `NestJSContainerAdapter` resolve / cold-start / scope performance
+(MINOR-worthy; see
+`project-orchestration/tasks/VP-006b-nestjs-adapter-performance.md`):
+
+- **nestjs:** **BEHAVIOR CHANGE**: `NestJSContainerAdapter.resolve()` now checks
+  the internal VytchesDDD registry before falling back to `ModuleRef` (aligns
+  with ADR-0014, VytchesDDD as primary container). Only affects tokens
+  registered in BOTH places with DIVERGENT instances — the internal instance now
+  wins where NestJS's previously did. If you dual-register, either drop the
+  internal registration or call `moduleRef.get()` directly for the NestJS
+  instance. In non-production environments the adapter logs a one-time warning
+  when it detects such a divergent dual registration.
+
+### Performance Improvements
+
+- **nestjs:** `NestJSContainerAdapter` caches `design:paramtypes` lazily, once
+  per constructor, on first instantiation (module-level
+  `WeakMap<Constructor, readonly Constructor[]>`; empty results cached too).
+  After a constructor's first materialization no further `Reflect.getMetadata`
+  calls occur for it. No behavior change — `registerFactory`/`registerInstance`
+  paths are unaffected.
+- **nestjs:** constructor-dependency resolution is now a SINGLE pass
+  (`resolveDependency` override replacing the base `isRegistered()` +
+  `resolve()` double lookup — previously up to two `ModuleRef.get` calls per
+  NestJS-side constructor parameter plus one swallowed throw per internal
+  parameter). Error contract unchanged: `ContainerServiceNotFoundError` naming
+  the owning service, `CircularDependencyError` with the full resolution chain,
+  `InvalidRegistrationError` — same types, messages, and timing.
+- **nestjs:** `createScope()` is now O(1) copy-on-write instead of eagerly
+  copying the full descriptor + singleton maps per scope. Measurement (AC4,
+  GC-hinted heap deltas, 1000 live scopes): the eager copy retained 56.62 KB per
+  live scope at N=1000 registered services — above the 50 KB materiality
+  threshold — hence copy-on-write; snapshot semantics (VF-030 D5) are preserved
+  exactly, and `dispose()` of a scope never clears the parent's maps (covered by
+  new tests).
+- **nestjs:** dev-only benchmarks added (`benchmarks/`,
+  `vitest.bench.config.ts`, `pnpm --filter @vytches/ddd-nestjs bench`) with
+  count-based SLOs (`benchmarks/baseline.json`: zero `ModuleRef.get` calls /
+  throws on the production hot path for internally-owned tokens, one
+  `Reflect.getMetadata` per constructor) plus heap/timing metrics. Not part of
+  the published package (`files` whitelist).
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 ### Bug Fixes

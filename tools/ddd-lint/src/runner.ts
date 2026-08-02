@@ -6,6 +6,7 @@ import type { LintIssue, LintResult, LintRule } from './types.js';
 import { noMutableStateInAggregate } from './rules/no-mutable-state-in-aggregate.js';
 import { noThrowInDomain } from './rules/no-throw-in-domain.js';
 import { factoryMustReturnResult } from './rules/factory-must-return-result.js';
+import { deepImportInsteadOfBarrel } from './rules/deep-import-instead-of-barrel.js';
 
 /**
  * Built-in rule set. Add new rules here; the runner dispatches all of them
@@ -15,6 +16,7 @@ export const BUILT_IN_RULES: readonly LintRule[] = [
   noMutableStateInAggregate,
   noThrowInDomain,
   factoryMustReturnResult,
+  deepImportInsteadOfBarrel,
 ] as const;
 
 export interface LintOptions {

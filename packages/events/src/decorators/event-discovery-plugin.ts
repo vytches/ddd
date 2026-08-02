@@ -5,6 +5,10 @@
  * that are decorated with the @EventHandler decorator and have DI integration enabled.
  */
 
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
+
 // import type { IHandlerDiscoveryPlugin, HandlerInfo } from '@vytches/ddd-di';
 // Temporarily mocked for testing
 interface IHandlerDiscoveryPlugin {
@@ -100,7 +104,6 @@ export class EventDiscoveryPlugin implements IHandlerDiscoveryPlugin {
               lifetime: diMetadata.options.lifetime || 'transient',
               context: diMetadata.options.context,
               tags: diMetadata.options.tags,
-              priority: diMetadata.options.priority,
               active: diMetadata.options.active !== false,
               autoRegister: diMetadata.options.autoRegister ?? true,
               registeredAt: diMetadata.registeredAt,

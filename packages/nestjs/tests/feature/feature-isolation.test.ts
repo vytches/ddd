@@ -49,6 +49,11 @@ vi.mock('@vytches/ddd-cqrs', () => {
     IQueryBus: MockIQueryBus,
     CommandBus: makeCommandBus,
     QueryBus: makeQueryBus,
+    // Symbol tokens must be included so VytchesExplorerService constructor
+    // decorators (@Inject(COMMAND_BUS_TOKEN) / @Inject(QUERY_BUS_TOKEN)) can
+    // be resolved when the module is loaded under this mock.
+    COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+    QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
   };
 });
 
@@ -58,16 +63,6 @@ vi.mock('@vytches/ddd-events', () => ({
     subscribe: vi.fn(),
     registerHandler: vi.fn(),
   })),
-}));
-
-vi.mock('@vytches/ddd-logging', () => ({
-  Logger: {
-    forContext: () => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-    }),
-  },
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -262,6 +257,69 @@ describe('VytchesExplorerService (Phase 3 additions)', () => {
 
     expect(commandBusMock.registerFactory).not.toHaveBeenCalled();
   });
+
+  it('onModuleDestroy() resets buses that support reset() (VS-003)', () => {
+    const commandReset = vi.fn();
+    const queryReset = vi.fn();
+    const resettableService = new VytchesExplorerService(
+      { get: vi.fn() } as never,
+      { getProviders: vi.fn().mockReturnValue([]) } as never,
+      { register: vi.fn(), registerFactory: vi.fn(), reset: commandReset } as never,
+      { register: vi.fn(), registerFactory: vi.fn(), reset: queryReset } as never,
+      undefined,
+      undefined
+    );
+
+    resettableService.onModuleDestroy();
+
+    expect(commandReset).toHaveBeenCalledTimes(1);
+    expect(queryReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('onModuleDestroy() is a no-op for buses without reset() (VS-003)', () => {
+    // service from beforeEach has buses without a reset() method
+    expect(() => service.onModuleDestroy()).not.toThrow();
+  });
+
+  describe('strict handler registration (VS-003)', () => {
+    const makeServiceWithFailingBus = () => {
+      const failingBus = {
+        register: vi.fn(),
+        registerFactory: vi.fn(() => {
+          throw new Error('registration boom');
+        }),
+      };
+      const svc = new VytchesExplorerService(
+        { get: vi.fn() } as never,
+        { getProviders: vi.fn().mockReturnValue([]) } as never,
+        failingBus as never,
+        { register: vi.fn(), registerFactory: vi.fn() } as never,
+        undefined,
+        undefined
+      );
+      (svc as unknown as { discoveredHandlers: unknown[] }).discoveredHandlers = [
+        makeHandlerInfo(CommandA),
+      ];
+      return svc;
+    };
+
+    it('swallows registration failures by default (backward compatible)', async () => {
+      const svc = makeServiceWithFailingBus();
+      await expect(svc.onApplicationBootstrap()).resolves.toBeUndefined();
+    });
+
+    it('rethrows registration failures when enabled via setStrictHandlerRegistration()', async () => {
+      const svc = makeServiceWithFailingBus();
+      svc.setStrictHandlerRegistration();
+      await expect(svc.onApplicationBootstrap()).rejects.toThrow('registration boom');
+    });
+
+    it('rethrows when enabled via configureContext({ strictHandlerRegistration: true })', async () => {
+      const svc = makeServiceWithFailingBus();
+      svc.configureContext({ name: 'Test', strictHandlerRegistration: true });
+      await expect(svc.onApplicationBootstrap()).rejects.toThrow('registration boom');
+    });
+  });
 });
 
 // ─── FeatureHandlerRegistrar unit tests ─────────────────────────────────────
@@ -308,14 +366,23 @@ describe('FeatureHandlerRegistrar', () => {
     const mockExplorerService = { claimHandlerTypes: vi.fn() };
     const mockModuleRef = { get: vi.fn().mockReturnValue(handlerInstance) };
 
-    // Build a fake modules container with one module that owns the anchor token
-    const fakeModule = {
+    // Variant A topology:
+    // featureModule  — owns the anchorToken (as forFeature() registers it)
+    // consumerModule — owns the handlers; imports featureModule
+    const featureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[anchorToken, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const consumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [anchorToken, { metatype: null }],
         [OrderHandler, { metatype: OrderHandler }],
       ]),
+      imports: new Set<unknown>([featureModule]),
     };
-    const mockContainer = new Map([['orders-hash', fakeModule]]);
+    const mockContainer = new Map([
+      ['feature-hash', featureModule],
+      ['consumer-hash', consumerModule],
+    ]);
 
     const registrar = new FeatureHandlerRegistrar(
       mockCommandBus as unknown as never,
@@ -346,13 +413,21 @@ describe('FeatureHandlerRegistrar', () => {
     const registerFactory = vi.fn();
     const mockCommandBus = { registerFactory };
 
-    const fakeModule = {
+    // Variant A topology: featureModule (anchor) + consumerModule (handler, imports featureModule)
+    const featureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[anchorToken, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const consumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [anchorToken, { metatype: null }],
         [GlobalHandler, { metatype: GlobalHandler }],
       ]),
+      imports: new Set<unknown>([featureModule]),
     };
-    const mockContainer = new Map([['hash', fakeModule]]);
+    const mockContainer = new Map([
+      ['feature-hash', featureModule],
+      ['consumer-hash', consumerModule],
+    ]);
 
     const registrar = new FeatureHandlerRegistrar(
       mockCommandBus as unknown as never,
@@ -382,13 +457,21 @@ describe('FeatureHandlerRegistrar', () => {
     const queryRegisterFactory = vi.fn();
     const commandRegisterFactory = vi.fn();
 
-    const fakeModule = {
+    // Variant A topology: featureModule (anchor) + consumerModule (handler, imports featureModule)
+    const featureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[anchorToken, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const consumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [anchorToken, { metatype: null }],
         [GetOrderHandler, { metatype: GetOrderHandler }],
       ]),
+      imports: new Set<unknown>([featureModule]),
     };
-    const mockContainer = new Map([['hash', fakeModule]]);
+    const mockContainer = new Map([
+      ['feature-hash', featureModule],
+      ['consumer-hash', consumerModule],
+    ]);
 
     const registrar = new FeatureHandlerRegistrar(
       { registerFactory: commandRegisterFactory } as unknown as never,
@@ -423,13 +506,21 @@ describe('FeatureHandlerRegistrar', () => {
     const eventRegisterHandler = vi.fn();
     const handlerInstance = new OrderPlacedHandler();
 
-    const fakeModule = {
+    // Variant A topology: featureModule (anchor) + consumerModule (handler, imports featureModule)
+    const featureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[anchorToken, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const consumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [anchorToken, { metatype: null }],
         [OrderPlacedHandler, { metatype: OrderPlacedHandler }],
       ]),
+      imports: new Set<unknown>([featureModule]),
     };
-    const mockContainer = new Map([['hash', fakeModule]]);
+    const mockContainer = new Map([
+      ['feature-hash', featureModule],
+      ['consumer-hash', consumerModule],
+    ]);
 
     const registrar = new FeatureHandlerRegistrar(
       { registerFactory: vi.fn() } as unknown as never,
@@ -467,22 +558,37 @@ describe('FeatureHandlerRegistrar', () => {
     const orderAnchor = Symbol('test:feature:orders-own');
     const catalogAnchor = Symbol('test:feature:catalog-other');
 
-    const ordersModule = {
+    // Variant A topology for BOTH contexts:
+    // - Each context has its own featureModule (owns the anchor) and
+    //   consumerModule (owns handlers, imports its own featureModule).
+    // - The orders registrar must only scan ordersConsumerModule,
+    //   not catalogConsumerModule.
+    const ordersFeatureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[orderAnchor, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const ordersConsumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [orderAnchor, { metatype: null }],
         [OrderHandler, { metatype: OrderHandler }],
       ]),
+      imports: new Set<unknown>([ordersFeatureModule]),
     };
-    const catalogModule = {
+    const catalogFeatureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[catalogAnchor, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const catalogConsumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [catalogAnchor, { metatype: null }],
         [CatalogHandler, { metatype: CatalogHandler }],
       ]),
+      imports: new Set<unknown>([catalogFeatureModule]),
     };
 
     const mockContainer = new Map([
-      ['orders-hash', ordersModule],
-      ['catalog-hash', catalogModule],
+      ['orders-feature-hash', ordersFeatureModule],
+      ['orders-consumer-hash', ordersConsumerModule],
+      ['catalog-feature-hash', catalogFeatureModule],
+      ['catalog-consumer-hash', catalogConsumerModule],
     ]);
 
     const registerFactory = vi.fn();
@@ -491,7 +597,7 @@ describe('FeatureHandlerRegistrar', () => {
       { registerFactory } as unknown as never,
       { registerFactory: vi.fn() } as unknown as never,
       { registerHandler: vi.fn() } as unknown as never,
-      orderAnchor, // registrar belongs to orders module
+      orderAnchor, // registrar belongs to orders feature module
       { get: vi.fn().mockReturnValue(new OrderHandler()) } as unknown as never,
       mockContainer as unknown as never,
       undefined
@@ -549,22 +655,34 @@ describe('cross-context isolation — ADR-0034 production bug scenario', () => {
     );
     Reflect.defineMetadata('di:handler-scope', 'context', CatalogUpdateHandler);
 
-    // --- Modules in container ---
-    const ordersModule = {
+    // --- Modules in container (Variant A topology) ---
+    // Each context: featureModule (owns anchor) + consumerModule (owns handlers,
+    // imports featureModule). This mirrors the actual NestJS wiring.
+    const ordersFeatureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[ordersAnchor, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const ordersConsumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [ordersAnchor, { metatype: null }],
         [OrdersUpdateHandler, { metatype: OrdersUpdateHandler }],
       ]),
+      imports: new Set<unknown>([ordersFeatureModule]),
     };
-    const catalogModule = {
+    const catalogFeatureModule = {
+      providers: new Map<unknown, { metatype: unknown }>([[catalogAnchor, { metatype: null }]]),
+      imports: new Set<unknown>(),
+    };
+    const catalogConsumerModule = {
       providers: new Map<unknown, { metatype: unknown }>([
-        [catalogAnchor, { metatype: null }],
         [CatalogUpdateHandler, { metatype: CatalogUpdateHandler }],
       ]),
+      imports: new Set<unknown>([catalogFeatureModule]),
     };
     const mockContainer = new Map([
-      ['orders-hash', ordersModule],
-      ['catalog-hash', catalogModule],
+      ['orders-feature-hash', ordersFeatureModule],
+      ['orders-consumer-hash', ordersConsumerModule],
+      ['catalog-feature-hash', catalogFeatureModule],
+      ['catalog-consumer-hash', catalogConsumerModule],
     ]);
 
     const mockExplorer = { claimHandlerTypes: claimSpy };

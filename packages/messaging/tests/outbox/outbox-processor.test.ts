@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 import {
   MessagePriority,
@@ -801,6 +802,7 @@ describe('OutboxProcessor — observability hooks (Part 5a)', () => {
 describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
   let repo: InMemoryOutboxRepository;
   let processor: OutboxProcessor;
+  let warnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     repo = new InMemoryOutboxRepository();
@@ -811,6 +813,11 @@ describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
       messageTimeout: 5000,
     });
     processor.start();
+    warnSpy = vi.spyOn(internalLogger, 'warn');
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
   });
 
   it('type-specific handler wins over default handler when type matches', async () => {
@@ -893,7 +900,16 @@ describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
     expect(statsAfter.hasDefaultHandler).toBe(true);
   });
 
-  it('second registerDefaultHandler call silently replaces the first (idempotent)', async () => {
+  it('first registerDefaultHandler call does not emit a replacement warning', () => {
+    processor.registerDefaultHandler({ handle: vi.fn().mockResolvedValue(undefined) });
+
+    const replacingCalls = warnSpy.mock.calls.filter(
+      (c: unknown[]) => typeof c[0] === 'string' && c[0].includes('replacing existing')
+    );
+    expect(replacingCalls).toHaveLength(0);
+  });
+
+  it('second registerDefaultHandler call emits replacement warning and replaces handler', async () => {
     const firstCalls: string[] = [];
     const secondCalls: string[] = [];
 
@@ -909,12 +925,18 @@ describe('OutboxProcessor — registerDefaultHandler (VP-008)', () => {
       },
     });
 
+    // warn emitted exactly once, on the second (replacement) call
+    const replacingCalls = warnSpy.mock.calls.filter(
+      (c: unknown[]) => typeof c[0] === 'string' && c[0].includes('replacing existing')
+    );
+    expect(replacingCalls).toHaveLength(1);
+
+    // handler is still actually replaced — second handler is used
     await repo.saveMessage(buildMessage({ id: 'r-1', messageType: 'replace.type' }));
     await processor.processBatch();
 
     expect(firstCalls).toHaveLength(0);
     expect(secondCalls).toEqual(['r-1']);
-    // No error thrown — idempotent replacement
   });
 });
 
@@ -1122,5 +1144,376 @@ describe('OutboxProcessor — adaptive re-poll + startup jitter (Part 4)', () =>
     expect(spy).toHaveBeenCalledTimes(1);
 
     processor.stop();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// VS-015 Issue 1 — Error object forwarded as 2nd arg of internalLogger.error
+// ---------------------------------------------------------------------------
+describe('OutboxProcessor — internalLogger.error stack-trace preservation (VS-015)', () => {
+  let errorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    errorSpy = vi.spyOn(internalLogger, 'error');
+  });
+
+  afterEach(() => {
+    errorSpy.mockRestore();
+  });
+
+  it('passes the Error as arg[1] when getUnprocessedMessages throws', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const boom = new Error('repo-down');
+    vi.spyOn(repo, 'getUnprocessedMessages').mockRejectedValue(boom);
+
+    const processor = new OutboxProcessor(repo, { batchSize: 5 });
+    processor.start();
+    await processor.processBatch();
+    processor.stop();
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      'OutboxProcessor: error retrieving messages',
+      boom
+      // no context arg for this call — undefined or absent
+    );
+    // Critically: the Error object itself is arg[1], not stringified into the message
+    expect(errorSpy.mock.calls[0]?.[1]).toBe(boom);
+    expect(errorSpy.mock.calls[0]?.[0]).not.toContain(boom.message);
+  });
+
+  it('passes the Error as arg[1] when message permanently fails (maxRetries reached)', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const handler: IOutboxMessageHandler = {
+      handle: vi.fn().mockRejectedValue(new Error('handler-boom')),
+    };
+    await repo.saveMessage(buildMessage({ id: 'perm-fail' }));
+
+    const processor = new OutboxProcessor(repo, { batchSize: 5, maxRetries: 1 });
+    processor.registerHandler('test.event', handler);
+    processor.start();
+
+    // First attempt: increments to attempt=1 which >= maxRetries=1 → permanent failure
+    await processor.processBatch();
+    processor.stop();
+
+    const permanentFailCall = errorSpy.mock.calls.find(
+      (c: unknown[]) => c[0] === 'OutboxProcessor: message permanently failed'
+    );
+    expect(permanentFailCall).toBeDefined();
+    // arg[1] is the Error object, not a stringified message
+    expect(permanentFailCall?.[1]).toBeInstanceOf(Error);
+    expect(permanentFailCall?.[1]).toHaveProperty('message', 'handler-boom');
+    // metadata is in arg[2], not interpolated into message
+    expect(permanentFailCall?.[2]).toMatchObject({ messageId: 'perm-fail', attempts: 1 });
+  });
+
+  it('passes updateError as arg[1] when repository status update throws', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const handlerError = new Error('handler-threw');
+    const updateError = new Error('db-write-failed');
+    const handler: IOutboxMessageHandler = {
+      handle: vi.fn().mockRejectedValue(handlerError),
+    };
+    await repo.saveMessage(buildMessage({ id: 'update-fail' }));
+    vi.spyOn(repo, 'incrementAttempt').mockRejectedValue(updateError);
+
+    const processor = new OutboxProcessor(repo, { batchSize: 5, maxRetries: 3 });
+    processor.registerHandler('test.event', handler);
+    processor.start();
+    await processor.processBatch();
+    processor.stop();
+
+    const updateFailCall = errorSpy.mock.calls.find(
+      (c: unknown[]) => c[0] === 'OutboxProcessor: error updating message status'
+    );
+    expect(updateFailCall).toBeDefined();
+    expect(updateFailCall?.[1]).toBe(updateError);
+    expect(updateFailCall?.[0]).not.toContain('db-write-failed');
+  });
+
+  it('passes Error as arg[1] and hookName in arg[2] when a hook throws (safelyInvokeHook)', async () => {
+    // safelyInvokeHook wraps every hook invocation; a throwing hook must NOT
+    // break the processing loop. The error is forwarded to internalLogger.error
+    // as (message, error, { hookName }) — stack trace preserved, nothing interpolated.
+    //
+    // onBatchComplete only fires when at least one message is dispatched, so we
+    // save a message and register a handler to ensure the batch is non-empty.
+    const hookError = new Error('hook-exploded');
+    const repo = new InMemoryOutboxRepository();
+    await repo.saveMessage(buildMessage({ id: 'hook-trigger' }));
+
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      hooks: {
+        onBatchComplete: () => {
+          throw hookError;
+        },
+      },
+    });
+    processor.registerHandler('test.event', { handle: vi.fn().mockResolvedValue(undefined) });
+    processor.start();
+    await processor.processBatch();
+    processor.stop();
+
+    const hookCall = errorSpy.mock.calls.find(
+      (c: unknown[]) => typeof c[0] === 'string' && c[0].includes('threw and was ignored')
+    );
+    expect(hookCall).toBeDefined();
+    // arg[1]: the actual Error object — stack trace preserved
+    expect(hookCall?.[1]).toBe(hookError);
+    // arg[2]: safe metadata only — hook name, no error message interpolated
+    expect(hookCall?.[2]).toMatchObject({ hookName: 'onBatchComplete' });
+    // arg[0]: message must NOT contain the error's message string
+    expect(hookCall?.[0]).not.toContain(hookError.message);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// VB-004 D-1 / AC#3 — the per-message handler timeout `setTimeout` inside
+// buildPipeline's Promise.race must be cleared via try/finally regardless of
+// which race branch wins, otherwise every processed message leaks a pending
+// Node timer for the full `messageTimeout` duration.
+// ---------------------------------------------------------------------------
+describe('OutboxProcessor — per-message timeout timer clearance (D-1 / AC#3)', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('clears the timeout timer after the handler resolves (success path)', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      messageTimeout: 5000,
+      processingInterval: 1_000_000, // never auto-fires within this test
+    });
+    processor.registerHandler('test.event', { handle: vi.fn().mockResolvedValue(undefined) });
+    processor.start();
+    await repo.saveMessage(buildMessage({ id: 'm-1' }));
+
+    // Baseline captured AFTER start() so the processor's own scheduled
+    // processing/crash-recovery timers are already accounted for.
+    const baseline = vi.getTimerCount();
+    await processor.processBatch();
+
+    // The message's own timeout timer (armed inside the Promise.race) must
+    // have been cleared once handler.handle() resolved — timer count returns
+    // exactly to baseline, proving no leak.
+    expect(vi.getTimerCount()).toBe(baseline);
+
+    processor.stop();
+  });
+
+  it('clears the timeout timer after the handler throws (early-exit path)', async () => {
+    const repo = new InMemoryOutboxRepository();
+    const processor = new OutboxProcessor(repo, {
+      batchSize: 5,
+      messageTimeout: 5000,
+      processingInterval: 1_000_000,
+    });
+    processor.registerHandler('test.event', {
+      handle: async () => {
+        throw new Error('handler boom');
+      },
+    });
+    processor.start();
+    await repo.saveMessage(buildMessage({ id: 'm-1' }));
+
+    const baseline = vi.getTimerCount();
+    await processor.processBatch();
+
+    // Even on the throw path, the finally block must still clear the timer —
+    // no leak whether the handler wins the race by resolving OR by rejecting.
+    expect(vi.getTimerCount()).toBe(baseline);
+
+    processor.stop();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// VB-004 D-2/D-3 — AC#1 / AC#2: atomic-claim contract for claimBatch().
+//
+// These fixtures EXTEND the existing InMemoryOutboxRepository defined at the
+// top of this file (not a from-scratch fake), overriding only `claimBatch`:
+//
+//  - AtomicClaimRepo:    read PENDING messages and mark them PROCESSING with
+//                        ZERO `await`/microtask yield between the two steps —
+//                        a synchronous critical section that correctly models
+//                        mutual exclusion under Node's single-threaded event
+//                        loop (nothing else can interleave mid-claim).
+//  - NonAtomicClaimRepo: RED control — identical logic, but with one
+//                        `await Promise.resolve()` gap inserted between the
+//                        read and the mark, so a second concurrent claim CAN
+//                        interleave and read the same still-PENDING messages.
+//
+// This proves that OutboxProcessor.processBatch() honors an atomic-claim
+// contract WHEN the repository provides one (AtomicClaimRepo → GREEN, zero
+// duplicate dispatches) and that duplicate dispatch genuinely occurs without
+// one (NonAtomicClaimRepo → RED, proving the GREEN result is a real property
+// of the atomic design, not a tautology of the test setup).
+//
+// This does NOT prove that IOutboxRepository's shipped default `claimBatch`
+// (or any specific real repository) is atomic — the shipped default in
+// outbox-repository.interface.ts is intentionally non-atomic/single-worker-
+// only, as documented in its own JSDoc.
+// ---------------------------------------------------------------------------
+describe('OutboxProcessor — atomic claimBatch concurrency (D-2/D-3, AC#1/AC#2)', () => {
+  const DEFAULT_PRIORITY_ORDER = [
+    MessagePriority.CRITICAL,
+    MessagePriority.HIGH,
+    MessagePriority.NORMAL,
+    MessagePriority.LOW,
+  ];
+
+  const readPending = (
+    repo: InMemoryOutboxRepository,
+    priorityOrder: MessagePriority[],
+    messageTypes: string[] | undefined
+  ): IOutboxMessage[] => {
+    const pending = Array.from(repo.store.values()).filter(
+      m =>
+        m.status === MessageStatus.PENDING &&
+        (messageTypes === undefined || messageTypes.includes(m.messageType))
+    );
+    return pending.sort((a, b) => {
+      const aPrio = priorityOrder.indexOf(a.priority ?? MessagePriority.NORMAL);
+      const bPrio = priorityOrder.indexOf(b.priority ?? MessagePriority.NORMAL);
+      if (aPrio !== bPrio) return aPrio - bPrio;
+      return a.createdAt.getTime() - b.createdAt.getTime();
+    });
+  };
+
+  class AtomicClaimRepo extends InMemoryOutboxRepository {
+    override async claimBatch(
+      limit = 10,
+      priorityOrder: MessagePriority[] = DEFAULT_PRIORITY_ORDER,
+      messageTypes?: string[]
+    ): Promise<IOutboxMessage[]> {
+      // Synchronous critical section: NO await between read and mark.
+      const claimed = readPending(this, priorityOrder, messageTypes).slice(0, limit);
+      for (const m of claimed) {
+        this.store.set(m.id, { ...m, status: MessageStatus.PROCESSING });
+      }
+      return Promise.resolve(claimed.map(m => ({ ...m, status: MessageStatus.PROCESSING })));
+    }
+  }
+
+  class NonAtomicClaimRepo extends InMemoryOutboxRepository {
+    override async claimBatch(
+      limit = 10,
+      priorityOrder: MessagePriority[] = DEFAULT_PRIORITY_ORDER,
+      messageTypes?: string[]
+    ): Promise<IOutboxMessage[]> {
+      const claimed = readPending(this, priorityOrder, messageTypes).slice(0, limit);
+
+      // RED control: yield the microtask queue HERE — the gap that lets a
+      // second concurrent claimBatch() call read the same PENDING messages
+      // before this call marks them PROCESSING.
+      await Promise.resolve();
+
+      for (const m of claimed) {
+        this.store.set(m.id, { ...m, status: MessageStatus.PROCESSING });
+      }
+      return claimed.map(m => ({ ...m, status: MessageStatus.PROCESSING }));
+    }
+  }
+
+  const seedMessages = async (repo: InMemoryOutboxRepository, count: number): Promise<void> => {
+    for (let i = 0; i < count; i++) {
+      await repo.saveMessage(buildMessage({ id: `c-${i}` }));
+    }
+  };
+
+  const countDuplicates = (dispatched: string[]): number => {
+    const counts = new Map<string, number>();
+    for (const id of dispatched) counts.set(id, (counts.get(id) ?? 0) + 1);
+    return Array.from(counts.values()).filter(c => c > 1).length;
+  };
+
+  it('RED CONTROL: non-atomic claimBatch double-dispatches under two concurrent processBatch calls', async () => {
+    const repo = new NonAtomicClaimRepo();
+    await seedMessages(repo, 5);
+
+    const dispatched: string[] = [];
+    const processor = new OutboxProcessor(repo, { batchSize: 5, useClaimBatch: true });
+    processor.registerHandler('test.event', {
+      handle: async msg => {
+        dispatched.push(msg.id);
+      },
+    });
+    processor.start();
+
+    // Two concurrent processBatch() calls racing on the SAME processor
+    // instance. processBatch() has zero internal concurrency guard, so this
+    // models two separate processor instances polling the same repository
+    // just as validly, while being simpler to set up.
+    await Promise.all([processor.processBatch(), processor.processBatch()]);
+    processor.stop();
+
+    // Without an atomic claim, both calls read the same 5 PENDING messages
+    // before either marks them PROCESSING → every message is dispatched twice.
+    expect(countDuplicates(dispatched)).toBeGreaterThan(0);
+    expect(dispatched.length).toBeGreaterThan(5);
+  });
+
+  it('GREEN: atomic claimBatch — zero duplicate dispatches under two concurrent processBatch calls', async () => {
+    const repo = new AtomicClaimRepo();
+    await seedMessages(repo, 5);
+
+    const dispatched: string[] = [];
+    const processor = new OutboxProcessor(repo, { batchSize: 5, useClaimBatch: true });
+    processor.registerHandler('test.event', {
+      handle: async msg => {
+        dispatched.push(msg.id);
+      },
+    });
+    processor.start();
+
+    await Promise.all([processor.processBatch(), processor.processBatch()]);
+    processor.stop();
+
+    // Atomic claim: each message is claimed by exactly one of the two
+    // concurrent calls — zero duplicate dispatches.
+    expect(countDuplicates(dispatched)).toBe(0);
+    expect(dispatched.length).toBe(5);
+  });
+
+  it('falls back to getUnprocessedMessages with a one-time warning when useClaimBatch is set but the repo has no claimBatch', async () => {
+    // IOutboxRepository provides a concrete default claimBatch, so every
+    // subclass inherits *some* claimBatch. To exercise the "repository has
+    // no claimBatch at all" fallback branch (e.g. a hand-rolled repository
+    // predating this feature), simulate that by erasing the inherited method
+    // on the instance — `typeof this.repository.claimBatch` then reads
+    // 'undefined', matching what a pre-VB-004 repository would look like.
+    const repo = new InMemoryOutboxRepository();
+    (repo as unknown as { claimBatch?: unknown }).claimBatch = undefined;
+
+    const warnSpy = vi.spyOn(internalLogger, 'warn');
+    const dispatched: string[] = [];
+    const processor = new OutboxProcessor(repo, { batchSize: 5, useClaimBatch: true });
+    processor.registerHandler('test.event', {
+      handle: async msg => {
+        dispatched.push(msg.id);
+      },
+    });
+    processor.start();
+
+    await repo.saveMessage(buildMessage({ id: 'fallback-1' }));
+    await processor.processBatch();
+    await processor.processBatch(); // second call must NOT warn again
+
+    processor.stop();
+
+    expect(dispatched).toEqual(['fallback-1']);
+    const fallbackWarnings = warnSpy.mock.calls.filter(
+      (c: unknown[]) =>
+        typeof c[0] === 'string' && c[0].includes('falling back to getUnprocessedMessages')
+    );
+    expect(fallbackWarnings).toHaveLength(1);
+
+    warnSpy.mockRestore();
   });
 });

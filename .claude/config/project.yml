@@ -4,7 +4,7 @@
 
 project:
   name: "@vytches/ddd"
-  description: "Enterprise-grade TypeScript DDD library — 21 packages in Nx monorepo"
+  description: "Enterprise-grade TypeScript DDD library — 19 packages in Nx monorepo"
   stack_profile: typescript-library
   language: typescript
   stack: "TypeScript 5.8, Nx, Vitest, pnpm"
@@ -17,6 +17,7 @@ skills:
   - architecture
   - typescript-library
   - meta
+  - integrations
 
 rules:
   - "This is a LIBRARY - no application-level DDD patterns (no controllers, no modules)."

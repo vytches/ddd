@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
-import { Logger } from '@vytches/ddd-logging';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { DefaultResilienceContext, ResiliencePolicyBuilder } from '@vytches/ddd-resilience';
-import 'reflect-metadata';
 import { IQueryBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';
-import type { IQuery, IQueryHandler } from '../interfaces';
+import type { IDisposableBus, IQuery, IQueryHandler, IResettableBus } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
@@ -16,6 +18,15 @@ import type { ICqrsValidatable } from '../validation';
  */
 export interface EnhancedQueryBusOptions {
   enableMetrics?: boolean;
+  /**
+   * Install the default {@link LoggingMiddleware}, which logs every query's
+   * start/completion/failure via `console` (or a custom logger passed to it
+   * directly). **Off by default** (VS-018) — decoupled from `enableMetrics`,
+   * which previously implied logging as a side effect and bypassed
+   * `configureDiagnostics` entirely. Opt in explicitly for execution tracing
+   * during development/debugging.
+   */
+  enableExecutionLogging?: boolean;
   enableCache?: boolean;
   cacheOptions?: CacheOptions;
   defaultTimeout?: number;
@@ -164,12 +175,18 @@ class LRUCache<K, V> {
 /**
  * Performance-optimized Enhanced Query Bus with resilience patterns
  */
-export class EnhancedQueryBus extends IQueryBus {
+export class EnhancedQueryBus extends IQueryBus implements IResettableBus, IDisposableBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
-  private handlers = new Map<
+  // Registered handlers split by registration kind. Keeping instances and
+  // factories in separate, typed maps removes the brittle `'execute' in x`
+  // runtime probe (which could misclassify a callable handler or a factory
+  // returning a non-handler). A given key lives in exactly one map: register()
+  // and registerFactory() evict the other kind, preserving last-write-wins.
+  private handlerInstances = new Map<Function | string, IQueryHandler<IQuery<unknown>, unknown>>();
+  private handlerFactories = new Map<
     Function | string,
-    IQueryHandler<IQuery<unknown>, unknown> | (() => IQueryHandler<IQuery<unknown>, unknown>)
+    () => IQueryHandler<IQuery<unknown>, unknown>
   >();
 
   // Performance optimization: Handler cache
@@ -198,9 +215,6 @@ export class EnhancedQueryBus extends IQueryBus {
 
   // Resilience strategy
   private resilienceStrategy?: ResilienceStrategy;
-
-  // Logger instance
-  private readonly logger = Logger.forContext('EnhancedQueryBus');
 
   // Current options for dynamic reconfiguration
   private options: EnhancedQueryBusOptions;
@@ -243,16 +257,38 @@ export class EnhancedQueryBus extends IQueryBus {
     // Setup resilience patterns using @vytches/ddd-resilience
     this.setupResilience(options.resilience);
 
-    // Add default logging middleware if metrics enabled
-    if (options.enableMetrics !== false) {
+    // VS-018: execution logging is opt-in (default off), decoupled from
+    // enableMetrics. LoggingMiddleware defaults to raw console when no
+    // custom logger is supplied — that is only reachable when a consumer
+    // explicitly requests it here.
+    if (options.enableExecutionLogging === true) {
       this.use(new LoggingMiddleware());
     }
 
-    // Clean caches periodically
+    // Clean caches periodically — only when caching is active. Spawning this
+    // unconditionally leaks a live interval (and a reference to the bus) for
+    // every instance, even when cache is disabled (the default). That matters
+    // in test processes that create many bus instances.
+    if (this.cacheEnabled) {
+      this.startCacheCleanup();
+    }
+  }
+
+  /**
+   * Start the periodic cache-cleanup interval if not already running.
+   */
+  private startCacheCleanup(): void {
+    if (this.cacheCleanupInterval) {
+      return;
+    }
     this.cacheCleanupInterval = setInterval(() => {
       this.cleanHandlerCache();
       this.cleanResultCache();
     }, 60000); // Every minute
+    // unref() allows the process / vitest-worker to exit even when this timer
+    // is still pending. Guards environments without unref (browser runtimes)
+    // with an optional-call.
+    this.cacheCleanupInterval.unref?.();
   }
 
   /**
@@ -293,7 +329,9 @@ export class EnhancedQueryBus extends IQueryBus {
       this.resilienceStrategy = builder.build();
       this.resilienceEnabled = true;
     } catch (error) {
-      this.logger.warn('Failed to setup resilience patterns', { error: String(error) });
+      internalLogger.warn('EnhancedQueryBus: Failed to setup resilience patterns', {
+        error: String(error),
+      });
       this.resilienceEnabled = false;
     }
   }
@@ -357,6 +395,12 @@ export class EnhancedQueryBus extends IQueryBus {
     if (!enable) {
       this.resultCache.clear();
       this.handlerCache.clear();
+      if (this.cacheCleanupInterval) {
+        clearInterval(this.cacheCleanupInterval);
+        this.cacheCleanupInterval = undefined;
+      }
+    } else {
+      this.startCacheCleanup();
     }
 
     return this;
@@ -378,7 +422,8 @@ export class EnhancedQueryBus extends IQueryBus {
   register<T extends IQuery<R>, R>(queryType: unknown, handler: IQueryHandler<T, R>): void {
     const key = typeof queryType === 'string' ? queryType : (queryType as Function);
     const keyName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-    this.handlers.set(key, handler);
+    this.handlerInstances.set(key, handler as IQueryHandler<IQuery<unknown>, unknown>);
+    this.handlerFactories.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
     this.invalidateCacheForQuery(keyName);
   }
@@ -392,7 +437,8 @@ export class EnhancedQueryBus extends IQueryBus {
   ): void {
     const key = typeof queryType === 'string' ? queryType : (queryType as Function);
     const keyName = typeof queryType === 'string' ? queryType : (queryType as Function).name;
-    this.handlers.set(key, factory);
+    this.handlerFactories.set(key, factory as () => IQueryHandler<IQuery<unknown>, unknown>);
+    this.handlerInstances.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
     this.invalidateCacheForQuery(keyName);
   }
@@ -537,22 +583,56 @@ export class EnhancedQueryBus extends IQueryBus {
       }
     }
 
-    // Function ref first, string fallback for handlers registered by name (BC)
-    const registered = this.handlers.get(queryClass) ?? this.handlers.get(queryClass.name);
-    if (registered) {
-      const handler =
-        typeof registered === 'function' && !('execute' in registered)
-          ? (registered as () => IQueryHandler<T, R>)()
-          : (registered as IQueryHandler<T, R>);
-
+    // Function ref first, string-name fallback for handlers registered by name
+    // (BC). A directly-registered instance is returned as-is; a factory is
+    // invoked lazily. No `'execute' in x` probe — the map a handler lives in is
+    // its kind.
+    const instance =
+      this.handlerInstances.get(queryClass) ?? this.handlerInstances.get(queryClass.name);
+    if (instance) {
       if (this.cacheEnabled) {
-        this.handlerCache.set(queryClass, {
-          handler,
-          resolvedAt: Date.now(),
-        });
+        this.handlerCache.set(queryClass, { handler: instance, resolvedAt: Date.now() });
       }
+      return instance as IQueryHandler<T, R>;
+    }
 
-      return handler;
+    const factory =
+      this.handlerFactories.get(queryClass) ?? this.handlerFactories.get(queryClass.name);
+    if (factory) {
+      try {
+        const handler = factory() as IQueryHandler<T, R>;
+
+        if (this.cacheEnabled) {
+          this.handlerCache.set(queryClass, { handler, resolvedAt: Date.now() });
+        }
+
+        return handler;
+      } catch (factoryError) {
+        // The factory threw — almost always a stale closure over a destroyed DI
+        // scope (e.g. a NestJS moduleRef from a torn-down test module). Left in
+        // place it poisons every future call to this query with an opaque 500.
+        // Evict the dead entry so the next call re-resolves cleanly from the
+        // container, and fail this call with a diagnosable error instead of
+        // leaking the raw factory exception.
+        this.handlerFactories.delete(queryClass);
+        this.handlerFactories.delete(queryClass.name);
+        this.handlerCache.delete(queryClass);
+        internalLogger.warn(
+          'EnhancedQueryBus: Evicted stale query handler factory; next call re-resolves',
+          {
+            queryName: queryClass.name,
+            error: factoryError instanceof Error ? factoryError.message : String(factoryError),
+          }
+        );
+        // Include stale-bus hint so the consumer can diagnose the root cause.
+        // The factory threw — most likely the bus was not recreated after
+        // module teardown (use useFactory, not useValue, to tie bus lifetime
+        // to module lifecycle — see VP-010).
+        throw new HandlerNotFoundError(
+          `${queryClass.name} (hint: factory threw — bus may be stale; recreate it via useFactory on each module init)`,
+          'query'
+        );
+      }
     }
 
     // Resolve from DI container
@@ -814,6 +894,19 @@ export class EnhancedQueryBus extends IQueryBus {
     this.resultCache.clear();
     this.handlerCache.clear();
     return this;
+  }
+
+  /**
+   * Evict all registered handlers and caches, returning the bus to a clean
+   * state. Use on DI module teardown (e.g. between test modules sharing one
+   * bus instance) to drop handler factories bound to a destroyed scope.
+   * Does not stop the cache-cleanup timer — use {@link dispose} for that.
+   */
+  reset(): void {
+    this.handlerInstances.clear();
+    this.handlerFactories.clear();
+    this.handlerCache.clear();
+    this.resultCache.clear();
   }
 
   /**

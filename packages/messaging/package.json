@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-messaging",
-  "version": "0.30.0",
+  "version": "0.31.0-alpha.0",
   "description": "Outbox pattern and reliable message delivery",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -17,7 +17,8 @@
   "files": [
     "LLMGUIDE.md",
     "README.md",
-    "dist"
+    "dist",
+    "LICENSE"
   ],
   "keywords": [
     "ddd",
@@ -46,7 +47,7 @@
     "typescript": "^5.0.0",
     "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.1.0"
   },
   "nx": {
     "tags": [
@@ -60,6 +61,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vytches/ddd-events": "workspace:*"
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-utils": "workspace:*"
   }
 }

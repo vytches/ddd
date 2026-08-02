@@ -7,17 +7,13 @@ export { EventHandler, EventDiscoveryPlugin, eventDiscoveryPlugin } from './deco
 export type { EventHandlerOptions, DIHandlerMetadata } from './decorators';
 
 export { BaseEventBus } from './base-event-bus';
+export type { PublishManyOptions } from './base-event-bus';
 
-/**
- * @internal Framework-only middleware marker symbol.
- *
- * Re-exported so custom bus implementations can detect middleware applied via
- * `Object.defineProperty(middleware, CUSTOM_MIDDLEWARE_SYMBOL, ...)`. NOT part
- * of the public consumer API — REL-005 removed it from the curated
- * `@vytches/ddd` meta-package barrel. Consumers should not import this
- * directly; it may be removed or reshaped without semver protection.
- */
-export { CUSTOM_MIDDLEWARE_SYMBOL } from './base-event-bus';
+export { AggregatedEventHandlerError } from './aggregated-event-handler-error';
+
+// CUSTOM_MIDDLEWARE_SYMBOL — moved to the `@vytches/ddd-events/internal`
+// subpath (VF-024, AC4). Framework-only middleware marker symbol; not part
+// of the public consumer API.
 
 export { UnifiedEventBus } from './unified-event-bus';
 export type { UnifiedEventHandler } from './unified-event-bus';

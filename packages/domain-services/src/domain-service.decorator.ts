@@ -1,7 +1,9 @@
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.defineMetadata/getMetadata typings — no runtime side effect
+// (reflect-metadata is a peer dependency here, see README).
+import type {} from 'reflect-metadata';
 import { ServiceLifetime } from '@vytches/ddd-di';
-import 'reflect-metadata';
 import type { DIServiceMetadata, EnhancedDomainServiceOptions } from './di-types';
-import { DIDomainServiceMetadataRegistry } from './di-types';
 
 /**
  * Metadata key for storing domain service information.
@@ -135,8 +137,9 @@ export function DomainService(
       // Store DI metadata on the class
       Reflect.defineMetadata(DI_DOMAIN_SERVICE_METADATA_KEY, diMetadata, target);
 
-      // Register with DI metadata registry for auto-discovery
-      DIDomainServiceMetadataRegistry.registerService(diMetadata);
+      // Note: registration with a metadata registry for auto-discovery has
+      // moved to @vytches/ddd-di (DIDomainServiceMetadataRegistry was removed
+      // from this package as write-only/unexported dead code).
 
       // Mark as pending DI registration
       Reflect.defineMetadata('di:registration-pending', true, target);

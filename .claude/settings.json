@@ -3,6 +3,52 @@
   "worktree": {
     "symlinkDirectories": ["node_modules"]
   },
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "Edit(src/**)",
+      "Edit(packages/**)",
+      "Edit(test/**)",
+      "Edit(tests/**)",
+      "Edit(.claude/**)",
+      "Write(src/**)",
+      "Write(packages/**)",
+      "Write(test/**)",
+      "Write(tests/**)",
+      "Write(.claude/**)",
+      "Write(docs/**)",
+      "MultiEdit(src/**)",
+      "MultiEdit(packages/**)",
+      "MultiEdit(test/**)",
+      "MultiEdit(tests/**)",
+      "Bash(pnpm *)",
+      "Bash(git *)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(mkdir *)",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(.env)",
+      "Read(.env.*)",
+      "Bash(git push --force *)",
+      "Bash(rm -rf *)",
+      "Bash(pnpm publish *)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"$HOME/.claude/hooks/statusline-pm.js\""
+  },
   "autoMode": {
     "environment": [
       "Shared TypeScript npm library (Nx monorepo with multiple packages).",
@@ -14,6 +60,18 @@
       "Read(*)",
       "Glob(*)",
       "Grep(*)",
+      "Edit(src/**)",
+      "Edit(packages/**)",
+      "Edit(test/**)",
+      "Edit(tests/**)",
+      "Write(src/**)",
+      "Write(packages/**)",
+      "Write(test/**)",
+      "Write(tests/**)",
+      "MultiEdit(src/**)",
+      "MultiEdit(packages/**)",
+      "MultiEdit(test/**)",
+      "MultiEdit(tests/**)",
       "Bash(pnpm test *)",
       "Bash(pnpm run lint *)",
       "Bash(pnpm tsc --noEmit *)",
@@ -28,6 +86,19 @@
     ]
   },
   "hooks": {
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/subagent-stop-cost-log.js\"",
+            "async": true
+          }
+        ],
+        "description": "Log per-agent token usage + branch to ~/.claude/logs/agent-usage.jsonl. Disable: AGENT_USAGE_LOG=off"
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit",

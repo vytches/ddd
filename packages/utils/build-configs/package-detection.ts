@@ -105,6 +105,14 @@ export function createBuildContext(packagePath: string): BuildContext {
  */
 export function getWorkspaceAliases(packagePath: string): Record<string, string> {
   return {
+    // VF-024 (AC4): subpath aliases MUST be listed before their parent
+    // package alias below — Vite's alias matcher checks entries in
+    // insertion order and matches on `importee === find ||
+    // importee.startsWith(find + '/')`, so the unqualified
+    // '@vytches/ddd-contracts' entry would otherwise shadow
+    // '@vytches/ddd-contracts/internal' and resolve it to the wrong file.
+    '@vytches/ddd-contracts/internal': resolve(packagePath, '../contracts/src/internal.ts'),
+    '@vytches/ddd-events/internal': resolve(packagePath, '../events/src/internal.ts'),
     '@vytches/ddd-utils': resolve(packagePath, '../utils/src/index.ts'),
     '@vytches/ddd-contracts': resolve(packagePath, '../contracts/src/index.ts'),
     '@vytches/ddd-domain-primitives': resolve(packagePath, '../domain-primitives/src/index.ts'),
@@ -112,7 +120,7 @@ export function getWorkspaceAliases(packagePath: string): Record<string, string>
     '@vytches/ddd-repositories': resolve(packagePath, '../repositories/src/index.ts'),
     '@vytches/ddd-aggregates': resolve(packagePath, '../aggregates/src/index.ts'),
     // NOTE: '@vytches/ddd-core' removed to prevent circular dependency
-    '@vytches/ddd-logging': resolve(packagePath, '../logging/src/index.ts'),
+    // NOTE: '@vytches/ddd-logging' removed (VS-010): application-logging layer deleted
     '@vytches/ddd-events': resolve(packagePath, '../events/src/index.ts'),
     '@vytches/ddd-cqrs': resolve(packagePath, '../cqrs/src/index.ts'),
     '@vytches/ddd-di': resolve(packagePath, '../di/src/index.ts'),

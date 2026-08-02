@@ -1,8 +1,15 @@
 // Core interfaces
-export type { ICommand, ICommandHandler, IQuery, IQueryHandler } from './interfaces';
+export type {
+  ICommand,
+  ICommandHandler,
+  IDisposableBus,
+  IQuery,
+  IQueryHandler,
+  IResettableBus,
+} from './interfaces';
 
-// Abstract classes (service tokens)
-export { ICommandBus, IQueryBus } from './abstracts';
+// Abstract classes (service tokens) + stable Symbol.for DI tokens (dual-package safe)
+export { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from './abstracts';
 
 // Concrete implementations
 export { CommandBus, QueryBus } from './implementations';
@@ -15,7 +22,7 @@ export { CommandHandler, QueryHandler } from './decorators';
 
 // Middleware
 export { CQRSExecutionContext, LoggingMiddleware } from './middleware';
-export type { ExecutionContext, ICQRSMiddleware } from './middleware';
+export type { ExecutionContext, ICQRSMiddleware, IMiddlewareLogger } from './middleware';
 
 // Registry removed - now using pure metadata approach with DI container auto-discovery
 

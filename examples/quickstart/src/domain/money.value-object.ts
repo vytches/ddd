@@ -7,11 +7,11 @@ interface MoneyProps {
 
 export class Money extends BaseValueObject<MoneyProps> {
   static create(amount: number, currency: string): Money {
-    const vo = new Money({ amount, currency });
-    if (!vo.validate({ amount, currency })) {
-      throw new Error(`Invalid money: amount=${amount}, currency=${currency}`);
-    }
-    return vo;
+    // VF-023 (D-1): BaseValueObject's constructor now calls validate() and
+    // throws automatically, so no separate post-construction check is
+    // needed here. The custom "Invalid money: ..." message is supplied via
+    // the getInvalidValueMessage() hook below.
+    return new Money({ amount, currency });
   }
 
   static zero(currency: string): Money {
@@ -26,6 +26,15 @@ export class Money extends BaseValueObject<MoneyProps> {
       typeof props.currency === 'string' &&
       props.currency.length === 3
     );
+  }
+
+  // VF-023 (D-1 regression fix): the base constructor throws synchronously
+  // BEFORE this class's constructor body would run, so the previous
+  // pattern of constructing then manually checking validate() and throwing
+  // a custom-message Error is unreachable. Override this hook instead to
+  // preserve the custom message.
+  protected override getInvalidValueMessage(value: MoneyProps): string {
+    return `Invalid money: amount=${value.amount}, currency=${value.currency}`;
   }
 
   get amount(): number {
