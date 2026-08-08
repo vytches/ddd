@@ -65,6 +65,28 @@ by a Symbol-token alias. As of this release the library also warns at bootstrap
 when handlers are discovered but no bus resolved, so an upgrade surfaces the
 problem in the logs rather than in production traffic.
 
+#### Also in 0.31.0-alpha.0, and the other break that bites on upgrade
+
+`BaseValueObject`'s constructor calls `this.validate(value)` and throws
+synchronously (VF-023 AC1), and the value is now **deep**-frozen rather than
+shallow-frozen. `AggregateRoot.getDomainEvents()` returns deep-frozen events for
+the same reason.
+
+This one was written down, but under an `[Unreleased]` heading that was never
+re-labelled when the release was cut — so it sat below the release it shipped
+in. It now lives under
+[Hand-written notes for 0.31.0-alpha.0](#hand-written-notes-for-0310-alpha0-vf-023-and-siblings),
+which carries the full migration text.
+
+The short version of the trap: `validate()` now runs during `super(value)`,
+before the subclass constructor body. A `validate()` override that reads other
+instance fields sees `undefined` for them, and a subclass's own `throw` placed
+after `super(value)` is no longer reachable. Override
+`protected getInvalidValueMessage(value: T): string` to customise the message.
+
+_Self-audit._ `grep -rln "extends BaseValueObject" src/` and check each
+`validate()` override reads only its `value` parameter.
+
 ### Added
 
 - **contracts:** `enrichEvent(event, { payload?, metadata? })` — copy an event
@@ -306,12 +328,12 @@ Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
   error semantics now runs all handlers and throws AggregatedEventHandlerError
   instead of rethrowing the first failure mid-loop.
 
-# Change Log
+## Hand-written notes for 0.31.0-alpha.0 (VF-023 and siblings)
 
-All notable changes to this project will be documented in this file. See
-[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
-## [Unreleased]
+These shipped in **0.31.0-alpha.0**. They were written under an `[Unreleased]`
+heading and never re-labelled when the release was cut, which filed the most
+consequential breaks of this version below the release that contained them. Kept
+here, under the release they belong to.
 
 ### BREAKING CHANGES
 

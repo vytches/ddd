@@ -3,6 +3,67 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## Migration notes for 0.31.0-alpha.0 — `BaseValueObject` (VF-023)
+
+The generated entry below says "see CHANGELOG.md for full migration notes". The
+part that actually costs upgrade time is here.
+
+**`BaseValueObject`'s constructor now calls `this.validate(value)` and throws.**
+Previously it did not, and every subclass was expected to repeat the check after
+`super(value)`.
+
+```ts
+constructor(value: T) {
+  this.value = /* deep-frozen when object */;
+  if (!this.validate(this.value)) {
+    throw new Error(this.getInvalidValueMessage(this.value));
+  }
+}
+```
+
+Two consequences, both silent until they bite:
+
+1. **`validate()` runs during `super(value)`, before your constructor body.** An
+   override that reads any instance field other than its `value` parameter sees
+   `undefined` for it — the "undefined-during-`super()`" trap. Fields assigned
+   in your constructor do not exist yet.
+
+   ```ts
+   // broken now: this.allowedCurrencies is undefined during super()
+   class Money extends BaseValueObject<number> {
+     private allowedCurrencies = ['PLN'];
+     protected validate(v: number): boolean {
+       return v > 0 && this.allowedCurrencies.length > 0;
+     }
+   }
+
+   // fix: validate from the value parameter only, or make the dependency static
+   protected validate(v: number): boolean {
+     return v > 0 && Money.ALLOWED.length > 0;
+   }
+   ```
+
+2. **A subclass's own `throw` after `super(value)` is unreachable** — the base
+   class throws first. To customise the message, override the hook instead:
+
+   ```ts
+   protected getInvalidValueMessage(value: T): string {
+     return `Money must be positive, got ${value}`;
+   }
+   ```
+
+**Values are deep-frozen, not shallow-frozen.** Nested objects and arrays inside
+a value object can no longer be mutated in place; in strict mode that throws
+rather than failing quietly.
+
+**`equals()` uses `LibUtils.deepEqual`, not `JSON.stringify` comparison**, so
+`undefined`, `Date`, `Map`, `Set` and `NaN` in nested structures now compare by
+value semantics instead of being dropped or coerced.
+
+_Self-audit._ `grep -rln "extends BaseValueObject" src/`, then for each hit
+check that `validate()` reads only its parameter, and that no `throw` sits after
+`super(value)` expecting to be reached.
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes
