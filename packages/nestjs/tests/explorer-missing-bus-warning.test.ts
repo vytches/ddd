@@ -62,6 +62,31 @@ describe('VytchesExplorerService — handler discovered without a bus', () => {
     await module.close();
   });
 
+  it('summarises the failure once at bootstrap when nothing could be registered', async () => {
+    const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+
+    const module = await Test.createTestingModule({
+      imports: [VytchesDDDModule.forRoot()],
+      providers: [DoSomethingHandler],
+    }).compile();
+
+    await module.init();
+
+    const summary = warnSpy.mock.calls.find(([message]) =>
+      String(message).includes('none were registered')
+    );
+
+    expect(summary).toBeDefined();
+    expect(summary?.[1]).toMatchObject({
+      registered: 0,
+      hasCommandBus: false,
+      hasQueryBus: false,
+    });
+    expect((summary?.[1] as { discovered: number }).discovered).toBeGreaterThan(0);
+
+    await module.close();
+  });
+
   it('stays quiet when the bus is present', async () => {
     const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
 
