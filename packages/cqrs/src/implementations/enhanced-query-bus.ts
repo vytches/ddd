@@ -174,6 +174,17 @@ class LRUCache<K, V> {
 
 /**
  * Performance-optimized Enhanced Query Bus with resilience patterns
+ *
+ * @remarks
+ * In a NestJS application, provide this through `VytchesDDDModule.forRoot()`
+ * (or `forContext()` / `forContexts()` / `forFeature()`) rather than
+ * instantiating it in a module of your own. Handler auto-discovery lives in
+ * `VytchesExplorerService`, which those factories provide and which resolves
+ * the bus via `QUERY_BUS_TOKEN`. A hand-built module that skips them leaves no
+ * explorer, or an explorer with no bus: nothing is registered and every
+ * `execute()` throws `No handler registered for ...`.
+ *
+ * Direct instantiation is the right call outside NestJS, and for tests.
  */
 export class EnhancedQueryBus extends IQueryBus implements IResettableBus, IDisposableBus {
   // Core properties

@@ -7,6 +7,18 @@ registration with CQRS buses via `VytchesDDDModule`. Decorated handlers are
 auto-discovered — no manual bus registration needed. ACL registrations still
 belong in `onModuleInit()`.
 
+**Auto-discovery only happens inside `VytchesDDDModule`.**
+`VytchesExplorerService` is provided by `forRoot()` / `forContext()` /
+`forContexts()` / `forFeature()` / `forTesting()`, and injects the buses via
+`COMMAND_BUS_TOKEN` / `QUERY_BUS_TOKEN` (Symbol tokens, stable across a
+dual-package ESM+CJS load). Those factories bridge your `ICommandBus` /
+`IQueryBus` providers onto the Symbol tokens. An application that builds its own
+module around `new EnhancedCommandBus(...)` and never imports one of them ends
+up with no explorer, or an explorer with no bus — discovery succeeds, nothing
+registers, and every dispatch throws `No handler registered for ...`. See
+"Manual wiring" in README.md for the aliases to add if you cannot use the
+factories yet.
+
 ## Quick Start
 
 ```typescript

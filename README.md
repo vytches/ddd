@@ -51,7 +51,10 @@ For tighter bundle control, install only what you use:
 npm install @vytches/ddd-aggregates @vytches/ddd-events @vytches/ddd-policies
 ```
 
-NestJS users: see `@vytches/ddd-nestjs` for module + DI auto-discovery.
+NestJS users: see `@vytches/ddd-nestjs` for module + DI auto-discovery. Wire the
+CQRS buses through `VytchesDDDModule` — handler auto-discovery lives inside that
+module, so an application that instantiates the buses itself and never imports
+it gets no handler registration at all.
 
 ## 60-second example
 
