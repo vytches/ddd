@@ -4,6 +4,7 @@ exports[`@vytches/ddd-nestjs public API surface > exports the documented set of 
 [
   "ACLAdapterFor",
   "ACL_REGISTRY",
+  "COMMAND_BUS_TOKEN",
   "ContextAwareEventDispatcher",
   "GLOBAL_COMMAND_BUS",
   "GLOBAL_QUERY_BUS",
@@ -11,6 +12,7 @@ exports[`@vytches/ddd-nestjs public API surface > exports the documented set of 
   "NestJSContainerAdapter",
   "OutboxProcessorModule",
   "OutboxProcessorService",
+  "QUERY_BUS_TOKEN",
   "VytchesDDDFeatureModule",
   "VytchesDDDModule",
   "VytchesExplorerService",
