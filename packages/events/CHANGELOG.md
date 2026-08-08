@@ -3,6 +3,42 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### Changed
+
+- `DomainEvent.withMetadata()` is unchanged, but its contract is now stated
+  explicitly. Two properties of it were easy to walk into:
+
+  1. **It forks identity.** The copy is built by calling the constructor, so it
+     receives a **new** `eventId` and `occurredOn`. Correct when the copy is
+     meant to be a distinct event; wrong when infrastructure is attaching
+     late-resolved metadata (a crypto-shredding key id, a correlation id) and
+     the event must stay the same event.
+  2. **It assumes the base three-argument constructor.** It calls
+     `new EventClass(payload, metadata, eventName)`, so an event declared as
+     `constructor(orderId: string, total: number)` does not survive the round
+     trip.
+
+  _Migration._ For identity-preserving enrichment use `enrichEvent()` from
+  `@vytches/ddd-contracts`, or `AggregateRoot.transformDomainEvents()` when the
+  events still live on an aggregate. Both copy the prototype instead of calling
+  the constructor.
+
+  ```ts
+  // forks identity — new eventId, and breaks custom constructor signatures
+  const forked = event.withMetadata({ userSpecificKeyId: key.id });
+
+  // preserves identity and prototype, never calls the constructor
+  const stamped = enrichEvent(event, {
+    metadata: { userSpecificKeyId: key.id },
+  });
+  ```
+
+  The behaviour was deliberately left alone: making `withMetadata()` preserve
+  identity would change runtime behaviour with no compile error to catch it, and
+  forking is legitimate for callers who want it.
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes

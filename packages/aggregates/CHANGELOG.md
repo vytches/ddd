@@ -3,6 +3,56 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### Added
+
+- `AggregateRoot.transformDomainEvents(transform)` — rewrite the payload and/or
+  metadata of the uncommitted domain events.
+
+  ```ts
+  // inside a repository's save(), before persisting:
+  aggregate.transformDomainEvents(event => ({
+    payload: encryptPII(event.payload, key),
+    metadata: { userSpecificKeyId: key.id },
+  }));
+  ```
+
+  This is an infrastructure-boundary API, in the same family as `commit()`: call
+  it from a repository immediately before persisting, never from the domain or
+  application layer. An aggregate records events through `apply()`; it does not
+  rewrite its own history.
+
+  Only `payload` and `metadata` can be replaced. `eventName`, event identity,
+  and the number and order of events are fixed — changing those would desync
+  handlers on replay or break the version invariant. Return nothing from the
+  transform to leave an event untouched. Identity, prototype and `instanceof`
+  survive, and the event's constructor is never called.
+
+  **If you currently reach into `_domainEvents`**, this replaces that. There was
+  no supported alternative before: `getDomainEvents()` deep-freezes what it
+  returns and the internal list is private, so encrypting PII or attaching a key
+  id at persistence time meant a type escape hatch.
+
+  ```ts
+  // before — private state, and the deep freeze fights back
+  (aggregate as any)._domainEvents[i] = Object.assign(
+    Object.create(Object.getPrototypeOf(event)),
+    event,
+    { payload: encrypted }
+  );
+
+  // after
+  aggregate.transformDomainEvents(event => ({
+    payload: encrypt(event.payload),
+  }));
+  ```
+
+  Apply it to the aggregate, not to a copy taken inside `save()`. The event
+  dispatcher re-reads the aggregate's events after persistence, so a local copy
+  would still publish the untransformed originals to the in-process event bus —
+  for the PII case, plaintext on the bus while the store holds ciphertext.
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes

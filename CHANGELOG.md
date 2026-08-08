@@ -3,6 +3,160 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### BREAKING CHANGES
+
+#### Already shipped in 0.31.0-alpha.0 — documented here for the first time
+
+**`VytchesExplorerService` resolves the CQRS buses through Symbol tokens, not
+the class tokens** (VP-009 Bug #3, commit `02adf265`, released in 0.31.0-alpha.0
+with no changelog entry).
+
+The explorer injects `@Optional() @Inject(COMMAND_BUS_TOKEN)` /
+`@Inject(QUERY_BUS_TOKEN)` — `Symbol.for('vytches:cqrs:command-bus')` and
+`Symbol.for('vytches:cqrs:query-bus')` — instead of the `ICommandBus` /
+`IQueryBus` class references. Symbols survive a dual-package load, where the
+same module reached once as ESM and once as CJS yields two different classes but
+one symbol. That is what the change was for.
+
+Because the injection is `@Optional()`, a mismatch does not fail at boot. It
+degrades silently: `discoverHandlers()` still reports success, no handler is
+ever registered, and every `commandBus.execute()` / `queryBus.execute()` throws
+`No handler registered for ...` at runtime. A consumer lost CQRS dispatch
+application-wide to this and spent real time tracing it back.
+
+_You are affected if_ your application provides the buses without going through
+one of the `VytchesDDDModule` factories — for example a hand-rolled `@Global()`
+module doing `{ provide: ICommandBus, useValue: new EnhancedCommandBus(...) }`.
+
+_Migration._ Preferred: wire through `VytchesDDDModule.forRoot()` (or
+`forContext()` / `forContexts()` / `forFeature()`), which bridges the class
+tokens onto the Symbol tokens for you and provides the explorer in the first
+place. If you cannot move yet, alias the tokens:
+
+```ts
+import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+
+providers: [
+  { provide: ICommandBus, useValue: myCommandBus },
+  { provide: IQueryBus, useValue: myQueryBus },
+  { provide: COMMAND_BUS_TOKEN, useExisting: ICommandBus },
+  { provide: QUERY_BUS_TOKEN, useExisting: IQueryBus },
+];
+```
+
+Use `useExisting` only where the class-token provider is guaranteed present —
+NestJS raises a DI error for `useExisting` against an absent token even under
+`@Optional()`. Where it may be missing, mirror what the factories do:
+
+```ts
+{
+  provide: COMMAND_BUS_TOKEN,
+  useFactory: (bus?: ICommandBus) => bus,
+  inject: [{ token: ICommandBus, optional: true }],
+}
+```
+
+_Self-audit._ `grep -rn "provide: ICommandBus\|provide: IQueryBus" src/`, then
+check each hit sits inside a `VytchesDDDModule` factory call or is accompanied
+by a Symbol-token alias. As of this release the library also warns at bootstrap
+when handlers are discovered but no bus resolved, so an upgrade surfaces the
+problem in the logs rather than in production traffic.
+
+### Added
+
+- **contracts:** `enrichEvent(event, { payload?, metadata? })` — copy an event
+  with a replaced payload and/or merged metadata while keeping its identity
+  (`eventId`, `occurredOn`), its prototype and `instanceof`. The event's
+  constructor is never called, so event classes with their own constructor
+  signature are safe, and the returned copy is unfrozen.
+
+  This is the supported way for infrastructure to stamp an event on its way to
+  the store — a crypto-shredding key id resolved at persistence time, a
+  correlation id assigned at dispatch, an encrypted payload. Previously there
+  was none, and `getDomainEvents()` hands out deep-frozen events.
+
+- **aggregates:** `AggregateRoot.transformDomainEvents(transform)` — rewrite the
+  payload and/or metadata of the uncommitted domain events in place. An
+  infrastructure-boundary API in the same family as `commit()`: call it from a
+  repository just before persisting, never from the domain or application layer.
+
+  ```ts
+  // inside a repository's save(), before persisting:
+  aggregate.transformDomainEvents(event => ({
+    payload: encryptPII(event.payload, key),
+    metadata: { userSpecificKeyId: key.id },
+  }));
+  ```
+
+  Only `payload` and `metadata` are replaceable. `eventName`, event identity,
+  and the number and order of events stay fixed — rewriting those would desync
+  handlers on replay or break the version invariant. Return nothing from the
+  transform to leave an event untouched.
+
+  This has to land on the aggregate rather than on a local copy inside `save()`:
+  the event dispatcher re-reads the aggregate's events after persistence, so a
+  local copy would still publish the untransformed originals to the in-process
+  event bus.
+
+- **nestjs:** `COMMAND_BUS_TOKEN` and `QUERY_BUS_TOKEN` are re-exported from
+  `@vytches/ddd-nestjs`, so wiring a NestJS application no longer requires a
+  direct import from `@vytches/ddd-cqrs`.
+
+- **examples:** `examples/nestjs` — a compiled, CI-run NestJS wiring example.
+  The NestJS setup previously existed only as prose in three documents that
+  nothing compiled or executed.
+
+### Fixed
+
+- **nestjs:** the CQRS Symbol→class token bridge is now registered by every
+  module factory. It previously existed only in `forRoot()` and `forTesting()`,
+  so an explorer created by `forContext()` or `forContexts()` silently received
+  no bus and registered nothing. `forFeature()` aliases the tokens onto its own
+  per-context buses, so `@Inject(COMMAND_BUS_TOKEN)` and `@Inject(ICommandBus)`
+  no longer disagree inside a feature module. `GLOBAL_COMMAND_BUS` /
+  `GLOBAL_QUERY_BUS` remain deliberately absent from `forFeature()` — reaching
+  past the feature scope to the root bus is their purpose.
+
+  ADR-0034 claimed `forRoot()` and `forFeature()` both carried this bridge;
+  neither half was accurate, and it has been corrected.
+
+- **nestjs:** a discovered handler with no bus to register on is now reported at
+  `warn` level, naming the handler, its type and its message type. It was
+  previously skipped without any signal.
+
+- **nestjs:** when handlers are discovered and none could be registered,
+  bootstrap emits one summary warning with discovered/registered counts, which
+  buses resolved, and the tokens to check. This is the fastest route from
+  symptom (`No handler registered for ...` on every request) to cause.
+
+- **contracts:** `createDomainEvent()` now sets `eventId` and `occurredOn` at
+  the top level as well as inside `metadata`, and `IDomainEvent` declares both
+  as optional. Events created through the string form of `AggregateRoot.apply()`
+  previously carried their id only in `metadata.eventId`, while class-based
+  events exposed it directly — an asymmetry that forced consumers to write their
+  own event reconstruction helpers. `instanceof DomainEvent` still does not hold
+  for string-form events; those are plain objects by construction.
+
+### Changed
+
+- **events:** `DomainEvent.withMetadata()` is unchanged but now documents what
+  it does to event identity: it rebuilds the event through the base
+  three-argument constructor, so the copy gets a **new** `eventId` and
+  `occurredOn`, and subclasses with their own constructor signature do not
+  survive the round trip. For identity-preserving enrichment use `enrichEvent()`
+  or `transformDomainEvents()`. The behaviour was deliberately not "fixed" —
+  changing it would be a silent runtime change with no compile error to catch
+  it.
+
+- **docs:** the root README, the `@vytches/ddd-nestjs` README and its LLM guide
+  now state up front that handler auto-discovery exists only inside
+  `VytchesDDDModule`, and `EnhancedCommandBus`, `EnhancedQueryBus` and
+  `VytchesDDD.getGlobalContainer()` carry `@remarks` that surface in the IDE.
+  These remain public API — outside NestJS they are the only route.
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes

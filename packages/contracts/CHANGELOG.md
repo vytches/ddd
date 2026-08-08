@@ -3,6 +3,53 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### Added
+
+- `enrichEvent(event, { payload?, metadata? })` — copy an event with a replaced
+  payload and/or merged metadata while keeping its identity (`eventId`,
+  `occurredOn`), its prototype and `instanceof`. The event's constructor is
+  never called, so event classes with their own constructor signature are safe,
+  and the returned copy is unfrozen.
+
+  ```ts
+  import { enrichEvent } from '@vytches/ddd-contracts';
+
+  const stamped = enrichEvent(event, {
+    payload: encryptPII(event.payload, key),
+    metadata: { userSpecificKeyId: key.id },
+  });
+  ```
+
+  This is the supported route for infrastructure that has to stamp an event on
+  its way to the store — a crypto-shredding key id resolved at persistence time,
+  a correlation id assigned at dispatch. Prefer
+  `AggregateRoot.transformDomainEvents()` when the events still live on an
+  aggregate, since the event dispatcher re-reads them from there.
+
+  Use this instead of `DomainEvent.withMetadata()` whenever event identity has
+  to survive: `withMetadata()` rebuilds through the constructor and mints a new
+  `eventId` / `occurredOn`.
+
+### Fixed
+
+- `createDomainEvent()` now sets `eventId` and `occurredOn` at the top level as
+  well as inside `metadata`, and `IDomainEvent` declares both as optional
+  (`eventId?: string`, `occurredOn?: Date`).
+
+  Events created through the string form of `AggregateRoot.apply()` previously
+  carried their id only in `metadata.eventId`, while class-based events exposed
+  `eventId` / `occurredOn` directly. `IDomainEvent` required neither, so
+  TypeScript never flagged the asymmetry and consumers wrote their own event
+  reconstruction helpers to paper over it.
+
+  _Nothing was removed_, so existing reads of `metadata.eventId` keep working.
+  If you maintain such a helper, you can likely drop the id-normalisation half
+  of it. `instanceof DomainEvent` still does not hold for string-form events —
+  those are plain objects by construction, and no additive change can alter
+  that.
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes

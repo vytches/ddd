@@ -3,6 +3,82 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### BREAKING CHANGES
+
+#### Already shipped in 0.31.0-alpha.0 — documented here for the first time
+
+**`VytchesExplorerService` resolves the CQRS buses through Symbol tokens**
+(VP-009 Bug #3, commit `02adf265`).
+
+It injects `@Optional() @Inject(COMMAND_BUS_TOKEN)` / `@Inject(QUERY_BUS_TOKEN)`
+instead of the `ICommandBus` / `IQueryBus` class references, so that DI keeps
+working when the same module is loaded once as ESM and once as CJS and the two
+class identities diverge.
+
+The injection is `@Optional()`, so a token mismatch does not fail at boot. It
+degrades silently: discovery reports success, nothing is registered, and every
+`execute()` throws `No handler registered for ...` at runtime.
+
+_You are affected if_ the buses are provided outside a `VytchesDDDModule`
+factory — typically a hand-rolled `@Global()` module doing
+`{ provide: ICommandBus, useValue: new EnhancedCommandBus(...) }`.
+
+_Migration._ Wire through `VytchesDDDModule.forRoot()` (or `forContext()` /
+`forContexts()` / `forFeature()`), which registers the bridge and provides the
+explorer. If that is not possible yet:
+
+```ts
+import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+
+providers: [
+  { provide: ICommandBus, useValue: myCommandBus },
+  { provide: IQueryBus, useValue: myQueryBus },
+  { provide: COMMAND_BUS_TOKEN, useExisting: ICommandBus },
+  { provide: QUERY_BUS_TOKEN, useExisting: IQueryBus },
+];
+```
+
+`useExisting` only where the class-token provider is guaranteed present; NestJS
+raises a DI error against an absent token even under `@Optional()`. Otherwise
+use `useFactory` with `inject: [{ token: ICommandBus, optional: true }]`.
+
+_Self-audit._ `grep -rn "provide: ICommandBus\|provide: IQueryBus" src/` and
+confirm each hit is inside a factory call or carries a Symbol alias.
+
+### Added
+
+- `COMMAND_BUS_TOKEN` and `QUERY_BUS_TOKEN` are re-exported from this package,
+  so the aliases above no longer need an import from `@vytches/ddd-cqrs`.
+
+### Fixed
+
+- The Symbol→class token bridge is registered by every module factory.
+  Previously only `forRoot()` and `forTesting()` had it, so an explorer created
+  by `forContext()` or `forContexts()` received no bus and registered nothing.
+  `forFeature()` now aliases the tokens onto its own per-context buses so
+  `@Inject(COMMAND_BUS_TOKEN)` and `@Inject(ICommandBus)` agree inside a feature
+  module; `GLOBAL_COMMAND_BUS` / `GLOBAL_QUERY_BUS` stay out of `forFeature()`
+  on purpose, since reaching the root bus is their job. ADR-0034 claimed
+  `forRoot()` and `forFeature()` both carried the bridge — corrected.
+
+- A discovered handler with no bus to register on is reported at `warn` level,
+  naming the handler, its type and its message type. It used to be skipped
+  silently.
+
+- When handlers are discovered and none could be registered, bootstrap emits one
+  summary warning with discovered/registered counts, which buses resolved, and
+  the tokens to check.
+
+### Changed
+
+- README and LLMGUIDE state up front that handler auto-discovery exists only
+  inside `VytchesDDDModule`, and carry a "Manual wiring" section for
+  applications that provide the buses themselves. The stale claim that
+  `forRoot()` is the only factory method is gone — there are five.
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes
