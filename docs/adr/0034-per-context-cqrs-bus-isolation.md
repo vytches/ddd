@@ -471,7 +471,8 @@ times or in how many formats the module is loaded.
 `VytchesExplorerService` now injects via `@Inject(COMMAND_BUS_TOKEN)` and
 `@Inject(QUERY_BUS_TOKEN)` instead of the class references.
 
-`VytchesDDDModule.forRoot()` and `forFeature()` each register bridge providers:
+Every factory that can create an explorer registers bridge providers for these
+tokens: `forRoot()`, `forContext()`, `forContexts()` and `forTesting()`.
 
 ```typescript
 {
@@ -480,6 +481,18 @@ times or in how many formats the module is loaded.
   inject: [{ token: ICommandBus, optional: true }],
 }
 ```
+
+`forFeature()` aliases the tokens too, but with `useExisting` onto its own
+per-context `ICommandBus` / `IQueryBus`, so that `@Inject(COMMAND_BUS_TOKEN)`
+and `@Inject(ICommandBus)` never disagree inside a feature module.
+`GLOBAL_COMMAND_BUS` / `GLOBAL_QUERY_BUS` are deliberately left out of
+`forFeature()` — reaching past the feature scope to the root bus is exactly what
+they are for.
+
+> Until the VP-009 follow-up, only `forRoot()` and `forTesting()` carried this
+> bridge. `forContext()`, `forContexts()` and `forFeature()` did not, so an
+> explorer created by those factories silently received no bus and registered no
+> handler.
 
 `useFactory` with `optional: true` is used instead of `useExisting` because
 NestJS throws a compile-time DI error for `useExisting` when the target token is

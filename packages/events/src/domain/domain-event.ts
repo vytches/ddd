@@ -63,10 +63,26 @@ export abstract class DomainEvent<T = unknown> implements IDomainEvent<T> {
   }
 
   /**
-   * Create a copy of this event with additional metadata
+   * Create a copy of this event with additional metadata.
+   *
+   * This forks the event's identity: the copy is built by calling the
+   * constructor, so it receives a **new** `eventId` and `occurredOn`. That is
+   * the intended behaviour when the copy is meant to be a distinct event.
+   *
+   * Two cases it does not cover:
+   * - Preserving identity — attaching metadata that infrastructure resolves
+   *   late (a crypto-shredding key id, a correlation id assigned at dispatch)
+   *   while keeping the event the same event. Use `enrichEvent()` from
+   *   `@vytches/ddd-contracts`, or `AggregateRoot.transformDomainEvents()` when
+   *   the events still live on an aggregate.
+   * - Subclasses with their own constructor signature — this calls
+   *   `new EventClass(payload, metadata, eventName)`, so an event declared as
+   *   `constructor(orderId, total)` will not survive the round trip.
+   *   `enrichEvent()` copies the prototype instead and never calls the
+   *   constructor.
    *
    * @param metadata - Metadata to merge with existing metadata
-   * @returns A new event instance with combined metadata
+   * @returns A new event instance with combined metadata and a fresh identity
    */
   public withMetadata(metadata: Partial<IEventMetadata>): DomainEvent<T> {
     const EventClass = this.constructor as new (

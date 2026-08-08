@@ -12,7 +12,7 @@ import type {
   IDomainEvent,
   IEventMetadata,
 } from '@vytches/ddd-contracts';
-import { CapabilityRegistry, createDomainEvent } from '@vytches/ddd-contracts';
+import { CapabilityRegistry, createDomainEvent, enrichEvent } from '@vytches/ddd-contracts';
 import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { LibUtils } from '@vytches/ddd-utils';
 
@@ -251,6 +251,53 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   commit(): void {
     this._domainEvents = [];
     this._initialVersion = this._version;
+  }
+
+  /**
+   * Rewrite the payload and/or metadata of the uncommitted domain events.
+   *
+   * This is an infrastructure boundary API, in the same family as `commit()`:
+   * call it from a repository immediately before persisting, never from the
+   * domain or application layer. An aggregate records events through `apply()`;
+   * it does not rewrite its own history.
+   *
+   * It exists for data that only the persistence boundary knows — a
+   * crypto-shredding key id resolved at save time, a correlation id assigned at
+   * dispatch, an encrypted payload. Doing this by hand from outside is not
+   * possible: `getDomainEvents()` deep-freezes what it returns, and the
+   * internal list is private. The transformation has to land here rather than
+   * on a local copy inside `save()`, because the event dispatcher reads the
+   * aggregate's events again — a local copy would leave the in-process event
+   * bus publishing the untransformed originals.
+   *
+   * Only `payload` and `metadata` can be replaced. `eventName`, identity, and
+   * the number and order of events are fixed: changing those would desync
+   * handlers on replay or break the version invariant. Return nothing to leave
+   * an event as it is.
+   *
+   * Identity, prototype and `instanceof` survive, and the event's constructor
+   * is never called, so event classes with their own constructor arguments are
+   * safe.
+   *
+   * @example
+   * // inside a repository's save(), before persisting:
+   * order.transformDomainEvents(event => ({
+   *   payload: encrypt(event.payload, key),
+   *   metadata: { userSpecificKeyId: key.id },
+   * }));
+   *
+   * @param transform - Called per event; returns the parts to replace, or nothing to keep it
+   */
+  transformDomainEvents<P = unknown>(
+    transform: (
+      event: Readonly<IDomainEvent<P>>,
+      index: number
+    ) => { payload?: P; metadata?: Partial<IEventMetadata> } | void
+  ): void {
+    this._domainEvents = this._domainEvents.map((event, index) => {
+      const patch = transform(event as IDomainEvent<P>, index);
+      return patch ? enrichEvent(event as IDomainEvent<P>, patch) : event;
+    });
   }
 
   // ==========================================

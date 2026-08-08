@@ -13,6 +13,7 @@ exports[`@vytches/ddd-contracts public API surface > exports the documented set 
   "configureDiagnostics",
   "createCapabilityRegistry",
   "createDomainEvent",
+  "enrichEvent",
   "isEventHandler",
 ]
 `;

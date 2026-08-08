@@ -142,7 +142,25 @@ export class VytchesExplorerService
    */
   async onApplicationBootstrap(): Promise<void> {
     const unclaimed = this.discoveredHandlers.filter(h => !this.claimedTypes.has(h.messageType));
-    await this.registerHandlersWithBuses(unclaimed);
+    const registered = await this.registerHandlersWithBuses(unclaimed);
+
+    // Handlers exist, none of them reached a bus: the application will answer
+    // every command and query with "No handler registered for ...". Say so once
+    // with the whole picture, so the cause is visible at boot rather than
+    // reconstructed from a pile of failing requests.
+    if (unclaimed.length > 0 && registered === 0) {
+      internalLogger.warn(
+        'VytchesExplorer: handlers were discovered but none were registered — every dispatch will fail. Check that a bus is provided under COMMAND_BUS_TOKEN / QUERY_BUS_TOKEN (VytchesDDDModule.forRoot() bridges the ICommandBus / IQueryBus class tokens for you)',
+        {
+          discovered: this.discoveredHandlers.length,
+          claimedByFeatureModules: this.discoveredHandlers.length - unclaimed.length,
+          registered,
+          hasCommandBus: this.commandBus !== undefined,
+          hasQueryBus: this.queryBus !== undefined,
+          hasEventBus: this.eventBus !== undefined,
+        }
+      );
+    }
   }
 
   /**
@@ -398,7 +416,9 @@ export class VytchesExplorerService
     return null;
   }
 
-  private async registerHandlersWithBuses(handlers: HandlerInfo[]): Promise<void> {
+  /** @returns how many handlers reached a bus — 0 with a non-empty input means nothing is wired */
+  private async registerHandlersWithBuses(handlers: HandlerInfo[]): Promise<number> {
+    let registered = 0;
     for (const handler of handlers) {
       try {
         const { handlerType, messageType } = handler;
@@ -408,6 +428,7 @@ export class VytchesExplorerService
         };
 
         if (handler.type === 'command' && this.commandBus) {
+          registered++;
           const bus = this.commandBus as unknown as BusWithRegistration;
           // F-M5: bus-scoped ledger prevents double-registering the same
           // handler (e.g. when forRoot() and forContext() each run their own
@@ -428,6 +449,7 @@ export class VytchesExplorerService
             }
           }
         } else if (handler.type === 'query' && this.queryBus) {
+          registered++;
           const bus = this.queryBus as unknown as BusWithRegistration;
           const claim = BusRegistrationLedger.claimCommandOrQuery(
             bus,
@@ -443,6 +465,7 @@ export class VytchesExplorerService
             }
           }
         } else if (handler.type === 'event' && this.eventBus) {
+          registered++;
           const bus = this.eventBus as unknown as BusWithRegistration;
           const eventTypeName =
             typeof messageType === 'function' ? messageType.name : String(messageType);
@@ -469,6 +492,21 @@ export class VytchesExplorerService
               }
             }
           }
+        } else {
+          // The handler was discovered but the bus it belongs on was never
+          // injected, so it is dropped here without a trace. Every dispatch of
+          // this message type then fails at runtime while discovery keeps
+          // reporting success — the exact combination that makes a DI token
+          // mismatch cost hours to trace. Name the missing bus instead.
+          internalLogger.warn(
+            `VytchesExplorer: ${handler.type} handler discovered but no ${handler.type} bus is injected — it will not be registered and dispatching this message type will fail`,
+            {
+              handlerName: handlerType.name,
+              handlerType: handler.type,
+              messageType:
+                typeof messageType === 'function' ? messageType.name : String(messageType),
+            }
+          );
         }
       } catch (error) {
         // A failed registration leaves the bus without a handler for this
@@ -491,6 +529,7 @@ export class VytchesExplorerService
         }
       }
     }
+    return registered;
   }
 
   // Legacy compatibility: `.context` mirrors `_contextOptions.name`, set via

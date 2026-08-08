@@ -388,6 +388,12 @@ export class VytchesDDD {
 
   /**
    * Get the global container
+   *
+   * @remarks
+   * In a NestJS application prefer `VytchesDDDModule`, which owns the container
+   * wiring and the handler auto-discovery that goes with it. Passing this
+   * container into a hand-built module works, but that module has no
+   * `VytchesExplorerService`, so no handler is ever registered on a bus.
    */
   static getGlobalContainer(): IDependencyContainer {
     return VytchesDDD.serviceLocator.getGlobalContainer();

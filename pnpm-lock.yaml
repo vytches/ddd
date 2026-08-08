@@ -306,6 +306,43 @@ importers:
         specifier: ^4.1.0
         version: 4.1.9(@types/node@20.19.1)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(vite@7.3.6)
 
+  examples/nestjs:
+    dependencies:
+      '@vytches/ddd-contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@vytches/ddd-cqrs':
+        specifier: workspace:*
+        version: link:../../packages/cqrs
+      '@vytches/ddd-events':
+        specifier: workspace:*
+        version: link:../../packages/events
+      '@vytches/ddd-nestjs':
+        specifier: workspace:*
+        version: link:../../packages/nestjs
+    devDependencies:
+      '@nestjs/common':
+        specifier: ^11.1.18
+        version: 11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^11.1.18
+        version: 11.1.19(@nestjs/common@11.1.19)(@nestjs/platform-express@11.1.19)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/testing':
+        specifier: ^11.1.18
+        version: 11.1.19(@nestjs/common@11.1.19)(@nestjs/core@11.1.19)(@nestjs/platform-express@11.1.19)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+      typescript:
+        specifier: ^5.8.0
+        version: 5.8.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.9(@types/node@20.19.1)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(vite@7.3.6)
+
   examples/policies:
     dependencies:
       '@vytches/ddd-contracts':
@@ -8929,7 +8966,7 @@ packages:
       methods: 1.1.2
       on-finished: 2.4.1
       parseurl: 1.3.3
-      path-to-regexp: 3.3.0
+      path-to-regexp: 8.4.2
       proxy-addr: 2.0.7
       qs: 6.15.2
       range-parser: 1.2.1
@@ -13243,10 +13280,6 @@ packages:
     dependencies:
       lru-cache: 11.3.5
       minipass: 7.1.3
-    dev: true
-
-  /path-to-regexp@3.3.0:
-    resolution: {integrity: sha512-qyCH421YQPS2WFDxDjftfc1ZR5WKQzVzqsp4n9M2kQhVOo/ByahFoUNJfl58kOcEGfQ//7weFTDhm+ss8Ecxgw==}
     dev: true
 
   /path-to-regexp@8.4.2:
