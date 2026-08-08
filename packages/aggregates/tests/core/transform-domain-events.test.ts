@@ -31,7 +31,7 @@ class User extends AggregateRoot<string> {
   }
 
   static register(email: string): User {
-    const user = new User({ id: EntityId.create<string>('user-1').value });
+    const user = new User({ id: EntityId.create() });
     user.apply<UserRegisteredPayload>('UserRegistered', { email });
     return user;
   }
@@ -49,7 +49,7 @@ describe('AggregateRoot.transformDomainEvents()', () => {
       payload: { email: '<encrypted>' },
     }));
 
-    const [event] = user.getDomainEvents();
+    const event = user.getDomainEvents()[0]!;
     expect((event.payload as UserRegisteredPayload).email).toBe('<encrypted>');
   });
 
@@ -58,7 +58,7 @@ describe('AggregateRoot.transformDomainEvents()', () => {
 
     user.transformDomainEvents(() => ({ metadata: { userSpecificKeyId: 'key-42' } }));
 
-    const [event] = user.getDomainEvents();
+    const event = user.getDomainEvents()[0]!;
     expect(event.metadata!.userSpecificKeyId).toBe('key-42');
     // The metadata apply() already recorded must survive the merge.
     expect(event.metadata!.timestamp).toBeDefined();
@@ -66,11 +66,11 @@ describe('AggregateRoot.transformDomainEvents()', () => {
 
   it('keeps event identity and name intact', () => {
     const user = User.register('someone@example.test');
-    const before = user.getDomainEvents()[0];
+    const before = user.getDomainEvents()[0]!;
 
     user.transformDomainEvents(() => ({ metadata: { userSpecificKeyId: 'key-42' } }));
 
-    const after = user.getDomainEvents()[0];
+    const after = user.getDomainEvents()[0]!;
     expect(after.eventName).toBe(before.eventName);
     expect(after.metadata!.eventId).toBe(before.metadata!.eventId);
   });
@@ -80,7 +80,7 @@ describe('AggregateRoot.transformDomainEvents()', () => {
 
     user.transformDomainEvents(() => undefined);
 
-    const [event] = user.getDomainEvents();
+    const event = user.getDomainEvents()[0]!;
     expect((event.payload as UserRegisteredPayload).email).toBe('someone@example.test');
   });
 
@@ -96,7 +96,7 @@ describe('AggregateRoot.transformDomainEvents()', () => {
       }))
     ).not.toThrow();
 
-    const [event] = user.getDomainEvents();
+    const event = user.getDomainEvents()[0]!;
     expect((event.payload as UserRegisteredPayload).email).toBe('<encrypted>');
   });
 
@@ -108,9 +108,9 @@ describe('AggregateRoot.transformDomainEvents()', () => {
       index === 1 ? { payload: { email: '<encrypted>' } } : undefined
     );
 
-    const events = user.getDomainEvents();
-    expect((events[0].payload as UserRegisteredPayload).email).toBe('first@example.test');
-    expect((events[1].payload as UserRegisteredPayload).email).toBe('<encrypted>');
+    const [first, second] = user.getDomainEvents();
+    expect((first!.payload as UserRegisteredPayload).email).toBe('first@example.test');
+    expect((second!.payload as UserRegisteredPayload).email).toBe('<encrypted>');
   });
 
   it('does not disturb aggregate state', () => {
