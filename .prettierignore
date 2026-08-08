@@ -13,3 +13,4 @@ templates/
 dist/
 *.cjs
 *.mjs
+pnpm-lock.yaml

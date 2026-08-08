@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **messaging,resilience:** outbox atomic-claim contract + timer/listener leak
+  fixes (VB-004)
+  ([463beb2](https://github.com/vytches/ddd/commit/463beb23e32c8ead6b70e12612261ff473442238))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+- **resilience:** block CSV formula injection in CsvMetricExporter (VS-006)
+  ([46fd54e](https://github.com/vytches/ddd/commit/46fd54e2955a7df671eebe03e42c6f7dadfa40f8))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+- **config:** trim dead and aspirational public API surface (VF-031)
+  ([27e0055](https://github.com/vytches/ddd/commit/27e005513894b0b0a17d966a1051b9746df21461))
+
+### BREAKING CHANGES
+
+- **config:** AggregateRoot's IAggregateBuilder interface removed (was exported
+  but shape-incompatible with the real builder). Several other
+  technically-exported- but-unreachable symbols removed (events/audit,
+  subscribeToContext, ACLDiscoveryPlugin, DIDomainServiceMetadataRegistry,
+  duplicate/speculative aggregate interfaces) - see CHANGELOG.md for full list
+  and migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-resilience
