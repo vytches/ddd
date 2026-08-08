@@ -469,6 +469,21 @@ export class VytchesExplorerService
               }
             }
           }
+        } else {
+          // The handler was discovered but the bus it belongs on was never
+          // injected, so it is dropped here without a trace. Every dispatch of
+          // this message type then fails at runtime while discovery keeps
+          // reporting success — the exact combination that makes a DI token
+          // mismatch cost hours to trace. Name the missing bus instead.
+          internalLogger.warn(
+            `VytchesExplorer: ${handler.type} handler discovered but no ${handler.type} bus is injected — it will not be registered and dispatching this message type will fail`,
+            {
+              handlerName: handlerType.name,
+              handlerType: handler.type,
+              messageType:
+                typeof messageType === 'function' ? messageType.name : String(messageType),
+            }
+          );
         }
       } catch (error) {
         // A failed registration leaves the bus without a handler for this
