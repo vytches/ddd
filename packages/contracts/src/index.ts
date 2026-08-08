@@ -41,6 +41,7 @@ export type {
 
 export {
   createDomainEvent,
+  enrichEvent,
   IEnhancedEventDispatcher,
   IEventBus,
   IEventDispatcher,

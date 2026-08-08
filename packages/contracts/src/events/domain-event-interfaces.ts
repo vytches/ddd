@@ -55,6 +55,19 @@ export interface IDomainEvent<P = unknown> {
   /** Payload (data) of the event */
   payload?: P | undefined;
 
+  /**
+   * Identity of this event.
+   *
+   * Optional because the interface also describes events produced by the
+   * string form of `AggregateRoot.apply()`, which are plain objects. Class
+   * based events (`DomainEvent`) always carry it, and `createDomainEvent()`
+   * sets it while mirroring it into `metadata.eventId`.
+   */
+  eventId?: string;
+
+  /** When the event happened. Same optionality rationale as `eventId`. */
+  occurredOn?: Date;
+
   /** Event metadata */
   metadata?: IEventMetadata;
 }
