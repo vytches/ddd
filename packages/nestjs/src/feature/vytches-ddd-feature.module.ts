@@ -1,7 +1,14 @@
 import { Module, type DynamicModule } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens
-import { CommandBus, QueryBus, ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import {
+  CommandBus,
+  QueryBus,
+  ICommandBus,
+  IQueryBus,
+  COMMAND_BUS_TOKEN,
+  QUERY_BUS_TOKEN,
+} from '@vytches/ddd-cqrs';
 import type { IEventBus } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from '@vytches/ddd-events';
 import { NestJSContainerAdapter } from '../adapters';
@@ -64,6 +71,20 @@ export class VytchesDDDFeatureModule {
           provide: IQueryBus,
           useFactory: (moduleRef: ModuleRef) => new QueryBus(new NestJSContainerAdapter(moduleRef)),
           inject: [ModuleRef],
+        },
+        // Symbol aliases for the two buses above. The class tokens are shadowed
+        // per context; without these the Symbol tokens would keep resolving the
+        // root buses, so `@Inject(COMMAND_BUS_TOKEN)` and `@Inject(ICommandBus)`
+        // would disagree inside the same module. GLOBAL_COMMAND_BUS /
+        // GLOBAL_QUERY_BUS stay deliberately absent — those exist precisely to
+        // reach past the feature scope to the root bus.
+        {
+          provide: COMMAND_BUS_TOKEN,
+          useExisting: ICommandBus,
+        },
+        {
+          provide: QUERY_BUS_TOKEN,
+          useExisting: IQueryBus,
         },
         // Per-context event bus under a dedicated token
         {

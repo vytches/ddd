@@ -39,6 +39,35 @@ import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS } from './constants';
 @Global()
 @Module({})
 export class VytchesDDDModule {
+  /**
+   * Symbol→class token aliases for the CQRS buses.
+   *
+   * VytchesExplorerService injects the buses via COMMAND_BUS_TOKEN /
+   * QUERY_BUS_TOKEN (stable across a dual-package ESM+CJS load, where class
+   * identities diverge), while consumers provide them under the ICommandBus /
+   * IQueryBus class tokens. Every factory that creates an explorer needs this
+   * bridge — without it the explorer silently receives undefined and registers
+   * nothing.
+   *
+   * useFactory rather than useExisting: NestJS raises a compile-time DI error
+   * for useExisting against an absent token even under @Optional, whereas a
+   * factory simply yields undefined and lets the module boot without a bus.
+   */
+  private static busTokenBridge(): Provider[] {
+    return [
+      {
+        provide: COMMAND_BUS_TOKEN,
+        useFactory: (bus?: ICommandBus) => bus,
+        inject: [{ token: ICommandBus, optional: true }],
+      },
+      {
+        provide: QUERY_BUS_TOKEN,
+        useFactory: (bus?: IQueryBus) => bus,
+        inject: [{ token: IQueryBus, optional: true }],
+      },
+    ];
+  }
+
   static forRoot(options: VytchesDDDModuleOptions = {}): DynamicModule {
     // Bridge providers: Symbol→class token aliases for CQRS buses.
     //
@@ -59,16 +88,7 @@ export class VytchesDDDModule {
     // stubs directly under COMMAND_BUS_TOKEN / QUERY_BUS_TOKEN and class tokens,
     // keeping test modules self-contained without a root bus reference.
     const bridgeProviders: Provider[] = [
-      {
-        provide: COMMAND_BUS_TOKEN,
-        useFactory: (bus?: ICommandBus) => bus,
-        inject: [{ token: ICommandBus, optional: true }],
-      },
-      {
-        provide: QUERY_BUS_TOKEN,
-        useFactory: (bus?: IQueryBus) => bus,
-        inject: [{ token: IQueryBus, optional: true }],
-      },
+      ...VytchesDDDModule.busTokenBridge(),
       // Global bus tokens — always resolve to the root ICommandBus / IQueryBus.
       // forFeature() intentionally does NOT provide these tokens, so injection
       // falls through to forRoot() (the global module) regardless of how many
@@ -114,6 +134,7 @@ export class VytchesDDDModule {
 
     const providers: Provider[] = [
       VytchesExplorerService,
+      ...VytchesDDDModule.busTokenBridge(),
       {
         provide: contextServiceName,
         useFactory: (moduleRef: ModuleRef, discoveryService: DiscoveryService) => {
@@ -175,6 +196,7 @@ export class VytchesDDDModule {
 
     const providers: Provider[] = [
       VytchesExplorerService,
+      ...VytchesDDDModule.busTokenBridge(),
       ...contextProviders,
       ...(options.providers || []),
     ];

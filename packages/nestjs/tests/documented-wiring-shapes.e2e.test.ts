@@ -58,6 +58,50 @@ describe('documented wiring shape — buses as sibling providers (LLMGUIDE "Glob
     await module.close();
   });
 
+  it('explorer resolves both buses under forContext()', async () => {
+    // forContext() creates its own explorer instances, so it needs the same
+    // Symbol→class bridge forRoot() has. It did not have it, which left every
+    // per-context explorer without a bus.
+    const module = await Test.createTestingModule({
+      imports: [
+        VytchesDDDModule.forContext('orders', {
+          providers: [
+            { provide: ICommandBus, useFactory: busStub },
+            { provide: IQueryBus, useFactory: busStub },
+          ],
+        }),
+      ],
+    }).compile();
+
+    const explorer = module.get(VytchesExplorerService, { strict: false });
+
+    expect(explorer.hasCommandBus()).toBe(true);
+    expect(explorer.hasQueryBus()).toBe(true);
+
+    await module.close();
+  });
+
+  it('explorer resolves both buses under forContexts()', async () => {
+    const module = await Test.createTestingModule({
+      imports: [
+        VytchesDDDModule.forContexts({
+          contexts: ['orders', 'billing'],
+          providers: [
+            { provide: ICommandBus, useFactory: busStub },
+            { provide: IQueryBus, useFactory: busStub },
+          ],
+        }),
+      ],
+    }).compile();
+
+    const explorer = module.get(VytchesExplorerService, { strict: false });
+
+    expect(explorer.hasCommandBus()).toBe(true);
+    expect(explorer.hasQueryBus()).toBe(true);
+
+    await module.close();
+  });
+
   it('explorer resolves both buses when they are passed into forRoot({ providers })', async () => {
     // Control case — the shape published in packages/nestjs/README.md.
     const module = await Test.createTestingModule({
