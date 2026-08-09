@@ -1,6 +1,9 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was
+_Last updated 2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
+VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
+ordering per owner directive — see the 2026-08-09 note above the boards).
+Prior: 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was
 stuck at `status: backlog` with unchecked ACs despite merge to `develop`
 `cf4029dd` 2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to
 `done`, ACs checked against git history, file moved to `completed-tasks/`).
@@ -179,38 +182,69 @@ normal/medium · P3 low · backlog)._
 > across all 8 directly-touched packages; CHANGELOG.md carries 4 VF-031 entries.
 > Moved to `completed-tasks/`.
 
+> **Audit + re-prioritization (2026-08-09)**: full maturity audit
+> (`analysis/LIB-MATURITY-AUDIT-2026-08-08.analysis.md`, 5 specialist agents:
+> overall ~6.7/10 — code release-grade, human-facing docs a full tier behind)
+> plus a consumer-reported incident (`getEqualityComponents()` docs-phantom
+> API → **VF-036**, P1) spawned four consolidated tasks: **VF-037** (standing
+> cross-context isolation regression suite + behavioral-BC checklist, P1),
+> **VD-008** (docs truth & parity sweep + docs-compile-gate extension, P2),
+> **VT-007** (re-enable domain-services e2e, P2), **VD-009** (priority example
+> workspaces, P3). **VP-012 promoted P2→P1** (confirmed-live runtime hot
+> paths). **VD-004/VF-002 demoted P2→P3** (docs-site/strategic-docs — no
+> runtime value; explicit owner decision: runtime behavior > linters/docs).
+>
+> **Release sequencing (owner decision, 2026-08-09)**: (1) merge the existing
+> alpha branch (`release/2026-07-18-alpha`, 0.31.0-alpha.0 — already merged
+> into `develop` via `d836beeb`) to **`main`** first; (2) all tasks below are
+> implemented **on top of** that state, branching from `develop`; (3) VF-036
+> additionally requires the downstream consumer's full-suite run on a patched
+> build before any npm tag that includes it (its AC5).
+
 ## P0 — Critical
 
 _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-_Ordered by actual work priority: VF-024, VF-023, VF-031, VF-035, and VF-030
-(pre-publish API surface, DDD foundation guarantees, surface diet, composite
-policy step-coverage bug, DI token identity) all shipped; VF-028 is the last P1
-hardening item._
+_Runtime-value first (owner directive 2026-08-09): things that change or
+protect how the library behaves at run time outrank docs/lint work. Suggested
+order: VF-036 → VF-028 → VP-012 → VF-037._
 
-| ID     | Title                                                       | Status  | Age |
-| ------ | ----------------------------------------------------------- | ------- | --- |
-| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN) | backlog | 1d  |
+| ID     | Title                                                            | Status  | Age |
+| ------ | ---------------------------------------------------------------- | ------- | --- |
+| VF-036 | BaseValueObject getEqualityComponents() hook (consumer-gated BC) | backlog | 1d  |
+| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)      | backlog | 31d |
+| VP-012 | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)   | backlog | 32d |
+| VF-037 | Cross-context isolation regression suite + behavioral-BC gate    | backlog | 0d  |
 
 ## P2 — Normal / Medium
 
+_Runtime-adjacent first (VF-025, VT-007, VF-032, VF-033, VT-006, VF-027), then
+docs & tooling (VD-008, VF-034, VD-006b). 2026-08-09 consistency fix: VF-027
+and VP-006c had task files but no board row since creation — added here and
+in P3 respectively._
+
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
-| VD-004  | Interactive Documentation System                                  | backlog | 56d |
-| VF-002  | Strategic Design Documentation                                    | backlog | 56d |
-| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 1d  |
-| VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)    | backlog | 1d  |
-| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 1d  |
-| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 0d  |
-| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 0d  |
-| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 0d  |
-| VF-033  | Validation hardening & one validation story                       | backlog | 0d  |
+| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 32d |
+| VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 0d  |
+| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 30d |
+| VF-033  | Validation hardening & one validation story                       | backlog | 30d |
+| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 32d |
+| VF-027  | ResilienceContext fork() — native AbortSignal.any() rewrite       | backlog | 32d |
+| VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 0d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 30d |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 36d |
 
 ## P3 — Low
 
-_None._
+| ID     | Title                                                          | Status  | Age |
+| ------ | -------------------------------------------------------------- | ------- | --- |
+| VD-009 | Priority example workspaces (repos+UoW, outbox, CQRS+resil.)   | backlog | 0d  |
+| VD-004 | Interactive Documentation System                               | backlog | 78d |
+| VF-002 | Strategic Design Documentation                                 | backlog | 78d |
+| VP-006c | BaseContainerAdapter resolve optimization (no live callers)   | backlog | 37d |
 
 ## Backlog
 
@@ -233,9 +267,21 @@ archival, flagged above.
 **`/task-tidy` sync (2026-07-18)**: **VP-006b** reconciled and archived to
 `completed-tasks/` — see updated header note above.
 
-**Recommended next action**: (1) **VF-028** (resilience correctness, 8h) is now
-the only open P1 — clears the hardening backlog entirely. (2) When ready to cut
-the release: run the juz-ide-api manual validation (237+ aggregates, 16K tests),
-then tag/publish v0.31.0 — no other code work blocks it. Full audit findings:
-`project-orchestration/analysis/LIB-AUDIT-2026-07-02.analysis.md`,
-`SEC-AUDIT-2026-07-09.analysis.md`, `LIB-UX-AUDIT-2026-07-10.analysis.md`.
+**Recommended next action (2026-08-09, runtime-first)**:
+
+1. **Merge alpha → `main`** (`release/2026-07-18-alpha` content, already in
+   `develop`) — establishes the base every task below builds on top of.
+2. **VF-036** (equality-components hook) — highest runtime value: fixes wrong
+   equality semantics for a real consumer; ship a patched build for their
+   full-suite validation (AC5) early, since their sign-off gates the tag.
+3. **VF-028 AC1** (jitter default) + **VP-012** (three confirmed-live hot
+   paths) — small, scoped runtime fixes; can be one working session.
+4. **VF-037** (isolation regression suite) — locks in the runtime correctness
+   the last three fixes bought.
+5. Then P2 runtime-adjacent (VF-025, VT-007), and only after that the docs
+   sweep **VD-008** — important for release credibility, but it changes no
+   runtime behavior.
+
+Full audit trail: `analysis/LIB-MATURITY-AUDIT-2026-08-08.analysis.md` (new),
+`LIB-AUDIT-2026-07-02.analysis.md`, `SEC-AUDIT-2026-07-09.analysis.md`,
+`LIB-UX-AUDIT-2026-07-10.analysis.md`.
