@@ -3,6 +3,47 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## `feat(core)`: `getIdentityComponents()` — partial-identity equality (VF-036)
+
+**Additive minor. No `BREAKING CHANGE:` entry — this is not one.**
+`BaseValueObject` gains a new protected hook,
+`getIdentityComponents(): readonly unknown[] | undefined`, that a subclass can
+override to compare by a subset/projection of its state instead of the full raw
+`value`. The default implementation returns `undefined`, so `equals()` runs the
+exact, unmodified raw comparison for every class that does not opt in — the
+existing equality corpus is unaffected, bit-for-bit.
+
+See the
+[value-objects README](../packages/value-objects/README.md#partial-identity-equality-with-getidentitycomponents)
+and [LLMGUIDE](../packages/value-objects/LLMGUIDE.md) for full behavior: the
+asymmetric, non-transitive fallback and its collection-level consequences, the
+`[]` footgun, throw propagation, and the frozen/readonly-state requirement for
+components.
+
+**A permanent note, because this has already cost a consumer real time:** an
+unrelated, similarly-named hook, `getEqualityComponents()`, appeared only in
+early (2025) documentation and was **never implemented** in any released version
+— every `equals()` call has always used the raw `value`-based comparison.
+`getIdentityComponents()` is the real, supported hook, under a deliberately new
+name; `getEqualityComponents` will not be added as an alias, shim, or
+runtime-detected fallback. If you have subclasses overriding
+`getEqualityComponents()`, those overrides have always been dead code — see the
+"getIdentityComponents() replaces the dead getEqualityComponents() override"
+section of the root `MIGRATION.md` to migrate them.
+
+**Release-notes line for `noImplicitOverride` consumers.** If a class of yours
+already declares a member literally named `getIdentityComponents` (coincidental
+naming, unrelated to this feature) and you compile with `noImplicitOverride`,
+TypeScript will report `TS4114` at that declaration once you upgrade. This is a
+compile-time signal only — nothing changes at runtime unless you also add
+`override` there.
+
+_Self-audit._ `grep -rln "extends BaseValueObject" src/`, then for each hit
+confirm you do not already declare `getIdentityComponents` unintentionally and,
+if migrating from `getEqualityComponents`, that the rename was applied as one
+atomic change across the whole class hierarchy — a partially migrated hierarchy
+reintroduces the non-transitivity hazard described above.
+
 ## Migration notes for 0.31.0-alpha.0 — `BaseValueObject` (VF-023)
 
 The generated entry below says "see CHANGELOG.md for full migration notes". The

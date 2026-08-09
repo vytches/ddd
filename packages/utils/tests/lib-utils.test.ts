@@ -948,6 +948,30 @@ describe('LibUtils', () => {
       expect(LibUtils.deepEqual(complex1, complex2)).toBe(true);
       expect(LibUtils.deepEqual(complex1, complex3)).toBe(false);
     });
+
+    // VF-036 (D7): regression PIN, not a fix. `visitedPairs` records the
+    // FIRST right-hand object a given left-hand reference was compared
+    // against. If the same left-hand reference legitimately recurs at a
+    // second position and the right-hand side has a *different* (but
+    // structurally identical) object there, the cached pairing makes
+    // `deepEqual` answer `false` even though both structures are equal
+    // value-wise. This is a pre-existing defect, tracked as a separate
+    // follow-up — it is NOT fixed here and must NOT be fixed as a side
+    // effect of VF-036. VF-036's own tests deliberately avoid shared
+    // references so they never depend on (or accidentally paper over)
+    // this behavior.
+    it('KNOWN PRE-EXISTING DEFECT (do not fix here): a left-hand reference shared across two positions produces a false negative against two distinct-but-equal right-hand objects', () => {
+      // Arrange
+      const shared = { x: 1 };
+      const obj1 = { a: shared, b: shared };
+      const obj2 = { a: { x: 1 }, b: { x: 1 } }; // structurally equal, but two distinct objects
+
+      // Act
+      const result = LibUtils.deepEqual(obj1, obj2);
+
+      // Assert — pinning the CURRENT (defective) behavior on purpose.
+      expect(result).toBe(false);
+    });
   });
 
   describe('sanitizeLogMessage (VS-018)', () => {
