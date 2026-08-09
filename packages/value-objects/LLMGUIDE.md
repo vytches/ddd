@@ -113,6 +113,14 @@ instances of the same base type are mixed. Migrate a whole hierarchy together
 instances are always equal to each other. Return `undefined` to opt out, never
 `[]`.
 
+**Fixed arity.** A class must always return the same number of components in the
+same order. Comparison begins with a length check, so a conditional push
+(`if (this.scope) parts.push(this.scope)`) makes two instances of one class
+unequal because of an unset optional field rather than a real data difference.
+Use a stable placeholder — `[this.tenant, this.scope ?? null, this.key]`. A
+subclass that adds a component changes the arity of every comparison against its
+parent; decide that deliberately.
+
 **Undefined-because-uninitialized is a different trap than it sounds.** Only a
 literal `undefined` returned _by the hook itself_ triggers the raw fallback; an
 `undefined` _component value_ inside a defined array does not. The real trap is

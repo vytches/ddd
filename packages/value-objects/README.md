@@ -213,6 +213,40 @@ both return `[]` are equal to each other regardless of what their `value` holds
 both). To opt out of component comparison, return `undefined` (the base
 default); never return `[]` to mean "not applicable."
 
+### The fixed-arity rule
+
+A class must **always return the same number of components**, in the same order.
+Comparison starts with a length check, so a conditional push —
+`if (this.scope) parts.push(this.scope)` — makes two instances of the same class
+unequal purely because one had an optional field set. That reads as a data
+difference when it is actually an arity difference. Push a stable placeholder
+instead:
+
+```ts compile-check
+import { BaseValueObject } from '@vytches/ddd-value-objects';
+
+interface GrantProps {
+  tenant: string;
+  scope?: string;
+  key: string;
+}
+
+class GrantRef extends BaseValueObject<GrantProps> {
+  validate(value: GrantProps): boolean {
+    return typeof value === 'object' && value !== null;
+  }
+
+  protected override getIdentityComponents(): readonly unknown[] {
+    // Always three slots, whatever is populated. Never push conditionally.
+    return [this.value.tenant, this.value.scope ?? null, this.value.key];
+  }
+}
+```
+
+The same applies across a hierarchy: if a subclass adds a component, it has
+changed the arity of every comparison against its parent — a design decision to
+make deliberately rather than discover.
+
 ### The "sometimes undefined" downgrade trap
 
 Only a **literal `undefined`/omitted return from the hook itself** triggers the

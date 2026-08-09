@@ -1,9 +1,19 @@
-# TM-VF-036 — `BaseValueObject.getEqualityComponents()` (docs-phantom API made real)
+# TM-VF-036 — `BaseValueObject.getIdentityComponents()` (partial-identity equality hook)
 
-**Status:** DRAFT **Date:** 2026-08-09 **Task:**
+**Status:** APPROVED **Date:** 2026-08-09 (rewritten 2026-08-09 after the
+rollout decision) **Task:**
 `project-orchestration/tasks/VF-036-value-object-equality-components.md`
 **Granularity:** Feature TM (adapted for library context — no HTTP endpoints, no
 PII, no auth)
+
+> **Rewrite notice.** The first draft of this TM modelled a hook named
+> `getEqualityComponents()` shipped by reusing a name that ~179 downstream
+> subclasses already declare as dead code. That rollout was rejected (analysis
+> Q1, option C). The shipped design uses a **new** name,
+> `getIdentityComponents()`, which nothing declares — so the entire "mass
+> activation on upgrade" threat class is removed **by construction**, not by
+> process. Finding IDs 001–006 are preserved because they are cited elsewhere;
+> 002 is restated to match the design that actually shipped.
 
 ## Scoping note (context adaptation)
 
@@ -12,173 +22,173 @@ applied here without re-deriving it:
 
 - **DFD (Step 2) is N/A.** No network trust boundary exists inside a
   domain-primitives library. The only "flow" is in-process:
-  `consumer VO subclass override → BaseValueObject.equals() → LibUtils.deepEqual`.
-  A DFD adds no information beyond the STRIDE table below.
-- The "actor" is **consumer application code** (a downstream service with ~237
-  aggregates / ~170 `getEqualityComponents()` override sites), not a remote
-  network attacker. Threats here are about **silent integrity guarantees
-  breaking** — specifically equality/identity semantics — under ordinary bugs or
-  an ordinary version upgrade, not malicious intent.
+  `consumer VO subclass override → BaseValueObject.equals() → componentEquals → LibUtils.deepEqual`.
+- The "actor" is **consumer application code**, not a remote network attacker.
+  Threats here are about **integrity guarantees breaking silently** —
+  specifically equality/identity semantics — under ordinary bugs, not malicious
+  intent.
 - **MITRE ATT&CK mapping is skipped** — no adversary technique catalog entry
-  fits "a value-object equality override was already buggy for years and nobody
-  knew because it was dead code." Attack tree (Step 4b) is produced for the one
-  Critical finding, per the same rule TM-VF-023 used.
+  fits "a value-object equality override silently widened identity".
 - **LINDDUN (Step 6) is N/A** — see §6.
 
-**Relationship to TM-VF-023:** TM-VF-023 already covered
-`BaseValueObject.equals()` under finding **TM-VF-023-006** (shallow-freeze +
-unreliable `equals()`, resolved via `LibUtils.deepEqual`, DREAD 10/High). That
-finding is about `equals()` comparing the _raw value_ correctly. VF-036 does
-**not** revisit that ground. It is entirely new surface: `equals()` gains a
-second, consumer-authored comparison path (`getEqualityComponents()`) that sits
-_in front of_ the raw-value comparison and that the library can neither see the
-contents of nor validate. Everything below is specific to that new path. One
-item (§3, Finding 006) is an inherited limitation of `LibUtils.deepEqual`'s
-`Set` handling that now also applies to component arrays — it is flagged as a
-minor extension of TM-VF-023-006, not a new root cause.
+**Relationship to TM-VF-023:** TM-VF-023 covered `BaseValueObject.equals()`
+under finding **TM-VF-023-006** (shallow-freeze + unreliable `equals()`,
+resolved via `LibUtils.deepEqual`, DREAD 10/High). That finding is about
+`equals()` comparing the _raw value_ correctly. VF-036 does not revisit it: the
+raw path is unchanged bit-for-bit and is only reached when the new hook is not
+overridden on both sides. VF-036's surface is the **second**, consumer-authored
+comparison path placed ahead of it, whose contents the library can neither see
+nor validate. Finding 006 below is an inherited `LibUtils.deepEqual` `Set`
+limitation that now also applies to component arrays — a minor extension of
+TM-VF-023-006, not a new root cause.
 
 ## 1. Scope
 
 **In scope:**
 
-- `BaseValueObject.getEqualityComponents()` — new protected hook, default
-  `undefined` (`packages/value-objects/src/base-value-object.ts:7-124`, per the
-  VF-036 design: `equals()` gains a components-first branch ahead of the current
-  raw-value logic at lines 58-73).
-- The interaction between that hook and `LibUtils.deepEqual`
-  (`packages/utils/src/lib-utils.ts:259-332`), reused for element-wise
-  comparison per the task design.
-- The activation of ~170 pre-existing, previously-dead-code consumer overrides
-  of this method name (per task doc: never invoked in any released version,
-  `d1c13027`→`0ad22d88`→`90d393a8` history).
+- `BaseValueObject.getIdentityComponents()` — new `protected` hook returning
+  `readonly unknown[] | undefined`, default `undefined`
+  (`packages/value-objects/src/base-value-object.ts:198`).
+- The components branch inside `equals()` (`:244`), which engages only when
+  **both** sides return a defined array.
+- `componentEquals` (`:33`) and its dispatch to a nested value object's own
+  `equals()` via the `Symbol.for('@vytches/ddd.valueObject')` brand, falling
+  through to `LibUtils.deepEqual` (`packages/utils/src/lib-utils.ts:259-332`).
 
-**Out of scope:** `AggregateRoot`/entity identity comparison (explicit non-goal
-in the task); the raw-value `equals()` path itself (TM-VF-023-006 territory).
+**Out of scope:** `AggregateRoot`/entity identity comparison (explicit non-goal;
+`EntityId` does not extend `BaseValueObject`); the raw-value `equals()` path
+itself (TM-VF-023-006 territory, and unchanged by this task).
+
+**Explicitly NOT in scope, because the design removed it:** activation of
+pre-existing consumer `getEqualityComponents` overrides. That symbol is never
+implemented and no shim delegates to it, so those overrides stay dead code after
+upgrade exactly as they were before it.
 
 **Actors and trust levels:**
 
-| Actor                                                                                     | Trust Level                                                                                              | Notes                                                                                                                                        |
-| ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Consumer application code authoring VO subclasses                                         | Medium — internal, but the override body is opaque to the library                                        | The library cannot see, constrain, or validate what a subclass puts into the returned array                                                  |
-| The ~170 pre-existing override sites specifically                                         | Medium — written years ago against a phantom API, unreviewed against real semantics since they never ran | Correctness unknown until first real execution post-upgrade (this is the crux of the risk)                                                   |
-| Downstream code that calls `.equals()` (dedupe, `.some()`, caches, Sets/Maps keyed by VO) | Low visibility into which VOs use partial-identity comparison                                            | Consumers of `equals()` typically assume it is total-identity and side-effect-free; VF-036 breaks both assumptions for overriding subclasses |
+| Actor                                                                                  | Trust Level                                                                       | Notes                                                                                                                                            |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Consumer application code authoring VO subclasses                                      | Medium — internal, but the override body is opaque to the library                 | The library cannot see, constrain or validate what a subclass puts into the returned array                                                       |
+| Consumers migrating dead `getEqualityComponents` overrides to the new name             | Medium — code written years ago against a phantom API, never executed, unreviewed | Correctness is unknown until first real execution, which now happens per-class at migration time rather than fleet-wide on upgrade               |
+| Downstream code calling `.equals()` (dedupe, `.some()`, caches, Sets/Maps keyed by VO) | Low visibility into which VOs use partial-identity comparison                     | Such callers typically assume `equals()` is total-identity, side-effect-free and non-throwing; VF-036 breaks all three for overriding subclasses |
 
 **Assets classification:** Same as TM-VF-023 — Internal (VO instances, no
-secrecy) / Confidential-for-integrity-not-secrecy (equality decisions can
-silently propagate into consumer-side authorization, caching, or deduplication
-logic that IS security- or correctness-relevant downstream, even though this
-library holds no PII/secrets itself).
+secrecy) / Confidential-for-integrity-not-secrecy: equality decisions can
+propagate into consumer-side authorization, caching or deduplication logic that
+IS correctness-relevant downstream, even though this library holds no
+PII/secrets itself.
 
 ## 2. DFD — N/A
 
-See scoping note above; identical justification to TM-VF-023 §2.
+See scoping note; identical justification to TM-VF-023 §2.
 
 ## 3. STRIDE Analysis
 
-| Category                                                            | Component                                                                       | Threat                                                                                                                                                                                  | Attack/Failure Scenario                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Mitigation (exists)                                                                                                                                                                                                                | Gap                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **T** Tampering (identity/authorization scope collapse)             | `getEqualityComponents()` override body (consumer code)                         | Two semantically **different** values compare equal                                                                                                                                     | A consumer override excludes a discriminating field (e.g. tenant id, permission scope, role, resource key, idempotency/cache key). If that field is security-relevant downstream, `equals()` now silently reports two distinct-scope values as identical, widening an authorization check or a cache/idempotency lookup that relies on VO equality. The library cannot see or constrain what a consumer puts in `getEqualityComponents()` — it can only execute whatever array is returned.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | None — this is inherent to the design (partial-identity equality is the _feature_, not a bug); mitigation is entirely on the JSDoc/documentation side.                                                                             | JSDoc must explicitly warn against putting security-relevant fields in _excluded_ territory without excluding them from components deliberately; no runtime guard is possible without knowing consumer semantics (UNVERIFIED whether any of the ~170 override sites actually encode a security-relevant field this way — out-of-repo, cannot confirm from this codebase).                      |
-| **T/R** Tampering + silent behavior change (mass activation)        | `BaseValueObject.equals()`, all ~170 pre-existing override sites simultaneously | Dormant code activates fleet-wide on a single upgrade; whether a compiler signal fires depends on a consumer-side flag the library cannot control (see the 2026-08-09 correction in §5) | `getEqualityComponents()` overrides were written against a phantom README API and have **never executed** in any released version (confirmed: zero occurrences of the symbol in this repo's source as of this TM). VF-036 does not change any public signature — it adds a new `protected` member with a default that is behavior-preserving for non-overriding subclasses. `api-extractor`/`validate:api` diffing typically flags _removed or changed_ public signatures, not _newly meaningful_ protected members with an already-compatible-looking name (UNVERIFIED — not confirmed against this project's actual `validate:api` config whether it would flag this at all). Every one of the ~170 sites goes live simultaneously the moment the dependency is bumped, with no per-site opt-in and no staged rollout.                                                                                                                                                                                                                     | Task AC5 already mandates a consumer full-suite sign-off gate before any npm tag — this is the correct control, but it is a _process_ mitigation, not a code-level one; a mis-run or skipped gate ships all 170 activations blind. | CHANGELOG `BREAKING CHANGE:` entry + grep hint (AC4) is necessary but not sufficient on its own — it informs, it does not verify. AC5 (consumer sign-off) is the load-bearing control and must not be skipped under release-pressure.                                                                                                                                                          |
-| **T** Tampering (broken symmetry)                                   | `equals()` components-first branch, asymmetric override case                    | `a.equals(b) !== b.equals(a)`                                                                                                                                                           | Per the documented design, the components path only engages if **both** sides return a defined array; if only one side overrides, the pair falls back to raw-value comparison. This is internally consistent for `a.equals(b)` vs `b.equals(a)` on _that specific pair_ (both fall back identically) — but breaks down across a _mixed population_ of VO instances/subclasses: a subtype hierarchy or a partial migration where some instances have the override and some don't produces a set of pairs where some compare via components and others via raw value, with no way for calling code (`list.some(x => x.equals(y))`) to know which comparison semantics applied to which pair. The net effect is equality that is not consistently defined across the whole collection, even though each individual pair is well-defined.                                                                                                                                                                                                        | Documented as an explicit fallback rule in the design (task item "Asymmetric case ... document this explicitly").                                                                                                                  | JSDoc must state this collection-level caveat plainly, not just the pairwise fallback rule, since AC3 currently only requires documenting "the asymmetric-fallback rule" pairwise.                                                                                                                                                                                                             |
-| **T** Tampering (universal-equality footgun)                        | `getEqualityComponents()` returning `[]`                                        | Every instance of a VO subclass compares equal to every other instance of that subclass                                                                                                 | An override that returns an empty array — a plausible copy-paste or "not-yet-implemented" placeholder among 170 sites — makes `equals()` component-wise-compare zero elements, which is vacuously true for every pair. This collapses the VO's entire identity.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Same-length + element-wise check as designed will pass trivially for length-0 arrays on both sides; no library-side guard against this exists or is proposed.                                                                      | Recommend JSDoc explicitly flag `[]` as almost always a bug (distinct from `undefined`, which is the documented "opt out" signal) and recommend AC2's test corpus include an explicit `[]` case with an assertion on the documented behavior (not just "some tests"), so this is a conscious, tested design choice rather than an accidental one.                                              |
-| **D** Denial of Service (new — was N/A in TM-VF-023 for this class) | `getEqualityComponents()` invoked from inside `equals()`                        | A previously-total, side-effect-free predicate can now throw or become expensive                                                                                                        | `equals()` currently cannot throw (it is a pure comparison over already-constructed, already-frozen values). Once it calls consumer code, it inherits whatever that code does: (a) it can throw, turning every caller of `.equals()` — including code that assumed a boolean-returning, non-throwing method, e.g. `Array.prototype.some`/`.filter`/dedupe loops — into a caller that must now handle exceptions from a method that never used to raise them; (b) the override can allocate/compute an O(n) array on every single `.equals()` call, and `.equals()` is frequently invoked inside hot loops (`.some()` over a list) — CPU cost scales with `(list size) × (component construction cost)` per comparison, which is a plausible amplification vector under ordinary (non-malicious) large-collection usage. This is UNVERIFIED against this repo specifically (no evidence any of the ~170 sites do this today), but the _capability_ is a direct, structural consequence of the VF-036 design as specified, not a hypothetical. | The base `value` is deep-frozen (VF-023 D-3), but the array returned by `getEqualityComponents()` is consumer-constructed on each call and is not frozen or otherwise guarded by the library.                                      | JSDoc must document throw-propagation explicitly ("if your override can throw, `equals()` can now throw — previously it could not") and should recommend overrides be side-effect-free, allocation-light, pure functions of already-available fields. No runtime try/catch swallow is recommended (would silently convert a real bug into `false`, violating "never swallow errors silently"). |
-| **S / I** Spoofing / Information Disclosure                         | (all components)                                                                | —                                                                                                                                                                                       | **N/A** — no network identity to spoof, no secret/PII data disclosed by any of the above; the leakage is at most cross-field identity information already present in the VO's own already-frozen value, visible to whatever code already holds a reference to the VO. Consistent with TM-VF-023's S/I framing.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | —                                                                                                                                                                                                                                  | —                                                                                                                                                                                                                                                                                                                                                                                              |
+AC references below use the **stable AC identifiers** defined in the task file,
+not ordinal numbers — ordinals drifted once already and silently repointed the
+release-blocking sign-off gate at a documentation item.
 
-## 4b. Attack/Failure Tree — Finding 002 (mass activation, DREAD 11, High — was 13/Critical before the 2026-08-09 correction in §5)
+| Category                                                            | Component                                                                         | Threat                                                                           | Failure Scenario                                                                                                                                                                                                                                                                                                                                                                                                                                         | Mitigation                                                                                                                                                                                                                                                                                                                   | Gap                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **T** Tampering (identity/authorization scope collapse)             | `getIdentityComponents()` override body (consumer code)                           | Two semantically **different** values compare equal                              | A consumer override omits a discriminating field (tenant id, permission scope, role, resource key, idempotency/cache key). If that field is security-relevant downstream, `equals()` silently reports two distinct-scope values as identical, widening an authorization check or a cache lookup that relies on VO equality. The library can only execute whatever array is returned.                                                                     | None at code level — partial-identity equality IS the feature. Mitigation is documentation (`AC-DOCS`).                                                                                                                                                                                                                      | No runtime guard is possible without knowing consumer semantics. Whether any real override encodes a security-relevant field this way is out-of-repo and UNVERIFIED.                                                                                                                                 |
+| **T/R** Tampering + silent behavior change                          | `equals()`, consumer classes migrating from the dead `getEqualityComponents` name | A migration turns previously-dead code live, class by class                      | The overrides exist and have never run. Renaming one to `getIdentityComponents` executes it for the first time. Done as a **staged** migration this also produces a mixed population, which is precisely the non-transitivity condition in finding 003.                                                                                                                                                                                                  | Design: the new name means **nothing activates on upgrade** — mitigated by construction, not by process. `AC-MIGRATION` requires the rename be performed as ONE atomic codemod, with the rationale stated. `AC-SIGNOFF` (downstream full-suite run on a pre-release build before any npm tag) validates the migrated corpus. | Residual and unavoidable for any new name: a consumer that already declares a member called `getIdentityComponents` and compiles with `noImplicitOverride` gets TS4114 at those sites. Compile-time signal, not a runtime change; measured as zero occurrences in the known consumer (analysis Q2c). |
+| **T** Tampering (broken symmetry across a collection)               | `equals()` components branch, asymmetric-override case                            | Equality stops partitioning into classes                                         | The components path engages only if **both** sides return a defined array; otherwise the pair falls back to raw comparison. Each pair is well-defined and the relation is symmetric, but it is **not transitive** across a mixed population, so `list.some(x => x.equals(y))` depends on which representative is in the list.                                                                                                                            | Accepted, documented and pinned by a test commented as a KNOWN ACCEPTED LIMITATION so it is not "fixed" later. `AC-DOCS` requires the collection-level consequence be stated, not only the pairwise rule.                                                                                                                    | Inherent to any opt-in-per-class equality hook with a fallback. The alternatives — removing the fallback, or refusing the feature — are worse. TypeScript cannot enforce the "all classes in an equality domain must provide components" invariant.                                                  |
+| **T** Tampering (universal-equality footgun)                        | `getIdentityComponents()` returning `[]`                                          | Every instance of the subclass compares equal to every other                     | An override returning an empty array — a plausible placeholder, or the output of `return this.parts ?? []` — compares zero elements, vacuously true for every pair, collapsing the VO's identity. A sibling trap: an override returning `undefined` because a field is not yet initialised silently DOWNGRADES to raw comparison instead of failing.                                                                                                     | Documented as a loaded gun and pinned by tests for both traps. No runtime warning: `equals()` is a hot path and the library logger is diagnostics-only.                                                                                                                                                                      | Deliberate: `[]` is the consistent reading of the same-length rule and is legitimate for unit/singleton VOs. The risk is accepted in exchange for not paying a guard on every comparison.                                                                                                            |
+| **D** Denial of Service (new — was N/A in TM-VF-023 for this class) | `getIdentityComponents()` invoked from inside `equals()`                          | A previously-total, side-effect-free predicate can now throw or become expensive | `equals()` previously could not throw. Calling consumer code, it inherits whatever that code does: (a) a throwing override propagates out of `equals()`, including out of `Array.prototype.some`/`.filter`/dedupe loops that never had to handle exceptions; (b) an override allocating an O(n) array on every call amplifies CPU as `(list size) × (component construction cost)` in hot loops. Structural consequence of the design, not hypothetical. | Throw propagation is a deliberate decision (analysis D5) — catching would convert a loud consumer bug into a silently wrong equality result. Documented and pinned by a test asserting propagation.                                                                                                                          | `AC-DOCS` must state plainly that `equals()` is no longer total, and recommend pure, allocation-light overrides derived only from already-frozen state. No library-side try/catch.                                                                                                                   |
+| **S / I** Spoofing / Information Disclosure                         | (all components)                                                                  | —                                                                                | **N/A** — no network identity to spoof; no secret or PII disclosed. Any leakage is cross-field identity information already present in the VO's own frozen value, visible to whatever code already holds the reference. Consistent with TM-VF-023.                                                                                                                                                                                                       | —                                                                                                                                                                                                                                                                                                                            | —                                                                                                                                                                                                                                                                                                    |
+
+## 4b. Attack/Failure Tree — Finding 002
+
+Retained for continuity with the first draft, which produced this tree for a
+then-Critical finding. Under the shipped design the tree **collapses at the
+root**: the branch that made it Critical requires reusing the old name.
 
 ```mermaid
 flowchart TD
-    GOAL["Outcome: silent identity/behavior<br/>change across ~170 sites at once"]
+    GOAL["Outcome: previously-dead override logic<br/>starts affecting equality"]
     GOAL --> A["Dependency bump lands VF-036"]
-    A --> B["OR: consumer full-suite gate (AC5) is run and passes<br/>-> mismatches caught before tag"]
-    A --> C["OR: consumer full-suite gate is skipped or has gaps<br/>(release pressure, partial test coverage of the 170 sites)"]
+    A --> B["Shipped design: hook has a NEW name<br/>-> nothing declares it -> nothing activates<br/>(mitigated by construction)"]
+    A --> C["Rejected design (option A): reuse getEqualityComponents<br/>-> every dormant override goes live at once"]
     C --> C1["Some overrides are semantically wrong<br/>(narrowed identity, [] footgun, throwing override)"]
-    C --> C2["No compiler/api-diff signal fires<br/>(api-extractor does not cover packages/value-objects at all;<br/>compiler signal only if the consumer sets noImplicitOverride — off by default)"]
-    C1 --> D["Silent equality/behavior divergence<br/>ships to production simultaneously at all 170 sites"]
+    C --> C2["Compiler signal only if the consumer sets<br/>noImplicitOverride — off by default in TypeScript"]
+    C1 --> D["Silent equality divergence ships<br/>at every site simultaneously"]
     C2 --> D
+    B --> E["Residual: per-class migration executes<br/>one override at a time"]
+    E --> F["Staged migration -> mixed population<br/>-> non-transitivity (finding 003)"]
 ```
 
-**Cheapest path:** C→C1/C2→D — this requires no attacker action at all, only an
-ordinary dependency upgrade combined with the sign-off gate (AC5) being skipped,
-rushed, or incomplete. **Highest-leverage mitigation:** AC5 itself (consumer
-full-suite sign-off recorded _before_ any npm tag) — collapsing branch C to
-branch B is the only mitigation that scales to all 170 sites at once, since no
-code-level fix can validate consumer-authored semantics. **Correction
-2026-08-09:** this holds only for rollout option (A). Under option (C) —
-shipping the hook under a new name — branch A never leads to activation at all,
-so the whole tree collapses at the root without relying on any process gate. See
-§5.
+**Remaining leverage:** performing the consumer-side rename as a single atomic
+codemod (`AC-MIGRATION`) is what keeps branch E from reaching F, and the
+downstream full-suite run (`AC-SIGNOFF`) is what validates the migrated corpus
+before any npm tag.
 
 ## 5. DREAD Risk Register
 
-| ID            | Component                                                        | Threat                                                                                                                                             | D   | R   | E   | A   | D   | Score  | Priority | Status                |
-| ------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | --- | --- | --- | ------ | -------- | --------------------- |
-| TM-VF-036-001 | `getEqualityComponents()` override body                          | Identity narrowing → equality false-positive on security-relevant field                                                                            | 3   | 3   | 2   | 2   | 1   | **11** | High     | OPEN                  |
-| TM-VF-036-002 | `equals()` + all pre-existing override sites                     | Dormant-code mass activation on upgrade; compiler signal depends on a consumer-side flag we do not control (CORRECTED 2026-08-09, was 13/Critical) | 3   | 2   | 1   | 3   | 2   | **11** | High     | OPEN                  |
-| TM-VF-036-003 | `equals()` components-first branch, mixed population             | Broken symmetry across a collection (asymmetric fallback)                                                                                          | 2   | 3   | 1   | 2   | 1   | **9**  | Medium   | OPEN                  |
-| TM-VF-036-004 | `getEqualityComponents()` returning `[]`                         | Universal-equality footgun (vacuous same-length-zero match)                                                                                        | 2   | 3   | 1   | 1   | 2   | **9**  | Medium   | OPEN                  |
-| TM-VF-036-005 | `getEqualityComponents()` invoked inside `equals()`              | Previously-total predicate can now throw / CPU amplification in hot loops                                                                          | 2   | 3   | 1   | 2   | 1   | **9**  | Medium   | OPEN                  |
-| TM-VF-036-006 | `LibUtils.deepEqual` `Set` handling, applied to component arrays | Reference-equality-for-object-members limitation inherited from TM-VF-023-006                                                                      | 1   | 3   | 1   | 1   | 1   | **7**  | Low      | OPEN — cross-ref only |
+| ID            | Component                                                        | Threat                                                                                       | D   | R   | E   | A   | D   | Score  | Priority | Status                |
+| ------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | --- | --- | --- | --- | --- | ------ | -------- | --------------------- |
+| TM-VF-036-001 | `getIdentityComponents()` override body                          | Identity narrowing → equality false-positive on a security-relevant field                    | 3   | 3   | 2   | 2   | 1   | **11** | High     | OPEN — documented     |
+| TM-VF-036-002 | `equals()` + consumer migration of dead overrides                | Previously-dead override logic goes live (per-class at migration, NOT fleet-wide on upgrade) | 3   | 2   | 1   | 3   | 2   | **11** | High     | MITIGATED BY DESIGN   |
+| TM-VF-036-003 | `equals()` components branch, mixed population                   | Non-transitivity across a collection (asymmetric fallback)                                   | 2   | 3   | 1   | 2   | 1   | **9**  | Medium   | ACCEPTED — pinned     |
+| TM-VF-036-004 | `getIdentityComponents()` returning `[]`                         | Universal-equality footgun (vacuous same-length-zero match)                                  | 2   | 3   | 1   | 1   | 2   | **9**  | Medium   | ACCEPTED — pinned     |
+| TM-VF-036-005 | `getIdentityComponents()` invoked inside `equals()`              | Previously-total predicate can now throw / CPU amplification in hot loops                    | 2   | 3   | 1   | 2   | 1   | **9**  | Medium   | ACCEPTED — documented |
+| TM-VF-036-006 | `LibUtils.deepEqual` `Set` handling, applied to component arrays | Reference-equality-for-object-members limitation inherited from TM-VF-023-006                | 1   | 3   | 1   | 1   | 1   | **7**  | Low      | OPEN — cross-ref only |
 
-**2 High, 3 Medium, 1 Low** (after the 2026-08-09 correction below; the register
-previously read 1 Critical, 1 High).
+**2 High, 3 Medium, 1 Low.** No Critical finding, so the DRAFT → APPROVED
+transition is not blocked.
 
-**Correction 2026-08-09 — TM-VF-036-002 downgraded 13/Critical → 11/High.** The
-finding was written on the assumption that mass activation carries _no_ compiler
-signal. Direct measurement of the known downstream consumer (recorded as Q2 in
-`project-orchestration/analysis/VF-036-value-object-equality-components.analysis.md`)
-disproves that for them: they compile with `noImplicitOverride: true` and
-`strict: true`, their 179 override declarations are uniformly plain `protected`
-methods with array return types, and 171 of them lack the `override` keyword.
-Under rollout option (A) — a concrete base member reusing the name — those 171
-sites therefore fail loudly with TS4114 rather than activating silently; under
-option (C) — a new hook name — nothing of theirs activates at all.
-Discoverability stays high (3) but Reproducibility drops 3 → 2 and the
-Damage-in-practice sub-score 3 → 2, because the silent-activation scenario now
-requires a _different_, unquantified consumer: one who built on the phantom
-README between 2025-07-16 and 2026-05-23 AND does not enable
-`noImplicitOverride` (off by default in TypeScript). Plausible, but no longer
-the expected case. Note the library cannot influence this — a consumer's
-tsconfig is not inherited from a dependency — so the residual risk is real but
-not addressable by any code-level control on our side.
-
-Per the same rule TM-VF-023 applied, the register no longer contains a Critical
-finding, so the DRAFT → APPROVED transition is not blocked on assigning a new
-task. The mitigation for TM-VF-036-002 remains VF-036 AC5 (consumer full-suite
-sign-off recorded before any npm tag), treated as load-bearing and
-non-skippable. If rollout option (C) is chosen, this finding is additionally
-mitigated **by construction** rather than by process, since no dormant override
-activates on upgrade for any consumer.
+**History of the 002 rating.** The first draft scored 002 at **13/Critical** on
+the assumption that mass activation carries no compiler signal. Direct
+measurement of the known downstream consumer (analysis Q2) disproved that for
+them: they compile with `noImplicitOverride: true` and `strict: true`, their 179
+override declarations are uniformly plain `protected` methods with array return
+types, and 171 lack the `override` keyword — so under the rejected option (A)
+those 171 sites would have failed loudly with TS4114 rather than activating
+silently. Reproducibility dropped 3 → 2 and the Damage sub-score 3 → 2, giving
+**11/High**, because silent activation then required a _different_, unquantified
+consumer: one who built on the phantom README between 2025-07-15 (`d1c13027`)
+and 2026-05-22 (`0ad22d88`) AND does not enable `noImplicitOverride`, which is
+off by default in TypeScript. The score is retained at 11/High, but under the
+shipped design the scenario is removed entirely rather than merely made less
+likely — hence Status **MITIGATED BY DESIGN**. Note the library cannot influence
+a consumer's tsconfig, which is not inherited from a dependency; an option whose
+safety depends on the consumer's compiler flags is not safe, only lucky. That
+observation is what settled the rollout decision.
 
 ## 6. LINDDUN — N/A
 
-No PII flows through `BaseValueObject` or `getEqualityComponents()` itself —
-both are generic containers; any PII possibly present in consumer-defined VO
-field values (out of this library's control) is unaffected by _how_ the library
-compares those values for equality. No GDPR obligation is triggered by VF-036.
-Identical justification to TM-VF-023 §6.
+No PII flows through `BaseValueObject` or `getIdentityComponents()` — both are
+generic containers, and any PII in consumer-defined VO field values is
+unaffected by _how_ the library compares those values. No GDPR obligation is
+triggered. Identical justification to TM-VF-023 §6.
 
-## 7. Recommended Mitigations (mapped to VF-036 ACs)
+## 7. Recommended Mitigations (mapped to stable AC identifiers)
 
-| Finding                  | AC(s)              | Mitigation shape                                                                                                                                                                                                                                                      |
-| ------------------------ | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TM-VF-036-001            | AC3                | JSDoc must explicitly warn: do not exclude security/authorization/cache-key-relevant fields from `getEqualityComponents()` unless that is a deliberate identity decision; give a worked example.                                                                      |
-| TM-VF-036-002 (Critical) | AC4, AC5           | CHANGELOG `BREAKING CHANGE:` entry + grep hint (AC4) as an _informational_ control; VF-036 AC5's consumer full-suite sign-off, recorded in this task file before any npm tag, as the _load-bearing_ control. Do not tag without AC5 evidence recorded.                |
-| TM-VF-036-003            | AC2, AC3           | AC2's asymmetric-override test must additionally assert collection-level behavior (e.g. a `.some()`-style scan over a mixed-override list), not just a single pairwise fallback case; AC3's JSDoc must state the collection-level caveat, not only the pairwise rule. |
-| TM-VF-036-004            | AC2, AC3           | AC2's test corpus must include an explicit `[]`-returning override case with an asserted, documented outcome; AC3's JSDoc must call out `[]` as a near-always-a-bug pattern, distinct from `undefined`.                                                               |
-| TM-VF-036-005            | AC3                | JSDoc must document throw-propagation explicitly (equals() can now throw) and recommend pure, allocation-light overrides; no library-side try/catch swallow (would violate fail-loud principle).                                                                      |
-| TM-VF-036-006            | — (cross-ref only) | No new AC needed — already covered by TM-VF-023-006's disposition of `LibUtils.deepEqual`; noted here only so a future reviewer does not mistake it for a new root cause introduced by VF-036.                                                                        |
+| Finding       | AC(s)                        | Mitigation shape                                                                                                                                                                                                                                                                                   |
+| ------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TM-VF-036-001 | `AC-DOCS`                    | JSDoc, README and LLMGUIDE must warn: do not omit security/authorization/cache-key-relevant fields from the component list unless that is a deliberate identity decision. Give a worked example.                                                                                                   |
+| TM-VF-036-002 | `AC-MIGRATION`, `AC-SIGNOFF` | MIGRATION.md carries the grep hint and the instruction to rename in ONE atomic codemod, with the non-transitivity rationale. Downstream full-suite sign-off on a pre-release build before any npm tag. **No `BREAKING CHANGE:` entry** — this release is an additive minor and one would be wrong. |
+| TM-VF-036-003 | `AC-TESTS`, `AC-DOCS`        | The non-transitivity triangle is pinned as a test commented KNOWN ACCEPTED LIMITATION; the docs state the collection-level consequence, not only the pairwise fallback rule.                                                                                                                       |
+| TM-VF-036-004 | `AC-TESTS`, `AC-DOCS`        | Explicit `[]`-vs-`[]` test with an asserted documented outcome, plus a test for the `undefined`-downgrade trap; docs call out both, and the fixed-arity rule.                                                                                                                                      |
+| TM-VF-036-005 | `AC-TESTS`, `AC-DOCS`        | Test asserting a throwing override propagates rather than being swallowed; docs state `equals()` is no longer total and recommend pure, allocation-light overrides over frozen state.                                                                                                              |
+| TM-VF-036-006 | — (cross-ref only)           | No new AC. Covered by TM-VF-023-006's disposition of `LibUtils.deepEqual`; noted so a future reviewer does not mistake it for a new root cause introduced by VF-036.                                                                                                                               |
 
-**UNVERIFIED items in this TM** (flagged rather than assumed): (a) whether
-`api-extractor`/`validate:api` in this repo would flag a new `protected` member
-at all; (b) whether any of the ~170 actual consumer override sites encode a
-security-relevant field (tenant/permission/cache-key) in a way that
-TM-VF-036-001 would fire on in practice; (c) whether any existing override
-bodies throw or are non-trivially expensive (TM-VF-036-005). All three are
-out-of-repo / consumer-internal facts not derivable from this codebase and
-should be confirmed as part of the VF-036 AC5 consumer sign-off process.
+**UNVERIFIED items** (flagged rather than assumed): (a) whether any real
+consumer override encodes a security-relevant field such that TM-VF-036-001
+fires in practice; (b) whether any existing override bodies throw or are
+non-trivially expensive (TM-VF-036-005). Both are consumer-internal facts not
+derivable from this codebase and should be confirmed as part of `AC-SIGNOFF`.
 
-**Next steps:** Review this TM + confirm findings with Tech Lead sign-off.
-Status transitions DRAFT → APPROVED after sign-off; TM-VF-036-002 (Critical)
-must have AC5 evidence recorded in the task file before this TM's status
-changes, per the same rule applied to TM-VF-023-001.
+**Gate coverage, stated honestly.** `packages/value-objects/api-extractor.json`
+now exists and is chained into the root `validate:api` script, and its `.api.md`
+report does include `protected` members — so the hook is visible to that gate.
+Two caveats a reader must not skip: `.github/workflows/ci.yml` does **not**
+invoke `validate:api` at all (it runs api-extractor inline for contracts, events
+and enterprise only), so there is no value-objects api-extractor step in CI
+today; and api-extractor is a **shape-diff** tool, so a clean report is never
+evidence that runtime equality behavior was preserved. The behavioral-safety
+argument for VF-036 rests on the `equals()` code review and the test corpus, not
+on this gate.
+
+**Sign-off:** APPROVED 2026-08-09. No Critical findings remain; 002 is mitigated
+by design rather than by process. `AC-SIGNOFF` remains outstanding and blocks
+the npm tag, not this TM.

@@ -33,7 +33,7 @@ open_questions:
       maintain backward compatibility". The strongest counter to (C): the
       consumer wrote those overrides AS their intended equality semantics, so
       (A) plausibly fixes latent bugs rather than causing them, and the task
-      already gates the npm tag on their full suite (AC5).
+      already gates the npm tag on their full suite (AC-SIGNOFF).
       UPDATED after Q2 was measured — the balance is now a dominance argument,
       not a preference. For the known consumer BOTH options cost exactly one
       mechanical codemod over the same 171 sites (add `override` under A;
@@ -66,7 +66,7 @@ open_questions:
       reflexivity guard fixing `NaN` self-inequality — was split out per the
       revised Q7 answer precisely to keep this true; any reflexivity shortcut
       that IS implemented must live inside the components branch only, so the
-      raw path stays bit-for-bit identical. AC4 therefore becomes a
+      raw path stays bit-for-bit identical. AC-MIGRATION therefore becomes a
       `feat(core):` CHANGELOG entry plus a MIGRATION.md section for
       consumers holding dead `getEqualityComponents` overrides, carrying the
       grep hint and the instruction to rename in ONE atomic codemod (per Q9).
@@ -77,7 +77,7 @@ open_questions:
       known consumer (Q2c); worth one line in the release notes. It is a
       compile-time signal, not a runtime change, so it does not alter the
       classification.
-      CONSEQUENCE FOR AC5 — the downstream full-suite sign-off stays, but its
+      CONSEQUENCE FOR AC-SIGNOFF — the downstream full-suite sign-off stays, but its
       role changes: it is no longer the load-bearing safety gate for mass
       activation (option C removes that failure mode by construction, per the
       2026-08-09 correction in the threat model). It becomes validation that
@@ -265,10 +265,10 @@ open_questions:
     blocking: true
     question: >-
       SCOPE BOUNDARY for three process/tooling artifacts that DO NOT EXIST
-      today and that AC4/AC6 implicitly assume. (a) `packages/value-objects/
+      today and that AC-DOCS/AC-MIGRATION implicitly assume. (a) `packages/value-objects/
       api-extractor.json` and `packages/value-objects/**/api-surface.test.ts`
       are both confirmed ABSENT, and root `validate:api` covers only
-      events/contracts/enterprise — so AC6's "api-surface snapshot updated" has
+      events/contracts/enterprise — so AC-GATE's "api-surface snapshot updated" has
       no snapshot to update, and `test:contracts` runs with `--passWithNoTests`
       (silent green). Wire them up inside VF-036, or a separate task? (b) The
       behavioral-BC checklist from LIB-MATURITY-AUDIT item 12 is PROPOSED ONLY
@@ -341,12 +341,12 @@ open_questions:
       (TM-VF-036-002, DREAD 13, "dormant ~170-site mass activation on upgrade
       with no compiler signal"). Per the same rule TM-VF-023 followed, a
       Critical finding needs an assigned mitigation before DRAFT → APPROVED.
-      The TM proposes treating existing AC5 (consumer full-suite sign-off
+      The TM proposes treating existing AC-SIGNOFF (consumer full-suite sign-off
       before any npm tag) as load-bearing and non-skippable rather than adding
       a new control. Confirm that, and flip the TM to APPROVED.
     answer: >-
       CONFIRMED (accepted 2026-08-09), with one required correction to the TM
-      before it flips. AC5 (downstream full-suite sign-off on a patched
+      before it flips. AC-SIGNOFF (downstream full-suite sign-off on a patched
       pre-release build, before any npm tag) is the assigned mitigation for
       TM-VF-036-002 and is non-skippable — no new control is invented.
       Correction: TM-VF-036-002 was written as "mass activation with NO
@@ -379,7 +379,7 @@ decisions:
       and will never be implemented, or the phantom regenerates.
     propose_adr: true
     adr_note: >-
-      No ADR decides value-object equality semantics (38 ADR files scanned).
+      No ADR decides value-object equality semantics (39 numbered ADR files scanned).
       ADR-0030 (stability levels @stable/@experimental/@internal +
       api-extractor CI) is PROPOSED, not accepted, so an @experimental tag
       carries no force today and cannot be used to lower the BC bar here.
@@ -501,26 +501,39 @@ information.
 | `LibUtils.deepEqual` — `Object.is` fast path (so `NaN` components compare equal), cycle/memo `WeakMap`, `Date` by time, `RegExp` by string, `Map` recursive, **`Set` by `has()` ⇒ reference equality for object members**                                                                                                                                                                                                                   | `packages/utils/src/lib-utils.ts:259-332`                                                                                                            |
 | `getEqualityComponents` — **ZERO occurrences anywhere in the repo**                                                                                                                                                                                                                                                                                                                                                                         | whole-repo search                                                                                                                                    |
 | Entity/aggregate identity is NOT affected: `Entity.equals` and `AggregateRoot.equals` delegate to `this._id.equals()` → `EntityId`, which does **not** extend `BaseValueObject`                                                                                                                                                                                                                                                             | `packages/aggregates/src/core/entity.ts:83-88`, `.../aggregate-root.ts:191-196`, `packages/contracts/src/domain/entity-id.implementation.ts:117-119` |
-| Existing equality corpus: ~6 equality tests, incl. one pinning cross-subclass same-value equality as `true`                                                                                                                                                                                                                                                                                                                                 | `packages/value-objects/tests/base-value-object.test.ts` (419 lines), `:108-117`, `:143-150`, `:176-185`, `:246-259`, `:355-373`                     |
+| Existing equality corpus: ~6 equality tests, incl. one pinning cross-subclass same-value equality as `true`                                                                                                                                                                                                                                                                                                                                 | `packages/value-objects/tests/base-value-object.test.ts` (418 lines), `:108-117`, `:143-150`, `:176-185`, `:246-259`, `:355-373`                     |
 | `validate:api` runs api-extractor for **events, contracts, enterprise only** — value-objects is not covered                                                                                                                                                                                                                                                                                                                                 | root `package.json:73`                                                                                                                               |
 | `test:contracts` = `vitest packages/**/api-surface.test.ts --passWithNoTests` — **CORRECTED 2026-08-09**: `packages/value-objects/tests/api-surface.test.ts` DOES exist (19 such tests repo-wide), so this package is NOT green-by-`--passWithNoTests`. It snapshots `Object.keys(api).sort()` — the named-export list only — so it still cannot see a new `protected` member on `BaseValueObject`. Conclusion unchanged, reason different. | root `package.json:50`, `packages/value-objects/tests/api-surface.test.ts` (20 lines)                                                                |
 | `ddd:lint` → `tools/ddd-lint/src/cli.ts packages` exists                                                                                                                                                                                                                                                                                                                                                                                    | root `package.json:85`                                                                                                                               |
 | Docs-compile CI gate exists (`pnpm docs-compile-gate:check`, VD-005 AC11)                                                                                                                                                                                                                                                                                                                                                                   | `.github/workflows/ci.yml:239-243`                                                                                                                   |
 | `LLMGUIDE.md:61` claims raw-`===` equality — already wrong since VF-023                                                                                                                                                                                                                                                                                                                                                                     | `packages/value-objects/LLMGUIDE.md`                                                                                                                 |
-| No ADR decides VO equality (38 ADR files); ADR-0030 and ADR-0029 are **Proposed**, ADR-0002 Accepted                                                                                                                                                                                                                                                                                                                                        | `docs/adr/`                                                                                                                                          |
+| No ADR decides VO equality (39 numbered ADR files); ADR-0030 and ADR-0029 are **Proposed**, ADR-0002 Accepted                                                                                                                                                                                                                                                                                                                               | `docs/adr/`                                                                                                                                          |
 
 ## Named symbols that DO NOT EXIST YET
 
 Every one of these reads like an existing thing in the task spec or in panel
-prose. None of them is in the repo — an implementer must **create** them:
+prose. None of them is in the repo — an implementer must **create** them. **All
+of these were shipped in `c88e728e` except where noted**; the list is kept for
+the record of what the state was before the task.
 
-- `getEqualityComponents()` / `getIdentityComponents()` — **MUST BE CREATED**
-  (zero occurrences; the whole premise of the task).
+- `getIdentityComponents()` — **MUST BE CREATED** (zero occurrences).
+  **CORRECTED 2026-08-09:** this bullet originally read
+  "`getEqualityComponents()` / `getIdentityComponents()`", written before Q1
+  picked a name. Read literally it instructs creating BOTH, which is option A
+  wearing a hat. Only `getIdentityComponents` is ever implemented;
+  `getEqualityComponents` is never created, aliased, shimmed or runtime-detected
+  (D1, and a task non-goal).
 - `componentEquals` element-comparison helper — **MUST BE CREATED** (D3).
 - Value-object brand symbol (`Symbol.for('@vytches/ddd.valueObject')`) — **MUST
   BE CREATED**.
-- Test-time assertion helper for detecting dead/mixed overrides — **MUST BE
-  CREATED** (proposal only).
+- ~~Test-time assertion helper for detecting dead/mixed overrides~~ — **NOT
+  ADOPTED, do not build.** It was floated in D4's rationale as an alternative to
+  a runtime warning, but no answer adopted it and the task lists "no
+  auto-warning for override-exists-but-was-dead-code" as an explicit non-goal.
+  Building it would add an unrequested export to the public surface of a release
+  whose whole classification rests on being additive-only. _(Struck 2026-08-09;
+  the bullet previously said MUST BE CREATED and "proposal only" in the same
+  breath.)_
 - `packages/value-objects/api-extractor.json` — **MUST BE CREATED** (confirmed
   absent).
 - ~~`packages/value-objects/**/api-surface.test.ts`~~ — **ALREADY EXISTS**, at
@@ -569,25 +582,29 @@ creates. Neither is a nit: the first makes the feature wrong for its main use,
 the second breaks the equivalence-relation contract that consumer collection
 code assumes.
 
-**4. AC1 is weaker evidence than it sounds.** "Run the existing equality test
-corpus unmodified" covers ~6 tests over primitives, flat objects and the null
-guard. There is zero existing coverage of nested `Date`/`Map`/`Set`/`NaN` inside
-a VO value. So an unmodified-corpus pass proves the primitive/flat slice only;
-the deep slice has to be added net-new before it proves anything.
+**4. AC-CORE is weaker evidence than it sounds.** "Run the existing equality
+test corpus unmodified" covers ~6 tests over primitives, flat objects and the
+null guard. There is zero existing coverage of nested `Date`/`Map`/`Set`/`NaN`
+inside a VO value. So an unmodified-corpus pass proves the primitive/flat slice
+only; the deep slice has to be added net-new before it proves anything.
 
 **5. Security.** `docs/security/threat-models/TM-VF-036.md` (DRAFT, written this
 run) carries six findings, one Critical: mass activation of ~170 dormant
 overrides with no compiler signal (DREAD 13). Notably, Denial-of-Service stops
 being N/A here — unlike TM-VF-023, `equals()` now calls consumer code that can
-throw or allocate on a hot path. The TM's position is that existing AC5
+throw or allocate on a hot path. The TM's position is that existing AC-SIGNOFF
 (consumer full-suite sign-off before any npm tag) is the mitigation and must be
 treated as non-skippable rather than inventing a new control (Q10).
 
 ## Risks (detail in the threat model — do not duplicate it here)
 
-- **Critical** — dormant-override mass activation, invisible to every existing
-  gate. Mitigation: AC5 consumer sign-off, made load-bearing; or removed
-  entirely by choosing option C.
+- **High** — dormant-override mass activation. **Removed by construction** once
+  option C was chosen (Q1): the hook carries a new name, so nothing activates on
+  upgrade for anyone. Rated 13/Critical in the TM's first draft, corrected to
+  11/High per Q10 once the compiler-signal measurement landed. `AC-SIGNOFF`
+  remains the assigned mitigation for the residual, and still blocks the npm
+  tag. _(This bullet said "Critical … or removed entirely by choosing option C"
+  until 2026-08-09; option C IS chosen, so the conditional was stale.)_
 - **High** — identity narrowing: a consumer override that omits a discriminating
   field (tenant, scope, resource key) silently widens equality, and the library
   can neither see nor constrain what goes into components.
@@ -602,11 +619,22 @@ treated as non-skippable rather than inventing a new control (Q10).
 Both `nx run @vytches/ddd-value-objects:test` **and** `:type-check` (tsc —
 Vitest/esbuild has previously missed signature regressions in this repo);
 coverage ≥80% on touched files; ESM+CJS build with clean `.d.ts`;
-`test:contracts` and `validate:api` — with the explicit caveat that a clean
-api-surface diff is **not** evidence of safety for a behavioral break, and must
-be reported as such rather than as a pass; corrected `LLMGUIDE.md:61` confirmed
-by eye, not by the gate; AC5 sign-off recorded. Leaving the throw contract (Q4)
-or the asymmetric-presence behavior untested is itself a block.
+`test:contracts`; corrected `LLMGUIDE.md` equality claim confirmed by eye, not
+by the gate; `AC-SIGNOFF` recorded. Leaving the throw contract (Q4) or the
+asymmetric-presence behavior untested is itself a block.
+
+**Do NOT gate on `pnpm validate:api` (added 2026-08-09, learned the hard way).**
+Two reasons. First, that chain is **already red before this task starts** — it
+aborts inside the `enterprise` config on an api-extractor internal error in
+`packages/aggregates`, so value-objects is never reached and a verifier reading
+the failure will misattribute it. Run the single config instead:
+`npx api-extractor run --local --config packages/value-objects/api-extractor.json`.
+Second, every config uses `--local`, which **overwrites** committed `api-report`
+baselines rather than diffing against them, so merely running the gate dirties
+two unrelated packages and looks like scope contamination at review time. Both
+are recorded as follow-ups in the task file. And whichever way it is run: a
+clean api-surface diff is **not** evidence of safety for a behavioral break, and
+must be reported as such rather than as a pass.
 
 ## Test matrix an implementer must add
 
@@ -617,36 +645,88 @@ tested in **both** call directions. Nested semantics: `Date`, `Map`, `Set`,
 `NaN` inside components; a component that is itself a value object (D3).
 Robustness: throwing override (per Q4); the non-transitivity triangle pinned as
 a known limitation with a comment so nobody "fixes" it later; cross-subclass
-same components (Q6); `NaN` self-equality (Q7); `0`/`-0`. Type fixtures: the
-historical `protected getEqualityComponents(): any[]` shape must still typecheck
-against the new base; negative fixtures for the arrow-property form (TS2425),
-`private` narrowing (TS2415) and non-array returns (TS2416). In
-`packages/utils/tests/`: a pinning repro for the shared-reference false negative
-(D7).
+same components (Q6); `0`/`-0`.
 
-## Open questions
+**Removed 2026-08-09: `NaN` self-equality (Q7).** This line asked for a test
+that CANNOT pass under the shipped design, and it cited Q7 as its authority
+while Q7 says the opposite. A VO wrapping `NaN` is not equal to itself on the
+raw path, and the only way to make such an assertion green is the unconditional
+`this === valueObject` guard that Q7 explicitly split out and that D2 forbids —
+reintroducing it would make the release breaking and invalidate Q1's whole
+classification. The `NaN` coverage that DOES belong here is `NaN` **inside
+components**, listed under Nested semantics above. Left in place, this line was
+a live instruction to undo the task's central constraint.
 
-Ten blocking questions are recorded in the frontmatter — Q1 (rollout shape) and
-Q2 (the downstream `noImplicitOverride` / override-shape facts) gate all the
-others, since a decision for option C changes the framing of Q8c and softens Q9.
-_(answers live in the frontmatter only)_
+Type fixtures: negative fixtures for the arrow-property form (TS2425), `private`
+narrowing (TS2415) and non-array returns (TS2416). In `packages/utils/tests/`: a
+pinning repro for the shared-reference false negative (D7).
 
-## Decisions (proposed)
+## Open questions — ALL ANSWERED (2026-08-09)
 
-D1–D8 in the frontmatter. **D1 supersedes the task spec's stated design** and
-must be accepted or rejected explicitly. D2–D6 are refinements the spec left
-under-specified; D7 and D8 expand the scope of what "done" means for testing and
-docs respectively.
+Ten blocking questions were recorded in the frontmatter; every one now carries
+an `answer`, and `status` is `approved`. Q1 (rollout shape) and Q2 (the
+downstream `noImplicitOverride` / override-shape facts) gated all the others —
+choosing option C changed the framing of Q8c and softened Q9. Nothing here is
+still open. _(answers live in the frontmatter only)_
 
-## Still UNVERIFIED (Bash/Grep/Glob denied this session)
+## Decisions — ACCEPTED (2026-08-09)
 
-- Whether `packages/utils/tests/lib-utils.test.ts` already covers `deepEqual`,
-  and how deeply.
-- Whether any expect-type fixtures already exist under `packages/value-objects`.
-- Whether internal `BaseValueObject` subclasses or `.equals()` call sites exist
-  elsewhere in the 19 packages beyond the Entity/AggregateRoot/EntityId path
-  that was confirmed unaffected. The scan was budget-limited; "no other internal
-  callers" is **not** established.
-- Whether VF-026 (ddd-lint anti-pattern rules) already scopes a dead-override
-  detection rule.
-- Everything in Q2 — downstream consumer facts, not derivable from this repo.
+D1–D8 in the frontmatter, all **accepted**. D1 superseded the task spec's stated
+design; the task file was rewritten to match on 2026-08-09, so
+`D1.supersedes_task_spec` is now history rather than a pending action. D2–D6 are
+refinements the spec left under-specified — note D2 carries a
+`CORRECTED 2026-08-09` clause where its original wording was superseded by the
+revised Q7. D7 and D8 expand what "done" means for testing and docs. D4's
+floated test-time assertion helper was NOT adopted (see the struck bullet
+above).
+
+## Verification status of the "UNVERIFIED" list
+
+The list below was written while `Bash`, `Grep` and `Glob` were denied. Each
+item was resolved on 2026-08-09 once tools were available:
+
+- `packages/utils/tests/lib-utils.test.ts` — **RESOLVED.** It exists; VF-036
+  adds a pinning test for the `deepEqual` shared-reference false negative to it.
+- expect-type fixtures under `packages/value-objects` — **RESOLVED: none
+  existed.** `expectTypeOf` appeared nowhere under `packages/`. VF-036 created
+  `tests/base-value-object.identity-components.type-fixtures.test.ts`.
+- Other internal `BaseValueObject` subclasses / `.equals()` call sites — **STILL
+  NOT EXHAUSTIVELY ESTABLISHED.** The Entity/AggregateRoot/EntityId path is
+  confirmed unaffected, and the full suite across all 26 projects is green,
+  which is strong evidence but not a proof of absence. Treat "no other internal
+  callers" as unproven.
+- VF-026 scoping a dead-override lint rule — **RESOLVED as locatable:** VF-026
+  is completed and lives in
+  `project-orchestration/completed-tasks/VF-026-ddd-lint-anti-pattern-rules.md`.
+  Whether it already covers this pattern still needs a read before the follow-up
+  is opened.
+- Everything in Q2 — **RESOLVED** by direct inspection of the consumer
+  repository; see the Q2 answer.
+
+## Known accuracy defects in this artifact (audited 2026-08-09)
+
+Recorded rather than silently patched, because the pattern matters more than the
+individual slips. Three audits were run against the real repo after
+implementation. The **fact table above held up** — every line anchor and every
+root `package.json` script claim was exact. What failed was the **joins between
+documents**: claims restated in the frontmatter, the body, the task file and the
+threat model, where updating one left the other three stale.
+
+Corrected in place: the `api-surface.test.ts` absence claim and the
+`--passWithNoTests` claim (both wrong); D2 contradicting the revised Q7; the
+`NaN` self-equality line in the test matrix; the `getEqualityComponents()` /
+`getIdentityComponents()` slash in the MUST-BE-CREATED list; D4's unadopted
+helper; every ordinal `ACn` reference, now pointing at stable IDs; the stale
+Critical rating in Risks; the test file's line count (418, not 419) and the ADR
+count (39 numbered files, not 38).
+
+One that cannot be fixed by editing, only by not repeating: the row asserting
+"`getEqualityComponents` — ZERO occurrences anywhere in the repo | whole-repo
+search" sat inside the block headed **"trust these"**, while the procedural note
+two sections down states that `Grep` was denied for the entire session. The
+engineering conclusion survives — there are zero occurrences in `packages/`,
+`docs/`, `.github/`, `scripts/` and `tools/`; the 12 real hits are all in
+`project-orchestration/` prose — but the claim describes a search that could not
+have been performed. **The failure was confidence labelling, not fact-finding**,
+and that is the worse of the two, because it removes the reader's ability to
+know which parts to trust.

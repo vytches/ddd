@@ -14,7 +14,7 @@ estimated_time: 8h
 created_by: consumer-feedback-2026-08-08
 created_at: 2026-08-08
 updated_at: 2026-08-09
-status: backlog
+status: in-progress # implemented and committed (c88e728e); AC-SIGNOFF outstanding, blocks the npm tag
 release_target:
   next pre-release after implementation; additive minor bump. Downstream
   consumer validation on a patched build before any npm tag (they offered)
@@ -41,7 +41,7 @@ established:
    initial docs commit `d1c13027` through the 2025-07-16 release `bdd5e30c`),
    showing a classic DDD `ValueObject` base with
    `protected abstract getEqualityComponents(): any[]`. The phantom was removed
-   from docs in the 2026-05-23 README accuracy cleanup (`0ad22d88`), but
+   from docs in the 2026-05-22 README accuracy cleanup (`0ad22d88`), but
    consumers had already built on it.
 2. **`equals()` has always compared the raw constructor value** —
    `JSON.stringify` before VF-023, `LibUtils.deepEqual` after. No released
@@ -114,60 +114,82 @@ Two consequences of keeping it non-breaking:
 
 ## Acceptance Criteria
 
-1. [ ] Hook, brand symbol and `componentEquals` implemented as designed; with no
-       override present, `equals()` is bit-for-bit the current behavior — the
-       existing equality corpus passes unmodified. Note that corpus is thin (~6
-       equality tests, no nested `Date`/`Map`/`Set`/`NaN` coverage), so it is a
-       necessary but not sufficient check.
-2. [ ] New tests: partial-identity VO (excluded timestamp → equal despite
-       differing raw props); component order/length mismatch; `[]` vs `[]`;
-       asymmetric override in BOTH call directions; `undefined`-returning
-       override; nested `Date`/`Map`/`Set`/`NaN` inside components; a component
-       that is itself a value object (must dispatch to its `equals()`); a
-       throwing override (assert it propagates); the non-transitivity triangle
-       pinned as a KNOWN ACCEPTED LIMITATION with an explanatory comment;
-       cross-subclass with identical components (pins current behavior).
-3. [ ] Type fixtures: an override matching the documented signature typechecks;
-       negative fixtures for the arrow-property form (TS2425), `private`
-       narrowing (TS2415) and non-array returns (TS2416).
-4. [ ] JSDoc + README + LLMGUIDE sections matching the code exactly, covering:
-       when to use component identity vs full-value equality; the asymmetric
-       fallback and its collection-level consequence (non-transitivity in mixed
-       populations); the `[]` footgun; throw propagation; that components must
-       derive only from frozen/`readonly` state (the constructor deep-freezes
-       `value` only, not subclass fields); and that `toString`/`toJSON` stay
-       value-based, so equals/hash desync is the consumer's responsibility.
-       **Also fix `LLMGUIDE.md:61`**, which still claims raw-`===` equality —
-       wrong since VF-023. New code fences must be marked `compile-check`.
-5. [ ] A permanent note in README/LLMGUIDE recording that
-       `getEqualityComponents` was a 2025 documentation error, was never
-       implemented, and will not be — otherwise the phantom regenerates.
-6. [ ] CHANGELOG `feat(core):` entry plus a MIGRATION.md section for consumers
-       holding dead `getEqualityComponents` overrides: the grep hint
-       (`grep -rn "getEqualityComponents" --include="*.ts" src/`), before/after
-       snippets, and the instruction to perform the rename as **one atomic
-       codemod** — a partially-migrated hierarchy is exactly the mixed
-       population that triggers non-transitivity.
-7. [ ] Wire the missing API gate for this package: create
-       `packages/value-objects/api-extractor.json` (absent — only events,
-       contracts and enterprise have one) and append it to root `validate:api`.
-       **Do NOT create an api-surface test** —
-       `packages/value-objects/tests/api-surface.test.ts` already exists (fact
-       corrected 2026-08-09; the earlier "absent, green only via
-       `--passWithNoTests`" claim was wrong). It snapshots the named-export
-       list, so it is blind to a new `protected` member by design — note that
-       limitation rather than papering over it. Report explicitly that a clean
-       api-surface diff is not evidence of behavioral safety.
-8. [ ] Create the behavioral-BC checklist (LIB-MATURITY-AUDIT item 12) as a real
-       artifact and apply it here. It is proposed-only today, and this is the
-       third instance of the defect class after VB-003/F-C4 and VP-009 Bug #3.
-9. [ ] Patched pre-release build handed to the downstream consumer for a full
-       e2e/integration run against their migrated call sites; sign-off recorded
-       here before any npm tag. (Under this design it validates the new hook
-       rather than gating a mass activation.)
-10. [ ] Type-check (`nx run @vytches/ddd-value-objects:type-check`, tsc — not
-        just Vitest), full suite, ESM+CJS build, coverage ≥80% on touched files,
-        all green.
+> Criteria carry **stable identifiers**, not ordinal numbers. An earlier rewrite
+> renumbered them and the analysis artifact and threat model kept citing the old
+> positions — which silently repointed "AC5, the release-blocking consumer
+> sign-off" at a documentation item. Cite these IDs from other documents; never
+> cite a position.
+
+- **AC-CORE** — [x] Hook, brand symbol and `componentEquals` implemented as
+  designed; with no override present, `equals()` is bit-for-bit the current
+  behavior and the existing equality corpus passes unmodified. That corpus is
+  thin (4 equality tests among 23, no nested `Date`/`Map`/`Set`/`NaN` coverage),
+  so it is necessary but not sufficient — hence AC-TESTS. _Done in `c88e728e`;
+  the no-override path was re-read and confirmed unchanged by the final
+  verification gate._
+- **AC-TESTS** — [x] Partial-identity VO; component order/length mismatch in
+  both directions; `[]` vs `[]`; asymmetric override in BOTH call directions;
+  `undefined`-returning override; nested `Date`/`Map`/`Set`/`NaN` inside
+  components; a component that is itself a value object (must dispatch to its
+  `equals()`); a throwing override (assert it propagates); the non-transitivity
+  triangle pinned as a KNOWN ACCEPTED LIMITATION with an explanatory comment;
+  cross-subclass with identical components. Plus a pinning regression test in
+  `packages/utils/tests/` for the pre-existing `deepEqual` shared-reference
+  false negative. _Done in `c88e728e`._ **Deliberately NOT included:** a `NaN`
+  self-equality assertion on the raw path. The only way to make one pass is the
+  unconditional `this === valueObject` guard that this task exists to keep out —
+  see Release classification. An earlier draft of the analysis test matrix asked
+  for it; that line has been removed.
+- **AC-TYPES** — [x] Type fixtures: an override matching the documented
+  signature typechecks; negative fixtures for the arrow-property form (TS2425),
+  `private` narrowing (TS2415) and non-array returns (TS2416). _Done in
+  `c88e728e`._
+- **AC-DOCS** — [x] JSDoc + README + LLMGUIDE matching the code exactly: when to
+  use component identity vs full-value equality; the asymmetric fallback and its
+  collection-level consequence (non-transitivity in mixed populations); the `[]`
+  footgun and the `undefined`-because-uninitialised downgrade trap; the
+  **fixed-arity rule** (a class must always return the same number of
+  components); throw propagation; that components must derive only from
+  frozen/`readonly` state, because the constructor deep-freezes `value` but not
+  subclass fields; the string-literal discriminator idiom; and that
+  `toString`/`toJSON` stay value-based, so equals/hash desync is the consumer's
+  responsibility. The stale raw-`===` equality claim in `LLMGUIDE.md` is
+  corrected. New code fences are marked `compile-check`. _Done in `c88e728e`._
+- **AC-PHANTOM-NOTE** — [x] A permanent note in README and LLMGUIDE recording
+  that `getEqualityComponents` was a 2025 documentation error, was never
+  implemented, and will not be — otherwise the phantom regenerates. _Done in
+  `c88e728e`._
+- **AC-MIGRATION** — [x] CHANGELOG `feat(core):` entry plus a MIGRATION.md
+  section for consumers holding dead `getEqualityComponents` overrides: the grep
+  hint (`grep -rn "getEqualityComponents" --include="*.ts" src/`), before/after
+  snippets, and the instruction to perform the rename as **one atomic codemod**
+  — a partially-migrated hierarchy is exactly the mixed population that triggers
+  non-transitivity. _Done in `c88e728e`. Note the commit scope is `core`:
+  `value-objects` is not in this repo's `commitlint.config.js` `scope-enum`._
+- **AC-GATE** — [x] `packages/value-objects/api-extractor.json` created and
+  appended to the root `validate:api` chain, with its first `.api.md` baseline
+  generated. No api-surface test was created —
+  `packages/value-objects/tests/api-surface.test.ts` already exists; it
+  snapshots the named-export list and is therefore blind to a new `protected`
+  member by design, which is the gap api-extractor closes. _Done in `c88e728e`._
+  **Two limitations to state rather than paper over:** a clean api-surface diff
+  is not evidence of behavioral safety (api-extractor is a shape-diff tool), and
+  `.github/workflows/ci.yml` does not invoke `validate:api` at all, so this gate
+  does not run in CI today. See Follow-ups.
+- **AC-CHECKLIST** — [x] `docs/process/behavioral-bc-checklist.md` created as a
+  reusable artifact and applied to VF-036 as its first consumer. This was the
+  third instance of the defect class after VB-003/F-C4 and VP-009 Bug #3. _Done
+  in `c88e728e`._
+- **AC-SIGNOFF** — [ ] **OUTSTANDING, blocks the npm tag.** Pre-release build
+  handed to the downstream consumer for a full e2e/integration run against their
+  migrated call sites; sign-off recorded here before any tag. Under this design
+  it validates the new hook rather than gating a mass activation, but it remains
+  non-skippable — it is the assigned mitigation for TM-VF-036-002.
+- **AC-VERIFY** — [x] Type-check
+  (`nx run @vytches/ddd-value-objects:type-check`, tsc — not just Vitest), full
+  suite, ESM+CJS build, coverage ≥80% on touched files. _All green;
+  `base-value-object.ts` measured at 93.75% statements / 100% branches / 93.33%
+  lines._
 
 ## Non-goals
 
@@ -183,7 +205,7 @@ Two consequences of keeping it non-breaking:
 
 ## Follow-ups spawned
 
-Found while wiring AC7. Both are PRE-EXISTING and outside the VF-036 diff —
+Found while wiring AC-GATE. Both are PRE-EXISTING and outside the VF-036 diff —
 recorded here rather than as standalone task files, and deliberately not fixed
 inside this change-set.
 
@@ -197,11 +219,20 @@ inside this change-set.
   before the VF-036 source change, contains zero occurrences of
   `getIdentityComponents`, and `packages/aggregates` has no working-tree changes
   — yet the enterprise config still fails standalone. The value-objects config
-  added by AC7 **passes standalone**, but will never be reached in CI until this
-  is fixed. Likely an api-extractor version issue; try a bump before rewriting
-  the loop. **Consequence for AC7 that must not be swallowed:** the gate VF-036
-  adds is correctly configured and independently green, but the chain it joins
-  is not. Say so in the release notes instead of implying the gate is live.
+  added by AC-GATE **passes standalone**. Likely an api-extractor version issue;
+  try a bump before rewriting the loop. **Correction 2026-08-09 to this
+  bullet.** An earlier version said the value-objects config "will never be
+  reached in CI until this is fixed". That was wrong, and it was written without
+  opening the workflow — the same failure mode this task keeps finding
+  elsewhere. `.github/workflows/ci.yml` never invokes `validate:api` at all: it
+  runs api-extractor inline for contracts (`:157`, `|| true`), events (`:158`,
+  `|| true`) and enterprise (`:170`, blocking). There is no value-objects step
+  in CI whatsoever, and the events → contracts → enterprise → value-objects
+  ordering exists only in the npm script. **The gap is therefore larger than
+  first stated:** wiring the config into `validate:api` does not put it in CI,
+  so closing this follow-up means both fixing the enterprise crash and adding a
+  CI invocation. Until then, say in the release notes that the gate exists but
+  does not run in CI — do not imply it is live.
 - **Committed api-report baselines are ~4 months stale, and `validate:api`
   mutates them.** `packages/contracts/api-report/ddd-contracts.api.md` and
   `packages/events/api-report/ddd-events.api.md` were last committed 2026-04-16
@@ -223,7 +254,10 @@ inside this change-set.
   comparison paths at the next major.
 - **`ddd-lint` rule** flagging classes that extend `BaseValueObject` and declare
   a dead `getEqualityComponents` method. Home is `tools/ddd-lint/src/cli.ts`;
-  check whether VF-026 already scopes it.
+  check whether VF-026 already scopes it — note VF-026 is **completed** and
+  lives in
+  `project-orchestration/completed-tasks/VF-026-ddd-lint-anti-pattern-rules.md`,
+  so this means reading what shipped, not coordinating with open work.
 
 ## Links & References
 
