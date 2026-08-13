@@ -99,6 +99,18 @@
         "description": "Log per-agent token usage + branch to ~/.claude/logs/agent-usage.jsonl. Disable: AGENT_USAGE_LOG=off"
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/check-approval-before-impl.js\""
+          }
+        ],
+        "description": "Blok approval-gate (runtime.yml): ostrzega przy edycji kodu, gdy artefakt analizy nie ma status: approved. Tryby: ORCHESTRATE_DDD_GATE=warn|block|off"
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit",
@@ -129,6 +141,16 @@
           }
         ],
         "description": "PM health check when task files change"
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/opt/projects/claude-patterns/hooks/check-human-voice.js\""
+          }
+        ],
+        "description": "check-human-voice (zdarzenie odczytane z nagłówka hooka)"
       }
     ]
   }

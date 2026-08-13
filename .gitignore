@@ -174,3 +174,5 @@ project-orchestration/.workflow/
 .claude/agents/library-api-guardian.md
 .claude/agents/library-quality-verifier.md
 .claude/agents/tech-lead.md
+
+.claude/config/runtime.yml
