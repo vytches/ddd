@@ -160,6 +160,88 @@ not — three factual claims about this repo turned out to be wrong, one of them
 inside a table headed "trust these". For a task whose entire subject is "check
 what the gates actually do", an analysis without search tools is worthless.
 
+## Outcome
+
+**A clean api-surface diff proves only that the _shape_ did not change. It is
+not evidence of behavioral safety.** This has to be stated plainly because the
+gate is persuasive when it is green: VF-036 would have passed it without a
+remark. Its change was a new `protected` hook consulted by an existing
+`equals()` — the named-export list was identical, every public signature was
+identical, and the `.api.md` diff would have been clean while the runtime
+behavior of every `equals()` call site was in play. That is exactly why
+**AC-CHECKLIST** sits **alongside AC-GATES rather than instead of it**: AC-GATES
+restores a mechanical check that had stopped reporting, and AC-CHECKLIST asks
+the one question that check cannot ask by construction.
+
+**AC-CHECKLIST — what was wired.** `docs/process/behavioral-bc-checklist.md`
+gained VF-023 (validate-throws) as a fourth calibration case, with the table now
+explicit that the four cases do **not** resolve the same way: F-C4, VP-009 #3
+and VF-023 are behavioral breaks, while VF-036 is the counter-example where the
+design was deliberately reshaped so the no-override path stays bit-for-bit
+identical, making it an additive minor with no `BREAKING CHANGE:` entry. The
+checklist is referenced from `project-orchestration/release-process.md` as a
+manual step in the release checklist the releaser actually performs, and from
+`.github/pull_request_template.md` hanging off the existing breaking-changes
+line as the core question — _does this change runtime behavior under an
+unchanged type signature?_
+
+**AC-GATES turned out to be a different shape than this task originally
+described.** The amendment under "Why" pinned the dead surface-diff layer on an
+api-extractor internal error at
+`packages/aggregates/src/core/aggregate-root.builder.ts:167`. Measured during
+implementation, that crash was a **`validate:api` defect, not an api-extractor
+bug** — the script was run without the prerequisite build and `fix:dts` step, so
+api-extractor was fed declaration output it should never have seen. Invoked
+correctly, the chain completes. The layer that was **genuinely dead** was
+**drift detection**: `--local` rewrites the committed `api-report` baseline
+instead of diffing against it, so even a fully green run could not fail on
+drift. Had only the crash been "fixed", the gate would have gone green and still
+detected nothing — which is the same failure mode, one level up, as trusting a
+shape diff to speak for behavior.
+
+**And there was a third layer under that one, found only by running the gate in
+anger.** Removing `--local` is necessary but not sufficient: in comparison mode
+api-extractor exits non-zero on **any** warning, not only on report drift.
+Proven on `value-objects` against a byte-identical baseline — exit 1 from
+docstring warnings alone. There were 61 such warnings (contracts 35, events 16,
+value-objects 10, enterprise 0), most of them the ordinary JSDoc `@throws {X}`
+form, which TSDoc rejects because it reads `{` as an inline tag. Two further
+sources of the same kind: api-extractor emits CRLF by default, and
+`packages/*/api-report/` was not in `.prettierignore`, so `lint-staged`
+reformatted every freshly generated baseline into permanent mismatch. Any one of
+the three would have kept CI red for reasons no reviewer could act on — and a
+gate that fires for things the reader cannot act on is a gate that gets
+`|| true`-ed back to death, which is precisely how the previous generation of
+this one died.
+
+The resolution was to give the gate **exactly one failure mode**.
+`api-extractor.base.json` is new: the four package configs were byte-identical
+copies, so policy now lives in one place and a fifth package inherits it instead
+of copying the wrong file. It sets `newlineKind: "lf"`, and silences
+`tsdocMessageReporting` and `ae-unresolved-link` — deliberately, with the
+reasoning written into the file. Docstring quality is a real concern, but it
+belongs in the linter where it blocks nobody; it is now **VF-038**, which also
+has to resolve `.eslintrc-jsdoc.json`, a config declaring jsdoc rules that is
+wired to nothing and has never run — the same failure mode as this gate, in a
+different corner.
+
+Verified end to end, not by inspection: with the baselines regenerated,
+`pnpm validate:api` exits 0 across all four packages; removing a single `export`
+line from one baseline makes it exit 1 with "You have changed the API
+signature"; restoring it returns to 0. The two commands are documented in
+`project-orchestration/release-process.md` — `validate:api` compares (what CI
+runs), `validate:api:local` regenerates (what you run when the change is
+intended, committed separately so the surface diff is reviewable on its own).
+
+**One process note, since this task's whole subject is controls that report
+success without having run.** The orchestrated implementation lost the AC-GATES
+layer after it had been verified GO: the next layer's verifier saw those files
+in the working tree, correctly-from-its-own-view called them scope
+contamination, and the fix agent resolved the finding with `git checkout --`.
+The final gate caught it and returned NO-GO, so the safety net held, but the
+work was reapplied by hand. The structural fix — give each layer verifier the
+previous layers' file list, and forbid revert commands outright — is **VF-039**.
+
 ## Links & References
 
 - `docs/process/behavioral-bc-checklist.md` — created by VF-036; this task wires

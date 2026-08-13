@@ -23,15 +23,31 @@ for the no-opt-in path, not just a happy-path test of the _new_ behavior.
 
 ## Prior occurrences (why this list exists)
 
-| #   | Defect                                                                                                              | What made it "no signature difference"                                                                                                                                                                       |
-| --- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | VB-003 / F-C4 — `forFeature()` DI wiring change that stopped a cross-context event leak                             | Same public `forFeature()` signature; the change was in _which handlers received which events_ at runtime, invisible to any type check.                                                                      |
-| 2   | VP-009 Bug #3 — CQRS DI token bridge only wired inside `forRoot()`, not the other registration path                 | Same exported `COMMAND_BUS_TOKEN`/`QUERY_BUS_TOKEN` symbols and types; the break was in DI resolution behavior depending on _which_ setup path a consumer used.                                              |
-| 3   | VF-036 (this task) — candidate: reusing the `getEqualityComponents()` name from 2025 docs for the new identity hook | Would have had an unchanged `equals()` signature; the risk was that ~179 already-declared, previously-dead consumer overrides would have started running simultaneously on upgrade. **Avoided** — see below. |
+| #   | Defect                                                                                                              | What made it "no signature difference"                                                                                                                                                                                                                                         |
+| --- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | VB-003 / F-C4 — `forFeature()` DI wiring change that stopped a cross-context event leak                             | Same public `forFeature()` signature; the change was in _which handlers received which events_ at runtime, invisible to any type check.                                                                                                                                        |
+| 2   | VP-009 Bug #3 — CQRS DI token bridge only wired inside `forRoot()`, not the other registration path                 | Same exported `COMMAND_BUS_TOKEN`/`QUERY_BUS_TOKEN` symbols and types; the break was in DI resolution behavior depending on _which_ setup path a consumer used.                                                                                                                |
+| 3   | VF-036 (this task) — candidate: reusing the `getEqualityComponents()` name from 2025 docs for the new identity hook | Would have had an unchanged `equals()` signature; the risk was that ~179 already-declared, previously-dead consumer overrides would have started running simultaneously on upgrade. **Avoided** — see below.                                                                   |
+| 4   | VF-023 — `BaseValueObject`'s constructor started calling `validate()`, which no released version had ever executed  | Same constructor signature, and consumers' `validate()` overrides were already declared — they had simply never run. A value object that used to construct successfully with invalid input now throws at construction. Announced as a `BREAKING CHANGE:` with migration notes. |
 
-Two of these (#1, #2) shipped before this checklist existed and were diagnosed
-after the fact. #3 is the first case run through this checklist _before_
-shipping.
+**Four cases, three different endings.** This table is calibration, not a
+verdict — reaching it does not mean the change is breaking, it means the
+classification has to be made explicitly:
+
+- **#1 (VB-003 / F-C4)** and **#4 (VF-023)** — behavioral breaks, correctly
+  classified and announced as `BREAKING CHANGE:` with migration notes.
+- **#2 (VP-009 Bug #3)** — a behavioral break that shipped **silently**. The one
+  to study: nothing in the type system, the CI gates, or the review flow said a
+  word.
+- **#3 (VF-036)** — the **counter-example**. Same shape as the others, but the
+  design was deliberately reshaped during analysis so that the no-override path
+  stays bit-for-bit identical, which made it a genuine additive minor with
+  **no** `BREAKING CHANGE:` entry. Answering this checklist honestly is what
+  produced that outcome; assuming a hit must mean "breaking" would have produced
+  the wrong release classification.
+
+#1, #2 and #4 all shipped before this checklist existed. #3 is the first case
+run through it _before_ shipping.
 
 ## The checklist
 

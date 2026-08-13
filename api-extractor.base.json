@@ -1,0 +1,78 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+
+  // VF-037 — shared base for every package that ships an api-report baseline.
+  //
+  // Why this file exists: the four package configs used to be byte-identical
+  // copies. A change of policy meant editing four files and hoping a fifth
+  // package would remember to copy the right one. Everything common lives here;
+  // a package config should carry only what genuinely differs for that package.
+  //
+  // The api-surface gate has exactly ONE job: fail when the public API shape
+  // drifts away from the committed baseline. Anything else that can make
+  // `api-extractor run` (without --local) exit non-zero is noise that will
+  // eventually get the gate disabled with `|| true` — which is how the previous
+  // generation of this gate died. Two such sources are neutralised below.
+
+  "mainEntryPointFilePath": "<projectFolder>/dist/index.d.ts",
+
+  // Noise source 1 of 2: line endings. api-extractor defaults to CRLF, which in
+  // a Linux-only toolchain means any editor or tool that normalises on save
+  // flips the baseline and turns the gate red for a reason that has nothing to
+  // do with the API. (The matching half of this fix is the
+  // `packages/*/api-report/` entry in .prettierignore — lint-staged runs
+  // `prettier --write` on staged files and would otherwise reformat a freshly
+  // generated report into permanent mismatch.)
+  "newlineKind": "lf",
+
+  "apiReport": {
+    "enabled": true,
+    "reportFolder": "<projectFolder>/api-report/",
+    "reportFileName": "<unscopedPackageName>.api.md"
+  },
+
+  "docModel": { "enabled": false },
+  "dtsRollup": { "enabled": false },
+  "tsdocMetadata": { "enabled": false },
+
+  "compiler": {
+    "tsconfigFilePath": "<projectFolder>/tsconfig.json"
+  },
+
+  "messages": {
+    "compilerMessageReporting": {
+      "default": { "logLevel": "warning" }
+    },
+
+    "extractorMessageReporting": {
+      "default": { "logLevel": "warning" },
+      "ae-missing-release-tag": { "logLevel": "none" },
+      "ae-forgotten-export": {
+        "logLevel": "warning",
+        "addToApiReportFile": true
+      },
+      "ae-wrong-input-file-type": { "logLevel": "none" },
+      // Same reasoning as tsdocMessageReporting below: an unresolvable
+      // `{@link ...}` target is a documentation defect, not an API-shape
+      // change, and must not be able to fail this gate. Tracked in VF-038.
+      "ae-unresolved-link": { "logLevel": "none" }
+    },
+
+    // Noise source 2 of 2: TSDoc comment syntax. In comparison mode
+    // api-extractor exits 1 on ANY warning, not just on report drift — measured
+    // on value-objects against a byte-identical baseline: exit 1 from tsdoc
+    // warnings alone. TSDoc rejects the ordinary JSDoc `@throws {SomeError}`
+    // form (it reads `{` as an inline tag), so 61 such comments across four
+    // packages would have kept CI permanently red on a comment-syntax
+    // technicality while real signature drift sailed through.
+    //
+    // Docstring quality is a real concern, but it belongs in the linter, where
+    // it can be fixed incrementally and blocks nobody. See the follow-up task
+    // VF-038 (JSDoc lint lane) — .eslintrc-jsdoc.json exists today but is wired
+    // to nothing, which is the same failure mode as a gate that reports success
+    // without having run.
+    "tsdocMessageReporting": {
+      "default": { "logLevel": "none" }
+    }
+  }
+}

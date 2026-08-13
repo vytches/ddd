@@ -1,50 +1,10 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
-  "mainEntryPointFilePath": "<projectFolder>/dist/index.d.ts",
-  "apiReport": {
-    "enabled": true,
-    "reportFolder": "<projectFolder>/api-report/",
-    "reportFileName": "<unscopedPackageName>.api.md"
-  },
-  "docModel": {
-    "enabled": false
-  },
-  "dtsRollup": {
-    "enabled": false
-  },
-  "tsdocMetadata": {
-    "enabled": false
-  },
-  "messages": {
-    "compilerMessageReporting": {
-      "default": {
-        "logLevel": "warning"
-      }
-    },
-    "extractorMessageReporting": {
-      "default": {
-        "logLevel": "warning"
-      },
-      "ae-missing-release-tag": {
-        "logLevel": "none"
-      },
-      "ae-forgotten-export": {
-        "logLevel": "warning",
-        "addToApiReportFile": true
-      },
-      "ae-wrong-input-file-type": {
-        "logLevel": "none"
-      }
-    },
-    "tsdocMessageReporting": {
-      "default": {
-        "logLevel": "warning"
-      },
-      "tsdoc-undefined-tag": {
-        "logLevel": "none"
-      }
-    }
-  },
+  "extends": "../../api-extractor.base.json",
+
+  // enterprise re-exports from sibling packages, so extraction needs its own
+  // tsconfig (the regular one does not resolve those paths). This is the only
+  // setting that genuinely differs from the shared base.
   "compiler": {
     "tsconfigFilePath": "<projectFolder>/tsconfig.api-extractor.json"
   }

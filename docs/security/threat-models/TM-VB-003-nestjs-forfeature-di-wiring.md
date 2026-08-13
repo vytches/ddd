@@ -272,3 +272,91 @@ TM-VB-003-001, not as fully mitigated by the one-line fix alone.
 **TM status remains DRAFT pending Tech Lead sign-off.** All 4 findings have an
 assigned task (VB-003) — consistent with the rule that Critical findings must
 have an assigned task before approval.
+
+---
+
+## Addendum VF-037 (2026-08-10)
+
+Added while analysing VF-037 (standing cross-context isolation regression suite
+plus the behavioural-BC checklist). VF-037 introduces no production code and no
+new trust boundary, so it gets no separate threat model. It does two things to
+this one: it changes the residual-risk position of TM-VB-003-001, and it
+surfaces two release-integrity findings that belong here rather than in a new
+document.
+
+### A1. TM-VB-003-001 — detection control, and what it does not cover
+
+The F-C4 fix is a preventive control. Until now nothing detected its regression
+on a live container: `feature-isolation.test.ts` asserts against a hand-built
+`Map` mock and never calls `Test.createTestingModule`, and every real-boot test
+in the repo (`feature-di-wiring.e2e.test.ts`, `global-bus-acl.test.ts`) boots
+exactly one `forFeature()` context. A single context cannot falsify an isolation
+claim — there is no B to check against.
+
+VF-037's suite adds that detection control: two bounded contexts in one module
+graph, with negative assertions in both directions for commands, queries and
+domain events. Treat it as lowering the _likelihood_ term for TM-VB-003-001, not
+its impact. A leak still exposes context A's event payloads to context B — the
+confidentiality classification in §1 is unchanged.
+
+Explicitly still uncovered, and carried forward from the architecture panel's
+residual-risk note above: **inter-module `onModuleInit` ordering**. NestJS does
+not guarantee that a feature registrar's local claim completes before the global
+explorer registers the same message type. A suite that boots a fixed module
+graph observes one ordering, not the space of orderings, so a green suite is not
+evidence this race is absent. Do not let VF-037 close that item.
+
+### A2. TM-VB-003-005 (new) — the api-surface gate cannot fail on drift
+
+**Category:** Tampering / release integrity. **Severity:** moderate — no runtime
+exposure, but it removes the control that was believed to catch surface changes
+such as the F-C4 class.
+
+`.github/workflows/ci.yml:159-164` and `:171-176` detect drift with
+`git diff --name-only | grep -q "api-report"` and respond with `echo "⚠️"`. A
+command in an `if` condition is exempt from `set -e`, so drift cannot fail the
+build — structurally, not by oversight. Compounding it, every invocation passes
+`--local`, which copies the generated report over the committed baseline instead
+of comparing against it. The only blocking behaviour in the whole step is a
+non-zero exit from api-extractor itself at `:170`.
+
+Measured 2026-08-10 on `develop`: after `build` + `fix:dts`, running the same
+three configs in comparison mode (no `--local`) returns **exit 1 for all three**
+— enterprise, contracts and events each carry real signature drift against their
+committed baselines. The CI step is nonetheless green. This is a control
+reporting success without having performed its check.
+
+**Mitigation:** VF-037 AC-GATES — drop `--local` in CI so drift exits non-zero,
+extend coverage to `value-objects` (which has a config and appears in no CI
+step), and remove `|| true` from contracts/events once the baselines are
+settled. Sequence matters: tightening before re-baselining produces a red build
+on day one, and a gate people learn to override is worse than no gate.
+
+### A3. TM-VB-003-006 (new) — stale baselines invite rubber-stamped approval
+
+**Category:** Tampering / release integrity. **Severity:** low, contingent.
+
+`contracts` and `events` baselines sit at `588c5eb7` (2026-04-16). Regenerating
+`contracts` produces a large diff whose most conspicuous element is the removal
+of an entire Scheduler subsystem. Investigated during this analysis and resolved
+as benign: the removal was deliberate, in VF-013 (`e6e7b2b5`, 2026-03-31, "Zero
+usage in any implementation package"), and the downstream consumer uses none of
+the affected symbols. The baseline is drift, not a hidden breaking change.
+
+The finding is the shape, not this instance. A four-month-stale baseline
+regenerated in one commit presents a reviewer with a diff too large to read, at
+exactly the moment the process wants a yes. Any future re-baseline must be its
+own reviewed commit with each removal accounted for, never folded into a
+functional change.
+
+### A4. Note on the scope of the api-surface control
+
+Recorded because the task asks for it in the outcome, and because it is the
+reason AC-CHECKLIST exists alongside AC-GATES: a clean api-surface diff proves
+the exported shape did not change. It carries no information about behaviour.
+F-C4, VP-009 Bug #3, VF-023 and VF-036 all had unchanged signatures. Fixing this
+gate buys back a control that should have existed; it does not address the
+defect class that produced TM-VB-003-001.
+
+**Addendum status:** the two new findings (TM-VB-003-005, TM-VB-003-006) have an
+assigned task (VF-037). The parent TM remains DRAFT pending Tech Lead sign-off.
