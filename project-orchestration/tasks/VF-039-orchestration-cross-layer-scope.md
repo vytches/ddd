@@ -13,14 +13,36 @@ complexity: low
 estimated_time: 2h
 created_by: VF-037
 created_at: 2026-08-12
-status: backlog
-updated_at: 2026-08-12
+status: split
+split_into: [VF-039a, VF-039b]
+updated_at: 2026-08-19
 release_target: n/a # tooling, not shipped in any package
 package:
   'n/a — target is the shared /orchestrate-ddd command template, outside this
   repo'
 findings: [VF-037 implementation run wf_f24e8621-140]
 ```
+
+> **SPLIT 2026-08-19 — nie implementuj tego pliku.** Analysis (panel 2026-08-13)
+> re-estimated the work at 5-6h and found four facts the criteria below did not
+> account for: the revert ban already exists but is worded as a licence for
+> single-file checkout; `/orchestrate-ddd` names no file; nothing invokes the
+> workflow lint, so WL1-WL10 protect nothing; and the command doc and lint are
+> deployed as byte copies, not symlinks, so editing the source alone changes no
+> runtime behaviour. The work now lives in two tasks:
+>
+> - **`VF-039a-orchestration-revert-ban.md`** (~2h, no blocking questions) —
+>   absolute revert ban, the incident note in the real command doc, the
+>   lint-invocation step, and the deploy. Priority.
+> - **`VF-039b-orchestration-churn-guard.md`** (~4h, blocked) — the
+>   deterministic monotonic-churn ledger injected into the verifier as a
+>   precomputed fact, plus the lint rule for revert commands. Gated on where the
+>   ledger lives.
+>
+> The criteria below are kept verbatim as the historical record of what was
+> asked. AC-ALLOWLIST in particular did NOT survive analysis in this form: a
+> flat previous-layers list degrades into a no-op as it grows, and would have
+> flagged layer `baselines` legitimately re-editing `ci.yml` as a violation.
 
 ## Why
 
