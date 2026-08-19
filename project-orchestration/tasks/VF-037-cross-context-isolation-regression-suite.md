@@ -14,8 +14,8 @@ complexity: medium
 estimated_time: 13h # was 8h; +5h for AC-GATES, added 2026-08-09
 created_by: LIB-MATURITY-AUDIT-2026-08-08
 created_at: 2026-08-09
-status: backlog
-updated_at: 2026-08-09 # amended after VF-036 shipped: AC-GATES added, checklist now exists
+status: done # zrealizowane; produkt na develop (c393a04b). Wg konwencji repo plik należy przenieść do completed-tasks/ — zostawiony w tasks/ do decyzji człowieka
+updated_at: 2026-08-19 # amended after VF-036 shipped: AC-GATES added, checklist now exists
 release_target: before first non-alpha tag
 package: "'@vytches/ddd-nestjs', '@vytches/ddd-cqrs', '@vytches/ddd-events'"
 findings:
