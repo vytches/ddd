@@ -116,10 +116,11 @@ an inferred fix.
 
 <!-- Updated by @product-owner on 2026-08-19 — scanned 23/23 tasks -->
 
-**Next milestone**: v0.31.0 — 2 critical-path items open (VF-028 in-progress,
-VF-036 AC-SIGNOFF outstanding). No `due_date` field exists in this task schema,
-so no overdue count is computed — that's a genuine gap, not an omission.
-juz-ide-api manual sign-off remains deferred, no deadline.
+**Next milestone**: v0.31.0 — down to 1 critical-path item: **VF-036
+AC-SIGNOFF**. VF-028 was reported in-progress earlier this pulse; that was stale
+— it shipped the same day (`05ac364a`) and is archived. No `due_date` field
+exists in this task schema, so no overdue count is computed — that's a genuine
+gap, not an omission. juz-ide-api manual sign-off remains deferred, no deadline.
 
 **Unvalidated features**: VD-004 (interactive docs) — its "80% faster discovery"
 claim has no cited source anywhere in the task file; correctly already demoted
@@ -147,11 +148,13 @@ no, re-date the deferral rather than leave it on an expired signal.
 
 **Actions this week**:
 
-1. Finish VF-028, collect VF-036's AC-SIGNOFF — both gate the npm tag.
-2. Run `/task-tidy` on VF-037 (archive) and VP-012 (fix stale priority field).
+1. Collect VF-036's AC-SIGNOFF — the sole remaining npm-tag gate (VF-028 already
+   shipped, archived 2026-08-19).
+2. Run `/task-tidy` on VP-012 (fix stale priority field) — VF-028/VF-037 are
+   already archived.
 3. Check with the maintainer whether VA-001's demand signal has actually
    materialized.
-4. After 1–2: run the full release checklist, then merge `develop` → `main` and
+4. After 1: run the full release checklist, then merge `develop` → `main` and
    tag.
 
 ---
