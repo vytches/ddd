@@ -81,6 +81,17 @@ exactly when a resilience package must not make things worse:
 6. [ ] Regression: existing resilience test suites green; new tests for AC1-AC4
        (jitter present in computed delays, per-instance isolation, probe gate,
        adapter diagnostics).
+7. [ ] Escape hatch for AC2: `scope?: 'instance' | 'shared'` on
+       `BaseResilienceDecoratorConfig`, default `'instance'`. Makes the JSDoc
+       promise in AC2 ("if you WANT a shared breaker... use a named policy")
+       actually true — without it, request-scoped providers lose
+       breaker/bulkhead protection entirely instead of just having it fixed. Own
+       contract tests, not folded into AC2's test suite. Decided 2026-08-19
+       after consulting architecture-guardian, ddd-patterns-expert,
+       library-expert and developer-experience (3:1 for building it now;
+       library-expert's dissent — zero observed `@CircuitBreaker`/`@Bulkhead` +
+       request-scoped usage in the repo today — is recorded in the analysis
+       artifact's OQ1 answer).
 
 ## Out of scope
 

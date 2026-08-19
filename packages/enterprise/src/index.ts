@@ -370,6 +370,7 @@ export {
 
 // Export CQRS ExecutionContext as primary version
 export type {
+  BusRetryOptions,
   CQRSOptions,
   ExecutionContext,
   ICommand,
@@ -506,6 +507,7 @@ export {
   BulkheadStrategy,
   CircuitBreaker,
   CircuitBreakerDecorator,
+  CircuitBreakerHalfOpenLimitError,
   CircuitBreakerMetricCollector,
   CircuitBreakerOpenError,
   CircuitBreakerState,

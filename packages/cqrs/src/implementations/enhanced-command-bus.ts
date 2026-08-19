@@ -19,6 +19,8 @@ import type { ICommand, ICommandHandler, IDisposableBus, IResettableBus } from '
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
+import type { BusRetryOptions } from './bus-retry-options';
+import { normalizeBusRetryOptions } from './bus-retry-options';
 
 /**
  * Configuration options for enhanced command bus
@@ -45,15 +47,13 @@ export interface EnhancedCommandBusOptions {
       enabled?: boolean;
       failureThreshold?: number;
       resetTimeout?: number;
-      halfOpenMaxAttempts?: number;
     };
-    retry?: {
-      enabled?: boolean;
-      maxAttempts?: number;
-      baseDelay?: number;
-      maxDelay?: number;
-      backoffMultiplier?: number;
-    };
+    /**
+     * `true` is a legacy alias for `{ enabled: true }` (D12). The object form
+     * requires `enabled: true` explicitly — `{ maxAttempts: 5 }` alone does
+     * NOT enable retry. See {@link BusRetryOptions}.
+     */
+    retry?: boolean | BusRetryOptions;
     timeout?: {
       enabled?: boolean;
       timeoutMs?: number;
@@ -217,14 +217,19 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus, I
     }
 
     // Retry Strategy (opt-in — see BREAKING note above)
-    if (config?.retry?.enabled === true) {
+    const retryOptions = normalizeBusRetryOptions(config?.retry);
+    if (retryOptions?.enabled === true) {
       strategies.push(
         new RetryStrategy({
-          maxAttempts: config?.retry?.maxAttempts ?? this.maxRetries,
-          baseDelay: config?.retry?.baseDelay ?? 1000,
-          maxDelay: config?.retry?.maxDelay ?? 30000,
-          backoffMultiplier: config?.retry?.backoffMultiplier ?? 2,
-          jitter: false,
+          maxAttempts: retryOptions.maxAttempts ?? this.maxRetries,
+          baseDelay: retryOptions.baseDelay ?? 1000,
+          maxDelay: retryOptions.maxDelay ?? 30000,
+          backoffMultiplier: retryOptions.backoffMultiplier ?? 2,
+          // AC1/SA-H3: was hardcoded `false` regardless of caller intent —
+          // every retried call backed off on the identical schedule. Now
+          // defaults to `true` (RetryPolicy.defaultConfig()) and honors an
+          // explicit `jitter: false` override.
+          jitter: retryOptions.jitter ?? true,
         })
       );
     }
@@ -281,14 +286,17 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus, I
   setRetries(maxRetries: number): this {
     this.maxRetries = maxRetries;
 
-    // Update retry configuration
+    // Update retry configuration. Normalize first: this.options.resilience.retry
+    // may currently hold the legacy boolean form, which cannot be spread.
+    const previousRetry = normalizeBusRetryOptions(this.options?.resilience?.retry);
+
     this.options = {
       ...this.options,
       defaultRetries: maxRetries,
       resilience: {
         ...this.options?.resilience,
         retry: {
-          ...this.options?.resilience?.retry,
+          ...previousRetry,
           enabled: true,
           maxAttempts: maxRetries,
         },

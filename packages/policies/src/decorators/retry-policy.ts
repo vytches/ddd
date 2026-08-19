@@ -35,7 +35,11 @@ export interface PolicyRetryConfig {
   backoffMultiplier?: number;
 
   /**
-   * Whether to add random jitter to delays
+   * Whether to add random jitter to delays. Jitter algorithm here is
+   * +/-10% of the computed delay (see {@link PolicyRetryBehavior.calculateDelay}) —
+   * a different algorithm from `@vytches/ddd-resilience`'s `RetryConfig.jitter`
+   * (Equal Jitter, 50%-100% band). The two packages' retry jitter are not
+   * interchangeable tuning knobs, docs-only note (D8, no behavior change).
    */
   jitter?: boolean;
 

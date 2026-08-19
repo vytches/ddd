@@ -9,6 +9,34 @@ export interface BaseResilienceDecoratorConfig {
   contextProvider?: () => ResilienceContext;
   enableMetrics?: boolean;
   decoratorName?: string;
+  /**
+   * Controls whether the resilience policy built by this decorator is
+   * private to each decorated instance or shared by the whole class
+   * (AC2/AC7, SA-M2).
+   *
+   * - `'instance'` (default): each `this` the decorated method is called on
+   *   gets its own lazily-created policy (circuit breaker, retry state,
+   *   bulkhead slots, ...), keyed by a `WeakMap<instance, policy>`. This is
+   *   almost always what you want — a circuit breaker/bulkhead that trips
+   *   for one instance no longer silently affects every other instance of
+   *   the same class (the pre-AC2 bug: the policy used to be built once, at
+   *   decoration time, and shared by every instance regardless of this
+   *   setting).
+   * - `'shared'`: restores the pre-AC2 behavior — one policy for the entire
+   *   decorated method, shared across every instance of the class. Opt into
+   *   this **explicitly** if you want a single breaker/bulkhead to protect a
+   *   shared downstream resource across all instances (e.g. a connection
+   *   pool). If you want that sharing without opting out of per-instance
+   *   isolation for everything else, prefer sharing the instance itself, or
+   *   building a single named policy with `ResiliencePolicyBuilder` and
+   *   reusing it directly instead of the decorator.
+   *
+   * When `this` is not an object at call time (a detached method reference,
+   * a destructured call, `.call(undefined)`) `'instance'` scope falls back
+   * to a single lazily-created policy shared by those calls — there is no
+   * object to key a `WeakMap` on.
+   */
+  scope?: 'instance' | 'shared';
 }
 
 export interface CircuitBreakerDecoratorConfig
@@ -48,9 +76,46 @@ function createResilienceDecorator<T extends BaseResilienceDecoratorConfig>(
   return function (config: T) {
     return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
       const originalMethod = descriptor.value;
-      const policy = policyFactory(config);
+
+      // AC7: 'shared' (opt-in, D9) restores the pre-AC2 behavior — one policy
+      // built once at decoration time, shared by every instance.
+      const scope = config.scope ?? 'instance';
+      const sharedPolicy = scope === 'shared' ? policyFactory(config) : undefined;
+
+      // AC2: per-instance policies, created lazily on first call and keyed by
+      // the runtime `this`, so a circuit breaker/bulkhead/retry state tripped
+      // by one instance no longer silently leaks into every other instance of
+      // the decorated class.
+      const instancePolicies = new WeakMap<object, ResilienceStrategy>();
+      // D11: WeakMap keys must be objects. When `this` is not one (a
+      // detached method reference, a destructured call, `.call(undefined)`)
+      // fall back to a single lazily-created "unbound" policy shared by those
+      // calls, instead of throwing (WeakMap.set(undefined, ...) would).
+      let unboundPolicy: ResilienceStrategy | undefined;
+
+      const resolvePolicy = (thisArg: unknown): ResilienceStrategy => {
+        if (sharedPolicy) {
+          return sharedPolicy;
+        }
+
+        if (thisArg !== null && (typeof thisArg === 'object' || typeof thisArg === 'function')) {
+          const key = thisArg as object;
+          let policy = instancePolicies.get(key);
+          if (!policy) {
+            policy = policyFactory(config);
+            instancePolicies.set(key, policy);
+          }
+          return policy;
+        }
+
+        if (!unboundPolicy) {
+          unboundPolicy = policyFactory(config);
+        }
+        return unboundPolicy;
+      };
 
       descriptor.value = async function (...args: unknown[]) {
+        const policy = resolvePolicy(this);
         const context =
           config.contextProvider?.() ??
           DefaultResilienceContext.create({
@@ -103,6 +168,9 @@ export const CircuitBreaker = createSimpleDecorator<CircuitBreakerDecoratorConfi
         successThreshold: config.successThreshold,
         timeout: config.timeout,
         name: config.name ?? config.decoratorName ?? 'circuit-breaker',
+        ...(config.halfOpenMaxProbes !== undefined && {
+          halfOpenMaxProbes: config.halfOpenMaxProbes,
+        }),
       })
       .build(),
   'circuit-breaker'
@@ -136,63 +204,37 @@ export const Bulkhead = createSimpleDecorator<BulkheadDecoratorConfig>(
   'bulkhead'
 );
 
-export const Resilience = function (config: CompositeResilienceConfig) {
-  return function (target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
+// D9: composite decorator now goes through the same createResilienceDecorator
+// factory as the individual decorators (dedup) — this is what unlocks AC2's
+// per-instance WeakMap and AC7's scope option here for free, with zero
+// change to the strategy-assembly logic below.
+export const Resilience = createSimpleDecorator<CompositeResilienceConfig>(config => {
+  const policyBuilder = ResiliencePolicyBuilder.create();
 
-    const policyBuilder = ResiliencePolicyBuilder.create();
-
-    if (config.bulkhead) {
-      policyBuilder.withBulkhead({
-        ...config.bulkhead,
-        name: config.decoratorName ? `${config.decoratorName}-bulkhead` : 'bulkhead',
-      });
-    }
-
-    if (config.circuitBreaker) {
-      policyBuilder.withCircuitBreaker({
-        ...config.circuitBreaker,
-        name: config.decoratorName ? `${config.decoratorName}-circuit-breaker` : 'circuit-breaker',
-      });
-    }
-
-    if (config.retry) {
-      policyBuilder.withRetry(config.retry);
-    }
-
-    if (config.timeout) {
-      policyBuilder.withTimeout(config.timeout);
-    }
-
-    const policy = policyBuilder.build();
-
-    descriptor.value = async function (...args: unknown[]) {
-      const context =
-        config.contextProvider?.() ??
-        DefaultResilienceContext.create({
-          metadata: {
-            className: (target as { constructor: { name: string } }).constructor.name,
-            methodName: propertyKey,
-            decoratorName: config.decoratorName ?? 'composite-resilience',
-          },
-        });
-
-      return policy.execute(
-        (ctx: ResilienceContext) => originalMethod.apply(this, [...args, ctx]),
-        context
-      );
-    };
-
-    // Preserve metadata for reflection
-    Object.defineProperty(descriptor.value, 'resilienceConfig', {
-      value: config,
-      writable: false,
-      enumerable: false,
+  if (config.bulkhead) {
+    policyBuilder.withBulkhead({
+      ...config.bulkhead,
+      name: config.decoratorName ? `${config.decoratorName}-bulkhead` : 'bulkhead',
     });
+  }
 
-    return descriptor;
-  };
-};
+  if (config.circuitBreaker) {
+    policyBuilder.withCircuitBreaker({
+      ...config.circuitBreaker,
+      name: config.decoratorName ? `${config.decoratorName}-circuit-breaker` : 'circuit-breaker',
+    });
+  }
+
+  if (config.retry) {
+    policyBuilder.withRetry(config.retry);
+  }
+
+  if (config.timeout) {
+    policyBuilder.withTimeout(config.timeout);
+  }
+
+  return policyBuilder.build();
+}, 'composite-resilience');
 
 export const Timeout = createSimpleDecorator<TimeoutDecoratorConfig>(
   config => ResiliencePolicyBuilder.create().withTimeout(config.timeout).build(),

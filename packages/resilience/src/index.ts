@@ -1,6 +1,7 @@
 // Most commonly used - prioritized exports
 export {
   CircuitBreaker,
+  CircuitBreakerHalfOpenLimitError,
   CircuitBreakerOpenError,
   CircuitBreakerState,
 } from './patterns/circuit-breaker';
