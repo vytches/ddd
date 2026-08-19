@@ -60,6 +60,7 @@ import { BusinessCalendar } from '@vytches/ddd-policies';
 import { BusinessRuleValidator } from '@vytches/ddd-validation';
 import { BusinessRuleValidatorAdapter } from '@vytches/ddd-policies';
 import { BusinessRuleValidatorPolicy } from '@vytches/ddd-policies';
+import { BusRetryOptions } from '@vytches/ddd-cqrs';
 import { Capability } from '@vytches/ddd-contracts';
 import { CapabilityConstructor } from '@vytches/ddd-contracts';
 import { CapabilityMap } from '@vytches/ddd-contracts';
@@ -70,6 +71,7 @@ import { CircuitBreaker } from '@vytches/ddd-resilience';
 import { CircuitBreakerCapability } from '@vytches/ddd-projections';
 import { CircuitBreakerDecorator } from '@vytches/ddd-resilience';
 import { CircuitBreakerDecoratorConfig } from '@vytches/ddd-resilience';
+import { CircuitBreakerHalfOpenLimitError } from '@vytches/ddd-resilience';
 import { CircuitBreakerMetricCollector } from '@vytches/ddd-resilience';
 import { CircuitBreakerOpenError } from '@vytches/ddd-resilience';
 import { CircuitBreakerState } from '@vytches/ddd-resilience';
@@ -554,6 +556,8 @@ export { BusinessRuleValidatorAdapter }
 
 export { BusinessRuleValidatorPolicy }
 
+export { BusRetryOptions }
+
 export { Capability }
 
 export { CapabilityConstructor }
@@ -573,6 +577,8 @@ export { CircuitBreakerCapability }
 export { CircuitBreakerDecorator }
 
 export { CircuitBreakerDecoratorConfig }
+
+export { CircuitBreakerHalfOpenLimitError }
 
 export { CircuitBreakerMetricCollector }
 

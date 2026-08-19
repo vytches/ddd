@@ -17,6 +17,11 @@ export { CommandBus, QueryBus } from './implementations';
 // Enhanced implementations (require @vytches/ddd-resilience)
 export { EnhancedCommandBus, EnhancedQueryBus } from './implementations/enhanced';
 
+// Retry configuration shared by EnhancedCommandBus/EnhancedQueryBus (D12).
+// EnhancedCommandBusOptions/EnhancedQueryBusOptions remain un-exported from
+// this top-level entry — a pre-existing gap, intentionally out of scope here.
+export type { BusRetryOptions } from './implementations/bus-retry-options';
+
 // Decorators
 export { CommandHandler, QueryHandler } from './decorators';
 

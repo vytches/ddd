@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### Added
+
+- `CircuitBreakerConfig.halfOpenMaxProbes` — caps the number of concurrent
+  HALF_OPEN recovery probes (default `1`). Extra callers over the limit are
+  rejected with the new `CircuitBreakerHalfOpenLimitError` (extends
+  `CircuitBreakerOpenError`) instead of all reaching the downstream at once
+  (VF-028, SA-M3).
+- `CircuitBreakerHalfOpenLimitError` — thrown when a HALF_OPEN breaker is
+  already at its probe limit.
+- `BaseResilienceDecoratorConfig.scope` (`'instance' | 'shared'`, default
+  `'instance'`) — opt into `'shared'` to restore the previous "one policy for
+  the whole decorated class" behavior (VF-028, AC7).
+
+### Fixed
+
+- `@CircuitBreakerDecorator`/`@BulkheadDecorator`/`@RetryDecorator`/`@ResilienceDecorator`
+  now build a separate resilience policy per decorated instance by default,
+  instead of sharing one policy — and its accumulated circuit-breaker/bulkhead
+  state — across every instance of the class (VF-028, SA-M2). Opt into the
+  previous shared behavior with `scope: 'shared'`.
+- HALF_OPEN circuit breaker state no longer lets an unbounded number of
+  concurrent callers through as recovery probes once `recoveryTimeout` elapses
+  (VF-028, SA-M3).
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes

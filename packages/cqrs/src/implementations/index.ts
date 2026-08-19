@@ -9,3 +9,4 @@ export {
   type CacheOptions,
   type EnhancedQueryBusOptions,
 } from './enhanced-query-bus';
+export type { BusRetryOptions } from './bus-retry-options';

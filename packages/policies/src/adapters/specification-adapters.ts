@@ -1,4 +1,5 @@
 import type { IAsyncSpecification, ISpecification } from '@vytches/ddd-contracts';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import type { Result } from '@vytches/ddd-utils';
 import type { BusinessRuleValidator } from '@vytches/ddd-validation';
 import {
@@ -29,8 +30,16 @@ export class BusinessRuleValidatorAdapter<T> implements ISpecification<T> {
     try {
       const result = this.validator.validate(candidate);
       return result.isSuccess;
-    } catch (_error) {
-      // If validation throws, treat as failure
+    } catch (error) {
+      // SA-M4: previously swallowed silently with zero diagnostics. Log then
+      // treat as failure — no rethrow: this is called from composed
+      // and()/or()/not() specifications that would otherwise blow up on a
+      // single failing leaf, and explainFailure() below logs its own message
+      // separately, so rethrowing here would also double the log.
+      internalLogger.warn('BusinessRuleValidatorAdapter: isSatisfiedBy threw', {
+        name: this.name ?? 'unnamed',
+        error: error instanceof Error ? error.message : String(error),
+      });
       return false;
     }
   }

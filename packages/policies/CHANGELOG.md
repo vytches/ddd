@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [Unreleased]
+
+### Fixed
+
+- `BusinessRuleValidatorAdapter.isSatisfiedBy()` no longer swallows a thrown
+  validator error with zero diagnostics — it now logs via `internalLogger.warn`
+  (specification name + sanitized error message) before returning `false`
+  (VF-028, SA-M4).
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes

@@ -3,7 +3,35 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+## [Unreleased]
+
+### Added
+
+- `BusRetryOptions` — named retry config shape shared by `EnhancedCommandBus`
+  and `EnhancedQueryBus`'s `resilience.retry` option (`enabled`, `maxAttempts`,
+  `baseDelay`, `maxDelay`, `backoffMultiplier`, `jitter`).
+  `EnhancedQueryBus.resilience.retry` now accepts the same object shape as
+  `EnhancedCommandBus` (previously boolean-only); `retry: true` remains a legacy
+  alias for `{ enabled: true }` on both buses (VF-028, D12, OQ3/OQ4).
+
+### Fixed
+
+- `EnhancedCommandBus`/`EnhancedQueryBus` no longer hardcode `jitter: false`
+  when building their internal retry strategy — retry delay jitter now defaults
+  to `true` (matching `RetryPolicy.defaultConfig()` in
+  `@vytches/ddd-resilience`) and is configurable via `resilience.retry.jitter`
+  (VF-028, SA-H3).
+
+### Removed
+
+- `EnhancedCommandBusOptions.resilience.circuitBreaker.halfOpenMaxAttempts`
+  removed. It was accepted but never read by `setupResilience` — setting it had
+  no effect. Removed without a `@deprecated` alias (VF-028, D3, PATCH): this is
+  a dead-field cleanup, not a behavior change, so no migration is needed. Not to
+  be confused with the unrelated `halfOpenMaxAttempts` in
+  `@vytches/ddd-projections`, which is untouched.
+
+## [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes
 

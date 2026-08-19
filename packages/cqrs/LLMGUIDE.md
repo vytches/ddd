@@ -147,6 +147,21 @@ const bus = new EnhancedCommandBus(container, {
 });
 ```
 
+`resilience.retry` accepts the same `BusRetryOptions` shape on both
+`EnhancedCommandBus` and `EnhancedQueryBus` — `retry: true` remains a legacy
+alias for `{ enabled: true }`, but the object form **requires `enabled: true`
+explicitly**; `{ maxAttempts: 5 }` alone does not turn retry on. Retry delays
+default to jittered (`jitter: true`, Equal Jitter 50%-100% band) — override with
+`jitter: false` for a fixed backoff schedule:
+
+```typescript
+const bus = new EnhancedQueryBus(container, {
+  resilience: {
+    retry: { enabled: true, maxAttempts: 3, baseDelay: 200, jitter: false },
+  },
+});
+```
+
 ### CQRSConfiguration one-stop bootstrap
 
 ```typescript

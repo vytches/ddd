@@ -53,6 +53,7 @@ exports[`@vytches/ddd-enterprise public API surface > exports the documented set
   "CircuitBreaker",
   "CircuitBreakerCapability",
   "CircuitBreakerDecorator",
+  "CircuitBreakerHalfOpenLimitError",
   "CircuitBreakerMetricCollector",
   "CircuitBreakerOpenError",
   "CircuitBreakerState",

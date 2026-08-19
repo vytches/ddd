@@ -12,6 +12,8 @@ import type { IDisposableBus, IQuery, IQueryHandler, IResettableBus } from '../i
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
+import type { BusRetryOptions } from './bus-retry-options';
+import { normalizeBusRetryOptions } from './bus-retry-options';
 
 /**
  * Configuration options for enhanced query bus
@@ -36,7 +38,13 @@ export interface EnhancedQueryBusOptions {
   batchDelayMs?: number;
   resilience?: {
     circuitBreaker?: boolean;
-    retry?: boolean;
+    /**
+     * `true` is a legacy alias for `{ enabled: true }` (D12). The object form
+     * requires `enabled: true` explicitly — `{ maxAttempts: 5 }` alone does
+     * NOT enable retry. Unified with `EnhancedCommandBus`'s retry shape
+     * (OQ3) — see {@link BusRetryOptions}.
+     */
+    retry?: boolean | BusRetryOptions;
     timeout?: boolean;
   };
 }
@@ -306,7 +314,10 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus, IDisp
    * Setup resilience patterns using the resilience package
    */
   private setupResilience(config?: EnhancedQueryBusOptions['resilience']): void {
-    if (!config || (!config.circuitBreaker && !config.retry && !config.timeout)) {
+    const retryOptions = normalizeBusRetryOptions(config?.retry);
+    const retryEnabled = retryOptions?.enabled === true;
+
+    if (!config || (!config.circuitBreaker && !retryEnabled && !config.timeout)) {
       return;
     }
 
@@ -323,13 +334,16 @@ export class EnhancedQueryBus extends IQueryBus implements IResettableBus, IDisp
         });
       }
 
-      if (config.retry === true) {
+      if (retryEnabled) {
         builder.withRetry({
-          maxAttempts: this.maxRetries,
-          baseDelay: 1000,
-          maxDelay: 30000,
-          backoffMultiplier: 2,
-          jitter: false,
+          maxAttempts: retryOptions?.maxAttempts ?? this.maxRetries,
+          baseDelay: retryOptions?.baseDelay ?? 1000,
+          maxDelay: retryOptions?.maxDelay ?? 30000,
+          backoffMultiplier: retryOptions?.backoffMultiplier ?? 2,
+          // AC1/SA-H3: was hardcoded `false` regardless of caller intent.
+          // Defaults to `true` (RetryPolicy.defaultConfig()) and honors an
+          // explicit `jitter: false` override.
+          jitter: retryOptions?.jitter ?? true,
         });
       }
 

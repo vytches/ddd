@@ -406,6 +406,18 @@ are missing.
 throws on duplicate `domain:policyId` keys. Call `unregister(domain, id)` first
 if replacing a policy.
 
+**Confusing `PolicyRetryConfig.jitter` with `@vytches/ddd-resilience`'s
+`RetryConfig.jitter`.** Same name, different algorithm — this package's jitter
+is +/-10% of the computed delay; resilience's is Equal Jitter (50%-100% of the
+computed delay). They are not interchangeable tuning knobs between the two
+packages.
+
+**Assuming `BusinessRuleValidatorAdapter.isSatisfiedBy()` throwing is silent.**
+It is not — a thrown validator now logs via `internalLogger.warn` (specification
+name + sanitized error message) before returning `false`, so a
+misconfigured/broken validator is diagnosable instead of silently always failing
+composed `and()`/`or()`/`not()` specifications.
+
 ## Hidden Features
 
 **`PolicyBuilder.should(spec)` produces WARNING-severity violations**, not
