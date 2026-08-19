@@ -9,14 +9,19 @@ title:
   the verifier as a precomputed fact, plus the lint rule that catches revert
   commands in an implementer prompt'
 type: chore
-priority: high
+priority: low
 complexity: medium
 estimated_time: 4h
 created_by: VF-039
 created_at: 2026-08-19
 status: blocked
-blocked_by: 'open question Q1 in the analysis — where the churn ledger lives'
-updated_at: 2026-08-19
+blocked_by:
+  'deprioritised 2026-08-19 — brings nothing to the library (package: n/a);
+  VF-039a already removed the revert permission, so this half only detects what
+  is now forbidden. Chose VF-028 (shipped resilience defects) instead. Q1 still
+  open; panel findings recorded in the analysis under q1_findings +
+  mechanism_holes.'
+updated_at: 2026-08-19 # priority high -> low after business review
 release_target: n/a # tooling, not shipped in any package
 package:
   'n/a — targets /opt/projects/claude-patterns and the per-task workflow scripts'

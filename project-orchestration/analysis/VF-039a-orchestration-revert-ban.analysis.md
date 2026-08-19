@@ -90,6 +90,55 @@ codebase_facts:
     workflow-lint.js. Jest dokładnie jeden dobrze określony moment przekazania
     skryptu i nie ma tam bramki.'
 
+# KOREKTA FAKTÓW 2026-08-19 (przed implementacją). Panel działał 2026-08-13; przez sześć dni
+# claude-patterns zmienił się istotnie (commity 48c024e, 5e1adc9, 8f5514a, 28c60d3).
+# Zweryfikowane ponownie dziś, przed delegacją:
+facts_revised_2026_08_19:
+  F2_UNIEWAŻNIONY:
+    "BYŁO: nic nie wywołuje workflow-lint automatycznie. JEST: hooks/hooks.json
+    rejestruje PreToolUse matcher 'Workflow' → pre-workflow-lint.js, aktywny
+    globalnie w ~/.claude/settings.json:10. Lint ma dziś 555 linii i reguły
+    WL1-WL16 (było 233 i WL1-WL10)."
+  F10_UNIEWAŻNIONY:
+    'BYŁO: orchestrate.md §2 nigdy nie każe uruchomić lintu, brak bramki w
+    momencie przekazania skryptu. JEST: bramka istnieje i jest MOCNIEJSZA niż
+    proponowany krok prozą — to hook PreToolUse, nie zdanie w instrukcji.
+    orchestrate.md urósł ze 190 do 436 linii.'
+  F3_CZĘŚCIOWO:
+    'Nazwa /orchestrate-ddd została już usunięta z commands/orchestrate.md
+    (grep: zero trafień). Pozostaje w prozie innych dokumentów, co i tak było
+    poza zakresem.'
+  F9_OBALONY:
+    'BYŁO (moja pomyłka z 2026-08-13, powtórzona 2026-08-19): commands/ i hooks/
+    docierają do runtime jako KOPIE bajtowe wymagające deployu. JEST:
+    ~/.claude/commands i ~/.claude/hooks to SYMLINKI KATALOGÓW do
+    claude-patterns — ten sam inode (100405514 dla orchestrate.md, 100405133 dla
+    workflow-lint.js). Pomyłka wzięła się stąd, że ls -l NA PLIKU pokazuje
+    zwykły plik, a diff -q mówi identyczne, bo idzie przez dowiązany katalog.
+    Skutek: kryterium AC-DEPLOY jest NIEWYKONALNE jak napisane (cp kończy się
+    are the same file), a jego CEL jest spełniony strukturalnie — dryf nie może
+    powstać. Weryfikacja: ls -ld na katalogu albo stat -c %i na obu ścieżkach.'
+  F_GATE_POTWIERDZONY_MOCNIEJ:
+    'pre-workflow-lint.js nie jest osobnym, słabszym sprawdzeniem: w linii 68
+    robi require(workflow-lint.js) i uruchamia pełny zestaw WL1-WL16, blokując
+    przy błędach. Bramka jest realna i twarda — skrypt Workflow bez zgodności z
+    WL nie wystartuje. To domyka wątpliwość zgłoszoną przez bramkę końcową
+    przebiegu.'
+  F8_POTWIERDZONY:
+    "Zakaz cofania nadal NIE ISTNIEJE w commands/orchestrate.md (grep na git
+    checkout/restore/reset/stash: zero trafień w roli zakazu). §2a' mówi o czym
+    innym — że wyjątek nie cofa zapisów z dysku."
+  WPŁYW_NA_AC:
+    'AC-LINT-GATE (D4) jest SPEŁNIONE cudzą pracą — do zweryfikowania i
+    udokumentowania, nie do zbudowania. AC-DOC traci część o zmianie nazwy,
+    zostaje sama notatka incydentowa. AC-DEPLOY staje się weryfikacją braku
+    dryfu, nie naprawą. AC-NO-REVERT (D2) jest jedyną nietkniętą pracą.'
+  WPŁYW_NA_VF039B:
+    'Nowa reguła lintu z VF-039b to WL17, nie WL11 — numeracja doszła do WL16.
+    Bramka PreToolUse oznacza, że WARN będzie realnie WIDZIANY, co było głównym
+    zarzutem wobec tej reguły w analizie (Q4 zyskuje mocniejszą pozycję
+    startową).'
+
 open_questions:
   - id: Q2
     blocking: false

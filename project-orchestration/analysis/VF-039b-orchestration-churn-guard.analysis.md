@@ -86,6 +86,87 @@ codebase_facts:
     494-503). Weryfikator już z powodzeniem konsumuje gotowe fakty
     deterministyczne.'
 
+# USTALENIA PANELU DO Q1 (2026-08-19, agenci projektowi: architecture-guardian + library-expert).
+# Q1 CELOWO ZOSTAJE BEZ ODPOWIEDZI — zadanie odłożone jako niepriorytetowe (patrz priority_review).
+# Poniższe zapisano, żeby przy powrocie nie badać tego od zera.
+q1_findings:
+  zgoda_obu:
+    'Mechanizm ma żyć w skrypcie (wariant A). Wariant B (kanoniczny fragment
+    wstrzykiwany przez args) odrzucony przez obu.'
+  architekt_dlaczego_nie_B:
+    'To nie jest tekst do zacytowania, tylko logika ze stanem trzymanym przez
+    cały przebieg. Przepchnięcie przez args wymagałoby przekazania kodu jako
+    stringa i new Function() — współdzielony runtime tylnymi drzwiami,
+    niewidoczny dla bramki PreToolUse, która czyta wyłącznie źródło skryptu.'
+  praktyk_dlaczego_nie_B:
+    'Kanoniczny fragment już istnieje i nie przetrwał: buildVerifierPrompt jest
+    w komentarzu opisany jako kanoniczny, a zmienił sygnaturę między VF-036 a
+    VF-037.'
+  spor_o_WL17:
+    'architecture-guardian ZA (precedens WL15 wymusza obecność konkretnej
+    sondy). library-expert PRZECIW (reguła musiałaby rozpoznać mechanizm pod
+    dowolną nazwą).'
+  synteza_koordynatora:
+    'Oba stanowiska godzi jedno rozróżnienie: WL15 dopasowuje się do konkretnego
+    NAPISU POLECENIA, nie do nazwy zmiennej ani struktury. WL17 jest wykonalne
+    wyłącznie w tej formie — szuka wywołania konkretnej sondy. Jako heurystyka
+    nazw/kształtu jest niewykonalne, i to jest właściwy odczyt zastrzeżenia
+    praktyka.'
+  dowod_empiryczny:
+    'VF-036 vs VF-037: 974 różniące się linie na 1481 (>65%). Te same pojęcia
+    nazwane inaczej: snapshot/gitState, progressed/noChanges,
+    layerFiles/recordFiles. Szkielet jest przepisywany od zera co zadanie, nie
+    utrzymywany.'
+  wycena_obu:
+    '30-60 min na sam mechanizm (mapa churnu już istnieje i jest wołana per
+    warstwa). Brakuje: persystencji między warstwami, rozszerzenia zakresu
+    porównania, jednego warunku przed weryfikatorem.'
+  blad_do_uniknięcia:
+    'Porównanie MUSI iść po sumie katalogów WSZYSTKICH dotychczasowych warstw,
+    nie po dirs warstwy bieżącej. W incydencie gates i baselines ruszały pliki w
+    różnych katalogach — wersja zawężona nie wykryłaby niczego.'
+
+# TRZY TRYBY AWARII SAMEGO MECHANIZMU (architecture-guardian). Zmieniają kryteria akceptacji
+# niezależnie od rozstrzygnięcia Q1 — domknąć przy powrocie do zadania.
+mechanism_holes:
+  H1_KRYTYCZNA:
+    'Nowy, jeszcze niedodany do repo plik NIE WYSTĘPUJE w git diff --numstat.
+    Jeśli praca zatwierdzona przez warstwę N to nowy plik, a warstwa N+1 go
+    kasuje — zero przed, zero po, spadek niewidoczny. Dziura w kształcie
+    oryginalnego incydentu. Trzeba łączyć numstat z git status --porcelain
+    (VF-037 już zbiera oba w snapshot()). Zgodne z zapisem w pamięci projektu:
+    git diff --stat jest ślepy na pliki nieśledzone.'
+  H2:
+    'Zmiana nazwy pliku (git mv) raportuje się jako 0/0 albo delete+add zależnie
+    od -M — naiwne porównanie zobaczy fałszywy spadek.'
+  H3:
+    'Legalne uproszczenie wcześniej zatwierdzonej treści (5 linii → 1, ta sama
+    logika) też daje spadek. Mechanizm z natury nie odróżnia cofnięcia od
+    uproszczenia — to heurystyka, nie niezmiennik. Przy odpowiedzi Q3 (twardy
+    stop) potrzebna jest OPISANA ścieżka wyjścia, inaczej pierwszy taki
+    przypadek zatnie przebieg bez niczyjej winy.'
+  H4:
+    'Wyścig, gdyby implementery dwóch warstw pisały współbieżnie do tego samego
+    pliku. WL2 chroni tylko weryfikatorów. Niepotwierdzone, czy taki układ w
+    ogóle występuje.'
+
+priority_review:
+  data: 2026-08-19
+  werdykt:
+    'ODŁOŻONE. Zadanie nie wnosi nic do biblioteki — package: n/a, żaden
+    konsument tego nie zobaczy. To ubezpieczenie procesu budowania, nie produkt.
+    Ryzyko zostało już w połowie zdjęte przez VF-039a, który odebrał automatowi
+    prawo cofania; VF-039b wykrywa coś, co jest już zakazane, więc jego wartość
+    krańcowa jest znacznie mniejsza, niż sugerował świeży incydent.'
+  wybrane_zamiast:
+    'VF-028 — cztery defekty behawioralne w wysyłanym kodzie odporności
+    (wyłączone rozrzucenie ponownych prób, stan bezpiecznika dzielony między
+    instancjami, brak bramki sondy przy odzyskiwaniu, wyjątek zamieniany po
+    cichu na odmowę biznesową). Widzi je konsument, w awarii.'
+  co_wznawia:
+    'Q1 pozostaje bez odpowiedzi. Przy powrocie: przyjąć wariant A, rozstrzygnąć
+    tylko WL17 wg syntezy powyżej, i domknąć H1-H3 w kryteriach akceptacji.'
+
 open_questions:
   - id: Q1
     blocking: true
@@ -119,7 +200,13 @@ open_questions:
       a previous layer added (a genuine refactor, not a revert) registers as a
       churn drop and would be blocked. Frequency is unknown; the corpus is two
       scripts.
-    answer: null
+    answer: >-
+      HARD-STOP przez istniejącą ścieżkę escalate() — decyzja użytkownika
+      2026-08-19. Spójne z pozostałymi bramkami repo (on_fail:
+      ESCALATE_AND_HALT). Przyjęty koszt: legalny refaktor usuwający
+      wcześniejsze linie zostanie zablokowany; częstotliwość nieznana przy
+      korpusie dwóch skryptów, więc obserwować i zgłosić, gdy pojawią się
+      fałszywe alarmy.
   - id: Q4
     blocking: false
     ask: >-
@@ -133,7 +220,16 @@ open_questions:
       That measurement is not in scope here. Without it the rule stays advisory
       permanently. Note VF-039a wires the lint into an invocation step, so a
       WARN is at least seen from now on.
-    answer: null
+    answer: >-
+      TAK, ale dopiero po pomiarze — decyzja użytkownika 2026-08-19. Reguła
+      startuje jako WARN; przed awansem na ERROR zmierzyć odsetek fałszywych
+      trafień na istniejącym korpusie (VF-036, VF-037). Pomiar i awans wydzielić
+      jako osobny drobny follow-up, żeby nie zniknęły. KOREKTA WOBEC ANALIZY:
+      bramka lintu okazała się realna i twarda (pre-workflow-lint.js jako hook
+      PreToolUse na Workflow, robi require workflow-lint.js i blokuje przy
+      ERROR), więc WARN będzie realnie widziany, a awans na ERROR faktycznie
+      zatrzyma przebieg. Ostrożność przy awansie jest tym samym ważniejsza, nie
+      mniejsza.
 
 decisions:
   - id: D1

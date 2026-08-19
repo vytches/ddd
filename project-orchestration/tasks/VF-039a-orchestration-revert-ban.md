@@ -84,19 +84,27 @@ Analysis established four things the original task did not account for:
        read as a vytches-ddd story. Correct the stale `/orchestrate-ddd` name in
        this file only — the wider rename across README, CLAUDE.md and
        DECISIONS-LOG is explicitly out of scope.
-3. [ ] **AC-LINT-GATE — the lint gets invoked at the one moment that matters.**
-       Add a step to `commands/orchestrate.md` section 2, at the exact point the
-       operator hands the hand-authored script to the `Workflow` tool, requiring
-       `node "$HOME/.claude/hooks/workflow-lint.js" <script>` to be run first
-       and its ERROR findings resolved before the run starts. Without this the
-       existing WL1-WL10 keep protecting nothing and any future rule ships into
-       a vacuum.
-4. [ ] **AC-DEPLOY — the change reaches the place the system reads from.**
-       Re-copy `commands/orchestrate.md` to `~/.claude/commands/orchestrate.md`
-       and verify byte-identity (`diff -q`), recording the verification in the
-       task evidence. The source and the deployed copy were byte-identical as of
-       2026-08-13, so this is trivial now; skipping it produces a task marked
-       done whose runtime behaviour did not change.
+3. [x] **AC-LINT-GATE — already satisfied by other work; verify, do not build.**
+       Between 2026-08-13 and 2026-08-19 the gate landed independently (commit
+       `48c024e`), and in a stronger form than this task proposed: not a prose
+       step but a PreToolUse hook on the `Workflow` matcher, registered in
+       `~/.claude/settings.json:10`, running `hooks/pre-workflow-lint.js`, which
+       at line 68 does `require('workflow-lint.js')` and therefore runs the full
+       WL1-WL16 set and blocks on errors. Verified this run. Adding a prose step
+       would now be a duplicate, so it is explicitly forbidden.
+
+4. [x] **AC-DEPLOY — the change reaches the place the system reads from.**
+       **Reworded 2026-08-19: the original wording was unsatisfiable.** It asked
+       for a re-copy to `~/.claude/commands/orchestrate.md` and a byte-identity
+       check, on the premise that the file reaches runtime as a copy. It does
+       not: `~/.claude/commands` and `~/.claude/hooks` are _directory_ symlinks
+       into `claude-patterns`, so source and deploy target are the same inode
+       and `cp` fails with "are the same file". The premise came from reading
+       `ls -l` on the file rather than `ls -ld` on the directory.
+   - Replacement check, satisfied: confirm the symlink resolves to source
+     (`ls -ld ~/.claude/commands`, `stat -c %i` on both paths). Drift is
+     structurally impossible, so the criterion's goal holds by construction and
+     no deploy step exists for anything in `claude-patterns`.
 
 ## Non-goals
 
