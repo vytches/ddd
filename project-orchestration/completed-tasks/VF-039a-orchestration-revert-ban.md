@@ -14,7 +14,7 @@ complexity: low
 estimated_time: 2h
 created_by: VF-039
 created_at: 2026-08-19
-status: backlog
+status: done
 updated_at: 2026-08-19
 release_target: n/a # tooling, not shipped in any package
 package: 'n/a — target is /opt/projects/claude-patterns, outside this repo'
@@ -54,7 +54,7 @@ Analysis established four things the original task did not account for:
 
 ## Acceptance Criteria
 
-1. [ ] **AC-NO-REVERT — reverting stops being an available move.** State in
+1. [x] **AC-NO-REVERT — reverting stops being an available move.** State in
        `commands/orchestrate.md` section 2, in the run of prose that already
        prescribes what every implementer prompt must carry, that `git checkout`,
        `git restore`, `git stash` and `git reset` are forbidden on any path,
@@ -76,7 +76,7 @@ Analysis established four things the original task did not account for:
      `cp`, not with git, so the absolute ban does not collide with it. If the
      prose needs an exception carve-out for that shape, it must be phrased as
      "use `cp`, never git", not as a relaxation of the ban.
-2. [ ] **AC-DOC — the incident survives into projects that copy the template.**
+2. [x] **AC-DOC — the incident survives into projects that copy the template.**
        Add the incident to the rules-as-prose run in
        `claude-patterns/commands/orchestrate.md`, alongside the existing notes
        that cite WL6 and the 2026-07-04 / 2026-07-20 incidents. Keep the lesson
@@ -130,3 +130,16 @@ Analysis established four things the original task did not account for:
   prompt builder for implement and fix at line 336.
 - Run journal `wf_f24e8621-140` — entries 6, 17, 18.
 - Sibling: `VF-039b-orchestration-churn-guard.md`.
+
+## Done (2026-08-19)
+
+All four ACs satisfied. AC-LINT-GATE and AC-DEPLOY closed 2026-08-19 by other
+work (commit `83019997` this repo — gate already existed as a stronger
+PreToolUse hook; AC-DEPLOY reworded, drift structurally impossible via directory
+symlinks). AC-NO-REVERT and AC-DOC landed in `/opt/projects/claude-patterns`
+commit `f646dda`
+(`docs(orchestrate): absolute revert ban + incident note (VF-039a)`), on
+`commands/orchestrate.md` section "2a″. Zakaz cofania": unconditional ban on
+`git checkout`/`restore`/`stash`/`reset` on any path replaces the prior
+scope-limited wording, and the `wf_f24e8621-140` incident is documented
+generically alongside the WL6 precedent notes.

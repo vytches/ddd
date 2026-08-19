@@ -247,16 +247,18 @@ how the library behaves at run time outrank docs/lint work. Updated order
 (2026-08-19): VF-036 sign-off → release checklist → merge to `main`. VF-028 and
 VF-037 shipped and archived same day; VF-039a is a cheap follow-on, not a gate._
 
-| ID      | Title                                                          | Status                                                 | Age |
-| ------- | -------------------------------------------------------------- | ------------------------------------------------------ | --- |
-| VF-036  | getIdentityComponents() equality hook (consumer-gated BC)      | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 11d |
-| VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash) | backlog _(file still says `priority: normal` — drift)_ | 48d |
-| VF-039  | Stop layer verifiers from reverting the previous layer's work  | split → VF-039a / VF-039b                              | 7d  |
-| VF-039a | Orchestration revert-ban (design-complete, ready to ship)      | backlog                                                | 0d  |
+| ID     | Title                                                          | Status                                                 | Age |
+| ------ | -------------------------------------------------------------- | ------------------------------------------------------ | --- |
+| VF-036 | getIdentityComponents() equality hook (consumer-gated BC)      | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 11d |
+| VP-012 | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash) | backlog _(file still says `priority: normal` — drift)_ | 48d |
+| VF-039 | Stop layer verifiers from reverting the previous layer's work  | split → VF-039a / VF-039b                              | 7d  |
 
 _Shipped and archived to `completed-tasks/` 2026-08-19: **VF-028** (resilience
 correctness, `05ac364a`), **VF-037** (isolation regression suite + behavioral-BC
-gate, `c393a04b`)._
+gate, `c393a04b`), **VF-039a** (orchestration revert-ban: absolute
+`git checkout`/`restore`/`stash`/`reset` ban + incident note, landed in
+`/opt/projects/claude-patterns` `f646dda`; AC-LINT-GATE/AC-DEPLOY closed earlier
+same day by other work, `83019997`)._
 
 ## P2 — Normal / Medium
 
