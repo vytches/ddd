@@ -14,7 +14,7 @@ complexity: medium
 estimated_time: 13h # was 8h; +5h for AC-GATES, added 2026-08-09
 created_by: LIB-MATURITY-AUDIT-2026-08-08
 created_at: 2026-08-09
-status: done # zrealizowane; produkt na develop (c393a04b). Wg konwencji repo plik należy przenieść do completed-tasks/ — zostawiony w tasks/ do decyzji człowieka
+status: done # zrealizowane; produkt na develop (c393a04b); przeniesiony do completed-tasks/ 2026-08-19
 updated_at: 2026-08-19 # amended after VF-036 shipped: AC-GATES added, checklist now exists
 release_target: before first non-alpha tag
 package: "'@vytches/ddd-nestjs', '@vytches/ddd-cqrs', '@vytches/ddd-events'"
@@ -86,7 +86,7 @@ on a gate that reports success without having run.
 
 ## Acceptance Criteria
 
-1. [ ] A dedicated regression suite (living in `packages/nestjs/tests/` or a
+1. [x] A dedicated regression suite (living in `packages/nestjs/tests/` or a
        cross-package e2e location — decide at implementation) asserting, on a
        real `Test.createTestingModule` boot:
    - commands/queries dispatched in context A never reach handlers registered in
@@ -98,12 +98,12 @@ on a gate that reports success without having run.
      generalizing wiring.test.ts);
    - domain events published in context A are not observed by context B
      subscribers unless explicitly bridged via ACL/integration path.
-2. [ ] Suite runs in the default `nx test` target for its package (i.e. every
+2. [x] Suite runs in the default `nx test` target for its package (i.e. every
        PR), not as a separate opt-in target.
-3. [ ] Each historical incident (F-C4, VF-030, VP-009 Bug #1-#3) is traceable to
+3. [x] Each historical incident (F-C4, VF-030, VP-009 Bug #1-#3) is traceable to
        at least one named test case (comment with the incident ID — follow
        wiring.test.ts's incident-story convention).
-4. [ ] **AC-CHECKLIST — wire up the checklist that now exists; do not write a
+4. [x] **AC-CHECKLIST — wire up the checklist that now exists; do not write a
        new one.** `docs/process/behavioral-bc-checklist.md` was created by
        VF-036 (`c88e728e`) and currently has exactly one consumer, VF-036
        itself. Reference it from `project-orchestration/release-process.md` and
@@ -120,7 +120,7 @@ on a gate that reports success without having run.
      making it a genuine additive minor with **no** `BREAKING CHANGE:` entry.
      The checklist's job is to force the question and make the answer explicit,
      not to force a breaking classification.
-5. [ ] **AC-GATES (new, 2026-08-09) — make the surface-diff layer actually
+5. [x] **AC-GATES (new, 2026-08-09) — make the surface-diff layer actually
        run.** See the amendment under "Why" for the measured state. Minimum: (a)
        fix or work around the api-extractor internal error on
        `packages/aggregates/src/core/aggregate-root.builder.ts:167` that aborts
@@ -134,7 +134,7 @@ on a gate that reports success without having run.
        outcome that a clean api-surface diff still is not evidence of behavioral
        safety; it is a shape diff. This AC buys back the gate that should have
        existed, it does not solve the defect class.
-6. [ ] Suite green on current develop; deliberately breaking any one of the
+6. [x] Suite green on current develop; deliberately breaking any one of the
        invariants locally (mutation check) makes at least one test fail.
 
 ## Non-goals

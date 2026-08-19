@@ -1,17 +1,27 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
+_Last updated 2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
+VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
+sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
+initially flagged VF-028 as "branch active, not yet done" — a direct user check
+("czy 028 właśnie nie skończyliśmy?") caught that this was itself stale: VF-028
+was implemented and committed the same day (`05ac364a`), just never had its task
+file updated. Verified (resilience 104/104, policies 237/237 green) and archived
+alongside VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09
+(maturity-audit re-prioritization: 5 new tasks filed
 VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
-ordering per owner directive — see the 2026-08-09 note above the boards).
-Prior: 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was
-stuck at `status: backlog` with unchecked ACs despite merge to `develop`
-`cf4029dd` 2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to
-`done`, ACs checked against git history, file moved to `completed-tasks/`).
-Prior: 2026-07-13 by `/pulse` (VD-005 shipped — docs truth cleanup + new
+ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
+2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
+`status: backlog` with unchecked ACs despite merge to `develop` `cf4029dd`
+2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to `done`, ACs
+checked against git history, file moved to `completed-tasks/`). Prior:
+2026-07-13 by `/pulse` (VD-005 shipped — docs truth cleanup + new
 `tools/docs-compile-gate` CI tool, all 11 ACs done, moved to `completed-tasks/`,
-merged to `develop`). VF-028 is now the only open P1 in the entire backlog. Age
-= days since created_at. Grouped by priority (P0 critical · P1 high · P2
-normal/medium · P3 low · backlog)._
+merged to `develop`). **VF-036 (AC-SIGNOFF) is now the sole open gate on the
+v0.31.0 tag** — owner decision 2026-08-19: collect the sign-off, run the full
+release checklist, then merge `develop` → `main` (178 commits ahead, `main`'s
+last reachable tag is `v0.27.0`) and tag. Age = days since created_at. Grouped
+by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -185,21 +195,46 @@ normal/medium · P3 low · backlog)._
 > **Audit + re-prioritization (2026-08-09)**: full maturity audit
 > (`analysis/LIB-MATURITY-AUDIT-2026-08-08.analysis.md`, 5 specialist agents:
 > overall ~6.7/10 — code release-grade, human-facing docs a full tier behind)
-> plus a consumer-reported incident (`getEqualityComponents()` docs-phantom
-> API → **VF-036**, P1) spawned four consolidated tasks: **VF-037** (standing
+> plus a consumer-reported incident (`getEqualityComponents()` docs-phantom API
+> → **VF-036**, P1) spawned four consolidated tasks: **VF-037** (standing
 > cross-context isolation regression suite + behavioral-BC checklist, P1),
 > **VD-008** (docs truth & parity sweep + docs-compile-gate extension, P2),
 > **VT-007** (re-enable domain-services e2e, P2), **VD-009** (priority example
-> workspaces, P3). **VP-012 promoted P2→P1** (confirmed-live runtime hot
-> paths). **VD-004/VF-002 demoted P2→P3** (docs-site/strategic-docs — no
-> runtime value; explicit owner decision: runtime behavior > linters/docs).
+> workspaces, P3). **VP-012 promoted P2→P1** (confirmed-live runtime hot paths).
+> **VD-004/VF-002 demoted P2→P3** (docs-site/strategic-docs — no runtime value;
+> explicit owner decision: runtime behavior > linters/docs).
 >
 > **Release sequencing (owner decision, 2026-08-09)**: (1) merge the existing
-> alpha branch (`release/2026-07-18-alpha`, 0.31.0-alpha.0 — already merged
-> into `develop` via `d836beeb`) to **`main`** first; (2) all tasks below are
+> alpha branch (`release/2026-07-18-alpha`, 0.31.0-alpha.0 — already merged into
+> `develop` via `d836beeb`) to **`main`** first; (2) all tasks below are
 > implemented **on top of** that state, branching from `develop`; (3) VF-036
 > additionally requires the downstream consumer's full-suite run on a patched
 > build before any npm tag that includes it (its AC5).
+
+> **Pulse (2026-08-19, 37-day gap)**: since the last sync, **VF-036** landed
+> code (`c88e728e`) — only AC-SIGNOFF (consumer full-suite run) is outstanding,
+> and it is now the sole thing blocking the npm tag. **VF-037** shipped in full
+> (`c393a04b`) — archived to `completed-tasks/` 2026-08-19. **VF-039** was split
+> same-day into **VF-039a** (revert-ban, design-complete, ready to ship) and
+> **VF-039b** (churn-guard, deprioritised — open architecture question on where
+> the churn ledger lives, not a blocker on anything else).
+>
+> **Correction, same day**: `/pulse` initially reported **VF-028** as "branch
+> active, task file not yet updated" — a direct user check ("czy 028 właśnie nie
+> skończyliśmy?") caught that the pulse's own read was stale. VF-028 was in fact
+> implemented and committed the same day (`05ac364a`); only its task-file
+> metadata lagged. Verified before archiving: `@vytches/ddd-resilience` 104/104
+> and `@vytches/ddd-policies` 237/237 tests green; the 3 failures seen in an
+> ad-hoc `@vytches/ddd-cqrs` run are pre-existing (`git blame` traces them to
+> 2025-08-23, untouched by this commit) and unrelated. Archived to
+> `completed-tasks/` alongside VF-037. Also found: **VP-012**'s task file still
+> reads `priority: normal` despite the 2026-08-09 note above recording its P2→P1
+> promotion — flagged for the next `/task-tidy`, not corrected here (no owner
+> confirmation on the intended priority value, unlike VF-028/VF-037 where git
+> history was conclusive). Owner decision this session: collect VF-036's
+> sign-off, run the full release checklist, **then** merge `develop` → `main`
+> (currently 178 commits behind, `main`'s last reachable tag is `v0.27.0`) and
+> tag/publish.
 
 ## P0 — Critical
 
@@ -207,53 +242,60 @@ _None._ VS-016 (the only P0) shipped 2026-07-10.
 
 ## P1 — High
 
-_Runtime-value first (owner directive 2026-08-09): things that change or
-protect how the library behaves at run time outrank docs/lint work. Suggested
-order: VF-036 → VF-028 → VP-012 → VF-037._
+_Runtime-value first (owner directive 2026-08-09): things that change or protect
+how the library behaves at run time outrank docs/lint work. Updated order
+(2026-08-19): VF-036 sign-off → release checklist → merge to `main`. VF-028 and
+VF-037 shipped and archived same day; VF-039a is a cheap follow-on, not a gate._
 
-| ID     | Title                                                            | Status  | Age |
-| ------ | ---------------------------------------------------------------- | ------- | --- |
-| VF-036 | BaseValueObject getEqualityComponents() hook (consumer-gated BC) | backlog | 1d  |
-| VF-028 | Resilience correctness (jitter, decorator state, HALF_OPEN)      | backlog | 31d |
-| VP-012 | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash)   | backlog | 32d |
-| VF-037 | Cross-context isolation regression suite + behavioral-BC gate    | backlog | 0d  |
+| ID      | Title                                                          | Status                                                 | Age |
+| ------- | -------------------------------------------------------------- | ------------------------------------------------------ | --- |
+| VF-036  | getIdentityComponents() equality hook (consumer-gated BC)      | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 11d |
+| VP-012  | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash) | backlog _(file still says `priority: normal` — drift)_ | 48d |
+| VF-039  | Stop layer verifiers from reverting the previous layer's work  | split → VF-039a / VF-039b                              | 7d  |
+| VF-039a | Orchestration revert-ban (design-complete, ready to ship)      | backlog                                                | 0d  |
+
+_Shipped and archived to `completed-tasks/` 2026-08-19: **VF-028** (resilience
+correctness, `05ac364a`), **VF-037** (isolation regression suite + behavioral-BC
+gate, `c393a04b`)._
 
 ## P2 — Normal / Medium
 
 _Runtime-adjacent first (VF-025, VT-007, VF-032, VF-033, VT-006, VF-027), then
-docs & tooling (VD-008, VF-034, VD-006b). 2026-08-09 consistency fix: VF-027
-and VP-006c had task files but no board row since creation — added here and
-in P3 respectively._
+docs & tooling (VD-008, VF-034, VD-006b)._
 
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
-| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 32d |
-| VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 0d  |
-| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 30d |
-| VF-033  | Validation hardening & one validation story                       | backlog | 30d |
-| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 32d |
-| VF-027  | ResilienceContext fork() — native AbortSignal.any() rewrite       | backlog | 32d |
-| VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 0d  |
-| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 30d |
-| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 36d |
+| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 48d |
+| VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 10d |
+| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 40d |
+| VF-033  | Validation hardening & one validation story                       | backlog | 40d |
+| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 48d |
+| VF-027  | ResilienceContext fork() — native AbortSignal.any() rewrite       | backlog | 47d |
+| VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 10d |
+| VF-038  | Give docstring quality its own lint lane                          | backlog | 7d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 40d |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 46d |
 
 ## P3 — Low
 
-| ID     | Title                                                          | Status  | Age |
-| ------ | -------------------------------------------------------------- | ------- | --- |
-| VD-009 | Priority example workspaces (repos+UoW, outbox, CQRS+resil.)   | backlog | 0d  |
-| VD-004 | Interactive Documentation System                               | backlog | 78d |
-| VF-002 | Strategic Design Documentation                                 | backlog | 78d |
-| VP-006c | BaseContainerAdapter resolve optimization (no live callers)   | backlog | 37d |
+| ID      | Title                                                        | Status  | Age  |
+| ------- | ------------------------------------------------------------ | ------- | ---- |
+| VF-039b | Churn guard — blocked on churn-ledger placement decision     | blocked | 0d   |
+| VD-009  | Priority example workspaces (repos+UoW, outbox, CQRS+resil.) | backlog | 10d  |
+| VD-004  | Interactive Documentation System                             | backlog | 141d |
+| VF-002  | Strategic Design Documentation                               | backlog | 141d |
+| VP-006c | BaseContainerAdapter resolve optimization (no live callers)  | backlog | 39d  |
 
 ## Backlog
 
 _Deliberately set aside (2026-07-11) — revisit after the P1 pre-publish pipeline
-clears, not a current priority._
+clears, not a current priority. Its own demand-signal window (`~2026-08/09`) is
+now current — worth a direct check with the maintainer this week rather than
+leaving it another pulse cycle._
 
 | ID     | Title                                          | Status  | Age |
 | ------ | ---------------------------------------------- | ------- | --- |
-| VA-001 | @vytches/ddd-agent — AI Agent DDD Boundary Pkg | backlog | 44d |
+| VA-001 | @vytches/ddd-agent — AI Agent DDD Boundary Pkg | backlog | 91d |
 
 ---
 
@@ -267,19 +309,36 @@ archival, flagged above.
 **`/task-tidy` sync (2026-07-18)**: **VP-006b** reconciled and archived to
 `completed-tasks/` — see updated header note above.
 
-**Recommended next action (2026-08-09, runtime-first)**:
+**`/pulse` sync (2026-08-19, 37-day gap)**: VF-036 code-complete (`c88e728e`),
+AC-SIGNOFF (consumer full-suite run) is now the **sole** gate on the npm tag.
+VF-037 shipped (`c393a04b`), archived. VF-039 split into VF-039a (ready) /
+VF-039b (deprioritised, blocked on a design question). VP-012's
+`priority: normal` field never caught up with its 2026-08-09 P2→P1 promotion —
+flagged for `/task-tidy`. VA-001's own demand-signal window (`~2026-08/09`) is
+now open — worth a direct maintainer check this week.
 
-1. **Merge alpha → `main`** (`release/2026-07-18-alpha` content, already in
-   `develop`) — establishes the base every task below builds on top of.
-2. **VF-036** (equality-components hook) — highest runtime value: fixes wrong
-   equality semantics for a real consumer; ship a patched build for their
-   full-suite validation (AC5) early, since their sign-off gates the tag.
-3. **VF-028 AC1** (jitter default) + **VP-012** (three confirmed-live hot
-   paths) — small, scoped runtime fixes; can be one working session.
-4. **VF-037** (isolation regression suite) — locks in the runtime correctness
-   the last three fixes bought.
-5. Then P2 runtime-adjacent (VF-025, VT-007), and only after that the docs
-   sweep **VD-008** — important for release credibility, but it changes no
+**Same-day correction**: VF-028's task file was initially found stale
+(`status: backlog` despite an active branch) and reported as still open. A
+direct user question ("czy 028 właśnie nie skończyliśmy?") prompted a re-check:
+VF-028 was in fact implemented, tested, and committed the same day (`05ac364a`)
+— the pulse's own read was the stale artifact, not the work. Verified
+(resilience 104/104, policies 237/237 tests green; the 3 `@vytches/ddd-cqrs`
+failures seen in an ad-hoc run predate this commit per `git blame` and are
+unrelated) and archived to `completed-tasks/` alongside VF-037. Owner decision:
+collect VF-036's sign-off → full release checklist → merge `develop` → `main`
+(178 commits ahead, `main` last tagged `v0.27.0`) → tag/publish.
+
+**Recommended next action (updated 2026-08-19)**:
+
+1. **VF-036 AC-SIGNOFF** — the sole remaining code-side gate: get the consumer's
+   full-suite run on the patched build, record the sign-off.
+2. **Full release checklist** (`release-process.md`) — tests, `validate:api`,
+   behavioral-BC checklist, coverage — once VF-036 is signed off.
+3. **Merge `develop` → `main`** and tag/publish. The old
+   `release/2026-07-18-alpha` branch needs no separate handling — it's already
+   fully inside `develop` (`d836beeb`).
+4. Then P2 runtime-adjacent (VF-025, VT-007, VP-012), and only after that the
+   docs sweep **VD-008** — important for release credibility, but it changes no
    runtime behavior.
 
 Full audit trail: `analysis/LIB-MATURITY-AUDIT-2026-08-08.analysis.md` (new),

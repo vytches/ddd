@@ -14,7 +14,7 @@ complexity: medium
 estimated_time: 8h
 created_by: SEC-AUDIT-2026-07-09
 created_at: 2026-07-09
-status: backlog
+status: done
 release_target:
   post-first-publish OK, except AC1 (default-behavior fix) preferred pre-publish
 package:
@@ -56,32 +56,32 @@ exactly when a resilience package must not make things worse:
 
 ## Acceptance Criteria
 
-1. [ ] `jitter` exposed in both buses' `resilience.retry` options, **default
+1. [x] `jitter` exposed in both buses' `resilience.retry` options, **default
        `true`** (aligning with `RetryPolicy`'s own default); hardcoded
        `jitter: false` removed. CHANGELOG note (retry delays become randomized —
        that is the fix, not a regression).
-2. [ ] Decorator policies are per-instance: policy created lazily per `this`
+2. [x] Decorator policies are per-instance: policy created lazily per `this`
        (e.g. `WeakMap<instance, policy>` inside the decorator) so
        breaker/bulkhead state is not shared across instances. Document the new
        semantics in JSDoc + LLMGUIDE (including "if you WANT a shared breaker,
        share the instance or use an explicit named policy").
-3. [ ] HALF_OPEN gates probes: single in-flight probe by default (configurable
+3. [x] HALF_OPEN gates probes: single in-flight probe by default (configurable
        `halfOpenMaxProbes` if trivially cheap); excess calls while probing are
        rejected as OPEN. Race-condition test: N concurrent calls at the recovery
        boundary → exactly the allowed probe count reaches the downstream.
-4. [ ] `isSatisfiedBy` no longer swallows silently: logs via
+4. [x] `isSatisfiedBy` no longer swallows silently: logs via
        `internalLogger.warn` (name + sanitized message) before returning
        `false`, OR rethrows non-domain errors — decide with the same
        fail-open-vs-fail-closed reasoning documented in the code, mirroring
        `explainFailure`'s behavior.
-5. [ ] SA-L5: JSDoc + LLMGUIDE warning on `RetryPolicy`/`@Retry` that the
+5. [x] SA-L5: JSDoc + LLMGUIDE warning on `RetryPolicy`/`@Retry` that the
        default retries ALL errors and `retryableErrors` should be set for
        non-idempotent work (no behavior change — the CQRS buses already made
        retry opt-in per REL-009).
-6. [ ] Regression: existing resilience test suites green; new tests for AC1-AC4
+6. [x] Regression: existing resilience test suites green; new tests for AC1-AC4
        (jitter present in computed delays, per-instance isolation, probe gate,
        adapter diagnostics).
-7. [ ] Escape hatch for AC2: `scope?: 'instance' | 'shared'` on
+7. [x] Escape hatch for AC2: `scope?: 'instance' | 'shared'` on
        `BaseResilienceDecoratorConfig`, default `'instance'`. Makes the JSDoc
        promise in AC2 ("if you WANT a shared breaker... use a named policy")
        actually true — without it, request-scoped providers lose
@@ -107,3 +107,26 @@ exactly when a resilience package must not make things worse:
   (SA-H3, SA-M2, SA-M3, SA-M4, SA-L5)
 - REL-009 (retry opt-in in CQRS buses) — the precedent this task completes:
   retry that IS enabled must also be safe (jitter) and observable.
+
+## Activity / Notes
+
+- 2026-08-19: Implemented and shipped in one commit on
+  `fix/VF-028-resilience-correctness`: `05ac364a` (jitter default, per-instance
+  decorator state via `WeakMap`, `scope?: 'instance' | 'shared'` escape hatch,
+  HALF_OPEN probe gate with `CircuitBreakerHalfOpenLimitError`, `isSatisfiedBy`
+  warn-before-false, SA-L5 JSDoc/LLMGUIDE notes, new `BusRetryOptions` type
+  unifying both buses' retry shape). Changeset
+  (`.changeset/vf-028-resilience-correctness.md`), CHANGELOGs and LLMGUIDEs
+  updated for `resilience`/`cqrs`/`policies`; enterprise barrel + api-report
+  regenerated. Verified: `@vytches/ddd-resilience` 104/104 and
+  `@vytches/ddd-policies` 237/237 tests green post-merge. `@vytches/ddd-cqrs`
+  had 3 pre-existing failures in `enhanced-bus.test.ts`
+  (`Reflect.getMetadata is not a function`) — confirmed via `git blame`
+  unrelated to this change (`isIdempotent`, authored 2025-08-23, untouched by
+  this commit; `reflect-metadata` is a declared peer dependency this package
+  deliberately does not import, per its own README — an ad-hoc single-package
+  test invocation without the app-level polyfill import). Task file's
+  `status`/AC checkboxes were left at `backlog`/unchecked after the commit —
+  metadata drift caught and corrected by `/pulse` + a direct user check ("czy
+  028 właśnie nie skończyliśmy?"), not by the implementing session itself
+  updating its own task file.

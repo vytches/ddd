@@ -1,46 +1,37 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-07-13 by `/pulse`_ _Updated by `/pulse`. Read-only for humans —
+_Last sync: 2026-08-19 by `/pulse`_ _Updated by `/pulse`. Read-only for humans —
 agents write here._
 
 ---
 
 ## 🎯 Sprint Focus
 
-**v0.31.0 code scope is 100% COMPLETE** (confirmed 2026-07-12, correcting the
-2026-07-03 pulse's framing). VS-006, VS-008, and VS-013 (app-logging removal)
-are all `done` in `completed-tasks/` — VS-013 merged **2026-06-05**. The sole
-remaining gate is **external validation against juz-ide-api** (237+ aggregates,
-16K tests), which is **deliberately deferred to the user's manual sign-off
-before any npm tag/release — by explicit prior authorization**, not a stalled or
-forgotten task (confirmed in VF-023's completion note, 2026-07-11). Treat this
-as a standing pre-release checklist item, not a red alert.
+**v0.31.0's code-side gate is down to one item**: **VF-036 AC-SIGNOFF** (code
+merged `c88e728e`; only the consumer's full-suite run on a patched build is
+outstanding). **VF-028** (resilience correctness) was flagged mid-pulse as
+"still active" — that framing was itself stale: it was implemented and committed
+the same day (`05ac364a`), verified (resilience 104/104, policies 237/237 tests
+green) and archived to `completed-tasks/`. Remaining gate besides VF-036:
+**juz-ide-api manual validation**, still deliberately deferred by prior explicit
+authorization, no deadline. Owner decision 2026-08-19: collect VF-036's
+sign-off, run the full release checklist, **then** merge `develop` → `main`
+(currently 178 commits behind, `main`'s last reachable tag is `v0.27.0`) and
+tag/publish.
 
-**Massive library-quality progress since the 2026-07-03 pulse** — two new audits
-(SEC-AUDIT-2026-07-09, LIB-UX-AUDIT-2026-07-10) plus the pre-first-publish
-pipeline itself, largely shipped in a 2026-07-10/11 concentrated push:
+**Since the 2026-07-13 pulse, also landed** (found this pulse without a prior
+status sync — 37-day gap): **VF-037** (standing cross-context isolation
+regression suite + behavioral-BC checklist, done `c393a04b`, now archived) and
+**VF-039**, split 2026-08-19 into **VF-039a** (revert-ban, design-complete,
+ready to ship) and **VF-039b** (churn-guard, deprioritised pending a design
+decision on churn-ledger placement).
 
-- **Pre-first-publish pipeline: 100% DONE.** VF-024 (API surface curation),
-  VF-023 (DDD foundation guarantees — VO/AggregateRoot always-valid, **BREAKING
-  CHANGE**), VF-031 (surface diet), VB-004 (outbox atomic claim), and now
-  **VD-005** (docs truth cleanup + new `tools/docs-compile-gate` CI tool,
-  shipped 2026-07-13 via `/orchestrate-ddd`, independently re-verified with a
-  full `pnpm build` + full `pnpm test` — not just the workflow's own GO) — all
-  shipped and archived. Nothing left open in this batch.
-- **Security audit findings**: VS-016 (crypto-random IDs, P0 cleared), VS-017
-  (error serialization leakage), VS-018 (CQRS logging opt-in) — all done.
-- **UX audit findings**: VF-026 (ddd-lint fixes + `ddd-005` rule), VF-029
-  (EventBus integrity), VF-030 (DI token identity by reference, `ADR-0038`) —
-  all done. VF-032/VF-033 (NestJS fluency, validation hardening) remain open.
-- **VF-035** (composite-policy step-coverage bug, real production bug) shipped
-  2026-07-11.
-- **VP-006b** (NestJS adapter perf — registry-first resolve, lazy paramtypes
-  cache, COW scopes) code merged to `develop` 2026-07-12 (`cf4029dd`), but its
-  task file is still `backlog` in `project-orchestration/tasks/` — **metadata
-  drift, needs `/task-tidy` to archive it.**
-
-**Last P1 hardening item**: VF-028 (resilience correctness — jitter, decorator
-state, HALF_OPEN probe gate).
+**Housekeeping flagged this pulse**: VF-028 and VF-037 both had stale task files
+(status/AC checkboxes not updated after their commits landed) — corrected and
+archived 2026-08-19. VP-012's `priority: normal` field still hasn't caught up
+with its recorded 2026-08-09 P2→P1 promotion — left unresolved, needs owner
+confirmation before flipping it (unlike VF-028/VF-037, git history alone doesn't
+settle what VP-012's priority _should_ say).
 
 ---
 
@@ -48,18 +39,25 @@ state, HALF_OPEN probe gate).
 
 <!-- @tech-lead updates this section on /pulse -->
 
-1. **juz-ide-api manual validation — the sole v0.31.0 publication gate,
-   deliberately deferred, not overdue.** All code work is done. Owner action
-   needed only when ready to cut the release: run `build && test` on the 237+
-   aggregate / 16K test consumer, then tag/publish. No deadline was ever set —
-   do not treat this as slipping.
-2. **Metadata drift: VP-006b still `status: backlog`, 2nd consecutive pulse
-   unresolved** (merged to `develop` 2026-07-12, `cf4029dd`) — run `/task-tidy`
-   to move it to `completed-tasks/`.
-3. **VF-028 is the only open P1** (resilience correctness — jitter wiring,
-   per-instance decorator state, HALF_OPEN probe gate, 8h). Pre-first-publish
-   pipeline is now 100% shipped (VD-005 closed 2026-07-13) — only VF-028 and the
-   P2/P3 backlog remain.
+1. **VF-036 AC-SIGNOFF outstanding — now the sole npm-tag gate.** Code is merged
+   (`c88e728e`); only the downstream consumer's full-suite run on the patched
+   build remains. Owner decision 2026-08-19: finish this, then run the full
+   release checklist before merging `develop` → `main`.
+2. **`main` is 178 commits behind `develop`** (last tag reachable from `main`:
+   `v0.27.0`). The old `release/2026-07-18-alpha` branch is already fully
+   absorbed into `develop` (`d836beeb`) — nothing separate to bring over. Merge
+   to `main` is deliberately queued behind item 1 + the release checklist, per
+   owner decision this session — not a red alert, a sequencing choice.
+3. **VF-028 was closed the same day it was flagged.** This pulse initially
+   reported it as "active, not done" — that was the pulse's own stale read,
+   corrected after a direct user check. It shipped (`05ac364a`), verified
+   (resilience 104/104, policies 237/237 green) and archived to
+   `completed-tasks/`. No action needed; listed here only so the correction is
+   visible, not buried.
+
+**Housekeeping (non-blocking)**: VP-012's task file still reads
+`priority: normal` despite its recorded 2026-08-09 P2→P1 promotion — needs a
+`/task-tidy` pass or an explicit owner call on the intended value.
 
 ---
 
@@ -71,98 +69,136 @@ _N/A — this is a library project, no mobile UI._
 
 ## ⚙️ Technical Pulse
 
-<!-- Updated by @tech-lead on 2026-07-13 -->
+<!-- Updated by @tech-lead on 2026-08-19 — scanned 23/24 active tasks, 37-day sync gap -->
 
-**Status**: 🟢 Green | **Velocity**: Sustained high — VD-005 shipped, closing
-the pre-first-publish pipeline 100% | **Debt**: 🟢 LOW (0 major, 0 minor)
+**Status**: 🟢 GREEN (revised same-day from 🟡 AMBER) — the metadata drift this
+pulse first flagged on VF-028 turned out to be the pulse's own read being stale,
+not the work: VF-028 was already done. AC-SIGNOFF gate on VF-036 is the only
+thing left blocking publish. Zero blocked dependency chains, zero tech debt.
 
-**Just landed (2026-07-13)**: **VD-005 DONE** — docs truth cleanup (10 ACs:
-docs/README rewrite, dead-doc archival, ADR index regen, quickstart Result<T,E>
-reconciliation, AggregateRoot JSDoc, SECURITY-AUDIT/eslintrc cleanup) plus a new
-**`tools/docs-compile-gate`** CI tool (AC11 — opt-in marker, type-checks fenced
-code examples in README/LLMGUIDE, 29/29 own tests including a
-deliberately-broken-fence fixture). Implemented via `/orchestrate-ddd` (4-layer
-workflow, all GO), then independently re-verified before merge: full
-`pnpm build` (exit 0) + full `pnpm test` (all 25 test-bearing projects green),
-not just the workflow's self-reported verdict. Merged to `develop` `603580bd`.
-**Pre-first-publish pipeline (VF-024/VF-023/VF-031/VB-004/VD-005) is now fully
-closed — nothing left in this batch.**
+**Blocked chains**: 0 upstream dependencies. VF-039b is deprioritised on an open
+architecture question (churn-ledger placement), not blocked by another task.
 
-**Metadata drift (2nd consecutive pulse unresolved)**: **VP-006b** (NestJS
-adapter perf) merged to `develop` **2026-07-12** (`cf4029dd`) but its task file
-still reads `status: backlog` — run `/task-tidy` to archive it.
+**Since the 2026-07-13 pulse (37 days)**: three new high-priority tasks landed
+without a status sync — **VF-036** (code merged `c88e728e`, AC-SIGNOFF
+outstanding), **VF-037** (done, `c393a04b`, now archived), **VF-039** (split
+same-day into VF-039a/VF-039b).
 
-**Active backlog** (16 task files, 0 blocked, 0 stale >14d):
+**Same-day self-correction**: initial pulse read VF-028's task file
+(`status: backlog`) at face value and reported it as still active. A direct user
+question caught the drift going the other way — the code was already merged
+(`05ac364a`) the same day. Re-verified before archiving: resilience 104/104 and
+policies 237/237 tests green; a `@vytches/ddd-cqrs` run showed 3 failures traced
+by `git blame` to 2025-08-23, unrelated to this change. Lesson: a task file's
+`status` field is a claim about the past, not a live signal — cross-check git
+log/branch state when the two disagree, don't just report the file.
 
-- **P1**: VF-028 (8h, resilience correctness — the only open P1, last hardening
-  item)
-- **P2**: VF-025 (14h, event-bus hardening), VP-012 (6h, hotpath perf), VT-006
-  (10h, policies coverage), VD-006b (10h R&D, unblocked), VF-034 (4h, dead-code
-  CI check), VF-032 (14h, NestJS fluency), VF-033 (6h, validation hardening),
-  VP-006c (6h, unblocked by VP-006b), VF-027 (1h)
-- **Deliberately deferred, not stale**: VA-001 (44d, set aside 2026-07-11 until
-  the P1 pipeline clears), VD-004 (56d), VF-002 (56d) — opportunistic
-  post-v0.31.0.
+**Stale (>14d)**: VD-004/VF-002 (141d, deliberate opportunistic hold), VA-001
+(91d, deliberate hold — see Business Pulse), VP-012/VT-006/VF-025 (~48d),
+VF-032/VF-033/VF-034 (40d). None flagged as forgotten — either deliberately
+deferred or genuinely next-in-queue.
 
-**Blocked**: None. Dependency graph acyclic.
+**Critical path to v0.31.0**: VF-036 consumer sign-off → full release checklist
+→ merge `develop` → `main` (178 commits ahead, `main` last tagged `v0.27.0`) →
+tag. Then VF-039a (2h, design-complete) clears the rest of the P1 board.
 
-**Debt**: 0 major, 0 minor.
+**Debt**: 0 major, 0 minor (no `tech_debt:` fields declared in any task file).
 
-**Critical path**: (1) juz-ide-api manual validation → tag/publish v0.31.0 —
-owner action, zero outstanding code, no deadline set. (2) VF-028 clears the last
-P1 — the only thing standing between now and a fully clean backlog.
-
-**Coverage**: 69.29% (stable, VT-002..005 series 2026-05-10). VT-006 is
-enrichment, not recovery.
+**Housekeeping found this pulse**: VF-028 and VF-037 task files both had stale
+status/AC fields relative to their actual git state — corrected and archived
+2026-08-19. VP-012's `priority: normal` field still hasn't caught up with its
+recorded 2026-08-09 P2→P1 promotion — left open, needs an owner call rather than
+an inferred fix.
 
 ---
 
 ## 💼 Business Pulse
 
-<!-- Updated by @product-owner on 2026-07-13 -->
+<!-- Updated by @product-owner on 2026-08-19 — scanned 23/23 tasks -->
 
-**Next milestone**: v0.31.0 (security hardening + DX polish) — **code scope is
-100% complete**, pre-first-publish pipeline now fully closed with VD-005's
-completion. Gap to publish is purely the owner's manual juz-ide-api sign-off
-(deliberately deferred by prior explicit authorization, no deadline set) —
-"ready when you are," not overdue.
+**Next milestone**: v0.31.0 — 2 critical-path items open (VF-028 in-progress,
+VF-036 AC-SIGNOFF outstanding). No `due_date` field exists in this task schema,
+so no overdue count is computed — that's a genuine gap, not an omission.
+juz-ide-api manual sign-off remains deferred, no deadline.
 
-**VD-005 shipped 2026-07-13**: docs truth cleanup + new
-`tools/docs-compile-gate` CI tool — a real production-safety improvement
-(catches non-compiling README/LLMGUIDE code examples before they reach
-consumers), not just housekeeping. Full build + full test suite independently
-re-verified green before merge. This was the last item in the pre-first-publish
-batch — nothing outstanding in that pipeline now.
+**Unvalidated features**: VD-004 (interactive docs) — its "80% faster discovery"
+claim has no cited source anywhere in the task file; correctly already demoted
+P2→P3 on 2026-08-09. VA-001 is **not** unvalidated — it's gated on a named
+demand signal, not an assumption.
 
-**Status drift (2nd consecutive pulse, housekeeping only)**: VP-006b merged to
-`develop` 2026-07-12 but task file still `backlog` — flag for `/task-tidy`, no
-business impact.
+**Mobile UX**: N/A — library has no UI, no `mobile_impact` field in schema.
 
-**Segment coverage**: unchanged. Production/scaling teams ~70% served.
-First-time DDD adopters ~30% (VF-001 MVP shipped; VF-002 still deferred,
-opportunistic post-release). AI-agent integrators 0% (VA-001 deliberately set
-aside 2026-07-11 until the P1 pipeline clears — correct call, no demand signal
-yet).
+**Segment coverage** (qualitative — no `segment` field in schema):
+production/scaling teams well-served (VF-028/VF-025/VP-012/VF-037 are all
+runtime-hardening work, prioritized by the 2026-08-09 owner directive).
+First-time DDD adopters underserved (VD-008/VD-009 sit at P2/P3). AI-agent
+integrators 0% — VA-001 still `backlog`.
 
-**Cut candidate if capacity tightens**: VD-004 (interactive docs, 20h,
-opportunistic post-release) — unchanged recommendation.
+**Cut candidate if capacity tightens**: **VP-006c** — its own task title states
+"no live callers," a weaker business case than VD-004 (which at least claims an
+unverified benefit). Recommend cutting VP-006c first if scope needs trimming.
 
-**Validate this week**: no publication deadline is set; juz-ide-api sign-off
-happens whenever the owner is ready to cut the release.
+**Validate with the maintainer this week**: VA-001's task file names its own
+trigger —
+`demand_signal: juz-ide-api scoping AI integration — expect attention ~2026-08/09`
+— and that window is open now. Worth a direct check: has juz-ide-api actually
+started scoping AI integration? If yes, VA-001's entry conditions may be met; if
+no, re-date the deferral rather than leave it on an expired signal.
 
 **Actions this week**:
 
-1. Run `/task-tidy` to archive VP-006b (pure housekeeping, now overdue across 2
-   pulses).
-2. Ship VF-028 (8h) — the only remaining P1, clears the hardening backlog
-   entirely.
-3. When ready to publish: run juz-ide-api manual validation, then tag v0.31.0.
+1. Finish VF-028, collect VF-036's AC-SIGNOFF — both gate the npm tag.
+2. Run `/task-tidy` on VF-037 (archive) and VP-012 (fix stale priority field).
+3. Check with the maintainer whether VA-001's demand signal has actually
+   materialized.
+4. After 1–2: run the full release checklist, then merge `develop` → `main` and
+   tag.
 
 ---
 
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-08-19] @human: Asked "czy 028 właśnie nie skończyliśmy?" — caught that the
+`/pulse` run minutes earlier had reported VF-028 as still active/backlog, which
+was wrong. Checked git: `05ac364a` (implementing all 7 ACs) was committed the
+same day. Verified `@vytches/ddd-resilience` (104/104) and
+`@vytches/ddd-policies` (237/237) tests green; the only failures seen
+(`@vytches/ddd-cqrs`, 3 tests) pre-date this commit per `git blame` (2025-08-23)
+and are unrelated. Task file corrected (`status: done`, all 7 AC checkboxes
+ticked, Activity/Notes section added) and moved to `completed-tasks/`, alongside
+VF-037 (moved on the same request — "037 przeneś do completed"). v0.31.0's
+code-side gate is now down to VF-036's AC-SIGNOFF alone.
+
+[2026-08-19] @human: Confirmed sequencing for the `main` catch-up — `main` is
+178 commits behind `develop` (last reachable tag `v0.27.0`); the old
+`release/2026-07-18-alpha` branch is already fully merged into `develop`
+(`d836beeb`), so there's no separate alpha content to bring over. Decision:
+finish VF-028 + VF-036 AC-SIGNOFF first, run the full release checklist, then
+merge `develop` → `main` and tag — not before.
+
+[2026-08-19] @pulse: 37-day sync gap (last pulse 2026-07-13). Corrected material
+drift: VF-036 (code done, AC-SIGNOFF outstanding) and VF-037 (done, unarchived)
+and the VF-039 split all happened without a status sync. VF-028's task file
+never moved past `status: backlog` despite an active branch and an approved
+`/analyze` artifact — flagged, not auto-corrected (out of `/pulse`'s scope).
+Also caught VP-012's stale `priority: normal` field (should be `high` per the
+2026-08-09 promotion note). Health: 🟡 AMBER — process/metadata gap, not a
+capability or blocker problem; 0 blocked tasks, 0 tech debt.
+
+[2026-08-19] @tech-lead: 🟡 AMBER. VF-036 AC-SIGNOFF is the publication gate.
+VF-028 branch active but task metadata not updated — fix status field before
+starting. VF-037 shipped (`c393a04b`), needs archival. VF-039 split 2026-08-19:
+VF-039a ready to ship (design-complete), VF-039b deprioritised on an open
+architecture question — correct call given VF-028's higher impact. Zero blocked
+upstream tasks.
+
+[2026-08-19] @product-owner: Milestone gap now gated on 2 items (VF-028, VF-036
+sign-off) instead of only juz-ide-api. VD-004's business-value claim remains
+unvalidated (correctly already P3). VA-001's own demand-signal window opened
+2026-08-09 — flagged for a maintainer check this week rather than another pulse
+cycle of silence.
 
 [2026-07-13] @pulse: VD-005 shipped today (docs truth cleanup + new
 `tools/docs-compile-gate` CI tool) — implemented via `/analyze-ddd` →
