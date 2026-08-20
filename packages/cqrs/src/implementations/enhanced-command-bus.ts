@@ -661,7 +661,12 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus, I
       executing.push(promise);
 
       if (executing.length >= concurrencyLimit) {
-        await Promise.race(executing);
+        // Single indexed race replaces the former probe-race + index-race pair:
+        // FIFO microtask ordering on an already-settled parent always yields
+        // the lowest actually-settled index, so one race is sufficient. Do
+        // NOT add a rejection handler here — a rejected command must still
+        // abort this race (and executeInParallel) instead of being silently
+        // swallowed into an unhandledRejection later.
         const completed = await Promise.race(executing.map((p, i) => p.then(() => i)));
         executing.splice(completed, 1);
       }
