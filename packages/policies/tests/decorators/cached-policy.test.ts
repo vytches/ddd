@@ -503,6 +503,248 @@ describe('CachedPolicy', () => {
     });
   });
 
+  // VP-012c / R1: two hashString() calls (contextHash + entityHash) merged
+  // into one hashString() call over a length-prefixed combined buffer.
+  // Digest primitive (SHA-256, 128-bit prefix) is unchanged — these tests
+  // cover only the merge's boundary-safety, not the hash algorithm itself
+  // (algorithm-level collision resistance is already covered by the
+  // "VS-005: SHA-256 cache key hash" suite above).
+  describe('VP-012c R1: merged single-hashString cache key generation', () => {
+    let r1Policy: TestPolicy;
+
+    beforeEach(() => {
+      r1Policy = new TestPolicy();
+    });
+
+    it('should not falsely collide when context length varies but a naive (unprefixed) concatenation of context+entity would coincide', async () => {
+      // Regression for the length-prefix format: without a length prefix,
+      // two different (contextRaw, entityKey) splits can concatenate to an
+      // identical combined string (e.g. contextRaw="ab"+entityKey="cd" vs
+      // contextRaw="a"+entityKey="bcd" both yield "abcd"). The length prefix
+      // makes the split point part of the hashed input, so this can never
+      // happen. We approximate the adversarial split here via two contexts
+      // whose userId differs only in where a shared substring sits relative
+      // to the context/entity boundary, paired with entities chosen so the
+      // *tail* of one contextRaw + its entityKey textually matches the
+      // *tail* of the other pairing once concatenated naively.
+      const policy = PolicyCachingBehavior.create(r1Policy as unknown as IBusinessPolicy<unknown>, {
+        ttl: 60000,
+      });
+
+      const contextA = PolicyContextBuilder.forUser('shared-prefix-X')
+        .withEnvironment('env')
+        .build();
+      const contextB = PolicyContextBuilder.forUser('shared-prefix-')
+        .withEnvironment('Xenv')
+        .build();
+
+      // entity chosen so naive contextRaw+entityKey concatenation for A and
+      // B would be textually close; only the length-prefixed encoding
+      // guarantees they hash to different combined strings.
+      await policy.check({ entity: { value: 'tail' }, context: contextA });
+      await policy.check({ entity: { value: 'tail' }, context: contextB });
+
+      // Two distinct cache entries (misses), never a false hit collapsing
+      // both requests into one slot.
+      expect(policy.getCacheSize()).toBe(2);
+      expect(r1Policy.callCount).toBe(2);
+    });
+
+    it('should keep entity content containing NUL bytes and colon characters from crossing the context/entity boundary', async () => {
+      const policy = PolicyCachingBehavior.create(r1Policy as unknown as IBusinessPolicy<unknown>, {
+        ttl: 60000,
+      });
+
+      const context = PolicyContextBuilder.forUser('user-boundary')
+        .withTenantId('tenant-boundary')
+        .withEnvironment('test')
+        .build();
+
+      // Entity payloads that echo the internal NUL field-separator and the
+      // "length:" prefix separator used by the merged encoding.
+      const entityWithNul = { note: 'a\x00b\x00c' };
+      const entityWithColon = { note: '4:injected' };
+
+      await policy.check({ entity: entityWithNul, context });
+      await policy.check({ entity: entityWithColon, context });
+
+      // Different entity payloads under the same context must still be two
+      // independent cache entries — no boundary confusion.
+      expect(policy.getCacheSize()).toBe(2);
+      expect(r1Policy.callCount).toBe(2);
+
+      // Repeating the first request must still be a clean cache hit
+      // (determinism preserved after the merge).
+      const callsBefore = r1Policy.callCount;
+      await policy.check({ entity: entityWithNul, context });
+      expect(r1Policy.callCount).toBe(callsBefore);
+    });
+
+    it('should still produce exactly one namespace segment and one hash segment in the cache key shape (single hashString call)', async () => {
+      // Behavioural proxy for "one hashString() call, not two": the public
+      // surface for this is cache size/determinism (already covered above);
+      // this test locks in that a bare `namespace` config still isolates
+      // correctly now that the key is namespace + ONE hash rather than
+      // namespace + contextHash + entityHash.
+      const namespacedA = PolicyCachingBehavior.create(
+        r1Policy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000, namespace: 'r1-namespace-a' }
+      );
+      const namespacedB = PolicyCachingBehavior.create(
+        r1Policy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000, namespace: 'r1-namespace-b' }
+      );
+
+      const context = PolicyContextBuilder.forUser('user-ns').withEnvironment('test').build();
+      const entity = { value: 'same' };
+
+      await namespacedA.check({ entity, context });
+      await namespacedB.check({ entity, context });
+
+      // Same context+entity, different namespace → isolated caches, each a
+      // miss (namespace is still the un-hashed prefix of the key).
+      expect(namespacedA.getCacheSize()).toBe(1);
+      expect(namespacedB.getCacheSize()).toBe(1);
+      expect(r1Policy.callCount).toBe(2);
+    });
+  });
+
+  // VP-012c testing layer: dedicated key-collision-resistance coverage for
+  // the default (non-keyGenerator) cache key, proving the three properties
+  // the R1 length-prefix framing is supposed to guarantee:
+  //   (a) same context + same entity  -> same key (stable, deterministic)
+  //   (b) different context OR entity -> different key (no false collision)
+  //   (c) boundary-shift edge case: a context/entity split that WOULD
+  //       naively concatenate to the same raw bytes at a different split
+  //       point (e.g. context="ab"+entity="c" vs context="a"+entity="bc")
+  //       must still resolve to different keys — this is exactly what the
+  //       decimal length-prefix in `generateCacheKey` (see its doc comment,
+  //       R1) is designed to prevent.
+  describe('VP-012c testing layer: default cache key collision resistance', () => {
+    let collisionPolicy: TestPolicy;
+
+    beforeEach(() => {
+      collisionPolicy = new TestPolicy();
+    });
+
+    it('(a) same context + same entity produces the same key (stable across repeated checks)', async () => {
+      const policy = PolicyCachingBehavior.create(
+        collisionPolicy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000 }
+      );
+
+      const context = PolicyContextBuilder.forUser('stable-user')
+        .withTenantId('stable-tenant')
+        .withEnvironment('stable-env')
+        .build();
+      const entity = { id: 'same-entity', payload: { nested: true, count: 3 } };
+
+      // Three checks of the identical (context, entity) pair: only the
+      // first is a miss, the other two must land on the same cache slot.
+      await policy.check({ entity, context });
+      await policy.check({ entity, context });
+      await policy.check({ entity, context });
+
+      expect(collisionPolicy.callCount).toBe(1);
+      expect(policy.getCacheSize()).toBe(1);
+    });
+
+    it('(b) different context OR different entity produces a different key (no false collision)', async () => {
+      const policy = PolicyCachingBehavior.create(
+        collisionPolicy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000 }
+      );
+
+      const baseContext = PolicyContextBuilder.forUser('base-user')
+        .withTenantId('base-tenant')
+        .withEnvironment('base-env')
+        .build();
+      const otherContext = PolicyContextBuilder.forUser('other-user') // only userId differs
+        .withTenantId('base-tenant')
+        .withEnvironment('base-env')
+        .build();
+      const entity = { id: 'shared-entity' };
+      const otherEntity = { id: 'different-entity' };
+
+      // Baseline
+      await policy.check({ entity, context: baseContext });
+      expect(policy.getCacheSize()).toBe(1);
+
+      // Different context, same entity -> new key
+      await policy.check({ entity, context: otherContext });
+      expect(policy.getCacheSize()).toBe(2);
+
+      // Same context (base), different entity -> new key
+      await policy.check({ entity: otherEntity, context: baseContext });
+      expect(policy.getCacheSize()).toBe(3);
+
+      // All three were distinct misses; nothing was ever reused.
+      expect(collisionPolicy.callCount).toBe(3);
+    });
+
+    it('(c) boundary-shift split (context/entity byte-shift that would naively coincide) still yields different keys', async () => {
+      const policy = PolicyCachingBehavior.create(
+        collisionPolicy as unknown as IBusinessPolicy<unknown>,
+        { ttl: 60000 }
+      );
+
+      // Fixed userId/tenantId so the ONLY moving parts are `environment`
+      // (the last field folded into contextRaw, directly adjacent to
+      // entityKey with zero separator between them) and the entity value.
+      //
+      // Entities are top-level BigInts: JSON.stringify() throws on BigInt,
+      // so generateCacheKey() falls back to generateFallbackKey(), whose
+      // stringify() renders a bare primitive as `String(obj)` with NO
+      // quoting/escaping (unlike JSON.stringify). That gives us exact,
+      // unescaped control over the raw entityKey bytes, which is required
+      // to construct a genuine naive-concatenation coincidence.
+      //
+      // Case A: environment = "12", entity = 3n  -> entityKey "3"
+      //         naive tail = "12" + "3"  = "123"
+      // Case B: environment = "1",  entity = 23n -> entityKey "23"
+      //         naive tail = "1"  + "23" = "123"   <- same naive tail as A
+      //
+      // contextRaw.length differs (ends in "...12" vs "...1"), so the real
+      // length-prefixed key (`${contextRaw.length}:${contextRaw}${entityKey}`)
+      // MUST diverge even though the unprefixed concatenation would not.
+      // This is the direct analogue of context="ab"+entity="c" vs
+      // context="a"+entity="bc".
+      const contextA = PolicyContextBuilder.forUser('boundary-user')
+        .withTenantId('boundary-tenant')
+        .withEnvironment('12')
+        .build();
+      const contextB = PolicyContextBuilder.forUser('boundary-user')
+        .withTenantId('boundary-tenant')
+        .withEnvironment('1')
+        .build();
+
+      const entityA = 3n as unknown;
+      const entityB = 23n as unknown;
+
+      // Sanity check on the construction itself: the naive (unprefixed)
+      // concatenation really would coincide for A and B, which is exactly
+      // the ambiguity the length prefix must resolve.
+      const contextRawA = `boundary-user\x00boundary-tenant\x0012`;
+      const contextRawB = `boundary-user\x00boundary-tenant\x001`;
+      expect(`${contextRawA}3`).toBe(`${contextRawB}23`);
+      expect(contextRawA.length).not.toBe(contextRawB.length);
+
+      await policy.check({ entity: entityA, context: contextA });
+      await policy.check({ entity: entityB, context: contextB });
+
+      // Two genuinely distinct cache entries — never collapsed into one
+      // slot despite the naive-concatenation coincidence above.
+      expect(policy.getCacheSize()).toBe(2);
+      expect(collisionPolicy.callCount).toBe(2);
+
+      // Determinism control: re-running case A must still be a clean hit
+      // on its own slot (proves the divergence isn't just "always misses").
+      const callsBefore = collisionPolicy.callCount;
+      await policy.check({ entity: entityA, context: contextA });
+      expect(collisionPolicy.callCount).toBe(callsBefore);
+    });
+  });
+
   describe('VS-005: LRU O(1) eviction (F3)', () => {
     it('should evict the least recently used entry on overflow', async () => {
       const policy = PolicyCachingBehavior.create(testPolicy, {
