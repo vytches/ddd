@@ -719,5 +719,63 @@ describe('EnhancedCommandBus', () => {
 
       expect(results).toEqual([0, 1, 2, 3, 4, 5, 6]);
     });
+
+    it('selects the same winning index regardless of which promise actually settles first (single indexed race)', async () => {
+      // VP-012a collapsed a probe-race + index-race pair into one indexed
+      // race. This exercises several distinct settlement orderings —
+      // strictly increasing delays (completion order == input order),
+      // strictly decreasing (fully reversed), a non-monotonic shuffle, and
+      // all-equal delays (ties, where FIFO microtask scheduling decides) —
+      // and asserts results[] is correct (i.e. the race always resolves to
+      // an actually-settled index) under every one of them.
+      const delayPatterns: number[][] = [
+        [5, 10, 15, 20, 25, 30, 35], // increasing
+        [70, 60, 50, 40, 30, 20, 10], // decreasing
+        [20, 5, 30, 10, 25, 15, 35], // shuffled / non-monotonic
+        [10, 10, 10, 10, 10, 10, 10], // ties
+      ];
+
+      for (const delays of delayPatterns) {
+        const handler = {
+          execute: vi.fn().mockImplementation(async (command: OrderedCommand) => {
+            await new Promise(resolve => setTimeout(resolve, command.delayMs));
+            return command.seq;
+          }),
+        };
+        (mockContainer.resolve as Mock).mockReturnValue(handler);
+
+        const commands = delays.map((delayMs, seq) => new OrderedCommand(seq, delayMs));
+        const results = await enhancedCommandBus.executeMany<OrderedCommand, number>(commands);
+
+        expect(results).toEqual(delays.map((_, seq) => seq));
+      }
+    });
+
+    it('surfaces a rejected command as a rejection instead of silently swallowing it', async () => {
+      // Regression guard for the "do NOT add a rejection handler to the
+      // indexed race" note on executeInParallel: a rejected command must
+      // still abort executeMany with that rejection, not be lost into an
+      // unhandledRejection while the batch quietly completes.
+      // Local bus WITHOUT retry — the file-level bus opts into retry, which
+      // would delay (but not hide) the rejection; disabling it keeps this
+      // test focused on propagation, not retry timing.
+      const bus = new EnhancedCommandBus(mockContainer);
+
+      const handler = {
+        execute: vi.fn().mockImplementation(async (command: OrderedCommand) => {
+          if (command.seq === 2) {
+            throw new Error('boom-seq-2');
+          }
+          await new Promise(resolve => setTimeout(resolve, command.delayMs));
+          return command.seq;
+        }),
+      };
+      (mockContainer.resolve as Mock).mockReturnValue(handler);
+
+      const delays = [30, 20, 10, 40, 25, 15, 35];
+      const commands = delays.map((delayMs, seq) => new OrderedCommand(seq, delayMs));
+
+      await expect(bus.executeMany<OrderedCommand, number>(commands)).rejects.toThrow('boom-seq-2');
+    });
   });
 });
