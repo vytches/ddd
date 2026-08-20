@@ -1,4 +1,4 @@
-import type { ModuleMetadata, Provider } from '@nestjs/common';
+import type { ModuleMetadata, Provider, Type } from '@nestjs/common';
 import type { HandlerInfo } from '@vytches/ddd-di';
 
 export type { HandlerInfo };
@@ -203,4 +203,114 @@ export interface VytchesModuleMetadata {
    * Discovered handlers
    */
   handlers: HandlerInfo[];
+}
+
+/**
+ * Factory contract for {@link VytchesDDDModule.forRootAsync} `useClass` /
+ * `useExisting`.
+ *
+ * Implement on a provider that can build the module options from injected
+ * dependencies (typically a `ConfigService`).
+ *
+ * @example
+ * ```typescript
+ * @Injectable()
+ * export class VytchesOptionsProvider implements VytchesDDDOptionsFactory {
+ *   constructor(private readonly config: ConfigService) {}
+ *
+ *   createVytchesDDDOptions(): VytchesDDDModuleOptions {
+ *     return { autoDiscovery: { enabled: this.config.get('DDD_DISCOVERY') !== 'off' } };
+ *   }
+ * }
+ * ```
+ *
+ * @public
+ * @since 0.31.0
+ */
+export interface VytchesDDDOptionsFactory {
+  createVytchesDDDOptions(): Promise<VytchesDDDModuleOptions> | VytchesDDDModuleOptions;
+}
+
+/**
+ * Async configuration for {@link VytchesDDDModule.forRootAsync} — the standard
+ * NestJS `useFactory` / `useClass` / `useExisting` triad.
+ *
+ * The factory resolves to the very same {@link VytchesDDDModuleOptions} that
+ * the synchronous `forRoot()` accepts, so there is one options vocabulary for
+ * the module rather than two.
+ *
+ * **Which fields are honoured asynchronously.** NestJS needs a `DynamicModule`'s
+ * `providers`, `imports`, `exports` and `global` flag *before* the DI container
+ * exists, so they cannot come out of a factory that itself depends on DI. They
+ * are therefore declared statically on this object ({@link imports},
+ * {@link isGlobal}, {@link providers}), while the factory supplies the options
+ * that are read at runtime — currently {@link VytchesDDDModuleOptions.autoDiscovery}
+ * and {@link VytchesDDDModuleOptions.context}. Returning `providers`/`imports`/
+ * `exports`/`isGlobal` from the factory is not an error, but those fields are
+ * ignored; declare them here instead.
+ *
+ * @example ConfigService-driven setup
+ * ```typescript
+ * @Module({
+ *   imports: [
+ *     VytchesDDDModule.forRootAsync({
+ *       imports: [ConfigModule],
+ *       inject: [ConfigService],
+ *       useFactory: (config: ConfigService) => ({
+ *         autoDiscovery: { enabled: config.get('DDD_DISCOVERY') !== 'off' },
+ *       }),
+ *     }),
+ *   ],
+ * })
+ * export class AppModule {}
+ * ```
+ *
+ * @example useClass
+ * ```typescript
+ * VytchesDDDModule.forRootAsync({
+ *   imports: [ConfigModule],
+ *   useClass: VytchesOptionsProvider,
+ * })
+ * ```
+ *
+ * @public
+ * @since 0.31.0
+ */
+export interface VytchesDDDModuleAsyncOptions extends Pick<ModuleMetadata, 'imports'> {
+  /**
+   * Dependencies injected into {@link useFactory}, in parameter order.
+   */
+  inject?: unknown[];
+
+  /**
+   * Builds the module options from injected dependencies.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- variadic
+  // factory args cannot be typed without making the signature contravariant
+  // and rejecting every real ConfigService factory; this is the same shape
+  // @nestjs/typeorm and @nestjs/config use.
+  useFactory?: (...args: any[]) => Promise<VytchesDDDModuleOptions> | VytchesDDDModuleOptions;
+
+  /**
+   * Class implementing {@link VytchesDDDOptionsFactory}; instantiated by NestJS.
+   */
+  useClass?: Type<VytchesDDDOptionsFactory>;
+
+  /**
+   * Already-registered provider implementing {@link VytchesDDDOptionsFactory}.
+   */
+  useExisting?: Type<VytchesDDDOptionsFactory>;
+
+  /**
+   * Custom providers. Static — NestJS resolves the provider list before the
+   * factory runs, so this cannot come from {@link useFactory}.
+   */
+  providers?: Provider[];
+
+  /**
+   * Global module flag. Static, for the same reason as {@link providers}.
+   *
+   * @default true
+   */
+  isGlobal?: boolean;
 }
