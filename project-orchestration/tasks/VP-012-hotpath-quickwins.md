@@ -6,8 +6,8 @@
 task_id: VP-012
 title: AuditCapability O(n²), CachedPolicy SHA-256, executeInParallel double-race
 type: optimization
-priority: normal
-complexity: simple
+priority: high
+complexity: medium
 estimated_time: 6h
 created_by: LIB-AUDIT-2026-07-02
 created_at: 2026-07-02
@@ -22,28 +22,39 @@ findings: [F-H13, F-H14, executeInParallel M6]
 Trzy izolowane, niskoryzykowne poprawki o realnym koszcie u konsumenta skali
 juz-ide-api (237+ agregatów, policy-check na każdej komendzie):
 
-1. **F-H13 — O(n²) replay z AuditCapability:**
-   `audit-capability.ts:73-85,145-155` woła `getDomainEvents()` po KAŻDYM
-   `apply()`, a getter robi pełną kopię spread (aggregate-root.ts:175-177) tylko
-   po to, by odczytać ostatni element. Replay N zdarzeń = 1+2+...+N kopii. Fix:
-   odczyt `_domainEvents[length-1]` wewnętrznie lub `peekLastEvent()` bez kopii.
+1. **F-H13 — O(n²) w getDomainEvents(), wołanym po każdym apply():**
+   `audit-capability.ts` woła `getDomainEvents()` po KAŻDYM `apply()`. Getter
+   dziś (implementacja VF-023) robi `.map(event => LibUtils.deepFreeze(event))`
+   - `Object.freeze()` na całej tablicy przy KAŻDYM wywołaniu — droższe niż
+     kopia przez spread, nie tańsze. N kolejnych apply() z audytem = O(N²)
+     deep-freeze. Fix: memoizacja zamrożonej tablicy w
+     AggregateRoot.getDomainEvents + inwalidacja przy mutacji (korekta ustalona
+     empirycznie w
+     `project-orchestration/analysis/VP-012-hotpath-quickwins.analysis.md`,
+     F1_KOREKTA, decyzja D2).
 2. **F-H14 — CachedPolicy hashuje kryptograficznie na każdym checku:**
    `cached-policy.ts:283-309` robi `JSON.stringify(request.entity)` + 2×
-   `await crypto.subtle.digest('SHA-256', ...)` per sprawdzenie autoryzacji. Cel
-   (brak surowego PII w kluczach cache) nie wymaga collision-resistance — szybki
-   synchroniczny hash (FNV-1a — precedens: enhanced-query-bus.ts:711-725,
-   VP-NEW-001, zmierzone 5-10× szybciej) spełnia to samo bez skoku w microtask.
+   wywołania `hashString()` (SHA-256, 128-bit prefix) per sprawdzenie
+   autoryzacji. Fix zaakceptowany: jeden połączony digest zamiast dwóch — NIE
+   FNV-1a. Bare FNV-1a odrzucony po analizie ryzyka jako regres bezpieczeństwa
+   (kolizja w 32-bitowym kontekście → cross-tenant data disclosure; patrz
+   analiza D3).
 3. **executeInParallel — podwójny Promise.race:**
    `enhanced-command-bus.ts:616-639` — wynik pierwszego race'a odrzucany, drugi
    race tylko po indeks. Jedna race z indeksem wystarczy.
 
 ## Acceptance Criteria
 
-1. [ ] AuditCapability bez kopii tablicy na apply(); test replay N=1000 zdarzeń
-       z audytem — czas liniowy (benchmark before/after).
-2. [ ] CachedPolicy: synchroniczny szybki hash zamiast 2× SHA-256; zachowany cel
-       prywatności (brak surowych wartości encji w kluczach); benchmark
-       before/after.
+1. [ ] AuditCapability: getDomainEvents() nie robi pełnego deep-freeze na każde
+       wywołanie, gdy stan agregatu się nie zmienił (memoizacja + dirty flag);
+       test mierzy koszt N kolejnych apply() + getDomainEvents() (ścieżka
+       AuditCapability), NIE loadFromHistory()/replay — loadFromHistory() woła
+       handleEvent(), nie apply(), i nie przechodzi przez interceptor
+       AuditCapability (patrz analiza F3).
+2. [ ] CachedPolicy: jeden połączony SHA-256 digest (128-bit prefix jak dziś)
+       zamiast dwóch osobnych wywołań hashString(), NIE FNV-1a; benchmark
+       before/after warunkuje merge (zysk musi przewyższać dominujący koszt
+       JSON.stringify(request.entity)).
 3. [ ] executeInParallel: pojedynczy race.
 4. [ ] `pnpm bench` (hot-paths + di) bez regresji; wyniki w opisie PR.
 5. [ ] Zero zmian publicznego API (wewnętrzne implementacje).

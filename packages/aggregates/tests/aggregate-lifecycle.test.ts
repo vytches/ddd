@@ -441,4 +441,180 @@ describe('AggregateRoot — full lifecycle', () => {
       expect(order.getInitialVersion()).toBe(5);
     });
   });
+
+  // VP-012b (D2, F15): getDomainEvents() now memoizes the deep-frozen array
+  // it returns, rebuilding it only when `_domainEventsCacheDirty` is set by
+  // `_invalidateDomainEventsCache()` — the single helper called from every
+  // one of the four mutation sites `library-expert` grepped for in the
+  // decision (apply/commit/loadFromHistory/transformDomainEvents). Per the
+  // updated getDomainEvents() JSDoc and CHANGELOG "Consumer Impact
+  // Checklist": two calls with NO intervening mutation now return the SAME
+  // array reference (`.toBe` holds, where it previously did not); a call
+  // separated from the previous one by any of the four mutation paths must
+  // return a DIFFERENT reference. Repo-wide grep
+  // (`grep -rn "getDomainEvents()" | grep -i "toBe\|===\|!=="`) found no
+  // pre-existing `not.toBe`/`!==` identity assertion anywhere in the
+  // library that this change breaks — there was nothing to migrate.
+  describe('getDomainEvents() — cache stability & freeze guarantees (VP-012b)', () => {
+    it('returns the SAME array reference on repeated calls with no intervening mutation', () => {
+      const order = newOrder();
+      order.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+
+      const first = order.getDomainEvents();
+      const second = order.getDomainEvents();
+      const third = order.getDomainEvents();
+
+      expect(second).toBe(first);
+      expect(third).toBe(first);
+    });
+
+    it('invalidates the cache after apply() — new reference, growing content, stale snapshot unaffected', () => {
+      const order = newOrder();
+      order.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+      const before = order.getDomainEvents();
+
+      order.applyEvent('OrderItemAdded', { sku: 'A', quantity: 1 });
+      const after = order.getDomainEvents();
+
+      expect(after).not.toBe(before);
+      expect(after).toHaveLength(2);
+      // `before` is a frozen array — it cannot be mutated out from under the
+      // caller, so it still reads as the 1-event snapshot from before apply().
+      expect(before).toHaveLength(1);
+    });
+
+    it('invalidates the cache after commit() — new reference, emptied', () => {
+      const order = newOrder();
+      order.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+      const before = order.getDomainEvents();
+
+      order.commit();
+      const after = order.getDomainEvents();
+
+      expect(after).not.toBe(before);
+      expect(after).toHaveLength(0);
+      expect(before).toHaveLength(1);
+    });
+
+    it('invalidates the cache after loadFromHistory() — new reference, replay does not reuse the stale cache', () => {
+      const order = newOrder();
+      order.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+      const before = order.getDomainEvents();
+
+      // loadFromHistory() discards prior uncommitted events (see the
+      // "reconstitution" suite above) — an empty replay still mutates
+      // `_domainEvents` (reassigned to []) and must invalidate the cache.
+      order.loadFrom([]);
+      const after = order.getDomainEvents();
+
+      expect(after).not.toBe(before);
+      expect(after).toHaveLength(0);
+      expect(before).toHaveLength(1);
+    });
+
+    it('invalidates the cache after transformDomainEvents() — new reference, transformed content, stale snapshot unaffected', () => {
+      const order = newOrder();
+      order.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+      const before = order.getDomainEvents();
+
+      order.transformDomainEvents<OrderCreatedPayload>(() => ({
+        payload: { customerId: 'c-9', amount: 1 },
+      }));
+      const after = order.getDomainEvents();
+
+      expect(after).not.toBe(before);
+      expect((after[0]!.payload as OrderCreatedPayload).customerId).toBe('c-9');
+      // `before` is frozen and holds the pre-transform payload.
+      expect((before[0]!.payload as OrderCreatedPayload).customerId).toBe('c-1');
+    });
+
+    it('every event and the array itself are deep-frozen, including nested payload/metadata objects', () => {
+      const order = newOrder();
+      order.applyEvent(
+        'OrderCreated',
+        { customerId: 'c-1', amount: 100, nested: { deep: { value: 1 } } },
+        { correlationId: 'req-1' }
+      );
+
+      const events = order.getDomainEvents();
+      expect(Object.isFrozen(events)).toBe(true);
+      for (const event of events) {
+        expect(Object.isFrozen(event)).toBe(true);
+        expect(Object.isFrozen(event.payload)).toBe(true);
+        expect(Object.isFrozen((event.payload as { nested: unknown }).nested)).toBe(true);
+        expect(Object.isFrozen((event.payload as { nested: { deep: unknown } }).nested.deep)).toBe(
+          true
+        );
+        expect(Object.isFrozen(event.metadata)).toBe(true);
+      }
+    });
+
+    it('freeze guarantee survives a cache rebuild triggered by mutation — hoisted WeakSet does not weaken it', () => {
+      const order = newOrder();
+      order.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+      order.getDomainEvents(); // builds cache #1 (fresh WeakSet hoisted for that call)
+
+      order.applyEvent('OrderItemAdded', { sku: 'A', quantity: 1 });
+      const events = order.getDomainEvents(); // cache invalidated, rebuilt with a NEW hoisted WeakSet
+
+      expect(events).toHaveLength(2);
+      expect(Object.isFrozen(events)).toBe(true);
+      for (const event of events) {
+        expect(Object.isFrozen(event)).toBe(true);
+        expect(Object.isFrozen(event.payload)).toBe(true);
+      }
+    });
+
+    it('deep-freezes a nested object aliased across two different events consistently (hoisted WeakSet is shared across the whole call, not just within one event)', () => {
+      const order = newOrder();
+      const sharedContext = { tag: 'shared' };
+      // Metadata is shallow-spread per apply() (a fresh top-level object each
+      // time), but a NESTED object passed inside it keeps the same reference
+      // across both events — this is the aliasing case the hoisted WeakSet
+      // (shared across the whole `.map()` pass, not recreated per event) must
+      // still freeze correctly and consistently for every event that holds it.
+      order.applyEvent(
+        'OrderCreated',
+        { customerId: 'c-1', amount: 100 },
+        { context: sharedContext }
+      );
+      order.applyEvent('OrderItemAdded', { sku: 'A', quantity: 1 }, { context: sharedContext });
+
+      const events = order.getDomainEvents();
+      const ctx0 = events[0]!.metadata!.context as { tag: string };
+      const ctx1 = events[1]!.metadata!.context as { tag: string };
+
+      expect(ctx0).toBe(sharedContext);
+      expect(ctx1).toBe(ctx0);
+      expect(Object.isFrozen(ctx0)).toBe(true);
+      expect(Object.isFrozen(ctx1)).toBe(true);
+    });
+
+    it('does not throw on a self-referential (cyclic) payload — hoisted WeakSet still terminates cycles', () => {
+      const order = newOrder();
+      const cyclic: Record<string, unknown> = { customerId: 'c-1', amount: 100 };
+      cyclic.self = cyclic;
+
+      order.applyEvent('OrderCreated', cyclic);
+      order.applyEvent('OrderItemAdded', { sku: 'A', quantity: 1 });
+
+      expect(() => order.getDomainEvents()).not.toThrow();
+      const events = order.getDomainEvents();
+      expect(Object.isFrozen(events[0]!.payload)).toBe(true);
+      expect((events[0]!.payload as Record<string, unknown>).self).toBe(events[0]!.payload);
+    });
+
+    it('mutating a frozen event or its payload throws TypeError (strict mode)', () => {
+      const order = newOrder();
+      order.applyEvent('OrderCreated', { customerId: 'c-1', amount: 100 });
+      const event = order.getDomainEvents()[0]!;
+
+      expect(() => {
+        (event as { eventName: string }).eventName = 'Tampered';
+      }).toThrow(TypeError);
+      expect(() => {
+        (event.payload as Record<string, unknown>).customerId = 'tampered';
+      }).toThrow(TypeError);
+    });
+  });
 });

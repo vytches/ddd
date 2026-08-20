@@ -136,6 +136,20 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   private _version = 0;
   private _initialVersion = 0;
   private _domainEvents: IDomainEvent[] = [];
+  /**
+   * VP-012b (D2, F15/F5): memoized, deep-frozen view returned by
+   * {@link getDomainEvents}. Rebuilt lazily on next read only when
+   * `_domainEventsCacheDirty` is true — see `_invalidateDomainEventsCache()`.
+   */
+  private _domainEventsCache: ReadonlyArray<IDomainEvent> = Object.freeze([]);
+  /**
+   * VP-012b (D2): dirty flag for `_domainEventsCache`. Set true by
+   * `_invalidateDomainEventsCache()`, the single helper called from every
+   * site that mutates `_domainEvents` (apply, commit, transformDomainEvents,
+   * loadFromHistory, _internal_setState). Starts true so the first
+   * `getDomainEvents()` call always builds the cache.
+   */
+  private _domainEventsCacheDirty = true;
   private _eventHandlers = new Map<string, IAggregateEventHandler>();
   private _capabilities = new CapabilityRegistry();
   /**
@@ -238,11 +252,45 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
    * data) inside it could still be mutated in place, silently corrupting
    * state shared with `_domainEvents` (the same object references are
    * stored internally — events are never re-cloned after creation).
+   *
+   * VP-012b (D2, BREAKING behavior change, non-breaking signature): the
+   * returned array reference is now **stable between calls** — the same
+   * frozen array object is returned on every call until the next mutation
+   * (`apply()`, `commit()`, `loadFromHistory()`, or
+   * `transformDomainEvents()`), instead of a fresh array being built on
+   * every call as before. Content equality (`toEqual`) is unaffected either
+   * way. Code that relies on *identity* — e.g. asserting `not.toBe`/`!==`
+   * between two `getDomainEvents()` calls to prove "each call returns a new
+   * array" — will observe the new stable-reference behavior and must be
+   * updated; asserting `.toBe`/`===` between two calls made with no
+   * intervening mutation now holds, where it previously did not. This is
+   * safe to alias: the returned array and its contents are frozen, so
+   * holding onto the reference across a mutation still reflects the state
+   * as of the call that produced it (the cache is not that same array
+   * anymore after invalidation — a stored old reference is simply stale
+   * data, never mutated out from under the caller).
    * @returns {ReadonlyArray<IDomainEvent>} Array of uncommitted domain events
    */
   getDomainEvents(): ReadonlyArray<IDomainEvent> {
-    const events = this._domainEvents.map(event => LibUtils.deepFreeze(event));
-    return Object.freeze(events);
+    if (this._domainEventsCacheDirty) {
+      const seen = new WeakSet<object>();
+      const events = this._domainEvents.map(event => LibUtils.deepFreeze(event, seen));
+      this._domainEventsCache = Object.freeze(events);
+      this._domainEventsCacheDirty = false;
+    }
+    return this._domainEventsCache;
+  }
+
+  /**
+   * VP-012b (D2): single invalidation point for `_domainEventsCache`,
+   * called from every site that mutates `_domainEvents` — `apply()`,
+   * `commit()`, `transformDomainEvents()`, `loadFromHistory()`, and
+   * `_internal_setState()`. Keeping invalidation in one helper (rather than
+   * setting the flag ad hoc at each call site) means a future mutation site
+   * cannot silently forget to invalidate.
+   */
+  private _invalidateDomainEventsCache(): void {
+    this._domainEventsCacheDirty = true;
   }
 
   /**
@@ -251,6 +299,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   commit(): void {
     this._domainEvents = [];
     this._initialVersion = this._version;
+    this._invalidateDomainEventsCache();
   }
 
   /**
@@ -298,6 +347,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
       const patch = transform(event as IDomainEvent<P>, index);
       return patch ? enrichEvent(event as IDomainEvent<P>, patch) : event;
     });
+    this._invalidateDomainEventsCache();
   }
 
   // ==========================================
@@ -404,6 +454,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     // (already-registered) handler runs.
     this._version = nextVersion;
     this._domainEvents.push(enrichedEvent);
+    this._invalidateDomainEventsCache();
     this.handleEvent(enrichedEvent);
   }
 
@@ -454,6 +505,7 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
   protected loadFromHistory(events: IDomainEvent[]): void {
     this._version = this._initialVersion;
     this._domainEvents = [];
+    this._invalidateDomainEventsCache();
 
     for (const event of events) {
       this.handleEvent(event);
@@ -589,6 +641,12 @@ export class AggregateRoot<TId = string> implements IAggregateRoot<TId> {
     this._version = state.version;
     this._initialVersion = state.initialVersion;
     this._domainEvents = [...state.domainEvents];
+    // VP-012b: this is a 5th `_domainEvents` mutation site beyond the four
+    // enumerated in the task's grep-established fact (apply/commit/
+    // transformDomainEvents/loadFromHistory) — used by SnapshotCapability to
+    // restore state. Without invalidating here, getDomainEvents() would keep
+    // serving a stale cached array after a snapshot restore.
+    this._invalidateDomainEventsCache();
   }
 }
 

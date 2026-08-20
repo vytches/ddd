@@ -279,6 +279,16 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
    * Uses `globalThis.crypto.subtle` (Web Crypto) instead of `node:crypto` to
    * remain compatible with platform-agnostic bundles (Vite externalises
    * `node:` builtins for browser-compat builds).
+   *
+   * R1 (VP-012c): context and entity are hashed through a single `hashString`
+   * call over a combined, length-prefixed buffer instead of two separate
+   * `hashString` calls. This is a mechanical reduction of digest invocations
+   * only (2 → 1) — the digest primitive itself is unchanged (still SHA-256,
+   * still the 128-bit prefix from `hashString`, see its doc comment). A
+   * cross-user collision on the same cached entity requires colliding only
+   * `contextHash` under the previous two-call scheme (F7); merging into one
+   * digest over both fields removes that narrower collision surface without
+   * weakening the hash itself.
    */
   private async generateCacheKey(request: PolicyRequest<T>): Promise<string> {
     if (this.config.keyGenerator) {
@@ -303,10 +313,25 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
     // identifiers, so it removes the delimiter ambiguity a printable separator
     // would allow (e.g. userId "a_b" + tenant "c" vs "a" + "b_c").
     const contextRaw = `${request.context.userId}\x00${request.context.tenantId || ''}\x00${request.context.environment}`;
-    const contextHash = await this.hashString(contextRaw);
-    const entityHash = await this.hashString(entityKey);
 
-    return `${namespace}:${contextHash}:${entityHash}`;
+    // R1 (VP-012c): single hashString() call over a length-prefixed combined
+    // buffer, replacing the former two separate calls (contextHash +
+    // entityHash). NUL cannot be reused as the context/entity boundary here —
+    // it is already the internal field separator *inside* contextRaw (line
+    // above), so a bare NUL boundary would let an attacker shift bytes across
+    // the context/entity split (e.g. move a trailing NUL-delimited context
+    // field into the entity portion, or vice versa) while still landing on
+    // the same combined buffer and colliding the cache key. A decimal
+    // length-prefix of contextRaw is unambiguous regardless of which bytes
+    // (including NUL) appear inside contextRaw or entityKey: the parser reads
+    // digits up to the ':' separator, consumes exactly that many bytes as the
+    // context, and treats everything after as the entity — there is no value
+    // of contextRaw that can be crafted to produce the same combined buffer
+    // as a different (context, entity) pair.
+    const combined = `${contextRaw.length}:${contextRaw}${entityKey}`;
+    const combinedHash = await this.hashString(combined);
+
+    return `${namespace}:${combinedHash}`;
   }
 
   /**
@@ -365,6 +390,20 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
    * guarantees availability.
    *
    * Async because `subtle.digest` returns a Promise.
+   *
+   * NON-GOAL (VP-012c / D3, binding): do NOT replace this primitive with
+   * FNV-1a, djb2, or any other non-cryptographic hash in the name of "hot
+   * path optimisation". That substitution was evaluated and rejected — a
+   * 32-bit non-cryptographic hash collides cheaply (birthday bound ~2^16
+   * entries), and because this hash forms authorization cache keys
+   * (`CachedPolicy`/`PolicyCachingBehavior.generateCacheKey`), a collision
+   * is not a performance footnote: it lets one tenant's cached policy
+   * `allow` result be served to a different tenant/entity — cross-tenant
+   * data disclosure. Collision resistance here is a security property of
+   * the cache key, not an implementation detail open to swapping for
+   * throughput. Any future change to this digest must go through a
+   * threat-model update (see `docs/security/threat-models/TM-VP-012c.md`)
+   * and `security-privacy-architect` review, not a standalone perf PR.
    */
   private async hashString(str: string): Promise<string> {
     const encoded = new TextEncoder().encode(str);

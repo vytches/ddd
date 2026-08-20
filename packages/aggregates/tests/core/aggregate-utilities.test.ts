@@ -393,3 +393,29 @@ describe('aggregate-utilities — bulk operations', () => {
     expect(getAggregateCapabilities(target)).toEqual([]);
   });
 });
+
+// VP-012b (D2): getAggregateInfo() is aggregate-utilities.ts's only call site
+// for getDomainEvents() (`events: aggregate.getDomainEvents().length`). This
+// guards against a regression where memoization/caching leaves that count
+// reading a stale cached array instead of the live post-mutation one.
+describe('aggregate-utilities — getAggregateInfo().events reflects live state across cache invalidation (VP-012b)', () => {
+  it('events count tracks each apply() individually, never a stale cached array', () => {
+    const aggregate = newAggregate();
+    expect(getAggregateInfo(aggregate).events).toBe(0);
+
+    aggregate.applyEvent('Created', { name: 'a' });
+    expect(getAggregateInfo(aggregate).events).toBe(1);
+
+    aggregate.applyEvent('Created', { name: 'b' });
+    expect(getAggregateInfo(aggregate).events).toBe(2);
+  });
+
+  it('events count drops to 0 immediately after commit() invalidates the cache', () => {
+    const aggregate = newAggregate();
+    aggregate.applyEvent('Created', { name: 'a' });
+    expect(getAggregateInfo(aggregate).events).toBe(1);
+
+    aggregate.commit();
+    expect(getAggregateInfo(aggregate).events).toBe(0);
+  });
+});
