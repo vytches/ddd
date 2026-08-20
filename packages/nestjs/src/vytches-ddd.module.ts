@@ -16,6 +16,7 @@ import type {
   VytchesDDDOptionsFactory,
 } from './types';
 import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS, VYTCHES_DDD_OPTIONS } from './constants';
+import { InvalidContextNameError, ModuleConfigurationError } from './errors';
 
 /**
  * VytchesDDD NestJS Integration Module
@@ -26,6 +27,27 @@ import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS, VYTCHES_DDD_OPTIONS } from './con
  * - Direct registration with CQRS buses (ICommandBus, IQueryBus)
  * - Context-based handler isolation
  * - Production-ready default configurations
+ *
+ * ## The one recommended pattern
+ *
+ * `forRoot()` (or `forRootAsync()`) once at the application root, then one
+ * `forFeature()` per bounded context:
+ *
+ * ```typescript
+ * @Module({ imports: [VytchesDDDModule.forRoot()] })
+ * export class AppModule {}
+ *
+ * @Module({
+ *   imports: [VytchesDDDModule.forFeature('orders', { busType: 'enhanced' })],
+ *   providers: [CreateOrderHandler],
+ * })
+ * export class OrdersModule {}
+ * ```
+ *
+ * `forContext()` and `forContexts()` are deprecated predecessors — they share
+ * the root buses across contexts, so they do not actually isolate anything.
+ * `forTesting()` stays: it is the test-module entry point, not a fourth way to
+ * wire production code.
  *
  * @example
  * // Basic configuration - buses auto-injected if provided
@@ -164,8 +186,9 @@ export class VytchesDDDModule {
    */
   static forRootAsync(options: VytchesDDDModuleAsyncOptions): DynamicModule {
     if (!options.useFactory && !options.useClass && !options.useExisting) {
-      throw new Error(
-        'VytchesDDDModule.forRootAsync(): one of useFactory, useClass or useExisting is required'
+      throw new ModuleConfigurationError(
+        'forRootAsync',
+        'one of useFactory, useClass or useExisting is required'
       );
     }
 
@@ -232,12 +255,32 @@ export class VytchesDDDModule {
     return providers;
   }
 
+  /**
+   * @deprecated Since 0.31.0 — use {@link forFeature} instead, and
+   * {@link forRoot} for the application-wide module.
+   *
+   * `forContext()` predates `forFeature()` and gives weaker isolation: it
+   * registers a named explorer alongside the root one, but the buses stay
+   * shared, so handlers from different contexts still land on the same
+   * `ICommandBus`. `forFeature()` gives each context its own buses and its own
+   * local event bus, which is what "bounded context" is supposed to mean here.
+   *
+   * Migration:
+   * ```typescript
+   * // before
+   * imports: [VytchesDDDModule.forContext('orders', { context: { name: 'orders' } })]
+   * // after
+   * imports: [VytchesDDDModule.forFeature('orders')]
+   * ```
+   *
+   * Kept for one release so existing wiring keeps working; slated for removal.
+   */
   static forContext(
     context: string,
     options: VytchesDDDModuleOptions & { context?: VytchesContextOptions } = {}
   ): DynamicModule {
     if (!context || context.trim() === '') {
-      throw new Error('Context name cannot be null or empty');
+      throw new InvalidContextNameError('forContext');
     }
 
     const contextServiceName = `VytchesExplorerService_${context}`;
@@ -269,6 +312,30 @@ export class VytchesDDDModule {
     };
   }
 
+  /**
+   * @deprecated Since 0.31.0 — import one {@link forFeature} per bounded
+   * context instead.
+   *
+   * `forContexts()` was an attempt to declare several contexts in a single
+   * call, but it shares the root buses across all of them (same limitation as
+   * {@link forContext}) and silently falls back to {@link forRoot} when
+   * `options.contexts` is absent or not an object — a typo in the option name
+   * yields a working module with zero contexts rather than an error.
+   *
+   * Migration:
+   * ```typescript
+   * // before
+   * imports: [VytchesDDDModule.forContexts({ contexts: ['orders', 'billing'] })]
+   * // after
+   * imports: [
+   *   VytchesDDDModule.forRoot(),
+   *   VytchesDDDModule.forFeature('orders'),
+   *   VytchesDDDModule.forFeature('billing'),
+   * ]
+   * ```
+   *
+   * Kept for one release so existing wiring keeps working; slated for removal.
+   */
   static forContexts(options: VytchesDDDModuleOptions = {}): DynamicModule {
     if (!options.contexts || typeof options.contexts !== 'object') {
       return VytchesDDDModule.forRoot(options);

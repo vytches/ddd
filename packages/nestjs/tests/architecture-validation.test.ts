@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
 import { safeRun } from '@vytches/ddd-utils';
+import { InvalidContextNameError } from '../src/errors';
 
 // Create mock abstract classes for DI token compatibility using vi.hoisted()
 const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
@@ -397,7 +398,10 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
       });
 
       expect(configError).toBeDefined();
-      expect(configError?.message).toContain('Context name cannot be null or empty');
+      // VF-032b: typed error, so assert the type rather than the wording — the
+      // message is free to change, the catchable type is the contract.
+      expect(configError).toBeInstanceOf(InvalidContextNameError);
+      expect((configError as InvalidContextNameError).factory).toBe('forContext');
 
       // Test válid context names work properly
       module = await Test.createTestingModule({

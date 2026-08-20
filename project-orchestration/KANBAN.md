@@ -1,28 +1,29 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-20 (VF-032a shipped; VF-032 split into VF-032a/VF-032b —
-see the notes below the boards). Prior: 2026-08-19 by `/pulse` + same-day
-correction (37-day sync gap — VF-036/VF-037/VF-039 work landed since the
-2026-07-13 pulse without a status sync; VF-039 split into VF-039a/VF-039b same
-day. **Correction**: `/pulse` initially flagged VF-028 as "branch active, not
-yet done" — a direct user check ("czy 028 właśnie nie skończyliśmy?") caught
-that this was itself stale: VF-028 was implemented and committed the same day
-(`05ac364a`), just never had its task file updated. Verified (resilience
-104/104, policies 237/237 green) and archived alongside VF-037 — both moved to
-`completed-tasks/`.) Prior: 2026-08-09 (maturity-audit re-prioritization: 5 new
-tasks filed VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1,
-runtime-first ordering per owner directive — see the 2026-08-09 note above the
-boards). Prior: 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was
-stuck at `status: backlog` with unchecked ACs despite merge to `develop`
-`cf4029dd` 2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to
-`done`, ACs checked against git history, file moved to `completed-tasks/`).
-Prior: 2026-07-13 by `/pulse` (VD-005 shipped — docs truth cleanup + new
-`tools/docs-compile-gate` CI tool, all 11 ACs done, moved to `completed-tasks/`,
-merged to `develop`). **VF-036 (AC-SIGNOFF) is now the sole open gate on the
-v0.31.0 tag** — owner decision 2026-08-19: collect the sign-off, run the full
-release checklist, then merge `develop` → `main` (178 commits ahead, `main`'s
-last reachable tag is `v0.27.0`) and tag. Age = days since created_at. Grouped
-by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
+_Last updated 2026-08-20 (VF-032a + VF-032b shipped; VF-032 split into
+VF-032a/VF-032b — see the notes below the boards). Prior: 2026-08-19 by
+`/pulse` + same-day correction (37-day sync gap — VF-036/VF-037/VF-039 work
+landed since the 2026-07-13 pulse without a status sync; VF-039 split into
+VF-039a/VF-039b same day. **Correction**: `/pulse` initially flagged VF-028 as
+"branch active, not yet done" — a direct user check ("czy 028 właśnie nie
+skończyliśmy?") caught that this was itself stale: VF-028 was implemented and
+committed the same day (`05ac364a`), just never had its task file updated.
+Verified (resilience 104/104, policies 237/237 green) and archived alongside
+VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09 (maturity-audit
+re-prioritization: 5 new tasks filed VF-036/VF-037/VD-008/VT-007/VD-009, VP-012
+promoted to P1, runtime-first ordering per owner directive — see the 2026-08-09
+note above the boards). Prior: 2026-07-18 by `/task-tidy` (VP-006b reconciled:
+task file was stuck at `status: backlog` with unchecked ACs despite merge to
+`develop` `cf4029dd` 2026-07-12 and a GO verifier verdict `3b81c5ba` — status
+flipped to `done`, ACs checked against git history, file moved to
+`completed-tasks/`). Prior: 2026-07-13 by `/pulse` (VD-005 shipped — docs truth
+cleanup + new `tools/docs-compile-gate` CI tool, all 11 ACs done, moved to
+`completed-tasks/`, merged to `develop`). **VF-036 (AC-SIGNOFF) is now the sole
+open gate on the v0.31.0 tag** — owner decision 2026-08-19: collect the
+sign-off, run the full release checklist, then merge `develop` → `main` (178
+commits ahead, `main`'s last reachable tag is `v0.27.0`) and tag. Age = days
+since created_at. Grouped by priority (P0 critical · P1 high · P2 normal/medium
+· P3 low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -269,6 +270,23 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > tests, tsc/lint/build clean, enterprise build and cqrs 300/300 unaffected.
 > **VF-032b unblocked.** Moved to `completed-tasks/`.
 
+> **Shipped (2026-08-20)**: **VF-032b** done — NestJS convergence. One
+> documented module pattern (`forRoot`/`forRootAsync` once + one `forFeature`
+> per context); `forContext`/`forContexts` `@deprecated` with migration notes
+> (both leave the buses shared, so they never isolated anything, and
+> `forContexts()` silently falls back to `forRoot()` on a typo'd option). All
+> five raw `new Error` sites replaced by a typed hierarchy — which does **not**
+> extend `BaseError`: Nx boundaries forbid `scope:nestjs` →
+> `scope:domain-primitives`, so `VytchesNestJSError extends Error` reproduces
+> its behaviour instead (widening the allowlist would be an architecture
+> decision, not this task's). Handler-discovery: shared `di:*` metadata reader
+> for the two NestJS scanners, with a recorded rationale for keeping
+> `CQRSDiscoveryPlugin` separate (it scans ES-module exports, not the DI graph).
+> New runnable e2e example `examples/nestjs/src/inventory.context.ts`. tsc
+> caught three defects Vitest passed, including an `apply()` visibility
+> violation the example would have taught. nestjs 271/271, example 4/4, full
+> repo 2656 passed. Moved to `completed-tasks/`. **VF-032 is now fully closed.**
+
 ## P0 — Critical
 
 _Empty._
@@ -312,7 +330,7 @@ combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 
 ## P2 — Normal / Medium
 
-_Runtime-adjacent first (VF-025, VT-007, VF-032b, VF-033, VT-006, VF-027), then
+_Runtime-adjacent first (VF-027, VB-007, VF-025, VT-007, VF-033, VT-006), then
 docs & tooling (VD-008, VF-034, VD-006b)._
 
 | ID      | Title                                                             | Status  | Age |

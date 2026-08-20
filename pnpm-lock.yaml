@@ -308,6 +308,9 @@ importers:
 
   examples/nestjs:
     dependencies:
+      '@vytches/ddd-aggregates':
+        specifier: workspace:*
+        version: link:../../packages/aggregates
       '@vytches/ddd-contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

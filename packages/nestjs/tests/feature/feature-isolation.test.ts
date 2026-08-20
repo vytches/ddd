@@ -14,6 +14,7 @@ import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../../src/constants';
 import { VytchesDDDFeatureModule } from '../../src/feature/vytches-ddd-feature.module';
 import { FeatureHandlerRegistrar } from '../../src/feature/feature-handler-registrar';
 import { VytchesExplorerService } from '../../src/services/vytches-explorer.service';
+import { InvalidContextNameError } from '../../src/errors';
 
 // ─── Shared mocks (hoisted so they are available to vi.mock factories) ─────────
 
@@ -151,16 +152,15 @@ describe('VytchesDDDFeatureModule.forFeature()', () => {
     expect(anchor1).not.toBe(anchor2);
   });
 
+  // VF-032b: these assert the typed error rather than its wording. An empty
+  // context name would collapse two contexts onto the same DI scope, so the
+  // rejection is a contract — the phrasing is not.
   it('throws when contextName is empty', () => {
-    expect(() => VytchesDDDFeatureModule.forFeature('')).toThrow(
-      'VytchesDDDModule.forFeature(): contextName cannot be empty'
-    );
+    expect(() => VytchesDDDFeatureModule.forFeature('')).toThrow(InvalidContextNameError);
   });
 
   it('throws when contextName is whitespace-only', () => {
-    expect(() => VytchesDDDFeatureModule.forFeature('   ')).toThrow(
-      'VytchesDDDModule.forFeature(): contextName cannot be empty'
-    );
+    expect(() => VytchesDDDFeatureModule.forFeature('   ')).toThrow(InvalidContextNameError);
   });
 });
 
