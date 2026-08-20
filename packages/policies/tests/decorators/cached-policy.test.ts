@@ -84,6 +84,26 @@ class DeferredPolicy extends BaseBusinessPolicy<{ value: number }> {
     }
     resolve(Result.ok(entity));
   }
+
+  /**
+   * Resolve the oldest still-pending `check()` call as a policy failure.
+   *
+   * Added for VB-007: proving that a failed evaluation clears its in-flight
+   * entry needs a deferred *failure*, not just a deferred success.
+   */
+  public resolveNextFailure(reason: string): void {
+    const resolve = this.pending.shift();
+    if (!resolve) {
+      throw new Error('DeferredPolicy: no pending check() call to resolve');
+    }
+    resolve(
+      Result.fail({
+        policyId: 'deferred-policy',
+        message: reason,
+        severity: 'error',
+      } as unknown as PolicyViolation)
+    );
+  }
 }
 
 /**
@@ -937,15 +957,20 @@ describe('CachedPolicy', () => {
     });
   });
 
-  // VB-006 AC4: regression for the D1/D2/D3 fixes in `PolicyCache.set()`
-  // (re-writing an already-cached key must not double-count as a new
-  // insertion, must not orphan its LRU node, and must not trigger a
-  // spurious extra eviction). `PolicyCache` itself is internal/unexported,
-  // so both scenarios below are driven entirely through the public
-  // `PolicyCachingBehavior` surface, using `DeferredPolicy` (see above) to
-  // deterministically force the ONLY public trigger for a same-key re-write:
-  // two `check()` calls racing on a key that is not yet cached.
-  describe('VB-006 AC4: PolicyCache re-write-of-existing-key invariants (D1-D3)', () => {
+  // VB-006 AC4 covered `PolicyCache.set()`'s re-write branch (D1: no
+  // double-count as a new insertion, D2: no orphaned LRU node, D3: no spurious
+  // extra eviction). Those tests drove it through the one public trigger that
+  // existed: two `check()` calls racing on a key not yet cached.
+  //
+  // VB-007 removed that trigger. In-flight deduplication means one key has at
+  // most one evaluation running, and a TTL-expired entry is deleted by `get()`
+  // before the next `set()` — so every `set()` reachable from `check()` is now
+  // an insert, never a re-write. The D1-D3 code stays as defence in depth, but
+  // it is no longer reachable through the public surface, and a test asserting
+  // otherwise would be asserting on a scenario that cannot occur.
+  //
+  // What replaces it: proof that the trigger really is closed.
+  describe('VB-007: concurrent identical checks collapse to one evaluation', () => {
     let policy: DeferredPolicy;
 
     beforeEach(() => {
@@ -953,114 +978,72 @@ describe('CachedPolicy', () => {
     });
 
     it(
-      're-writing an existing key at a full cache does not change size, evict an unrelated entry, or inflate the entry count',
+      'invokes the inner policy exactly once for N concurrent identical checks',
       async () => {
-        const cached = PolicyCachingBehavior.create(policy, {
-          ttl: 60000,
-          maxSize: 2,
-        });
-        const context = PolicyContextBuilder.forUser('ac4a-user').withEnvironment('test').build();
+        const cached = PolicyCachingBehavior.create(policy, { ttl: 60000, maxSize: 10 });
+        const context = PolicyContextBuilder.forUser('vb007-user').withEnvironment('test').build();
+        const request = { entity: { value: 1 }, context };
 
-        // Fill the cache to capacity with two ordinary entries.
-        await checkAndResolve(cached, policy, { value: 1 }, context);
-        await checkAndResolve(cached, policy, { value: 2 }, context);
-        expect(cached.getCacheSize()).toBe(2);
-        expect(cached.getCacheMetrics().entries).toBe(2);
-        expect(cached.getCacheMetrics().evictions).toBe(0);
+        const pending = Array.from({ length: 8 }, () => cached.check(request));
 
-        // Race two concurrent checks for a THIRD, not-yet-cached key while the
-        // cache is already full.
-        const request3 = { entity: { value: 3 }, context };
-        const before = policy.callCount;
-        const p1 = cached.check(request3);
-        const p2 = cached.check(request3);
+        // One evaluation for eight callers. Before VB-007 this was eight.
+        await waitUntil(() => policy.callCount === 1, 'first evaluation pending');
+        expect(policy.callCount).toBe(1);
 
-        // Wait until BOTH have missed the cache and registered as pending
-        // before releasing either — this is what guarantees the race.
-        await waitUntil(() => policy.callCount === before + 2, 'both racing checks pending');
+        policy.resolveNextSuccess({ value: 1 });
+        const results = await Promise.all(pending);
 
-        // Release the first: a genuine fresh insert of key 3. The cache is
-        // already at maxSize, so this evicts the true LRU head (value 1).
-        policy.resolveNextSuccess({ value: 3 });
-        await p1;
-        expect(cached.getCacheSize()).toBe(2);
-        expect(cached.getCacheMetrics().evictions).toBe(1);
-        expect(cached.getCacheMetrics().entries).toBe(2);
-
-        // Release the second: this is the re-write of an EXISTING key (3 is
-        // already cached from p1) while the cache is at capacity. Per D1/D3
-        // this must be a no-op with respect to size/eviction/entry counting.
-        policy.resolveNextSuccess({ value: 3 });
-        await p2;
-
-        expect(cached.getCacheSize()).toBe(2); // unchanged by the re-write
-        const metrics = cached.getCacheMetrics();
-        expect(metrics.evictions).toBe(1); // no NEW eviction from the re-write
-        expect(metrics.entries).toBe(2); // not inflated to 3
-
-        // Entity 2 (untouched by the race) must still be the surviving,
-        // unrelated entry — not collaterally evicted by the re-write.
-        const callsBeforeHit = policy.callCount;
-        const hit = await cached.check({ entity: { value: 2 }, context });
-        expect(policy.callCount).toBe(callsBeforeHit); // served from cache, no pending call
-        expect(hit.isSuccess).toBe(true);
+        expect(policy.callCount).toBe(1);
+        expect(results.every(r => r.isSuccess)).toBe(true);
+        // A single insert, so no re-write branch is entered at all.
+        expect(cached.getCacheSize()).toBe(1);
       },
       RACE_TEST_TIMEOUT_MS
     );
 
     it(
-      're-writing the entry that is currently the LRU-oldest key does not corrupt LRU ordering for later evictions (oldest-first preserved)',
+      'a failed evaluation does not poison the key — the next caller re-evaluates',
       async () => {
         const cached = PolicyCachingBehavior.create(policy, {
           ttl: 60000,
-          maxSize: 2,
+          maxSize: 10,
+          cacheFailures: false,
         });
-        const context = PolicyContextBuilder.forUser('ac4b-user').withEnvironment('test').build();
+        const context = PolicyContextBuilder.forUser('vb007-fail').withEnvironment('test').build();
+        const request = { entity: { value: 2 }, context };
 
-        // Race key A's FIRST-EVER population: the only public trigger for
-        // `PolicyCache.set()`'s re-write branch while A is (trivially) the
-        // sole, oldest entry — this is exactly the D2 orphaned-LRU-node case.
-        const requestA = { entity: { value: 100 }, context };
-        const before = policy.callCount;
-        const pA1 = cached.check(requestA);
-        const pA2 = cached.check(requestA);
-        await waitUntil(() => policy.callCount === before + 2, 'race on key A pending');
-        policy.resolveNextSuccess({ value: 100 }); // fresh insert (isUpdate=false)
-        await pA1;
-        policy.resolveNextSuccess({ value: 100 }); // re-write (isUpdate=true) — D2 case
-        await pA2;
-        expect(cached.getCacheSize()).toBe(1);
+        const first = cached.check(request);
+        await waitUntil(() => policy.callCount === 1, 'first evaluation pending');
+        policy.resolveNextFailure('denied');
+        await first;
 
-        // Ordinary inserts: B fills the cache, C evicts the true oldest (A),
-        // D evicts the next true oldest (B). maxSize=2 throughout.
-        await checkAndResolve(cached, policy, { value: 200 }, context); // {A,B}, full
-        await checkAndResolve(cached, policy, { value: 300 }, context); // should evict A -> {B,C}
-        await checkAndResolve(cached, policy, { value: 400 }, context); // should evict B -> {C,D}
+        // In-flight entry cleared on settle, so this starts a fresh evaluation
+        // rather than joining a dead one or returning the stale rejection.
+        const second = cached.check(request);
+        await waitUntil(() => policy.callCount === 2, 'second evaluation pending');
+        policy.resolveNextSuccess({ value: 2 });
 
-        // Bounded: the cache must never exceed maxSize, even across the
-        // earlier re-write. Under the D2 bug, `lruHead` gets stuck pointing at
-        // an orphaned node and a later eviction becomes a silent no-op,
-        // letting the cache grow past maxSize.
+        expect((await second).isSuccess).toBe(true);
+      },
+      RACE_TEST_TIMEOUT_MS
+    );
+
+    it(
+      'distinct keys still evaluate independently — dedup is per key, not global',
+      async () => {
+        const cached = PolicyCachingBehavior.create(policy, { ttl: 60000, maxSize: 10 });
+        const context = PolicyContextBuilder.forUser('vb007-keys').withEnvironment('test').build();
+
+        const pA = cached.check({ entity: { value: 10 }, context });
+        const pB = cached.check({ entity: { value: 20 }, context });
+
+        await waitUntil(() => policy.callCount === 2, 'both evaluations pending');
+        policy.resolveNextSuccess({ value: 10 });
+        policy.resolveNextSuccess({ value: 20 });
+
+        await Promise.all([pA, pB]);
+        expect(policy.callCount).toBe(2);
         expect(cached.getCacheSize()).toBe(2);
-
-        // The correct members survive in oldest-first order: C and D are
-        // hits, A and B are genuine misses again.
-        const callsBeforeHits = policy.callCount;
-        const hitC = await cached.check({ entity: { value: 300 }, context });
-        const hitD = await cached.check({ entity: { value: 400 }, context });
-        expect(policy.callCount).toBe(callsBeforeHits); // both hits, no new pending calls
-        expect(hitC.isSuccess).toBe(true);
-        expect(hitD.isSuccess).toBe(true);
-
-        // A and B were genuinely evicted (in that order) — re-checking them
-        // must go back through the inner policy.
-        const callsBeforeA = policy.callCount;
-        await checkAndResolve(cached, policy, { value: 100 }, context);
-        expect(policy.callCount).toBe(callsBeforeA + 1);
-
-        const callsBeforeB = policy.callCount;
-        await checkAndResolve(cached, policy, { value: 200 }, context);
-        expect(policy.callCount).toBe(callsBeforeB + 1);
       },
       RACE_TEST_TIMEOUT_MS
     );
