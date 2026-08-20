@@ -1,29 +1,29 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-20 (VF-032a, VF-032b, VF-027, VB-007 shipped; VF-032 split
-into VF-032a/VF-032b — see the notes below the boards). Prior: 2026-08-19 by
-`/pulse` + same-day correction (37-day sync gap — VF-036/VF-037/VF-039 work
-landed since the 2026-07-13 pulse without a status sync; VF-039 split into
-VF-039a/VF-039b same day. **Correction**: `/pulse` initially flagged VF-028 as
-"branch active, not yet done" — a direct user check ("czy 028 właśnie nie
-skończyliśmy?") caught that this was itself stale: VF-028 was implemented and
-committed the same day (`05ac364a`), just never had its task file updated.
-Verified (resilience 104/104, policies 237/237 green) and archived alongside
-VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09 (maturity-audit
-re-prioritization: 5 new tasks filed VF-036/VF-037/VD-008/VT-007/VD-009, VP-012
-promoted to P1, runtime-first ordering per owner directive — see the 2026-08-09
-note above the boards). Prior: 2026-07-18 by `/task-tidy` (VP-006b reconciled:
-task file was stuck at `status: backlog` with unchecked ACs despite merge to
-`develop` `cf4029dd` 2026-07-12 and a GO verifier verdict `3b81c5ba` — status
-flipped to `done`, ACs checked against git history, file moved to
-`completed-tasks/`). Prior: 2026-07-13 by `/pulse` (VD-005 shipped — docs truth
-cleanup + new `tools/docs-compile-gate` CI tool, all 11 ACs done, moved to
-`completed-tasks/`, merged to `develop`). **VF-036 (AC-SIGNOFF) is now the sole
-open gate on the v0.31.0 tag** — owner decision 2026-08-19: collect the
-sign-off, run the full release checklist, then merge `develop` → `main` (178
-commits ahead, `main`'s last reachable tag is `v0.27.0`) and tag. Age = days
-since created_at. Grouped by priority (P0 critical · P1 high · P2 normal/medium
-· P3 low · backlog)._
+_Last updated 2026-08-20 (VF-032a, VF-032b, VF-027, VB-007, VP-006c shipped;
+VF-032 split into VF-032a/VF-032b — see the notes below the boards). Prior:
+2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
+VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
+sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
+initially flagged VF-028 as "branch active, not yet done" — a direct user check
+("czy 028 właśnie nie skończyliśmy?") caught that this was itself stale: VF-028
+was implemented and committed the same day (`05ac364a`), just never had its task
+file updated. Verified (resilience 104/104, policies 237/237 green) and archived
+alongside VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09
+(maturity-audit re-prioritization: 5 new tasks filed
+VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
+ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
+2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
+`status: backlog` with unchecked ACs despite merge to `develop` `cf4029dd`
+2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to `done`, ACs
+checked against git history, file moved to `completed-tasks/`). Prior:
+2026-07-13 by `/pulse` (VD-005 shipped — docs truth cleanup + new
+`tools/docs-compile-gate` CI tool, all 11 ACs done, moved to `completed-tasks/`,
+merged to `develop`). **VF-036 (AC-SIGNOFF) is now the sole open gate on the
+v0.31.0 tag** — owner decision 2026-08-19: collect the sign-off, run the full
+release checklist, then merge `develop` → `main` (178 commits ahead, `main`'s
+last reachable tag is `v0.27.0`) and tag. Age = days since created_at. Grouped
+by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -313,6 +313,19 @@ since created_at. Grouped by priority (P0 critical · P1 high · P2 normal/mediu
 > stays; the two tests that drove it were rewritten as proofs the trigger is
 > closed. policies 263/263, full repo 2663 passed. Moved to `completed-tasks/`.
 
+> **Shipped (2026-08-20)**: **VP-006c** done — `BaseContainerAdapter` gains a
+> `tryResolve()` hook so `resolveDependency()` makes ONE lookup pass instead of
+> `isRegistered()` + `resolve()`, and the O(n) `Array.includes` cycle check
+> gains a companion `Set` (the array stays — `CircularDependencyError` needs the
+> ordered chain). Default hook reproduces the old two-pass behaviour exactly, so
+> adapters overriding only `resolve()` are unaffected. New public export
+> `NOT_REGISTERED` — a sentinel rather than `undefined`, because a registration
+> may legitimately hold `undefined`. `NestJSContainerAdapter` deliberately
+> untouched (out of package scope); its VP-006b override could later be replaced
+> by a `tryResolve()` override, removing a divergent copy of the chain logic —
+> worth a follow-up. di 140/140, full repo 2670 passed. Moved to
+> `completed-tasks/`.
+
 ## P0 — Critical
 
 _Empty._
@@ -380,7 +393,6 @@ _Runtime-adjacent first (VF-025, VT-007, VF-033, VT-006), then docs & tooling
 | VD-009  | Priority example workspaces (repos+UoW, outbox, CQRS+resil.) | backlog | 10d  |
 | VD-004  | Interactive Documentation System                             | backlog | 141d |
 | VF-002  | Strategic Design Documentation                               | backlog | 141d |
-| VP-006c | BaseContainerAdapter resolve optimization (no live callers)  | backlog | 39d  |
 | VB-008  | Behaviors export shape violates public-api-pattern (PA5/N2)  | planned | 0d   |
 
 ## Backlog

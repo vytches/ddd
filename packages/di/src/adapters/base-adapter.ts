@@ -14,6 +14,20 @@ import type {
   ServiceToken,
 } from '../types';
 
+/**
+ * Returned by {@link BaseContainerAdapter.tryResolve} when a token is not
+ * registered.
+ *
+ * A dedicated sentinel rather than `undefined`/`null`, because both are
+ * legitimate resolved values — a container may hold a registration whose value
+ * is `undefined`, and conflating that with a miss would turn a working
+ * registration into a `ContainerServiceNotFoundError`.
+ *
+ * @public
+ * @since 0.31.0
+ */
+export const NOT_REGISTERED: unique symbol = Symbol('vytches:di:not-registered');
+
 export abstract class BaseContainerAdapter implements IDependencyContainer {
   // Simple Phase 1 implementation without logging
 
@@ -25,6 +39,17 @@ export abstract class BaseContainerAdapter implements IDependencyContainer {
    * derived string key.
    */
   private readonly dependencyResolutionStack: ServiceToken[] = [];
+
+  /**
+   * Membership index over {@link dependencyResolutionStack}.
+   *
+   * The array is kept for ordering — `CircularDependencyError` reports the full
+   * chain, which a Set cannot express — while this Set answers "is this token
+   * already being resolved?" in O(1) instead of the O(n) `Array.includes` scan
+   * that ran once per constructor parameter (VP-006c). The two are always
+   * mutated together; treat them as one structure.
+   */
+  private readonly dependencyResolutionSet = new Set<ServiceToken>();
 
   /**
    * Resolve a service by token
@@ -129,19 +154,51 @@ export abstract class BaseContainerAdapter implements IDependencyContainer {
    * @throws CircularDependencyError when a resolution cycle is detected
    */
   protected resolveDependency<T>(param: ServiceToken<T>, ownerToken: ServiceToken): T {
-    if (this.dependencyResolutionStack.includes(param)) {
+    if (this.dependencyResolutionSet.has(param)) {
       throw new CircularDependencyError([...this.dependencyResolutionStack, param]);
     }
 
-    if (!this.isRegistered(param)) {
-      throw new ContainerServiceNotFoundError(param, describeToken(ownerToken));
-    }
-
     this.dependencyResolutionStack.push(param);
+    this.dependencyResolutionSet.add(param);
     try {
-      return this.resolve(param);
+      const resolved = this.tryResolve(param);
+
+      if (resolved === NOT_REGISTERED) {
+        throw new ContainerServiceNotFoundError(param, describeToken(ownerToken));
+      }
+
+      return resolved;
     } finally {
       this.dependencyResolutionStack.pop();
+      this.dependencyResolutionSet.delete(param);
     }
+  }
+
+  /**
+   * Miss-tolerant resolution: return the service, or {@link NOT_REGISTERED} if
+   * this container does not have it.
+   *
+   * Exists so {@link resolveDependency} can answer "registered?" and "give me
+   * the instance" in **one** pass. The default implementation preserves the
+   * previous two-pass behaviour exactly — `isRegistered()` then `resolve()` —
+   * so a subclass that overrides only `resolve()` is unaffected and needs no
+   * changes.
+   *
+   * Override it when the underlying container exposes a cheaper native lookup
+   * that reports a miss without throwing. A framework-backed adapter otherwise
+   * pays two framework lookups (or one wasted throw/catch) per constructor
+   * parameter — the cost VP-006b measured and fixed adapter-locally for
+   * `NestJSContainerAdapter`; this hook generalises that fix to every adapter
+   * built on this base class.
+   *
+   * An override MUST return {@link NOT_REGISTERED} for a miss rather than
+   * throwing or returning `undefined`: `undefined` is a legitimate resolved
+   * value, and only the sentinel distinguishes the two.
+   *
+   * @param token - Token to resolve
+   * @returns The resolved service, or {@link NOT_REGISTERED}
+   */
+  protected tryResolve<T>(token: ServiceToken<T>): T | typeof NOT_REGISTERED {
+    return this.isRegistered(token) ? this.resolve(token) : NOT_REGISTERED;
   }
 }

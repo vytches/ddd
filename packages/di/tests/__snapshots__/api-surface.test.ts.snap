@@ -11,6 +11,7 @@ exports[`@vytches/ddd-di public API surface > exports the documented set of symb
   "DIError",
   "HandlerDiscoveryRegistry",
   "InvalidRegistrationError",
+  "NOT_REGISTERED",
   "ServiceAlreadyRegisteredError",
   "ServiceLifetime",
   "ServiceLocator",
