@@ -87,6 +87,28 @@ after `super(value)` is no longer reachable. Override
 _Self-audit._ `grep -rln "extends BaseValueObject" src/` and check each
 `validate()` override reads only its `value` parameter.
 
+#### `AggregateRoot.getDomainEvents()` now returns a stable array reference (VP-012b)
+
+`getDomainEvents()` built a brand-new array (and re-ran `LibUtils.deepFreeze`
+over every event) on every single call, even when nothing had changed since the
+previous call. It is now memoized: the same frozen array reference is returned
+on every call until the next mutation — `apply()`, `commit()`,
+`loadFromHistory()`, or `transformDomainEvents()` — at which point the cache is
+invalidated and the next call rebuilds it once.
+
+Content (`toEqual`) is unaffected. What changes is **identity**: two calls with
+no intervening mutation now return the same array object (`===`/`.toBe` holds),
+where previously each call returned a distinct array (`not.toBe`/`!==` held).
+This is safe to alias — the array and its contents are frozen either way — but
+any test or code that specifically asserts "each call returns a new array
+instance" will now fail, because that is no longer true.
+
+_Self-audit._ `grep -rn "getDomainEvents" src/ | grep -i "toBe\|===\|!=="` —
+find assertions or logic that compares two `getDomainEvents()` results by
+identity rather than content. Update `not.toBe`/`!==` identity checks to
+`toEqual`/structural comparisons, or drop them if they were only asserting "a
+fresh array every time" as an implementation detail.
+
 ### Added
 
 - **contracts:** `enrichEvent(event, { payload?, metadata? })` — copy an event

@@ -41,7 +41,8 @@ class Order extends AggregateRoot<string> {
 // Usage
 const order = Order.create('c-1', 500);
 const events = order.getDomainEvents(); // [{ eventName: 'OrderCreated', ... }]
-order.commit(); // clear pending events after saving
+order.getDomainEvents() === events; // true — same array reference until the next mutation
+order.commit(); // clear pending events after saving; getDomainEvents() now returns a new, empty array
 ```
 
 ## Key API
@@ -82,19 +83,19 @@ order.commit(); // clear pending events after saving
 
 ### `AggregateRoot` method reference
 
-| Method                                  | Description                                                               |
-| --------------------------------------- | ------------------------------------------------------------------------- |
-| `apply(eventType, payload?, metadata?)` | Record a domain event, increment version, call handler                    |
-| `loadFromHistory(events)`               | Replay historical events to restore state without accumulating new events |
-| `getDomainEvents()`                     | Return readonly array of uncommitted events since last `commit()`         |
-| `commit()`                              | Clear uncommitted events; call after persisting to storage                |
-| `hasChanges()`                          | `true` if there are uncommitted events                                    |
-| `getVersion()`                          | Current version after all applied events                                  |
-| `getInitialVersion()`                   | Version when last loaded from storage (for optimistic locking)            |
-| `addCapability(cap)`                    | Attach a capability; calls `cap.attach(this)`                             |
-| `getCapability(CapClass)`               | Retrieve capability by constructor, returns `undefined` if absent         |
-| `hasCapability(CapClass)`               | Type-safe capability presence check                                       |
-| `registerEventHandler(type, fn)`        | Protected; wire event name to state mutation function                     |
+| Method                                  | Description                                                                                                                                                                                                           |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apply(eventType, payload?, metadata?)` | Record a domain event, increment version, call handler                                                                                                                                                                |
+| `loadFromHistory(events)`               | Replay historical events to restore state without accumulating new events                                                                                                                                             |
+| `getDomainEvents()`                     | Return readonly, deep-frozen array of uncommitted events since last `commit()`. Same array reference on repeat calls — rebuilt only on the next mutation (`apply`/`commit`/`loadFromHistory`/`transformDomainEvents`) |
+| `commit()`                              | Clear uncommitted events; call after persisting to storage                                                                                                                                                            |
+| `hasChanges()`                          | `true` if there are uncommitted events                                                                                                                                                                                |
+| `getVersion()`                          | Current version after all applied events                                                                                                                                                                              |
+| `getInitialVersion()`                   | Version when last loaded from storage (for optimistic locking)                                                                                                                                                        |
+| `addCapability(cap)`                    | Attach a capability; calls `cap.attach(this)`                                                                                                                                                                         |
+| `getCapability(CapClass)`               | Retrieve capability by constructor, returns `undefined` if absent                                                                                                                                                     |
+| `hasCapability(CapClass)`               | Type-safe capability presence check                                                                                                                                                                                   |
+| `registerEventHandler(type, fn)`        | Protected; wire event name to state mutation function                                                                                                                                                                 |
 
 ## Patterns
 
