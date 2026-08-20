@@ -15,13 +15,33 @@ complexity: complex
 estimated_time: 14h
 created_by: LIB-UX-AUDIT-2026-07-10
 created_at: 2026-07-10
-status: backlog
+status: split
+split_into: [VF-032a, VF-032b]
+updated_at: 2026-08-20
 release_target:
   API-shape decisions (AC1-AC3) pre-first-publish preferred; implementation may
   land incrementally after
 package: "'@vytches/ddd-nestjs', '@vytches/ddd-cqrs'"
 findings: [UX-T5, UX-T2.2, UX-T2.4]
 ```
+
+> **SPLIT 2026-08-20 — nie implementuj tego pliku.** The 14h scope mixed two
+> decisions about the module's public shape with convergence/hygiene work that
+> can only be written once those decisions land. Owner-approved split:
+>
+> - **`VF-032a-nestjs-async-config-feature-buses.md`** (~6h) — `forRootAsync`
+>   (AC1), `forFeature()` through `CQRSConfiguration` (AC2), and the ghost
+>   `types/index.ts` decision that VF-031 AC3 deferred here. This is the half
+>   with the runtime payoff: today `forFeature()` silently costs the consumer
+>   resilience and metrics.
+> - **`VF-032b-nestjs-convergence-errors-example.md`** (~8h, blocked on VF-032a)
+>   — factory convergence (AC3), handler-discovery dedup (AC4), typed errors
+>   (AC5), golden-path docs (AC6), end-to-end example (AC7).
+>
+> The criteria below are kept verbatim as the historical record. **AC5's count
+> is stale**: verified 2026-08-20, only **4** raw `new Error` sites remain — the
+> two in `nestjs-container.adapter.ts` were replaced under VF-030. AC6's
+> `autoRegister` half was already closed by VD-005 AC10d.
 
 ## Why
 

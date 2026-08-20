@@ -1,14 +1,15 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
-VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
-sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
-initially flagged VF-028 as "branch active, not yet done" — a direct user check
-("czy 028 właśnie nie skończyliśmy?") caught that this was itself stale: VF-028
-was implemented and committed the same day (`05ac364a`), just never had its task
-file updated. Verified (resilience 104/104, policies 237/237 green) and archived
-alongside VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09
-(maturity-audit re-prioritization: 5 new tasks filed
+_Last updated 2026-08-20 (VF-032 split into VF-032a/VF-032b — see the split note
+below the boards). Prior: 2026-08-19 by `/pulse` + same-day correction (37-day
+sync gap — VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a
+status sync; VF-039 split into VF-039a/VF-039b same day. **Correction**:
+`/pulse` initially flagged VF-028 as "branch active, not yet done" — a direct
+user check ("czy 028 właśnie nie skończyliśmy?") caught that this was itself
+stale: VF-028 was implemented and committed the same day (`05ac364a`), just
+never had its task file updated. Verified (resilience 104/104, policies 237/237
+green) and archived alongside VF-037 — both moved to `completed-tasks/`.) Prior:
+2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
 VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
 ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
@@ -236,6 +237,24 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > (currently 178 commits behind, `main`'s last reachable tag is `v0.27.0`) and
 > tag/publish.
 
+> **Split (2026-08-20)**: **VF-032** → owner-approved split after a
+> runtime-impact review of the backlog. The 14h scope mixed two public-shape
+> decisions with convergence work that can only be documented once those
+> decisions land, so it became **VF-032a** (~6h — `forRootAsync`, `forFeature()`
+> routed through `CQRSConfiguration`, plus the ghost
+> `packages/nestjs/src/types/index.ts` decision that VF-031 AC3 deferred here)
+> and **VF-032b** (~8h, blocked on VF-032a — factory convergence,
+> handler-discovery dedup, typed errors, golden-path docs, runnable end-to-end
+> example). Original file marked `status: split`, kept as historical record.
+> Verified against the tree while splitting: `forRootAsync` is still absent from
+> `VytchesDDDModule` (only `OutboxProcessorModule` has it),
+> `vytches-ddd-feature.module.ts:64-73` still hand-builds raw
+> `CommandBus`/`QueryBus` (so `forFeature()` consumers get no middleware and no
+> Enhanced buses), and `types/index.ts` is still unimported — `'./types'`
+> resolves to the sibling `types.ts`. One correction to the original file: AC5's
+> "6 raw `new Error` sites" is stale, **4** remain (VF-030 replaced the two in
+> `nestjs-container.adapter.ts`).
+
 ## P0 — Critical
 
 _Empty._
@@ -279,14 +298,16 @@ combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 
 ## P2 — Normal / Medium
 
-_Runtime-adjacent first (VF-025, VT-007, VF-032, VF-033, VT-006, VF-027), then
-docs & tooling (VD-008, VF-034, VD-006b)._
+_Runtime-adjacent first (VF-025, VT-007, VF-032a, VF-033, VT-006, VF-027), then
+docs & tooling (VD-008, VF-034, VD-006b). VF-032b is sequenced behind VF-032a —
+it documents the module shape VF-032a decides._
 
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
 | VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 48d |
 | VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 10d |
-| VF-032  | NestJS fluency (forRootAsync, forFeature→CQRSConfiguration)       | backlog | 40d |
+| VF-032a | NestJS async config + forFeature→CQRSConfiguration buses          | backlog | 0d  |
+| VF-032b | NestJS convergence, discovery dedup, typed errors, e2e example    | blocked | 0d  |
 | VF-033  | Validation hardening & one validation story                       | backlog | 40d |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 48d |
 | VF-027  | ResilienceContext fork() — native AbortSignal.any() rewrite       | backlog | 47d |
