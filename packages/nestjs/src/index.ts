@@ -5,6 +5,7 @@
 
 export { VytchesDDDModule } from './vytches-ddd.module';
 export { VytchesDDDFeatureModule } from './feature/vytches-ddd-feature.module';
+export type { VytchesDDDFeatureOptions } from './feature/vytches-ddd-feature.module';
 export { VytchesExplorerService } from './services/vytches-explorer.service';
 
 // Container adapter for CQRS buses
@@ -26,7 +27,12 @@ export { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 export { ContextAwareEventDispatcher } from './dispatchers/context-aware-event-dispatcher';
 
 // Types and interfaces
-export type { HandlerInfo, VytchesDDDModuleOptions } from './types';
+export type {
+  HandlerInfo,
+  VytchesDDDModuleOptions,
+  VytchesDDDModuleAsyncOptions,
+  VytchesDDDOptionsFactory,
+} from './types';
 
 // Outbox processor module (multi-processor lifecycle wrapper)
 export { OutboxProcessorModule, OutboxProcessorService } from './outbox';

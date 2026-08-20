@@ -9,8 +9,8 @@ import type { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { EVENT_HANDLER_METADATA, internalLogger } from '@vytches/ddd-contracts/internal';
-import type { HandlerInfo, VytchesContextOptions } from '../types';
-import { ACL_ADAPTER_METADATA, ACL_REGISTRY } from '../constants';
+import type { HandlerInfo, VytchesContextOptions, VytchesDDDModuleOptions } from '../types';
+import { ACL_ADAPTER_METADATA, ACL_REGISTRY, VYTCHES_DDD_OPTIONS } from '../constants';
 import type { ACLAdapterMetadata } from '../decorators/acl-adapter.decorator';
 import { BusRegistrationLedger } from './bus-registration-ledger';
 
@@ -89,7 +89,8 @@ export class VytchesExplorerService
     @Optional() @Inject(COMMAND_BUS_TOKEN) private readonly commandBus?: ICommandBus,
     @Optional() @Inject(QUERY_BUS_TOKEN) private readonly queryBus?: IQueryBus,
     @Optional() @Inject(IEventBus) private readonly eventBus?: IEventBus,
-    @Optional() @Inject(ACL_REGISTRY) private readonly aclRegistry?: IACLRegistryLike
+    @Optional() @Inject(ACL_REGISTRY) private readonly aclRegistry?: IACLRegistryLike,
+    @Optional() @Inject(VYTCHES_DDD_OPTIONS) private readonly options?: VytchesDDDModuleOptions
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -116,6 +117,16 @@ export class VytchesExplorerService
           { busLabel, busType: bus.constructor?.name ?? 'unknown' }
         );
       }
+    }
+
+    // autoDiscovery.enabled === false opts out of the reflection scan entirely.
+    // Absent options (or an absent flag) keep discovery on, matching the
+    // documented default and every module built before the options token
+    // existed.
+    if (this.options?.autoDiscovery?.enabled === false) {
+      this.discoveredHandlers = [];
+      this.initialized = true;
+      return;
     }
 
     try {

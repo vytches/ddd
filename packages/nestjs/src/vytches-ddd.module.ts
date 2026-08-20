@@ -1,13 +1,21 @@
-import type { DynamicModule, ModuleMetadata, Provider } from '@nestjs/common';
+import type { DynamicModule, Provider, Type } from '@nestjs/common';
 import { Global, Module } from '@nestjs/common';
 import { DiscoveryModule, DiscoveryService, ModuleRef } from '@nestjs/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens in forTesting()
 import { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { VytchesExplorerService } from './services/vytches-explorer.service';
-import { VytchesDDDFeatureModule } from './feature/vytches-ddd-feature.module';
-import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
-import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS } from './constants';
+import {
+  VytchesDDDFeatureModule,
+  type VytchesDDDFeatureOptions,
+} from './feature/vytches-ddd-feature.module';
+import type {
+  VytchesContextOptions,
+  VytchesDDDModuleAsyncOptions,
+  VytchesDDDModuleOptions,
+  VytchesDDDOptionsFactory,
+} from './types';
+import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS, VYTCHES_DDD_OPTIONS } from './constants';
 
 /**
  * VytchesDDD NestJS Integration Module
@@ -110,6 +118,11 @@ export class VytchesDDDModule {
     const providers: Provider[] = [
       VytchesExplorerService,
       ...bridgeProviders,
+      // Single options token for both entry points: forRoot() publishes the
+      // literal object, forRootAsync() publishes the factory result. Consumers
+      // of the options (currently VytchesExplorerService) inject this token and
+      // never need to know which factory built the module.
+      { provide: VYTCHES_DDD_OPTIONS, useValue: options },
       ...(options.providers || []),
     ];
 
@@ -120,6 +133,103 @@ export class VytchesDDDModule {
       exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
       global: options.isGlobal !== false,
     };
+  }
+
+  /**
+   * Async counterpart of {@link forRoot} — the standard NestJS
+   * `useFactory` / `useClass` / `useExisting` triad, for configuration that
+   * depends on injected services such as `ConfigService`.
+   *
+   * The factory returns the same {@link VytchesDDDModuleOptions} that
+   * `forRoot()` accepts. NestJS needs `providers`, `imports` and the `global`
+   * flag before the DI container exists, so those stay static on the async
+   * options object; see {@link VytchesDDDModuleAsyncOptions} for the exact
+   * split.
+   *
+   * @example
+   * ```typescript
+   * @Module({
+   *   imports: [
+   *     VytchesDDDModule.forRootAsync({
+   *       imports: [ConfigModule],
+   *       inject: [ConfigService],
+   *       useFactory: (config: ConfigService) => ({
+   *         autoDiscovery: { enabled: config.get('DDD_DISCOVERY') !== 'off' },
+   *       }),
+   *     }),
+   *   ],
+   * })
+   * export class AppModule {}
+   * ```
+   */
+  static forRootAsync(options: VytchesDDDModuleAsyncOptions): DynamicModule {
+    if (!options.useFactory && !options.useClass && !options.useExisting) {
+      throw new Error(
+        'VytchesDDDModule.forRootAsync(): one of useFactory, useClass or useExisting is required'
+      );
+    }
+
+    const bridgeProviders: Provider[] = [
+      ...VytchesDDDModule.busTokenBridge(),
+      {
+        provide: GLOBAL_COMMAND_BUS,
+        useFactory: (bus?: ICommandBus) => bus,
+        inject: [{ token: ICommandBus, optional: true }],
+      },
+      {
+        provide: GLOBAL_QUERY_BUS,
+        useFactory: (bus?: IQueryBus) => bus,
+        inject: [{ token: IQueryBus, optional: true }],
+      },
+    ];
+
+    return {
+      module: VytchesDDDModule,
+      imports: [DiscoveryModule, ...(options.imports || [])],
+      providers: [
+        VytchesExplorerService,
+        ...bridgeProviders,
+        ...VytchesDDDModule.asyncOptionsProviders(options),
+        ...(options.providers || []),
+      ],
+      exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
+      global: options.isGlobal !== false,
+    };
+  }
+
+  /**
+   * Builds the providers that resolve {@link VYTCHES_DDD_OPTIONS} from whichever
+   * async form the caller chose. `useClass` additionally registers the factory
+   * class itself; `useExisting` assumes the caller already provides it.
+   */
+  private static asyncOptionsProviders(options: VytchesDDDModuleAsyncOptions): Provider[] {
+    if (options.useFactory) {
+      return [
+        {
+          provide: VYTCHES_DDD_OPTIONS,
+          useFactory: options.useFactory,
+          inject: options.inject ?? [],
+        } as Provider,
+      ];
+    }
+
+    // Non-null: forRootAsync() rejected the all-absent case before calling us.
+    const factoryClass = (options.useClass ??
+      options.useExisting) as Type<VytchesDDDOptionsFactory>;
+
+    const providers: Provider[] = [
+      {
+        provide: VYTCHES_DDD_OPTIONS,
+        useFactory: (factory: VytchesDDDOptionsFactory) => factory.createVytchesDDDOptions(),
+        inject: [factoryClass],
+      },
+    ];
+
+    if (options.useClass) {
+      providers.push({ provide: options.useClass, useClass: options.useClass });
+    }
+
+    return providers;
   }
 
   static forContext(
@@ -239,8 +349,8 @@ export class VytchesDDDModule {
    * }
    * ```
    */
-  static forFeature(contextName: string): DynamicModule {
-    return VytchesDDDFeatureModule.forFeature(contextName);
+  static forFeature(contextName: string, options: VytchesDDDFeatureOptions = {}): DynamicModule {
+    return VytchesDDDFeatureModule.forFeature(contextName, options);
   }
 
   static forTesting(options: VytchesDDDModuleOptions = {}): DynamicModule {

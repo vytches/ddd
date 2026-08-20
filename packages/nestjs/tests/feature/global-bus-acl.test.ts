@@ -62,11 +62,35 @@ vi.mock('@vytches/ddd-cqrs', () => {
     registerFactory = vi.fn();
     send = vi.fn();
   }
+  // forFeature() builds its per-context buses through CQRSConfiguration
+  // (VF-032a AC2), so the mock must model it: one instance exposing the two
+  // buses, honouring busType/middlewares the same way the real class does.
+  class CQRSConfiguration {
+    commandBus: CommandBus;
+    queryBus: QueryBus;
+    constructor(
+      _container: unknown,
+      options: {
+        commandBusType?: string;
+        queryBusType?: string;
+        middlewares?: { use?: unknown }[];
+      } = {}
+    ) {
+      this.commandBus = new CommandBus();
+      this.queryBus = new QueryBus();
+      this.busType = options.commandBusType ?? 'basic';
+      this.middlewares = options.middlewares ?? [];
+    }
+    busType: string;
+    middlewares: unknown[];
+  }
+
   return {
     ICommandBus: MockICommandBus,
     IQueryBus: MockIQueryBus,
     CommandBus,
     QueryBus,
+    CQRSConfiguration,
     // Symbol tokens must match the real package so forRoot() bridge providers
     // and VytchesExplorerService @Inject decorators resolve correctly.
     COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),

@@ -14,7 +14,8 @@ complexity: medium
 estimated_time: 6h
 created_by: VF-032 split (2026-08-20)
 created_at: 2026-08-20
-status: backlog
+status: done
+completed_at: 2026-08-20
 parent_task: VF-032
 release_target:
   API-shape decisions preferred pre-first-publish — forFeature() options are an
@@ -153,9 +154,37 @@ rather than mint a parallel middleware model. Whether the public knob is spelled
 `commandBusType`/`queryBusType`, or the CQRS field names are exposed directly,
 is left to the implementer — but the middleware type is not negotiable.
 
+**D7 — what an async factory can and cannot supply (found during implementation,
+not by the panel).** NestJS resolves a `DynamicModule`'s `providers`, `imports`,
+`exports` and `global` flag _before_ the DI container exists, so a factory that
+itself depends on DI cannot produce them. D2 still holds — the factory returns
+`VytchesDDDModuleOptions`, one vocabulary — but only the runtime-read fields of
+that object take effect asynchronously (`autoDiscovery`, `context`).
+`providers`/`imports`/`isGlobal` are declared statically on
+`VytchesDDDModuleAsyncOptions` instead. This is documented on the type rather
+than left for a consumer to discover: returning `providers` from the factory is
+not an error, it is simply ignored, and silently ignoring a field is exactly the
+kind of thing that produced the ghost in the first place.
+
+**D8 — `autoDiscovery.enabled` was an inert switch; it now works.** Verified
+while wiring D7: `forRoot()` read only `providers`, `imports` and `isGlobal`
+from its options — `autoDiscovery.enabled` was declared, JSDoc'd
+`@default true`, and consumed by nothing. A `forRootAsync()` whose factory
+result nothing reads would have been a second ghost, so the options are now
+published under the already-existing-but-unused `VYTCHES_DDD_OPTIONS` token
+(both entry points), and `VytchesExplorerService` skips the reflection scan when
+`enabled === false`.
+
+Same defect class as VB-006's `cacheFailures`/`enableMetrics`: a documented
+public switch that silently did nothing. **Behavioural change**: a consumer who
+passed `autoDiscovery: { enabled: false }` previously got handler discovery
+anyway; now they get what the docs always promised. Safe in the pre-publish
+window, and the alternative — leaving the flag inert — was not acceptable once
+the token had to exist regardless.
+
 ## Acceptance Criteria
 
-1. [ ] `VytchesDDDModule.forRootAsync()` supporting `useFactory`, `useClass` and
+1. [x] `VytchesDDDModule.forRootAsync()` supporting `useFactory`, `useClass` and
        `useExisting` — the standard Nest async-config triad
        (`TypeOrmModule.forRootAsync` / `JwtModule.forRootAsync` shape).
        `useFactory` must return `VytchesDDDModuleOptions` — the same type
@@ -170,20 +199,20 @@ is left to the implementer — but the middleware type is not negotiable.
    > per-processor provider factory, not a module async-config triad.
    > Consistency with outbox applies to **JSDoc style** (rich `@example` showing
    > full `DynamicModule` usage), not to the options shape.
-2. [ ] `forFeature()` routed through `CQRSConfiguration`. `middlewares` and bus
+2. [x] `forFeature()` routed through `CQRSConfiguration`. `middlewares` and bus
        type (`basic` / `enhanced`) exposed as `forFeature()` options;
        per-context resilience and metrics no longer require undocumented
        provider overrides. Non-breaking: `forFeature('orders')` with no options
        keeps today's behaviour (see AC6).
-3. [ ] `packages/nestjs/src/types/index.ts` **deleted in full** — all 11
+3. [x] `packages/nestjs/src/types/index.ts` **deleted in full** — all 11
        interfaces, nothing relocated to an `internal` module (D2/D3). Closes the
        VF-031 AC3 deferral. `types/extended.ts` stays untouched: it has a real,
        explicit import path (`'../types/extended'`) and is not part of this
        defect.
-4. [ ] Exactly one `types` module resolvable under `packages/nestjs/src/` — the
+4. [x] Exactly one `types` module resolvable under `packages/nestjs/src/` — the
        flat `types.ts`, holding both the sync and the new async options types.
        The `types.ts` / `types/index.ts` shadowing pair is gone (D4).
-5. [ ] Contract tests: `forRootAsync` wiring (all three factory forms resolving
+5. [x] Contract tests: `forRootAsync` wiring (all three factory forms resolving
        into a working `DynamicModule`, not merely typechecking), and a
        `forFeature({ busType: 'enhanced', middlewares: [...] })` test asserting
        the per-context bus actually is the enhanced one and the middleware runs.
@@ -192,9 +221,9 @@ is left to the implementer — but the middleware type is not negotiable.
        `VytchesDDDOptionsFactory['createVytchesDDDOptions']`'s return type is
        assignable to the parameter type of `forRoot()`. This is the exact defect
        D2 rejects; a test must make it unrepeatable.
-6. [ ] Regression: the `forFeature` isolation e2e suite from VB-003 stays green
+6. [x] Regression: the `forFeature` isolation e2e suite from VB-003 stays green
        (it is the baseline proving F-C4 cross-context event leak stays fixed).
-7. [ ] `nx run @vytches/ddd-nestjs:type-check` clean, run with
+7. [x] `nx run @vytches/ddd-nestjs:type-check` clean, run with
        `--skip-nx-cache`. Vitest alone is **not** sufficient for this package —
        esbuild misses excess-property regressions on the new options types, and
        the review pass hit a stale-cache false pass on this exact target.
@@ -225,3 +254,29 @@ is left to the implementer — but the middleware type is not negotiable.
 - `completed-tasks/VF-031-prepublish-surface-diet.md` — AC3 deferral rationale
 - `completed-tasks/VB-003-nestjs-forfeature-di-wiring.md` — regression baseline
   for AC6
+
+## Outcome (2026-08-20)
+
+All eight criteria met. Gates, each run with `--skip-nx-cache`:
+
+| Gate                                   | Result                             |
+| -------------------------------------- | ---------------------------------- |
+| `@vytches/ddd-nestjs:test`             | 271/271 (was 257 — 14 new)         |
+| `@vytches/ddd-nestjs:type-check` (tsc) | clean                              |
+| `@vytches/ddd-nestjs:lint`             | 0 errors (9 pre-existing warnings) |
+| `@vytches/ddd-nestjs:build`            | clean                              |
+| `@vytches/ddd-enterprise:build`        | clean (re-exports the package)     |
+| `@vytches/ddd-cqrs` tests              | 300/300                            |
+
+Notes for whoever picks up VF-032b:
+
+- **The type test earned its place immediately.** `async-config.types.test.ts`
+  passed under Vitest while `tsc` rejected it — the exact esbuild blind spot AC7
+  warns about. Do not treat a green Vitest run as evidence for this package.
+- **One test needed extending, not fixing**:
+  `tests/feature/global-bus-acl.test.ts` mocks `@vytches/ddd-cqrs` wholesale, so
+  routing `forFeature()` through `CQRSConfiguration` made the mock incomplete.
+  The mock now models the configuration class. Any further CQRS dependency added
+  to the feature module will hit the same wall.
+- **Raw `new Error` sites are now 5, not 4** — `forRootAsync()` validates that
+  one factory form is present. VF-032b AC3 should expect five.

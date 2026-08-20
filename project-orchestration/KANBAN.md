@@ -1,22 +1,22 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-20 (VF-032 split into VF-032a/VF-032b — see the split note
-below the boards). Prior: 2026-08-19 by `/pulse` + same-day correction (37-day
-sync gap — VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a
-status sync; VF-039 split into VF-039a/VF-039b same day. **Correction**:
-`/pulse` initially flagged VF-028 as "branch active, not yet done" — a direct
-user check ("czy 028 właśnie nie skończyliśmy?") caught that this was itself
-stale: VF-028 was implemented and committed the same day (`05ac364a`), just
-never had its task file updated. Verified (resilience 104/104, policies 237/237
-green) and archived alongside VF-037 — both moved to `completed-tasks/`.) Prior:
-2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
-VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
-ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
-2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
-`status: backlog` with unchecked ACs despite merge to `develop` `cf4029dd`
-2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to `done`, ACs
-checked against git history, file moved to `completed-tasks/`). Prior:
-2026-07-13 by `/pulse` (VD-005 shipped — docs truth cleanup + new
+_Last updated 2026-08-20 (VF-032a shipped; VF-032 split into VF-032a/VF-032b —
+see the notes below the boards). Prior: 2026-08-19 by `/pulse` + same-day
+correction (37-day sync gap — VF-036/VF-037/VF-039 work landed since the
+2026-07-13 pulse without a status sync; VF-039 split into VF-039a/VF-039b same
+day. **Correction**: `/pulse` initially flagged VF-028 as "branch active, not
+yet done" — a direct user check ("czy 028 właśnie nie skończyliśmy?") caught
+that this was itself stale: VF-028 was implemented and committed the same day
+(`05ac364a`), just never had its task file updated. Verified (resilience
+104/104, policies 237/237 green) and archived alongside VF-037 — both moved to
+`completed-tasks/`.) Prior: 2026-08-09 (maturity-audit re-prioritization: 5 new
+tasks filed VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1,
+runtime-first ordering per owner directive — see the 2026-08-09 note above the
+boards). Prior: 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was
+stuck at `status: backlog` with unchecked ACs despite merge to `develop`
+`cf4029dd` 2026-07-12 and a GO verifier verdict `3b81c5ba` — status flipped to
+`done`, ACs checked against git history, file moved to `completed-tasks/`).
+Prior: 2026-07-13 by `/pulse` (VD-005 shipped — docs truth cleanup + new
 `tools/docs-compile-gate` CI tool, all 11 ACs done, moved to `completed-tasks/`,
 merged to `develop`). **VF-036 (AC-SIGNOFF) is now the sole open gate on the
 v0.31.0 tag** — owner decision 2026-08-19: collect the sign-off, run the full
@@ -255,6 +255,20 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > "6 raw `new Error` sites" is stale, **4** remain (VF-030 replaced the two in
 > `nestjs-container.adapter.ts`).
 
+> **Shipped (2026-08-20)**: **VF-032a** done — NestJS async config + per-context
+> CQRS. `VytchesDDDModule.forRootAsync()` added
+> (`useFactory`/`useClass`/`useExisting`); `forFeature()` now builds its buses
+> through `CQRSConfiguration`, so `busType: 'enhanced'` and `middlewares`
+> finally reach a bounded context without undocumented provider overrides. Ghost
+> `types/index.ts` deleted whole (closes the VF-031 AC3 deferral) after a
+> three-agent panel rejected reviving it — its factory returned an options type
+> incompatible with the live one, it declared a second `CQRSOptions`, and it
+> carried `sagas`/`eventStore`/broker fields contradicting settled decisions.
+> **Behavioural change (D8)**: `autoDiscovery.enabled` was an inert switch and
+> now works — same defect class as VB-006's `cacheFailures`. 271/271 nestjs
+> tests, tsc/lint/build clean, enterprise build and cqrs 300/300 unaffected.
+> **VF-032b unblocked.** Moved to `completed-tasks/`.
+
 ## P0 — Critical
 
 _Empty._
@@ -298,9 +312,8 @@ combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 
 ## P2 — Normal / Medium
 
-_Runtime-adjacent first (VF-025, VT-007, VF-032a, VF-033, VT-006, VF-027), then
-docs & tooling (VD-008, VF-034, VD-006b). VF-032b is sequenced behind VF-032a —
-it documents the module shape VF-032a decides._
+_Runtime-adjacent first (VF-025, VT-007, VF-032b, VF-033, VT-006, VF-027), then
+docs & tooling (VD-008, VF-034, VD-006b)._
 
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
