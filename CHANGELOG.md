@@ -155,6 +155,47 @@ fresh array every time" as an implementation detail.
 
 ### Fixed
 
+- **policies:** `PolicyCachingBehaviorFactory.forExpensivePolicy()` no longer
+  silently discards an explicit `cacheFailures: false` from the caller — it used
+  `options.cacheFailures || true`, which forced caching of failure results even
+  when a consumer had deliberately opted out. Same fix applied to the other
+  `options.X || <literal>` fallbacks in that factory (`ttl`, `maxSize`), all
+  switched to `??` so only `undefined`/omission falls back to the default, not
+  any other falsy value.
+
+  Separately, `PolicyCachingBehaviorFactory.withTTL()` and `.withCustomKey()`
+  previously built a cache config with no `maxSize` at all, which disabled the
+  size-based eviction backstop — combined with TTL's lazy (read-time only)
+  expiry, a key that was written and never read again would never be reclaimed,
+  so the cache could grow without bound. Caches created through those factories
+  are now bounded: the fallback lives at the point where the behaviour writes to
+  its cache, so an omitted `maxSize` resolves to a default of 1000 entries
+  instead of leaving eviction disabled.
+
+  **Raising the cap:** `withTTL()` and `.withCustomKey()` take no `maxSize`
+  parameter, so callers on those two factories cannot change the limit in place
+  — switch to `PolicyCachingBehavior.create(policy, { ttl, maxSize })` if 1000
+  entries doesn't fit your workload. `forExpensivePolicy()` does accept
+  `maxSize` and keeps its own, deliberately lower default of 500 (its cached
+  values are typically larger per entry). Callers who already pass `maxSize`
+  anywhere are unaffected.
+
+  Also fixed an internal LRU bookkeeping bug in the same cache: re-setting an
+  already-cached key could leave a stale linked-list node reachable from the
+  eviction pointer, causing a later eviction to remove the wrong (still-live)
+  entry instead of the actual least-recently-used one. This is an internal
+  implementation detail with no API surface change.
+
+  Finally, `PolicyCacheConfig.enableMetrics` is honoured. It was declared and
+  documented as a switch over cache metrics collection, but nothing ever read it
+  — hits, misses, evictions and entry counts were collected unconditionally.
+  Passing `enableMetrics: false` now suppresses collection and
+  `getCacheMetrics()` reports zeroes. Omitting the option still collects
+  metrics, so this only changes behaviour for callers who had explicitly opted
+  out and were being ignored. The counters are observational only — eviction is
+  driven by `maxSize` against the live entry count, never by the counters — so
+  disabling them cannot change what is cached.
+
 - **nestjs:** the CQRS Symbol→class token bridge is now registered by every
   module factory. It previously existed only in `forRoot()` and `forTesting()`,
   so an explorer created by `forContext()` or `forContexts()` silently received

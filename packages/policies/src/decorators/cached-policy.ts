@@ -8,9 +8,33 @@ import type {
 } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
+/**
+ * Default `maxSize` used by `PolicyCache.set()` and by factories that don't
+ * ask the consumer for a size (`PolicyCachingBehaviorFactory.withTTL()`,
+ * `.withCustomKey()`). See VB-006: those two factories previously left
+ * `maxSize` unset entirely, which disabled the size-based eviction backstop
+ * and let the cache grow without bound (F6/F7).
+ */
+const DEFAULT_MAX_SIZE = 1000;
+
+/**
+ * Default `maxSize` for `PolicyCachingBehaviorFactory.forExpensivePolicy()`.
+ * Deliberately lower than `DEFAULT_MAX_SIZE`: this factory targets expensive
+ * operations, whose entries are typically larger/costlier per key, so a
+ * smaller cap keeps memory bounded at a similar total cost.
+ */
+const DEFAULT_EXPENSIVE_MAX_SIZE = 500;
+
 export interface PolicyCacheConfig {
   /**
-   * Time to live in milliseconds for cached policy results
+   * Time to live in milliseconds for cached policy results.
+   *
+   * Expiry is LAZY: it is only checked when a key is read back via `get()`.
+   * There is no background sweeper/timer (the library has no lifecycle hook
+   * to own one). A key that is written and never read again does NOT expire
+   * on a timer — it simply sits in the cache until evicted by `maxSize`
+   * eviction. Size-based eviction is therefore the only real memory
+   * backstop; see `maxSize`.
    */
   ttl: number;
 
@@ -34,7 +58,13 @@ export interface PolicyCacheConfig {
   namespace?: string;
 
   /**
-   * Maximum number of cache entries for this policy
+   * Maximum number of cache entries for this policy.
+   *
+   * This is the ONLY real memory backstop: TTL expiry is lazy (see `ttl`
+   * doc) and never reclaims a key that is set and then never read again.
+   * When omitted, the implementation falls back to an internal default
+   * rather than leaving the cache unbounded — see the `@vytches/ddd-policies`
+   * changelog entry for VB-006 for the exact default per factory.
    */
   maxSize?: number;
 
@@ -51,7 +81,18 @@ export interface PolicyCacheConfig {
   cacheFailures?: boolean;
 
   /**
-   * Whether to enable cache metrics collection
+   * Whether to collect cache metrics (hits, misses, evictions, entries)
+   * exposed through `getCacheMetrics()`.
+   *
+   * Defaults to `true` when omitted. Metrics are observational only —
+   * nothing in the cache reads them for control flow (eviction is driven by
+   * `maxSize` against the live entry count, never by the counters), so
+   * disabling collection cannot change caching behaviour, only what
+   * `getCacheMetrics()` reports.
+   *
+   * An explicit `false` is honoured: prior to VB-006 this option was
+   * declared and documented but never read, so metrics were collected
+   * unconditionally.
    */
   enableMetrics?: boolean;
 }
@@ -80,6 +121,12 @@ interface LruNode {
  *
  * LRU eviction is O(1) — implemented as a Map + doubly-linked list so that
  * both insertion and access update the MRU position in constant time.
+ *
+ * Size contract (VB-006, AC3): `maxSize` is the only real memory backstop,
+ * because TTL expiry is lazy (only checked on `get()`, see
+ * `PolicyCacheConfig.ttl`). `set()` always receives a `maxSize` — either the
+ * caller's explicit value or a module default (`DEFAULT_MAX_SIZE` /
+ * `DEFAULT_EXPENSIVE_MAX_SIZE`) — so eviction never silently no-ops.
  */
 class PolicyCache {
   private cache = new Map<string, CacheEntry<unknown>>();
@@ -99,13 +146,24 @@ class PolicyCache {
   };
 
   /**
+   * @param metricsEnabled When `false`, every counter update below is
+   * skipped and `getMetrics()` keeps reporting zeroes. Defaults to `true`
+   * so that callers which never pass the flag keep the pre-VB-006
+   * behaviour. Counters are never read for control flow, so this switch is
+   * safe by construction — see `PolicyCacheConfig.enableMetrics`.
+   */
+  constructor(private readonly metricsEnabled = true) {}
+
+  /**
    * Get cached result if valid
    */
   public get<T>(key: string): Result<T, PolicyViolation> | null {
     const entry = this.cache.get(key) as CacheEntry<T> | undefined;
 
     if (!entry) {
-      this.metrics.misses++;
+      if (this.metricsEnabled) {
+        this.metrics.misses++;
+      }
       return null;
     }
 
@@ -116,36 +174,53 @@ class PolicyCache {
     if (age > entry.ttl) {
       this.removeNode(key);
       this.cache.delete(key);
-      this.metrics.evictions++;
-      this.metrics.entries--;
-      this.metrics.misses++;
+      if (this.metricsEnabled) {
+        this.metrics.evictions++;
+        this.metrics.entries--;
+        this.metrics.misses++;
+      }
       return null;
     }
 
     // Move to MRU position (O(1) LRU refresh on hit)
     this.touchNode(key);
 
-    this.metrics.hits++;
+    if (this.metricsEnabled) {
+      this.metrics.hits++;
+    }
     return entry.result;
   }
 
   /**
-   * Set cache entry with TTL
+   * Set cache entry with TTL.
+   *
+   * `maxSize` defaults to `DEFAULT_MAX_SIZE` when the caller omits it, so
+   * eviction is always active — see the class-level "Size contract" doc.
    */
   public set<T>(
     key: string,
     result: Result<T, PolicyViolation>,
     ttl: number,
-    maxSize?: number
+    maxSize: number = DEFAULT_MAX_SIZE
   ): void {
-    // Enforce max size by evicting the least recently used entry (O(1))
-    if (maxSize && this.cache.size >= maxSize) {
+    // D1 (VB-006): capture before any capacity check. A re-set of an
+    // existing key does not grow the effective cache size, so it must not
+    // be treated the same as a brand-new insertion below.
+    const isUpdate = this.cache.has(key);
+
+    // Enforce max size by evicting the least recently used entry (O(1)).
+    // Gated on `!isUpdate` (D1): checking capacity before this gate would
+    // evict an unrelated entry on a same-key re-set even though the entry
+    // count doesn't actually change.
+    if (!isUpdate && this.cache.size >= maxSize) {
       const lruKey = this.lruHead?.key;
       if (lruKey !== undefined) {
         this.removeNode(lruKey);
         this.cache.delete(lruKey);
-        this.metrics.evictions++;
-        this.metrics.entries--;
+        if (this.metricsEnabled) {
+          this.metrics.evictions++;
+          this.metrics.entries--;
+        }
       }
     }
 
@@ -154,8 +229,24 @@ class PolicyCache {
       timestamp: new Date(),
       ttl,
     });
+
+    // D2 (VB-006): detach any existing LRU node for this key before
+    // appending a fresh one. Without this, re-setting a key that was
+    // previously `lruHead` leaves that node orphaned but still reachable
+    // from `lruHead` (F8) — the next eviction would then read the stale
+    // `lruHead.key`, look it up in the (already overwritten) `lruNodes` map,
+    // and delete the wrong, still-live entry.
+    if (this.lruNodes.has(key)) {
+      this.removeNode(key);
+    }
     this.addNode(key);
-    this.metrics.entries++;
+
+    // D3 (VB-006): only count real insertions. Counting on every call (the
+    // prior behaviour) drifts `metrics.entries` upward on every re-set,
+    // once re-sets became reachable after the D1/D2 fix (F9).
+    if (!isUpdate && this.metricsEnabled) {
+      this.metrics.entries++;
+    }
   }
 
   /**
@@ -229,7 +320,7 @@ class PolicyCache {
 }
 
 export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
-  private readonly cache = new PolicyCache();
+  private readonly cache: PolicyCache;
 
   public readonly id: string;
   public readonly domain: string;
@@ -239,6 +330,14 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
     private readonly innerPolicy: IBusinessPolicy<T>,
     private readonly config: PolicyCacheConfig
   ) {
+    // VB-006: `enableMetrics` was declared and documented but never read —
+    // the same dead-switch defect class as `cacheFailures` (fixed above).
+    // `??` (not `||`) so an explicit `false` survives; the `true` default
+    // keeps behaviour unchanged for callers that omit the option. Built
+    // here rather than as a field initializer so `config` is guaranteed
+    // assigned.
+    this.cache = new PolicyCache(config.enableMetrics ?? true);
+
     this.id = `cached_${innerPolicy.id}`;
     this.domain = innerPolicy.domain;
     this.name = `Cached ${innerPolicy.name}`;
@@ -262,7 +361,12 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
     // Cache result if enabled and TTL > 0
     const shouldCache = (this.config.cacheFailures || result.isSuccess) && this.config.ttl > 0;
     if (shouldCache) {
-      this.cache.set(cacheKey, result, this.config.ttl, this.config.maxSize);
+      // D4/F6 (VB-006): factories that don't ask the consumer for a size
+      // (`withTTL()`, `withCustomKey()`) leave `config.maxSize` unset. Fall
+      // back to `DEFAULT_MAX_SIZE` here rather than letting `undefined`
+      // reach `PolicyCache.set()` implicitly, so the bound is explicit at
+      // the call site that feeds every configuration path.
+      this.cache.set(cacheKey, result, this.config.ttl, this.config.maxSize ?? DEFAULT_MAX_SIZE);
     }
 
     return result;
@@ -475,14 +579,19 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
       ttl,
       cacheFailures: false,
       enableMetrics: true,
-      maxSize: 1000,
+      maxSize: DEFAULT_MAX_SIZE,
     });
   }
 }
 
 export class PolicyCachingBehaviorFactory {
   /**
-   * Create cached policy with TTL
+   * Create cached policy with TTL.
+   *
+   * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
+   * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
+   * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
+   * need a different cap.
    */
   public static withTTL<T>(policy: IBusinessPolicy<T>, ttlMs: number): PolicyCachingBehavior<T> {
     return PolicyCachingBehavior.create(policy, {
@@ -492,7 +601,12 @@ export class PolicyCachingBehaviorFactory {
   }
 
   /**
-   * Create cached policy for expensive operations
+   * Create cached policy for expensive operations.
+   *
+   * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Defaults to a smaller
+   * `maxSize` than `withTTL()`/`withCustomKey()` (see `DEFAULT_EXPENSIVE_MAX_SIZE`),
+   * on the assumption that entries here are individually costlier; pass
+   * `maxSize` explicitly to raise or lower it.
    */
   public static forExpensivePolicy<T>(
     policy: IBusinessPolicy<T>,
@@ -503,9 +617,9 @@ export class PolicyCachingBehaviorFactory {
     } = {}
   ): PolicyCachingBehavior<T> {
     const cachedPolicy = PolicyCachingBehavior.create(policy, {
-      ttl: options.ttl || 600000, // 10 minutes for expensive operations
-      maxSize: options.maxSize || 500,
-      cacheFailures: options.cacheFailures || true, // Cache failures for expensive ops
+      ttl: options.ttl ?? 600000, // 10 minutes for expensive operations
+      maxSize: options.maxSize ?? DEFAULT_EXPENSIVE_MAX_SIZE,
+      cacheFailures: options.cacheFailures ?? true, // Cache failures for expensive ops
       enableMetrics: true,
       namespace: `expensive_${policy.id}`,
     });
@@ -520,7 +634,12 @@ export class PolicyCachingBehaviorFactory {
   }
 
   /**
-   * Create cached policy with custom key generation
+   * Create cached policy with custom key generation.
+   *
+   * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
+   * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
+   * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
+   * need a different cap.
    */
   public static withCustomKey<T>(
     policy: IBusinessPolicy<T>,
