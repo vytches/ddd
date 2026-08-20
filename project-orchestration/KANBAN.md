@@ -247,18 +247,22 @@ how the library behaves at run time outrank docs/lint work. Updated order
 (2026-08-19): VF-036 sign-off → release checklist → merge to `main`. VF-028 and
 VF-037 shipped and archived same day; VF-039a is a cheap follow-on, not a gate._
 
-| ID     | Title                                                          | Status                                                 | Age |
-| ------ | -------------------------------------------------------------- | ------------------------------------------------------ | --- |
-| VF-036 | getIdentityComponents() equality hook (consumer-gated BC)      | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 11d |
-| VP-012 | Hot-path quick wins (AuditCapability O(n²), CachedPolicy hash) | backlog _(file still says `priority: normal` — drift)_ | 48d |
-| VF-039 | Stop layer verifiers from reverting the previous layer's work  | split → VF-039a / VF-039b                              | 7d  |
+| ID     | Title                                                         | Status                                                 | Age |
+| ------ | ------------------------------------------------------------- | ------------------------------------------------------ | --- |
+| VF-036 | getIdentityComponents() equality hook (consumer-gated BC)     | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 11d |
+| VB-005 | Benchmark harness broken (pnpm bench doesn't run at all)      | backlog _(discovered 2026-08-20 while closing VP-012)_ | 0d  |
+| VF-039 | Stop layer verifiers from reverting the previous layer's work | split → VF-039a / VF-039b                              | 7d  |
 
 _Shipped and archived to `completed-tasks/` 2026-08-19: **VF-028** (resilience
 correctness, `05ac364a`), **VF-037** (isolation regression suite + behavioral-BC
 gate, `c393a04b`), **VF-039a** (orchestration revert-ban: absolute
 `git checkout`/`restore`/`stash`/`reset` ban + incident note, landed in
 `/opt/projects/claude-patterns` `f646dda`; AC-LINT-GATE/AC-DEPLOY closed earlier
-same day by other work, `83019997`)._
+same day by other work, `83019997`). 2026-08-20: **VP-012** (hot-path quick wins
+— cqrs single race, aggregates getDomainEvents() memoization, policies
+combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
+(benchmark proof) formally unmet — pre-existing broken harness, spun off as
+**VB-005**._
 
 ## P2 — Normal / Medium
 
