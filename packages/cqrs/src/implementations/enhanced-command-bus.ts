@@ -650,12 +650,16 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus, I
     commands: T[],
     concurrencyLimit: number
   ): Promise<TResult[]> {
-    const results: TResult[] = [] as TResult[];
+    // Pre-sized so results[] preserves input order (indexed by original
+    // command position), not completion order — commands can settle out of
+    // order once concurrencyLimit forces interleaving.
+    const results: TResult[] = new Array(commands.length);
     const executing: Promise<void>[] = [];
 
-    for (const command of commands) {
+    for (let idx = 0; idx < commands.length; idx++) {
+      const command = commands[idx] as T;
       const promise = this.executeWithResilience<T, TResult>(command).then(result => {
-        results.push(result as TResult);
+        results[idx] = result as TResult;
       });
 
       executing.push(promise);
