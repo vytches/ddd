@@ -238,7 +238,11 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
 ## P0 — Critical
 
-_None._ VS-016 (the only P0) shipped 2026-07-10.
+| ID     | Title                                                             | Status                                                 | Age |
+| ------ | ----------------------------------------------------------------- | ------------------------------------------------------ | --- |
+| VB-006 | PolicyCache v2 — cacheFailures silently inverted, unbounded cache | backlog _(filed 2026-08-20, panel: priority > VP-012)_ | 0d  |
+
+_VS-016 (the prior sole P0) shipped 2026-07-10._
 
 ## P1 — High
 
