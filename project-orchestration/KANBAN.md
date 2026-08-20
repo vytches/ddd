@@ -1,7 +1,7 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-20 (VF-032a, VF-032b, VF-027 shipped; VF-032 split into
-VF-032a/VF-032b — see the notes below the boards). Prior: 2026-08-19 by
+_Last updated 2026-08-20 (VF-032a, VF-032b, VF-027, VB-007 shipped; VF-032 split
+into VF-032a/VF-032b — see the notes below the boards). Prior: 2026-08-19 by
 `/pulse` + same-day correction (37-day sync gap — VF-036/VF-037/VF-039 work
 landed since the 2026-07-13 pulse without a status sync; VF-039 split into
 VF-039a/VF-039b same day. **Correction**: `/pulse` initially flagged VF-028 as
@@ -300,6 +300,19 @@ since created_at. Grouped by priority (P0 critical · P1 high · P2 normal/mediu
 > the context machinery. resilience 110/110, full repo 2662 passed. Moved to
 > `completed-tasks/`.
 
+> **Shipped (2026-08-20)**: **VB-007** done — `PolicyCachingBehavior` now
+> deduplicates concurrent identical checks through an in-flight map; N
+> simultaneous misses on one key invoke the inner policy once. On by default and
+> with no new option (D1): the caching contract already promises a result may be
+> served to a caller that never ran the policy. In-flight entries sit outside
+> the LRU so they cannot be evicted mid-flight (D3), and clear on settle, so a
+> failure cannot poison the key. **Side effect worth knowing**: this closed
+> VB-006 AC4's only public trigger — with dedup, and with `get()` deleting
+> TTL-expired entries, every `set()` reachable from `check()` is an insert, so
+> the re-write branch is unreachable from the public surface. The defensive code
+> stays; the two tests that drove it were rewritten as proofs the trigger is
+> closed. policies 263/263, full repo 2663 passed. Moved to `completed-tasks/`.
+
 ## P0 — Critical
 
 _Empty._
@@ -343,8 +356,8 @@ combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 
 ## P2 — Normal / Medium
 
-_Runtime-adjacent first (VB-007, VF-025, VT-007, VF-033, VT-006), then docs &
-tooling (VD-008, VF-034, VD-006b)._
+_Runtime-adjacent first (VF-025, VT-007, VF-033, VT-006), then docs & tooling
+(VD-008, VF-034, VD-006b)._
 
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
@@ -358,7 +371,6 @@ tooling (VD-008, VF-034, VD-006b)._
 | VF-038  | Give docstring quality its own lint lane                          | backlog | 7d  |
 | VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 40d |
 | VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 46d |
-| VB-007  | PolicyCache — dedupe concurrent identical checks (stampede)       | backlog | 0d  |
 
 ## P3 — Low
 

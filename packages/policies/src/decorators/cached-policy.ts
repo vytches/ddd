@@ -322,6 +322,23 @@ class PolicyCache {
 export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   private readonly cache: PolicyCache;
 
+  /**
+   * Evaluations currently running, keyed by cache key (VB-007).
+   *
+   * The cache only absorbs repeated cost *after* the first call completes, so a
+   * burst of simultaneous misses for one key used to pay full price N times —
+   * worst of all in `forExpensivePolicy()`, the factory whose whole purpose is
+   * shielding callers from repeated expensive evaluation, and whose callers are
+   * therefore the most likely to fan out concurrently.
+   *
+   * Deliberately separate from the LRU (D3): an entry here is not a cached
+   * value and must never be evictable, or an eviction mid-flight would strand
+   * the callers awaiting it. Entries are removed when the evaluation settles —
+   * no timers, no background sweep (the library has no lifecycle hook; see
+   * VB-006 D5).
+   */
+  private readonly inFlight = new Map<string, Promise<Result<T, PolicyViolation>>>();
+
   public readonly id: string;
   public readonly domain: string;
   public readonly name: string;
@@ -355,7 +372,38 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
       return cached;
     }
 
-    // Execute actual policy
+    // VB-007: join an evaluation already running for this key rather than
+    // starting a second one. A caller arriving while an in-flight evaluation
+    // is past its TTL still joins it (D2): TTL bounds how long a *stored*
+    // result stays usable, and an evaluation that started moments ago is
+    // fresher than anything the cache could hand back.
+    const pending = this.inFlight.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+
+    const evaluation = this.evaluate(request, cacheKey);
+    this.inFlight.set(cacheKey, evaluation);
+
+    try {
+      return await evaluation;
+    } finally {
+      // Cleared on settle, success or failure alike, so a rejected evaluation
+      // cannot poison the key — the next caller re-evaluates (AC2). Callers
+      // already awaiting this promise hold their own reference and still
+      // receive its outcome.
+      this.inFlight.delete(cacheKey);
+    }
+  }
+
+  /**
+   * Runs the inner policy and stores the result. Split out of {@link check} so
+   * the promise can be registered in {@link inFlight} before it is awaited.
+   */
+  private async evaluate(
+    request: PolicyRequest<T>,
+    cacheKey: string
+  ): Promise<Result<T, PolicyViolation>> {
     const result = await this.innerPolicy.check(request);
 
     // Cache result if enabled and TTL > 0
