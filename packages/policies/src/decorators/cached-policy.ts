@@ -81,7 +81,18 @@ export interface PolicyCacheConfig {
   cacheFailures?: boolean;
 
   /**
-   * Whether to enable cache metrics collection
+   * Whether to collect cache metrics (hits, misses, evictions, entries)
+   * exposed through `getCacheMetrics()`.
+   *
+   * Defaults to `true` when omitted. Metrics are observational only —
+   * nothing in the cache reads them for control flow (eviction is driven by
+   * `maxSize` against the live entry count, never by the counters), so
+   * disabling collection cannot change caching behaviour, only what
+   * `getCacheMetrics()` reports.
+   *
+   * An explicit `false` is honoured: prior to VB-006 this option was
+   * declared and documented but never read, so metrics were collected
+   * unconditionally.
    */
   enableMetrics?: boolean;
 }
@@ -135,13 +146,24 @@ class PolicyCache {
   };
 
   /**
+   * @param metricsEnabled When `false`, every counter update below is
+   * skipped and `getMetrics()` keeps reporting zeroes. Defaults to `true`
+   * so that callers which never pass the flag keep the pre-VB-006
+   * behaviour. Counters are never read for control flow, so this switch is
+   * safe by construction — see `PolicyCacheConfig.enableMetrics`.
+   */
+  constructor(private readonly metricsEnabled = true) {}
+
+  /**
    * Get cached result if valid
    */
   public get<T>(key: string): Result<T, PolicyViolation> | null {
     const entry = this.cache.get(key) as CacheEntry<T> | undefined;
 
     if (!entry) {
-      this.metrics.misses++;
+      if (this.metricsEnabled) {
+        this.metrics.misses++;
+      }
       return null;
     }
 
@@ -152,16 +174,20 @@ class PolicyCache {
     if (age > entry.ttl) {
       this.removeNode(key);
       this.cache.delete(key);
-      this.metrics.evictions++;
-      this.metrics.entries--;
-      this.metrics.misses++;
+      if (this.metricsEnabled) {
+        this.metrics.evictions++;
+        this.metrics.entries--;
+        this.metrics.misses++;
+      }
       return null;
     }
 
     // Move to MRU position (O(1) LRU refresh on hit)
     this.touchNode(key);
 
-    this.metrics.hits++;
+    if (this.metricsEnabled) {
+      this.metrics.hits++;
+    }
     return entry.result;
   }
 
@@ -191,8 +217,10 @@ class PolicyCache {
       if (lruKey !== undefined) {
         this.removeNode(lruKey);
         this.cache.delete(lruKey);
-        this.metrics.evictions++;
-        this.metrics.entries--;
+        if (this.metricsEnabled) {
+          this.metrics.evictions++;
+          this.metrics.entries--;
+        }
       }
     }
 
@@ -216,7 +244,7 @@ class PolicyCache {
     // D3 (VB-006): only count real insertions. Counting on every call (the
     // prior behaviour) drifts `metrics.entries` upward on every re-set,
     // once re-sets became reachable after the D1/D2 fix (F9).
-    if (!isUpdate) {
+    if (!isUpdate && this.metricsEnabled) {
       this.metrics.entries++;
     }
   }
@@ -292,7 +320,7 @@ class PolicyCache {
 }
 
 export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
-  private readonly cache = new PolicyCache();
+  private readonly cache: PolicyCache;
 
   public readonly id: string;
   public readonly domain: string;
@@ -302,6 +330,14 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
     private readonly innerPolicy: IBusinessPolicy<T>,
     private readonly config: PolicyCacheConfig
   ) {
+    // VB-006: `enableMetrics` was declared and documented but never read —
+    // the same dead-switch defect class as `cacheFailures` (fixed above).
+    // `??` (not `||`) so an explicit `false` survives; the `true` default
+    // keeps behaviour unchanged for callers that omit the option. Built
+    // here rather than as a field initializer so `config` is guaranteed
+    // assigned.
+    this.cache = new PolicyCache(config.enableMetrics ?? true);
+
     this.id = `cached_${innerPolicy.id}`;
     this.domain = innerPolicy.domain;
     this.name = `Cached ${innerPolicy.name}`;
