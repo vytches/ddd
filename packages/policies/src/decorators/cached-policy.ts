@@ -177,10 +177,16 @@ class PolicyCache {
     ttl: number,
     maxSize: number = DEFAULT_MAX_SIZE
   ): void {
+    // D1 (VB-006): capture before any capacity check. A re-set of an
+    // existing key does not grow the effective cache size, so it must not
+    // be treated the same as a brand-new insertion below.
+    const isUpdate = this.cache.has(key);
+
     // Enforce max size by evicting the least recently used entry (O(1)).
-    // `maxSize` always has a value now (module default), so the previous
-    // truthiness guard is gone — eviction can no longer silently no-op.
-    if (this.cache.size >= maxSize) {
+    // Gated on `!isUpdate` (D1): checking capacity before this gate would
+    // evict an unrelated entry on a same-key re-set even though the entry
+    // count doesn't actually change.
+    if (!isUpdate && this.cache.size >= maxSize) {
       const lruKey = this.lruHead?.key;
       if (lruKey !== undefined) {
         this.removeNode(lruKey);
@@ -198,7 +204,12 @@ class PolicyCache {
 
     this.addNode(key);
 
-    this.metrics.entries++;
+    // D3 (VB-006): only count real insertions. Counting on every call (the
+    // prior behaviour) drifts `metrics.entries` upward on every re-set,
+    // once re-sets became reachable after the D1/D2 fix (F9).
+    if (!isUpdate) {
+      this.metrics.entries++;
+    }
   }
 
   /**
