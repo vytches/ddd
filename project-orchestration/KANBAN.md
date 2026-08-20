@@ -238,9 +238,18 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
 ## P0 — Critical
 
-| ID     | Title                                                             | Status                                                 | Age |
-| ------ | ----------------------------------------------------------------- | ------------------------------------------------------ | --- |
-| VB-006 | PolicyCache v2 — cacheFailures silently inverted, unbounded cache | backlog _(filed 2026-08-20, panel: priority > VP-012)_ | 0d  |
+_Empty._
+
+> **Shipped (2026-08-20)**: **VB-006** done — `PolicyCache` v2. The
+> `cacheFailures` dead switch now honours an explicit `false`; caches from the
+> TTL and custom-key factories are bounded by a default size instead of growing
+> without limit; the write path separates inserts from updates, so a re-set no
+> longer evicts an unrelated entry, corrupts LRU ordering or inflates the entry
+> count; `enableMetrics` — a fourth dead option found during implementation — is
+> honoured too. New contract test covers every option of the public cache
+> config. Purely behavioural: both barrels untouched, `maxSize` stays optional.
+> Six commits on `fix/VB-006-policy-cache-v2`, archived to `completed-tasks/`.
+> Spawned **VB-007** and **VB-008**.
 
 _VS-016 (the prior sole P0) shipped 2026-07-10._
 
@@ -285,6 +294,7 @@ docs & tooling (VD-008, VF-034, VD-006b)._
 | VF-038  | Give docstring quality its own lint lane                          | backlog | 7d  |
 | VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 40d |
 | VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 46d |
+| VB-007  | PolicyCache — dedupe concurrent identical checks (stampede)       | backlog | 0d  |
 
 ## P3 — Low
 
@@ -295,6 +305,7 @@ docs & tooling (VD-008, VF-034, VD-006b)._
 | VD-004  | Interactive Documentation System                             | backlog | 141d |
 | VF-002  | Strategic Design Documentation                               | backlog | 141d |
 | VP-006c | BaseContainerAdapter resolve optimization (no live callers)  | backlog | 39d  |
+| VB-008  | Behaviors export shape violates public-api-pattern (PA5/N2)  | planned | 0d   |
 
 ## Backlog
 
