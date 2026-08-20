@@ -1,16 +1,22 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DefaultResilienceContext } from '../../src/core/resilience-context';
 
+/**
+ * VF-027 replaced VB-004's hand-rolled disposal with native
+ * `AbortSignal.any()` / `AbortSignal.timeout()`.
+ *
+ * VB-004's tests asserted that `dispose()` *released* two resources: a
+ * `setTimeout` and an `{ once: true }` abort listener on the parent signal.
+ * Both are gone, so those assertions cannot hold — AC4 anticipated this and
+ * allows updating them to the new mechanism's observable semantics.
+ *
+ * The guarantee under test has therefore inverted, and is stronger: nothing is
+ * registered that would need releasing in the first place, so forgetting to
+ * call `dispose()` can no longer leak anything. That is what these tests pin.
+ */
 describe('DefaultResilienceContext', () => {
-  describe('dispose()', () => {
-    // VB-004: fork() (and withAttempt()) leak two resources when a forked
-    // context is never explicitly disposed: (1) the setTimeout backing the
-    // fork's own timeout-abort, and (2) the abort listener registered on
-    // the PARENT signal -- {once: true} only auto-removes that listener
-    // when the parent aborts, never on the happy-path settle. dispose()
-    // must release both.
-
-    describe('fork timer clearance (D-5: vi.getTimerCount() idiom)', () => {
+  describe('native AbortSignal composition (VF-027)', () => {
+    describe('no user-space timer is registered by fork()', () => {
       beforeEach(() => {
         vi.useFakeTimers();
       });
@@ -19,127 +25,130 @@ describe('DefaultResilienceContext', () => {
         vi.useRealTimers();
       });
 
-      it('clears the fork timeout on dispose after a successful operation', async () => {
+      it('registers no fake-timer for a fork timeout', () => {
         const baseline = vi.getTimerCount();
 
         const parent = DefaultResilienceContext.create();
-        const forked = parent.fork(5000);
+        parent.fork(5000);
 
-        expect(vi.getTimerCount()).toBe(baseline + 1);
-
-        forked.dispose?.();
-
+        // Was baseline + 1 before VF-027. AbortSignal.timeout() is backed by an
+        // internal, already-unref'd timer the platform clears itself — it never
+        // reaches the global setTimeout that fake timers intercept, so there is
+        // no timer for a forgotten dispose() to strand.
         expect(vi.getTimerCount()).toBe(baseline);
       });
 
-      it('clears the fork timeout on dispose after an early-exit/throw path', async () => {
+      it('leaves no timer behind when the context is dropped without dispose()', () => {
         const baseline = vi.getTimerCount();
 
         const parent = DefaultResilienceContext.create();
-        const forked = parent.fork(5000);
+        for (let i = 0; i < 25; i++) parent.fork(5000);
 
-        expect(vi.getTimerCount()).toBe(baseline + 1);
-
-        let caught: unknown;
-        try {
-          throw new Error('operation failed');
-        } catch (error) {
-          caught = error;
-        } finally {
-          forked.dispose?.();
-        }
-
-        expect(caught).toBeInstanceOf(Error);
-        expect(vi.getTimerCount()).toBe(baseline);
-      });
-
-      it('is a no-op when called multiple times', () => {
-        const baseline = vi.getTimerCount();
-
-        const parent = DefaultResilienceContext.create();
-        const forked = parent.fork(5000);
-
-        forked.dispose?.();
-        forked.dispose?.();
-        forked.dispose?.();
-
-        expect(vi.getTimerCount()).toBe(baseline);
-      });
-
-      it('is a no-op for a context forked without a timeout', () => {
-        const baseline = vi.getTimerCount();
-
-        const parent = DefaultResilienceContext.create();
-        const forked = parent.fork();
-
-        expect(vi.getTimerCount()).toBe(baseline);
-
-        expect(() => forked.dispose?.()).not.toThrow();
         expect(vi.getTimerCount()).toBe(baseline);
       });
     });
 
-    describe('parent-signal abort listener removal (separate from timer clearance)', () => {
-      // getTimerCount() cannot observe an EventTarget listener leak -- this
-      // needs its own assertion mechanism (spying on removeEventListener).
+    describe('parent-signal listeners do not accumulate', () => {
+      it('fork() adds no user-space listener to the parent signal', () => {
+        const parent = DefaultResilienceContext.create();
+        const addSpy = vi.spyOn(parent.signal, 'addEventListener');
 
-      it('removes the abort listener registered on the parent signal when disposed', () => {
-        const parent = DefaultResilienceContext.create() as DefaultResilienceContext;
-        const removeSpy = vi.spyOn(parent.signal, 'removeEventListener');
+        parent.fork(5000);
+
+        // AbortSignal.any() subscribes internally, not through the public
+        // addEventListener the old implementation used.
+        expect(addSpy).not.toHaveBeenCalled();
+      });
+
+      it('withAttempt() adds no user-space listener, across many attempts (SA-M12)', () => {
+        // The leak this replaces: RetryPolicy.execute() derives one attempt
+        // context per attempt from a context that may be reused across many
+        // execute() calls. Each derivation used to register a {once:true}
+        // listener that only a real abort would remove.
+        const parent = DefaultResilienceContext.create();
+        const addSpy = vi.spyOn(parent.signal, 'addEventListener');
+
+        for (let attempt = 1; attempt <= 50; attempt++) {
+          DefaultResilienceContext.withAttempt(parent, attempt);
+        }
+
+        expect(addSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('behaviour preserved from the manual implementation', () => {
+      it('propagates a parent abort to the forked child', async () => {
+        const controller = new AbortController();
+        const parent = new DefaultResilienceContext(undefined, undefined, 1, undefined, controller);
+        const forked = parent.fork();
+
+        expect(forked.signal.aborted).toBe(false);
+        controller.abort(new Error('parent aborted'));
+        await Promise.resolve();
+
+        expect(forked.signal.aborted).toBe(true);
+      });
+
+      it('starts already-aborted when the parent aborted before the fork', () => {
+        const controller = new AbortController();
+        const parent = new DefaultResilienceContext(undefined, undefined, 1, undefined, controller);
+        controller.abort(new Error('parent aborted'));
+
+        expect(parent.fork(5000).signal.aborted).toBe(true);
+      });
+
+      it('aborts the child on timeout, leaving the parent untouched', async () => {
+        vi.useRealTimers();
+        const parent = DefaultResilienceContext.create();
+        const forked = parent.fork(10);
+
+        await new Promise(resolve => setTimeout(resolve, 40));
+
+        expect(forked.signal.aborted).toBe(true);
+        expect(parent.signal.aborted).toBe(false);
+        // Native timeouts abort with a DOMException whose name is
+        // 'TimeoutError' rather than this package's TimeoutError class. Code
+        // branching on `reason.name` is unaffected; code using `instanceof
+        // TimeoutError` on a fork reason is not — recorded as D3 in the task.
+        expect((forked.signal.reason as Error).name).toBe('TimeoutError');
+      });
+
+      it('carries correlationId, startTime and metadata into the child', () => {
+        const parent = DefaultResilienceContext.create({
+          correlationId: 'corr-1',
+          metadata: { tenant: 'acme' },
+        });
 
         const forked = parent.fork(5000);
 
-        expect(removeSpy).not.toHaveBeenCalled();
-
-        forked.dispose?.();
-
-        expect(removeSpy).toHaveBeenCalledTimes(1);
-        expect(removeSpy).toHaveBeenCalledWith('abort', expect.any(Function));
+        expect(forked.correlationId).toBe('corr-1');
+        expect(forked.startTime).toEqual(parent.startTime);
+        expect(forked.metadata.get('tenant')).toBe('acme');
       });
 
-      it('removes the abort listener registered by withAttempt() on the parent signal', () => {
-        const parent = DefaultResilienceContext.create() as DefaultResilienceContext;
-        const removeSpy = vi.spyOn(parent.signal, 'removeEventListener');
+      it('withAttempt() carries the attempt number and metadata', () => {
+        const parent = DefaultResilienceContext.create({ metadata: { tenant: 'acme' } });
 
-        const child = DefaultResilienceContext.withAttempt(parent, 2);
+        const child = DefaultResilienceContext.withAttempt(parent, 3);
 
-        expect(removeSpy).not.toHaveBeenCalled();
-
-        child.dispose?.();
-
-        expect(removeSpy).toHaveBeenCalledTimes(1);
-        expect(removeSpy).toHaveBeenCalledWith('abort', expect.any(Function));
+        expect(child.attempt).toBe(3);
+        expect(child.metadata.get('tenant')).toBe('acme');
       });
+    });
 
-      it('does not throw and does not attempt listener removal when the parent was already aborted at fork time', () => {
-        const parentController = new AbortController();
-        const parent = new DefaultResilienceContext(
-          undefined,
-          undefined,
-          1,
-          undefined,
-          parentController
-        );
-        parentController.abort(new Error('parent aborted'));
-
-        const removeSpy = vi.spyOn(parent.signal, 'removeEventListener');
-
+    describe('dispose() compatibility (AC3)', () => {
+      it('is a harmless no-op, so existing dispose?.() call sites keep working', () => {
+        const parent = DefaultResilienceContext.create();
         const forked = parent.fork(5000);
 
-        expect(() => forked.dispose?.()).not.toThrow();
-        expect(removeSpy).not.toHaveBeenCalled();
-      });
+        expect(() => {
+          forked.dispose?.();
+          forked.dispose?.();
+        }).not.toThrow();
 
-      it('is safe to call dispose multiple times without double-removing listeners', () => {
-        const parent = DefaultResilienceContext.create() as DefaultResilienceContext;
-        const removeSpy = vi.spyOn(parent.signal, 'removeEventListener');
-
-        const forked = parent.fork(5000);
-
-        forked.dispose?.();
-        forked.dispose?.();
-
-        expect(removeSpy).toHaveBeenCalledTimes(1);
+        // Still functional afterwards — dispose() releases nothing and
+        // therefore breaks nothing.
+        expect(forked.signal.aborted).toBe(false);
       });
     });
   });

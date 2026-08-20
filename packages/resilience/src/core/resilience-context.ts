@@ -14,13 +14,20 @@ export interface ResilienceContext {
   withTimeout(timeoutMs: number): ResilienceContext;
 
   /**
-   * Releases resources held by this context: the fork timeout (if any) and
-   * the abort listener registered on the parent signal. Optional for
-   * backward compatibility -- existing implementers of this interface are
-   * unaffected. Consumers that fork/derive a context (e.g. via `fork()` or
-   * `withTimeout()`) should call `context.dispose?.()` once the operation
-   * using that context has settled (success or failure) to avoid leaking
-   * timers and event listeners.
+   * @deprecated Since 0.31.0 — a no-op on {@link DefaultResilienceContext},
+   * kept only so existing `context.dispose?.()` calls keep compiling.
+   *
+   * VB-004 introduced this because `fork()`/`withAttempt()` wired their own
+   * `setTimeout` and their own `addEventListener('abort', …, { once: true })`
+   * on the parent signal — and `{ once: true }` only removes the listener if
+   * the parent actually aborts, so every happy-path settle left one behind.
+   * VF-027 replaced that machinery with `AbortSignal.any()` /
+   * `AbortSignal.timeout()`, which the platform cleans up on its own: the
+   * timer is unref'd and self-clearing, and the composite signal's
+   * subscription to its sources dies with the composite. There is nothing
+   * left to release.
+   *
+   * Calling it remains harmless. New code should not.
    */
   dispose?(): void;
 }
@@ -28,8 +35,15 @@ export interface ResilienceContext {
 export class DefaultResilienceContext implements ResilienceContext {
   private abortController: AbortController;
   private _metadata: Map<string, unknown>;
-  private _disposeTimerId: ReturnType<typeof setTimeout> | undefined = undefined;
-  private _disposeAbortCleanup: (() => void) | undefined = undefined;
+
+  /**
+   * Set on contexts produced by {@link fork} / {@link withAttempt}, where the
+   * signal is a composite built by `AbortSignal.any()` rather than the one
+   * owned by {@link abortController}. Undefined elsewhere, so a directly
+   * constructed context keeps exposing its controller's signal and stays
+   * abortable through that controller.
+   */
+  private _derivedSignal: AbortSignal | undefined = undefined;
 
   constructor(
     public readonly correlationId: string = LibUtils.getUUID(),
@@ -43,7 +57,7 @@ export class DefaultResilienceContext implements ResilienceContext {
   }
 
   get signal(): AbortSignal {
-    return this.abortController.signal;
+    return this._derivedSignal ?? this.abortController.signal;
   }
 
   get metadata(): ReadonlyMap<string, unknown> {
@@ -51,67 +65,41 @@ export class DefaultResilienceContext implements ResilienceContext {
   }
 
   fork(timeout?: number): ResilienceContext {
-    const newController = new AbortController();
-    let parentAbortCleanup: (() => void) | undefined;
-
-    // Forward abort from parent
-    if (this.signal.aborted) {
-      newController.abort(this.signal.reason);
-    } else {
-      const onParentAbort = (): void => {
-        newController.abort(this.signal.reason);
-      };
-      this.signal.addEventListener('abort', onParentAbort, { once: true });
-      // {once: true} only auto-removes the listener when the parent aborts;
-      // on the happy path (context settles without the parent ever
-      // aborting) the listener would otherwise remain registered on the
-      // parent signal for the parent's lifetime. dispose() removes it.
-      parentAbortCleanup = () => {
-        this.signal.removeEventListener('abort', onParentAbort);
-      };
-    }
-
-    // Set timeout if specified
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    if (timeout !== undefined && timeout > 0) {
-      timeoutId = setTimeout(() => {
-        if (!newController.signal.aborted) {
-          newController.abort(new TimeoutError(`Operation timed out after ${timeout}ms`));
-        }
-      }, timeout);
-    }
+    // Native composition (VF-027). AbortSignal.timeout() is backed by an
+    // already-unref'd, self-clearing timer, and AbortSignal.any() owns its
+    // subscription to the sources — so neither the timer nor the parent
+    // listener outlives the child, with no dispose() call required. The
+    // hand-rolled setTimeout + {once:true} listener pair this replaces leaked
+    // on every happy-path settle (VB-004 D-4, SA-M12, UX-C6).
+    const sources: AbortSignal[] =
+      timeout !== undefined && timeout > 0
+        ? [this.signal, AbortSignal.timeout(timeout)]
+        : [this.signal];
 
     const child = new DefaultResilienceContext(
       this.correlationId,
       this.startTime,
       this.attempt,
       this._metadata,
-      newController
+      new AbortController()
     );
 
-    child._disposeTimerId = timeoutId;
-    child._disposeAbortCleanup = parentAbortCleanup;
+    child._derivedSignal = AbortSignal.any(sources);
 
     return child;
   }
 
   /**
-   * Clears the fork timeout (if this context was created with one) and
-   * removes the abort listener registered on the parent signal during
-   * fork()/withAttempt(). Safe to call multiple times; a no-op once
-   * already disposed or when this context holds neither resource (e.g.
-   * a context created directly via the constructor or `static create()`).
+   * @deprecated Since 0.31.0 — no-op. See {@link ResilienceContext.dispose}.
+   *
+   * Retained so the `context.dispose?.()` calls VB-004 added across
+   * `circuit-breaker.ts`, `resilience-strategy.ts` and elsewhere keep
+   * compiling and keep meaning "I am done with this context". They simply have
+   * nothing to release now that `AbortSignal.any()` / `AbortSignal.timeout()`
+   * handle cleanup.
    */
   dispose(): void {
-    if (this._disposeTimerId !== undefined) {
-      clearTimeout(this._disposeTimerId);
-      this._disposeTimerId = undefined;
-    }
-
-    if (this._disposeAbortCleanup !== undefined) {
-      this._disposeAbortCleanup();
-      this._disposeAbortCleanup = undefined;
-    }
+    // Intentionally empty — see the deprecation note above.
   }
 
   withMetadata(key: string, value: unknown): ResilienceContext {
@@ -145,32 +133,21 @@ export class DefaultResilienceContext implements ResilienceContext {
   }
 
   static withAttempt(context: ResilienceContext, attempt: number): ResilienceContext {
-    const newController = new AbortController();
-    let parentAbortCleanup: (() => void) | undefined;
-
-    // Propagate abort from parent context to child attempt
-    if (context.signal.aborted) {
-      newController.abort(context.signal.reason);
-    } else {
-      const onParentAbort = (): void => {
-        newController.abort(context.signal.reason);
-      };
-      context.signal.addEventListener('abort', onParentAbort, { once: true });
-      // Same {once: true} happy-path leak as fork() -- see dispose().
-      parentAbortCleanup = () => {
-        context.signal.removeEventListener('abort', onParentAbort);
-      };
-    }
-
+    // Same native composition as fork(). SA-M12: RetryPolicy.execute() builds
+    // one of these per attempt against a context that may be reused across
+    // many execute() calls; under the old manual pairing each attempt added a
+    // parent listener that only a real abort would remove, so listeners grew
+    // without bound. AbortSignal.any() makes that structurally impossible —
+    // no per-attempt dispose() needed.
     const child = new DefaultResilienceContext(
       context.correlationId,
       context.startTime,
       attempt,
       new Map(context.metadata),
-      newController
+      new AbortController()
     );
 
-    child._disposeAbortCleanup = parentAbortCleanup;
+    child._derivedSignal = AbortSignal.any([context.signal]);
 
     return child;
   }

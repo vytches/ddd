@@ -15,7 +15,8 @@ created_by:
   'VB-004 analysis panel (OQ-3), confirmed by
   architecture-guardian/library-api-guardian/library-expert consultation'
 created_at: 2026-07-03
-status: backlog
+status: done
+completed_at: 2026-08-20
 release_target:
   post-first-public-publish (opportunistic — internal-only change, does not gate
   publish)
@@ -79,32 +80,32 @@ budget; it is well-scoped as its own small task instead.
 
 ## Acceptance Criteria
 
-1. [ ] `fork()`/`withAttempt()` in `resilience-context.ts` use
+1. [x] `fork()`/`withAttempt()` in `resilience-context.ts` use
        `AbortSignal.timeout()` / `AbortSignal.any([...])` instead of the manual
        `setTimeout` + `addEventListener('abort', ...)` pairing introduced/fixed
        by VB-004's D-4.
-2. [ ] No public API signature change — `ResilienceContext.fork()`'s return type
+2. [x] No public API signature change — `ResilienceContext.fork()`'s return type
        and all method signatures stay exactly as they are today (this is an
        internal-implementation swap, not an API redesign — confirmed low-risk
        since `ResilienceContext` has zero external implementers anywhere in this
        repo per VB-004's OQ-5 finding).
-3. [ ] Explicitly decide and document the fate of VB-004's `dispose?()` member:
+3. [x] Explicitly decide and document the fate of VB-004's `dispose?()` member:
        does it become a no-op once native disposal handles cleanup
        automatically, is it formally deprecated, or does it stay for a different
        reason? Record the decision (not just leave it ambiguous).
-4. [ ] VB-004's disposal tests (timer-count via `vi.getTimerCount()` + a
+4. [x] VB-004's disposal tests (timer-count via `vi.getTimerCount()` + a
        separate listener-count assertion, per VB-004 decision D-5) still pass,
        or are updated to match the new mechanism's observable semantics if
        `dispose?()` becomes a no-op.
-5. [ ] Regression: existing
+5. [x] Regression: existing
        `CircuitBreaker`/`TimeoutStrategy`/resilience-context test suites stay
        green.
-6. [ ] **SA-M12:** `RetryPolicy.execute()` attempt contexts no longer leak
+6. [x] **SA-M12:** `RetryPolicy.execute()` attempt contexts no longer leak
        parent-abort listeners — either disposed explicitly per attempt (in
        `finally`, matching circuit-breaker/timeout) or made structurally
        unnecessary by the native `AbortSignal.any()` composition; test: listener
        count on a reused parent context is stable across N `execute()` calls.
-7. [ ] **UX-C6:** `bulkhead.ts` covered by the same mechanism —
+7. [x] **UX-C6:** `bulkhead.ts` covered by the same mechanism —
        `executeWithTimeout` disposes (or natively composes) its forked timeout
        context, and `enqueue`'s abort listener is removed when a queued task
        settles normally; test: listener count on a reused context is stable
@@ -130,3 +131,41 @@ budget; it is well-scoped as its own small task instead.
   leave it as a prose recommendation buried in the analysis artifact (this
   project's own history — VB-002/VB-003 spawning VD-006/VD-007/VF-026 — shows
   that pattern reliably loses follow-up work otherwise).
+
+## Outcome (2026-08-20)
+
+All seven criteria met. `fork()` and `withAttempt()` now compose signals with
+`AbortSignal.any()` (plus `AbortSignal.timeout()` when a timeout is given); the
+manual `setTimeout` + `{ once: true }` listener pairing is gone.
+
+**D1 — the guarantee inverted, and got stronger.** VB-004's disposal was a
+promise that `dispose()` _releases_ two resources. There is now nothing to
+release: the timeout is an internal, already-unref'd platform timer, and the
+composite signal owns its subscription to its sources. Forgetting to call
+`dispose()` can no longer leak anything — which is what made AC6 and AC7
+collapse into the same fix rather than needing three separate `finally` blocks.
+
+**D2 — `dispose?()` becomes a documented no-op, not a removal (AC3).** VB-004
+added `context.dispose?.()` calls in `circuit-breaker.ts` and
+`resilience-strategy.ts`; deleting the member would break them for no gain. Both
+the interface member and the implementation are `@deprecated` with the reasoning
+inline, and the empty body is deliberate.
+
+**D3 — one observable change worth knowing.** A fork that times out now aborts
+with a `DOMException` whose `name` is `'TimeoutError'`, not with this package's
+`TimeoutError` class. Code branching on `reason.name` is unaffected; code doing
+`reason instanceof TimeoutError` on a _fork reason_ is. Nothing in this repo
+does — `TimeoutError` is thrown directly by `resilience-strategy.ts`, which is
+untouched, and that is what the existing tests assert against. Pinned by a test
+so it cannot change silently.
+
+**AC7 needed a second fix the context rewrite did not cover.** `bulkhead.ts`'s
+`enqueue()` registers its _own_ `{ once: true }` listener, independent of the
+context machinery — so it leaked on exactly the same happy path. Queued tasks
+now carry a `releaseAbortListener` that `processQueue()` calls when the task
+leaves the queue. The new test asserts removals equal additions on a reused
+context; before the fix, removals stayed at zero.
+
+Gates (`--skip-nx-cache`): resilience 110/110 (was 104 — 5 VB-004 disposal tests
+rewritten per AC4, 6 new leak tests added), tsc clean, lint clean, build clean;
+full repo 2662 passed / 7 skipped / 11 todo.
