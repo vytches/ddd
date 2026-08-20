@@ -708,6 +708,43 @@ export class EnhancedFrameworkAdapter extends MyFrameworkAdapter {
 
 ---
 
+## Single-Pass Resolution: the `tryResolve` Hook
+
+`BaseContainerAdapter.resolveDependency()` needs two answers about each
+constructor parameter: _is it registered?_ and _what is it?_ By default it asks
+separately — `isRegistered()` then `resolve()` — which through a
+framework-backed container means two framework lookups, or one wasted
+throw/catch, **per parameter**.
+
+Override `tryResolve()` when your container can answer both at once:
+
+```typescript
+import { BaseContainerAdapter, NOT_REGISTERED } from '@vytches/ddd-di';
+
+class MyAdapter extends BaseContainerAdapter {
+  protected override tryResolve<T>(
+    token: ServiceToken<T>
+  ): T | typeof NOT_REGISTERED {
+    const found = myContainer.lookup(token); // native miss-tolerant lookup
+    return found === undefined ? NOT_REGISTERED : (found as T);
+  }
+}
+```
+
+Two rules:
+
+- **Return `NOT_REGISTERED` for a miss** — never `undefined`, never a throw.
+  `undefined` is a legitimate resolved value; only the sentinel separates
+  "registered, holds undefined" from "not registered". Getting this wrong turns
+  a working registration into a `ContainerServiceNotFoundError`.
+- **Do not raise `ContainerServiceNotFoundError` yourself.**
+  `resolveDependency()` raises it with the owning service as context, which your
+  hook does not have.
+
+This is optional. An adapter that overrides only `resolve()` — every adapter
+written before `tryResolve` existed — keeps working exactly as before: the
+default implementation is the historical two-pass behaviour.
+
 ## Best Practices
 
 ### 1. Adapter Selection Guidelines

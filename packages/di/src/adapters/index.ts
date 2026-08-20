@@ -2,4 +2,4 @@
  * Container adapters for popular DI frameworks
  */
 
-export { BaseContainerAdapter } from './base-adapter';
+export { BaseContainerAdapter, NOT_REGISTERED } from './base-adapter';

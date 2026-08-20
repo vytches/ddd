@@ -11,7 +11,8 @@ complexity: medium
 estimated_time: 6h
 created_by: VP-006b analysis follow-up (OQ-3/D-3, approved 2026-07-11)
 created_at: 2026-07-11
-status: backlog
+status: done
+completed_at: 2026-08-20
 release_target: post-v0.26
 parent: VP-006-di-container-performance
 package: '@vytches/ddd-di'
@@ -67,19 +68,19 @@ CONFIRMED."
 
 ## Acceptance Criteria
 
-1. [ ] `resolveDependency()` performs a single resolution pass (no
+1. [x] `resolveDependency()` performs a single resolution pass (no
        `isRegistered()` + `resolve()` double lookup) via a `tryResolve` hook;
        default behavior for existing subclasses unchanged.
-2. [ ] Cycle detection membership check is O(1) (Set-based) while
+2. [x] Cycle detection membership check is O(1) (Set-based) while
        `CircularDependencyError` still reports the full ordered chain.
-3. [ ] Backward-compat review documented: no breaking change to the
+3. [x] Backward-compat review documented: no breaking change to the
        `BaseContainerAdapter` protected/public surface; all existing adapter
        tests green without modification (any deliberate test change must be
        justified and CHANGELOG-noted).
-4. [ ] Error contract regression-tested: `ContainerServiceNotFoundError`
+4. [x] Error contract regression-tested: `ContainerServiceNotFoundError`
        (owner-scoped), `CircularDependencyError` (full chain),
        `InvalidRegistrationError` — types, messages, and timing unchanged.
-5. [ ] CHANGELOG entry for `@vytches/ddd-di` (perf; behavior change only if the
+5. [x] CHANGELOG entry for `@vytches/ddd-di` (perf; behavior change only if the
        compat review surfaces one — then escalate before merging).
 
 ## Out of scope
@@ -103,3 +104,47 @@ CONFIRMED."
 - Parent task: `project-orchestration/tasks/VP-006-di-container-performance.md`
 - Pattern: `.claude/knowledge/patterns/backward-compatibility-pattern.md`,
   `.claude/knowledge/patterns/package-boundary-pattern.md`
+
+## Outcome (2026-08-20)
+
+**1. `tryResolve` hook.** `resolveDependency()` is now a single pass. The
+default `tryResolve()` is `isRegistered() ? resolve() : NOT_REGISTERED`, i.e.
+byte-for-byte the previous behaviour, so an adapter overriding only `resolve()`
+sees no change. An adapter with a native miss-tolerant lookup overrides the hook
+and drops to one framework call per constructor parameter.
+
+**2. Set-based cycle stack.** `Array.includes` (O(n) per parameter) replaced by
+a companion `Set` for membership; the array stays for ordering because
+`CircularDependencyError` reports the full chain, which a Set cannot express.
+Both are mutated together — the test that resolves the same token twice in
+sequence exists specifically to catch a Set that is added to but not deleted
+from.
+
+**3. Backward-compat review (AC3).**
+
+- **`NOT_REGISTERED` is new public API.** A sentinel, not `undefined`/`null`,
+  because a container may legitimately hold a registration whose value _is_
+  `undefined` — conflating the two would turn a working registration into a
+  `ContainerServiceNotFoundError`. Exported from the package barrel, since an
+  adapter author cannot implement the hook without it. Added to the api-surface
+  snapshot.
+- **No existing override points changed signature.** `resolve`, `isRegistered`,
+  `register`, `registerFactory`, `registerInstance`, `getServices` are all
+  untouched; `tryResolve` is additive and optional.
+- **Only one subclass exists in-repo**: `NestJSContainerAdapter`. It is
+  deliberately **not** touched — VP-006c's scope is `packages/di/src/**`, and
+  that adapter carries its own `resolveDependency()` override from VP-006b with
+  a local `NOT_RESOLVED` sentinel and a local resolution chain (the base stack
+  was private). It keeps working unchanged.
+- **Follow-up worth filing** (not done here): now that the base class offers the
+  same single-pass mechanism, `NestJSContainerAdapter`'s override and its
+  duplicate sentinel could be deleted in favour of a `tryResolve()` override —
+  removing a second, divergent copy of the cycle-detection chain. That is an
+  edit to `packages/nestjs`, outside this task's package boundary.
+
+`FRAMEWORK-ADAPTERS.md` documents the hook with the two rules an implementer
+must not get wrong (return the sentinel, never throw; leave
+`ContainerServiceNotFoundError` to the base class).
+
+Gates (`--skip-nx-cache`): di 140/140 (7 new), tsc clean, lint 0 errors, build
+clean; full repo 2670 passed / 7 skipped / 11 todo.
