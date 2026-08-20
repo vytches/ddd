@@ -202,6 +202,15 @@ class PolicyCache {
       ttl,
     });
 
+    // D2 (VB-006): detach any existing LRU node for this key before
+    // appending a fresh one. Without this, re-setting a key that was
+    // previously `lruHead` leaves that node orphaned but still reachable
+    // from `lruHead` (F8) — the next eviction would then read the stale
+    // `lruHead.key`, look it up in the (already overwritten) `lruNodes` map,
+    // and delete the wrong, still-live entry.
+    if (this.lruNodes.has(key)) {
+      this.removeNode(key);
+    }
     this.addNode(key);
 
     // D3 (VB-006): only count real insertions. Counting on every call (the

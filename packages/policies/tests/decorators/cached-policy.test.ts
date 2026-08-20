@@ -990,5 +990,58 @@ describe('CachedPolicy', () => {
       expect(policy.callCount).toBe(callsBeforeHit); // served from cache, no pending call
       expect(hit.isSuccess).toBe(true);
     });
+
+    it('re-writing the entry that is currently the LRU-oldest key does not corrupt LRU ordering for later evictions (oldest-first preserved)', async () => {
+      const cached = PolicyCachingBehavior.create(policy, {
+        ttl: 60000,
+        maxSize: 2,
+      });
+      const context = PolicyContextBuilder.forUser('ac4b-user').withEnvironment('test').build();
+
+      // Race key A's FIRST-EVER population: the only public trigger for
+      // `PolicyCache.set()`'s re-write branch while A is (trivially) the
+      // sole, oldest entry — this is exactly the D2 orphaned-LRU-node case.
+      const requestA = { entity: { value: 100 }, context };
+      const before = policy.callCount;
+      const pA1 = cached.check(requestA);
+      const pA2 = cached.check(requestA);
+      await waitUntil(() => policy.callCount === before + 2, 'race on key A pending');
+      policy.resolveNextSuccess({ value: 100 }); // fresh insert (isUpdate=false)
+      await pA1;
+      policy.resolveNextSuccess({ value: 100 }); // re-write (isUpdate=true) — D2 case
+      await pA2;
+      expect(cached.getCacheSize()).toBe(1);
+
+      // Ordinary inserts: B fills the cache, C evicts the true oldest (A),
+      // D evicts the next true oldest (B). maxSize=2 throughout.
+      await checkAndResolve(cached, policy, { value: 200 }, context); // {A,B}, full
+      await checkAndResolve(cached, policy, { value: 300 }, context); // should evict A -> {B,C}
+      await checkAndResolve(cached, policy, { value: 400 }, context); // should evict B -> {C,D}
+
+      // Bounded: the cache must never exceed maxSize, even across the
+      // earlier re-write. Under the D2 bug, `lruHead` gets stuck pointing at
+      // an orphaned node and a later eviction becomes a silent no-op,
+      // letting the cache grow past maxSize.
+      expect(cached.getCacheSize()).toBe(2);
+
+      // The correct members survive in oldest-first order: C and D are
+      // hits, A and B are genuine misses again.
+      const callsBeforeHits = policy.callCount;
+      const hitC = await cached.check({ entity: { value: 300 }, context });
+      const hitD = await cached.check({ entity: { value: 400 }, context });
+      expect(policy.callCount).toBe(callsBeforeHits); // both hits, no new pending calls
+      expect(hitC.isSuccess).toBe(true);
+      expect(hitD.isSuccess).toBe(true);
+
+      // A and B were genuinely evicted (in that order) — re-checking them
+      // must go back through the inner policy.
+      const callsBeforeA = policy.callCount;
+      await checkAndResolve(cached, policy, { value: 100 }, context);
+      expect(policy.callCount).toBe(callsBeforeA + 1);
+
+      const callsBeforeB = policy.callCount;
+      await checkAndResolve(cached, policy, { value: 200 }, context);
+      expect(policy.callCount).toBe(callsBeforeB + 1);
+    });
   });
 });
