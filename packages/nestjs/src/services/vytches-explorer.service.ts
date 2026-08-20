@@ -13,6 +13,7 @@ import type { HandlerInfo, VytchesContextOptions, VytchesDDDModuleOptions } from
 import { ACL_ADAPTER_METADATA, ACL_REGISTRY, VYTCHES_DDD_OPTIONS } from '../constants';
 import type { ACLAdapterMetadata } from '../decorators/acl-adapter.decorator';
 import { BusRegistrationLedger } from './bus-registration-ledger';
+import { readDiHandlerMetadata } from './handler-metadata';
 
 /**
  * Minimal interface for ACL registry — avoids hard dependency on @vytches/ddd-acl
@@ -360,14 +361,16 @@ export class VytchesExplorerService
 
   private getHandlerMetadata(target: Constructor): HandlerMetadata | null {
     try {
-      // DI-aware handler metadata (new pattern)
-      const diHandlerType = Reflect.getMetadata(DI_HANDLER_TYPE, target);
-      const diHandlerMetadata = Reflect.getMetadata(DI_HANDLER_METADATA, target);
-      if (diHandlerType && diHandlerMetadata?.messageType) {
-        return {
-          type: diHandlerType as 'command' | 'query' | 'event' | 'domain-service',
-          messageType: diHandlerMetadata.messageType,
-        };
+      // DI-aware handler metadata (new pattern) — shared with
+      // FeatureHandlerRegistrar via readDiHandlerMetadata (VF-032b AC2). The
+      // legacy fallbacks below stay here: they are this scanner's own
+      // backward-compatibility surface, not part of the di:* contract.
+      const di = readDiHandlerMetadata(target);
+      if (di) {
+        // The shared reader types messageType as the ledger's ClassRef
+        // (Function) because the registrar keys a Map on it; this scanner
+        // wants the narrower Constructor. Same value either way.
+        return { type: di.kind, messageType: di.messageType as Constructor };
       }
 
       // Command handler metadata

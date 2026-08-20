@@ -37,3 +37,12 @@ export type {
 // Outbox processor module (multi-processor lifecycle wrapper)
 export { OutboxProcessorModule, OutboxProcessorService } from './outbox';
 export type { OutboxProcessorEntry, OutboxProcessorModuleAsyncOptions } from './outbox';
+
+// Typed error hierarchy (VF-032b) — lets consumers catch adapter-level
+// failures by type instead of string-matching a bare Error.
+export {
+  VytchesNestJSError,
+  InvalidContextNameError,
+  ModuleConfigurationError,
+  ConflictingHandlerRegistrationError,
+} from './errors';

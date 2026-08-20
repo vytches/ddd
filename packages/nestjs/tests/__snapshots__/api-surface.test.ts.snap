@@ -5,10 +5,13 @@ exports[`@vytches/ddd-nestjs public API surface > exports the documented set of 
   "ACLAdapterFor",
   "ACL_REGISTRY",
   "COMMAND_BUS_TOKEN",
+  "ConflictingHandlerRegistrationError",
   "ContextAwareEventDispatcher",
   "GLOBAL_COMMAND_BUS",
   "GLOBAL_QUERY_BUS",
+  "InvalidContextNameError",
   "LOCAL_EVENT_BUS",
+  "ModuleConfigurationError",
   "NestJSContainerAdapter",
   "OutboxProcessorModule",
   "OutboxProcessorService",
@@ -16,5 +19,6 @@ exports[`@vytches/ddd-nestjs public API surface > exports the documented set of 
   "VytchesDDDFeatureModule",
   "VytchesDDDModule",
   "VytchesExplorerService",
+  "VytchesNestJSError",
 ]
 `;

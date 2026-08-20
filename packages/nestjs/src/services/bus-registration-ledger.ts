@@ -1,3 +1,5 @@
+import { ConflictingHandlerRegistrationError } from '../errors';
+
 // Class constructor reference used as a ledger key — intentional Function usage.
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 type ClassRef = Function;
@@ -82,11 +84,7 @@ export class BusRegistrationLedger {
     const messageName = typeof messageType === 'function' ? messageType.name : String(messageType);
     const existingName = existing.handlerType.name || '<anonymous>';
     const incomingName = handlerType.name || '<anonymous>';
-    throw new Error(
-      `BusRegistrationLedger: conflicting ${kind} handler registration for "${messageName}" — ` +
-        `already claimed by "${existingName}", cannot also register "${incomingName}" on the ` +
-        `same bus. Each ${kind} messageType may only have one handler per bus instance.`
-    );
+    throw new ConflictingHandlerRegistrationError(kind, messageName, existingName, incomingName);
   }
 
   /**

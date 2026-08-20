@@ -16,6 +16,7 @@ import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';
 // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- runtime class needed for NestJS @Optional() DI token
 import { VytchesExplorerService } from '../services/vytches-explorer.service';
 import { BusRegistrationLedger } from '../services/bus-registration-ledger';
+import { readDiHandlerMetadata } from '../services/handler-metadata';
 
 interface BusLike {
   register?(messageType: unknown, handler: unknown): void;
@@ -148,26 +149,19 @@ export class FeatureHandlerRegistrar implements OnModuleInit, OnModuleDestroy {
       const { metatype } = wrapper;
       if (!metatype || typeof metatype !== 'function') continue;
 
-      const handlerKind = Reflect.getMetadata('di:handler-type', metatype) as
-        | 'command'
-        | 'query'
-        | 'event'
-        | undefined;
-      const handlerMetadata = Reflect.getMetadata('di:handler-metadata', metatype) as
-        | { messageType?: ClassRef }
-        | undefined;
-      const scope =
-        (Reflect.getMetadata('di:handler-scope', metatype) as string | undefined) ?? 'context';
+      // Shared reader (VF-032b AC2) — the explorer uses the same one, so the
+      // two scanners cannot drift on metadata shape any more.
+      const meta = readDiHandlerMetadata(metatype);
 
       if (
-        (handlerKind === 'command' || handlerKind === 'query' || handlerKind === 'event') &&
-        handlerMetadata?.messageType &&
-        scope !== 'global'
+        meta &&
+        meta.scope !== 'global' &&
+        (meta.kind === 'command' || meta.kind === 'query' || meta.kind === 'event')
       ) {
         handlers.push({
-          messageType: handlerMetadata.messageType,
+          messageType: meta.messageType,
           handlerType: metatype,
-          handlerKind,
+          handlerKind: meta.kind,
         });
       }
     }

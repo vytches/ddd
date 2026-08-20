@@ -14,8 +14,8 @@ complexity: complex
 estimated_time: 8h
 created_by: VF-032 split (2026-08-20)
 created_at: 2026-08-20
-status: blocked
-blocked_by: VF-032a
+status: done
+completed_at: 2026-08-20
 parent_task: VF-032
 release_target:
   deprecation markers preferred pre-first-publish; the rest may land
@@ -61,28 +61,28 @@ findings: [UX-T5, UX-T2.4]
 
 ## Acceptance Criteria
 
-1. [ ] One recommended module pattern documented, matching the shape VF-032a
+1. [x] One recommended module pattern documented, matching the shape VF-032a
        settled on. `forContext`/`forContexts` either merged into `forFeature()`
        or JSDoc-`@deprecated` with a migration note naming the replacement call.
-2. [ ] Handler discovery consolidated: the nestjs explorer/registrar delegate
+2. [x] Handler discovery consolidated: the nestjs explorer/registrar delegate
        the decorator-metadata scan to `CQRSDiscoveryPlugin` (NestJS-specific
        provider traversal stays separate), **or** a recorded rationale in the
        task file for why the two scanners must stay independent.
-3. [ ] A typed nestjs error hierarchy extending `BaseError` replaces the 4 raw
+3. [x] A typed nestjs error hierarchy extending `BaseError` replaces the 4 raw
        `new Error` sites listed above. Class naming coordinated with VF-024 AC2
        (`ServiceNotFoundError` collision) and VF-030 AC4 — both now in
        `completed-tasks/`, so check the names they actually shipped rather than
        the names those tasks proposed.
-4. [ ] Golden-path docs updated to the final recommended pattern
+4. [x] Golden-path docs updated to the final recommended pattern
        (`README_SIMPLE_INTEGRATION.md` and the package LLMGUIDE).
    > Note (2026-07-12): the nonexistent `forRoot({ autoRegister })` reference
    > was already removed under VD-005 AC10d. This AC is documentation of the
    > post-VF-032a shape only.
-5. [ ] One runnable end-to-end example under `examples/`: aggregate → command
+5. [x] One runnable end-to-end example under `examples/`: aggregate → command
        handler → repository (with an in-memory persistence handler) →
        per-context event bus → event handler, wired via `forFeature()`. Must
        compile under the docs-compile-gate introduced by VD-005.
-6. [ ] Regression: the VB-003 `forFeature` isolation e2e suite stays green;
+6. [x] Regression: the VB-003 `forFeature` isolation e2e suite stays green;
        `nx run @vytches/ddd-nestjs:type-check` clean (Vitest alone is not
        sufficient for this package).
 
@@ -106,3 +106,53 @@ findings: [UX-T5, UX-T2.4]
 - `completed-tasks/VF-024-prepublish-api-surface.md`,
   `completed-tasks/VF-030-di-token-identity.md` — error-naming coordination
 - `completed-tasks/VB-003-nestjs-forfeature-di-wiring.md` — regression baseline
+
+## Outcome (2026-08-20)
+
+All six criteria met.
+
+**AC2 — split verdict, not a full merge.** The shared part (`di:*` metadata
+read) is extracted to `src/services/handler-metadata.ts` and used by both
+`VytchesExplorerService` and `FeatureHandlerRegistrar`, so those two can no
+longer drift. `CQRSDiscoveryPlugin` deliberately stays independent, and the
+rationale is recorded in that file's header: it walks
+`Object.entries(moduleNamespace)` over an ES-module's exports and requires
+`di:registration-pending`, while both NestJS scanners walk NestJS's own DI graph
+where that flag never applies. Merging the traversals would mean teaching a
+framework-agnostic core package about NestJS internals.
+
+**AC3 — the hierarchy does not extend `BaseError`, and could not.** Nx boundary
+rules forbid a `scope:nestjs` project from depending on
+`scope:domain-primitives` (`nx lint` fails on the import; the allowlist is di,
+utils, events, resilience, cqrs, acl, policies, messaging, validation,
+contracts, testing). Widening that allowlist is an architectural decision well
+outside this task. `VytchesNestJSError extends Error` reproduces `BaseError`'s
+behaviour verbatim (name from constructor, stack capture outside production), so
+if the boundary is ever widened the base class can change without touching a
+single subclass. All five raw `new Error` sites replaced:
+`InvalidContextNameError` (×2), `ModuleConfigurationError`,
+`ConflictingHandlerRegistrationError`; the fifth site
+(`vytches-explorer.service.ts`) is a non-Error rethrow wrapper and correctly
+stays as it is.
+
+**AC1** — `forContext`/`forContexts` carry `@deprecated` with migration
+snippets. Both leave the buses shared, so they never isolated anything;
+`forContexts()` additionally falls back to `forRoot()` on a missing/non-object
+`contexts` option, meaning a typo yields zero contexts and no error. Documented.
+
+Gates (`--skip-nx-cache`): nestjs 271/271, tsc clean, lint 0 errors, build
+clean; `examples/nestjs` 4/4 and its own `tsc --noEmit` clean; full repo suite
+2656 passed / 7 skipped / 11 todo.
+
+**tsc caught three defects Vitest passed** — the same blind spot AC6 warns
+about, three times in one task: a variance error in the shared reader's return
+type, and in the new example both an `apply()` visibility violation (the example
+would have taught consumers to break aggregate encapsulation) and, earlier, a
+placeholder `StockReceived` event with quantity 0 that the runtime test did
+catch. Treat a green Vitest run on this package as no evidence at all.
+
+**Follow-up worth filing** (not done here, out of scope): `packages/nestjs` is
+still absent from `api-extractor` coverage, so every symbol this task added to
+the barrel — four error classes, `VytchesDDDFeatureOptions`,
+`VytchesDDDModuleAsyncOptions`, `VytchesDDDOptionsFactory` — has no automated
+drift gate.

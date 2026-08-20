@@ -65,12 +65,67 @@ import { UnifiedEventBus, IEventBus } from '@vytches/ddd-events';
 export class AppModule {}
 ```
 
+## The recommended pattern
+
+`forRoot()` (or `forRootAsync()`) once at the application root, then one
+`forFeature()` per bounded context:
+
+```typescript
+@Module({ imports: [VytchesDDDModule.forRoot()] })
+export class AppModule {}
+
+@Module({
+  imports: [VytchesDDDModule.forFeature('orders', { busType: 'enhanced' })],
+  providers: [CreateOrderHandler, OrderRepository],
+})
+export class OrdersModule {}
+```
+
+That is the whole decision. The other factories:
+
+| Factory                              | Use it for                                              |
+| ------------------------------------ | ------------------------------------------------------- |
+| `forRoot(options)`                   | the application root, one per app                       |
+| `forRootAsync(options)`              | same, when the options come from `ConfigService`        |
+| `forFeature(name, options)`          | one bounded context — its own buses and local event bus |
+| `forTesting(options)`                | test modules; wires stubs                               |
+| ~~`forContext`~~ / ~~`forContexts`~~ | **deprecated** since 0.31.0 — see below                 |
+
+`forContext()` and `forContexts()` are deprecated predecessors of
+`forFeature()`. They register a named explorer per context but leave the buses
+shared, so handlers from different contexts still land on the same `ICommandBus`
+— they never actually isolated anything. `forContexts()` additionally falls back
+to `forRoot()` when its `contexts` option is missing or not an object, so a typo
+yields a working module with zero contexts instead of an error. Migrate to one
+`forFeature()` per context; both still work for one release.
+
+A runnable end-to-end example of the full flow — aggregate → command handler →
+repository → per-context event bus → event handler, wired via `forFeature()` —
+lives in
+[`examples/nestjs/src/inventory.context.ts`](../../examples/nestjs/src/inventory.context.ts).
+
+### Async configuration
+
+```typescript
+VytchesDDDModule.forRootAsync({
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => ({
+    autoDiscovery: { enabled: config.get('DDD_DISCOVERY') !== 'off' },
+  }),
+});
+```
+
+`useClass` and `useExisting` are supported too. One caveat worth knowing: NestJS
+needs `providers`, `imports` and the `global` flag _before_ the DI container
+exists, so those are declared on the async options object itself, while the
+factory supplies the options read at runtime. Returning `providers` from the
+factory is not an error — it is simply ignored.
+
 ## VytchesDDDModule.forRoot
 
 The entry point for a single-context application, and the one to reach for
-first. `forContext()` / `forContexts()` scope an explorer per bounded context,
-`forFeature()` gives a module its own isolated buses, and `forTesting()` wires
-stubs. Accepts `VytchesDDDModuleOptions`:
+first. Accepts `VytchesDDDModuleOptions`:
 
 ```typescript
 interface VytchesDDDModuleOptions {

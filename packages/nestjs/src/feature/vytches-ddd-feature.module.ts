@@ -13,6 +13,7 @@ import type { IEventBus } from '@vytches/ddd-contracts';
 import { UnifiedEventBus } from '@vytches/ddd-events';
 import { NestJSContainerAdapter } from '../adapters';
 import { LOCAL_EVENT_BUS, FEATURE_ANCHOR_INJECTION } from '../constants';
+import { InvalidContextNameError } from '../errors';
 import { ContextAwareEventDispatcher } from '../dispatchers/context-aware-event-dispatcher';
 import { FeatureHandlerRegistrar } from './feature-handler-registrar';
 
@@ -95,7 +96,7 @@ export class VytchesDDDFeatureModule {
    */
   static forFeature(contextName: string, options: VytchesDDDFeatureOptions = {}): DynamicModule {
     if (!contextName || contextName.trim() === '') {
-      throw new Error('VytchesDDDModule.forFeature(): contextName cannot be empty');
+      throw new InvalidContextNameError('forFeature');
     }
 
     const { busType = 'basic', middlewares = [] } = options;

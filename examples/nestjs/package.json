@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@vytches/ddd-aggregates": "workspace:*",
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-cqrs": "workspace:*",
     "@vytches/ddd-events": "workspace:*",

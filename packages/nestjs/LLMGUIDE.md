@@ -7,7 +7,11 @@ registration with CQRS buses via `VytchesDDDModule`. Decorated handlers are
 auto-discovered — no manual bus registration needed. ACL registrations still
 belong in `onModuleInit()`.
 
-**Auto-discovery only happens inside `VytchesDDDModule`.**
+**Auto-discovery only happens inside `VytchesDDDModule`.** The recommended
+wiring is `forRoot()` (or `forRootAsync()`) once, then one `forFeature()` per
+bounded context; `forContext()`/`forContexts()` are deprecated since 0.31.0
+because they leave the buses shared.
+
 `VytchesExplorerService` is provided by `forRoot()` / `forContext()` /
 `forContexts()` / `forFeature()` / `forTesting()`, and injects the buses via
 `COMMAND_BUS_TOKEN` / `QUERY_BUS_TOKEN` (Symbol tokens, stable across a
