@@ -8,7 +8,7 @@ import {
 import { BaseBusinessPolicy } from '../../src/core/base/base-business-policy';
 import type { PolicyViolation } from '../../src/core/models/policy-violation';
 import { PolicyContextBuilder } from '../../src/utils/policy-context-builder';
-import type { IBusinessPolicy, PolicyRequest } from '../../src/core/interfaces';
+import type { IBusinessPolicy, PolicyContext, PolicyRequest } from '../../src/core/interfaces';
 
 // Test policy that tracks call count
 class TestPolicy extends BaseBusinessPolicy<{ value: number }> {
@@ -816,6 +816,42 @@ describe('CachedPolicy', () => {
       expect(metrics.misses).toBe(3);
       expect(metrics.evictions).toBe(1);
       expect(metrics.entries).toBe(2);
+    });
+  });
+
+  // VB-006 AC1: regression for the "dead switch" bug where an explicit
+  // `cacheFailures: false` passed to `forExpensivePolicy()` was silently
+  // ignored (the factory's own `?? true` default effectively won regardless
+  // of what the caller passed). Before the VB-006 fix this test would be
+  // RED: the second identical denial would be served from cache and
+  // `callCount` would stay at 1.
+  describe('VB-006 AC1: forExpensivePolicy() explicit cacheFailures:false is respected', () => {
+    it('does NOT cache a denial when cacheFailures is explicitly false, and re-runs the inner policy on the next identical check', async () => {
+      const policy = new TestPolicy();
+      policy.shouldFail = true;
+
+      const expensiveCachedPolicy = PolicyCachingBehaviorFactory.forExpensivePolicy(policy, {
+        cacheFailures: false, // explicit false must override the factory's own default
+      });
+
+      const context = PolicyContextBuilder.forUser('ac1-user')
+        .withTenantId('ac1-tenant')
+        .withEnvironment('test')
+        .build();
+      const denialRequest = { entity: { value: 1 }, context };
+
+      const result1 = await expensiveCachedPolicy.check(denialRequest);
+      expect(result1.isFailure).toBe(true);
+      expect(policy.callCount).toBe(1);
+
+      // An identical second denial MUST hit the inner policy again — the
+      // switch must actually gate caching, not just exist in the type.
+      const result2 = await expensiveCachedPolicy.check(denialRequest);
+      expect(result2.isFailure).toBe(true);
+      expect(policy.callCount).toBe(2);
+
+      // Nothing should have been written to the cache at all.
+      expect(expensiveCachedPolicy.getCacheSize()).toBe(0);
     });
   });
 });
