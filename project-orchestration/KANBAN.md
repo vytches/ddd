@@ -1,6 +1,6 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-20 (VF-032a + VF-032b shipped; VF-032 split into
+_Last updated 2026-08-20 (VF-032a, VF-032b, VF-027 shipped; VF-032 split into
 VF-032a/VF-032b — see the notes below the boards). Prior: 2026-08-19 by
 `/pulse` + same-day correction (37-day sync gap — VF-036/VF-037/VF-039 work
 landed since the 2026-07-13 pulse without a status sync; VF-039 split into
@@ -287,6 +287,19 @@ since created_at. Grouped by priority (P0 critical · P1 high · P2 normal/mediu
 > violation the example would have taught. nestjs 271/271, example 4/4, full
 > repo 2656 passed. Moved to `completed-tasks/`. **VF-032 is now fully closed.**
 
+> **Shipped (2026-08-20)**: **VF-027** done — `fork()`/`withAttempt()` rewritten
+> onto native `AbortSignal.any()` / `AbortSignal.timeout()`. All three leak
+> sites (retry SA-M12, bulkhead ×2 UX-C6) close structurally rather than by
+> adding `finally` blocks: nothing is registered that could leak, so a missed
+> `dispose()` is harmless. `dispose?()` kept as a documented no-op (VB-004's
+> call sites keep compiling). One observable change: a timed-out fork aborts
+> with a `DOMException` named `TimeoutError` rather than this package's
+> `TimeoutError` class — `reason.name` checks unaffected, `instanceof` on a fork
+> reason is; nothing in-repo relies on it, and a test pins it. `bulkhead`'s
+> `enqueue()` needed its own fix — its `{once:true}` listener was independent of
+> the context machinery. resilience 110/110, full repo 2662 passed. Moved to
+> `completed-tasks/`.
+
 ## P0 — Critical
 
 _Empty._
@@ -330,8 +343,8 @@ combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 
 ## P2 — Normal / Medium
 
-_Runtime-adjacent first (VF-027, VB-007, VF-025, VT-007, VF-033, VT-006), then
-docs & tooling (VD-008, VF-034, VD-006b)._
+_Runtime-adjacent first (VB-007, VF-025, VT-007, VF-033, VT-006), then docs &
+tooling (VD-008, VF-034, VD-006b)._
 
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
@@ -341,7 +354,6 @@ docs & tooling (VD-008, VF-034, VD-006b)._
 | VF-032b | NestJS convergence, discovery dedup, typed errors, e2e example    | blocked | 0d  |
 | VF-033  | Validation hardening & one validation story                       | backlog | 40d |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 48d |
-| VF-027  | ResilienceContext fork() — native AbortSignal.any() rewrite       | backlog | 47d |
 | VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 10d |
 | VF-038  | Give docstring quality its own lint lane                          | backlog | 7d  |
 | VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 40d |
