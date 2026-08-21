@@ -1,8 +1,8 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-20 (VF-032a, VF-032b, VF-027, VB-007, VP-006c shipped;
-VF-032 split into VF-032a/VF-032b — see the notes below the boards). Prior:
-2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
+_Last updated 2026-08-21 (VF-040 shipped; prior day: VF-032a, VF-032b, VF-027,
+VB-007, VP-006c; VF-032 split into VF-032a/VF-032b — see the notes below the
+boards). Prior: 2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
 VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
 sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
 initially flagged VF-028 as "branch active, not yet done" — a direct user check
@@ -326,6 +326,18 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > worth a follow-up. di 140/140, full repo 2670 passed. Moved to
 > `completed-tasks/`.
 
+> **Shipped (2026-08-21)**: **VF-040** done — `@vytches/ddd-nestjs` is now under
+> the api-surface gate (5 packages covered, was 4). Filed as a VF-032b follow-up
+> and closed the same session. Needed more than a config file: the repo-wide
+> `paths` send api-extractor into dependency **source**, where it hit an
+> api-extractor 7.57.8 internal defect on ordinary destructuring in `messaging`
+> (probed — removing one destructuring just moved the error to the next).
+> `packages/nestjs/tsconfig.api-extractor.json` redirects dependency paths to
+> their emitted `.d.ts`, which is the right configuration anyway: the gate
+> should read the published shape of its dependencies, as a consumer does.
+> Anyone extending the gate to the remaining 14 packages will hit the same wall
+> — see the task's outcome note. Baseline captures every symbol VF-032a/b added.
+
 ## P0 — Critical
 
 _Empty._
@@ -375,6 +387,7 @@ _Runtime-adjacent first (VF-025, VT-007, VF-033, VT-006), then docs & tooling
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
 | VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 48d |
+| VP-006d | NestJS adapter: swap resolveDependency override for tryResolve    | backlog | 0d  |
 | VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 10d |
 | VF-032a | NestJS async config + forFeature→CQRSConfiguration buses          | backlog | 0d  |
 | VF-032b | NestJS convergence, discovery dedup, typed errors, e2e example    | blocked | 0d  |
