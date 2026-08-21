@@ -1,16 +1,21 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-21 (VF-040 + VP-006d shipped; prior day: VF-032a, VF-032b,
-VF-027, VB-007, VP-006c; VF-032 split into VF-032a/VF-032b — see the notes below
-the boards). Prior: 2026-08-19 by `/pulse` + same-day correction (37-day sync
-gap — VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a
-status sync; VF-039 split into VF-039a/VF-039b same day. **Correction**:
-`/pulse` initially flagged VF-028 as "branch active, not yet done" — a direct
-user check ("czy 028 właśnie nie skończyliśmy?") caught that this was itself
-stale: VF-028 was implemented and committed the same day (`05ac364a`), just
-never had its task file updated. Verified (resilience 104/104, policies 237/237
-green) and archived alongside VF-037 — both moved to `completed-tasks/`.) Prior:
-2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
+_Last updated 2026-08-21 — runtime series closed (7 tasks: VF-032a/b, VF-027,
+VB-007, VP-006c/d, VF-040) and boards re-prioritised. **Board correction the
+same day**: VF-032a and VF-032b had sat on the P2 board for a day after being
+archived — the row deletions were exact-string matches that stopped matching
+once `prettier --write` realigned the table columns. Cross-checked every board
+row against `tasks/` afterwards; the only entries now absent from a board are
+the three `split` parents (VD-006, VF-032, VF-039), which is intended. Prior:
+2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
+VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
+sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
+initially flagged VF-028 as "branch active, not yet done" — a direct user check
+("czy 028 właśnie nie skończyliśmy?") caught that this was itself stale: VF-028
+was implemented and committed the same day (`05ac364a`), just never had its task
+file updated. Verified (resilience 104/104, policies 237/237 green) and archived
+alongside VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09
+(maturity-audit re-prioritization: 5 new tasks filed
 VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
 ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
@@ -24,6 +29,37 @@ v0.31.0 tag** — owner decision 2026-08-19: collect the sign-off, run the full
 release checklist, then merge `develop` → `main` (178 commits ahead, `main`'s
 last reachable tag is `v0.27.0`) and tag. Age = days since created_at. Grouped
 by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
+
+## Start here (2026-08-21)
+
+**Repo state.** `develop` is **221 commits ahead of `main`** and **nothing is
+pushed** — the entire runtime series lives locally only. `main`'s last reachable
+tag is `v0.27.0`. Full suite green: 2673 passed / 7 skipped / 11 todo;
+`validate:api` green across five packages.
+
+**The one gate on the v0.31.0 tag is still VF-036's AC-SIGNOFF.** Everything
+else on P1 is a window-closing decision, not a blocker.
+
+**Next three things, in order:**
+
+1. **VF-036 sign-off** → release checklist → merge `develop` → `main` → tag.
+2. **VB-008** — run `/analyze VB-008` first. Breaking export-shape change; free
+   to decide now, a major bump after publish.
+3. **VF-025 and VF-033** — the last two runtime defects in the backlog (P2, top
+   of the list, see the note there).
+
+**Two things a newcomer to this board should not have to rediscover:**
+
+- **Vitest green is not evidence in this repo.** It runs through esbuild, which
+  strips types without checking them. Four defects in two days passed Vitest and
+  were caught by `tsc`. Always also run
+  `nx run <pkg>:type-check --skip-nx-cache` — the `--skip-nx-cache` is not
+  decoration, a stale cache produced a false pass.
+- **Prettier reformats these tables.** Editing a board row by exact-string match
+  silently misses after a `prettier --write`; two completed tasks sat on the P2
+  board for a day that way. Match on the ID, verify afterwards.
+
+---
 
 > Active board only — `done`/`completed`/`cancelled` tasks moved to
 > `completed-tasks/`. Source of truth: `project-orchestration/tasks/`.
@@ -238,118 +274,56 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > (currently 178 commits behind, `main`'s last reachable tag is `v0.27.0`) and
 > tag/publish.
 
-> **Split (2026-08-20)**: **VF-032** → owner-approved split after a
-> runtime-impact review of the backlog. The 14h scope mixed two public-shape
-> decisions with convergence work that can only be documented once those
-> decisions land, so it became **VF-032a** (~6h — `forRootAsync`, `forFeature()`
-> routed through `CQRSConfiguration`, plus the ghost
-> `packages/nestjs/src/types/index.ts` decision that VF-031 AC3 deferred here)
-> and **VF-032b** (~8h, blocked on VF-032a — factory convergence,
-> handler-discovery dedup, typed errors, golden-path docs, runnable end-to-end
-> example). Original file marked `status: split`, kept as historical record.
-> Verified against the tree while splitting: `forRootAsync` is still absent from
-> `VytchesDDDModule` (only `OutboxProcessorModule` has it),
-> `vytches-ddd-feature.module.ts:64-73` still hand-builds raw
-> `CommandBus`/`QueryBus` (so `forFeature()` consumers get no middleware and no
-> Enhanced buses), and `types/index.ts` is still unimported — `'./types'`
-> resolves to the sibling `types.ts`. One correction to the original file: AC5's
-> "6 raw `new Error` sites" is stale, **4** remain (VF-030 replaced the two in
-> `nestjs-container.adapter.ts`).
-
-> **Shipped (2026-08-20)**: **VF-032a** done — NestJS async config + per-context
-> CQRS. `VytchesDDDModule.forRootAsync()` added
-> (`useFactory`/`useClass`/`useExisting`); `forFeature()` now builds its buses
-> through `CQRSConfiguration`, so `busType: 'enhanced'` and `middlewares`
-> finally reach a bounded context without undocumented provider overrides. Ghost
-> `types/index.ts` deleted whole (closes the VF-031 AC3 deferral) after a
-> three-agent panel rejected reviving it — its factory returned an options type
-> incompatible with the live one, it declared a second `CQRSOptions`, and it
-> carried `sagas`/`eventStore`/broker fields contradicting settled decisions.
-> **Behavioural change (D8)**: `autoDiscovery.enabled` was an inert switch and
-> now works — same defect class as VB-006's `cacheFailures`. 271/271 nestjs
-> tests, tsc/lint/build clean, enterprise build and cqrs 300/300 unaffected.
-> **VF-032b unblocked.** Moved to `completed-tasks/`.
-
-> **Shipped (2026-08-20)**: **VF-032b** done — NestJS convergence. One
-> documented module pattern (`forRoot`/`forRootAsync` once + one `forFeature`
-> per context); `forContext`/`forContexts` `@deprecated` with migration notes
-> (both leave the buses shared, so they never isolated anything, and
-> `forContexts()` silently falls back to `forRoot()` on a typo'd option). All
-> five raw `new Error` sites replaced by a typed hierarchy — which does **not**
-> extend `BaseError`: Nx boundaries forbid `scope:nestjs` →
-> `scope:domain-primitives`, so `VytchesNestJSError extends Error` reproduces
-> its behaviour instead (widening the allowlist would be an architecture
-> decision, not this task's). Handler-discovery: shared `di:*` metadata reader
-> for the two NestJS scanners, with a recorded rationale for keeping
-> `CQRSDiscoveryPlugin` separate (it scans ES-module exports, not the DI graph).
-> New runnable e2e example `examples/nestjs/src/inventory.context.ts`. tsc
-> caught three defects Vitest passed, including an `apply()` visibility
-> violation the example would have taught. nestjs 271/271, example 4/4, full
-> repo 2656 passed. Moved to `completed-tasks/`. **VF-032 is now fully closed.**
-
-> **Shipped (2026-08-20)**: **VF-027** done — `fork()`/`withAttempt()` rewritten
-> onto native `AbortSignal.any()` / `AbortSignal.timeout()`. All three leak
-> sites (retry SA-M12, bulkhead ×2 UX-C6) close structurally rather than by
-> adding `finally` blocks: nothing is registered that could leak, so a missed
-> `dispose()` is harmless. `dispose?()` kept as a documented no-op (VB-004's
-> call sites keep compiling). One observable change: a timed-out fork aborts
-> with a `DOMException` named `TimeoutError` rather than this package's
-> `TimeoutError` class — `reason.name` checks unaffected, `instanceof` on a fork
-> reason is; nothing in-repo relies on it, and a test pins it. `bulkhead`'s
-> `enqueue()` needed its own fix — its `{once:true}` listener was independent of
-> the context machinery. resilience 110/110, full repo 2662 passed. Moved to
-> `completed-tasks/`.
-
-> **Shipped (2026-08-20)**: **VB-007** done — `PolicyCachingBehavior` now
-> deduplicates concurrent identical checks through an in-flight map; N
-> simultaneous misses on one key invoke the inner policy once. On by default and
-> with no new option (D1): the caching contract already promises a result may be
-> served to a caller that never ran the policy. In-flight entries sit outside
-> the LRU so they cannot be evicted mid-flight (D3), and clear on settle, so a
-> failure cannot poison the key. **Side effect worth knowing**: this closed
-> VB-006 AC4's only public trigger — with dedup, and with `get()` deleting
-> TTL-expired entries, every `set()` reachable from `check()` is an insert, so
-> the re-write branch is unreachable from the public surface. The defensive code
-> stays; the two tests that drove it were rewritten as proofs the trigger is
-> closed. policies 263/263, full repo 2663 passed. Moved to `completed-tasks/`.
-
-> **Shipped (2026-08-20)**: **VP-006c** done — `BaseContainerAdapter` gains a
-> `tryResolve()` hook so `resolveDependency()` makes ONE lookup pass instead of
-> `isRegistered()` + `resolve()`, and the O(n) `Array.includes` cycle check
-> gains a companion `Set` (the array stays — `CircularDependencyError` needs the
-> ordered chain). Default hook reproduces the old two-pass behaviour exactly, so
-> adapters overriding only `resolve()` are unaffected. New public export
-> `NOT_REGISTERED` — a sentinel rather than `undefined`, because a registration
-> may legitimately hold `undefined`. `NestJSContainerAdapter` deliberately
-> untouched (out of package scope); its VP-006b override could later be replaced
-> by a `tryResolve()` override, removing a divergent copy of the chain logic —
-> worth a follow-up. di 140/140, full repo 2670 passed. Moved to
-> `completed-tasks/`.
-
-> **Shipped (2026-08-21)**: **VF-040** done — `@vytches/ddd-nestjs` is now under
-> the api-surface gate (5 packages covered, was 4). Filed as a VF-032b follow-up
-> and closed the same session. Needed more than a config file: the repo-wide
-> `paths` send api-extractor into dependency **source**, where it hit an
-> api-extractor 7.57.8 internal defect on ordinary destructuring in `messaging`
-> (probed — removing one destructuring just moved the error to the next).
-> `packages/nestjs/tsconfig.api-extractor.json` redirects dependency paths to
-> their emitted `.d.ts`, which is the right configuration anyway: the gate
-> should read the published shape of its dependencies, as a consumer does.
-> Anyone extending the gate to the remaining 14 packages will hit the same wall
-> — see the task's outcome note. Baseline captures every symbol VF-032a/b added.
-
-> **Shipped (2026-08-21)**: **VP-006d** done — `NestJSContainerAdapter` drops
-> its VP-006b `resolveDependency()` override, its duplicate `NOT_RESOLVED`
-> sentinel and its private `resolutionChain` in favour of the VP-006c
-> `tryResolve()` hook. Cycle detection now lives in one place for every adapter
-> instead of two copies free to diverge. Verified rather than assumed:
-> `getTokenKey()` is a delegate to `describeToken()`, so error messages are
-> byte-identical; and a new test spies on `isRegistered()` to pin "one lookup
-> per constructor parameter", which nothing guarded before — the VP-006b win
-> could have reverted silently. **The day-old VF-040 gate caught the resulting
-> surface change immediately**, on the _protected_ surface, which is exactly the
-> kind that reads as internal but is public API for adapter authors. nestjs
-> 274/274, full repo 2673 passed.
+> **Runtime series, 2026-08-20/21 — seven tasks shipped, all merged to
+> `develop`.** Started from a backlog review filtered on "changes behaviour for
+> a consumer at runtime"; only six of the then-22 tasks qualified. Each note
+> below is compressed — the full record is in `completed-tasks/`.
+>
+> - **VF-032** split into **VF-032a** + **VF-032b**, both done. `forRootAsync()`
+>   added; `forFeature()` now builds its buses through `CQRSConfiguration`, so
+>   `busType: 'enhanced'` and `middlewares` finally reach a bounded context —
+>   before this, adopting `forFeature()` silently cost a context its resilience
+>   and metrics. One documented module pattern; `forContext`/`forContexts`
+>   deprecated (they left the buses shared, so they never isolated anything).
+>   Five raw `new Error` sites replaced by a typed hierarchy. Ghost
+>   `types/index.ts` deleted after a three-agent panel rejected reviving it. New
+>   runnable e2e example under `examples/nestjs/`.
+> - **VF-027** — `fork()`/`withAttempt()` rewritten onto native
+>   `AbortSignal.any()`/`timeout()`. Three listener leaks (retry SA-M12,
+>   bulkhead ×2 UX-C6) close structurally: nothing is registered that could
+>   leak, so a missed `dispose()` is harmless. `dispose?()` kept as a documented
+>   no-op.
+> - **VB-007** — `PolicyCachingBehavior` deduplicates concurrent identical
+>   checks; N simultaneous misses on one key invoke the inner policy once.
+> - **VP-006c** + **VP-006d** — `BaseContainerAdapter` gains a `tryResolve()`
+>   hook (one lookup per constructor parameter instead of two) and Set-backed
+>   cycle detection; `NestJSContainerAdapter` then dropped its VP-006b override,
+>   so cycle detection lives in one place instead of two divergent copies.
+> - **VF-040** — `@vytches/ddd-nestjs` brought under the api-surface gate (5
+>   packages covered, was 4). Needed a per-package
+>   `tsconfig.api-extractor.json`: the repo-wide `paths` send api-extractor into
+>   dependency _source_, where it hits an api-extractor 7.57.8 internal defect.
+>   **Anyone extending the gate to the remaining 14 packages will hit the same
+>   wall** — see the task's outcome note.
+>
+> **Three behavioural changes a consumer would notice**, all deliberate, all
+> inside the pre-publish window:
+>
+> 1. `autoDiscovery.enabled` was an inert switch and now works (VF-032a D8) —
+>    same defect class as VB-006's `cacheFailures`.
+> 2. A timed-out `fork()` now aborts with a `DOMException` named `TimeoutError`
+>    rather than this package's `TimeoutError` class (VF-027 D3). `reason.name`
+>    checks unaffected; `instanceof` on a fork reason is not.
+> 3. Policy-check deduplication is on by default, with no opt-out (VB-007 D1).
+>
+> **Recurring lesson, four times in two days:** `tsc` caught defects Vitest
+> passed — a variance error, an `apply()` visibility violation an example would
+> have taught consumers, a constructor-type mismatch, and a `Function`/
+> `Constructor` narrowing bug. Vitest runs through esbuild, which strips types
+> without checking them. A green Vitest run is **not** evidence for `nestjs`;
+> `nx run <pkg>:type-check --skip-nx-cache` is the gate that checks anything.
+> (`--skip-nx-cache` matters: a stale cache produced a false pass during
+> review.)
 
 ## P0 — Critical
 
@@ -371,15 +345,26 @@ _VS-016 (the prior sole P0) shipped 2026-07-10._
 ## P1 — High
 
 _Runtime-value first (owner directive 2026-08-09): things that change or protect
-how the library behaves at run time outrank docs/lint work. Updated order
-(2026-08-19): VF-036 sign-off → release checklist → merge to `main`. VF-028 and
-VF-037 shipped and archived same day; VF-039a is a cheap follow-on, not a gate._
+how the library behaves at run time outrank docs/lint work. Re-prioritised
+2026-08-21 after the runtime series — the six runtime-impacting tasks that
+review found are now five done and two left (VF-025, VF-033, both P2). What
+ranks P1 now is **the release gate and the decisions whose window closes at
+first publish**, not raw runtime value._
 
-| ID     | Title                                                         | Status                                                 | Age |
-| ------ | ------------------------------------------------------------- | ------------------------------------------------------ | --- |
-| VF-036 | getIdentityComponents() equality hook (consumer-gated BC)     | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 11d |
-| VB-005 | Benchmark harness broken (pnpm bench doesn't run at all)      | backlog _(discovered 2026-08-20 while closing VP-012)_ | 0d  |
-| VF-039 | Stop layer verifiers from reverting the previous layer's work | split → VF-039a / VF-039b                              | 7d  |
+| ID     | Title                                                     | Status                                                 | Age |
+| ------ | --------------------------------------------------------- | ------------------------------------------------------ | --- |
+| VF-036 | getIdentityComponents() equality hook (consumer-gated BC) | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 12d |
+| VB-008 | Behaviors export shape violates public-api-pattern        | planned — **needs `/analyze VB-008` before any code**  | 1d  |
+| VB-005 | Benchmark harness broken (pnpm bench doesn't run at all)  | backlog _(discovered 2026-08-20 while closing VP-012)_ | 1d  |
+
+> **VB-008 promoted P3 → P1 on 2026-08-21**, not because it became more urgent
+> but because its window is closing. It changes the export _shape_ of three
+> behaviour families in `@vytches/ddd-policies` (concrete classes where the
+> pattern wants interface + factory), which is a breaking change the moment the
+> package is published — its own `release_target` says "major or a deprecation
+> window". Deciding it now costs a discussion; deciding it later costs a major
+> bump. Note the status: it needs analysis first, and is **not** ready to
+> implement — the same trap VF-032 fell into before it was split.
 
 _Shipped and archived to `completed-tasks/` 2026-08-19: **VF-028** (resilience
 correctness, `05ac364a`), **VF-037** (isolation regression suite + behavioral-BC
@@ -394,21 +379,26 @@ combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 
 ## P2 — Normal / Medium
 
-_Runtime-adjacent first (VF-025, VT-007, VF-033, VT-006), then docs & tooling
-(VD-008, VF-034, VD-006b)._
+_**VF-025 and VF-033 are the last two runtime-impacting tasks in the whole
+backlog** — the 2026-08-20 review found six, and five shipped in the runtime
+series. Take them before anything else here: both are live defects in published
+behaviour, not hardening. VF-033: `CoreRules.minLength` passes on a missing
+field (`String(undefined)` is 9 chars) and `range` accepts `null`
+(`Number(null) === 0`). VF-025: a consumer's `retryConfig` is ignored by
+`shouldRetry`, and `clearProjectionState` calls `deleteAll()` instead of
+deleting one projection. Then VT-007/VT-006 (test debt), then docs & tooling
+(VD-008, VF-038, VF-034, VD-006b)._
 
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
-| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 48d |
-| VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 10d |
-| VF-032a | NestJS async config + forFeature→CQRSConfiguration buses          | backlog | 0d  |
-| VF-032b | NestJS convergence, discovery dedup, typed errors, e2e example    | blocked | 0d  |
-| VF-033  | Validation hardening & one validation story                       | backlog | 40d |
-| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 48d |
-| VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 10d |
-| VF-038  | Give docstring quality its own lint lane                          | backlog | 7d  |
-| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 40d |
-| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 46d |
+| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 49d |
+| VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 11d |
+| VF-033  | Validation hardening & one validation story                       | backlog | 41d |
+| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 49d |
+| VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 11d |
+| VF-038  | Give docstring quality its own lint lane                          | backlog | 8d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 41d |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 47d |
 
 ## P3 — Low
 
@@ -418,7 +408,6 @@ _Runtime-adjacent first (VF-025, VT-007, VF-033, VT-006), then docs & tooling
 | VD-009  | Priority example workspaces (repos+UoW, outbox, CQRS+resil.) | backlog | 10d  |
 | VD-004  | Interactive Documentation System                             | backlog | 141d |
 | VF-002  | Strategic Design Documentation                               | backlog | 141d |
-| VB-008  | Behaviors export shape violates public-api-pattern (PA5/N2)  | planned | 0d   |
 
 ## Backlog
 
