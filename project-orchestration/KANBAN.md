@@ -1,16 +1,16 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-21 (VF-040 shipped; prior day: VF-032a, VF-032b, VF-027,
-VB-007, VP-006c; VF-032 split into VF-032a/VF-032b — see the notes below the
-boards). Prior: 2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
-VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
-sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
-initially flagged VF-028 as "branch active, not yet done" — a direct user check
-("czy 028 właśnie nie skończyliśmy?") caught that this was itself stale: VF-028
-was implemented and committed the same day (`05ac364a`), just never had its task
-file updated. Verified (resilience 104/104, policies 237/237 green) and archived
-alongside VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09
-(maturity-audit re-prioritization: 5 new tasks filed
+_Last updated 2026-08-21 (VF-040 + VP-006d shipped; prior day: VF-032a, VF-032b,
+VF-027, VB-007, VP-006c; VF-032 split into VF-032a/VF-032b — see the notes below
+the boards). Prior: 2026-08-19 by `/pulse` + same-day correction (37-day sync
+gap — VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a
+status sync; VF-039 split into VF-039a/VF-039b same day. **Correction**:
+`/pulse` initially flagged VF-028 as "branch active, not yet done" — a direct
+user check ("czy 028 właśnie nie skończyliśmy?") caught that this was itself
+stale: VF-028 was implemented and committed the same day (`05ac364a`), just
+never had its task file updated. Verified (resilience 104/104, policies 237/237
+green) and archived alongside VF-037 — both moved to `completed-tasks/`.) Prior:
+2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
 VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
 ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
@@ -338,6 +338,19 @@ by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 > Anyone extending the gate to the remaining 14 packages will hit the same wall
 > — see the task's outcome note. Baseline captures every symbol VF-032a/b added.
 
+> **Shipped (2026-08-21)**: **VP-006d** done — `NestJSContainerAdapter` drops
+> its VP-006b `resolveDependency()` override, its duplicate `NOT_RESOLVED`
+> sentinel and its private `resolutionChain` in favour of the VP-006c
+> `tryResolve()` hook. Cycle detection now lives in one place for every adapter
+> instead of two copies free to diverge. Verified rather than assumed:
+> `getTokenKey()` is a delegate to `describeToken()`, so error messages are
+> byte-identical; and a new test spies on `isRegistered()` to pin "one lookup
+> per constructor parameter", which nothing guarded before — the VP-006b win
+> could have reverted silently. **The day-old VF-040 gate caught the resulting
+> surface change immediately**, on the _protected_ surface, which is exactly the
+> kind that reads as internal but is public API for adapter authors. nestjs
+> 274/274, full repo 2673 passed.
+
 ## P0 — Critical
 
 _Empty._
@@ -387,7 +400,6 @@ _Runtime-adjacent first (VF-025, VT-007, VF-033, VT-006), then docs & tooling
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
 | VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 48d |
-| VP-006d | NestJS adapter: swap resolveDependency override for tryResolve    | backlog | 0d  |
 | VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 10d |
 | VF-032a | NestJS async config + forFeature→CQRSConfiguration buses          | backlog | 0d  |
 | VF-032b | NestJS convergence, discovery dedup, typed errors, e2e example    | blocked | 0d  |
