@@ -22,6 +22,7 @@ import { IOutboxRepository } from '@vytches/ddd-messaging';
 import { IQueryBus } from '@vytches/ddd-cqrs';
 import { ModuleMetadata } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { NOT_REGISTERED } from '@vytches/ddd-di';
 import { OnApplicationBootstrap } from '@nestjs/common';
 import { OnModuleDestroy } from '@nestjs/common';
 import { OnModuleInit } from '@nestjs/common';
@@ -116,8 +117,8 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
     registerFactory<T>(token: ServiceToken<T>, factory: ServiceFactory<T>, options?: ServiceRegistrationOptions): void;
     registerInstance<T>(token: ServiceToken<T>, instance: T, options?: ServiceRegistrationOptions): void;
     resolve<T>(token: ServiceToken<T>): T;
-    protected resolveDependency<T>(param: ServiceToken<T>, ownerToken: ServiceToken): T;
     setModuleRef(moduleRef: ModuleRef): void;
+    protected tryResolve<T>(token: ServiceToken<T>): T | typeof NOT_REGISTERED;
 }
 
 // @public

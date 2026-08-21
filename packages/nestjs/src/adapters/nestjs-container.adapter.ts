@@ -4,9 +4,9 @@ import { internalLogger } from '@vytches/ddd-contracts/internal';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- @vytches/ddd-di is a real static dependency here (base class, thrown error types, ServiceLifetime enum), not lazy-loaded
 import {
   BaseContainerAdapter,
-  CircularDependencyError,
   ContainerServiceNotFoundError,
   InvalidRegistrationError,
+  NOT_REGISTERED,
   ServiceLifetime,
 } from '@vytches/ddd-di';
 import type {
@@ -24,7 +24,6 @@ import type { ExtendedServiceRegistrationOptions } from '../types/extended';
  * token is found neither in the internal registry nor in the NestJS
  * container. Module-private — never leaves this file.
  */
-const NOT_RESOLVED: unique symbol = Symbol('vytches.ddd.nestjs.not-resolved');
 
 /**
  * Lazy-once reflection cache (VP-006b / D-1): `design:paramtypes` is read via
@@ -65,13 +64,6 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
   private moduleRef?: ModuleRef;
 
   /**
-   * Tokens currently being resolved through {@link resolveDependency}.
-   * Kept locally because the base class stack is private (VP-006b / D-3);
-   * error type and chain semantics are identical to the base implementation.
-   */
-  private readonly resolutionChain: ServiceToken[] = [];
-
-  /**
    * Tokens already probed by the dev-only dual-registration divergence
    * guard — each token is probed against the NestJS container at most once
    * per adapter instance (VP-006b / OQ-4 post-audit condition).
@@ -108,21 +100,29 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
    * factory, or instance
    */
   resolve<T>(token: ServiceToken<T>): T {
-    const result = this.resolveOrMiss(token);
-    if (result === NOT_RESOLVED) {
+    const result = this.tryResolve(token);
+    if (result === NOT_REGISTERED) {
       throw new ContainerServiceNotFoundError(token);
     }
     return result;
   }
 
   /**
-   * Single-pass resolution shared by {@link resolve} and
-   * {@link resolveDependency}: internal registry first, then the NestJS
-   * container. Returns the {@link NOT_RESOLVED} sentinel instead of throwing
-   * on a miss so each caller can raise `ContainerServiceNotFoundError` with
-   * its own context (plain vs. owner-scoped) without a double lookup.
+   * Single-pass resolution: internal registry first, then the NestJS container.
+   *
+   * This is the `tryResolve` hook `BaseContainerAdapter` calls (VP-006c),
+   * overridden here because NestJS offers a miss-tolerant lookup of its own —
+   * so one call answers both "registered?" and "what is it?". VP-006b achieved
+   * the same effect by overriding `resolveDependency()` wholesale, which meant
+   * carrying a private copy of the cycle-detection chain; VP-006d deleted that
+   * copy in favour of this hook, leaving cycle detection in one place for every
+   * adapter.
+   *
+   * Returns {@link NOT_REGISTERED} rather than throwing, so each caller raises
+   * `ContainerServiceNotFoundError` with its own context (plain vs.
+   * owner-scoped) without a second lookup.
    */
-  private resolveOrMiss<T>(token: ServiceToken<T>): T | typeof NOT_RESOLVED {
+  protected override tryResolve<T>(token: ServiceToken<T>): T | typeof NOT_REGISTERED {
     // Internal container first — keyed by the token itself (VF-030 D1)
     const descriptor = this.services.get(token);
     if (descriptor) {
@@ -143,7 +143,7 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
       }
     }
 
-    return NOT_RESOLVED;
+    return NOT_REGISTERED;
   }
 
   /**
@@ -430,40 +430,6 @@ export class NestJSContainerAdapter extends BaseContainerAdapter {
 
     // Create instance with resolved dependencies
     return new constructor(...dependencies);
-  }
-
-  /**
-   * Resolve a constructor dependency of `ownerToken` in a SINGLE pass
-   * (VP-006b / OQ-3), overriding the base `isRegistered()` + `resolve()`
-   * double lookup.
-   *
-   * Semantics are identical to the base implementation: an unregistered
-   * dependency throws `ContainerServiceNotFoundError` with the owning
-   * service as context (display string via the inherited `getTokenKey`),
-   * and a resolution cycle throws `CircularDependencyError` with the full
-   * chain. `CircularDependencyError` (and any other error from nested
-   * resolution, e.g. `InvalidRegistrationError` or an owner-scoped
-   * not-found from a deeper level) is NEVER swallowed or re-wrapped —
-   * only THIS level's miss gets THIS owner's context.
-   *
-   * @throws ContainerServiceNotFoundError when the dependency is not registered
-   * @throws CircularDependencyError when a resolution cycle is detected
-   */
-  protected override resolveDependency<T>(param: ServiceToken<T>, ownerToken: ServiceToken): T {
-    if (this.resolutionChain.includes(param)) {
-      throw new CircularDependencyError([...this.resolutionChain, param]);
-    }
-
-    this.resolutionChain.push(param);
-    try {
-      const result = this.resolveOrMiss(param);
-      if (result === NOT_RESOLVED) {
-        throw new ContainerServiceNotFoundError(param, this.getTokenKey(ownerToken));
-      }
-      return result;
-    } finally {
-      this.resolutionChain.pop();
-    }
   }
 
   /**

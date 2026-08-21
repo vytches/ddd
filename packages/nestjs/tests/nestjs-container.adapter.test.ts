@@ -290,6 +290,71 @@ describe('NestJSContainerAdapter', () => {
     });
   });
 
+  describe('single-pass resolution via tryResolve (VP-006d)', () => {
+    // VP-006b removed the isRegistered() + resolve() double lookup by
+    // overriding resolveDependency() wholesale — which forced a private copy of
+    // the cycle-detection chain. VP-006d deleted that copy and moved the
+    // optimisation onto the VP-006c tryResolve hook. These pin the two things
+    // that could regress silently in that swap.
+
+    it('resolves a constructor dependency with ONE registry lookup, not two', () => {
+      const adapter = new NestJSContainerAdapter();
+
+      class Dependency {}
+      class Owner {
+        constructor(...args: unknown[]) {
+          this.dep = args[0] as Dependency;
+        }
+        readonly dep: Dependency;
+      }
+      Reflect.defineMetadata('design:paramtypes', [Dependency], Owner);
+
+      adapter.register(Dependency, Dependency);
+      adapter.register('owner', Owner);
+
+      const isRegisteredSpy = vi.spyOn(adapter, 'isRegistered');
+      adapter.resolve('owner');
+
+      // The base class's default tryResolve() would call isRegistered() once
+      // per constructor parameter before resolving. The override answers both
+      // questions in a single registry pass, so this stays untouched.
+      expect(isRegisteredSpy).not.toHaveBeenCalled();
+    });
+
+    it('still reports the full chain on a cycle, now from the base class', () => {
+      // Cycle detection lives in BaseContainerAdapter after VP-006d. If the
+      // adapter had kept its own chain, or if the base Set were not unwound
+      // correctly, this is where it would show.
+      const adapter = new NestJSContainerAdapter();
+
+      class A {
+        constructor(...args: unknown[]) {
+          void args;
+        }
+      }
+      class B {
+        constructor(...args: unknown[]) {
+          void args;
+        }
+      }
+      Reflect.defineMetadata('design:paramtypes', [B], A);
+      Reflect.defineMetadata('design:paramtypes', [A], B);
+      adapter.register(A, A);
+      adapter.register(B, B);
+
+      expect(() => adapter.resolve(A)).toThrow(CircularDependencyError);
+    });
+
+    it('resolves the same token twice in sequence without a false cycle', () => {
+      const adapter = new NestJSContainerAdapter();
+      class Service {}
+      adapter.register('svc', Service);
+
+      expect(adapter.resolve('svc')).toBeInstanceOf(Service);
+      expect(adapter.resolve('svc')).toBeInstanceOf(Service);
+    });
+  });
+
   describe('dual-registration divergence guard (VP-006b)', () => {
     it('should warn exactly ONCE per token when internal and NestJS registrations diverge', () => {
       const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
