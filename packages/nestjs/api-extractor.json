@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "extends": "../../api-extractor.base.json",
+
+  // Overrides the base's `<projectFolder>/tsconfig.json`. See the header of
+  // tsconfig.api-extractor.json for why this package needs its own: the
+  // repo-wide `paths` send api-extractor into dependency SOURCE, and it should
+  // be reading their emitted .d.ts.
+  "compiler": {
+    "tsconfigFilePath": "<projectFolder>/tsconfig.api-extractor.json"
+  }
+}
