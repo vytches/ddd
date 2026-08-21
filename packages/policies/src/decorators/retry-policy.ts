@@ -1,4 +1,5 @@
 import { Result } from '@vytches/ddd-utils';
+import { BaseBusinessPolicy } from '../core/base/base-business-policy';
 import type {
   IBusinessPolicy,
   IPolicyComposer,
@@ -7,6 +8,23 @@ import type {
   PolicyRequest,
 } from '../core/interfaces/business-policy.interface';
 import { PolicyViolation } from '../core/models/policy-violation';
+
+/**
+ * VB-008 (AC1): adapter that lets a decorator (`this`) participate in
+ * and()/or()/when() composition through BaseBusinessPolicy's composer
+ * machinery — private to base-business-policy.ts — while still routing
+ * check() through the decorator itself rather than its raw inner policy.
+ * Without this, composing a retry policy silently drops the retry wrapper.
+ */
+class ComposableSelf<T> extends BaseBusinessPolicy<T> {
+  constructor(private readonly self: IBusinessPolicy<T>) {
+    super(self.id, self.domain, self.name);
+  }
+
+  public check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
+    return this.self.check(request);
+  }
+}
 
 export interface PolicyRetryConfig {
   /**
@@ -349,12 +367,17 @@ export class PolicyRetryBehavior<T> implements IBusinessPolicy<T> {
 
   // Implement IBusinessPolicy interface
 
+  // AC1 (VB-008): compose THIS decorator, not the raw inner policy — see
+  // ComposableSelf doc comment above. not() below already re-wraps the
+  // negated inner policy in a fresh PolicyRetryBehavior; that pattern is the
+  // proof this was an oversight, not a designed contract.
+
   public and(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.innerPolicy.and(other);
+    return new ComposableSelf<T>(this).and(other);
   }
 
   public or(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.innerPolicy.or(other);
+    return new ComposableSelf<T>(this).or(other);
   }
 
   public not(): IBusinessPolicy<T> {
@@ -362,27 +385,54 @@ export class PolicyRetryBehavior<T> implements IBusinessPolicy<T> {
   }
 
   public when(condition: PolicyCondition<T>): IPolicyConditionalBuilder<T> {
-    return this.innerPolicy.when(condition);
+    return new ComposableSelf<T>(this).when(condition);
   }
 
   /**
-   * Create retry policy behavior
+   * Create retry policy behavior.
+   *
+   * VB-008 (AC4): `config` is optional — an omitted config reproduces the
+   * defaults that `withDefaults()` used to hard-code (3 attempts, 1s base
+   * delay, 30s cap, exponential backoff with jitter, metrics on).
    */
   public static create<T>(
     policy: IBusinessPolicy<T>,
-    config: PolicyRetryConfig
+    config?: PolicyRetryConfig
   ): PolicyRetryBehavior<T> {
-    return new PolicyRetryBehavior(policy, config);
+    return new PolicyRetryBehavior(
+      policy,
+      config ?? {
+        maxAttempts: 3,
+        baseDelay: 1000,
+        maxDelay: 30000,
+        backoff: 'exponential',
+        backoffMultiplier: 2,
+        jitter: true,
+        enableMetrics: true,
+      }
+    );
   }
 
+  private static withDefaultsWarned = false;
+
   /**
-   * Create retry policy with default configuration
+   * Create retry policy with default configuration.
+   *
+   * @deprecated Since v0.31.0 (VB-008). Use `create(policy)` instead — an
+   * omitted `config` now reproduces this method's defaults. Will be removed
+   * in the following minor release.
    */
   public static withDefaults<T>(
     policy: IBusinessPolicy<T>,
     maxAttempts = 3
   ): PolicyRetryBehavior<T> {
-    return new PolicyRetryBehavior(policy, {
+    if (!PolicyRetryBehavior.withDefaultsWarned) {
+      PolicyRetryBehavior.withDefaultsWarned = true;
+      console.warn(
+        "[@vytches/ddd-policies] PolicyRetryBehavior.withDefaults() is deprecated since v0.31.0 and will be removed in the following minor release. Use PolicyRetryBehavior.create(policy) instead — an omitted config reproduces this method's defaults."
+      );
+    }
+    return PolicyRetryBehavior.create(policy, {
       maxAttempts,
       baseDelay: 1000,
       maxDelay: 30000,
@@ -394,68 +444,76 @@ export class PolicyRetryBehavior<T> implements IBusinessPolicy<T> {
   }
 }
 
-export class PolicyRetryBehaviorFactory {
-  /**
-   * Create retry policy for transient failures
-   */
-  public static forTransientFailures<T>(
-    policy: IBusinessPolicy<T>,
-    maxAttempts = 3
-  ): PolicyRetryBehavior<T> {
-    return PolicyRetryBehavior.create(policy, {
-      maxAttempts,
-      baseDelay: 1000,
-      backoff: 'exponential',
-      jitter: true,
-      shouldRetry: violation =>
-        violation.code.includes('TIMEOUT') ||
-        violation.code.includes('UNAVAILABLE') ||
-        violation.severity === 'WARNING',
-    });
-  }
-
-  /**
-   * Create retry policy for external service calls
-   */
-  public static forExternalServices<T>(
-    policy: IBusinessPolicy<T>,
-    options: {
-      maxAttempts?: number;
-      baseDelay?: number;
-      maxDelay?: number;
-    } = {}
-  ): PolicyRetryBehavior<T> {
-    return PolicyRetryBehavior.create(policy, {
-      maxAttempts: options.maxAttempts || 5,
-      baseDelay: options.baseDelay || 2000,
-      maxDelay: options.maxDelay || 60000,
-      backoff: 'exponential',
-      backoffMultiplier: 2,
-      jitter: true,
-      shouldRetryOnException: error =>
-        error.message.includes('ECONNRESET') ||
-        error.message.includes('TIMEOUT') ||
-        error.message.includes('UNAVAILABLE'),
-      enableMetrics: true,
-    });
-  }
-
-  /**
-   * Create retry policy with custom logic
-   */
-  public static withCustomLogic<T>(
-    policy: IBusinessPolicy<T>,
-    shouldRetry: (violation: PolicyViolation) => boolean,
-    maxAttempts = 3,
-    baseDelay = 1000
-  ): PolicyRetryBehavior<T> {
-    return PolicyRetryBehavior.create(policy, {
-      maxAttempts,
-      baseDelay,
-      backoff: 'exponential',
-      jitter: true,
-      shouldRetry,
-      enableMetrics: true,
-    });
-  }
+/**
+ * Create retry policy for transient failures
+ */
+function forTransientFailures<T>(
+  policy: IBusinessPolicy<T>,
+  maxAttempts = 3
+): PolicyRetryBehavior<T> {
+  return PolicyRetryBehavior.create(policy, {
+    maxAttempts,
+    baseDelay: 1000,
+    backoff: 'exponential',
+    jitter: true,
+    shouldRetry: violation =>
+      violation.code.includes('TIMEOUT') ||
+      violation.code.includes('UNAVAILABLE') ||
+      violation.severity === 'WARNING',
+  });
 }
+
+/**
+ * Create retry policy for external service calls
+ */
+function forExternalServices<T>(
+  policy: IBusinessPolicy<T>,
+  options: {
+    maxAttempts?: number;
+    baseDelay?: number;
+    maxDelay?: number;
+  } = {}
+): PolicyRetryBehavior<T> {
+  return PolicyRetryBehavior.create(policy, {
+    maxAttempts: options.maxAttempts || 5,
+    baseDelay: options.baseDelay || 2000,
+    maxDelay: options.maxDelay || 60000,
+    backoff: 'exponential',
+    backoffMultiplier: 2,
+    jitter: true,
+    shouldRetryOnException: error =>
+      error.message.includes('ECONNRESET') ||
+      error.message.includes('TIMEOUT') ||
+      error.message.includes('UNAVAILABLE'),
+    enableMetrics: true,
+  });
+}
+
+/**
+ * Create retry policy with custom logic
+ */
+function withCustomLogic<T>(
+  policy: IBusinessPolicy<T>,
+  shouldRetry: (violation: PolicyViolation) => boolean,
+  maxAttempts = 3,
+  baseDelay = 1000
+): PolicyRetryBehavior<T> {
+  return PolicyRetryBehavior.create(policy, {
+    maxAttempts,
+    baseDelay,
+    backoff: 'exponential',
+    jitter: true,
+    shouldRetry,
+    enableMetrics: true,
+  });
+}
+
+/**
+ * VB-008 (AC2): frozen object export, not a static-only class — same export
+ * name, same call syntax (`PolicyRetryBehaviorFactory.forTransientFailures(...)`).
+ */
+export const PolicyRetryBehaviorFactory = {
+  forTransientFailures,
+  forExternalServices,
+  withCustomLogic,
+} as const;

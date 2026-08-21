@@ -429,8 +429,10 @@ result is `isSuccess` if only should-steps failed.
 policy logic can branch on `request.context.environment`.
 
 **`PolicyCachingBehavior` wraps any `IBusinessPolicy`.** Pass a policy and a
-cache config (ttl, key extractor) to `PolicyCachingBehaviorFactory.create()` to
-get a caching policy decorator without subclassing.
+cache config (ttl, key extractor) to `PolicyCachingBehavior.create()` — or one
+of the named `PolicyCachingBehaviorFactory` presets (`withTTL`,
+`forExpensivePolicy`, `withCustomKey`) — to get a caching policy decorator
+without subclassing.
 
 **There is no pre-built `PolicyEventBus` singleton.** VF-024/SA-M11 removed
 `globalPolicyEventBus` from the public barrel — a process-global, un-partitioned

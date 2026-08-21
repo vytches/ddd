@@ -111,6 +111,33 @@ fresh array every time" as an implementation detail.
 
 ### Added
 
+- **policies:** `PolicyCacheMetrics` — named interface for what
+  `PolicyCachingBehavior.getCacheMetrics()` returns (`hits`, `misses`,
+  `evictions`, `entries`, all `readonly number`). Previously the return type was
+  `ReturnType<PolicyCache['getMetrics']>`, anonymous and derived from an
+  unexported internal class, so callers had no type to name a local variable,
+  function parameter, or stored field with:
+
+  ```ts
+  // Before: nothing to import: no exported type describes the return value
+  function logMetrics(
+    m: ReturnType<PolicyCachingBehavior<unknown>['getCacheMetrics']>
+  ) {
+    console.log(m.hits, m.misses, m.evictions, m.entries);
+  }
+
+  // After:
+  import type { PolicyCacheMetrics } from '@vytches/ddd-policies';
+
+  function logMetrics(m: PolicyCacheMetrics) {
+    console.log(m.hits, m.misses, m.evictions, m.entries);
+  }
+  ```
+
+  Also re-exported from `@vytches/ddd`. The runtime shape returned by
+  `getCacheMetrics()` is unchanged — only the return type is now named.
+  Non-breaking, additive. (VB-008 AC3)
+
 - **contracts:** `enrichEvent(event, { payload?, metadata? })` — copy an event
   with a replaced payload and/or merged metadata while keeping its identity
   (`eventId`, `occurredOn`), its prototype and `instanceof`. The event's
@@ -154,6 +181,31 @@ fresh array every time" as an implementation detail.
   nothing compiled or executed.
 
 ### Fixed
+
+- **policies:** composing a cached, retried, or temporal policy no longer drops
+  the wrapper. `and()`, `or()` and `when()` on `PolicyCachingBehavior`,
+  `PolicyRetryBehavior` and `PolicyTemporalBehavior` delegated straight to the
+  wrapped inner/base policy instead of routing through the decorator itself, so
+  the resulting composite silently lost caching/retry/time-window behavior.
+  `not()` already re-wrapped correctly on all three — that asymmetry is why this
+  is classified as a bug fix rather than a contract change: `IBusinessPolicy<T>`
+  signatures are unchanged, only the runtime behavior of the returned composite
+  is corrected.
+
+  ```ts
+  // Before: composite silently lost caching
+  const cached = PolicyCachingBehavior.create(basePolicy, { ttl: 60000 });
+  const composite = cached.and(otherPolicy);
+  // composite re-evaluated basePolicy on every check() — uncached
+
+  // After: composite is still cached
+  const composite = cached.and(otherPolicy);
+  // composite's left branch still hits the cache on repeated identical requests
+  ```
+
+  No migration needed unless you depended on the buggy behavior — if composing a
+  cached/retried/temporal policy produced unexpected cache misses, missing
+  retries, or ignored time windows, that is what this fixes. (VB-008 AC1)
 
 - **policies:** `PolicyCachingBehaviorFactory.forExpensivePolicy()` no longer
   silently discards an explicit `cacheFailures: false` from the caller — it used
@@ -226,6 +278,47 @@ fresh array every time" as an implementation detail.
   for string-form events; those are plain objects by construction.
 
 ### Changed
+
+- **policies:** `PolicyCachingBehaviorFactory`, `PolicyRetryBehaviorFactory` and
+  `PolicyTemporalBehaviorFactory` are now frozen (`as const`) object exports
+  built from standalone functions, not static-only classes.
+
+  **This is invisible to every normal call site — there is nothing to migrate.**
+  Export name and call syntax are identical before and after:
+
+  ```ts
+  // Unchanged:
+  PolicyCachingBehaviorFactory.withTTL(policy, 60000);
+  PolicyRetryBehaviorFactory.forTransientFailures(policy);
+  PolicyTemporalBehaviorFactory.businessHours(policy, fallback);
+  ```
+
+  The only observable difference is for code that used these as classes rather
+  than as callable namespaces — `new PolicyCachingBehaviorFactory()` or
+  `instanceof PolicyCachingBehaviorFactory` — which was never a supported usage
+  (there were no instance members) and now fails. If you only ever called the
+  static methods, do not change anything. (VB-008 AC2)
+
+- **policies:** `PolicyCachingBehavior.withDefaults()` and
+  `PolicyRetryBehavior.withDefaults()` are `@deprecated` in favor of
+  `create(policy, config?)` — an omitted `config` now reproduces exactly what
+  `withDefaults()` used to build. Calling `withDefaults()` still works; it logs
+  one `console.warn` per class on first call naming the replacement, and will be
+  removed in the following minor release.
+
+  ```ts
+  // Before:
+  const cached = PolicyCachingBehavior.withDefaults(basePolicy);
+  const retried = PolicyRetryBehavior.withDefaults(basePolicy);
+
+  // After:
+  const cached = PolicyCachingBehavior.create(basePolicy);
+  const retried = PolicyRetryBehavior.create(basePolicy);
+  ```
+
+  `PolicyRetryBehavior.withDefaults(policy, maxAttempts?)` keeps its existing
+  second parameter; `PolicyTemporalBehavior` is unaffected — it only ever had
+  `create()`. (VB-008 AC4)
 
 - **events:** `DomainEvent.withMetadata()` is unchanged but now documents what
   it does to event identity: it rebuilds the event through the base

@@ -75,6 +75,16 @@ export {
   PolicySpecificationFactory,
 } from './adapters';
 
+// VB-008: composing a cached/retried/temporal policy now preserves the
+// wrapper instead of silently discarding it — and()/or()/when() previously
+// delegated straight to the raw inner policy (not() already did this
+// correctly). PolicyCachingBehaviorFactory / PolicyRetryBehaviorFactory /
+// PolicyTemporalBehaviorFactory are now frozen object exports instead of
+// static-only classes — export name and call syntax are unchanged, nothing
+// to migrate. PolicyCachingBehavior.withDefaults() and
+// PolicyRetryBehavior.withDefaults() are @deprecated in favor of
+// create(policy) with an omitted config; removed in the following minor.
+// See CHANGELOG.md.
 // Phase 4: Policy Behaviors (domain-focused, following MediatR pattern)
 export {
   // New behavior classes
@@ -88,6 +98,7 @@ export {
   type BusinessCalendar,
   // Types
   type PolicyCacheConfig,
+  type PolicyCacheMetrics,
   type PolicyRetryConfig,
   type RetryAttempt,
   type RetryMetrics,

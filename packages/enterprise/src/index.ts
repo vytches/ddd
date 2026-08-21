@@ -263,6 +263,7 @@ export type {
   PolicyBuilderConfig,
   PolicyBuildStep,
   PolicyCacheConfig,
+  PolicyCacheMetrics,
   PolicyCondition,
   PolicyContext,
   PolicyDefinition,

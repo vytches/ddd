@@ -259,6 +259,17 @@ jobs:
           echo "🔍 Type-checking \`compile-check\`-marked fences in README.md/LLMGUIDE.md..."
           pnpm docs-compile-gate:check
 
+      # Complements the gate above rather than duplicating it. That one is
+      # OPT-IN per fence, which is exactly how three phantom APIs shipped in
+      # @vytches/ddd-policies (VB-008): nobody marked the fences, so nothing
+      # checked them. This one needs no per-snippet marker — a retired name is
+      # dead by construction, so a scan finds every remaining reference. It is
+      # a deny-list, so retiring a public symbol means adding its old name to
+      # scripts/check-retired-symbols.mjs in the same commit.
+      # Runs on every event, not just PRs: it costs milliseconds and needs no build.
+      - name: Check retired symbols in docs and examples (VB-008 AC5.5)
+        run: pnpm check:retired-symbols
+
       - name: Check if quality gates needed
         id: check_gates
         run: |

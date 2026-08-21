@@ -1,4 +1,5 @@
 import type { Result } from '@vytches/ddd-utils';
+import { BaseBusinessPolicy } from '../core/base/base-business-policy';
 import type {
   IBusinessPolicy,
   IPolicyComposer,
@@ -7,6 +8,23 @@ import type {
   PolicyRequest,
 } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation } from '../core/models/policy-violation';
+
+/**
+ * VB-008 (AC1): adapter that lets a decorator (`this`) participate in
+ * and()/or()/when() composition through BaseBusinessPolicy's composer
+ * machinery — private to base-business-policy.ts — while still routing
+ * check() through the decorator itself rather than its raw inner policy.
+ * Without this, composing a cached policy silently drops the cache wrapper.
+ */
+class ComposableSelf<T> extends BaseBusinessPolicy<T> {
+  constructor(private readonly self: IBusinessPolicy<T>) {
+    super(self.id, self.domain, self.name);
+  }
+
+  public check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
+    return this.self.check(request);
+  }
+}
 
 /**
  * Default `maxSize` used by `PolicyCache.set()` and by factories that don't
@@ -113,6 +131,21 @@ interface LruNode {
   key: string;
   prev: LruNode | null;
   next: LruNode | null;
+}
+
+/**
+ * Snapshot of `PolicyCache`'s counters, as returned by
+ * `PolicyCachingBehavior.getCacheMetrics()`.
+ *
+ * VB-008 (AC3): named explicitly so consumers can reference the return type
+ * — it used to be `ReturnType<PolicyCache['getMetrics']>`, an anonymous type
+ * derived from an unexported internal class.
+ */
+export interface PolicyCacheMetrics {
+  readonly hits: number;
+  readonly misses: number;
+  readonly evictions: number;
+  readonly entries: number;
 }
 
 /**
@@ -263,7 +296,7 @@ class PolicyCache {
   /**
    * Get cache metrics
    */
-  public getMetrics(): typeof this.metrics {
+  public getMetrics(): PolicyCacheMetrics {
     return { ...this.metrics };
   }
 
@@ -577,7 +610,7 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   /**
    * Get cache metrics
    */
-  public getCacheMetrics(): ReturnType<PolicyCache['getMetrics']> {
+  public getCacheMetrics(): PolicyCacheMetrics {
     return this.cache.getMetrics();
   }
 
@@ -590,12 +623,20 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
 
   // Implement IBusinessPolicy interface
 
+  // AC1 (VB-008): and()/or()/when() must compose THIS decorator, not the raw
+  // inner policy, or the cache wrapper is silently dropped from the result.
+  // AndPolicyComposer/OrPolicyComposer/ConditionalPolicyBuilder are private to
+  // base-business-policy.ts, so `this` is routed through the composable-self
+  // adapter to reach that machinery while still calling this.check()
+  // (cached) for its branch. not() below already gets this right by
+  // re-wrapping the negated inner policy in a fresh PolicyCachingBehavior.
+
   public and(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.innerPolicy.and(other);
+    return new ComposableSelf<T>(this).and(other);
   }
 
   public or(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.innerPolicy.or(other);
+    return new ComposableSelf<T>(this).or(other);
   }
 
   public not(): IBusinessPolicy<T> {
@@ -603,27 +644,51 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   }
 
   public when(condition: PolicyCondition<T>): IPolicyConditionalBuilder<T> {
-    return this.innerPolicy.when(condition);
+    return new ComposableSelf<T>(this).when(condition);
   }
 
   /**
-   * Create cached policy decorator
+   * Create cached policy decorator.
+   *
+   * VB-008 (AC4): `config` is optional — an omitted config reproduces the
+   * defaults that `withDefaults()` used to hard-code (5 minute TTL, no
+   * failure caching, metrics on, `DEFAULT_MAX_SIZE` cap).
    */
   public static create<T>(
     policy: IBusinessPolicy<T>,
-    config: PolicyCacheConfig
+    config?: PolicyCacheConfig
   ): PolicyCachingBehavior<T> {
-    return new PolicyCachingBehavior(policy, config);
+    return new PolicyCachingBehavior(
+      policy,
+      config ?? {
+        ttl: 300000, // 5 minutes default
+        cacheFailures: false,
+        enableMetrics: true,
+        maxSize: DEFAULT_MAX_SIZE,
+      }
+    );
   }
 
+  private static withDefaultsWarned = false;
+
   /**
-   * Create cached policy with default configuration
+   * Create cached policy with default configuration.
+   *
+   * @deprecated Since v0.31.0 (VB-008). Use `create(policy)` instead — an
+   * omitted `config` now reproduces this method's defaults. Will be removed
+   * in the following minor release.
    */
   public static withDefaults<T>(
     policy: IBusinessPolicy<T>,
     ttl = 300000 // 5 minutes default
   ): PolicyCachingBehavior<T> {
-    return new PolicyCachingBehavior(policy, {
+    if (!PolicyCachingBehavior.withDefaultsWarned) {
+      PolicyCachingBehavior.withDefaultsWarned = true;
+      console.warn(
+        "[@vytches/ddd-policies] PolicyCachingBehavior.withDefaults() is deprecated since v0.31.0 and will be removed in the following minor release. Use PolicyCachingBehavior.create(policy) instead — an omitted config reproduces this method's defaults."
+      );
+    }
+    return PolicyCachingBehavior.create(policy, {
       ttl,
       cacheFailures: false,
       enableMetrics: true,
@@ -632,72 +697,80 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   }
 }
 
-export class PolicyCachingBehaviorFactory {
-  /**
-   * Create cached policy with TTL.
-   *
-   * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
-   * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
-   * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
-   * need a different cap.
-   */
-  public static withTTL<T>(policy: IBusinessPolicy<T>, ttlMs: number): PolicyCachingBehavior<T> {
-    return PolicyCachingBehavior.create(policy, {
-      ttl: ttlMs,
-      cacheFailures: false,
-    });
-  }
-
-  /**
-   * Create cached policy for expensive operations.
-   *
-   * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Defaults to a smaller
-   * `maxSize` than `withTTL()`/`withCustomKey()` (see `DEFAULT_EXPENSIVE_MAX_SIZE`),
-   * on the assumption that entries here are individually costlier; pass
-   * `maxSize` explicitly to raise or lower it.
-   */
-  public static forExpensivePolicy<T>(
-    policy: IBusinessPolicy<T>,
-    options: {
-      ttl?: number;
-      maxSize?: number;
-      cacheFailures?: boolean;
-    } = {}
-  ): PolicyCachingBehavior<T> {
-    const cachedPolicy = PolicyCachingBehavior.create(policy, {
-      ttl: options.ttl ?? 600000, // 10 minutes for expensive operations
-      maxSize: options.maxSize ?? DEFAULT_EXPENSIVE_MAX_SIZE,
-      cacheFailures: options.cacheFailures ?? true, // Cache failures for expensive ops
-      enableMetrics: true,
-      namespace: `expensive_${policy.id}`,
-    });
-    // Override the ID to include expensive prefix
-    Object.defineProperty(cachedPolicy, 'id', {
-      value: `expensive_cached_${policy.id}`,
-      writable: false,
-      enumerable: true,
-      configurable: false,
-    });
-    return cachedPolicy;
-  }
-
-  /**
-   * Create cached policy with custom key generation.
-   *
-   * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
-   * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
-   * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
-   * need a different cap.
-   */
-  public static withCustomKey<T>(
-    policy: IBusinessPolicy<T>,
-    keyGenerator: (request: PolicyRequest<unknown>) => string,
-    ttl = 300000
-  ): PolicyCachingBehavior<T> {
-    return PolicyCachingBehavior.create(policy, {
-      ttl,
-      keyGenerator,
-      enableMetrics: true,
-    });
-  }
+/**
+ * Create cached policy with TTL.
+ *
+ * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
+ * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
+ * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
+ * need a different cap.
+ */
+function withTTL<T>(policy: IBusinessPolicy<T>, ttlMs: number): PolicyCachingBehavior<T> {
+  return PolicyCachingBehavior.create(policy, {
+    ttl: ttlMs,
+    cacheFailures: false,
+  });
 }
+
+/**
+ * Create cached policy for expensive operations.
+ *
+ * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Defaults to a smaller
+ * `maxSize` than `withTTL()`/`withCustomKey()` (see `DEFAULT_EXPENSIVE_MAX_SIZE`),
+ * on the assumption that entries here are individually costlier; pass
+ * `maxSize` explicitly to raise or lower it.
+ */
+function forExpensivePolicy<T>(
+  policy: IBusinessPolicy<T>,
+  options: {
+    ttl?: number;
+    maxSize?: number;
+    cacheFailures?: boolean;
+  } = {}
+): PolicyCachingBehavior<T> {
+  const cachedPolicy = PolicyCachingBehavior.create(policy, {
+    ttl: options.ttl ?? 600000, // 10 minutes for expensive operations
+    maxSize: options.maxSize ?? DEFAULT_EXPENSIVE_MAX_SIZE,
+    cacheFailures: options.cacheFailures ?? true, // Cache failures for expensive ops
+    enableMetrics: true,
+    namespace: `expensive_${policy.id}`,
+  });
+  // Override the ID to include expensive prefix
+  Object.defineProperty(cachedPolicy, 'id', {
+    value: `expensive_cached_${policy.id}`,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  });
+  return cachedPolicy;
+}
+
+/**
+ * Create cached policy with custom key generation.
+ *
+ * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
+ * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
+ * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
+ * need a different cap.
+ */
+function withCustomKey<T>(
+  policy: IBusinessPolicy<T>,
+  keyGenerator: (request: PolicyRequest<unknown>) => string,
+  ttl = 300000
+): PolicyCachingBehavior<T> {
+  return PolicyCachingBehavior.create(policy, {
+    ttl,
+    keyGenerator,
+    enableMetrics: true,
+  });
+}
+
+/**
+ * VB-008 (AC2): frozen object export, not a static-only class — same export
+ * name, same call syntax (`PolicyCachingBehaviorFactory.withTTL(...)`).
+ */
+export const PolicyCachingBehaviorFactory = {
+  withTTL,
+  forExpensivePolicy,
+  withCustomKey,
+} as const;

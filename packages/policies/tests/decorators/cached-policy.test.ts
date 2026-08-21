@@ -351,13 +351,52 @@ describe('CachedPolicy', () => {
       expect(cachedPolicy.name).toBe('Cached Test Policy');
     });
 
-    it('should support policy composition', async () => {
+    // VB-008 (AC1/AC5-unit3): these replace `expect(() => …).not.toThrow()`.
+    // A composed policy that silently dropped the cache decorator would
+    // still not throw — it would just re-invoke `testPolicy` on every
+    // `check()`. The counter is the only thing that actually distinguishes
+    // "wrapper survived composition" from "wrapper got dropped".
+    it('should keep caching behavior when composed with and()', async () => {
       const otherPolicy = new TestPolicy();
       Object.defineProperty(otherPolicy, 'id', { value: 'other-policy', configurable: true });
 
-      // Composition should work but won't be tested deeply here
-      expect(() => cachedPolicy.and(otherPolicy)).not.toThrow();
-      expect(() => cachedPolicy.or(otherPolicy)).not.toThrow();
+      const composed = cachedPolicy.and(otherPolicy);
+      await composed.check(request);
+      await composed.check(request);
+
+      // Second check() must hit the cache: testPolicy is the policy the
+      // cache decorator wraps, so its call count proves the decorator
+      // (not the raw inner policy) is what and() composed.
+      expect(testPolicy.callCount).toBe(1);
+    });
+
+    it('should keep caching behavior when composed with or()', async () => {
+      const otherPolicy = new TestPolicy();
+      otherPolicy.shouldFail = true;
+      Object.defineProperty(otherPolicy, 'id', { value: 'other-policy', configurable: true });
+
+      const composed = cachedPolicy.or(otherPolicy);
+      await composed.check(request);
+      await composed.check(request);
+
+      expect(testPolicy.callCount).toBe(1);
+    });
+
+    it('should route when() through the cache decorator, not the raw inner policy', () => {
+      // `ConditionalPolicyBuilder.then()`/`.thenMust()` unconditionally
+      // throw ("use PolicyBuilder.when().then() instead") regardless of
+      // which policy the builder wraps, so the composed condition can
+      // never be evaluated — there is no observable side effect to assert
+      // on here the way there is for and()/or(). The only thing a test can
+      // still confirm is that when() itself keeps delegating into that same
+      // builder machinery (doesn't throw, doesn't silently no-op) after the
+      // AC1 fix, and that the eventual .then() call fails with the expected,
+      // unchanged error rather than some other failure mode.
+      const builder = cachedPolicy.when(() => true);
+
+      expect(() => builder.then(new TestPolicy())).toThrow(
+        'Use PolicyBuilder.when().then() for conditional policies'
+      );
     });
 
     it('should support negation with cache preservation', () => {
@@ -1047,5 +1086,71 @@ describe('CachedPolicy', () => {
       },
       RACE_TEST_TIMEOUT_MS
     );
+  });
+});
+
+/**
+ * VB-008 AC4/D11 — deprecation notice for `withDefaults()`.
+ *
+ * The warning is guarded by a private static flag so it fires once per class,
+ * not once per call. That guard is precisely what makes it easy to ship broken:
+ * a warning that never fires and a warning that fires on every call both pass
+ * "there is a console.warn in the code". These tests pin the actual contract.
+ *
+ * The flag is reset explicitly because the rest of this file calls
+ * `withDefaults()` many times before we get here — without the reset the spy
+ * would see zero calls and the test would be green for the wrong reason.
+ */
+describe('VB-008 AC4: PolicyCachingBehavior.withDefaults() deprecation notice', () => {
+  const resetWarnGuard = (): void => {
+    (PolicyCachingBehavior as unknown as { withDefaultsWarned: boolean }).withDefaultsWarned =
+      false;
+  };
+
+  beforeEach(() => {
+    resetWarnGuard();
+  });
+
+  it('warns exactly once no matter how many times it is called', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const policy = new TestPolicy();
+
+    PolicyCachingBehavior.withDefaults(policy);
+    PolicyCachingBehavior.withDefaults(policy);
+    PolicyCachingBehavior.withDefaults(policy, 1000);
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it('names the replacement and the removal version (PA7 / BC8)', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    PolicyCachingBehavior.withDefaults(new TestPolicy());
+
+    const message = String(warn.mock.calls[0]?.[0] ?? '');
+    expect(message).toContain('deprecated');
+    expect(message).toContain('create(');
+    expect(message).toMatch(/v?0\.\d+/);
+    warn.mockRestore();
+  });
+
+  it('still returns a working cached policy while deprecated', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const policy = new TestPolicy();
+
+    const cached = PolicyCachingBehavior.withDefaults(policy);
+    const req = {
+      entity: { value: 1 },
+      context: PolicyContextBuilder.forUser('deprecation-test-user')
+        .withTenantId('test-tenant')
+        .withEnvironment('test')
+        .build(),
+    };
+    await cached.check(req);
+    await cached.check(req);
+
+    expect(policy.callCount).toBe(1);
+    vi.restoreAllMocks();
   });
 });
