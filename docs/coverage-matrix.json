@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-19T11:16:37.778Z",
+  "generatedAt": "2026-08-22T19:55:04.789Z",
   "cells": [
     {
       "name": "aggregate-plus-specification",
@@ -202,6 +202,32 @@
       "status": "VERIFIED",
       "testedBy": [
         "examples/domain-services/tests/domain-services-examples.test.ts"
+      ]
+    },
+    {
+      "file": "examples/nestjs/src/inventory.context.ts",
+      "exampleDir": "nestjs",
+      "packages": [
+        "@vytches/ddd-aggregates",
+        "@vytches/ddd-contracts",
+        "@vytches/ddd-cqrs",
+        "@vytches/ddd-nestjs"
+      ],
+      "status": "VERIFIED",
+      "testedBy": [
+        "examples/nestjs/tests/inventory-flow.test.ts"
+      ]
+    },
+    {
+      "file": "examples/nestjs/src/orders.module.ts",
+      "exampleDir": "nestjs",
+      "packages": [
+        "@vytches/ddd-cqrs",
+        "@vytches/ddd-nestjs"
+      ],
+      "status": "VERIFIED",
+      "testedBy": [
+        "examples/nestjs/tests/wiring.test.ts"
       ]
     },
     {
