@@ -21,7 +21,7 @@ overrides:
   glob@>=11.0.0 <11.1.0: '>=11.1.0'
   handlebars: '>=4.7.9'
   ip-address@<=10.1.0: '>=10.1.1'
-  js-yaml: '>=4.2.0 <5.0.0'
+  js-yaml: '>=4.3.1 <5.0.0'
   jws: '>=3.2.3'
   lodash: '>=4.18.0'
   lodash-es: '>=4.18.0'
@@ -187,8 +187,8 @@ importers:
         specifier: ^29.7.0
         version: 29.7.0
       js-yaml:
-        specifier: '>=4.2.0 <5.0.0'
-        version: 4.3.0
+        specifier: '>=4.3.1 <5.0.0'
+        version: 4.3.1
       jsonc-eslint-parser:
         specifier: ^2.1.0
         version: 2.4.0
@@ -940,8 +940,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
       js-yaml:
-        specifier: '>=4.2.0 <5.0.0'
-        version: 4.3.0
+        specifier: '>=4.3.1 <5.0.0'
+        version: 4.3.1
 
   packages/validation:
     dependencies:
@@ -1023,8 +1023,8 @@ importers:
         specifier: ^4.0.9
         version: 4.0.9
       js-yaml:
-        specifier: '>=4.2.0 <5.0.0'
-        version: 4.3.0
+        specifier: '>=4.3.1 <5.0.0'
+        version: 4.3.1
       vitest:
         specifier: ^4.1.0
         version: 4.1.9(@types/node@20.19.1)(@vitest/coverage-v8@4.1.9)(@vitest/ui@4.1.9)(vite@7.3.6)
@@ -2657,7 +2657,7 @@ packages:
     resolution: {integrity: sha512-ZDmNc53+dXdWEv7fqIUSgRQOLYoUom5Z40gmLgmATmYR9NbL6FJJHwakcCpzaeCy+1D0m0n7mT4jj2B/MQPl7A==}
     dependencies:
       '@changesets/types': 6.1.0
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
     dev: false
 
   /@changesets/pre@2.0.2:
@@ -3285,7 +3285,7 @@ packages:
       globals: 14.0.0
       ignore: 5.3.2
       import-fresh: 3.3.1
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       minimatch: 3.1.5
       strip-json-comments: 3.1.1
     transitivePeerDependencies:
@@ -3387,7 +3387,7 @@ packages:
       camelcase: 5.3.1
       find-up: 4.1.0
       get-package-type: 0.1.0
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       resolve-from: 5.0.0
     dev: true
 
@@ -3700,7 +3700,7 @@ packages:
       inquirer: 8.2.5
       is-ci: 3.0.1
       is-stream: 2.0.0
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       libnpmpublish: 9.0.9
       load-json-file: 6.2.0
       make-dir: 4.0.0
@@ -5853,7 +5853,7 @@ packages:
     dependencies:
       '@verdaccio/core': 8.0.0-next-8.19
       debug: 4.4.1
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       lodash: 4.18.1
       minimatch: 7.4.9
     transitivePeerDependencies:
@@ -6197,7 +6197,7 @@ packages:
     resolution: {integrity: sha512-/HcYgtUSiJiot/XWGLOlGxPYUG65+/31V8oqk17vZLW1xlCoR4PampyePljOxY2n8/3jz9+tIFzICsyGujJZoA==}
     engines: {node: '>=18.12.0'}
     dependencies:
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       tslib: 2.8.1
     dev: true
 
@@ -7819,7 +7819,7 @@ packages:
         optional: true
     dependencies:
       import-fresh: 3.3.1
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       parse-json: 5.2.0
       path-type: 4.0.0
       typescript: 5.8.3
@@ -7836,7 +7836,7 @@ packages:
     dependencies:
       env-paths: 2.2.1
       import-fresh: 3.3.1
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       parse-json: 5.2.0
       typescript: 5.8.3
     dev: true
@@ -7852,7 +7852,7 @@ packages:
     dependencies:
       env-paths: 2.2.1
       import-fresh: 3.3.1
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       parse-json: 5.2.0
       typescript: 5.8.3
     dev: true
@@ -9377,7 +9377,7 @@ packages:
   /front-matter@4.0.2:
     resolution: {integrity: sha512-I8ZuJ/qG92NWX8i5x1Y8qyj3vizhXS31OxjKDu3LKP+7/qBgfIKValiZIEwoVoJKUHlhWtYrktkxV1XsX+pPlg==}
     dependencies:
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
     dev: true
 
   /fs-constants@1.0.0:
@@ -9827,7 +9827,7 @@ packages:
     resolution: {integrity: sha512-5v6yZd4JK3eMI3FqqCouswVqwugaA9r4dNZB1wwcmrD02QkV5H0y7XBQW8QwQqEaZY1pM9aqORSORhJRdNK44Q==}
     engines: {node: '>=6.0'}
     dependencies:
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       kind-of: 6.0.3
       section-matter: 1.0.0
       strip-bom-string: 1.0.0
@@ -11163,8 +11163,8 @@ packages:
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
-  /js-yaml@4.3.0:
-    resolution: {integrity: sha512-1td788aAnnZ5qs7V2QIRl1owjtYpbKt749Y3xauqQgwIIGF/xXWz1wMTEBx5O3LK3lXLVuqXPdPxj2BoFHaW9Q==}
+  /js-yaml@4.3.1:
+    resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
     hasBin: true
     dependencies:
       argparse: 2.0.1
@@ -11426,7 +11426,7 @@ packages:
       is-ci: 3.0.1
       is-stream: 2.0.0
       jest-diff: 29.7.0
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       libnpmaccess: 8.0.6
       libnpmpublish: 9.0.9
       load-json-file: 6.2.0
@@ -11602,7 +11602,7 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       graceful-fs: 4.2.11
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       pify: 4.0.1
       strip-bom: 3.0.0
     dev: false
@@ -13781,7 +13781,7 @@ packages:
     engines: {node: '>=6'}
     dependencies:
       graceful-fs: 4.2.11
-      js-yaml: 4.3.0
+      js-yaml: 4.3.1
       pify: 4.0.1
       strip-bom: 3.0.0
     dev: false
