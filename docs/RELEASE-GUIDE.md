@@ -225,6 +225,41 @@ develop          ← cała aktywna praca
 Lerna blokuje `lerna version` poza `release/*` i `hotfix/*` — to celowe, żeby
 nie wersjonować przypadkowo z feature branches.
 
+### PR release'owy: merge commit, NIE squash
+
+`lerna version` tworzy tag na branchu `release/*`. Squash zbija całą historię
+tego brancha w jeden nowy commit na `main`, więc otagowany commit **przestaje
+być przodkiem `main`** — tag zostaje osierocony, mimo że treść jest identyczna.
+
+Skutek jest cichy i ujawnia się dopiero przy następnym wydaniu:
+
+```bash
+git describe --tags origin/main
+# po squashu:      v0.27.0-7-gfc4e172e   ← widzi tag sprzed czterech wydań
+# po merge commit: v0.31.0
+```
+
+`lerna version --conventional-commits` i `pnpm release:collect` wyznaczają
+zakres commitów od ostatniego osiągalnego tagu. Z osieroconym tagiem policzą go
+od wydania sprzed kilku wersji i wygenerują changelog obejmujący pracę już
+wydaną — a przy zmianach łamiących mogą też źle wyliczyć bump.
+
+Dlatego PR `release/*` → `main` **mergujemy commitem scalającym**. Jeśli squash
+już się wydarzył, napraw tag zaraz po merge'u — treść jest identyczna
+(`git diff <tag> main` musi być puste), więc przeniesienie niczego nie gubi:
+
+```bash
+git diff --stat <stary-commit-tagu> main   # MUSI być puste
+git tag -f -a vX.Y.Z main -m "vX.Y.Z"
+git push origin :refs/tags/vX.Y.Z
+git push origin vX.Y.Z
+git describe --tags origin/main            # musi zwrócić vX.Y.Z
+```
+
+> Przenoszenie tagu jest bezpieczne tylko dopóki drzewa są identyczne. Jeśli
+> `git diff` cokolwiek pokazuje, tag opisuje inną treść niż to, co wydano —
+> wtedy nie przenoś, tylko wyjaśnij rozjazd.
+
 ---
 
 ## Instalacja pakietów (konsument)
