@@ -26,8 +26,8 @@ The only skipped-test hotspot in the entire monorepo (verified 2026-08-08):
 whole e2e suite with `describe.skip`, annotated in-code as
 `(DISABLED - missing container classes)`, plus one `it.todo` in
 `tests/di-integration/domain-service-discovery.test.ts:84`. This is real
-untested runtime surface — not a false-passing test, but functionality with
-no e2e verification at all. Note VF-031 removed the write-only
+untested runtime surface — not a false-passing test, but functionality with no
+e2e verification at all. Note VF-031 removed the write-only
 `DIDomainServiceMetadataRegistry` from this package; the skipped tests may
 predate that surface diet and reference removed/never-built classes.
 
@@ -35,17 +35,16 @@ predate that surface diet and reference removed/never-built classes.
 
 1. [ ] Investigate which "container classes" the suite expects: determine for
        each skipped block whether (a) the class should exist and is a real
-       library gap, (b) the test targets surface removed by VF-031 and should
-       be rewritten against the current API, or (c) the scenario is obsolete
-       and the block should be deleted (with justification in the commit).
+       library gap, (b) the test targets surface removed by VF-031 and should be
+       rewritten against the current API, or (c) the scenario is obsolete and
+       the block should be deleted (with justification in the commit).
 2. [ ] Every `describe.skip`/`it.skip`/`it.todo` in the package is resolved —
-       re-enabled and passing, rewritten and passing, or deleted with
-       rationale. Zero skipped tests remain in `packages/domain-services`.
+       re-enabled and passing, rewritten and passing, or deleted with rationale.
+       Zero skipped tests remain in `packages/domain-services`.
 3. [ ] If (a) applies anywhere (missing library functionality), a scoped
-       follow-up task is filed instead of growing this one — this task's job
-       is truthful test coverage, not new features.
-4. [ ] Full package suite + type-check green; no other package's tests
-       touched.
+       follow-up task is filed instead of growing this one — this task's job is
+       truthful test coverage, not new features.
+4. [ ] Full package suite + type-check green; no other package's tests touched.
 
 ## Links & References
 

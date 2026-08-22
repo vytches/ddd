@@ -133,7 +133,7 @@ NX_DAEMON=false pnpm lerna version --conventional-commits --conventional-graduat
 > **Uwaga:** Standardowy `pnpm release` bumpuje alpha → alpha+1 (nie do
 > stabilnej). Do graduacji użyj `--conventional-graduate`.
 
-> **Sanity check przed krokiem 2:**
+> **Sanity check przed krokiem 2:** >
 > `git merge-base --is-ancestor v<ostatnia-alpha> develop` musi przejść. Jeśli
 > nie — branch alphowy nie jest w `develop` i graduacja pominie jego zawartość.
 
