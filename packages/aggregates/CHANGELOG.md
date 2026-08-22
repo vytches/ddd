@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **aggregates:** satisfy tsc in the transformDomainEvents test
+  ([ba1fe04](https://github.com/vytches/ddd/commit/ba1fe04f5e45081f8fb67ac707b0761cd5415f53))
+
+### Features
+
+- **aggregates:** add transformDomainEvents() for persistence-boundary stamping
+  ([38101b6](https://github.com/vytches/ddd/commit/38101b611f445f52b27991db6287bbb5865f1d24))
+
+### Performance Improvements
+
+- **aggregates:** memoize getDomainEvents() to avoid O(n^2) deep-freeze cost
+  ([07e714d](https://github.com/vytches/ddd/commit/07e714d02d800e6ffd1039b8617c68f9f2cf3859))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [Unreleased]
 
 ### Added

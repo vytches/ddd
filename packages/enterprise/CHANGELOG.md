@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **policies:** preserve behaviour wrapper across composition (VB-008)
+  ([5dfa6fa](https://github.com/vytches/ddd/commit/5dfa6fa053e49764f353f81e5d3c0c2dbadc1010))
+- **resilience:** jitter default, per-instance decorator state, HALF_OPEN probe
+  gate (VF-028)
+  ([05ac364](https://github.com/vytches/ddd/commit/05ac364a5ea9f02e355b9235ab00019e9608d69b))
+
+### BREAKING CHANGES
+
+- **policies:** composed policies now retain their caching/retry/temporal
+  wrapper, and composite ids carry the wrapper prefix as a result. Migration
+  notes per change in .changeset/vb-008-\*.md.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01THJr8eZUzbcrRZKwRbskka
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
 
 ### Bug Fixes

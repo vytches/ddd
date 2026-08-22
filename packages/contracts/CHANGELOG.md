@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Features
+
+- **contracts:** add enrichEvent() and align the two event shapes
+  ([7027c21](https://github.com/vytches/ddd/commit/7027c212a48c5c309c087c796be141d6d05b4878))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [Unreleased]
 
 ### Added

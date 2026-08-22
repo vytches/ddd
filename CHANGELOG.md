@@ -3,6 +3,98 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **aggregates:** satisfy tsc in the transformDomainEvents test
+  ([ba1fe04](https://github.com/vytches/ddd/commit/ba1fe04f5e45081f8fb67ac707b0761cd5415f53))
+- **ci:** invoke api-extractor via pnpm exec, not bare command
+  ([8e64d4c](https://github.com/vytches/ddd/commit/8e64d4c9f46ccfc91c546442c64f973faa816f80))
+- **ci:** invoke api-extractor via pnpm exec, not bare command
+  ([7b3ef5f](https://github.com/vytches/ddd/commit/7b3ef5f3a5ab575ee38fd56d4f4fa8c3e6caf3d4))
+- **ci:** make the api-surface gate able to fail, and wire the behavioural-BC
+  checklist
+  ([fbf6fbf](https://github.com/vytches/ddd/commit/fbf6fbf25ebf2efd053dde45a984543e2db3172b))
+- **ci:** scope dependencies.yml audit gate to production deps too
+  ([4cc7695](https://github.com/vytches/ddd/commit/4cc7695a2b333c38f52b707644161f217b925b17))
+- **ci:** scope security audit gate to production deps, ignore lockfile in
+  prettier
+  ([ea303d9](https://github.com/vytches/ddd/commit/ea303d9a23215a5e37aabb710f65702dd10cbc47))
+- **config:** regenerate stale coverage-matrix, exclude generated docs from
+  prettier
+  ([6771bb9](https://github.com/vytches/ddd/commit/6771bb91e9d47360cbe7e96417db38acbc826c06))
+- **config:** regenerate stale coverage-matrix, exclude generated docs from
+  prettier
+  ([03db507](https://github.com/vytches/ddd/commit/03db50703991a97b531326f6c20f533f51a995ed))
+- **cqrs:** preserve input order in executeInParallel results
+  ([57172b2](https://github.com/vytches/ddd/commit/57172b22efc21871e289bc4a965c8df45000136e))
+- **deps:** resolve remaining audit findings (25 -> 3 advisories)
+  ([f2bc15b](https://github.com/vytches/ddd/commit/f2bc15b0432ec0212f867be675da034ec189e40c))
+- **nestjs:** register the CQRS token bridge in every module factory
+  ([1384dce](https://github.com/vytches/ddd/commit/1384dcea2200cf276f6cfcaa655c4a9d6fa9d0e9))
+- **nestjs:** report at bootstrap when no handler could be registered
+  ([8074352](https://github.com/vytches/ddd/commit/8074352463106888a8da4a48479deaff510b902a))
+- **nestjs:** warn when a discovered handler has no bus to register on
+  ([b428e34](https://github.com/vytches/ddd/commit/b428e3479ed131beedd60a7c6297b7b1fa28a56c))
+- **policies:** detach the stale LRU node when a cached key is re-written
+  ([eb916d6](https://github.com/vytches/ddd/commit/eb916d6f047b7b07d0401265b06a4bef47dff3cb))
+- **policies:** distinguish insert from update in the PolicyCache write path
+  ([40ce9b5](https://github.com/vytches/ddd/commit/40ce9b5f4a3e06b30a2d46f9ac26ced35a962594))
+- **policies:** honour enableMetrics instead of always collecting
+  ([47ac340](https://github.com/vytches/ddd/commit/47ac340ed49b1fd68ea267d85c394c3a638e6206))
+- **policies:** preserve behaviour wrapper across composition (VB-008)
+  ([5dfa6fa](https://github.com/vytches/ddd/commit/5dfa6fa053e49764f353f81e5d3c0c2dbadc1010))
+- **policies:** respect explicitly falsy cache options and bound cache size
+  ([0a6e1d6](https://github.com/vytches/ddd/commit/0a6e1d643cb0852823e7240f76fa4a35bdd710c1))
+- **release:** fail publish job on real npm publish errors
+  ([4aad98b](https://github.com/vytches/ddd/commit/4aad98bc536f7e42183fba19affa145806ec612c))
+- **release:** verify-exports asserted the opposite of the meta-package design
+  ([bb639ae](https://github.com/vytches/ddd/commit/bb639aeb2bab379b293bf48dfad6aa09c8848764))
+- **resilience:** compose abort signals natively, closing three listener leaks
+  ([2c61ea2](https://github.com/vytches/ddd/commit/2c61ea24e761a2164d9160b37245ae95982b8dab))
+- **resilience:** jitter default, per-instance decorator state, HALF_OPEN probe
+  gate (VF-028)
+  ([05ac364](https://github.com/vytches/ddd/commit/05ac364a5ea9f02e355b9235ab00019e9608d69b))
+
+### Features
+
+- **aggregates:** add transformDomainEvents() for persistence-boundary stamping
+  ([38101b6](https://github.com/vytches/ddd/commit/38101b611f445f52b27991db6287bbb5865f1d24))
+- **contracts:** add enrichEvent() and align the two event shapes
+  ([7027c21](https://github.com/vytches/ddd/commit/7027c212a48c5c309c087c796be141d6d05b4878))
+- **core:** add getIdentityComponents() partial-identity equality hook
+  ([c88e728](https://github.com/vytches/ddd/commit/c88e728ea666aaf14c40581b065828005938a87e))
+- **nestjs:** add forRootAsync and route forFeature through CQRSConfiguration
+  ([abab7ba](https://github.com/vytches/ddd/commit/abab7ba2266d9869ab387cd38e32915c0de1d0ab))
+- **nestjs:** re-export COMMAND_BUS_TOKEN and QUERY_BUS_TOKEN
+  ([39972c9](https://github.com/vytches/ddd/commit/39972c9169e9a311d96010c59a490644a3138a57))
+- **policies:** deduplicate concurrent identical policy checks
+  ([ab4292f](https://github.com/vytches/ddd/commit/ab4292fdef22412c6f74608c7bf410ab636a3bfc))
+
+### Performance Improvements
+
+- **aggregates:** memoize getDomainEvents() to avoid O(n^2) deep-freeze cost
+  ([07e714d](https://github.com/vytches/ddd/commit/07e714d02d800e6ffd1039b8617c68f9f2cf3859))
+- **di:** single-pass dependency resolution and Set-based cycle detection
+  ([97d1d89](https://github.com/vytches/ddd/commit/97d1d892d0a17d9a5f5c8fb8828428693069ff29))
+- **policies:** combine CachedPolicy cache-key hashing into a single digest
+  ([2963a68](https://github.com/vytches/ddd/commit/2963a6842b0441ac5dc744244c6244b509f05e23))
+
+### BREAKING CHANGES
+
+- **policies:** composed policies now retain their caching/retry/temporal
+  wrapper, and composite ids carry the wrapper prefix as a result. Migration
+  notes per change in .changeset/vb-008-\*.md.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01THJr8eZUzbcrRZKwRbskka
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [Unreleased]
 
 ### BREAKING CHANGES

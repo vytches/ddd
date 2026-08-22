@@ -3,6 +3,48 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **policies:** detach the stale LRU node when a cached key is re-written
+  ([eb916d6](https://github.com/vytches/ddd/commit/eb916d6f047b7b07d0401265b06a4bef47dff3cb))
+- **policies:** distinguish insert from update in the PolicyCache write path
+  ([40ce9b5](https://github.com/vytches/ddd/commit/40ce9b5f4a3e06b30a2d46f9ac26ced35a962594))
+- **policies:** honour enableMetrics instead of always collecting
+  ([47ac340](https://github.com/vytches/ddd/commit/47ac340ed49b1fd68ea267d85c394c3a638e6206))
+- **policies:** preserve behaviour wrapper across composition (VB-008)
+  ([5dfa6fa](https://github.com/vytches/ddd/commit/5dfa6fa053e49764f353f81e5d3c0c2dbadc1010))
+- **policies:** respect explicitly falsy cache options and bound cache size
+  ([0a6e1d6](https://github.com/vytches/ddd/commit/0a6e1d643cb0852823e7240f76fa4a35bdd710c1))
+- **resilience:** jitter default, per-instance decorator state, HALF_OPEN probe
+  gate (VF-028)
+  ([05ac364](https://github.com/vytches/ddd/commit/05ac364a5ea9f02e355b9235ab00019e9608d69b))
+
+### Features
+
+- **policies:** deduplicate concurrent identical policy checks
+  ([ab4292f](https://github.com/vytches/ddd/commit/ab4292fdef22412c6f74608c7bf410ab636a3bfc))
+
+### Performance Improvements
+
+- **policies:** combine CachedPolicy cache-key hashing into a single digest
+  ([2963a68](https://github.com/vytches/ddd/commit/2963a6842b0441ac5dc744244c6244b509f05e23))
+
+### BREAKING CHANGES
+
+- **policies:** composed policies now retain their caching/retry/temporal
+  wrapper, and composite ids carry the wrapper prefix as a result. Migration
+  notes per change in .changeset/vb-008-\*.md.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01THJr8eZUzbcrRZKwRbskka
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [Unreleased]
 
 ### Added

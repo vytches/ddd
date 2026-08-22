@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **nestjs:** register the CQRS token bridge in every module factory
+  ([1384dce](https://github.com/vytches/ddd/commit/1384dcea2200cf276f6cfcaa655c4a9d6fa9d0e9))
+- **nestjs:** report at bootstrap when no handler could be registered
+  ([8074352](https://github.com/vytches/ddd/commit/8074352463106888a8da4a48479deaff510b902a))
+- **nestjs:** warn when a discovered handler has no bus to register on
+  ([b428e34](https://github.com/vytches/ddd/commit/b428e3479ed131beedd60a7c6297b7b1fa28a56c))
+
+### Features
+
+- **nestjs:** add forRootAsync and route forFeature through CQRSConfiguration
+  ([abab7ba](https://github.com/vytches/ddd/commit/abab7ba2266d9869ab387cd38e32915c0de1d0ab))
+- **nestjs:** re-export COMMAND_BUS_TOKEN and QUERY_BUS_TOKEN
+  ([39972c9](https://github.com/vytches/ddd/commit/39972c9169e9a311d96010c59a490644a3138a57))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [Unreleased]
 
 ### BREAKING CHANGES
