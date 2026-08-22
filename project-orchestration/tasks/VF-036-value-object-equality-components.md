@@ -14,7 +14,7 @@ estimated_time: 8h
 created_by: consumer-feedback-2026-08-08
 created_at: 2026-08-08
 updated_at: 2026-08-09
-status: in-progress # implemented and committed (c88e728e); AC-SIGNOFF outstanding, blocks the npm tag
+status: done # implemented and committed (c88e728e); AC-SIGNOFF recorded 2026-08-22, npm tag unblocked
 release_target:
   next pre-release after implementation; additive minor bump. Downstream
   consumer validation on a patched build before any npm tag (they offered)
@@ -180,11 +180,21 @@ Two consequences of keeping it non-breaking:
   reusable artifact and applied to VF-036 as its first consumer. This was the
   third instance of the defect class after VB-003/F-C4 and VP-009 Bug #3. _Done
   in `c88e728e`._
-- **AC-SIGNOFF** — [ ] **OUTSTANDING, blocks the npm tag.** Pre-release build
-  handed to the downstream consumer for a full e2e/integration run against their
-  migrated call sites; sign-off recorded here before any tag. Under this design
-  it validates the new hook rather than gating a mass activation, but it remains
-  non-skippable — it is the assigned mitigation for TM-VF-036-002.
+- **AC-SIGNOFF** — [x] **Done 2026-08-22.** Downstream consumer validated
+  against a local substitution of the full dependency closure — all 18
+  `@vytches/*` packages in its lockfile packed from `develop` (`pnpm build`,
+  i.e. including `fix:dts` + `bundle:types`) and installed via `pnpm.overrides`
+  `file:` entries; substitution proven before any run (18/18 resolved from the
+  local tarballs, 0 from the registry, `getIdentityComponents` present on the
+  shipped prototype and absent on the registry control). _Regression:
+  `tsc --noEmit` exit 0 with 0 errors, identical to the registry baseline; full
+  unit suite 33132 passed / 22 skipped / 4 todo across 1656 test files, with the
+  single failure (`invites-rate-limits.spec.ts`, `ConfigValidationError` on
+  unset
+  `AZURE_CONTENT_SAFETY_\*`) reproduced identically on the unmodified registry baseline and therefore environmental. All 203 dead `getEqualityComponents`overrides remained inert — the name is absent from the shipped prototype and comparison behaviour was unchanged. Positive probe:`FacetScoreDisclosure` (`src/contexts/reputation/domain/value-objects/facet-score-disclosure.vo.ts`) migrated to `getIdentityComponents()`with its hand-written`equals()`
+  workaround deleted — 26/26 spec green on the base-class hook alone, while the
+  same class with the phantom name and no workaround failed the tier-only
+  equality assertion, proving the hook is what fires.\_
 - **AC-VERIFY** — [x] Type-check
   (`nx run @vytches/ddd-value-objects:type-check`, tsc — not just Vitest), full
   suite, ESM+CJS build, coverage ≥80% on touched files. _All green;
