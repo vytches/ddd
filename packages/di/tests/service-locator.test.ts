@@ -1,9 +1,10 @@
 import { safeRun } from '@vytches/ddd-utils';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
+  CircularDependencyError,
   ContainerConfigurationError,
   ServiceLocator,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
   SimpleContainer,
   VytchesDDD,
 } from '../src';
@@ -113,13 +114,13 @@ describe('ServiceLocator', () => {
       expect(instance).toBeInstanceOf(TestService);
     });
 
-    it('should throw ServiceNotFoundError when service not found', () => {
+    it('should throw ContainerServiceNotFoundError when service not found', () => {
       VytchesDDD.configure(globalContainer);
 
       const [serviceNotFoundError] = safeRun(() => {
         VytchesDDD.resolve('UnregisteredService');
       });
-      expect(serviceNotFoundError).toBeInstanceOf(ServiceNotFoundError);
+      expect(serviceNotFoundError).toBeInstanceOf(ContainerServiceNotFoundError);
     });
 
     it('should throw ContainerConfigurationError when no global container configured', () => {
@@ -266,6 +267,67 @@ describe('ServiceLocator', () => {
       const instance2 = ServiceLocator.getInstance();
 
       expect(instance1).toBe(instance2);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // D-3/A — single-lookup resolve; CircularDependencyError propagation (OQ-6)
+  // ---------------------------------------------------------------------------
+  describe('resolve — single-lookup semantics and error propagation', () => {
+    it('propagates CircularDependencyError from global container (never swallows it)', () => {
+      const c = new SimpleContainer();
+      c.registerFactory('A', cc => cc.resolve('B'));
+      c.registerFactory('B', cc => cc.resolve('A'));
+      VytchesDDD.configure(c);
+
+      const [err] = safeRun(() => VytchesDDD.resolve('A'));
+
+      expect(err).toBeInstanceOf(CircularDependencyError);
+    });
+
+    it('propagates CircularDependencyError from context container (never swallows it)', () => {
+      const c = new SimpleContainer();
+      c.registerFactory('A', cc => cc.resolve('B'));
+      c.registerFactory('B', cc => cc.resolve('A'));
+      VytchesDDD.configure(globalContainer);
+      VytchesDDD.configureContext('ctx', c);
+
+      const [err] = safeRun(() => VytchesDDD.resolve('A', 'ctx'));
+
+      expect(err).toBeInstanceOf(CircularDependencyError);
+    });
+
+    it('ContainerServiceNotFoundError message preserves canonical format for string token', () => {
+      VytchesDDD.configure(globalContainer);
+
+      const [err] = safeRun(() => VytchesDDD.resolve('MySpecificService'));
+
+      expect(err).toBeInstanceOf(ContainerServiceNotFoundError);
+      // Exact message shape required by D-3/A: token name + context string
+      expect((err as Error).message).toContain('MySpecificService');
+      expect((err as Error).message).toContain('Service not registered in any container');
+    });
+
+    it('ContainerServiceNotFoundError uses "unknown" for non-string tokens', () => {
+      VytchesDDD.configure(globalContainer);
+      const sym = Symbol('TestSym');
+
+      const [err] = safeRun(() => VytchesDDD.resolve(sym));
+
+      expect(err).toBeInstanceOf(ContainerServiceNotFoundError);
+      expect((err as Error).message).toContain('unknown');
+      expect((err as Error).message).toContain('Service not registered in any container');
+    });
+
+    it('falls back to global when service absent from context but present in global', () => {
+      class Svc {}
+      globalContainer.register('Svc', Svc);
+      VytchesDDD.configure(globalContainer);
+      VytchesDDD.configureContext('ctx', contextContainer); // contextContainer has no Svc
+
+      const result = VytchesDDD.resolve<Svc>('Svc', 'ctx');
+
+      expect(result).toBeInstanceOf(Svc);
     });
   });
 });

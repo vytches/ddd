@@ -28,6 +28,12 @@ interface QueuedTask<T = unknown> {
   resolve: (value: T) => void;
   reject: (error: Error) => void;
   startTime: number;
+  /**
+   * Removes this task's abort listener from its context signal. Set by
+   * `enqueue()`; called once the task leaves the queue, whatever its outcome.
+   * Absent on tasks that never went through the queue.
+   */
+  releaseAbortListener?: () => void;
 }
 
 export class Bulkhead {
@@ -114,17 +120,24 @@ export class Bulkhead {
 
       this.queue.push(task);
 
-      context.signal.addEventListener(
-        'abort',
-        () => {
-          const index = this.queue.indexOf(task);
-          if (index !== -1) {
-            this.queue.splice(index, 1);
-            reject(context.signal.reason);
-          }
-        },
-        { once: true }
-      );
+      // UX-C6: `{ once: true }` alone removes the listener only if the signal
+      // actually aborts. A task that leaves the queue normally — the common
+      // case — used to strand one listener per call on a caller-supplied
+      // context, which is typically reused across many bulkhead calls. The
+      // task's settle path now removes it explicitly.
+      const onAbort = (): void => {
+        const index = this.queue.indexOf(task);
+        if (index !== -1) {
+          this.queue.splice(index, 1);
+          reject(context.signal.reason);
+        }
+      };
+
+      task.releaseAbortListener = () => {
+        context.signal.removeEventListener('abort', onAbort);
+      };
+
+      context.signal.addEventListener('abort', onAbort, { once: true });
     });
   }
 
@@ -135,6 +148,11 @@ export class Bulkhead {
 
     const task = this.queue.shift();
     if (!task) return;
+
+    // The task has left the queue, so its abort listener can no longer do
+    // anything useful — drop it now rather than waiting for an abort that may
+    // never come (UX-C6).
+    task.releaseAbortListener?.();
 
     this.activeTasks++;
 

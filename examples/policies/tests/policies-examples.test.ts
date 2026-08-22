@@ -12,6 +12,14 @@ import { buildAuditedCreditPolicy, captureEventsTo } from '../src/05-event-drive
 import { buildRetryingRiskPolicy } from '../src/06-retry-policy';
 import { buildCachedFlagPolicy } from '../src/07-cached-policy';
 import { buildTemporalFraudPolicy } from '../src/08-temporal-policy';
+import { buildCachedFraudPolicy } from '../src/09-caching-factory-preset';
+import { buildRetryingShippingPolicy } from '../src/10-retry-factory-preset';
+import { buildPresetTemporalPaymentPolicy } from '../src/11-temporal-factory-preset';
+import { buildFlagPolicyWithMetrics, reportCacheHealth } from '../src/12-cache-metrics';
+import {
+  buildRetryThenCachePolicy,
+  buildCacheThenRetryPolicy,
+} from '../src/13-composed-enriched-policies';
 
 const ctx = PolicyContextBuilder.forUser('test-user').build();
 const reqOf = <T>(entity: T) => PolicyRequestBuilder.forEntityAndContext(entity, ctx).build();
@@ -156,5 +164,88 @@ describe('Example 8 — Temporal policy', () => {
     expect(policy).toBeDefined();
     const r = await policy.check(reqOf({ amount: 100, riskScore: 10 }));
     expect(r.isSuccess).toBe(true);
+  });
+});
+
+describe('Example 9 — Caching preset factory', () => {
+  it('forExpensivePolicy() produces a working cached policy', async () => {
+    const policy = buildCachedFraudPolicy();
+    const r1 = await policy.check(reqOf({ transactionFingerprint: 'fp-1', amount: 500 }));
+    const r2 = await policy.check(reqOf({ transactionFingerprint: 'fp-1', amount: 500 }));
+    expect(r1.isSuccess).toBe(true);
+    expect(r2.isSuccess).toBe(true);
+  });
+
+  it('rejects transactions over the fraud-score threshold', async () => {
+    const policy = buildCachedFraudPolicy();
+    const r = await policy.check(reqOf({ transactionFingerprint: 'fp-2', amount: 20_000 }));
+    expect(r.isFailure).toBe(true);
+    if (r.isFailure) expect(r.error.code).toBe('FRAUD_SCORE_TOO_HIGH');
+  });
+});
+
+describe('Example 10 — Retry preset factory', () => {
+  it('forExternalServices() produces a working retrying policy', async () => {
+    const policy = buildRetryingShippingPolicy();
+    const r = await policy.check(reqOf({ orderId: 'o-1', weightKg: 20 }));
+    expect(r.isSuccess).toBe(true);
+  });
+
+  it('rejects shipments the carrier cannot rate', async () => {
+    const policy = buildRetryingShippingPolicy();
+    const r = await policy.check(reqOf({ orderId: 'o-2', weightKg: 500 }));
+    expect(r.isFailure).toBe(true);
+    if (r.isFailure) expect(r.error.code).toBe('CARRIER_CANNOT_RATE');
+  });
+});
+
+describe('Example 11 — Temporal preset factory', () => {
+  it('businessHours() produces a usable temporal policy', async () => {
+    const policy = buildPresetTemporalPaymentPolicy();
+    expect(policy).toBeDefined();
+    const r = await policy.check(reqOf({ amount: 100, riskScore: 10 }));
+    expect(r.isSuccess).toBe(true);
+  });
+});
+
+describe('Example 12 — Reading cache metrics', () => {
+  it('reportCacheHealth() computes a hit ratio from PolicyCacheMetrics', async () => {
+    const policy = buildFlagPolicyWithMetrics();
+    const req = reqOf({ userId: 'A_1', flagName: 'new-checkout' });
+
+    await policy.check(req); // miss, populates the cache
+    await policy.check(req); // hit
+    await policy.check(req); // hit
+
+    const report = reportCacheHealth(policy);
+    expect(report.currentSize).toBe(1);
+    // 1 miss, 2 hits => hitRatio = 2/3
+    expect(report.hitRatio).toBeCloseTo(2 / 3);
+  });
+});
+
+describe('Example 13 — Composed enriched policies (wrapping order)', () => {
+  it('order 1 — cached(retry(base)): retries resolve flakiness, base runs twice', async () => {
+    const { policy, callCount } = buildRetryThenCachePolicy();
+    const req = reqOf({ transactionId: 'tx-order-1' });
+
+    const result = await policy.check(req);
+
+    expect(result.isSuccess).toBe(true);
+    expect(callCount()).toBe(2); // first attempt failed, retry succeeded
+  });
+
+  it('order 2 — retry(cached(base)): a cached failure defeats the retry, base runs once', async () => {
+    const { policy, callCount } = buildCacheThenRetryPolicy();
+    const req = reqOf({ transactionId: 'tx-order-2' });
+
+    const result = await policy.check(req);
+
+    // The first attempt's failure gets cached; every further retry
+    // attempt reads that cached failure instead of calling base again —
+    // so the composite never recovers, even though base would succeed on
+    // a genuine second call.
+    expect(result.isFailure).toBe(true);
+    expect(callCount()).toBe(1);
   });
 });

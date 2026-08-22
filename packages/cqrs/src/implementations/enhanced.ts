@@ -5,3 +5,4 @@ export { EnhancedCommandBus } from './enhanced-command-bus';
 export { EnhancedQueryBus } from './enhanced-query-bus';
 export type { EnhancedCommandBusOptions } from './enhanced-command-bus';
 export type { EnhancedQueryBusOptions } from './enhanced-query-bus';
+export type { BusRetryOptions } from './bus-retry-options';

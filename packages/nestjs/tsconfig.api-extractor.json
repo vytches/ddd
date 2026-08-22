@@ -1,0 +1,37 @@
+{
+  // VF-040 — compiler config used ONLY by api-extractor for this package.
+  //
+  // The repo-wide `paths` in tsconfig.base.json point every @vytches/* import
+  // at the package's TypeScript SOURCE, which is right for building and testing
+  // but wrong here: api-extractor analyses `dist/index.d.ts`, follows those
+  // paths back into src/, and then walks the full source of every dependency.
+  // On @vytches/ddd-messaging it hits an api-extractor 7.57.8 internal defect
+  // ("Unable to determine semantic information for declaration") on ordinary
+  // destructuring — confirmed by probe: removing one destructuring statement
+  // simply moved the error to the next one.
+  //
+  // Redirecting the dependencies to their emitted .d.ts is the actual fix, not
+  // a workaround for that defect: an API-surface gate should read the published
+  // shape of its dependencies, exactly as a consumer does, rather than
+  // recompiling their internals. The defect stops being reachable as a side
+  // effect.
+  //
+  // Only the packages @vytches/ddd-nestjs actually depends on are listed;
+  // validate:api:prepare builds them.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@vytches/ddd-acl": ["../acl/dist/index.d.ts"],
+      "@vytches/ddd-contracts": ["../contracts/dist/index.d.ts"],
+      "@vytches/ddd-contracts/internal": ["../contracts/dist/internal.d.ts"],
+      "@vytches/ddd-cqrs": ["../cqrs/dist/index.d.ts"],
+      "@vytches/ddd-di": ["../di/dist/index.d.ts"],
+      "@vytches/ddd-events": ["../events/dist/index.d.ts"],
+      "@vytches/ddd-events/internal": ["../events/dist/internal.d.ts"],
+      "@vytches/ddd-messaging": ["../messaging/dist/index.d.ts"],
+      "@vytches/ddd-resilience": ["../resilience/dist/index.d.ts"],
+      "@vytches/ddd-utils": ["../utils/dist/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
+}

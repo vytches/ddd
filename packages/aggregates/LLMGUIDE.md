@@ -41,44 +41,61 @@ class Order extends AggregateRoot<string> {
 // Usage
 const order = Order.create('c-1', 500);
 const events = order.getDomainEvents(); // [{ eventName: 'OrderCreated', ... }]
-order.commit(); // clear pending events after saving
+order.getDomainEvents() === events; // true — same array reference until the next mutation
+order.commit(); // clear pending events after saving; getDomainEvents() now returns a new, empty array
 ```
 
 ## Key API
 
-| Export                                 | Kind           | Description                                                                                                                                               |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AggregateRoot<TId>`                   | class          | Base aggregate root; manages version, events, capabilities — the _transactional_ root                                                                     |
-| `Entity<TId>`                          | abstract class | Base for **non-root** domain entities (VF-CANON-001) — identity-based equality, no version/event machinery. Use for `OrderLine`, inner aggregate entities |
-| `AggregateBuilder<TId>`                | class          | Fluent builder for constructing aggregates with capabilities                                                                                              |
-| `aggregateBuilder(params)`             | function       | Shorthand factory for `AggregateBuilder.create(params)`                                                                                                   |
-| `AggregateError`                       | class          | Domain error for aggregate-level failures                                                                                                                 |
-| `SnapshotCapability`                   | class          | Enables snapshot creation and restoration                                                                                                                 |
-| `AuditCapability`                      | class          | Attaches an audit log to every event applied                                                                                                              |
-| `VersioningCapability`                 | class          | Registers event upcasters for schema evolution                                                                                                            |
-| `EventSourcingCapability`              | class          | Integrates with `IEventStore` for persistence                                                                                                             |
-| `asSnapshotAggregate(agg)`             | function       | Casts aggregate, throws if no `SnapshotCapability`                                                                                                        |
-| `asAuditAggregate(agg)`                | function       | Casts aggregate, throws if no `AuditCapability`                                                                                                           |
-| `hasAllCapabilities(agg, [...])`       | function       | Returns `true` if aggregate has every listed capability                                                                                                   |
-| `getAggregateCapabilities(agg)`        | function       | Returns string array of capability type names                                                                                                             |
-| `AggregateWithSnapshotCapability<TId>` | type           | Type-safe alias for snapshot-capable aggregates                                                                                                           |
-| `IAggregateRoot<TId>`                  | interface      | Full contract for aggregates                                                                                                                              |
+| Export                                      | Kind           | Description                                                                                                                                                                                                   |
+| ------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `AggregateRoot<TId>`                        | class          | Base aggregate root; manages version, events, capabilities — the _transactional_ root                                                                                                                         |
+| `Entity<TId>`                               | abstract class | Base for **non-root** domain entities (VF-CANON-001) — identity-based equality, no version/event machinery. Use for `OrderLine`, inner aggregate entities                                                     |
+| `AggregateBuilder<TId>`                     | class          | Fluent builder for constructing aggregates with capabilities                                                                                                                                                  |
+| `aggregateBuilder(params)`                  | function       | Shorthand factory for `AggregateBuilder.create(params)`                                                                                                                                                       |
+| `AggregateError`                            | class          | Domain error for aggregate-level failures                                                                                                                                                                     |
+| `SnapshotCapability`                        | class          | Enables snapshot creation and restoration                                                                                                                                                                     |
+| `AuditCapability`                           | class          | Attaches an audit log to every event applied                                                                                                                                                                  |
+| `VersioningCapability`                      | class          | Registers event upcasters for schema evolution                                                                                                                                                                |
+| `EventSourcingCapability`                   | class          | Integrates with `IEventStore` for persistence                                                                                                                                                                 |
+| `asSnapshotAggregate(agg)`                  | function       | Casts aggregate, throws if no `SnapshotCapability`                                                                                                                                                            |
+| `asAuditAggregate(agg)`                     | function       | Casts aggregate, throws if no `AuditCapability`                                                                                                                                                               |
+| `asVersioningAggregate(agg)`                | function       | Casts aggregate, throws if no `VersioningCapability`                                                                                                                                                          |
+| `asEventSourcingAggregate(agg)`             | function       | Casts aggregate, throws if no `EventSourcingCapability`                                                                                                                                                       |
+| `tryAsSnapshotAggregate(agg)`               | function       | Non-throwing sibling of `asSnapshotAggregate`; returns `Result.ok(aggregate)` or `Result.fail(AggregateError)` instead of throwing                                                                            |
+| `tryAsAuditAggregate(agg)`                  | function       | Non-throwing sibling of `asAuditAggregate`; returns a `Result<AggregateWithAuditCapability<TId>, AggregateError>`                                                                                             |
+| `tryAsVersioningAggregate(agg)`             | function       | Non-throwing sibling of `asVersioningAggregate`; returns a `Result<AggregateWithVersioningCapability<TId>, AggregateError>`                                                                                   |
+| `tryAsEventSourcingAggregate(agg)`          | function       | Non-throwing sibling of `asEventSourcingAggregate`; returns a `Result<AggregateWithEventSourcingCapability<TId>, AggregateError>`                                                                             |
+| `hasAllCapabilities(agg, [...])`            | function       | Returns `true` if aggregate has every listed capability                                                                                                                                                       |
+| `getAggregateCapabilities(agg)`             | function       | Returns string array of capability type names                                                                                                                                                                 |
+| `AggregateWithSnapshotCapability<TId>`      | type           | Type-safe alias for snapshot-capable aggregates; return type of `asSnapshotAggregate`/`tryAsSnapshotAggregate`                                                                                                |
+| `AggregateWithAuditCapability<TId>`         | type           | Type-safe alias for audit-capable aggregates; return type of `asAuditAggregate`/`tryAsAuditAggregate`                                                                                                         |
+| `AggregateWithVersioningCapability<TId>`    | type           | Type-safe alias for versioning-capable aggregates; return type of `asVersioningAggregate`/`tryAsVersioningAggregate`                                                                                          |
+| `AggregateWithEventSourcingCapability<TId>` | type           | Type-safe alias for event-sourcing-capable aggregates; return type of `asEventSourcingAggregate`/`tryAsEventSourcingAggregate`                                                                                |
+| `IAggregateRoot<TId>`                       | interface      | Full contract for aggregates                                                                                                                                                                                  |
+| `IAggregateCapability`                      | interface      | Base contract every capability implements: `attach(aggregate)` (required) + `detach?()` (optional). `SnapshotCapability`, `AuditCapability`, `VersioningCapability`, `EventSourcingCapability` all satisfy it |
+| `IAggregateEventHandler<T>`                 | interface      | Callable shape `(payload: T, metadata?) => void` — the handler function type registered via `registerEventHandler(type, fn)`                                                                                  |
+
+> **BREAKING (v0.31.0):** `IAggregateBuilder<TId>` was removed — it was exported
+> but shape-incompatible with the concrete `AggregateBuilder` class. Use
+> `AggregateBuilder` directly for `withSnapshots()`, `withVersioning()`,
+> `withEventSourcing()`, `withAudit()`, `withCustomCapability()`, `build()`.
 
 ### `AggregateRoot` method reference
 
-| Method                                  | Description                                                               |
-| --------------------------------------- | ------------------------------------------------------------------------- |
-| `apply(eventType, payload?, metadata?)` | Record a domain event, increment version, call handler                    |
-| `loadFromHistory(events)`               | Replay historical events to restore state without accumulating new events |
-| `getDomainEvents()`                     | Return readonly array of uncommitted events since last `commit()`         |
-| `commit()`                              | Clear uncommitted events; call after persisting to storage                |
-| `hasChanges()`                          | `true` if there are uncommitted events                                    |
-| `getVersion()`                          | Current version after all applied events                                  |
-| `getInitialVersion()`                   | Version when last loaded from storage (for optimistic locking)            |
-| `addCapability(cap)`                    | Attach a capability; calls `cap.attach(this)`                             |
-| `getCapability(CapClass)`               | Retrieve capability by constructor, returns `undefined` if absent         |
-| `hasCapability(CapClass)`               | Type-safe capability presence check                                       |
-| `registerEventHandler(type, fn)`        | Protected; wire event name to state mutation function                     |
+| Method                                  | Description                                                                                                                                                                                                           |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apply(eventType, payload?, metadata?)` | Record a domain event, increment version, call handler                                                                                                                                                                |
+| `loadFromHistory(events)`               | Replay historical events to restore state without accumulating new events                                                                                                                                             |
+| `getDomainEvents()`                     | Return readonly, deep-frozen array of uncommitted events since last `commit()`. Same array reference on repeat calls — rebuilt only on the next mutation (`apply`/`commit`/`loadFromHistory`/`transformDomainEvents`) |
+| `commit()`                              | Clear uncommitted events; call after persisting to storage                                                                                                                                                            |
+| `hasChanges()`                          | `true` if there are uncommitted events                                                                                                                                                                                |
+| `getVersion()`                          | Current version after all applied events                                                                                                                                                                              |
+| `getInitialVersion()`                   | Version when last loaded from storage (for optimistic locking)                                                                                                                                                        |
+| `addCapability(cap)`                    | Attach a capability; calls `cap.attach(this)`                                                                                                                                                                         |
+| `getCapability(CapClass)`               | Retrieve capability by constructor, returns `undefined` if absent                                                                                                                                                     |
+| `hasCapability(CapClass)`               | Type-safe capability presence check                                                                                                                                                                                   |
+| `registerEventHandler(type, fn)`        | Protected; wire event name to state mutation function                                                                                                                                                                 |
 
 ## Patterns
 
@@ -133,6 +150,57 @@ import {
 if (hasAllCapabilities(order, [AuditCapability])) {
   const auditable = asAuditAggregate(order);
   const log = auditable.getCapability(AuditCapability)!.getAuditLog();
+}
+```
+
+### Composing multiple capabilities and narrowing with `tryAs*` helpers
+
+Build one aggregate with two capabilities (versioning + event sourcing), then
+narrow it back to each capability-specific type with the non-throwing `tryAs*`
+variants — useful in application-layer code where a missing capability should be
+handled as a `Result`, not an exception.
+
+```typescript
+import {
+  AggregateBuilder,
+  VersioningCapability,
+  EventSourcingCapability,
+  tryAsVersioningAggregate,
+  tryAsEventSourcingAggregate,
+  type AggregateWithVersioningCapability,
+  type AggregateWithEventSourcingCapability,
+} from '@vytches/ddd-aggregates';
+import { EntityId } from '@vytches/ddd-value-objects';
+
+const order = AggregateBuilder.create({ id: EntityId.create() })
+  .withVersioning()
+  .withEventSourcing()
+  .build(Order);
+
+// Narrow to versioning-capable: register an upcaster for an old event shape.
+const versioningResult = tryAsVersioningAggregate(order);
+if (versioningResult.isSuccess) {
+  const versioned: AggregateWithVersioningCapability<string> =
+    versioningResult.value;
+  versioned
+    .getCapability(VersioningCapability)!
+    .registerUpcaster('OrderCreated', 1, {
+      upcast: (payload: { amount: number }) => ({
+        ...payload,
+        currency: 'USD',
+      }),
+    });
+}
+
+// Narrow to event-sourcing-capable: persist to the configured event store.
+const eventSourcingResult = tryAsEventSourcingAggregate(order);
+if (eventSourcingResult.isSuccess) {
+  const sourced: AggregateWithEventSourcingCapability<string> =
+    eventSourcingResult.value;
+  await sourced.getCapability(EventSourcingCapability)!.saveToEventStore();
+} else {
+  // eventSourcingResult.error is an AggregateError — handle without throwing.
+  console.error(eventSourcingResult.error.message);
 }
 ```
 

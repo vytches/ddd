@@ -47,7 +47,6 @@ export class InventoryReservationService extends AsyncDomainService {
    * Real implementations would warm an in-memory cache from the DB here.
    */
   override async initialize(): Promise<void> {
-    this.logger.info('Initializing inventory service');
     // Stub: pretend we loaded from DB.
     this.stockOnHand = new Map([
       ['SKU-A', 100],
@@ -62,9 +61,6 @@ export class InventoryReservationService extends AsyncDomainService {
    * pending stock updates here.
    */
   override async dispose(): Promise<void> {
-    this.logger.info('Releasing all reservations on shutdown', {
-      count: this.reservations.size,
-    });
     this.reservations.clear();
   }
 

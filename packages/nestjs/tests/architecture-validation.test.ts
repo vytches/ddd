@@ -5,6 +5,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
 import { safeRun } from '@vytches/ddd-utils';
+import { InvalidContextNameError } from '../src/errors';
 
 // Create mock abstract classes for DI token compatibility using vi.hoisted()
 const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
@@ -42,6 +43,8 @@ vi.mock('@vytches/ddd-cqrs', () => {
     QueryBus: mockBus,
     EnhancedCommandBus: mockBus,
     EnhancedQueryBus: mockBus,
+    COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+    QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
   };
 });
 
@@ -53,7 +56,8 @@ vi.mock('@vytches/ddd-events', async () => ({
   })),
 }));
 
-vi.mock('@vytches/ddd-di', async () => ({
+vi.mock('@vytches/ddd-di', async importOriginal => ({
+  ...(await importOriginal<typeof import('@vytches/ddd-di')>()),
   SimpleContainer: vi.fn().mockImplementation(() => ({
     register: vi.fn(),
     resolve: vi.fn(),
@@ -190,19 +194,7 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
   describe('Real-World NestJS Integration', () => {
     it('should integrate seamlessly with NestJS controllers and services', async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('UserManagement', {
-            bridgeToNestJS: true,
-            handlers: {
-              include: ['*Handler'],
-              prefix: 'User',
-            },
-            performance: {
-              performanceTarget: 100,
-              autoOptimize: true,
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('UserManagement', {})],
         controllers: [UserController],
         providers: [UserBusinessService, TestCommandHandler, TestQueryHandler, TestEventHandler],
       }).compile();
@@ -220,7 +212,6 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
       const contextConfig = explorer.getContextConfiguration();
       expect(contextConfig).toBeDefined();
       expect(contextConfig?.context).toBe('UserManagement');
-      expect(contextConfig?.bridgeToNestJS).toBe(true);
 
       // Sprawdź czy NestJS services działają normalnie
       const userService = module.get(UserBusinessService);
@@ -244,21 +235,10 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
       module = await Test.createTestingModule({
         imports: [
           VytchesDDDModule.forContexts({
-            globalBridgeToNestJS: true,
-            enableContexts: true,
             contexts: {
-              UserManagement: {
-                handlers: { prefix: 'User' },
-                performance: { performanceTarget: 100 },
-              },
-              OrderProcessing: {
-                handlers: { prefix: 'Order' },
-                performance: { performanceTarget: 150 },
-              },
-              PaymentProcessing: {
-                bridgeToNestJS: false, // Override global setting
-                handlers: { prefix: 'Payment' },
-              },
+              UserManagement: {},
+              OrderProcessing: {},
+              PaymentProcessing: {},
             },
           }),
         ],
@@ -284,9 +264,6 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
       expect(userConfig?.context).toBe('UserManagement');
       expect(orderConfig?.context).toBe('OrderProcessing');
       expect(paymentConfig?.context).toBe('PaymentProcessing');
-
-      // Sprawdź bridgeToNestJS configuration
-      expect(paymentConfig?.bridgeToNestJS).toBe(false);
 
       // Base explorer should also be available
       const baseExplorer = module.get(VytchesExplorerService);
@@ -332,15 +309,7 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
   describe('Handler Discovery and Registration', () => {
     beforeEach(async () => {
       module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('TestContext', {
-            bridgeToNestJS: true,
-            handlers: {
-              include: ['*Handler'],
-              exclude: ['*MockHandler'],
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('TestContext', {})],
         providers: [TestCommandHandler, TestQueryHandler, TestEventHandler],
       }).compile();
 
@@ -367,15 +336,7 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
     it('should respect handler filtering rules', async () => {
       // Test z różnymi filtrami
       const moduleWithFilters = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('FilteredContext', {
-            bridgeToNestJS: true,
-            handlers: {
-              include: ['*Command*'],
-              exclude: ['*Test*'],
-            },
-          }),
-        ],
+        imports: [VytchesDDDModule.forContext('FilteredContext', {})],
         providers: [TestCommandHandler, TestQueryHandler],
       }).compile();
 
@@ -384,8 +345,7 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
       const explorer = moduleWithFilters.get(`VytchesExplorerService_FilteredContext`);
       const config = explorer.getContextConfiguration();
 
-      expect(config?.handlers?.include).toContain('*Command*');
-      expect(config?.handlers?.exclude).toContain('*Test*');
+      expect(config?.context).toBe('FilteredContext');
 
       await moduleWithFilters.close();
     });
@@ -403,77 +363,11 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
     });
   });
 
-  describe('Performance Configuration Validation', () => {
-    it('should apply performance settings per context', async () => {
-      const performanceOptions = {
-        performanceMode: 'production' as const,
-        autoOptimize: true,
-        performanceTarget: 75,
-        contexts: ['HighPerformanceContext'],
-      };
-
-      module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('HighPerformanceContext', {
-            bridgeToNestJS: true,
-            performance: performanceOptions,
-            monitoring: {
-              enabled: true,
-              warnAt: 40,
-              errorAt: 80,
-            },
-          }),
-        ],
-        providers: [TestCommandHandler],
-      }).compile();
-
-      await module.init();
-
-      const explorer = module.get(`VytchesExplorerService_HighPerformanceContext`);
-      const config = explorer.getContextConfiguration();
-
-      expect(config?.context).toBe('HighPerformanceContext');
-      expect(config?.bridgeToNestJS).toBe(true);
-
-      // Performance config powinien być stosowany
-      expect(config?.performance).toBeDefined();
-    });
-
-    it('should handle performance monitoring setup', async () => {
-      module = await Test.createTestingModule({
-        imports: [
-          VytchesDDDModule.forContext('MonitoredContext', {
-            performance: {
-              performanceMode: 'development',
-              performanceTarget: 200,
-              autoOptimize: false,
-            },
-            monitoring: {
-              enabled: true,
-              warnAt: 100,
-              errorAt: 300,
-            },
-          }),
-        ],
-      }).compile();
-
-      await module.init();
-
-      const explorer = module.get(`VytchesExplorerService_MonitoredContext`);
-      expect(explorer).toBeInstanceOf(VytchesExplorerService);
-
-      const config = explorer.getContextConfiguration();
-      expect(config?.monitoring?.enabled).toBe(true);
-    });
-  });
-
   describe('Edge Cases and Error Handling', () => {
     it('should handle empty context configurations', async () => {
       module = await Test.createTestingModule({
         imports: [
           VytchesDDDModule.forContexts({
-            globalBridgeToNestJS: false,
-            enableContexts: true,
             contexts: {},
           }),
         ],
@@ -486,15 +380,7 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
     it('should handle malformed handler configurations', async () => {
       const [moduleError] = await safeRun(async () => {
         const testModule = await Test.createTestingModule({
-          imports: [
-            VytchesDDDModule.forContext('InvalidContext', {
-              bridgeToNestJS: true,
-              handlers: {
-                include: [], // Empty include
-                exclude: null as unknown as string[], // Invalid exclude
-              },
-            }),
-          ],
+          imports: [VytchesDDDModule.forContext('InvalidContext', {})],
         }).compile();
 
         await testModule.init();
@@ -508,19 +394,22 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
     it('should validate context names and prevent conflicts', async () => {
       // Test invalid context name should throw during configuration
       const [configError] = safeRun(() => {
-        return VytchesDDDModule.forContext('', { bridgeToNestJS: true });
+        return VytchesDDDModule.forContext('', {});
       });
 
       expect(configError).toBeDefined();
-      expect(configError?.message).toContain('Context name cannot be null or empty');
+      // VF-032b: typed error, so assert the type rather than the wording — the
+      // message is free to change, the catchable type is the contract.
+      expect(configError).toBeInstanceOf(InvalidContextNameError);
+      expect((configError as InvalidContextNameError).factory).toBe('forContext');
 
       // Test válid context names work properly
       module = await Test.createTestingModule({
         imports: [
           VytchesDDDModule.forContexts({
             contexts: {
-              ValidContext: { bridgeToNestJS: true },
-              'Another-Valid_Context123': { bridgeToNestJS: true },
+              ValidContext: {},
+              'Another-Valid_Context123': {},
             },
           }),
         ],
@@ -541,12 +430,7 @@ describe('VytchesDDDModule - Architecture Validation Tests', () => {
 
       const modulePromises = contexts.map(context =>
         Test.createTestingModule({
-          imports: [
-            VytchesDDDModule.forContext(context, {
-              bridgeToNestJS: true,
-              performance: { performanceTarget: Math.floor(Math.random() * 100) + 50 },
-            }),
-          ],
+          imports: [VytchesDDDModule.forContext(context, {})],
         }).compile()
       );
 

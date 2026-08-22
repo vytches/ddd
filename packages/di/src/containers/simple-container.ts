@@ -1,10 +1,10 @@
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import {
   CircularDependencyError,
   ContainerDisposedError,
   InvalidRegistrationError,
   ServiceAlreadyRegisteredError,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
 } from '../errors';
 import type {
   Constructor,
@@ -17,11 +17,19 @@ import type {
 import { ServiceLifetime } from '../types';
 
 export class SimpleContainer implements IDependencyContainer {
-  private readonly logger = Logger.forContext('SimpleContainer');
-  private readonly services = new Map<string, ServiceDescriptor>();
-  private readonly singletonInstances = new Map<string, unknown>();
-  private readonly scopedInstances = new Map<string, unknown>();
-  private readonly resolutionChain: ServiceToken[] = [];
+  // VF-030 D1: token identity lives in the Map key itself (ADR-0034).
+  // String tokens key by VALUE; function/class and symbol tokens key by
+  // REFERENCE — two distinct classes that share a .name never collide, and
+  // Symbol('X') !== Symbol('X') are distinct registrations. Use Symbol.for()
+  // for tokens that must be shared across module instances (dual ESM/CJS).
+  private readonly services = new Map<ServiceToken, ServiceDescriptor>();
+  private readonly singletonInstances = new Map<ServiceToken, unknown>();
+  private readonly scopedInstances = new Map<ServiceToken, unknown>();
+
+  // D-2/C: Set for O(1) cycle detection; separate ordered array for DFS error message.
+  private readonly resolutionChainSet = new Set<ServiceToken>();
+  private readonly resolutionChainOrder: ServiceToken[] = [];
+
   private disposed = false;
 
   /**
@@ -32,25 +40,48 @@ export class SimpleContainer implements IDependencyContainer {
   }
 
   /**
-   * Resolve a service by token
+   * Resolve a service by token. Throws ContainerServiceNotFoundError when absent.
    */
   resolve<T>(token: ServiceToken<T>): T {
     this.ensureNotDisposed();
 
-    // Check for circular dependencies
-    if (this.resolutionChain.includes(token)) {
-      throw new CircularDependencyError([...this.resolutionChain, token]);
+    // D-2/C: O(1) cycle detection via Set
+    if (this.resolutionChainSet.has(token)) {
+      throw new CircularDependencyError([...this.resolutionChainOrder, token]);
     }
 
-    // Add to resolution chain
-    this.resolutionChain.push(token);
+    this.resolutionChainSet.add(token);
+    this.resolutionChainOrder.push(token);
 
     try {
-      const instance = this.resolveInternal<T>(token);
-      return instance;
+      return this.resolveInternal<T>(token);
     } finally {
-      // Remove from resolution chain
-      this.resolutionChain.pop();
+      // Symmetric delete — preserves DFS ordering for subsequent cycles
+      this.resolutionChainSet.delete(token);
+      this.resolutionChainOrder.pop();
+    }
+  }
+
+  /**
+   * D-3/A: Try to resolve a service. Returns undefined when absent (never throws
+   * ContainerServiceNotFoundError), but still throws CircularDependencyError on cycles and
+   * still walks the parent scope.
+   */
+  tryResolve<T>(token: ServiceToken<T>): T | undefined {
+    this.ensureNotDisposed();
+
+    if (this.resolutionChainSet.has(token)) {
+      throw new CircularDependencyError([...this.resolutionChainOrder, token]);
+    }
+
+    this.resolutionChainSet.add(token);
+    this.resolutionChainOrder.push(token);
+
+    try {
+      return this.tryResolveInternal<T>(token);
+    } finally {
+      this.resolutionChainSet.delete(token);
+      this.resolutionChainOrder.pop();
     }
   }
 
@@ -64,13 +95,11 @@ export class SimpleContainer implements IDependencyContainer {
   ): void {
     this.ensureNotDisposed();
 
-    const tokenKey = this.getTokenKey(token);
-
     if (!implementation) {
       throw new InvalidRegistrationError(token, 'Implementation cannot be null or undefined');
     }
 
-    if (this.services.has(tokenKey)) {
+    if (this.services.has(token)) {
       throw new ServiceAlreadyRegisteredError(token, options?.context);
     }
 
@@ -82,7 +111,7 @@ export class SimpleContainer implements IDependencyContainer {
       ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
-    this.services.set(tokenKey, descriptor);
+    this.services.set(token, descriptor);
   }
 
   /**
@@ -95,13 +124,11 @@ export class SimpleContainer implements IDependencyContainer {
   ): void {
     this.ensureNotDisposed();
 
-    const tokenKey = this.getTokenKey(token);
-
     if (!factory) {
       throw new InvalidRegistrationError(token, 'Factory cannot be null or undefined');
     }
 
-    if (this.services.has(tokenKey)) {
+    if (this.services.has(token)) {
       throw new ServiceAlreadyRegisteredError(token, options?.context);
     }
 
@@ -113,11 +140,15 @@ export class SimpleContainer implements IDependencyContainer {
       ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
-    this.services.set(tokenKey, descriptor);
+    this.services.set(token, descriptor);
   }
 
   /**
-   * Register a service instance
+   * Register a service instance.
+   *
+   * D-4: stores the instance only in services[token].instance; does NOT pre-populate
+   * singletonInstances. The singleton cache is populated on first resolve(), which
+   * keeps getServices()/resolve() byte-for-byte identical to pre-D-4 behaviour.
    */
   registerInstance<T>(
     token: ServiceToken<T>,
@@ -126,13 +157,11 @@ export class SimpleContainer implements IDependencyContainer {
   ): void {
     this.ensureNotDisposed();
 
-    const tokenKey = this.getTokenKey(token);
-
     if (instance === null || instance === undefined) {
       throw new InvalidRegistrationError(token, 'Instance cannot be null or undefined');
     }
 
-    if (this.services.has(tokenKey)) {
+    if (this.services.has(token)) {
       throw new ServiceAlreadyRegisteredError(token, options?.context);
     }
 
@@ -144,8 +173,9 @@ export class SimpleContainer implements IDependencyContainer {
       ...(options?.tags !== undefined && { tags: options.tags }),
     };
 
-    this.services.set(tokenKey, descriptor);
-    this.singletonInstances.set(tokenKey, instance);
+    this.services.set(token, descriptor);
+    // D-4: do NOT also store in singletonInstances here.
+    // resolveInternal will populate singletonInstances on first resolve.
   }
 
   /**
@@ -153,8 +183,7 @@ export class SimpleContainer implements IDependencyContainer {
    */
   isRegistered<T>(token: ServiceToken<T>): boolean {
     this.ensureNotDisposed();
-    const tokenKey = this.getTokenKey(token);
-    return this.services.has(tokenKey) || (this.parentScope?.isRegistered(token) ?? false);
+    return this.services.has(token) || (this.parentScope?.isRegistered(token) ?? false);
   }
 
   /**
@@ -202,7 +231,9 @@ export class SimpleContainer implements IDependencyContainer {
         try {
           (instance as { dispose: () => void }).dispose();
         } catch (error) {
-          this.logger.warn('Error disposing singleton instance', { error: String(error) });
+          internalLogger.warn('SimpleContainer: Error disposing singleton instance', {
+            error: String(error),
+          });
         }
       }
     }
@@ -216,23 +247,47 @@ export class SimpleContainer implements IDependencyContainer {
   }
 
   /**
-   * Internal resolution logic
+   * Internal resolution logic — throws ContainerServiceNotFoundError when absent.
    */
   private resolveInternal<T>(token: ServiceToken<T>): T {
-    const tokenKey = this.getTokenKey(token);
-    const descriptor = this.services.get(tokenKey);
+    const descriptor = this.services.get(token);
 
     if (!descriptor) {
       // Try parent scope if available
       if (this.parentScope) {
         return this.parentScope.resolve<T>(token);
       }
-      throw new ServiceNotFoundError(token);
+      throw new ContainerServiceNotFoundError(token);
     }
 
+    return this.createInstance<T>(descriptor as ServiceDescriptor<T>, token);
+  }
+
+  /**
+   * D-3/A: Like resolveInternal but returns undefined when absent instead of throwing.
+   */
+  private tryResolveInternal<T>(token: ServiceToken<T>): T | undefined {
+    const descriptor = this.services.get(token);
+
+    if (!descriptor) {
+      if (this.parentScope) {
+        return this.parentScope.tryResolve<T>(token);
+      }
+      return undefined;
+    }
+
+    return this.createInstance<T>(descriptor as ServiceDescriptor<T>, token);
+  }
+
+  /**
+   * Shared instance-creation logic used by both resolveInternal and tryResolveInternal.
+   * Handles singleton/scoped caching, factory invocation, and constructor instantiation.
+   * Caches are keyed by the token itself (reference identity — VF-030 D1).
+   */
+  private createInstance<T>(descriptor: ServiceDescriptor<T>, token: ServiceToken<T>): T {
     // Check singleton cache
     if (descriptor.lifetime === ServiceLifetime.Singleton) {
-      const cachedInstance = this.singletonInstances.get(tokenKey);
+      const cachedInstance = this.singletonInstances.get(token);
       if (cachedInstance !== undefined) {
         return cachedInstance as T;
       }
@@ -240,7 +295,7 @@ export class SimpleContainer implements IDependencyContainer {
 
     // Check scoped cache
     if (descriptor.lifetime === ServiceLifetime.Scoped) {
-      const cachedInstance = this.scopedInstances.get(tokenKey);
+      const cachedInstance = this.scopedInstances.get(token);
       if (cachedInstance !== undefined) {
         return cachedInstance as T;
       }
@@ -261,30 +316,15 @@ export class SimpleContainer implements IDependencyContainer {
 
     // Cache singleton instances
     if (descriptor.lifetime === ServiceLifetime.Singleton) {
-      this.singletonInstances.set(tokenKey, instance);
+      this.singletonInstances.set(token, instance);
     }
 
     // Cache scoped instances
     if (descriptor.lifetime === ServiceLifetime.Scoped) {
-      this.scopedInstances.set(tokenKey, instance);
+      this.scopedInstances.set(token, instance);
     }
 
     return instance;
-  }
-
-  /**
-   * Get a consistent string key for a service token
-   */
-  private getTokenKey(token: ServiceToken): string {
-    if (typeof token === 'string') {
-      return token;
-    }
-
-    if (typeof token === 'symbol') {
-      return token.toString();
-    }
-
-    return token.name || token.toString();
   }
 
   /**

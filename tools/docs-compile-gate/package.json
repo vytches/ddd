@@ -1,0 +1,17 @@
+{
+  "name": "@vytches/docs-compile-gate",
+  "version": "0.26.0",
+  "private": true,
+  "description": "VD-005 (AC11) — type-checks TypeScript code fences embedded in README.md/LLMGUIDE.md files that opt in via the `ts compile-check` marker, catching drift such as wrong constructor argument order, methods that don't exist, or renamed config fields before it lands in docs again. v1 is OPT-IN: only marked fences are checked, everything else is left untouched.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest --run",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "typescript": "^5.8.0"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.0"
+  }
+}

@@ -3,6 +3,92 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **cqrs:** preserve input order in executeInParallel results
+  ([57172b2](https://github.com/vytches/ddd/commit/57172b22efc21871e289bc4a965c8df45000136e))
+- **resilience:** jitter default, per-instance decorator state, HALF_OPEN probe
+  gate (VF-028)
+  ([05ac364](https://github.com/vytches/ddd/commit/05ac364a5ea9f02e355b9235ab00019e9608d69b))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [Unreleased]
+
+### Added
+
+- `BusRetryOptions` — named retry config shape shared by `EnhancedCommandBus`
+  and `EnhancedQueryBus`'s `resilience.retry` option (`enabled`, `maxAttempts`,
+  `baseDelay`, `maxDelay`, `backoffMultiplier`, `jitter`).
+  `EnhancedQueryBus.resilience.retry` now accepts the same object shape as
+  `EnhancedCommandBus` (previously boolean-only); `retry: true` remains a legacy
+  alias for `{ enabled: true }` on both buses (VF-028, D12, OQ3/OQ4).
+
+### Fixed
+
+- `EnhancedCommandBus`/`EnhancedQueryBus` no longer hardcode `jitter: false`
+  when building their internal retry strategy — retry delay jitter now defaults
+  to `true` (matching `RetryPolicy.defaultConfig()` in
+  `@vytches/ddd-resilience`) and is configurable via `resilience.retry.jitter`
+  (VF-028, SA-H3).
+
+### Removed
+
+- `EnhancedCommandBusOptions.resilience.circuitBreaker.halfOpenMaxAttempts`
+  removed. It was accepted but never read by `setupResilience` — setting it had
+  no effect. Removed without a `@deprecated` alias (VF-028, D3, PATCH): this is
+  a dead-field cleanup, not a behavior change, so no migration is needed. Not to
+  be confused with the unrelated `halfOpenMaxAttempts` in
+  `@vytches/ddd-projections`, which is untouched.
+
+## [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **cqrs:** evict stale handler factories and add bus reset (VS-003)
+  ([550f865](https://github.com/vytches/ddd/commit/550f8654472260140d67a2f15876691f1f1f6348))
+- **cqrs:** make CQRS execution logging opt-in, sanitize logged errors
+  ([5f58796](https://github.com/vytches/ddd/commit/5f587964c1aa2b00adaf662742b18fda7dbd9315))
+- **cqrs:** unref cache timers and align command enableCache default to false
+  (vp-010)
+  ([56068b7](https://github.com/vytches/ddd/commit/56068b73a39a20d8c18aa7be6cd676639ea1cce5))
+- **messaging:** preserve outbox stack trace + widen LoggingMiddleware logger
+  type (VS-015)
+  ([f11f6f9](https://github.com/vytches/ddd/commit/f11f6f96427a9b41910a5c5249fbc1c541201055))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Features
+
+- **cqrs:** add IDisposableBus interface and export from package
+  ([00ada97](https://github.com/vytches/ddd/commit/00ada97a1d6f104e972de1a3a33a511520ba6f48))
+- **cqrs:** export Symbol.for DI tokens to fix dual-package hazard (VP-009 Bug
+  [#3](https://github.com/vytches/ddd/issues/3))
+  ([a985fa8](https://github.com/vytches/ddd/commit/a985fa8301c711d063820c72f55aab76f1ba1331))
+
+### BREAKING CHANGES
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-cqrs

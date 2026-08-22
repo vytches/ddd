@@ -71,6 +71,29 @@ class AlwaysPassPolicy extends BaseBusinessPolicy<{ value: number }> {
   }
 }
 
+/**
+ * VB-008 (AC1/AC5-unit3): tracks how many times it is actually evaluated.
+ * Used as the `duringBusinessHours` branch so composition tests can prove
+ * the temporal time-window switch is still executing after and()/or() —
+ * if composition silently dropped the temporal decorator (the AC1 defect),
+ * `check()` would route straight to the raw base policy and this branch
+ * would never run, so callCount would stay 0.
+ */
+class CountingPolicy extends BaseBusinessPolicy<{ value: number }> {
+  public callCount = 0;
+
+  constructor() {
+    super('counting-policy', 'test', 'Counting Policy');
+  }
+
+  public async check(
+    request: PolicyRequest<{ value: number }>
+  ): Promise<Result<{ value: number }, PolicyViolation>> {
+    this.callCount++;
+    return this.success(request.entity);
+  }
+}
+
 describe('TemporalPolicy', () => {
   let basePolicy: StrictPolicy;
   let strictPolicy: StrictPolicy;
@@ -475,11 +498,69 @@ describe('TemporalPolicy', () => {
       expect(temporalPolicy.name).toBe('Temporal Strict Policy');
     });
 
-    it('should support policy composition', () => {
+    // VB-008 (AC1/AC5-unit3): replaces `expect(() => …).not.toThrow()`. A
+    // composed policy that silently dropped the temporal decorator would
+    // still not throw — it would just delegate straight to the raw base
+    // policy and never run the time-window branch below. The counter is
+    // what proves the temporal switch (not the raw inner policy) is what
+    // and()/or() composed.
+    it('should keep temporal switching when composed with and()', async () => {
+      const businessTime = new Date('2024-03-20T10:00:00Z'); // Wednesday, business hours
+      vi.setSystemTime(businessTime);
+      const requestWithTime = {
+        ...request,
+        context: { ...policyContext, timestamp: businessTime },
+      };
+
+      const countingPolicy = new CountingPolicy();
+      const businessHoursTemporalPolicy = PolicyTemporalBehaviorBuilder.from(basePolicy)
+        .withBusinessCalendar(businessCalendar)
+        .duringBusinessHours(countingPolicy)
+        .build();
       const otherPolicy = new RelaxedPolicy();
 
-      expect(() => temporalPolicy.and(otherPolicy)).not.toThrow();
-      expect(() => temporalPolicy.or(otherPolicy)).not.toThrow();
+      const composed = businessHoursTemporalPolicy.and(otherPolicy);
+      await composed.check(requestWithTime);
+      await composed.check(requestWithTime);
+
+      expect(countingPolicy.callCount).toBe(2);
+    });
+
+    it('should keep temporal switching when composed with or()', async () => {
+      const businessTime = new Date('2024-03-20T10:00:00Z');
+      vi.setSystemTime(businessTime);
+      const requestWithTime = {
+        ...request,
+        context: { ...policyContext, timestamp: businessTime },
+      };
+
+      const countingPolicy = new CountingPolicy();
+      const businessHoursTemporalPolicy = PolicyTemporalBehaviorBuilder.from(basePolicy)
+        .withBusinessCalendar(businessCalendar)
+        .duringBusinessHours(countingPolicy)
+        .build();
+      const otherPolicy = new StrictPolicy(); // fails for value 50, forces OR to evaluate both
+
+      const composed = businessHoursTemporalPolicy.or(otherPolicy);
+      await composed.check(requestWithTime);
+      await composed.check(requestWithTime);
+
+      expect(countingPolicy.callCount).toBe(2);
+    });
+
+    it('should route when() through the temporal decorator, not the raw inner policy', () => {
+      // Same caveat as the cached-policy and retry-policy suites:
+      // `ConditionalPolicyBuilder`'s `.then()`/`.thenMust()` unconditionally
+      // throw regardless of which policy they wrap, so there is no
+      // branch-selection side effect to observe through when(). This only
+      // confirms when() still delegates into that builder machinery
+      // post-AC1, rather than throwing or silently no-op'ing.
+      const otherPolicy = new RelaxedPolicy();
+      const builder = temporalPolicy.when(() => true);
+
+      expect(() => builder.then(otherPolicy)).toThrow(
+        'Use PolicyBuilder.when().then() for conditional policies'
+      );
     });
 
     it('should support negation with temporal preservation', () => {

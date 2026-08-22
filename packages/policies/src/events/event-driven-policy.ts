@@ -1,4 +1,5 @@
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
+import { LibUtils } from '@vytches/ddd-utils';
 import type { Result } from '@vytches/ddd-utils';
 import type {
   IBusinessPolicy,
@@ -24,7 +25,6 @@ export interface EventDrivenPolicyConfig {
 }
 
 export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
-  private readonly logger = Logger.forContext('EventDrivenPolicy');
   private readonly config: {
     eventBus: PolicyEventBus;
     emitStartEvents: boolean;
@@ -114,7 +114,7 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
         await this.config.eventBus.publish(startEvent);
       } catch (error) {
         // Don't fail policy evaluation due to event emission errors
-        this.logger.warn('Failed to emit policy evaluation started event', {
+        internalLogger.warn('EventDrivenPolicy: Failed to emit policy evaluation started event', {
           error: error instanceof Error ? error.message : String(error),
         });
       }
@@ -148,9 +148,12 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
           await this.config.eventBus.publish(completionEvent);
         } catch (error) {
           // Don't fail policy evaluation due to event emission errors
-          this.logger.warn('Failed to emit policy evaluation completed event', {
-            error: error instanceof Error ? error.message : String(error),
-          });
+          internalLogger.warn(
+            'EventDrivenPolicy: Failed to emit policy evaluation completed event',
+            {
+              error: error instanceof Error ? error.message : String(error),
+            }
+          );
         }
       }
 
@@ -171,7 +174,7 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
           await this.config.eventBus.publish(errorEvent);
         } catch (eventError) {
           // Don't fail policy evaluation due to event emission errors
-          this.logger.warn('Failed to emit policy evaluation error event', {
+          internalLogger.warn('EventDrivenPolicy: Failed to emit policy evaluation error event', {
             error: eventError instanceof Error ? eventError.message : String(eventError),
           });
         }
@@ -285,7 +288,7 @@ export class EventDrivenPolicy<T> implements IBusinessPolicy<T> {
   }
 
   private generateExecutionId(): string {
-    return `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `exec_${LibUtils.getUUID()}`;
   }
 }
 

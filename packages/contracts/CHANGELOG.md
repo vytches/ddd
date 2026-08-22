@@ -3,6 +3,107 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Features
+
+- **contracts:** add enrichEvent() and align the two event shapes
+  ([7027c21](https://github.com/vytches/ddd/commit/7027c212a48c5c309c087c796be141d6d05b4878))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [Unreleased]
+
+### Added
+
+- `enrichEvent(event, { payload?, metadata? })` — copy an event with a replaced
+  payload and/or merged metadata while keeping its identity (`eventId`,
+  `occurredOn`), its prototype and `instanceof`. The event's constructor is
+  never called, so event classes with their own constructor signature are safe,
+  and the returned copy is unfrozen.
+
+  ```ts
+  import { enrichEvent } from '@vytches/ddd-contracts';
+
+  const stamped = enrichEvent(event, {
+    payload: encryptPII(event.payload, key),
+    metadata: { userSpecificKeyId: key.id },
+  });
+  ```
+
+  This is the supported route for infrastructure that has to stamp an event on
+  its way to the store — a crypto-shredding key id resolved at persistence time,
+  a correlation id assigned at dispatch. Prefer
+  `AggregateRoot.transformDomainEvents()` when the events still live on an
+  aggregate, since the event dispatcher re-reads them from there.
+
+  Use this instead of `DomainEvent.withMetadata()` whenever event identity has
+  to survive: `withMetadata()` rebuilds through the constructor and mints a new
+  `eventId` / `occurredOn`.
+
+### Fixed
+
+- `createDomainEvent()` now sets `eventId` and `occurredOn` at the top level as
+  well as inside `metadata`, and `IDomainEvent` declares both as optional
+  (`eventId?: string`, `occurredOn?: Date`).
+
+  Events created through the string form of `AggregateRoot.apply()` previously
+  carried their id only in `metadata.eventId`, while class-based events exposed
+  `eventId` / `occurredOn` directly. `IDomainEvent` required neither, so
+  TypeScript never flagged the asymmetry and consumers wrote their own event
+  reconstruction helpers to paper over it.
+
+  _Nothing was removed_, so existing reads of `metadata.eventId` keep working.
+  If you maintain such a helper, you can likely drop the id-normalisation half
+  of it. `instanceof DomainEvent` still does not hold for string-form events —
+  those are plain objects by construction, and no additive change can alter
+  that.
+
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **contracts:** replace Math.random UUID/id generation with crypto.randomUUID
+  ([3798355](https://github.com/vytches/ddd/commit/37983557fa99edde6f60b7662a874b2ae683e078))
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Features
+
+- **contracts:** add configureDiagnostics public control API (VS-014)
+  ([68d90f6](https://github.com/vytches/ddd/commit/68d90f605697e740c6773ee5c3b352ecd080df34))
+
+### BREAKING CHANGES
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-contracts

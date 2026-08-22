@@ -3,6 +3,203 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **policies:** detach the stale LRU node when a cached key is re-written
+  ([eb916d6](https://github.com/vytches/ddd/commit/eb916d6f047b7b07d0401265b06a4bef47dff3cb))
+- **policies:** distinguish insert from update in the PolicyCache write path
+  ([40ce9b5](https://github.com/vytches/ddd/commit/40ce9b5f4a3e06b30a2d46f9ac26ced35a962594))
+- **policies:** honour enableMetrics instead of always collecting
+  ([47ac340](https://github.com/vytches/ddd/commit/47ac340ed49b1fd68ea267d85c394c3a638e6206))
+- **policies:** preserve behaviour wrapper across composition (VB-008)
+  ([5dfa6fa](https://github.com/vytches/ddd/commit/5dfa6fa053e49764f353f81e5d3c0c2dbadc1010))
+- **policies:** respect explicitly falsy cache options and bound cache size
+  ([0a6e1d6](https://github.com/vytches/ddd/commit/0a6e1d643cb0852823e7240f76fa4a35bdd710c1))
+- **resilience:** jitter default, per-instance decorator state, HALF_OPEN probe
+  gate (VF-028)
+  ([05ac364](https://github.com/vytches/ddd/commit/05ac364a5ea9f02e355b9235ab00019e9608d69b))
+
+### Features
+
+- **policies:** deduplicate concurrent identical policy checks
+  ([ab4292f](https://github.com/vytches/ddd/commit/ab4292fdef22412c6f74608c7bf410ab636a3bfc))
+
+### Performance Improvements
+
+- **policies:** combine CachedPolicy cache-key hashing into a single digest
+  ([2963a68](https://github.com/vytches/ddd/commit/2963a6842b0441ac5dc744244c6244b509f05e23))
+
+### BREAKING CHANGES
+
+- **policies:** composed policies now retain their caching/retry/temporal
+  wrapper, and composite ids carry the wrapper prefix as a result. Migration
+  notes per change in .changeset/vb-008-\*.md.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01THJr8eZUzbcrRZKwRbskka
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [Unreleased]
+
+### Added
+
+- `PolicyCacheMetrics` — named interface for what
+  `PolicyCachingBehavior.getCacheMetrics()` returns (`hits`, `misses`,
+  `evictions`, `entries`, all `readonly number`). Previously the return type was
+  `ReturnType<PolicyCache['getMetrics']>`, anonymous and derived from an
+  unexported internal class, so callers had no type to name a local variable,
+  function parameter, or stored field with:
+
+  ```ts
+  // Before: nothing to import: no exported type describes the return value
+  function logMetrics(
+    m: ReturnType<PolicyCachingBehavior<unknown>['getCacheMetrics']>
+  ) {
+    console.log(m.hits, m.misses, m.evictions, m.entries);
+  }
+
+  // After:
+  import type { PolicyCacheMetrics } from '@vytches/ddd-policies';
+
+  function logMetrics(m: PolicyCacheMetrics) {
+    console.log(m.hits, m.misses, m.evictions, m.entries);
+  }
+  ```
+
+  Also re-exported from `@vytches/ddd`. The runtime shape returned by
+  `getCacheMetrics()` is unchanged — only the return type is now named.
+  Non-breaking, additive. (VB-008 AC3)
+
+### Fixed
+
+- Composing a cached, retried, or temporal policy no longer drops the wrapper.
+  `and()`, `or()` and `when()` on `PolicyCachingBehavior`, `PolicyRetryBehavior`
+  and `PolicyTemporalBehavior` delegated straight to the wrapped inner/base
+  policy instead of routing through the decorator itself, so the resulting
+  composite silently lost caching/retry/time-window behavior. `not()` already
+  re-wrapped correctly on all three — that asymmetry is why this is classified
+  as a bug fix rather than a contract change: `IBusinessPolicy<T>` signatures
+  are unchanged, only the runtime behavior of the returned composite is
+  corrected.
+
+  ```ts
+  // Before: composite silently lost caching
+  const cached = PolicyCachingBehavior.create(basePolicy, { ttl: 60000 });
+  const composite = cached.and(otherPolicy);
+  // composite re-evaluated basePolicy on every check() — uncached
+
+  // After: composite is still cached
+  const composite = cached.and(otherPolicy);
+  // composite's left branch still hits the cache on repeated identical requests
+  ```
+
+  No migration needed unless you depended on the buggy behavior — if composing a
+  cached/retried/temporal policy produced unexpected cache misses, missing
+  retries, or ignored time windows, that is what this fixes. (VB-008 AC1)
+
+- `BusinessRuleValidatorAdapter.isSatisfiedBy()` no longer swallows a thrown
+  validator error with zero diagnostics — it now logs via `internalLogger.warn`
+  (specification name + sanitized error message) before returning `false`
+  (VF-028, SA-M4).
+
+### Changed
+
+- `PolicyCachingBehaviorFactory`, `PolicyRetryBehaviorFactory` and
+  `PolicyTemporalBehaviorFactory` are now frozen (`as const`) object exports
+  built from standalone functions, not static-only classes.
+
+  **This is invisible to every normal call site — there is nothing to migrate.**
+  Export name and call syntax are identical before and after:
+
+  ```ts
+  // Unchanged:
+  PolicyCachingBehaviorFactory.withTTL(policy, 60000);
+  PolicyRetryBehaviorFactory.forTransientFailures(policy);
+  PolicyTemporalBehaviorFactory.businessHours(policy, fallback);
+  ```
+
+  The only observable difference is for code that used these as classes rather
+  than as callable namespaces — `new PolicyCachingBehaviorFactory()` or
+  `instanceof PolicyCachingBehaviorFactory` — which was never a supported usage
+  (there were no instance members) and now fails. If you only ever called the
+  static methods, do not change anything. (VB-008 AC2)
+
+- `PolicyCachingBehavior.withDefaults()` and
+  `PolicyRetryBehavior.withDefaults()` are `@deprecated` in favor of
+  `create(policy, config?)` — an omitted `config` now reproduces exactly what
+  `withDefaults()` used to build. Calling `withDefaults()` still works; it logs
+  one `console.warn` per class on first call naming the replacement, and will be
+  removed in the following minor release.
+
+  ```ts
+  // Before:
+  const cached = PolicyCachingBehavior.withDefaults(basePolicy);
+  const retried = PolicyRetryBehavior.withDefaults(basePolicy);
+
+  // After:
+  const cached = PolicyCachingBehavior.create(basePolicy);
+  const retried = PolicyRetryBehavior.create(basePolicy);
+  ```
+
+  `PolicyRetryBehavior.withDefaults(policy, maxAttempts?)` keeps its existing
+  second parameter; `PolicyTemporalBehavior` is unaffected — it only ever had
+  `create()`. (VB-008 AC4)
+
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **contracts:** replace Math.random UUID/id generation with crypto.randomUUID
+  ([3798355](https://github.com/vytches/ddd/commit/37983557fa99edde6f60b7662a874b2ae683e078))
+- **core:** stop errors from leaking data through JSON.stringify
+  ([870b012](https://github.com/vytches/ddd/commit/870b01245f614735588ecd99a032ba4cc03a357e))
+- **policies:** cover all step-type union members in policy evaluators (VF-035)
+  ([a880b32](https://github.com/vytches/ddd/commit/a880b32b384b99fc07109532a4e5dba8262fec6b))
+- **policies:** replace 32-bit djb2 cache key hash with sha-256 (VS-005)
+  ([689738b](https://github.com/vytches/ddd/commit/689738b396c06bc695ca75fbc4671231fb8f5529))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+- **config:** trim dead and aspirational public API surface (VF-031)
+  ([27e0055](https://github.com/vytches/ddd/commit/27e005513894b0b0a17d966a1051b9746df21461))
+
+### Features
+
+- **policies:** shouldSatisfyAny returns IPolicyStepBuilder (VF-035 AC7)
+  ([63a0759](https://github.com/vytches/ddd/commit/63a075939e1640c36c3b05ab55128ad6325068ac))
+
+### BREAKING CHANGES
+
+- **config:** AggregateRoot's IAggregateBuilder interface removed (was exported
+  but shape-incompatible with the real builder). Several other
+  technically-exported- but-unreachable symbols removed (events/audit,
+  subscribeToContext, ACLDiscoveryPlugin, DIDomainServiceMetadataRegistry,
+  duplicate/speculative aggregate interfaces) - see CHANGELOG.md for full list
+  and migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-policies

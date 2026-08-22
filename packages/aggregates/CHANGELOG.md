@@ -3,6 +3,129 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **aggregates:** satisfy tsc in the transformDomainEvents test
+  ([ba1fe04](https://github.com/vytches/ddd/commit/ba1fe04f5e45081f8fb67ac707b0761cd5415f53))
+
+### Features
+
+- **aggregates:** add transformDomainEvents() for persistence-boundary stamping
+  ([38101b6](https://github.com/vytches/ddd/commit/38101b611f445f52b27991db6287bbb5865f1d24))
+
+### Performance Improvements
+
+- **aggregates:** memoize getDomainEvents() to avoid O(n^2) deep-freeze cost
+  ([07e714d](https://github.com/vytches/ddd/commit/07e714d02d800e6ffd1039b8617c68f9f2cf3859))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [Unreleased]
+
+### Added
+
+- `AggregateRoot.transformDomainEvents(transform)` — rewrite the payload and/or
+  metadata of the uncommitted domain events.
+
+  ```ts
+  // inside a repository's save(), before persisting:
+  aggregate.transformDomainEvents(event => ({
+    payload: encryptPII(event.payload, key),
+    metadata: { userSpecificKeyId: key.id },
+  }));
+  ```
+
+  This is an infrastructure-boundary API, in the same family as `commit()`: call
+  it from a repository immediately before persisting, never from the domain or
+  application layer. An aggregate records events through `apply()`; it does not
+  rewrite its own history.
+
+  Only `payload` and `metadata` can be replaced. `eventName`, event identity,
+  and the number and order of events are fixed — changing those would desync
+  handlers on replay or break the version invariant. Return nothing from the
+  transform to leave an event untouched. Identity, prototype and `instanceof`
+  survive, and the event's constructor is never called.
+
+  **If you currently reach into `_domainEvents`**, this replaces that. There was
+  no supported alternative before: `getDomainEvents()` deep-freezes what it
+  returns and the internal list is private, so encrypting PII or attaching a key
+  id at persistence time meant a type escape hatch.
+
+  ```ts
+  // before — private state, and the deep freeze fights back
+  (aggregate as any)._domainEvents[i] = Object.assign(
+    Object.create(Object.getPrototypeOf(event)),
+    event,
+    { payload: encrypted }
+  );
+
+  // after
+  aggregate.transformDomainEvents(event => ({
+    payload: encrypt(event.payload),
+  }));
+  ```
+
+  Apply it to the aggregate, not to a copy taken inside `save()`. The event
+  dispatcher re-reads the aggregate's events after persistence, so a local copy
+  would still publish the untransformed originals to the in-process event bus —
+  for the PII case, plaintext on the bus while the store holds ciphertext.
+
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **config:** fix ddd-lint no-throw-in-domain path matching, wire CI, triage
+  findings
+  ([a5ac3e9](https://github.com/vytches/ddd/commit/a5ac3e9e101b4eb8b32e56edb4272e8498f2d8c4))
+- **contracts:** replace Math.random UUID/id generation with crypto.randomUUID
+  ([3798355](https://github.com/vytches/ddd/commit/37983557fa99edde6f60b7662a874b2ae683e078))
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+- **config:** trim dead and aspirational public API surface (VF-031)
+  ([27e0055](https://github.com/vytches/ddd/commit/27e005513894b0b0a17d966a1051b9746df21461))
+
+### BREAKING CHANGES
+
+- **config:** AggregateRoot's IAggregateBuilder interface removed (was exported
+  but shape-incompatible with the real builder). Several other
+  technically-exported- but-unreachable symbols removed (events/audit,
+  subscribeToContext, ACLDiscoveryPlugin, DIDomainServiceMetadataRegistry,
+  duplicate/speculative aggregate interfaces) - see CHANGELOG.md for full list
+  and migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-aggregates

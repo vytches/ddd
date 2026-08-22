@@ -12,6 +12,7 @@ export {
   PolicyCachingBehavior,
   PolicyCachingBehaviorFactory,
   type PolicyCacheConfig,
+  type PolicyCacheMetrics,
 } from './cached-policy';
 
 // Policy Retry Behavior - Business rule retry logic for transient failures

@@ -1,5 +1,4 @@
 import type { IDomainEvent } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
 
 import type { IOutboxMessage, OutboxMessageOptions } from './outbox-interfaces';
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
@@ -22,7 +21,6 @@ export interface OutboxServiceOptions {
 export class OutboxService {
   private readonly repository: IOutboxRepository;
   private readonly options: Required<OutboxServiceOptions>;
-  private readonly logger = Logger.create('OutboxService');
 
   constructor(repository: IOutboxRepository, options: OutboxServiceOptions = {}) {
     this.repository = repository;
@@ -50,7 +48,6 @@ export class OutboxService {
     });
 
     const messageId = await this.repository.saveMessage(message);
-    this.logger.debug(`Saved message ${messageId} of type ${messageType}`);
     return messageId;
   }
 
@@ -73,7 +70,6 @@ export class OutboxService {
     );
 
     const messageIds = await this.repository.saveBatch(outboxMessages);
-    this.logger.debug(`Saved batch of ${messages.length} messages`);
     return messageIds;
   }
 
@@ -93,9 +89,6 @@ export class OutboxService {
     });
 
     const messageId = await this.repository.scheduleMessage(message, message.processAfter as Date);
-    this.logger.debug(
-      `Scheduled message ${messageId} of type ${messageType} for processing in ${delayMs}ms`
-    );
     return messageId;
   }
 
@@ -149,7 +142,6 @@ export class OutboxService {
     );
 
     const messageId = await this.repository.saveMessage(message);
-    this.logger.debug(`Saved domain event ${event.eventName} as message ${messageId}`);
     return messageId;
   }
 
@@ -172,7 +164,6 @@ export class OutboxService {
    */
   async retryMessage(id: string): Promise<void> {
     await this.repository.updateStatus(id, MessageStatus.PENDING);
-    this.logger.info(`Reset message ${id} to pending for retry`);
   }
 
   /**
@@ -180,7 +171,6 @@ export class OutboxService {
    */
   async retryMessages(ids: string[]): Promise<void> {
     await this.repository.updateStatusBatch(ids, MessageStatus.PENDING);
-    this.logger.info(`Reset ${ids.length} messages to pending for retry`);
   }
 
   /**
@@ -195,7 +185,6 @@ export class OutboxService {
       cutoffDate,
       MessageStatus.PROCESSED
     );
-    this.logger.info(`Cleaned up ${deletedCount} processed messages older than ${days} days`);
     return deletedCount;
   }
 
@@ -229,14 +218,5 @@ export class OutboxService {
       totalProcessed: 0, // Would need separate query
       totalFailed: 0, // Would need separate query
     };
-  }
-
-  /**
-   * Logs messages if logging is enabled
-   */
-  private log(message: string): void {
-    if (this.options.enableLogging) {
-      this.logger.info(message);
-    }
   }
 }

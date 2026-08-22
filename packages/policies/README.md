@@ -382,10 +382,9 @@ const temporalPolicy = PolicyTemporalBehavior.create(strictPolicy, {
 });
 
 // Alternative policies for different times
-const businessHoursPolicy = PolicyTemporalBehaviorFactory.forBusinessHours(
+const businessHoursPolicy = PolicyTemporalBehaviorFactory.businessHours(
   strictPolicy,
-  relaxedPolicy,
-  { start: '09:00', end: '17:00' }
+  relaxedPolicy
 );
 
 // Execute temporal policy
@@ -584,7 +583,11 @@ const result = await cachedPolicy.check({ entity: user, context });
 ### Temporal Behavior
 
 ```typescript
-import { PolicyTemporalBehavior } from '@vytches/ddd-policies';
+import {
+  PolicyTemporalBehavior,
+  PolicyTemporalBehaviorBuilder,
+  PolicyTemporalBehaviorFactory,
+} from '@vytches/ddd-policies';
 
 // Time-aware policy behavior
 const temporalPolicy = PolicyTemporalBehavior.create(basePolicy, {
@@ -597,17 +600,17 @@ const temporalPolicy = PolicyTemporalBehavior.create(basePolicy, {
 });
 
 // Factory methods
-const businessHoursPolicy = PolicyTemporalBehaviorFactory.forBusinessHours(
+const businessHoursPolicy = PolicyTemporalBehaviorFactory.businessHours(
   strictPolicy,
-  relaxedPolicy,
-  { start: '09:00', end: '17:00' }
+  relaxedPolicy
 );
 
-const workingDaysPolicy = PolicyTemporalBehaviorFactory.forWorkingDays(
-  businessPolicy,
-  weekendPolicy,
-  [1, 2, 3, 4, 5]
-);
+// Working-day rules go through the builder — the factory has exactly three
+// presets (businessHours, weekendAware, holidayAware) and no working-day one.
+const workingDaysPolicy = PolicyTemporalBehaviorBuilder.from(businessPolicy)
+  .withWorkingDays([1, 2, 3, 4, 5]) // Mon-Fri
+  .duringWeekends(weekendPolicy)
+  .build();
 ```
 
 ### Behavior Composition

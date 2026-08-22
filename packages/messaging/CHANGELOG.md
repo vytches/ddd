@@ -3,6 +3,51 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+**Note:** Version bump only for package @vytches/ddd-messaging
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **cqrs:** make CQRS execution logging opt-in, sanitize logged errors
+  ([5f58796](https://github.com/vytches/ddd/commit/5f587964c1aa2b00adaf662742b18fda7dbd9315))
+- **messaging,resilience:** outbox atomic-claim contract + timer/listener leak
+  fixes (VB-004)
+  ([463beb2](https://github.com/vytches/ddd/commit/463beb23e32c8ead6b70e12612261ff473442238))
+- **messaging:** preserve outbox stack trace + widen LoggingMiddleware logger
+  type (VS-015)
+  ([f11f6f9](https://github.com/vytches/ddd/commit/f11f6f96427a9b41910a5c5249fbc1c541201055))
+- **messaging:** warn when OutboxProcessor default handler is replaced (VS-007,
+  SEC-MESSAGING-001)
+  ([54ac0fe](https://github.com/vytches/ddd/commit/54ac0fef5e1350110dd56063db560895dc810f93))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### BREAKING CHANGES
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 ### Features

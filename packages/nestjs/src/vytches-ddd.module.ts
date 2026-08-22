@@ -1,12 +1,22 @@
-import type { DynamicModule, ModuleMetadata, Provider } from '@nestjs/common';
+import type { DynamicModule, Provider, Type } from '@nestjs/common';
 import { Global, Module } from '@nestjs/common';
 import { DiscoveryModule, DiscoveryService, ModuleRef } from '@nestjs/core';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI tokens in forTesting()
-import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+import { ICommandBus, IQueryBus, COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
 import { IEventBus } from '@vytches/ddd-contracts';
 import { VytchesExplorerService } from './services/vytches-explorer.service';
-import { VytchesDDDFeatureModule } from './feature/vytches-ddd-feature.module';
-import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
+import {
+  VytchesDDDFeatureModule,
+  type VytchesDDDFeatureOptions,
+} from './feature/vytches-ddd-feature.module';
+import type {
+  VytchesContextOptions,
+  VytchesDDDModuleAsyncOptions,
+  VytchesDDDModuleOptions,
+  VytchesDDDOptionsFactory,
+} from './types';
+import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS, VYTCHES_DDD_OPTIONS } from './constants';
+import { InvalidContextNameError, ModuleConfigurationError } from './errors';
 
 /**
  * VytchesDDD NestJS Integration Module
@@ -18,69 +28,274 @@ import type { VytchesContextOptions, VytchesDDDModuleOptions } from './types';
  * - Context-based handler isolation
  * - Production-ready default configurations
  *
+ * ## The one recommended pattern
+ *
+ * `forRoot()` (or `forRootAsync()`) once at the application root, then one
+ * `forFeature()` per bounded context:
+ *
+ * ```typescript
+ * @Module({ imports: [VytchesDDDModule.forRoot()] })
+ * export class AppModule {}
+ *
+ * @Module({
+ *   imports: [VytchesDDDModule.forFeature('orders', { busType: 'enhanced' })],
+ *   providers: [CreateOrderHandler],
+ * })
+ * export class OrdersModule {}
+ * ```
+ *
+ * `forContext()` and `forContexts()` are deprecated predecessors — they share
+ * the root buses across contexts, so they do not actually isolate anything.
+ * `forTesting()` stays: it is the test-module entry point, not a fourth way to
+ * wire production code.
+ *
  * @example
  * // Basic configuration - buses auto-injected if provided
  * VytchesDDDModule.forRoot()
  *
  * @example
- * // With CQRS buses in providers
+ * // With CQRS buses in providers. Prefer useFactory over useValue so each
+ * // module owns its bus instance — a useValue bus is a process-global
+ * // singleton whose handler registrations outlive the module, leaking stale
+ * // handler factories across sequentially-created modules (e.g. tests).
  * @Module({
  *   imports: [VytchesDDDModule.forRoot()],
  *   providers: [
- *     { provide: ICommandBus, useValue: new EnhancedCommandBus(container) },
- *     { provide: IQueryBus, useValue: new EnhancedQueryBus(container) },
+ *     { provide: ICommandBus, useFactory: () => new EnhancedCommandBus(container) },
+ *     { provide: IQueryBus, useFactory: () => new EnhancedQueryBus(container) },
  *   ],
  * })
  */
 @Global()
 @Module({})
 export class VytchesDDDModule {
+  /**
+   * Symbol→class token aliases for the CQRS buses.
+   *
+   * VytchesExplorerService injects the buses via COMMAND_BUS_TOKEN /
+   * QUERY_BUS_TOKEN (stable across a dual-package ESM+CJS load, where class
+   * identities diverge), while consumers provide them under the ICommandBus /
+   * IQueryBus class tokens. Every factory that creates an explorer needs this
+   * bridge — without it the explorer silently receives undefined and registers
+   * nothing.
+   *
+   * useFactory rather than useExisting: NestJS raises a compile-time DI error
+   * for useExisting against an absent token even under @Optional, whereas a
+   * factory simply yields undefined and lets the module boot without a bus.
+   */
+  private static busTokenBridge(): Provider[] {
+    return [
+      {
+        provide: COMMAND_BUS_TOKEN,
+        useFactory: (bus?: ICommandBus) => bus,
+        inject: [{ token: ICommandBus, optional: true }],
+      },
+      {
+        provide: QUERY_BUS_TOKEN,
+        useFactory: (bus?: IQueryBus) => bus,
+        inject: [{ token: IQueryBus, optional: true }],
+      },
+    ];
+  }
+
   static forRoot(options: VytchesDDDModuleOptions = {}): DynamicModule {
-    const providers: Provider[] = [VytchesExplorerService, ...(options.providers || [])];
+    // Bridge providers: Symbol→class token aliases for CQRS buses.
+    //
+    // Purpose: VytchesExplorerService is injected via Symbol tokens
+    // (@Inject(COMMAND_BUS_TOKEN) / @Inject(QUERY_BUS_TOKEN)), but consumers
+    // typically provide buses under the class tokens (ICommandBus / IQueryBus).
+    // These bridges translate class→Symbol so both injection styles work.
+    //
+    // Why useFactory + optional inject (not useExisting):
+    // NestJS throws a compile-time DI error for useExisting when the target
+    // token is absent — even if the consumer uses @Optional. useFactory returns
+    // undefined when the class token is not registered; @Optional then resolves
+    // to undefined gracefully (module boots without a bus configured).
+    //
+    // GLOBAL_COMMAND_BUS / GLOBAL_QUERY_BUS follow the same pattern and are
+    // exported so cross-context ACL handlers can inject the root-level bus.
+    // forTesting() deliberately does NOT declare GLOBAL_* tokens — it registers
+    // stubs directly under COMMAND_BUS_TOKEN / QUERY_BUS_TOKEN and class tokens,
+    // keeping test modules self-contained without a root bus reference.
+    const bridgeProviders: Provider[] = [
+      ...VytchesDDDModule.busTokenBridge(),
+      // Global bus tokens — always resolve to the root ICommandBus / IQueryBus.
+      // forFeature() intentionally does NOT provide these tokens, so injection
+      // falls through to forRoot() (the global module) regardless of how many
+      // forFeature() modules shadow ICommandBus / IQueryBus in the consumer.
+      // This is the cross-context ACL symmetry to LOCAL_EVENT_BUS (which gives
+      // the feature-scoped bus); GLOBAL_*_BUS always gives the root bus.
+      {
+        provide: GLOBAL_COMMAND_BUS,
+        useFactory: (bus?: ICommandBus) => bus,
+        inject: [{ token: ICommandBus, optional: true }],
+      },
+      {
+        provide: GLOBAL_QUERY_BUS,
+        useFactory: (bus?: IQueryBus) => bus,
+        inject: [{ token: IQueryBus, optional: true }],
+      },
+    ];
+
+    const providers: Provider[] = [
+      VytchesExplorerService,
+      ...bridgeProviders,
+      // Single options token for both entry points: forRoot() publishes the
+      // literal object, forRootAsync() publishes the factory result. Consumers
+      // of the options (currently VytchesExplorerService) inject this token and
+      // never need to know which factory built the module.
+      { provide: VYTCHES_DDD_OPTIONS, useValue: options },
+      ...(options.providers || []),
+    ];
 
     return {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
       providers,
-      exports: [VytchesExplorerService],
+      exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
       global: options.isGlobal !== false,
     };
   }
 
-  static forRootAsync(options: {
-    imports?: ModuleMetadata['imports'];
-    useFactory?: (...args: unknown[]) => Promise<VytchesDDDModuleOptions> | VytchesDDDModuleOptions;
-    inject?: Array<string | symbol | unknown>;
-  }): DynamicModule {
+  /**
+   * Async counterpart of {@link forRoot} — the standard NestJS
+   * `useFactory` / `useClass` / `useExisting` triad, for configuration that
+   * depends on injected services such as `ConfigService`.
+   *
+   * The factory returns the same {@link VytchesDDDModuleOptions} that
+   * `forRoot()` accepts. NestJS needs `providers`, `imports` and the `global`
+   * flag before the DI container exists, so those stay static on the async
+   * options object; see {@link VytchesDDDModuleAsyncOptions} for the exact
+   * split.
+   *
+   * @example
+   * ```typescript
+   * @Module({
+   *   imports: [
+   *     VytchesDDDModule.forRootAsync({
+   *       imports: [ConfigModule],
+   *       inject: [ConfigService],
+   *       useFactory: (config: ConfigService) => ({
+   *         autoDiscovery: { enabled: config.get('DDD_DISCOVERY') !== 'off' },
+   *       }),
+   *     }),
+   *   ],
+   * })
+   * export class AppModule {}
+   * ```
+   */
+  static forRootAsync(options: VytchesDDDModuleAsyncOptions): DynamicModule {
+    if (!options.useFactory && !options.useClass && !options.useExisting) {
+      throw new ModuleConfigurationError(
+        'forRootAsync',
+        'one of useFactory, useClass or useExisting is required'
+      );
+    }
+
+    const bridgeProviders: Provider[] = [
+      ...VytchesDDDModule.busTokenBridge(),
+      {
+        provide: GLOBAL_COMMAND_BUS,
+        useFactory: (bus?: ICommandBus) => bus,
+        inject: [{ token: ICommandBus, optional: true }],
+      },
+      {
+        provide: GLOBAL_QUERY_BUS,
+        useFactory: (bus?: IQueryBus) => bus,
+        inject: [{ token: IQueryBus, optional: true }],
+      },
+    ];
+
     return {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
-      providers: [VytchesExplorerService],
-      exports: [VytchesExplorerService],
-      global: true,
+      providers: [
+        VytchesExplorerService,
+        ...bridgeProviders,
+        ...VytchesDDDModule.asyncOptionsProviders(options),
+        ...(options.providers || []),
+      ],
+      exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
+      global: options.isGlobal !== false,
     };
   }
 
+  /**
+   * Builds the providers that resolve {@link VYTCHES_DDD_OPTIONS} from whichever
+   * async form the caller chose. `useClass` additionally registers the factory
+   * class itself; `useExisting` assumes the caller already provides it.
+   */
+  private static asyncOptionsProviders(options: VytchesDDDModuleAsyncOptions): Provider[] {
+    if (options.useFactory) {
+      return [
+        {
+          provide: VYTCHES_DDD_OPTIONS,
+          useFactory: options.useFactory,
+          inject: options.inject ?? [],
+        } as Provider,
+      ];
+    }
+
+    // Non-null: forRootAsync() rejected the all-absent case before calling us.
+    const factoryClass = (options.useClass ??
+      options.useExisting) as Type<VytchesDDDOptionsFactory>;
+
+    const providers: Provider[] = [
+      {
+        provide: VYTCHES_DDD_OPTIONS,
+        useFactory: (factory: VytchesDDDOptionsFactory) => factory.createVytchesDDDOptions(),
+        inject: [factoryClass],
+      },
+    ];
+
+    if (options.useClass) {
+      providers.push({ provide: options.useClass, useClass: options.useClass });
+    }
+
+    return providers;
+  }
+
+  /**
+   * @deprecated Since 0.31.0 — use {@link forFeature} instead, and
+   * {@link forRoot} for the application-wide module.
+   *
+   * `forContext()` predates `forFeature()` and gives weaker isolation: it
+   * registers a named explorer alongside the root one, but the buses stay
+   * shared, so handlers from different contexts still land on the same
+   * `ICommandBus`. `forFeature()` gives each context its own buses and its own
+   * local event bus, which is what "bounded context" is supposed to mean here.
+   *
+   * Migration:
+   * ```typescript
+   * // before
+   * imports: [VytchesDDDModule.forContext('orders', { context: { name: 'orders' } })]
+   * // after
+   * imports: [VytchesDDDModule.forFeature('orders')]
+   * ```
+   *
+   * Kept for one release so existing wiring keeps working; slated for removal.
+   */
   static forContext(
     context: string,
     options: VytchesDDDModuleOptions & { context?: VytchesContextOptions } = {}
   ): DynamicModule {
     if (!context || context.trim() === '') {
-      throw new Error('Context name cannot be null or empty');
+      throw new InvalidContextNameError('forContext');
     }
 
     const contextServiceName = `VytchesExplorerService_${context}`;
 
     const providers: Provider[] = [
       VytchesExplorerService,
+      ...VytchesDDDModule.busTokenBridge(),
       {
         provide: contextServiceName,
         useFactory: (moduleRef: ModuleRef, discoveryService: DiscoveryService) => {
           const explorer = new VytchesExplorerService(moduleRef, discoveryService);
-          (explorer as unknown as { contextConfig: unknown }).contextConfig = {
-            context,
-            ...options,
-          };
+          // F-M5 / D-3: real configureContext() API, not an unsafe private-field
+          // cast. options.context carries the per-context sub-options (e.g.
+          // strictHandlerRegistration) so it is actually reachable here.
+          explorer.configureContext({ ...(options.context || {}), name: context });
           return explorer;
         },
         inject: [ModuleRef, DiscoveryService],
@@ -97,6 +312,30 @@ export class VytchesDDDModule {
     };
   }
 
+  /**
+   * @deprecated Since 0.31.0 — import one {@link forFeature} per bounded
+   * context instead.
+   *
+   * `forContexts()` was an attempt to declare several contexts in a single
+   * call, but it shares the root buses across all of them (same limitation as
+   * {@link forContext}) and silently falls back to {@link forRoot} when
+   * `options.contexts` is absent or not an object — a typo in the option name
+   * yields a working module with zero contexts rather than an error.
+   *
+   * Migration:
+   * ```typescript
+   * // before
+   * imports: [VytchesDDDModule.forContexts({ contexts: ['orders', 'billing'] })]
+   * // after
+   * imports: [
+   *   VytchesDDDModule.forRoot(),
+   *   VytchesDDDModule.forFeature('orders'),
+   *   VytchesDDDModule.forFeature('billing'),
+   * ]
+   * ```
+   *
+   * Kept for one release so existing wiring keeps working; slated for removal.
+   */
   static forContexts(options: VytchesDDDModuleOptions = {}): DynamicModule {
     if (!options.contexts || typeof options.contexts !== 'object') {
       return VytchesDDDModule.forRoot(options);
@@ -120,10 +359,10 @@ export class VytchesDDDModule {
         provide: contextServiceName,
         useFactory: (moduleRef: ModuleRef, discoveryService: DiscoveryService) => {
           const explorer = new VytchesExplorerService(moduleRef, discoveryService);
-          (explorer as unknown as { contextConfig: unknown }).contextConfig = {
-            context: contextName,
-            ...contextConfig,
-          };
+          // F-M5 / D-3: real configureContext() API, not an unsafe private-field
+          // cast — so per-context options like strictHandlerRegistration are
+          // actually reachable.
+          explorer.configureContext({ ...contextConfig, name: contextName });
           return explorer;
         },
         inject: [ModuleRef, DiscoveryService],
@@ -134,6 +373,7 @@ export class VytchesDDDModule {
 
     const providers: Provider[] = [
       VytchesExplorerService,
+      ...VytchesDDDModule.busTokenBridge(),
       ...contextProviders,
       ...(options.providers || []),
     ];
@@ -176,37 +416,43 @@ export class VytchesDDDModule {
    * }
    * ```
    */
-  static forFeature(contextName: string): DynamicModule {
-    return VytchesDDDFeatureModule.forFeature(contextName);
+  static forFeature(contextName: string, options: VytchesDDDFeatureOptions = {}): DynamicModule {
+    return VytchesDDDFeatureModule.forFeature(contextName, options);
   }
 
   static forTesting(options: VytchesDDDModuleOptions = {}): DynamicModule {
+    // Stubs are defined once and registered under both the class token (ICommandBus /
+    // IQueryBus) and the stable Symbol token (COMMAND_BUS_TOKEN / QUERY_BUS_TOKEN).
+    // VytchesExplorerService injects via the Symbol tokens; external consumers that
+    // still use the class token also get the same stub instance (Pitfall 1 fix).
+    const commandBusStub = {
+      register: (): void => {
+        /* noop */
+      },
+      registerFactory: (): void => {
+        /* noop */
+      },
+      execute: () => Promise.resolve({ success: true }),
+    };
+
+    const queryBusStub = {
+      register: (): void => {
+        /* noop */
+      },
+      registerFactory: (): void => {
+        /* noop */
+      },
+      send: () => Promise.resolve({ success: true }),
+    };
+
     const providers: Provider[] = [
       VytchesExplorerService,
-      {
-        provide: ICommandBus,
-        useValue: {
-          register: (): void => {
-            /* noop */
-          },
-          registerFactory: (): void => {
-            /* noop */
-          },
-          execute: () => Promise.resolve({ success: true }),
-        },
-      },
-      {
-        provide: IQueryBus,
-        useValue: {
-          register: (): void => {
-            /* noop */
-          },
-          registerFactory: (): void => {
-            /* noop */
-          },
-          send: () => Promise.resolve({ success: true }),
-        },
-      },
+      // Register under Symbol token — used by VytchesExplorerService constructor
+      { provide: COMMAND_BUS_TOKEN, useValue: commandBusStub },
+      { provide: QUERY_BUS_TOKEN, useValue: queryBusStub },
+      // Alias class tokens to the Symbol-token stubs so both resolve the same object
+      { provide: ICommandBus, useExisting: COMMAND_BUS_TOKEN },
+      { provide: IQueryBus, useExisting: QUERY_BUS_TOKEN },
       {
         provide: IEventBus,
         useValue: {
@@ -230,7 +476,14 @@ export class VytchesDDDModule {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
       providers,
-      exports: [VytchesExplorerService, ICommandBus, IQueryBus, IEventBus],
+      exports: [
+        VytchesExplorerService,
+        COMMAND_BUS_TOKEN,
+        QUERY_BUS_TOKEN,
+        ICommandBus,
+        IQueryBus,
+        IEventBus,
+      ],
       global: false,
     };
   }

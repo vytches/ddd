@@ -3,7 +3,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
 import { Injectable } from '@nestjs/common';
-import { EVENT_HANDLER_METADATA, IEventBus } from '@vytches/ddd-contracts';
+import { IEventBus } from '@vytches/ddd-contracts';
+import { EVENT_HANDLER_METADATA } from '@vytches/ddd-contracts/internal';
 import { safeRun } from '@vytches/ddd-utils';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
@@ -32,6 +33,8 @@ const { MockICommandBus, MockIQueryBus } = vi.hoisted(() => {
 vi.mock('@vytches/ddd-cqrs', () => ({
   ICommandBus: MockICommandBus,
   IQueryBus: MockIQueryBus,
+  COMMAND_BUS_TOKEN: Symbol.for('vytches:cqrs:command-bus'),
+  QUERY_BUS_TOKEN: Symbol.for('vytches:cqrs:query-bus'),
 }));
 
 // --- Test message types ---

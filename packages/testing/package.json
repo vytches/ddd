@@ -1,6 +1,6 @@
 {
   "name": "@vytches/ddd-testing",
-  "version": "0.30.0",
+  "version": "0.31.0",
   "description": "Test utilities and DDD-specific testing helpers",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -17,7 +17,8 @@
   "files": [
     "dist",
     "README.md",
-    "LLMGUIDE.md"
+    "LLMGUIDE.md",
+    "LICENSE"
   ],
   "keywords": [
     "ddd",
@@ -47,13 +48,14 @@
     "@vytches/ddd-contracts": "workspace:*",
     "@vytches/ddd-domain-primitives": "workspace:*",
     "@vytches/ddd-messaging": "workspace:*",
-    "@vytches/ddd-utils": "workspace:*"
+    "@vytches/ddd-utils": "workspace:*",
+    "@vytches/ddd-value-objects": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vite": "^7.3.2",
     "vite-plugin-dts": "^4.0.0",
-    "vitest": "^4.0.0"
+    "vitest": "^4.1.0"
   },
   "nx": {
     "tags": [

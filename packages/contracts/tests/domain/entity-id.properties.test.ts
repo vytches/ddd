@@ -102,6 +102,18 @@ describe('EntityId — algebraic invariants (PBT, fast-check)', () => {
       );
     });
 
+    it('EntityId.create() returns a well-formed UUID v4 (VS-016: crypto.randomUUID, not Math.random)', () => {
+      const uuidV4Pattern =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      fc.assert(
+        fc.property(fc.integer({ min: 1, max: 100 }), n => {
+          for (let i = 0; i < n; i++) {
+            expect(EntityId.create().getValue()).toMatch(uuidV4Pattern);
+          }
+        })
+      );
+    });
+
     it('EntityId.create() returns ids that pairwise NEVER equal (random uuid)', () => {
       fc.assert(
         fc.property(fc.integer({ min: 2, max: 20 }), n => {

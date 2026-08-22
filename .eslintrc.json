@@ -50,7 +50,6 @@
                   "scope:value-objects",
                   "scope:contracts",
                   "scope:testing",
-                  "scope:logging",
                   "scope:repositories"
                 ]
               },
@@ -61,15 +60,12 @@
                   "scope:utils",
                   "scope:events",
                   "scope:resilience",
-                  "scope:process-managers",
                   "scope:cqrs",
                   "scope:acl",
-                  "scope:core",
                   "scope:policies",
                   "scope:messaging",
                   "scope:validation",
                   "scope:contracts",
-                  "scope:logging",
                   "scope:testing"
                 ]
               },
@@ -80,16 +76,6 @@
                   "scope:domain-primitives",
                   "scope:value-objects",
                   "scope:contracts",
-                  "scope:logging",
-                  "scope:aggregates"
-                ]
-              },
-              {
-                "sourceTag": "scope:core",
-                "onlyDependOnLibsWithTags": [
-                  "scope:core",
-                  "scope:contracts",
-                  "scope:value-objects",
                   "scope:aggregates"
                 ]
               },
@@ -112,7 +98,6 @@
                   "scope:contracts",
                   "scope:validation",
                   "scope:utils",
-                  "scope:logging",
                   "scope:policies"
                 ]
               },
@@ -125,14 +110,12 @@
                   "scope:utils",
                   "scope:events",
                   "scope:contracts",
-                  "scope:di",
-                  "scope:logging"
+                  "scope:di"
                 ]
               },
               {
                 "sourceTag": "scope:cqrs",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
                   "scope:domain-primitives",
                   "scope:events",
                   "scope:validation",
@@ -140,46 +123,29 @@
                   "scope:contracts",
                   "scope:resilience",
                   "scope:di",
-                  "scope:logging",
                   "scope:cqrs"
                 ]
               },
               {
                 "sourceTag": "scope:acl",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
                   "scope:domain-primitives",
                   "scope:events",
                   "scope:utils",
                   "scope:acl",
                   "scope:testing",
-                  "scope:logging",
                   "scope:contracts",
                   "scope:validation"
                 ]
               },
               {
-                "sourceTag": "scope:process-managers",
-                "onlyDependOnLibsWithTags": [
-                  "scope:core",
-                  "scope:domain-primitives",
-                  "scope:events",
-                  "scope:utils",
-                  "scope:contracts",
-                  "scope:testing",
-                  "scope:logging"
-                ]
-              },
-              {
                 "sourceTag": "scope:projections",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
                   "scope:domain-primitives",
                   "scope:events",
                   "scope:contracts",
                   "scope:utils",
-                  "scope:projections",
-                  "scope:logging"
+                  "scope:projections"
                 ]
               },
               {
@@ -189,19 +155,16 @@
                   "scope:utils",
                   "scope:di",
                   "scope:messaging",
-                  "scope:domain-primitives",
-                  "scope:logging"
+                  "scope:domain-primitives"
                 ]
               },
               {
                 "sourceTag": "scope:resilience",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
                   "scope:domain-primitives",
                   "scope:utils",
                   "scope:resilience",
-                  "scope:contracts",
-                  "scope:logging"
+                  "scope:contracts"
                 ]
               },
               {
@@ -220,19 +183,6 @@
                 "onlyDependOnLibsWithTags": ["scope:*", "scope:enterprise", "*"]
               },
               {
-                "sourceTag": "scope:cli",
-                "onlyDependOnLibsWithTags": [
-                  "scope:core",
-                  "scope:domain-primitives",
-                  "scope:aggregates",
-                  "scope:value-objects",
-                  "scope:utils",
-                  "scope:contracts",
-                  "scope:cli",
-                  "scope:logging"
-                ]
-              },
-              {
                 "sourceTag": "scope:contracts",
                 "onlyDependOnLibsWithTags": ["scope:contracts", "scope:utils"]
               },
@@ -240,7 +190,6 @@
                 "sourceTag": "scope:domain-services",
                 "onlyDependOnLibsWithTags": [
                   "scope:contracts",
-                  "scope:core",
                   "scope:domain-primitives",
                   "scope:aggregates",
                   "scope:repositories",
@@ -248,48 +197,16 @@
                   "scope:validation",
                   "scope:utils",
                   "scope:di",
-                  "scope:logging",
                   "scope:domain-services"
-                ]
-              },
-              {
-                "sourceTag": "scope:logging",
-                "onlyDependOnLibsWithTags": [
-                  "scope:domain-primitives",
-                  "scope:utils",
-                  "scope:contracts",
-                  "scope:logging"
                 ]
               },
               {
                 "sourceTag": "scope:di",
                 "onlyDependOnLibsWithTags": [
-                  "scope:core",
                   "scope:domain-primitives",
                   "scope:utils",
                   "scope:contracts",
-                  "scope:logging",
                   "scope:di"
-                ]
-              },
-              {
-                "sourceTag": "scope:event-store",
-                "onlyDependOnLibsWithTags": [
-                  "scope:contracts",
-                  "scope:core",
-                  "scope:events",
-                  "scope:logging",
-                  "scope:utils",
-                  "scope:event-store"
-                ]
-              },
-              {
-                "sourceTag": "scope:event-scheduling",
-                "onlyDependOnLibsWithTags": [
-                  "scope:contracts",
-                  "scope:testing",
-                  "scope:events",
-                  "scope:utils"
                 ]
               },
               {

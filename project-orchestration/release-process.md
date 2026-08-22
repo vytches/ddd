@@ -171,6 +171,8 @@ The `pnpm prerelease` command performs:
 - [ ] Bundle sizes within limits
 - [ ] No circular dependencies
 - [ ] TypeScript strict mode compliant
+- [ ] `pnpm validate:api` passes — the public API of contracts, events,
+      value-objects and enterprise matches the committed `api-report/` baselines
 
 ### Documentation ✅
 
@@ -183,6 +185,11 @@ The `pnpm prerelease` command performs:
 ### Manual Verification 🔍
 
 - [ ] Breaking changes documented
+- [ ] **Behavioral BC checklist run** — for every change in this release that
+      touches an existing public symbol whose TypeScript signature is unchanged
+      (or only additively widened), `docs/process/behavioral-bc-checklist.md`
+      has been answered and the conclusion is recorded in the PR and the
+      CHANGELOG
 - [ ] Deprecation warnings added
 - [ ] Version bump appropriate
 - [ ] Git history clean
@@ -194,6 +201,66 @@ The `pnpm prerelease` command performs:
 - [ ] GitHub release draft prepared
 - [ ] Announcement ready
 ```
+
+### API surface baselines — the two commands (VF-037)
+
+There are exactly two, and the difference between them is the whole point:
+
+| command                   | mode         | what it does                                                                                                                                                                    |
+| ------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm validate:api`       | comparison   | Builds, runs `fix:dts`, then **compares** the generated report against the committed `api-report/*.api.md`. Exits non-zero on any difference. This is what CI runs on every PR. |
+| `pnpm validate:api:local` | regeneration | Same build, but **overwrites** the baselines with the newly generated reports. Run this only when the API change is intended.                                                   |
+
+Both build and run `fix:dts` first. That matters: api-extractor analysing an
+unprocessed `dist/` walks into implementation code and dies with an internal
+error at `packages/aggregates/src/core/aggregate-root.builder.ts:167`, which
+reads like a compiler bug and is not one — it just means the build step was
+skipped.
+
+When the PR gate fires, the fix is:
+
+1. Read the reported drift. Decide whether the API change was intended.
+2. If intended: `pnpm validate:api:local`, then commit the regenerated baselines
+   **as their own commit**, separate from the code change, so the surface diff
+   is reviewable on its own.
+3. If not intended: fix the code, not the baseline.
+
+Never edit an `api-report/*.api.md` by hand — it is generated output, and
+`packages/*/api-report/` is in `.prettierignore` for the same reason (a
+`prettier --write` from lint-staged reformats it into permanent mismatch).
+
+The gate deliberately fails on **one** thing: the public API shape drifted from
+its baseline. Doc-comment problems (tsdoc syntax, unresolved `{@link}` targets)
+are silenced in `api-extractor.base.json` so they cannot fail it — they belong
+in the linter, where they block nobody. A gate that fires for things the reader
+cannot act on is a gate that gets `|| true`-ed back to death; that is exactly
+how the previous generation of this one died.
+
+### Behavioral BC checklist — how the releaser runs it
+
+The "Behavioral BC checklist run" item above is a step performed by hand, not an
+automated check, and it cannot be delegated to the gates. Type-check,
+api-extractor `.api.md` diffs and `api-surface.test.ts` compare **shapes**; a
+clean surface diff says the signatures did not move, and says nothing about
+whether existing call sites now behave differently at runtime.
+
+For each change in the release range that modifies an existing public
+class/function while leaving its exported signature identical (or only
+additively widened), walk
+[`docs/process/behavioral-bc-checklist.md`](../docs/process/behavioral-bc-checklist.md)
+and record the answer:
+
+- If the answer is "behavioral break", the release is a **major** bump with a
+  `BREAKING CHANGE:` entry and migration notes — regardless of what the
+  TypeScript diff suggests.
+- If the answer is "additive, opted-in, pinned by a regression test on the
+  no-opt-in path", it ships as a minor/patch, and that conclusion is written
+  down rather than left implied. See the VF-036 worked example at the bottom of
+  the checklist for what a clean "additive" answer looks like.
+
+Four prior occurrences are catalogued in the checklist; three were behavioral
+breaks and one was not. The checklist's job is to force the question, not to
+force the classification.
 
 ## Rollback Plan
 

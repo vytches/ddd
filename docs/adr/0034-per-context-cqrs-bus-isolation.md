@@ -382,6 +382,151 @@ incrementally, one context at a time.
 
 ---
 
+## Bug #2 Fix — GLOBAL_QUERY_BUS / GLOBAL_COMMAND_BUS tokens for cross-context ACL (VP-009, 2026-06-11)
+
+### Problem
+
+`VytchesDDDModule.forFeature()` provides `ICommandBus` and `IQueryBus` scoped to
+the importing module. Any service inside that module that needs to dispatch
+queries or commands to the root context (e.g. an Anti-Corruption Layer service
+translating between bounded contexts) would receive the feature-local bus
+instead of the application root bus. There was no stable DI token that always
+resolved to the root bus regardless of what `forFeature()` modules shadow in the
+local provider chain.
+
+### Decision
+
+Two new `Symbol.for` tokens are added to `@vytches/ddd-nestjs`:
+
+- `GLOBAL_QUERY_BUS = Symbol.for('vytches:global-query-bus')`
+- `GLOBAL_COMMAND_BUS = Symbol.for('vytches:global-command-bus')`
+
+`VytchesDDDModule.forRoot()` provides both tokens as bridge factories:
+
+```typescript
+{
+  provide: GLOBAL_QUERY_BUS,
+  useFactory: (bus?: IQueryBus) => bus,
+  inject: [{ token: IQueryBus, optional: true }],
+}
+```
+
+`VytchesDDDModule.forFeature()` intentionally does **not** provide these tokens.
+NestJS resolution walks upward to the global module (`@Global()` on
+`VytchesDDDModule`) and resolves the `forRoot()` provider — always the root
+instance.
+
+Symmetry with `LOCAL_EVENT_BUS`:
+
+| Token                | Direction     | Provided by    |
+| -------------------- | ------------- | -------------- |
+| `LOCAL_EVENT_BUS`    | feature-local | `forFeature()` |
+| `GLOBAL_QUERY_BUS`   | root          | `forRoot()`    |
+| `GLOBAL_COMMAND_BUS` | root          | `forRoot()`    |
+
+When no bus is registered (`forRoot()` with empty providers), the factory
+returns `undefined` — the module boots without throwing and `@Optional()`
+consumers receive `undefined` gracefully (Pitfall 5 tolerance).
+
+### Consumer Usage
+
+```typescript
+import { GLOBAL_QUERY_BUS } from '@vytches/ddd-nestjs';
+import type { IQueryBus } from '@vytches/ddd-cqrs';
+
+@Injectable()
+export class CrossContextAclService {
+  constructor(
+    @Inject(GLOBAL_QUERY_BUS) private readonly rootQuery: IQueryBus
+  ) {}
+}
+```
+
+No breaking change. `GLOBAL_QUERY_BUS` and `GLOBAL_COMMAND_BUS` are additive
+exports. Existing code using `ICommandBus` / `IQueryBus` directly is unaffected.
+
+---
+
+## Bug #3 Fix — Symbol.for DI Tokens (VP-009, 2026-06-11)
+
+### Problem
+
+`ICommandBus` and `IQueryBus` are `export abstract class` objects used as DI
+tokens via `@Inject(ICommandBus)`. In dual-package (ESM + CJS) environments
+(e.g. Vitest or Node.js with mixed module graphs), the same package can be
+loaded twice — once as ESM and once as CJS. Each load produces a distinct class
+object reference. NestJS DI compares token identity by reference; when the
+reference diverges, `@Optional() @Inject(ICommandBus)` resolves to `undefined`
+silently. The downstream guard `&& this.commandBus` then skips command-handler
+registration. The symptom is a 503 with no thrown exception.
+
+### Decision
+
+Stable injection tokens `COMMAND_BUS_TOKEN` and `QUERY_BUS_TOKEN` are exported
+from `@vytches/ddd-cqrs` as `Symbol.for('vytches:cqrs:command-bus')` and
+`Symbol.for('vytches:cqrs:query-bus')`. `Symbol.for` uses a global symbol
+registry — the same key always returns the same symbol regardless of how many
+times or in how many formats the module is loaded.
+
+`VytchesExplorerService` now injects via `@Inject(COMMAND_BUS_TOKEN)` and
+`@Inject(QUERY_BUS_TOKEN)` instead of the class references.
+
+Every factory that can create an explorer registers bridge providers for these
+tokens: `forRoot()`, `forContext()`, `forContexts()` and `forTesting()`.
+
+```typescript
+{
+  provide: COMMAND_BUS_TOKEN,
+  useFactory: (bus?: ICommandBus) => bus,
+  inject: [{ token: ICommandBus, optional: true }],
+}
+```
+
+`forFeature()` aliases the tokens too, but with `useExisting` onto its own
+per-context `ICommandBus` / `IQueryBus`, so that `@Inject(COMMAND_BUS_TOKEN)`
+and `@Inject(ICommandBus)` never disagree inside a feature module.
+`GLOBAL_COMMAND_BUS` / `GLOBAL_QUERY_BUS` are deliberately left out of
+`forFeature()` — reaching past the feature scope to the root bus is exactly what
+they are for.
+
+> Until the VP-009 follow-up, only `forRoot()` and `forTesting()` carried this
+> bridge. `forContext()`, `forContexts()` and `forFeature()` did not, so an
+> explorer created by those factories silently received no bus and registered no
+> handler.
+
+`useFactory` with `optional: true` is used instead of `useExisting` because
+NestJS throws a compile-time DI error for `useExisting` when the target token is
+absent, even if the downstream consumer has `@Optional`. The factory returns
+`undefined` when no bus is registered, which `@Optional` handles correctly.
+
+`forTesting()` registers stubs directly under both the Symbol token and the
+class token alias (`useExisting: COMMAND_BUS_TOKEN`), so both injection styles
+resolve the same stub object (Pitfall 1).
+
+### Migration Guide for Consumers
+
+**No breaking change.** Existing `@Inject(ICommandBus)` decorators in
+application code continue to work as long as the consumer registers a provider
+under `ICommandBus`. The library's internal injection moved to Symbol tokens —
+this is invisible to consumers.
+
+To benefit from the dual-package fix in application-level injection, migrate:
+
+```typescript
+// Before (class token — fragile under dual-package loading)
+@Inject(ICommandBus) private readonly commandBus: ICommandBus
+
+// After (Symbol token — stable across ESM/CJS)
+import { COMMAND_BUS_TOKEN } from '@vytches/ddd-cqrs';
+@Inject(COMMAND_BUS_TOKEN) private readonly commandBus: ICommandBus
+```
+
+For test environments only, `server.deps.inline: ['@vytches']` in
+`vitest.config` is an alternative mitigation (forces single-load of the package)
+— but Symbol tokens are the correct long-term fix.
+
+---
+
 ## Related Decisions
 
 - ADR-0014: DI Integration Bridge Pattern — established the
@@ -391,3 +536,4 @@ incrementally, one context at a time.
 - ADR-0007: Event System Consolidation — established `DomainEvent` /
   `IntegrationEvent` split that this ADR leverages for EventBus routing
 - Task VP-007: implementation details
+- Task VP-009: Bug #3 fix — Symbol.for tokens

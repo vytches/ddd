@@ -4,8 +4,15 @@
 
 project:
   name: "@vytches/ddd"
-  description: "Enterprise-grade TypeScript DDD library — 21 packages in Nx monorepo"
+  description: "Enterprise-grade TypeScript DDD library — 19 packages in Nx monorepo"
   stack_profile: typescript-library
+  # Kompozycja bloków (ADR 0008) — źródło dla .claude/config/runtime.yml.
+  # Alias `typescript-library` rozwija się do [ts-library, library-layers, nx-monorepo]:
+  # framework (wzorce + panel API) + architektura warstw + granice pakietów Nx.
+  # `approval-gate` wnosi twardą bramkę PAUSE — /analyze kończy się artefaktem czekającym
+  # na odpowiedzi, a /orchestrate-blocks nie ruszy bez `status: approved`.
+  # `stack_profile` zostaje: stary system presetów działa równolegle do końca pilota (D7).
+  stack_blocks: [typescript-library, approval-gate]
   language: typescript
   stack: "TypeScript 5.8, Nx, Vitest, pnpm"
   testing: "Vitest"
@@ -17,6 +24,7 @@ skills:
   - architecture
   - typescript-library
   - meta
+  - integrations
 
 rules:
   - "This is a LIBRARY - no application-level DDD patterns (no controllers, no modules)."

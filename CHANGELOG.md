@@ -3,6 +3,815 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **aggregates:** satisfy tsc in the transformDomainEvents test
+  ([ba1fe04](https://github.com/vytches/ddd/commit/ba1fe04f5e45081f8fb67ac707b0761cd5415f53))
+- **ci:** invoke api-extractor via pnpm exec, not bare command
+  ([8e64d4c](https://github.com/vytches/ddd/commit/8e64d4c9f46ccfc91c546442c64f973faa816f80))
+- **ci:** invoke api-extractor via pnpm exec, not bare command
+  ([7b3ef5f](https://github.com/vytches/ddd/commit/7b3ef5f3a5ab575ee38fd56d4f4fa8c3e6caf3d4))
+- **ci:** make the api-surface gate able to fail, and wire the behavioural-BC
+  checklist
+  ([fbf6fbf](https://github.com/vytches/ddd/commit/fbf6fbf25ebf2efd053dde45a984543e2db3172b))
+- **ci:** scope dependencies.yml audit gate to production deps too
+  ([4cc7695](https://github.com/vytches/ddd/commit/4cc7695a2b333c38f52b707644161f217b925b17))
+- **ci:** scope security audit gate to production deps, ignore lockfile in
+  prettier
+  ([ea303d9](https://github.com/vytches/ddd/commit/ea303d9a23215a5e37aabb710f65702dd10cbc47))
+- **config:** regenerate stale coverage-matrix, exclude generated docs from
+  prettier
+  ([6771bb9](https://github.com/vytches/ddd/commit/6771bb91e9d47360cbe7e96417db38acbc826c06))
+- **config:** regenerate stale coverage-matrix, exclude generated docs from
+  prettier
+  ([03db507](https://github.com/vytches/ddd/commit/03db50703991a97b531326f6c20f533f51a995ed))
+- **cqrs:** preserve input order in executeInParallel results
+  ([57172b2](https://github.com/vytches/ddd/commit/57172b22efc21871e289bc4a965c8df45000136e))
+- **deps:** resolve remaining audit findings (25 -> 3 advisories)
+  ([f2bc15b](https://github.com/vytches/ddd/commit/f2bc15b0432ec0212f867be675da034ec189e40c))
+- **nestjs:** register the CQRS token bridge in every module factory
+  ([1384dce](https://github.com/vytches/ddd/commit/1384dcea2200cf276f6cfcaa655c4a9d6fa9d0e9))
+- **nestjs:** report at bootstrap when no handler could be registered
+  ([8074352](https://github.com/vytches/ddd/commit/8074352463106888a8da4a48479deaff510b902a))
+- **nestjs:** warn when a discovered handler has no bus to register on
+  ([b428e34](https://github.com/vytches/ddd/commit/b428e3479ed131beedd60a7c6297b7b1fa28a56c))
+- **policies:** detach the stale LRU node when a cached key is re-written
+  ([eb916d6](https://github.com/vytches/ddd/commit/eb916d6f047b7b07d0401265b06a4bef47dff3cb))
+- **policies:** distinguish insert from update in the PolicyCache write path
+  ([40ce9b5](https://github.com/vytches/ddd/commit/40ce9b5f4a3e06b30a2d46f9ac26ced35a962594))
+- **policies:** honour enableMetrics instead of always collecting
+  ([47ac340](https://github.com/vytches/ddd/commit/47ac340ed49b1fd68ea267d85c394c3a638e6206))
+- **policies:** preserve behaviour wrapper across composition (VB-008)
+  ([5dfa6fa](https://github.com/vytches/ddd/commit/5dfa6fa053e49764f353f81e5d3c0c2dbadc1010))
+- **policies:** respect explicitly falsy cache options and bound cache size
+  ([0a6e1d6](https://github.com/vytches/ddd/commit/0a6e1d643cb0852823e7240f76fa4a35bdd710c1))
+- **release:** fail publish job on real npm publish errors
+  ([4aad98b](https://github.com/vytches/ddd/commit/4aad98bc536f7e42183fba19affa145806ec612c))
+- **release:** verify-exports asserted the opposite of the meta-package design
+  ([bb639ae](https://github.com/vytches/ddd/commit/bb639aeb2bab379b293bf48dfad6aa09c8848764))
+- **resilience:** compose abort signals natively, closing three listener leaks
+  ([2c61ea2](https://github.com/vytches/ddd/commit/2c61ea24e761a2164d9160b37245ae95982b8dab))
+- **resilience:** jitter default, per-instance decorator state, HALF_OPEN probe
+  gate (VF-028)
+  ([05ac364](https://github.com/vytches/ddd/commit/05ac364a5ea9f02e355b9235ab00019e9608d69b))
+
+### Features
+
+- **aggregates:** add transformDomainEvents() for persistence-boundary stamping
+  ([38101b6](https://github.com/vytches/ddd/commit/38101b611f445f52b27991db6287bbb5865f1d24))
+- **contracts:** add enrichEvent() and align the two event shapes
+  ([7027c21](https://github.com/vytches/ddd/commit/7027c212a48c5c309c087c796be141d6d05b4878))
+- **core:** add getIdentityComponents() partial-identity equality hook
+  ([c88e728](https://github.com/vytches/ddd/commit/c88e728ea666aaf14c40581b065828005938a87e))
+- **nestjs:** add forRootAsync and route forFeature through CQRSConfiguration
+  ([abab7ba](https://github.com/vytches/ddd/commit/abab7ba2266d9869ab387cd38e32915c0de1d0ab))
+- **nestjs:** re-export COMMAND_BUS_TOKEN and QUERY_BUS_TOKEN
+  ([39972c9](https://github.com/vytches/ddd/commit/39972c9169e9a311d96010c59a490644a3138a57))
+- **policies:** deduplicate concurrent identical policy checks
+  ([ab4292f](https://github.com/vytches/ddd/commit/ab4292fdef22412c6f74608c7bf410ab636a3bfc))
+
+### Performance Improvements
+
+- **aggregates:** memoize getDomainEvents() to avoid O(n^2) deep-freeze cost
+  ([07e714d](https://github.com/vytches/ddd/commit/07e714d02d800e6ffd1039b8617c68f9f2cf3859))
+- **di:** single-pass dependency resolution and Set-based cycle detection
+  ([97d1d89](https://github.com/vytches/ddd/commit/97d1d892d0a17d9a5f5c8fb8828428693069ff29))
+- **policies:** combine CachedPolicy cache-key hashing into a single digest
+  ([2963a68](https://github.com/vytches/ddd/commit/2963a6842b0441ac5dc744244c6244b509f05e23))
+
+### BREAKING CHANGES
+
+- **policies:** composed policies now retain their caching/retry/temporal
+  wrapper, and composite ids carry the wrapper prefix as a result. Migration
+  notes per change in .changeset/vb-008-\*.md.
+
+Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01THJr8eZUzbcrRZKwRbskka
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [Unreleased]
+
+### BREAKING CHANGES
+
+#### Already shipped in 0.31.0-alpha.0 — documented here for the first time
+
+**`VytchesExplorerService` resolves the CQRS buses through Symbol tokens, not
+the class tokens** (VP-009 Bug #3, commit `02adf265`, released in 0.31.0-alpha.0
+with no changelog entry).
+
+The explorer injects `@Optional() @Inject(COMMAND_BUS_TOKEN)` /
+`@Inject(QUERY_BUS_TOKEN)` — `Symbol.for('vytches:cqrs:command-bus')` and
+`Symbol.for('vytches:cqrs:query-bus')` — instead of the `ICommandBus` /
+`IQueryBus` class references. Symbols survive a dual-package load, where the
+same module reached once as ESM and once as CJS yields two different classes but
+one symbol. That is what the change was for.
+
+Because the injection is `@Optional()`, a mismatch does not fail at boot. It
+degrades silently: `discoverHandlers()` still reports success, no handler is
+ever registered, and every `commandBus.execute()` / `queryBus.execute()` throws
+`No handler registered for ...` at runtime. A consumer lost CQRS dispatch
+application-wide to this and spent real time tracing it back.
+
+_You are affected if_ your application provides the buses without going through
+one of the `VytchesDDDModule` factories — for example a hand-rolled `@Global()`
+module doing `{ provide: ICommandBus, useValue: new EnhancedCommandBus(...) }`.
+
+_Migration._ Preferred: wire through `VytchesDDDModule.forRoot()` (or
+`forContext()` / `forContexts()` / `forFeature()`), which bridges the class
+tokens onto the Symbol tokens for you and provides the explorer in the first
+place. If you cannot move yet, alias the tokens:
+
+```ts
+import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+
+providers: [
+  { provide: ICommandBus, useValue: myCommandBus },
+  { provide: IQueryBus, useValue: myQueryBus },
+  { provide: COMMAND_BUS_TOKEN, useExisting: ICommandBus },
+  { provide: QUERY_BUS_TOKEN, useExisting: IQueryBus },
+];
+```
+
+Use `useExisting` only where the class-token provider is guaranteed present —
+NestJS raises a DI error for `useExisting` against an absent token even under
+`@Optional()`. Where it may be missing, mirror what the factories do:
+
+```ts
+{
+  provide: COMMAND_BUS_TOKEN,
+  useFactory: (bus?: ICommandBus) => bus,
+  inject: [{ token: ICommandBus, optional: true }],
+}
+```
+
+_Self-audit._ `grep -rn "provide: ICommandBus\|provide: IQueryBus" src/`, then
+check each hit sits inside a `VytchesDDDModule` factory call or is accompanied
+by a Symbol-token alias. As of this release the library also warns at bootstrap
+when handlers are discovered but no bus resolved, so an upgrade surfaces the
+problem in the logs rather than in production traffic.
+
+#### Also in 0.31.0-alpha.0, and the other break that bites on upgrade
+
+`BaseValueObject`'s constructor calls `this.validate(value)` and throws
+synchronously (VF-023 AC1), and the value is now **deep**-frozen rather than
+shallow-frozen. `AggregateRoot.getDomainEvents()` returns deep-frozen events for
+the same reason.
+
+This one was written down, but under an `[Unreleased]` heading that was never
+re-labelled when the release was cut — so it sat below the release it shipped
+in. It now lives under
+[Hand-written notes for 0.31.0-alpha.0](#hand-written-notes-for-0310-alpha0-vf-023-and-siblings),
+which carries the full migration text.
+
+The short version of the trap: `validate()` now runs during `super(value)`,
+before the subclass constructor body. A `validate()` override that reads other
+instance fields sees `undefined` for them, and a subclass's own `throw` placed
+after `super(value)` is no longer reachable. Override
+`protected getInvalidValueMessage(value: T): string` to customise the message.
+
+_Self-audit._ `grep -rln "extends BaseValueObject" src/` and check each
+`validate()` override reads only its `value` parameter.
+
+#### `AggregateRoot.getDomainEvents()` now returns a stable array reference (VP-012b)
+
+`getDomainEvents()` built a brand-new array (and re-ran `LibUtils.deepFreeze`
+over every event) on every single call, even when nothing had changed since the
+previous call. It is now memoized: the same frozen array reference is returned
+on every call until the next mutation — `apply()`, `commit()`,
+`loadFromHistory()`, or `transformDomainEvents()` — at which point the cache is
+invalidated and the next call rebuilds it once.
+
+Content (`toEqual`) is unaffected. What changes is **identity**: two calls with
+no intervening mutation now return the same array object (`===`/`.toBe` holds),
+where previously each call returned a distinct array (`not.toBe`/`!==` held).
+This is safe to alias — the array and its contents are frozen either way — but
+any test or code that specifically asserts "each call returns a new array
+instance" will now fail, because that is no longer true.
+
+_Self-audit._ `grep -rn "getDomainEvents" src/ | grep -i "toBe\|===\|!=="` —
+find assertions or logic that compares two `getDomainEvents()` results by
+identity rather than content. Update `not.toBe`/`!==` identity checks to
+`toEqual`/structural comparisons, or drop them if they were only asserting "a
+fresh array every time" as an implementation detail.
+
+### Added
+
+- **policies:** `PolicyCacheMetrics` — named interface for what
+  `PolicyCachingBehavior.getCacheMetrics()` returns (`hits`, `misses`,
+  `evictions`, `entries`, all `readonly number`). Previously the return type was
+  `ReturnType<PolicyCache['getMetrics']>`, anonymous and derived from an
+  unexported internal class, so callers had no type to name a local variable,
+  function parameter, or stored field with:
+
+  ```ts
+  // Before: nothing to import: no exported type describes the return value
+  function logMetrics(
+    m: ReturnType<PolicyCachingBehavior<unknown>['getCacheMetrics']>
+  ) {
+    console.log(m.hits, m.misses, m.evictions, m.entries);
+  }
+
+  // After:
+  import type { PolicyCacheMetrics } from '@vytches/ddd-policies';
+
+  function logMetrics(m: PolicyCacheMetrics) {
+    console.log(m.hits, m.misses, m.evictions, m.entries);
+  }
+  ```
+
+  Also re-exported from `@vytches/ddd`. The runtime shape returned by
+  `getCacheMetrics()` is unchanged — only the return type is now named.
+  Non-breaking, additive. (VB-008 AC3)
+
+- **contracts:** `enrichEvent(event, { payload?, metadata? })` — copy an event
+  with a replaced payload and/or merged metadata while keeping its identity
+  (`eventId`, `occurredOn`), its prototype and `instanceof`. The event's
+  constructor is never called, so event classes with their own constructor
+  signature are safe, and the returned copy is unfrozen.
+
+  This is the supported way for infrastructure to stamp an event on its way to
+  the store — a crypto-shredding key id resolved at persistence time, a
+  correlation id assigned at dispatch, an encrypted payload. Previously there
+  was none, and `getDomainEvents()` hands out deep-frozen events.
+
+- **aggregates:** `AggregateRoot.transformDomainEvents(transform)` — rewrite the
+  payload and/or metadata of the uncommitted domain events in place. An
+  infrastructure-boundary API in the same family as `commit()`: call it from a
+  repository just before persisting, never from the domain or application layer.
+
+  ```ts
+  // inside a repository's save(), before persisting:
+  aggregate.transformDomainEvents(event => ({
+    payload: encryptPII(event.payload, key),
+    metadata: { userSpecificKeyId: key.id },
+  }));
+  ```
+
+  Only `payload` and `metadata` are replaceable. `eventName`, event identity,
+  and the number and order of events stay fixed — rewriting those would desync
+  handlers on replay or break the version invariant. Return nothing from the
+  transform to leave an event untouched.
+
+  This has to land on the aggregate rather than on a local copy inside `save()`:
+  the event dispatcher re-reads the aggregate's events after persistence, so a
+  local copy would still publish the untransformed originals to the in-process
+  event bus.
+
+- **nestjs:** `COMMAND_BUS_TOKEN` and `QUERY_BUS_TOKEN` are re-exported from
+  `@vytches/ddd-nestjs`, so wiring a NestJS application no longer requires a
+  direct import from `@vytches/ddd-cqrs`.
+
+- **examples:** `examples/nestjs` — a compiled, CI-run NestJS wiring example.
+  The NestJS setup previously existed only as prose in three documents that
+  nothing compiled or executed.
+
+### Fixed
+
+- **policies:** composing a cached, retried, or temporal policy no longer drops
+  the wrapper. `and()`, `or()` and `when()` on `PolicyCachingBehavior`,
+  `PolicyRetryBehavior` and `PolicyTemporalBehavior` delegated straight to the
+  wrapped inner/base policy instead of routing through the decorator itself, so
+  the resulting composite silently lost caching/retry/time-window behavior.
+  `not()` already re-wrapped correctly on all three — that asymmetry is why this
+  is classified as a bug fix rather than a contract change: `IBusinessPolicy<T>`
+  signatures are unchanged, only the runtime behavior of the returned composite
+  is corrected.
+
+  ```ts
+  // Before: composite silently lost caching
+  const cached = PolicyCachingBehavior.create(basePolicy, { ttl: 60000 });
+  const composite = cached.and(otherPolicy);
+  // composite re-evaluated basePolicy on every check() — uncached
+
+  // After: composite is still cached
+  const composite = cached.and(otherPolicy);
+  // composite's left branch still hits the cache on repeated identical requests
+  ```
+
+  No migration needed unless you depended on the buggy behavior — if composing a
+  cached/retried/temporal policy produced unexpected cache misses, missing
+  retries, or ignored time windows, that is what this fixes. (VB-008 AC1)
+
+- **policies:** `PolicyCachingBehaviorFactory.forExpensivePolicy()` no longer
+  silently discards an explicit `cacheFailures: false` from the caller — it used
+  `options.cacheFailures || true`, which forced caching of failure results even
+  when a consumer had deliberately opted out. Same fix applied to the other
+  `options.X || <literal>` fallbacks in that factory (`ttl`, `maxSize`), all
+  switched to `??` so only `undefined`/omission falls back to the default, not
+  any other falsy value.
+
+  Separately, `PolicyCachingBehaviorFactory.withTTL()` and `.withCustomKey()`
+  previously built a cache config with no `maxSize` at all, which disabled the
+  size-based eviction backstop — combined with TTL's lazy (read-time only)
+  expiry, a key that was written and never read again would never be reclaimed,
+  so the cache could grow without bound. Caches created through those factories
+  are now bounded: the fallback lives at the point where the behaviour writes to
+  its cache, so an omitted `maxSize` resolves to a default of 1000 entries
+  instead of leaving eviction disabled.
+
+  **Raising the cap:** `withTTL()` and `.withCustomKey()` take no `maxSize`
+  parameter, so callers on those two factories cannot change the limit in place
+  — switch to `PolicyCachingBehavior.create(policy, { ttl, maxSize })` if 1000
+  entries doesn't fit your workload. `forExpensivePolicy()` does accept
+  `maxSize` and keeps its own, deliberately lower default of 500 (its cached
+  values are typically larger per entry). Callers who already pass `maxSize`
+  anywhere are unaffected.
+
+  Also fixed an internal LRU bookkeeping bug in the same cache: re-setting an
+  already-cached key could leave a stale linked-list node reachable from the
+  eviction pointer, causing a later eviction to remove the wrong (still-live)
+  entry instead of the actual least-recently-used one. This is an internal
+  implementation detail with no API surface change.
+
+  Finally, `PolicyCacheConfig.enableMetrics` is honoured. It was declared and
+  documented as a switch over cache metrics collection, but nothing ever read it
+  — hits, misses, evictions and entry counts were collected unconditionally.
+  Passing `enableMetrics: false` now suppresses collection and
+  `getCacheMetrics()` reports zeroes. Omitting the option still collects
+  metrics, so this only changes behaviour for callers who had explicitly opted
+  out and were being ignored. The counters are observational only — eviction is
+  driven by `maxSize` against the live entry count, never by the counters — so
+  disabling them cannot change what is cached.
+
+- **nestjs:** the CQRS Symbol→class token bridge is now registered by every
+  module factory. It previously existed only in `forRoot()` and `forTesting()`,
+  so an explorer created by `forContext()` or `forContexts()` silently received
+  no bus and registered nothing. `forFeature()` aliases the tokens onto its own
+  per-context buses, so `@Inject(COMMAND_BUS_TOKEN)` and `@Inject(ICommandBus)`
+  no longer disagree inside a feature module. `GLOBAL_COMMAND_BUS` /
+  `GLOBAL_QUERY_BUS` remain deliberately absent from `forFeature()` — reaching
+  past the feature scope to the root bus is their purpose.
+
+  ADR-0034 claimed `forRoot()` and `forFeature()` both carried this bridge;
+  neither half was accurate, and it has been corrected.
+
+- **nestjs:** a discovered handler with no bus to register on is now reported at
+  `warn` level, naming the handler, its type and its message type. It was
+  previously skipped without any signal.
+
+- **nestjs:** when handlers are discovered and none could be registered,
+  bootstrap emits one summary warning with discovered/registered counts, which
+  buses resolved, and the tokens to check. This is the fastest route from
+  symptom (`No handler registered for ...` on every request) to cause.
+
+- **contracts:** `createDomainEvent()` now sets `eventId` and `occurredOn` at
+  the top level as well as inside `metadata`, and `IDomainEvent` declares both
+  as optional. Events created through the string form of `AggregateRoot.apply()`
+  previously carried their id only in `metadata.eventId`, while class-based
+  events exposed it directly — an asymmetry that forced consumers to write their
+  own event reconstruction helpers. `instanceof DomainEvent` still does not hold
+  for string-form events; those are plain objects by construction.
+
+### Changed
+
+- **policies:** `PolicyCachingBehaviorFactory`, `PolicyRetryBehaviorFactory` and
+  `PolicyTemporalBehaviorFactory` are now frozen (`as const`) object exports
+  built from standalone functions, not static-only classes.
+
+  **This is invisible to every normal call site — there is nothing to migrate.**
+  Export name and call syntax are identical before and after:
+
+  ```ts
+  // Unchanged:
+  PolicyCachingBehaviorFactory.withTTL(policy, 60000);
+  PolicyRetryBehaviorFactory.forTransientFailures(policy);
+  PolicyTemporalBehaviorFactory.businessHours(policy, fallback);
+  ```
+
+  The only observable difference is for code that used these as classes rather
+  than as callable namespaces — `new PolicyCachingBehaviorFactory()` or
+  `instanceof PolicyCachingBehaviorFactory` — which was never a supported usage
+  (there were no instance members) and now fails. If you only ever called the
+  static methods, do not change anything. (VB-008 AC2)
+
+- **policies:** `PolicyCachingBehavior.withDefaults()` and
+  `PolicyRetryBehavior.withDefaults()` are `@deprecated` in favor of
+  `create(policy, config?)` — an omitted `config` now reproduces exactly what
+  `withDefaults()` used to build. Calling `withDefaults()` still works; it logs
+  one `console.warn` per class on first call naming the replacement, and will be
+  removed in the following minor release.
+
+  ```ts
+  // Before:
+  const cached = PolicyCachingBehavior.withDefaults(basePolicy);
+  const retried = PolicyRetryBehavior.withDefaults(basePolicy);
+
+  // After:
+  const cached = PolicyCachingBehavior.create(basePolicy);
+  const retried = PolicyRetryBehavior.create(basePolicy);
+  ```
+
+  `PolicyRetryBehavior.withDefaults(policy, maxAttempts?)` keeps its existing
+  second parameter; `PolicyTemporalBehavior` is unaffected — it only ever had
+  `create()`. (VB-008 AC4)
+
+- **events:** `DomainEvent.withMetadata()` is unchanged but now documents what
+  it does to event identity: it rebuilds the event through the base
+  three-argument constructor, so the copy gets a **new** `eventId` and
+  `occurredOn`, and subclasses with their own constructor signature do not
+  survive the round trip. For identity-preserving enrichment use `enrichEvent()`
+  or `transformDomainEvents()`. The behaviour was deliberately not "fixed" —
+  changing it would be a silent runtime change with no compile error to catch
+  it.
+
+- **docs:** the root README, the `@vytches/ddd-nestjs` README and its LLM guide
+  now state up front that handler auto-discovery exists only inside
+  `VytchesDDDModule`, and `EnhancedCommandBus`, `EnhancedQueryBus` and
+  `VytchesDDD.getGlobalContainer()` carry `@remarks` that surface in the IDE.
+  These remain public API — outside NestJS they are the only route.
+
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- adding configuration to claude
+  ([eecfd38](https://github.com/vytches/ddd/commit/eecfd38de9cca24e92900fde9f0a9a767fe3b3f4))
+- **config:** fix ddd-lint no-throw-in-domain path matching, wire CI, triage
+  findings
+  ([a5ac3e9](https://github.com/vytches/ddd/commit/a5ac3e9e101b4eb8b32e56edb4272e8498f2d8c4))
+- **config:** include benchmarks/ in nestjs and di tsconfig for type-check
+  coverage
+  ([b0d6884](https://github.com/vytches/ddd/commit/b0d6884e24947c6d83fcc40fdf61879c03cdf4e5))
+- **contracts:** replace Math.random UUID/id generation with crypto.randomUUID
+  ([3798355](https://github.com/vytches/ddd/commit/37983557fa99edde6f60b7662a874b2ae683e078))
+- **core:** enforce structural invariants in BaseValueObject and AggregateRoot
+  (VF-023)
+  ([90d393a](https://github.com/vytches/ddd/commit/90d393a877a437915cc0196822c9591898b93698))
+- **core:** stop errors from leaking data through JSON.stringify
+  ([870b012](https://github.com/vytches/ddd/commit/870b01245f614735588ecd99a032ba4cc03a357e))
+- **cqrs:** evict stale handler factories and add bus reset (VS-003)
+  ([550f865](https://github.com/vytches/ddd/commit/550f8654472260140d67a2f15876691f1f1f6348))
+- **cqrs:** make CQRS execution logging opt-in, sanitize logged errors
+  ([5f58796](https://github.com/vytches/ddd/commit/5f587964c1aa2b00adaf662742b18fda7dbd9315))
+- **cqrs:** unref cache timers and align command enableCache default to false
+  (vp-010)
+  ([56068b7](https://github.com/vytches/ddd/commit/56068b73a39a20d8c18aa7be6cd676639ea1cce5))
+- **deps:** bump vulnerable transitive dependencies (22 advisories)
+  ([f397bb4](https://github.com/vytches/ddd/commit/f397bb4cfdb54da2283d44414a8fa1b2259ad228))
+- **di:** key DI tokens by reference identity, fix adapter lifetime and errors
+  (VF-030)
+  ([3f7fcff](https://github.com/vytches/ddd/commit/3f7fcff28162db78b4e70334e0079549f751b476))
+- **events:** unify bus error semantics, registries, unsubscribe identity,
+  handler cap
+  ([b77e510](https://github.com/vytches/ddd/commit/b77e5102e0cb9ca9cb9e159549329f17eca2e106))
+- **logging:** DataMasker isSensitiveKey — mask plural-form keys (passwords,
+  apiTokens)
+  ([69e7ead](https://github.com/vytches/ddd/commit/69e7ead1904ec4f9d2b25856dd45156f5adcc2d2))
+- **logging:** VS-001 — automatic PII masking for CQRS payload decorators
+  ([31a25d2](https://github.com/vytches/ddd/commit/31a25d2636d83ebaa2a6c61b0ff6dc4d208b92fd))
+- **logging:** VS-002 — PII masking for ConsoleProvider and DefaultLogger
+  defaults
+  ([93191a3](https://github.com/vytches/ddd/commit/93191a329120db48e1135e0d818cf6c7387a61ff))
+- **logging:** VS-004 — DataMasker regex pattern validation (ReDoS protection)
+  ([981fd66](https://github.com/vytches/ddd/commit/981fd66db5095d3e6a59a25f937038ab63b6dc9c))
+- **messaging,resilience:** outbox atomic-claim contract + timer/listener leak
+  fixes (VB-004)
+  ([463beb2](https://github.com/vytches/ddd/commit/463beb23e32c8ead6b70e12612261ff473442238))
+- **messaging:** preserve outbox stack trace + widen LoggingMiddleware logger
+  type (VS-015)
+  ([f11f6f9](https://github.com/vytches/ddd/commit/f11f6f96427a9b41910a5c5249fbc1c541201055))
+- **messaging:** warn when OutboxProcessor default handler is replaced (VS-007,
+  SEC-MESSAGING-001)
+  ([54ac0fe](https://github.com/vytches/ddd/commit/54ac0fef5e1350110dd56063db560895dc810f93))
+- **nestjs:** repair forFeature() DI wiring so bounded-context handlers stay
+  local (VB-003)
+  ([ddbedb6](https://github.com/vytches/ddd/commit/ddbedb6c17e60f8266bf561011df245454db77af))
+- **nestjs:** resolve importing consumer module in feature handler registrar
+  ([efda71f](https://github.com/vytches/ddd/commit/efda71f44c3f056fe06080c0895aa321d6d6af38)),
+  closes [#1](https://github.com/vytches/ddd/issues/1)
+- **nestjs:** surface failed handler registrations and reset buses on destroy
+  (VS-003)
+  ([7460d72](https://github.com/vytches/ddd/commit/7460d729eb1be7d0ceb831bee60dc00cdf56dc06))
+- **nestjs:** switch VytchesExplorerService injection to Symbol.for DI tokens
+  (VP-009 Bug [#3](https://github.com/vytches/ddd/issues/3))
+  ([02adf26](https://github.com/vytches/ddd/commit/02adf2653c19cedba7d3963bd38901381e3c5c57))
+- **policies:** cover all step-type union members in policy evaluators (VF-035)
+  ([a880b32](https://github.com/vytches/ddd/commit/a880b32b384b99fc07109532a4e5dba8262fec6b))
+- **policies:** replace 32-bit djb2 cache key hash with sha-256 (VS-005)
+  ([689738b](https://github.com/vytches/ddd/commit/689738b396c06bc695ca75fbc4671231fb8f5529))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+- **resilience:** block CSV formula injection in CsvMetricExporter (VS-006)
+  ([46fd54e](https://github.com/vytches/ddd/commit/46fd54e2955a7df671eebe03e42c6f7dadfa40f8))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+- **config:** trim dead and aspirational public API surface (VF-031)
+  ([27e0055](https://github.com/vytches/ddd/commit/27e005513894b0b0a17d966a1051b9746df21461))
+
+### Features
+
+- **cli:** add example-matrix coverage generator + CI enforcement (VD-006a)
+  ([ff985aa](https://github.com/vytches/ddd/commit/ff985aa9176075b4faf28a10799ebf705359a420))
+- **config:** add ddd-005 deep-import-instead-of-barrel lint rule
+  ([ee6c817](https://github.com/vytches/ddd/commit/ee6c8170e4700351e9d2ae4b4ccbb36af054c454))
+- **contracts:** add configureDiagnostics public control API (VS-014)
+  ([68d90f6](https://github.com/vytches/ddd/commit/68d90f605697e740c6773ee5c3b352ecd080df34))
+- **cqrs:** add IDisposableBus interface and export from package
+  ([00ada97](https://github.com/vytches/ddd/commit/00ada97a1d6f104e972de1a3a33a511520ba6f48))
+- **cqrs:** export Symbol.for DI tokens to fix dual-package hazard (VP-009 Bug
+  [#3](https://github.com/vytches/ddd/issues/3))
+  ([a985fa8](https://github.com/vytches/ddd/commit/a985fa8301c711d063820c72f55aab76f1ba1331))
+- env-var suppression for EntityIdFactory deprecation warn (VS-008)
+  ([6428850](https://github.com/vytches/ddd/commit/6428850dc6cc21de166fe54e394310cb1591cd3b))
+- **nestjs:** add GLOBAL_COMMAND_BUS / GLOBAL_QUERY_BUS tokens for cross-context
+  ACL (VP-009 Bug [#2](https://github.com/vytches/ddd/issues/2))
+  ([0b47e4d](https://github.com/vytches/ddd/commit/0b47e4d16b54dc696194a25860d81d9c1f02070f))
+- **nestjs:** opt-in strict handler registration (fail-fast on bootstrap)
+  ([bd320b5](https://github.com/vytches/ddd/commit/bd320b57b7641a82755d714bea0f6399e50026f3))
+- **nestjs:** warn when injected bus does not implement reset()
+  ([747c87b](https://github.com/vytches/ddd/commit/747c87b510b5f03e453b75dafb328e36a0efdc7a)),
+  closes [#3](https://github.com/vytches/ddd/issues/3)
+- **policies:** shouldSatisfyAny returns IPolicyStepBuilder (VF-035 AC7)
+  ([63a0759](https://github.com/vytches/ddd/commit/63a075939e1640c36c3b05ab55128ad6325068ac))
+
+### Performance Improvements
+
+- **di:** internal resolve/memory optimizations + dev-only bench (VP-006)
+  ([38f7f54](https://github.com/vytches/ddd/commit/38f7f5431d4f9613491ea4c3014e9f60809b8516))
+- **nestjs:** registry-first resolve, lazy paramtypes cache, COW scopes
+  (VP-006b)
+  ([9b56a71](https://github.com/vytches/ddd/commit/9b56a71ad7779f6626c35192d60c4eea3a51b8c3))
+
+### Reverts
+
+- drop unrelated statusline config accidentally auto-committed
+  ([735be17](https://github.com/vytches/ddd/commit/735be1715735c7c80ae168240c6cff34c21dd422))
+
+### BREAKING CHANGES
+
+- **config:** AggregateRoot's IAggregateBuilder interface removed (was exported
+  but shape-incompatible with the real builder). Several other
+  technically-exported- but-unreachable symbols removed (events/audit,
+  subscribeToContext, ACLDiscoveryPlugin, DIDomainServiceMetadataRegistry,
+  duplicate/speculative aggregate interfaces) - see CHANGELOG.md for full list
+  and migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **core:** BaseValueObject constructor now throws on invalid values (previously
+  silent); VO/event freeze is now deep, not shallow; equals() semantics changed;
+  AggregateRoot.\_internal_setState requires a token parameter. See CHANGELOG.md
+  for full migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+- **events:** BaseEventBus DI machinery removed - the useDI constructor
+  parameter, registerHandlerFactory() and discoverHandlers() are gone; default
+  error semantics now runs all handlers and throws AggregatedEventHandlerError
+  instead of rethrowing the first failure mid-loop.
+
+## Hand-written notes for 0.31.0-alpha.0 (VF-023 and siblings)
+
+These shipped in **0.31.0-alpha.0**. They were written under an `[Unreleased]`
+heading and never re-labelled when the release was cut, which filed the most
+consequential breaks of this version below the release that contained them. Kept
+here, under the release they belong to.
+
+### BREAKING CHANGES
+
+VF-023 — DDD foundation guarantees: value-object validation-during-construction,
+deep immutability, and aggregate event-application atomicity (pre-1.0 BC window;
+see `project-orchestration/tasks/VF-023-ddd-foundation-guarantees.md` and
+`docs/security/threat-models/TM-VF-023.md`):
+
+- **value-objects (AC1):** `BaseValueObject`'s constructor now calls
+  `this.validate(value)` and throws synchronously on failure, instead of relying
+  on every subclass to repeat that check after `super(value)`. Subclasses whose
+  `validate()` override reads other instance fields (rather than only the
+  `value` parameter) will now see `undefined` for those fields, because
+  `validate()` runs before the subclass constructor body executes (the
+  "undefined-during-`super()`" trap). Override the new
+  `protected getInvalidValueMessage(value: T): string` hook to customize the
+  thrown message; a subclass's own post-`super(value)` `throw` is no longer
+  reachable.
+- **value-objects (AC2, AC3, AC11):** `BaseValueObject` values are now
+  **deep**-frozen (`LibUtils.deepFreeze`), not shallow-frozen — nested
+  objects/arrays inside a VO's value are no longer mutable. `equals()` now uses
+  `LibUtils.deepEqual` instead of `JSON.stringify` comparison, fixing false
+  positives/negatives for `undefined`, `Date`, `Map`, `Set`, and `NaN` inside
+  nested structures.
+- **aggregates (AC11):** `AggregateRoot.getDomainEvents()` now returns
+  deep-frozen events (`LibUtils.deepFreeze`), matching the value-objects
+  immutability guarantee. Code that previously mutated events returned from
+  `getDomainEvents()` (a bug even before this change) will now throw in strict
+  mode instead of silently corrupting aggregate state.
+- **aggregates (AC4, F-C6 fix):** `apply()`'s `maxEvents` (REL-007) guard now
+  runs _before_ any state mutation. Previously the guard fired after `_version`
+  had already been incremented, so a caught `maxEvents` error left the
+  aggregate's version and event log permanently out of sync, and a subsequent
+  valid `apply()` call would skip a version number. Guard ordering is now
+  identical between `apply()` (live) and `loadFromHistory()` (replay).
+- **aggregates (AC5, CRITICAL F-H4):** `AggregateRoot._internal_setState` —
+  previously a plain method reachable via any `as unknown as {...}` cast — now
+  requires a module-private `unique symbol` token (`INTERNAL_STATE_TOKEN`,
+  exported only from `./core/aggregate-root`, never from the package's public
+  barrel) as its first parameter, and throws `TypeError` if the token doesn't
+  match. `SnapshotCapability` (the only legitimate caller) has been updated to
+  pass the token. Consumers cannot obtain this token and therefore cannot call
+  `_internal_setState` at all.
+
+#### Consumer Impact Checklist (VF-023)
+
+Before upgrading, run these greps against your codebase to self-audit for the
+behaviors above:
+
+- `grep -rn "\.getValue()\." src/` — find code that reads a nested field off a
+  VO's `getValue()` result and then assigns into it (or into an array method
+  like `.push()`/`.splice()`). These now throw `TypeError` under deep freeze
+  instead of silently mutating shared state.
+- `grep -rn "getDomainEvents()" src/` — find code (projectors, test helpers,
+  outbox processors) that mutates an event or its `payload` after reading it
+  from `getDomainEvents()`. Same deep-freeze consequence as above.
+- `grep -rn "_internal_setState" src/` — find any direct calls to this method.
+  Only `SnapshotCapability` inside `@vytches/ddd-aggregates` itself is a
+  legitimate caller; any application-level call will now fail to compile/throw
+  `TypeError`, since the required `INTERNAL_STATE_TOKEN` is not exported from
+  the public barrel.
+- Review every `BaseValueObject` subclass's `validate()` override: if it
+  previously returned `true`/no-op for values it should have rejected (a silent
+  bug pre-VF-023, since nothing enforced the subclass calling `validate()` at
+  all), construction will now throw at `new Xyz(...)` time instead of allowing
+  an invalid object to exist. Search with
+  `grep -rn "extends BaseValueObject" src/` and manually review each
+  `validate()` body.
+- Review any `validate()` override that reads `this.<otherField>` instead of
+  only its `value` parameter — it will now see `undefined` for fields set up in
+  the subclass constructor body, because `validate()` now runs during `super()`,
+  before that body executes.
+
+VF-031 — prepublish surface diet, second pass (pre-1.0 BC window; see
+`project-orchestration/tasks/VF-031-prepublish-surface-diet.md`):
+
+- **aggregates:** `IAggregateBuilder` removed. The interface's shape was
+  incompatible with the concrete builder implementations shipped in this
+  package, so it could not be implemented as declared; there is no drop-in
+  replacement export, since nothing in this library could have satisfied the old
+  contract. Consumers depending on `IAggregateBuilder` should type against the
+  concrete builder class(es) they actually construct instead.
+
+VF-030 — DI token identity by reference (pre-1.0 BC window; see
+`docs/adr/0038-di-token-identity-by-reference.md` and
+`docs/security/threat-models/TM-VF-030.md`):
+
+- **di, nestjs:** container adapters' internal maps are now keyed by the
+  `ServiceToken` itself (reference identity for class/function and symbol
+  tokens, value identity for strings) instead of a string derived from the
+  token. No public signature changed, and **string-token behavior is unchanged**
+  — but two registrations that previously collided through their string
+  rendering (two classes sharing a `.name` across bounded contexts, or two
+  separate `Symbol('X')` calls both rendering as `"Symbol(X)"`) are now distinct
+  registrations. Code that accidentally relied on such collisions — registering
+  under one class/symbol and resolving with a different same-named one — will
+  now throw `ContainerServiceNotFoundError` instead of silently resolving the
+  wrong service. There is deliberately no `.name` fallback; for tokens shared
+  across bounded contexts or across dual ESM/CJS module graphs, declare them
+  with `Symbol.for('namespaced:key')` (see `packages/di/FRAMEWORK-ADAPTERS.md`).
+- **nestjs:** `NestJSContainerAdapter` now honors `ServiceLifetime.Scoped` — a
+  Scoped service resolves to the same instance within one scope (`createScope()`
+  starts a fresh scoped cache; materialized singletons are shared). Previously
+  Scoped was silently treated as Transient, producing a new instance on every
+  `resolve()`. Consumers that registered services as Scoped but depended on the
+  accidental fresh-instance-per-resolve behavior should register them as
+  Transient.
+- **nestjs:** failed constructor-dependency resolution in
+  `NestJSContainerAdapter` now throws `ContainerServiceNotFoundError` (naming
+  the owning service), and a constructor-dependency cycle throws
+  `CircularDependencyError` with the full resolution chain. Previously an
+  unresolvable dependency fell back to silently constructing it with zero
+  arguments (`new paramType()`), producing an uninitialized instance that failed
+  later and far from the cause.
+- **di:** `BaseContainerAdapter.getTokenKey()` is `@deprecated` and now a
+  display-only helper for error messages and logs — its string output is
+  intentionally lossy and must not be used as a lookup key. The `protected`
+  method remains available to adapter subclasses with an unchanged signature;
+  custom adapters keying their own maps with it should switch to keying by the
+  token itself (migration guide in `packages/di/FRAMEWORK-ADAPTERS.md`).
+
+### Added
+
+- **aggregates (AC6):**
+  `IAggregateConstructorParams.onMissingHandler?: 'warn' | 'throw'` — new
+  optional constructor parameter controlling what happens when
+  `apply()`/`loadFromHistory()` encounters an event with no registered handler.
+  Defaults to `'warn'` (previous behavior, unchanged — a message is logged and
+  the event is recorded but state is not updated). Pass `'throw'` for tests or
+  strict environments where a missing handler should fail fast instead.
+  Non-breaking, additive.
+- **aggregates (AC10):** `AggregateRoot.equals(other)` — identity-based
+  equality, mirroring `Entity.equals()`. Compares by id
+  (`this.getId().equals(other.getId())`); attribute/version differences are
+  ignored. `AggregateRoot` does not extend `Entity`, so this was previously
+  unavailable on aggregates. Non-breaking, additive.
+
+VF-024 — public API surface curation ahead of the first public publish (pre-1.0
+BC window; see `project-orchestration/tasks/VF-024-prepublish-api-surface.md`):
+
+- **di:** `ServiceNotFoundError` renamed to `ContainerServiceNotFoundError` to
+  resolve a silent name collision with `@vytches/ddd-domain-services`'
+  `ServiceNotFoundError` (the two used to be indistinguishable via `instanceof`
+  when both were in scope). Update any `instanceof ServiceNotFoundError` checks
+  against DI container errors to `ContainerServiceNotFoundError`.
+- **value-objects:** `EntityIdFactory` (deprecated, runtime-warned) removed. Use
+  `EntityId.create()` / `EntityId.createWithRandomUUID()` /
+  `EntityId.fromUUID()` / `EntityId.fromInteger()` / `EntityId.fromBigInt()` /
+  `EntityId.fromText()` instead, depending on the identifier shape.
+- **contracts, events:** `internalLogger`, `EVENT_HANDLER_METADATA`,
+  `EVENT_HANDLER_OPTIONS` (contracts) and `CUSTOM_MIDDLEWARE_SYMBOL` (events)
+  removed from the public `.` barrel — they were never meant to be public API.
+  They remain available to sibling `@vytches/ddd-*` packages only, via the
+  `@vytches/ddd-contracts/internal` and `@vytches/ddd-events/internal` subpaths,
+  which carry no semver stability guarantee for external consumers.
+- **enterprise:** `BaseEntityId` (the `@vytches/ddd-contracts` `EntityId`
+  re-exported under an alias to avoid colliding with the
+  `@vytches/ddd-value-objects` `EntityId`) renamed to `ContractsEntityId` for
+  clarity.
+- **policies:** `globalPolicyEventBus` (a process-global, un-partitioned
+  singleton instantiated at import time) removed from the public barrel
+  (SA-M11). Construct your own instance instead: `new PolicyEventBus()`.
+
+VF-031 — prepublish surface diet, second pass (pre-1.0 BC window; see
+`project-orchestration/tasks/VF-031-prepublish-surface-diet.md`):
+
+- **resilience:** `getResilienceConfig(instance, methodName)` — new function
+  that reads back the decorator configuration attached to a
+  `@Resilience`/`@Timeout`/etc-decorated method. `getResilienceMetrics()` is now
+  `@deprecated` in favor of this accurately-named equivalent and simply
+  delegates to it; behavior is unchanged and both remain exported. Non-breaking,
+  additive.
+
+Internal cleanup (technically exported but with no known real consumers; removed
+as part of the same surface diet, not user-facing deprecations):
+
+- **events:** the audit subsystem (`Audible`, `AuditEvent`,
+  `AuditEventProcessor`, `CaptureState`, and the package's
+  `generic-event-persistence-handler.ts`) removed.
+- **events:** `subscribeToContext` and `EventHandlerOptions.priority` removed.
+- **acl:** `ACLDiscoveryPlugin` and its associated decorators removed. Use the
+  `@ACLAdapterFor` decorator from `@vytches/ddd-nestjs` instead.
+- **domain-services:** `DIDomainServiceMetadataRegistry` removed.
+- **aggregates:** duplicate capability interfaces and speculative
+  never-implemented capability interfaces (e.g. `ICachingCapability`) removed.
+
+### Changed
+
+VP-006b — `NestJSContainerAdapter` resolve / cold-start / scope performance
+(MINOR-worthy; see
+`project-orchestration/tasks/VP-006b-nestjs-adapter-performance.md`):
+
+- **nestjs:** **BEHAVIOR CHANGE**: `NestJSContainerAdapter.resolve()` now checks
+  the internal VytchesDDD registry before falling back to `ModuleRef` (aligns
+  with ADR-0014, VytchesDDD as primary container). Only affects tokens
+  registered in BOTH places with DIVERGENT instances — the internal instance now
+  wins where NestJS's previously did. If you dual-register, either drop the
+  internal registration or call `moduleRef.get()` directly for the NestJS
+  instance. In non-production environments the adapter logs a one-time warning
+  when it detects such a divergent dual registration.
+
+### Performance Improvements
+
+- **nestjs:** `NestJSContainerAdapter` caches `design:paramtypes` lazily, once
+  per constructor, on first instantiation (module-level
+  `WeakMap<Constructor, readonly Constructor[]>`; empty results cached too).
+  After a constructor's first materialization no further `Reflect.getMetadata`
+  calls occur for it. No behavior change — `registerFactory`/`registerInstance`
+  paths are unaffected.
+- **nestjs:** constructor-dependency resolution is now a SINGLE pass
+  (`resolveDependency` override replacing the base `isRegistered()` +
+  `resolve()` double lookup — previously up to two `ModuleRef.get` calls per
+  NestJS-side constructor parameter plus one swallowed throw per internal
+  parameter). Error contract unchanged: `ContainerServiceNotFoundError` naming
+  the owning service, `CircularDependencyError` with the full resolution chain,
+  `InvalidRegistrationError` — same types, messages, and timing.
+- **nestjs:** `createScope()` is now O(1) copy-on-write instead of eagerly
+  copying the full descriptor + singleton maps per scope. Measurement (AC4,
+  GC-hinted heap deltas, 1000 live scopes): the eager copy retained 56.62 KB per
+  live scope at N=1000 registered services — above the 50 KB materiality
+  threshold — hence copy-on-write; snapshot semantics (VF-030 D5) are preserved
+  exactly, and `dispose()` of a scope never clears the parent's maps (covered by
+  new tests).
+- **nestjs:** dev-only benchmarks added (`benchmarks/`,
+  `vitest.bench.config.ts`, `pnpm --filter @vytches/ddd-nestjs bench`) with
+  count-based SLOs (`benchmarks/baseline.json`: zero `ModuleRef.get` calls /
+  throws on the production hot path for internally-owned tokens, one
+  `Reflect.getMetadata` per constructor) plus heap/timing metrics. Not part of
+  the published package (`files` whitelist).
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 ### Bug Fixes

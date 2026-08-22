@@ -1,5 +1,5 @@
 {
-  "name": "@vytches/ddd",
+  "name": "@vytches/ddd-workspace",
   "version": "0.26.0",
   "private": true,
   "description": "VytchesDDD - Enterprise-grade TypeScript library implementing Domain-Driven Design patterns",
@@ -20,9 +20,6 @@
   },
   "bugs": {
     "url": "https://github.com/vytches/ddd/issues"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
   },
   "files": [
     "dist",
@@ -57,6 +54,7 @@
     "test:ci": "nx run-many --target=test --all --parallel=3",
     "test:all": "vitest packages/**/*.{test,spec}.ts examples/**/*.{test,spec}.ts --passWithNoTests",
     "test:package": "bash scripts/test-package.sh",
+    "test:smoke": "bash scripts/smoke-test-publish.sh",
     "// === BUILDING WORKFLOWS ===": "",
     "build": "nx run-many --target=build --projects=tag:type:lib --parallel=3 && pnpm run fix:dts && pnpm run bundle:types",
     "build:all": "nx run-many --target=build --all --parallel=3",
@@ -72,7 +70,9 @@
     "build:clean:full": "pnpm clean && pnpm install && pnpm build",
     "build:enterprise": "nx build enterprise",
     "validate": "pnpm validate:exports && pnpm validate:bundles && pnpm validate:types",
-    "validate:api": "api-extractor run --local --config packages/events/api-extractor.json && api-extractor run --local --config packages/contracts/api-extractor.json",
+    "validate:api:prepare": "rimraf packages/enterprise/dist && nx run-many --target=build --projects=@vytches/ddd-contracts,@vytches/ddd-events,@vytches/ddd-value-objects,@vytches/ddd-enterprise,@vytches/ddd-nestjs --parallel=3 && pnpm run fix:dts",
+    "validate:api": "pnpm run validate:api:prepare && api-extractor run --config packages/events/api-extractor.json && api-extractor run --config packages/contracts/api-extractor.json && api-extractor run --config packages/enterprise/api-extractor.json && api-extractor run --config packages/value-objects/api-extractor.json && api-extractor run --config packages/nestjs/api-extractor.json",
+    "validate:api:local": "pnpm run validate:api:prepare && api-extractor run --local --config packages/events/api-extractor.json && api-extractor run --local --config packages/contracts/api-extractor.json && api-extractor run --local --config packages/enterprise/api-extractor.json && api-extractor run --local --config packages/nestjs/api-extractor.json && api-extractor run --local --config packages/value-objects/api-extractor.json",
     "validate:exports": "node scripts/validate-exports.js",
     "validate:bundles": "node scripts/quality-gates/bundle-size-monitor.js",
     "validate:types": "nx run-many --target=type-check --all --parallel=3",
@@ -85,6 +85,10 @@
     "format:check": "prettier --check .",
     "type-check": "nx run-many --target=type-check --all --parallel=3",
     "ddd:lint": "tsx tools/ddd-lint/src/cli.ts packages",
+    "example-matrix:check": "tsx tools/example-matrix/src/cli.ts --check",
+    "example-matrix:generate": "tsx tools/example-matrix/src/cli.ts",
+    "docs-compile-gate:check": "tsx tools/docs-compile-gate/src/cli.ts --check",
+    "check:retired-symbols": "node scripts/check-retired-symbols.mjs",
     "// === QUALITY GATES ===": "",
     "quality": "node scripts/quality-gates/quality-gates.js",
     "quality:ci": "node scripts/quality-gates/quality-gates.js --ci --parallel",
@@ -174,8 +178,8 @@
     "@types/node": "^20.8.0",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
-    "@vitest/coverage-v8": "^4.0.18",
-    "@vitest/ui": "^4.0.18",
+    "@vitest/coverage-v8": "^4.1.0",
+    "@vitest/ui": "^4.1.0",
     "@vytches/ddd-testing": "workspace:*",
     "chokidar": "^3.5.3",
     "commitizen": "^4.3.0",
@@ -194,7 +198,7 @@
     "husky": "^8.0.3",
     "jest": "^29.7.0",
     "jest-environment-node": "^29.7.0",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.3.1",
     "jsonc-eslint-parser": "^2.1.0",
     "lerna": "^8.0.0",
     "lint-staged": "^15.0.2",
@@ -211,9 +215,9 @@
     "tsx": "^4.20.3",
     "typescript": "~5.8.2",
     "verdaccio": "^6.0.5",
-    "vite": "^7.3.2",
+    "vite": "^7.3.5",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.18",
+    "vitest": "^4.1.0",
     "vitest-sonar-reporter": "^2.0.1",
     "yargs": "^17.7.2"
   },
@@ -221,26 +225,29 @@
     "auditConfig": {
       "ignoreCves": [
         "CVE-2026-0775",
-        "GHSA-36xv-jgw5-4q75"
+        "GHSA-36xv-jgw5-4q75",
+        "GHSA-g2r8-wvmj-jf5w",
+        "GHSA-v422-hmwv-36x6"
       ]
     },
     "overrides": {
       "@isaacs/brace-expansion": ">=5.0.1",
+      "@babel/core": ">=7.29.6",
       "@babel/plugin-transform-modules-systemjs@>=7.12.0 <7.29.4": ">=7.29.4",
       "ajv@>=7.0.0-alpha.0 <8.18.0": ">=8.18.0",
-      "axios": ">=1.15.2",
+      "axios": ">=1.18.0",
       "diff": ">=4.0.4",
       "esbuild": ">=0.25.0",
-      "fast-uri@<=3.1.1": ">=3.1.2",
+      "fast-uri": ">=3.1.4",
       "file-type": ">=21.3.2",
       "flatted": ">=3.4.2",
       "follow-redirects": ">=1.16.0",
-      "form-data": ">=4.0.4",
+      "form-data": ">=4.0.6",
       "glob@>=10.2.0 <10.5.0": ">=10.5.0",
       "glob@>=11.0.0 <11.1.0": ">=11.1.0",
       "handlebars": ">=4.7.9",
       "ip-address@<=10.1.0": ">=10.1.1",
-      "js-yaml": ">=4.1.1",
+      "js-yaml": ">=4.3.1 <5.0.0",
       "jws": ">=3.2.3",
       "lodash": ">=4.18.0",
       "lodash-es": ">=4.18.0",
@@ -248,24 +255,31 @@
       "minimatch@>=7.0.0 <7.4.8": ">=7.4.8 <8.0.0",
       "minimatch@>=9.0.0 <9.0.7": ">=9.0.7 <10.0.0",
       "minimatch@>=10.0.0 <10.2.3": ">=10.2.3",
-      "brace-expansion@>=2.0.0 <2.0.3": ">=2.0.3 <3.0.0",
-      "brace-expansion@>=5.0.0 <5.0.6": ">=5.0.6",
-      "multer": ">=2.0.3 <3.0.0",
+      "brace-expansion@<1.1.17": ">=1.1.17",
+      "brace-expansion@>=2.0.0 <2.1.3": ">=2.1.3 <3.0.0",
+      "brace-expansion@>=5.0.0 <5.0.8": ">=5.0.8",
+      "multer": ">=2.2.0 <3.0.0",
       "on-headers": ">=1.1.0",
       "path-to-regexp@<0.1.13": ">=0.1.13",
       "picomatch": ">=4.0.4",
+      "postcss": ">=8.5.18",
+      "body-parser@<1.20.6": ">=1.20.6",
+      "body-parser@>=2.0.0 <2.3.0": ">=2.3.0",
       "qs@>=6.7.0 <=6.15.1": ">=6.15.2",
       "rollup": ">=4.59.0",
-      "tar": ">=7.5.11",
-      "tmp": ">=0.2.4",
-      "undici": ">=7.24.0",
+      "tar": ">=7.5.21",
+      "tmp": ">=0.2.6",
+      "undici": ">=8.5.0",
       "uuid@>=8.0.0 <11.1.1": ">=11.1.1",
       "validator": ">=13.15.22",
       "vite@>=5.2.6 <5.4.21": ">=5.4.21",
       "vite@>=6.0.0 <6.4.1": ">=6.4.1",
-      "vite@>=7.0.0 <7.3.2": ">=7.3.2",
+      "vite@>=7.0.0 <7.3.5": ">=7.3.5",
       "cross-spawn": ">=6.0.6",
-      "yaml": ">=2.8.3"
+      "yaml": ">=2.8.3",
+      "shell-quote": ">=1.8.4",
+      "sigstore": ">=4.1.1 <5.0.0",
+      "@sigstore/core": ">=3.2.1"
     }
   },
   "config": {
@@ -280,8 +294,7 @@
   },
   "dependencies": {
     "@changesets/cli": "^2.27.1",
-    "reflect-metadata": "^0.2.2",
-    "uuid": "^11.1.0"
+    "reflect-metadata": "^0.2.2"
   },
   "nx": {
     "includedScripts": []

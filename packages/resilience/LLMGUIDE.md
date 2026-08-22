@@ -34,9 +34,9 @@ await breaker.execute(() => paymentApi.charge(order));
 // 2. Composed policy: timeout → retry → circuit breaker → bulkhead
 const policy = new ResiliencePolicyBuilder()
   .withTimeout(5_000)
-  .withRetry({ maxAttempts: 3, baseDelayMs: 100 })
+  .withRetry({ maxAttempts: 3, baseDelay: 100 })
   .withCircuitBreaker({ failureThreshold: 5 })
-  .withBulkhead({ maxConcurrent: 10, maxQueue: 50 })
+  .withBulkhead({ maxConcurrency: 10, queueCapacity: 50 })
   .build();
 
 const result = await policy.execute(() => externalService.call(payload));
@@ -46,42 +46,44 @@ const result = await policy.execute(() => externalService.call(payload));
 
 ### Patterns
 
-| Export                        | Kind      | Description                                                     |
-| ----------------------------- | --------- | --------------------------------------------------------------- |
-| `CircuitBreaker`              | class     | Three-state breaker (Closed / Open / Half-Open) with thresholds |
-| `CircuitBreakerOpenError`     | error     | Thrown when execution attempted while breaker is Open           |
-| `CircuitBreakerState`         | enum      | `Closed`, `Open`, `HalfOpen`                                    |
-| `RetryPolicy`                 | class     | Exponential backoff retry with optional jitter                  |
-| `MaxRetriesExceededError`     | error     | Thrown when retry budget is exhausted                           |
-| `Bulkhead`                    | class     | Concurrency limiter with optional queue                         |
-| `BulkheadRejectedException`   | error     | Thrown when both active and queue are saturated                 |
-| `TimeoutError`                | error     | Thrown by `TimeoutStrategy` when deadline exceeded              |
-| `OperationCancelledError`     | error     | Thrown when operation is cancelled mid-flight via context       |
-| `ResiliencePolicyBuilder`     | class     | Fluent builder for composing strategies                         |
-| `ResilienceStrategy`          | interface | `execute<T>(fn): Promise<T>`                                    |
-| `CompositeResilienceStrategy` | class     | Chains multiple strategies into one                             |
-| `RetryStrategy`               | class     | Strategy wrapper around RetryPolicy                             |
-| `CircuitBreakerStrategy`      | class     | Strategy wrapper around CircuitBreaker                          |
-| `BulkheadStrategy`            | class     | Strategy wrapper around Bulkhead                                |
-| `TimeoutStrategy`             | class     | Reject promise after N ms                                       |
-| `DefaultResilienceContext`    | class     | Carries cancel signal + correlation ID through strategies       |
+| Export                             | Kind      | Description                                                                                                |
+| ---------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------- |
+| `CircuitBreaker`                   | class     | Three-state breaker (Closed / Open / Half-Open) with thresholds                                            |
+| `CircuitBreakerOpenError`          | error     | Thrown when execution attempted while breaker is Open                                                      |
+| `CircuitBreakerHalfOpenLimitError` | error     | Thrown when HALF_OPEN already has `halfOpenMaxProbes` probes in flight (extends `CircuitBreakerOpenError`) |
+| `CircuitBreakerState`              | enum      | `Closed`, `Open`, `HalfOpen`                                                                               |
+| `RetryPolicy`                      | class     | Exponential backoff retry with optional jitter                                                             |
+| `MaxRetriesExceededError`          | error     | Thrown when retry budget is exhausted                                                                      |
+| `Bulkhead`                         | class     | Concurrency limiter with optional queue                                                                    |
+| `BulkheadRejectedException`        | error     | Thrown when both active and queue are saturated                                                            |
+| `TimeoutError`                     | error     | Thrown by `TimeoutStrategy` when deadline exceeded                                                         |
+| `OperationCancelledError`          | error     | Thrown when operation is cancelled mid-flight via context                                                  |
+| `ResiliencePolicyBuilder`          | class     | Fluent builder for composing strategies                                                                    |
+| `ResilienceStrategy`               | interface | `execute<T>(fn): Promise<T>`                                                                               |
+| `CompositeResilienceStrategy`      | class     | Chains multiple strategies into one                                                                        |
+| `RetryStrategy`                    | class     | Strategy wrapper around RetryPolicy                                                                        |
+| `CircuitBreakerStrategy`           | class     | Strategy wrapper around CircuitBreaker                                                                     |
+| `BulkheadStrategy`                 | class     | Strategy wrapper around Bulkhead                                                                           |
+| `TimeoutStrategy`                  | class     | Reject promise after N ms                                                                                  |
+| `DefaultResilienceContext`         | class     | Carries cancel signal + correlation ID through strategies                                                  |
 
 ### Decorators (method-level)
 
-| Export                           | Kind      | Description                                            |
-| -------------------------------- | --------- | ------------------------------------------------------ |
-| `RetryDecorator(opts?)`          | decorator | `@RetryDecorator({ maxAttempts: 3 })` on a method      |
-| `CircuitBreakerDecorator(opts?)` | decorator | `@CircuitBreakerDecorator({ name, failureThreshold })` |
-| `BulkheadDecorator(opts?)`       | decorator | `@BulkheadDecorator({ maxConcurrent: 10 })`            |
-| `TimeoutDecorator(opts?)`        | decorator | `@TimeoutDecorator({ ms: 2000 })`                      |
-| `ResilienceDecorator(opts?)`     | decorator | Composite — apply all four with one decorator          |
-| `getResilienceMetrics(target)`   | function  | Read accumulated metrics from a decorated class        |
-| `RetryDecoratorConfig`           | type      | Decorator options                                      |
-| `CircuitBreakerDecoratorConfig`  | type      | Decorator options                                      |
-| `BulkheadDecoratorConfig`        | type      | Decorator options                                      |
-| `TimeoutDecoratorConfig`         | type      | Decorator options                                      |
-| `CompositeResilienceConfig`      | type      | Composite decorator options                            |
-| `ResilienceDecoratorConfig`      | type      | Generic config base                                    |
+| Export                                      | Kind      | Description                                                                      |
+| ------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
+| `RetryDecorator(opts?)`                     | decorator | `@RetryDecorator({ maxAttempts: 3 })` on a method                                |
+| `CircuitBreakerDecorator(opts?)`            | decorator | `@CircuitBreakerDecorator({ name, failureThreshold })`                           |
+| `BulkheadDecorator(opts?)`                  | decorator | `@BulkheadDecorator({ maxConcurrency: 10 })`                                     |
+| `TimeoutDecorator(opts?)`                   | decorator | `@TimeoutDecorator({ timeout: 2000 })`                                           |
+| `ResilienceDecorator(opts?)`                | decorator | Composite — apply all four with one decorator                                    |
+| `getResilienceConfig(instance, methodName)` | function  | Read back the static decorator config for a decorated method                     |
+| `getResilienceMetrics(target)`              | function  | Deprecated alias of `getResilienceConfig` — despite the name, no runtime metrics |
+| `RetryDecoratorConfig`                      | type      | Decorator options                                                                |
+| `CircuitBreakerDecoratorConfig`             | type      | Decorator options                                                                |
+| `BulkheadDecoratorConfig`                   | type      | Decorator options                                                                |
+| `TimeoutDecoratorConfig`                    | type      | Decorator options                                                                |
+| `CompositeResilienceConfig`                 | type      | Composite decorator options                                                      |
+| `ResilienceDecoratorConfig`                 | type      | Generic config base                                                              |
 
 ### Observability & metrics
 
@@ -125,8 +127,8 @@ import {
 
 class PaymentService {
   @ResilienceDecorator({
-    timeout: { ms: 2000 },
-    retry: { maxAttempts: 3, baseDelayMs: 100 },
+    timeout: 2000,
+    retry: { maxAttempts: 3, baseDelay: 100 },
     circuitBreaker: { name: 'payments', failureThreshold: 5 },
   })
   async charge(orderId: string, amount: number): Promise<void> {
@@ -174,6 +176,77 @@ await retry.execute(() => bus.publish(event));
 // await retry.execute(() => orderService.placeOrder(payload));
 ```
 
+**By default `RetryPolicy`/`@RetryDecorator` retries every thrown error.**
+`retryableErrors` is optional — leave it unset and _any_ failure (including a
+validation error unrelated to transient infrastructure) triggers a retry. Set
+`retryableErrors` explicitly whenever the wrapped operation is not provably
+idempotent:
+
+```typescript
+const retry = new RetryPolicy({
+  ...RetryPolicy.defaultConfig(),
+  retryableErrors: error =>
+    error.name === 'ECONNRESET' || error.name === 'TimeoutError',
+});
+```
+
+### Decorator policy scope: per-instance by default
+
+`@CircuitBreakerDecorator`/`@BulkheadDecorator`/`@RetryDecorator`/`@ResilienceDecorator`
+build a **separate policy per decorated instance** (`this`), lazily on first
+call. A circuit breaker tripped by one instance no longer silently affects every
+other instance of the same class.
+
+If you deliberately want one shared breaker/bulkhead/retry state across every
+instance of a class (e.g. protecting a shared connection pool), opt in with
+`scope: 'shared'` — this restores the previous "one policy for the whole class"
+behavior:
+
+```typescript
+class GatewayClient {
+  @CircuitBreakerDecorator({
+    name: 'gateway',
+    failureThreshold: 5,
+    scope: 'shared',
+  })
+  async call(payload: Payload): Promise<Response> {
+    return gatewayApi.send(payload);
+  }
+}
+```
+
+If you want the sharing without giving up per-instance isolation for everything
+else, share the _instance_ instead (one `GatewayClient` used by all callers), or
+build a single named policy with `ResiliencePolicyBuilder` and call it directly
+rather than through the decorator.
+
+### Circuit breaker HALF_OPEN probe gating
+
+Once `recoveryTimeout` elapses, the breaker enters HALF_OPEN and every caller
+that arrives is a candidate "recovery probe" against the downstream. By default
+only **one** probe is allowed in flight at a time — extra concurrent callers are
+rejected with `CircuitBreakerHalfOpenLimitError` (which
+`extends CircuitBreakerOpenError`, so existing
+`instanceof CircuitBreakerOpenError` handling still works) instead of all
+reaching the downstream at once. Raise the limit with `halfOpenMaxProbes` if the
+downstream can safely absorb more than one concurrent probe:
+
+```typescript
+new CircuitBreaker({
+  name: 'payments',
+  failureThreshold: 5,
+  recoveryTimeout: 30_000,
+  successThreshold: 2,
+  timeout: 5_000,
+  halfOpenMaxProbes: 3,
+});
+```
+
+A probe holds its slot for its entire execution, including any `Retry` composed
+inside the same circuit breaker (retry runs _inside_ the breaker in
+`CompositeResilienceStrategy`) — so full recovery can take noticeably longer
+than `recoveryTimeout` alone suggests when a probe itself retries with backoff.
+
 ## Anti-Patterns
 
 - **Do not retry domain command handlers** — most are not idempotent.
@@ -187,3 +260,8 @@ await retry.execute(() => bus.publish(event));
 - **Do not skip `MetricCollector` registration** when using decorators in
   production — without a registered collector, `getResilienceMetrics()` is empty
   and you lose visibility into failure modes.
+- **Do not assume `retryableErrors` defaults to "transient errors only"** — it
+  defaults to retrying everything. Set it explicitly for non-idempotent work.
+- **Do not assume `scope: 'shared'` on a decorator is the default** — it isn't.
+  Per-instance policies are the default (`scope: 'instance'`); opt into
+  `'shared'` deliberately, only when you actually want cross-instance sharing.

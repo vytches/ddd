@@ -1,6 +1,7 @@
 // Most commonly used - prioritized exports
 export {
   CircuitBreaker,
+  CircuitBreakerHalfOpenLimitError,
   CircuitBreakerOpenError,
   CircuitBreakerState,
 } from './patterns/circuit-breaker';
@@ -67,6 +68,7 @@ export {
 export {
   Bulkhead as BulkheadDecorator,
   CircuitBreaker as CircuitBreakerDecorator,
+  getResilienceConfig,
   getResilienceMetrics,
   Resilience as ResilienceDecorator,
   Retry as RetryDecorator,

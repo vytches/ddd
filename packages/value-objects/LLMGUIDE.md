@@ -55,13 +55,107 @@ const textId = EntityId.fromText('order-slug');
 
 ### `BaseValueObject<T>` method reference
 
-| Method                              | Description                                        |
-| ----------------------------------- | -------------------------------------------------- |
-| `getValue(): T`                     | Returns the raw wrapped value                      |
-| `equals(other): boolean`            | Structural equality by raw value (`===`)           |
-| `toString(): string`                | `String(value)`                                    |
-| `toJSON(): string`                  | `JSON.stringify(value)`                            |
-| `abstract validate(value): boolean` | Must be implemented; called in subclass `create()` |
+| Method                                                     | Description                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `getValue(): T`                                            | Returns the raw wrapped value                                                                                                                                                                                                                                      |
+| `equals(other): boolean`                                   | `===` for primitives, `LibUtils.deepEqual` for objects — unless `getIdentityComponents()` is overridden on both sides, in which case identity components decide equality instead (VF-036)                                                                          |
+| `toString(): string`                                       | `String(value)`                                                                                                                                                                                                                                                    |
+| `toJSON(): unknown`                                        | Returns the raw value (not a JSON string)                                                                                                                                                                                                                          |
+| `abstract validate(value): boolean`                        | Must be implemented; called in subclass `create()`                                                                                                                                                                                                                 |
+| `getIdentityComponents(): readonly unknown[] \| undefined` | Protected opt-in hook (VF-036). Default returns `undefined` (raw comparison, unchanged). Override to compare by a subset/projection of fields instead of the full raw value; if either side returns `undefined`, `equals()` falls back to the raw comparison above |
+
+## Partial-identity equality: `getIdentityComponents()` (VF-036)
+
+**When to use it:** override this protected hook when only a subset of a value
+object's `value` should participate in equality (e.g. exclude a display flag,
+audit timestamp, or cache key from identity). Leave it unimplemented (default
+returns `undefined`) when the full raw `value` should decide equality — that is
+the common case.
+
+```ts compile-check
+import { BaseValueObject } from '@vytches/ddd-value-objects';
+
+interface MoneyProps {
+  amount: number;
+  currency: string;
+  displayFormat: 'symbol' | 'code';
+}
+
+class Money extends BaseValueObject<MoneyProps> {
+  validate(value: unknown): boolean {
+    const v = value as MoneyProps;
+    return v.amount >= 0 && v.currency.length === 3;
+  }
+
+  // string-literal discriminator ('Money') scopes equality to this type —
+  // see "Type-scoped equality" below; displayFormat is excluded on purpose.
+  protected override getIdentityComponents(): readonly unknown[] {
+    return ['Money', this.value.amount, this.value.currency];
+  }
+}
+```
+
+**Dispatch rule:** `equals()` calls the hook on both sides. Both defined →
+compare components (same length, then element-wise, dispatching to nested
+`.equals()` for value objects, `LibUtils.deepEqual` otherwise). Either side
+`undefined` → unchanged raw comparison (`===` / `LibUtils.deepEqual`).
+
+**Non-transitivity in mixed populations (collection hazard).** The fallback is
+symmetric but not transitive: with A (no override), B (override, same raw
+`value` as A), C (override, same components as B), `A.equals(B)` and
+`B.equals(C)` can both be `true` while `A.equals(C)` is `false`. Code that
+assumes an equivalence relation — `list.some(x => x.equals(y))`, de-duplication
+by `.equals()` — breaks silently when raw-comparison and component-override
+instances of the same base type are mixed. Migrate a whole hierarchy together
+(see MIGRATION.md), never partially.
+
+**`[]` footgun.** `[]` is defined-and-empty, not "opt out" — two `[]`- returning
+instances are always equal to each other. Return `undefined` to opt out, never
+`[]`.
+
+**Fixed arity.** A class must always return the same number of components in the
+same order. Comparison begins with a length check, so a conditional push
+(`if (this.scope) parts.push(this.scope)`) makes two instances of one class
+unequal because of an unset optional field rather than a real data difference.
+Use a stable placeholder — `[this.tenant, this.scope ?? null, this.key]`. A
+subclass that adds a component changes the arity of every comparison against its
+parent; decide that deliberately.
+
+**Undefined-because-uninitialized is a different trap than it sounds.** Only a
+literal `undefined` returned _by the hook itself_ triggers the raw fallback; an
+`undefined` _component value_ inside a defined array does not. The real trap is
+a _conditional_ override that sometimes returns `undefined` — that silently and
+intermittently downgrades the same class to raw comparison. Always return an
+array once a class opts in.
+
+**Throw propagation.** A throwing override propagates out of `equals()` uncaught
+— no try/catch, by design (`equals()` is a hot path; the library logger is
+diagnostics-only). `equals()` is no longer a total function for a subclass whose
+override can throw.
+
+**Frozen/readonly state only.** The constructor deep-freezes `value`, not any
+subclass field assigned after `super(value)`. Components must derive only from
+`value` or from subclass fields the subclass itself keeps immutable — deriving
+from mutable state breaks equality stability over the instance's lifetime.
+
+**Type-scoped equality idiom.** No type/`instanceof` check is performed —
+cross-subclass equality with matching components stays `true`, same as raw
+comparison today. To scope equality to one type, add a string literal as the
+first component (`['Money', ...]`), never `this.constructor.name`
+(minification-unsafe) or the class object itself (unsafe across duplicate
+package copies).
+
+**`toString()`/`toJSON()` stay value-based** regardless of this hook — both
+always serialize the raw `value`. An override that narrows equality can desync
+serialization from equality; keeping that coherent is the consumer's
+responsibility.
+
+> **Permanent note:** `getEqualityComponents()` — a similarly-named hook from an
+> early (2025) documentation draft — was **never implemented** in any released
+> version and will not be added as an alias/shim/fallback.
+> `getIdentityComponents()` is the real hook, under a deliberately new name. Any
+> existing `getEqualityComponents()` override has always been dead code; see
+> root `MIGRATION.md` to migrate it.
 
 ## Patterns
 

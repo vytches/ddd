@@ -39,7 +39,6 @@ exports[`@vytches/ddd-policies public API surface > exports the documented set o
   "PolicyViolation",
   "PolicyViolationCollection",
   "SpecificationPolicy",
-  "globalPolicyEventBus",
   "withEvents",
 ]
 `;

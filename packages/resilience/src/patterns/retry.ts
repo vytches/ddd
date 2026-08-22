@@ -6,7 +6,24 @@ export interface RetryConfig {
   readonly baseDelay: number;
   readonly maxDelay: number;
   readonly backoffMultiplier: number;
+  /**
+   * Jitter algorithm here is **Equal Jitter**: the computed exponential delay
+   * is multiplied by a random factor in the 50%-100% band (see
+   * {@link RetryPolicy.calculateDelay}). This is a different algorithm from
+   * `@vytches/ddd-policies`' `PolicyRetryConfig.jitter` (+/-10% band around
+   * the computed delay) — the two packages' retry jitter are not
+   * interchangeable tuning knobs, docs-only note (SA-L5/D8, no behavior
+   * change).
+   */
   readonly jitter: boolean;
+  /**
+   * SA-L5: when omitted, {@link RetryPolicy.execute} retries **every**
+   * thrown error, including ones that are unsafe to retry blindly (e.g. a
+   * validation error from a non-idempotent operation). Set this to scope
+   * retry to errors you know are transient/safe to retry (network timeouts,
+   * `ECONNRESET`, etc.) — especially when wrapping anything that is not
+   * provably idempotent.
+   */
   readonly retryableErrors?: (error: Error) => boolean;
 }
 
@@ -68,6 +85,8 @@ export class RetryPolicy {
       return this.config.retryableErrors(error);
     }
 
+    // SA-L5: no `retryableErrors` configured — retries ALL errors. See the
+    // JSDoc on RetryConfig.retryableErrors.
     return true;
   }
 

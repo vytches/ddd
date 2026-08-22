@@ -1,4 +1,4 @@
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import type {
   HandlerInfo,
   IHandlerDiscoveryPlugin,
@@ -6,7 +6,6 @@ import type {
 } from './handler-discovery.interface';
 
 export class HandlerDiscoveryRegistry implements IHandlerDiscoveryRegistry {
-  private readonly logger = Logger.forContext('HandlerDiscoveryRegistry');
   private plugins = new Map<string, IHandlerDiscoveryPlugin>();
 
   /**
@@ -15,9 +14,6 @@ export class HandlerDiscoveryRegistry implements IHandlerDiscoveryRegistry {
   registerPlugin(plugin: IHandlerDiscoveryPlugin): void {
     if (plugin.isAvailable()) {
       this.plugins.set(plugin.name, plugin);
-      this.logger.debug('Registered handler discovery plugin', { pluginName: plugin.name });
-    } else {
-      this.logger.debug('Plugin not available, skipping registration', { pluginName: plugin.name });
     }
   }
 
@@ -29,15 +25,10 @@ export class HandlerDiscoveryRegistry implements IHandlerDiscoveryRegistry {
 
     for (const [name, plugin] of this.plugins) {
       try {
-        this.logger.debug('Discovering handlers with plugin', { pluginName: name });
         const handlers = await plugin.discoverHandlers(assemblies);
         allHandlers.push(...handlers);
-        this.logger.debug('Plugin discovered handlers', {
-          pluginName: name,
-          handlerCount: handlers.length,
-        });
       } catch (error) {
-        this.logger.warn('Plugin failed to discover handlers', {
+        internalLogger.warn('HandlerDiscoveryRegistry: plugin failed to discover handlers', {
           pluginName: name,
           error: String(error),
         });

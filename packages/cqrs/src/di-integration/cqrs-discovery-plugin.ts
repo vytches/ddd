@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import 'reflect-metadata';
+
+// F-C3 (VB-002): type-only import brings in reflect-metadata's ambient
+// `Reflect.getMetadata`/`defineMetadata` typings for the compiler WITHOUT a
+// runtime side effect (fully erased on emit) — reflect-metadata is a peer
+// dependency here, consumers must import it once at bootstrap themselves.
+import type {} from 'reflect-metadata';
 
 // Local type definitions to avoid hard dependency on DI package
 interface HandlerInfo {

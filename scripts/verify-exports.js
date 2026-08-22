@@ -46,7 +46,9 @@ const CRITICAL_EXPORTS = {
     'UniversalEventDispatcher',
     'UnifiedEventBus',
     'BaseEventBus',
-    'CUSTOM_MIDDLEWARE_SYMBOL',
+    // CUSTOM_MIDDLEWARE_SYMBOL deliberately absent: removed from the public
+    // surface in REL-005 (it was @internal). Still reachable via a direct
+    // `@vytches/ddd-events` import for custom bus implementations.
     'DomainEvent',
     'EventHandler',
     'EventDiscoveryPlugin',
@@ -59,7 +61,8 @@ const CRITICAL_EXPORTS = {
     'IEventBus',
     'IEventDispatcher',
   ],
-  'value-objects': ['EntityId', 'EntityIdFactory', 'BaseValueObject'],
+  // EntityIdFactory dropped in VF-024 (AC3) — it was a deprecated wrapper class.
+  'value-objects': ['EntityId', 'BaseValueObject'],
   'domain-primitives': ['BaseError', 'IDomainError', 'MissingValueError', 'InvalidParameterError'],
   utils: ['safeRun', 'Result', 'LibUtils'],
 };
@@ -194,14 +197,56 @@ function verifyMetaPackageBundling() {
   const stats = fs.statSync(enterprisePath);
   const sizeKB = (stats.size / 1024).toFixed(2);
 
-  // Meta-package should be large (bundling all sub-packages)
-  if (stats.size < 100000) {
-    log.error(`Enterprise bundle too small (${sizeKB}KB) - likely not bundling dependencies`);
+  // This used to assert `size >= 100000` on the theory that a meta-package
+  // "should be large (bundling all sub-packages)". That is the opposite of the
+  // architecture: ADR-0002 made the meta-package a *lightweight* re-export
+  // layer and records the resulting size reduction as the win. Inlining the
+  // sub-packages here would actively break consumers, because every one of
+  // them is also declared as a runtime dependency — they would get each symbol
+  // twice, from two separate copies, with `instanceof` failing across them.
+  //
+  // So the shape to verify is "thin re-export layer", not "big bundle": every
+  // declared sibling dependency must actually be required, and the output must
+  // not balloon to the size that inlining would produce.
+  const enterprisePkg = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '..', 'packages', 'enterprise', 'package.json'), 'utf8')
+  );
+  const declaredDeps = Object.keys(enterprisePkg.dependencies || {}).filter(d =>
+    d.startsWith('@vytches/')
+  );
+
+  const bundle = fs.readFileSync(enterprisePath, 'utf8');
+  // Minified output uses double quotes; unminified may use single.
+  const required = new Set(
+    [...bundle.matchAll(/require\(\s*["']([^"']+)["']\s*\)/g)].map(m => m[1])
+  );
+  const notReExported = declaredDeps.filter(d => !required.has(d));
+
+  if (notReExported.length > 0) {
+    log.error(
+      `Enterprise does not re-export ${notReExported.length} declared dependency/ies: ` +
+        `${notReExported.join(', ')} — the meta-package would silently omit their exports`
+    );
     hasErrors = true;
     return false;
   }
 
-  log.success(`Enterprise bundle size: ${sizeKB}KB - properly bundling sub-packages`);
+  // Upper bound, not lower: crossing it means someone disabled externalization
+  // and the sub-packages are being inlined after all. Current output is ~23KB,
+  // so this leaves an order of magnitude of headroom for legitimate growth.
+  const MAX_META_BUNDLE_BYTES = 250000;
+  if (stats.size > MAX_META_BUNDLE_BYTES) {
+    log.error(
+      `Enterprise bundle unexpectedly large (${sizeKB}KB) - sub-packages are likely being ` +
+        `inlined instead of re-exported, which ships every symbol twice (ADR-0002)`
+    );
+    hasErrors = true;
+    return false;
+  }
+
+  log.success(
+    `Enterprise bundle ${sizeKB}KB - thin re-export layer over all ${declaredDeps.length} sub-packages`
+  );
 
   // Load the module to check exports
   try {
@@ -247,8 +292,10 @@ function verifyCriticalExports(enterprise) {
   }
 
   // Check special cases
-  if (!('BaseEntityId' in enterprise)) {
-    log.error('Missing BaseEntityId (contracts EntityId exported as BaseEntityId)');
+  // VF-024 (AC5) renamed this from BaseEntityId to ContractsEntityId, for
+  // consistency with the ContractsValidationError pattern next to it.
+  if (!('ContractsEntityId' in enterprise)) {
+    log.error('Missing ContractsEntityId (contracts EntityId re-exported under that name)');
     hasErrors = true;
     missingCount++;
   }

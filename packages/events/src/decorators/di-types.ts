@@ -45,9 +45,6 @@ export interface EventHandlerOptions extends DIDecoratorOptions {
   /** Available from version */
   availableFrom?: string;
 
-  /** Handler priority (higher = earlier execution) */
-  priority?: number;
-
   /** Context filter for event handling - can be single context, multiple contexts, or undefined for all */
   eventContext?: string | string[];
 

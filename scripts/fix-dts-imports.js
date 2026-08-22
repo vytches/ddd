@@ -1,29 +1,109 @@
 #!/usr/bin/env node
 
 /**
- * Fix TypeScript declaration files (.d.ts) to use package imports instead of relative paths
- * This script fixes the issue where DTS plugin generates relative imports that break in published packages
+ * Fix TypeScript declaration files (.d.ts) to use package imports instead of
+ * monorepo-relative paths (e.g. `from '../../di/src/index.ts'`).
+ *
+ * F-C1 (VB-002): this used to be TWO independent, out-of-sync fixers —
+ * an inline `afterBuild` hook in `packages/utils/build-configs/config-builders.ts`
+ * (only ran for "meta" packages, only touched the top-level `dist/index.d.ts`,
+ * and only matched exactly `../../`), and this script (explicitly SKIPPED
+ * meta-packages, only scanned top-level `dist/*.d.ts`, and hardcoded a regex
+ * per package name that silently missed newer packages).
+ *
+ * This is now the SINGLE consolidated mechanism:
+ *   - No meta-package exemption — every package's dist is processed.
+ *   - Recurses into `dist/**\/*.d.ts` (nested declaration files too, not just
+ *     the top-level barrel).
+ *   - The package-name rewrite table is derived DYNAMICALLY from
+ *     `packages/*\/package.json` — no hardcoded list to fall out of sync.
+ *   - The relative-path regex matches `(\.\.\/)+` (any depth of `../`), not
+ *     just exactly two levels.
+ *
+ * A CI guard (`scripts/smoke-test-publish.sh`, AC1) asserts
+ * `grep -r "/src/index.ts" packages/*\/dist` is empty after this runs.
  */
 
 const fs = require('fs');
 const path = require('path');
 
-function fixDtsImports(packagePath) {
-  const packageJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf-8'));
-  const packageName = packageJson.name?.split('/')[1] || 'unknown';
+const packagesDir = path.join(__dirname, '..', 'packages');
 
-  // Skip meta-packages (they use custom templates)
-  const isMetaPackage =
-    packageName === 'enterprise' ||
-    packageName === 'ddd' ||
-    (packageJson.dependencies &&
-      Object.keys(packageJson.dependencies).filter(dep => dep.startsWith('@vytches/ddd-')).length >=
-        5);
+/**
+ * Build a map of package directory name -> published package name, e.g.
+ * "domain-primitives" -> "@vytches/ddd-domain-primitives", by reading every
+ * packages/*\/package.json. This replaces the old hardcoded per-package
+ * regex list, which was missing entries for resilience, messaging,
+ * projections, acl, domain-services, testing, nestjs, event-store, etc.
+ */
+function buildPackageNameMap(dir) {
+  const map = new Map();
+  const packageDirs = fs.readdirSync(dir).filter(d => {
+    const full = path.join(dir, d);
+    return fs.statSync(full).isDirectory() && fs.existsSync(path.join(full, 'package.json'));
+  });
 
-  if (isMetaPackage) {
-    console.log(`Skipping ${packageName} - meta-package uses custom template`);
-    return;
+  for (const packageDir of packageDirs) {
+    try {
+      const pkgJson = JSON.parse(
+        fs.readFileSync(path.join(dir, packageDir, 'package.json'), 'utf-8')
+      );
+      if (pkgJson.name) {
+        map.set(packageDir, pkgJson.name);
+      }
+    } catch (error) {
+      console.warn(`Warning: could not read package.json for ${packageDir}:`, error.message);
+    }
   }
+
+  return map;
+}
+
+/**
+ * Recursively collect every .d.ts file under a directory.
+ */
+function findDtsFilesRecursive(dir) {
+  const results = [];
+  if (!fs.existsSync(dir)) {
+    return results;
+  }
+
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...findDtsFilesRecursive(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith('.d.ts')) {
+      results.push(fullPath);
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Build one regex+replacement pair per known package directory, matching any
+ * depth of `../` (not just exactly `../../`) followed by `<dir>/src/index`
+ * (with or without the `.ts` extension, single or double quotes).
+ */
+function buildRewriteRules(packageNameMap) {
+  const rules = [];
+  for (const [dirName, packageName] of packageNameMap.entries()) {
+    // Escape regex-special characters in the directory name (none expected
+    // today, but package dirs are user-controlled over time).
+    const escapedDir = dirName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = new RegExp(
+      `from\\s+(['"])(?:\\.\\.\\/)+${escapedDir}\\/src\\/index(?:\\.ts)?\\1`,
+      'g'
+    );
+    rules.push({ dirName, packageName, pattern });
+  }
+  return rules;
+}
+
+function fixDtsImports(packagePath, rewriteRules) {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf-8'));
+  const packageName = packageJson.name || path.basename(packagePath);
 
   const distPath = path.join(packagePath, 'dist');
   if (!fs.existsSync(distPath)) {
@@ -31,95 +111,35 @@ function fixDtsImports(packagePath) {
     return;
   }
 
-  console.log(`Fixing DTS imports for: ${packageName}`);
+  const dtsFiles = findDtsFilesRecursive(distPath);
+  if (dtsFiles.length === 0) {
+    console.log(`Skipping ${packageName} - no .d.ts files in dist`);
+    return;
+  }
 
-  // Find all .d.ts files in dist directory
-  const dtsFiles = fs.readdirSync(distPath).filter(file => file.endsWith('.d.ts'));
+  console.log(`Fixing DTS imports for: ${packageName}`);
 
   let totalFixedFiles = 0;
   let totalFixedImports = 0;
 
-  for (const dtsFile of dtsFiles) {
-    const filePath = path.join(distPath, dtsFile);
+  for (const filePath of dtsFiles) {
     const content = fs.readFileSync(filePath, 'utf-8');
     let fixedContent = content;
     let fileImportsFixed = 0;
 
-    // Fix relative imports to contracts
-    const contractsRegex = /from\s+['"](\.\.\/)*\.\.\/contracts\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(contractsRegex, "from '@vytches/ddd-contracts'");
-    fileImportsFixed += (content.match(contractsRegex) || []).length;
+    for (const { packageName: targetPackageName, pattern } of rewriteRules) {
+      const matches = fixedContent.match(pattern);
+      if (matches) {
+        fileImportsFixed += matches.length;
+      }
+      fixedContent = fixedContent.replace(pattern, `from '${targetPackageName}'`);
+    }
 
-    // Fix relative imports to utils
-    const utilsRegex = /from\s+['"](\.\.\/)*\.\.\/utils\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(utilsRegex, "from '@vytches/ddd-utils'");
-    fileImportsFixed += (content.match(utilsRegex) || []).length;
-
-    // Fix relative imports to domain-primitives
-    const domainPrimitivesRegex =
-      /from\s+['"](\.\.\/)*\.\.\/domain-primitives\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(
-      domainPrimitivesRegex,
-      "from '@vytches/ddd-domain-primitives'"
-    );
-    fileImportsFixed += (content.match(domainPrimitivesRegex) || []).length;
-
-    // Fix relative imports to value-objects
-    const valueObjectsRegex = /from\s+['"](\.\.\/)*\.\.\/value-objects\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(valueObjectsRegex, "from '@vytches/ddd-value-objects'");
-    fileImportsFixed += (content.match(valueObjectsRegex) || []).length;
-
-    // Fix relative imports to aggregates
-    const aggregatesRegex = /from\s+['"](\.\.\/)*\.\.\/aggregates\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(aggregatesRegex, "from '@vytches/ddd-aggregates'");
-    fileImportsFixed += (content.match(aggregatesRegex) || []).length;
-
-    // Fix relative imports to repositories
-    const repositoriesRegex = /from\s+['"](\.\.\/)*\.\.\/repositories\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(repositoriesRegex, "from '@vytches/ddd-repositories'");
-    fileImportsFixed += (content.match(repositoriesRegex) || []).length;
-
-    // Fix relative imports to logging
-    const loggingRegex = /from\s+['"](\.\.\/)*\.\.\/logging\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(loggingRegex, "from '@vytches/ddd-logging'");
-    fileImportsFixed += (content.match(loggingRegex) || []).length;
-
-    // Fix relative imports to events
-    const eventsRegex = /from\s+['"](\.\.\/)*\.\.\/events\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(eventsRegex, "from '@vytches/ddd-events'");
-    fileImportsFixed += (content.match(eventsRegex) || []).length;
-
-    // Fix relative imports to cqrs
-    const cqrsRegex = /from\s+['"](\.\.\/)*\.\.\/cqrs\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(cqrsRegex, "from '@vytches/ddd-cqrs'");
-    fileImportsFixed += (content.match(cqrsRegex) || []).length;
-
-    // Fix relative imports to di
-    const diRegex = /from\s+['"](\.\.\/)*\.\.\/di\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(diRegex, "from '@vytches/ddd-di'");
-    fileImportsFixed += (content.match(diRegex) || []).length;
-
-    // Fix relative imports to validation
-    const validationRegex = /from\s+['"](\.\.\/)*\.\.\/validation\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(validationRegex, "from '@vytches/ddd-validation'");
-    fileImportsFixed += (content.match(validationRegex) || []).length;
-
-    // Fix relative imports to policies
-    const policiesRegex = /from\s+['"](\.\.\/)*\.\.\/policies\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(policiesRegex, "from '@vytches/ddd-policies'");
-    fileImportsFixed += (content.match(policiesRegex) || []).length;
-
-    // Fix relative imports to core
-    const coreRegex = /from\s+['"](\.\.\/)*\.\.\/core\/src\/index\.ts['"]/g;
-    fixedContent = fixedContent.replace(coreRegex, "from '@vytches/ddd-core'");
-    fileImportsFixed += (content.match(coreRegex) || []).length;
-
-    // Write back if there were changes
     if (fileImportsFixed > 0) {
       fs.writeFileSync(filePath, fixedContent);
       totalFixedFiles++;
       totalFixedImports += fileImportsFixed;
-      console.log(`  Fixed ${fileImportsFixed} imports in ${dtsFile}`);
+      console.log(`  Fixed ${fileImportsFixed} imports in ${path.relative(distPath, filePath)}`);
     }
   }
 
@@ -133,17 +153,19 @@ function fixDtsImports(packagePath) {
 }
 
 // Main execution
-const packagesDir = path.join(__dirname, '..', 'packages');
+const packageNameMap = buildPackageNameMap(packagesDir);
+const rewriteRules = buildRewriteRules(packageNameMap);
+
 const packageDirs = fs
   .readdirSync(packagesDir)
   .filter(dir => fs.statSync(path.join(packagesDir, dir)).isDirectory());
 
-console.log('🔧 Fixing DTS imports in foundation packages...\n');
+console.log(`🔧 Fixing DTS imports across ${packageDirs.length} packages...\n`);
 
 for (const packageDir of packageDirs) {
   const packagePath = path.join(packagesDir, packageDir);
   try {
-    fixDtsImports(packagePath);
+    fixDtsImports(packagePath, rewriteRules);
   } catch (error) {
     console.error(`❌ Error processing ${packageDir}:`, error.message);
   }

@@ -1,15 +1,45 @@
 /* eslint-disable no-promise-executor-return */
-import { v4 as uuidV4, validate } from 'uuid';
 
 type UUID = 'v4';
 
+/**
+ * RFC 4122/9562 UUID matcher (versions 1-8, plus the nil and max UUIDs).
+ * Mirrors the validation semantics of the `uuid` npm package's `validate()`
+ * (v10+, e.g. the `regex.js` shipped in `uuid@11.1.0`) without the runtime
+ * dependency — case-insensitive, and deliberately NOT restricted to 1-5:
+ * the `uuid` package widened the version nibble to 1-8 and added the max
+ * UUID special case in v10.0.0 to support the newer RFC 9562 UUID versions
+ * (v6/v7/v8); narrowing this back to 1-5 would be a silent behavior
+ * regression for any consumer validating those UUIDs.
+ */
+const UUID_PATTERN =
+  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/i;
+
 export class LibUtils {
+  /**
+   * Generate a UUID v4 using the platform crypto API.
+   *
+   * `globalThis.crypto.randomUUID()` is available in:
+   *   - Node.js >= 19 (standard, no import required)
+   *   - All modern browsers (Web Crypto)
+   *   - Cloudflare Workers / Deno / Bun
+   *
+   * The library's `engines.node >= 22.19.0` ensures availability.
+   * Using globalThis avoids importing `node:crypto`, which Vite externalizes
+   * for browser-compat builds and breaks the utils foundation bundle.
+   *
+   * F-M7 (VB-002): this replaces the vendored `uuid` npm package, which was
+   * bundled inline into `utils`'s dist without a license attribution, a
+   * devDependency entry, or a security-patch path — see
+   * `contracts/src/events/domain-event-utils.ts` for the identical pattern
+   * used elsewhere in this monorepo.
+   */
   static getUUID(type?: UUID) {
     if (type === 'v4') {
-      return uuidV4();
+      return globalThis.crypto.randomUUID();
     }
 
-    return uuidV4();
+    return globalThis.crypto.randomUUID();
   }
 
   private static _isSpecialCaseFalse(input: unknown): boolean {
@@ -180,8 +210,19 @@ export class LibUtils {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  /**
+   * Strip ASCII control characters (C0 range + DEL) from a string before
+   * it's interpolated into a log line. Prevents log injection — forged log
+   * entries via embedded `\r`/`\n` — when the string may carry untrusted
+   * data (e.g. an error message built from external input). VS-018.
+   */
+  static sanitizeLogMessage(input: string): string {
+    // eslint-disable-next-line no-control-regex -- intentional: stripping C0 control chars
+    return input.replace(/[\x00-\x1f\x7f]/g, ' ');
+  }
+
   static isValidUUID(value: string): boolean {
-    return validate(value);
+    return UUID_PATTERN.test(value);
   }
 
   static isValidInteger(value: number): boolean {
@@ -288,5 +329,56 @@ export class LibUtils {
     }
 
     return true;
+  }
+
+  /**
+   * Recursively freezes an object graph in place, returning the same
+   * reference. Used by `BaseValueObject` (VF-023 D-3) and `AggregateRoot`
+   * to enforce immutability beyond the shallow `Object.freeze()` — without
+   * a deep freeze, nested objects/arrays inside a "frozen" value object or
+   * a returned domain-events array remain mutable, defeating the guarantee.
+   *
+   * - Primitives and `null` are returned unchanged (already immutable).
+   * - Cycles are tracked via a `WeakSet` so self-referential structures
+   *   terminate instead of recursing forever.
+   * - `Date`/`RegExp` instances are frozen at the top level only — they
+   *   have no meaningful own-enumerable-property graph to recurse into.
+   * - `Map`/`Set` values are recursively frozen; the collections
+   *   themselves are frozen via `Object.freeze`, which does not block
+   *   `.set()`/`.add()`/`.delete()` (those mutate internal slots, not own
+   *   properties) — callers needing a truly immutable Map/Set should wrap
+   *   access, this only guarantees the *contained* values are deep-frozen.
+   */
+  static deepFreeze<T>(obj: T, seen = new WeakSet<object>()): T {
+    if (obj === null || typeof obj !== 'object') {
+      return obj;
+    }
+
+    const target = obj as unknown as object;
+
+    if (seen.has(target) || Object.isFrozen(target)) {
+      return obj;
+    }
+    seen.add(target);
+
+    if (Array.isArray(target)) {
+      for (const item of target) {
+        this.deepFreeze(item, seen);
+      }
+    } else if (target instanceof Map) {
+      for (const value of target.values()) {
+        this.deepFreeze(value, seen);
+      }
+    } else if (target instanceof Set) {
+      for (const value of target) {
+        this.deepFreeze(value, seen);
+      }
+    } else if (!(target instanceof Date) && !(target instanceof RegExp)) {
+      for (const key of Object.keys(target as Record<string, unknown>)) {
+        this.deepFreeze((target as Record<string, unknown>)[key], seen);
+      }
+    }
+
+    return Object.freeze(obj);
   }
 }

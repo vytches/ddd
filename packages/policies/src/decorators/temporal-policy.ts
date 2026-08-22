@@ -1,5 +1,6 @@
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { Result } from '@vytches/ddd-utils';
+import { BaseBusinessPolicy } from '../core/base/base-business-policy';
 import type {
   IBusinessPolicy,
   IPolicyComposer,
@@ -9,6 +10,24 @@ import type {
 } from '../core/interfaces/business-policy.interface';
 import type { PolicyContext } from '../core/shared';
 import { PolicyViolation } from '../core/models/policy-violation';
+
+/**
+ * VB-008 (AC1): adapter that lets a decorator (`this`) participate in
+ * and()/or()/when() composition through BaseBusinessPolicy's composer
+ * machinery — private to base-business-policy.ts — while still routing
+ * check() through the decorator itself rather than its raw base policy.
+ * Without this, composing a temporal policy silently drops the temporal
+ * wrapper.
+ */
+class ComposableSelf<T> extends BaseBusinessPolicy<T> {
+  constructor(private readonly self: IBusinessPolicy<T>) {
+    super(self.id, self.domain, self.name);
+  }
+
+  public check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
+    return this.self.check(request);
+  }
+}
 
 export interface BusinessCalendar {
   /**
@@ -98,7 +117,6 @@ export interface TemporalPolicyConfig {
 }
 
 export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
-  private readonly logger = Logger.forContext('PolicyTemporalBehavior');
   public readonly id: string;
   public readonly domain: string;
   public readonly name: string;
@@ -181,7 +199,7 @@ export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
           }
         } catch (error) {
           // Log error but continue to next condition
-          this.logger.warn('Temporal condition failed', {
+          internalLogger.warn('PolicyTemporalBehavior: Temporal condition failed', {
             conditionName: name,
             error: error instanceof Error ? error.message : String(error),
           });
@@ -297,12 +315,17 @@ export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
 
   // Implement IBusinessPolicy interface
 
+  // AC1 (VB-008): compose THIS decorator, not the raw base policy — see
+  // ComposableSelf doc comment above. not() below already re-wraps the
+  // negated base policy in a fresh PolicyTemporalBehavior; that pattern is
+  // the proof this was an oversight, not a designed contract.
+
   public and(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.basePolicy.and(other);
+    return new ComposableSelf<T>(this).and(other);
   }
 
   public or(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.basePolicy.or(other);
+    return new ComposableSelf<T>(this).or(other);
   }
 
   public not(): IBusinessPolicy<T> {
@@ -310,7 +333,7 @@ export class PolicyTemporalBehavior<T> implements IBusinessPolicy<T> {
   }
 
   public when(condition: PolicyCondition<T>): IPolicyConditionalBuilder<T> {
-    return this.basePolicy.when(condition);
+    return new ComposableSelf<T>(this).when(condition);
   }
 
   /**
@@ -469,52 +492,62 @@ export class PolicyTemporalBehaviorBuilder<T> {
   }
 }
 
-export class PolicyTemporalBehaviorFactory {
-  /**
-   * Create standard business hours policy
-   */
-  public static businessHours<T>(
-    policy: IBusinessPolicy<T>,
-    businessHoursPolicy: IBusinessPolicy<T>,
-    afterHoursPolicy?: IBusinessPolicy<T>
-  ): PolicyTemporalBehavior<T> {
-    return PolicyTemporalBehaviorBuilder.from(policy)
-      .withBusinessHours('09:00', '17:00')
-      .withWorkingDays([1, 2, 3, 4, 5]) // Mon-Fri
-      .duringBusinessHours(businessHoursPolicy)
-      .duringAfterHours(afterHoursPolicy || policy)
-      .withTemporalInfo(true)
-      .build();
-  }
-
-  /**
-   * Create weekend-aware policy
-   */
-  public static weekendAware<T>(
-    policy: IBusinessPolicy<T>,
-    weekdayPolicy: IBusinessPolicy<T>,
-    weekendPolicy: IBusinessPolicy<T>
-  ): PolicyTemporalBehavior<T> {
-    return PolicyTemporalBehaviorBuilder.from(policy)
-      .withWorkingDays([1, 2, 3, 4, 5])
-      .duringBusinessHours(weekdayPolicy)
-      .duringWeekends(weekendPolicy)
-      .withTemporalInfo(true)
-      .build();
-  }
-
-  /**
-   * Create holiday-aware policy
-   */
-  public static holidayAware<T>(
-    policy: IBusinessPolicy<T>,
-    holidays: Date[],
-    holidayPolicy: IBusinessPolicy<T>
-  ): PolicyTemporalBehavior<T> {
-    return PolicyTemporalBehaviorBuilder.from(policy)
-      .withHolidays(holidays)
-      .duringHolidays(holidayPolicy)
-      .withTemporalInfo(true)
-      .build();
-  }
+/**
+ * Create standard business hours policy
+ */
+function businessHours<T>(
+  policy: IBusinessPolicy<T>,
+  businessHoursPolicy: IBusinessPolicy<T>,
+  afterHoursPolicy?: IBusinessPolicy<T>
+): PolicyTemporalBehavior<T> {
+  return PolicyTemporalBehaviorBuilder.from(policy)
+    .withBusinessHours('09:00', '17:00')
+    .withWorkingDays([1, 2, 3, 4, 5]) // Mon-Fri
+    .duringBusinessHours(businessHoursPolicy)
+    .duringAfterHours(afterHoursPolicy || policy)
+    .withTemporalInfo(true)
+    .build();
 }
+
+/**
+ * Create weekend-aware policy
+ */
+function weekendAware<T>(
+  policy: IBusinessPolicy<T>,
+  weekdayPolicy: IBusinessPolicy<T>,
+  weekendPolicy: IBusinessPolicy<T>
+): PolicyTemporalBehavior<T> {
+  return PolicyTemporalBehaviorBuilder.from(policy)
+    .withWorkingDays([1, 2, 3, 4, 5])
+    .duringBusinessHours(weekdayPolicy)
+    .duringWeekends(weekendPolicy)
+    .withTemporalInfo(true)
+    .build();
+}
+
+/**
+ * Create holiday-aware policy
+ */
+function holidayAware<T>(
+  policy: IBusinessPolicy<T>,
+  holidays: Date[],
+  holidayPolicy: IBusinessPolicy<T>
+): PolicyTemporalBehavior<T> {
+  return PolicyTemporalBehaviorBuilder.from(policy)
+    .withHolidays(holidays)
+    .duringHolidays(holidayPolicy)
+    .withTemporalInfo(true)
+    .build();
+}
+
+/**
+ * VB-008 (AC2): frozen object export, not a static-only class — same export
+ * name, same call syntax (`PolicyTemporalBehaviorFactory.businessHours(...)`).
+ * Three methods only — `from()` belongs to `PolicyTemporalBehaviorBuilder`
+ * and is untouched (D5).
+ */
+export const PolicyTemporalBehaviorFactory = {
+  businessHours,
+  weekendAware,
+  holidayAware,
+} as const;

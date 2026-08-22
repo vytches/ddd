@@ -34,7 +34,7 @@ pnpm add @vytches/ddd-di
 | Export                          | Kind  | Description                                 |
 | ------------------------------- | ----- | ------------------------------------------- |
 | `DIError`                       | class | Base DI error                               |
-| `ServiceNotFoundError`          | class | No service registered under the given token |
+| `ContainerServiceNotFoundError` | class | No service registered under the given token |
 | `CircularDependencyError`       | class | Circular dependency detected                |
 | `ServiceAlreadyRegisteredError` | class | Token already has a registration            |
 | `InvalidRegistrationError`      | class | Invalid registration arguments              |
@@ -132,12 +132,15 @@ await VytchesDDD.discoverAndRegisterHandlers();
 ## Error handling
 
 ```typescript
-import { ServiceNotFoundError, CircularDependencyError } from '@vytches/ddd-di';
+import {
+  ContainerServiceNotFoundError,
+  CircularDependencyError,
+} from '@vytches/ddd-di';
 
 try {
   VytchesDDD.resolve<unknown>('UnknownService');
 } catch (error) {
-  if (error instanceof ServiceNotFoundError) {
+  if (error instanceof ContainerServiceNotFoundError) {
     console.error('Service missing:', error.message);
   }
 }
@@ -168,6 +171,30 @@ describe('UserService', () => {
 
 `@vytches/ddd-di` has **zero** dependencies on other `@vytches/ddd-*` packages.
 It is the foundation layer; all other packages may optionally depend on it.
+
+## Peer dependency: `reflect-metadata`
+
+Decorator-based APIs in this package (handler/service registration decorators,
+`Reflect.getMetadata`/`defineMetadata` lookups) require the
+[`reflect-metadata`](https://www.npmjs.com/package/reflect-metadata) polyfill to
+be loaded **once** before any decorator runs.
+
+This package does **not** import `reflect-metadata` for you — it declares it as
+an optional `peerDependency` instead. Importing it as an unconditional side
+effect would contradict this package's `"sideEffects": false` (a bundler is free
+to strip a side-effecting import from a tree-shakeable package, which would make
+the polyfill's presence non-deterministic).
+
+If you use any decorator from this package, import the polyfill once at your
+application's bootstrap, before anything else:
+
+```typescript
+import 'reflect-metadata';
+// ... the rest of your bootstrap
+```
+
+If your application already depends on `reflect-metadata` (e.g. via NestJS), no
+extra action is needed — the polyfill only needs to be loaded once per process.
 
 ## License
 

@@ -113,3 +113,76 @@ describe('LibUtils.deepEqual() — value comparison', () => {
     LibUtils.deepEqual(a, b);
   });
 });
+
+// === CachedPolicy.generateCacheKey() — VP-012c / R1 =========================
+//
+// @vytches/ddd-policies' `PolicyCachingBehavior.generateCacheKey()` (default,
+// no `keyGenerator` override) used to call its private `hashString()`
+// (SHA-256 via `globalThis.crypto.subtle`, sliced to a 128-bit hex prefix)
+// TWICE per cache key — once for the context, once for the serialised
+// entity. R1 merges this into a SINGLE `hashString()` call over a combined,
+// length-prefixed buffer (`${contextRaw.length}:${contextRaw}${entityKey}`)
+// to close a narrower collision surface (colliding `contextHash` alone used
+// to be sufficient for a cross-user cache-key collision on the same entity;
+// see docs/security/threat-models/TM-VP-012c.md). `hashString()` itself is
+// unchanged — still SHA-256, still a 128-bit prefix — so this suite measures
+// only the digest-call-count reduction (2 → 1), not a hashing-algorithm
+// change (that swap, e.g. to FNV-1a, is an explicit NON-GOAL — see the
+// `hashString()` doc comment in cached-policy.ts).
+//
+// `generateCacheKey()`/`hashString()` are private on `PolicyCachingBehavior`,
+// so BEFORE/AFTER are reproduced here as standalone functions using the same
+// `globalThis.crypto.subtle.digest('SHA-256', ...)` primitive and the same
+// slice(0, 32) truncation — this measures the shape of the change (call
+// count) without depending on package-internal access.
+//
+// The benchmark also isolates `JSON.stringify(request.entity)` as its own
+// baseline: R1 is a merge from 2 digests to 1, which only matters if that
+// saved digest call is not already dwarfed by entity serialisation cost —
+// the dominant cost on any non-trivial entity. If JSON.stringify() alone
+// costs far more than one whole hashString() call, the merge's real-world
+// win is bounded by (at most) one digest's worth of time, not "half the
+// hashing work".
+describe('CachedPolicy.generateCacheKey() — R1 hash-merge (VP-012c)', () => {
+  async function hashString(str: string): Promise<string> {
+    const encoded = new TextEncoder().encode(str);
+    const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', encoded);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+      .slice(0, 32);
+  }
+
+  // Representative policy request shape: a userId/tenantId/environment
+  // context plus a moderately sized entity (comparable to a real
+  // aggregate/DTO passed through a cached policy), not a trivial `{value}`.
+  const contextRaw = 'user-0123456789abcdef\x00tenant-0123456789abcdef\x00production';
+  const entity = {
+    id: 'order-0123456789abcdef',
+    status: 'CONFIRMED',
+    items: Array.from({ length: 10 }, (_, i) => ({
+      sku: `SKU-${i}`,
+      quantity: i + 1,
+      unitPrice: 19.99 + i,
+    })),
+    customer: { id: 'cust-0123456789abcdef', tier: 'GOLD', region: 'EU' },
+    metadata: { source: 'web', campaign: 'summer-sale', notes: 'expedited shipping requested' },
+  };
+
+  bench('baseline: JSON.stringify(request.entity) alone', () => {
+    JSON.stringify(entity);
+  });
+
+  bench('BEFORE (2 hashString calls: contextHash + entityHash)', async () => {
+    const entityKey = JSON.stringify(entity);
+    await hashString(contextRaw);
+    await hashString(entityKey);
+  });
+
+  bench('AFTER (1 hashString call over length-prefixed combined buffer)', async () => {
+    const entityKey = JSON.stringify(entity);
+    const combined = `${contextRaw.length}:${contextRaw}${entityKey}`;
+    await hashString(combined);
+  });
+});

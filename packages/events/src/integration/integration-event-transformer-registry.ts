@@ -5,6 +5,17 @@ import type {
   IIntegrationEvent,
 } from './integration-event-interfaces';
 
+/**
+ * @public
+ *
+ * @remarks
+ * VF-031 (D-4): Supporting registry for the low-priority integration event
+ * bridge (`IntegrationEventProcessor` / `DomainToIntegrationTransformer` /
+ * `ContextRouter`). Kept because the bridge is re-exported from the public
+ * `@vytches/ddd-enterprise` barrel, but its shape may be refactored in a
+ * future major release. Treat as stable-but-narrow API surface, not a
+ * long-term architectural commitment.
+ */
 export class IntegrationEventTransformerRegistry {
   private readonly transformers: Map<
     string,

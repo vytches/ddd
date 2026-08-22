@@ -1,5 +1,6 @@
 import { Capability } from '@vytches/ddd-contracts';
 import type { IAuditCapability, IAuditEvent, IDomainEvent } from '@vytches/ddd-contracts';
+import { LibUtils } from '@vytches/ddd-utils';
 import type { IAggregateRoot } from '../aggregate-interfaces';
 
 /**
@@ -69,6 +70,16 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
     // Store original apply method for restoration
     this.originalApply = aggWithApply.apply;
 
+    // KNOWN FRAGILITY (flagged for future structural refactor): this
+    // capability works by reassigning the aggregate's own `apply` instance
+    // property (monkey-patching), then restoring the previous value on
+    // detach(). If multiple capabilities each wrap `apply` this way and are
+    // attached/detached out of order, the restore chain can clobber another
+    // capability's wrapper instead of the true original, silently dropping
+    // interception. Do not stack capabilities that both patch `apply`
+    // without verifying attach/detach ordering. A more robust design would
+    // expose a first-class `onEventApplied` hook on the aggregate itself
+    // instead of patching `apply` — out of scope for now.
     // Intercept the apply method to capture events as they're added
     if (this.originalApply) {
       (this.aggregate as unknown as { apply: (...args: unknown[]) => void }).apply = (
@@ -159,7 +170,7 @@ export class AuditCapability extends Capability<'audit'> implements IAuditCapabi
    */
   recordEvent(event: IDomainEvent): void {
     const auditEvent: IAuditEvent = {
-      eventId: (event.metadata?.eventId as string) || `audit-${Date.now()}-${Math.random()}`,
+      eventId: (event.metadata?.eventId as string) || `audit-${LibUtils.getUUID()}`,
       eventName: event.eventName,
       aggregateId: this.aggregate.getId().toString(),
       aggregateType: this.aggregate.constructor.name,

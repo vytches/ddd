@@ -2,6 +2,7 @@ import type { IAggregateSnapshot, ISnapshotCapability } from '@vytches/ddd-contr
 import { Capability } from '@vytches/ddd-contracts';
 import { AggregateError } from '../aggregate-errors';
 import type { IAggregateRoot } from '../aggregate-interfaces';
+import { INTERNAL_STATE_TOKEN } from '../core/aggregate-root';
 
 /**
  * Capability that enables snapshot creation and restoration on an aggregate
@@ -158,22 +159,24 @@ export class SnapshotCapability<TState = unknown, TMeta = unknown>
       metadataRestorer(snapshot.metadata);
     }
 
-    // Reset aggregate state using internal method (type-safe approach)
+    // Reset aggregate state using internal method (VF-023 D-2: gated by
+    // INTERNAL_STATE_TOKEN — this capability is the only legitimate caller).
     const aggregateWithInternalState = this.aggregate as IAggregateRoot & {
-      _internal_setState?: (state: {
-        version: number;
-        initialVersion: number;
-        domainEvents: unknown[];
-      }) => void;
+      _internal_setState: (
+        token: typeof INTERNAL_STATE_TOKEN,
+        state: {
+          version: number;
+          initialVersion: number;
+          domainEvents: unknown[];
+        }
+      ) => void;
     };
 
-    if (aggregateWithInternalState._internal_setState) {
-      aggregateWithInternalState._internal_setState({
-        version: snapshot.version,
-        initialVersion: snapshot.version,
-        domainEvents: [],
-      });
-    }
+    aggregateWithInternalState._internal_setState(INTERNAL_STATE_TOKEN, {
+      version: snapshot.version,
+      initialVersion: snapshot.version,
+      domainEvents: [],
+    });
   }
 
   /**

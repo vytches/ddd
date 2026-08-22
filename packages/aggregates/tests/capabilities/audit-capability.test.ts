@@ -102,7 +102,11 @@ describe('AuditCapability — recording', () => {
       metadata: {},
     } as unknown as IDomainEvent;
     audit.recordEvent(event);
-    expect(audit.getAuditLog()[0]?.eventId).toMatch(/^audit-\d+-/);
+    // VS-016: fallback id is now `audit-<uuid>` (crypto.randomUUID), not the
+    // former `audit-<timestamp>-<Math.random()>`.
+    expect(audit.getAuditLog()[0]?.eventId).toMatch(
+      /^audit-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    );
   });
 
   it('recordEvent(event) records arbitrary domain events outside apply() flow', () => {
@@ -228,5 +232,55 @@ describe('AuditCapability — type metadata', () => {
   it('exposes type "audit" on instance and capabilityType on class', () => {
     expect(new AuditCapability().type).toBe('audit');
     expect(AuditCapability.capabilityType).toBe('audit');
+  });
+});
+
+// VP-012b (D2, F1_KOREKTA, AC1): AuditCapability's recordAuditEvent() calls
+// `aggregate.getDomainEvents()` after EVERY apply() (see
+// audit-capability.ts's recordAuditEvent()) — this is the exact F-H13 hot
+// path getDomainEvents() memoization targets. These tests exercise the
+// caching behavior specifically through that interception path, not just
+// through direct external calls.
+describe('AuditCapability — VP-012b getDomainEvents() caching interaction (F-H13 hot path)', () => {
+  it('external getDomainEvents() reads after AuditCapability interception reuse the same cached reference', () => {
+    const { order, audit } = newAuditedOrder();
+    order.applyEvent('Created', { id: 'o-1' });
+    order.applyEvent('Updated', { changed: true });
+
+    // AuditCapability already triggered a getDomainEvents() rebuild internally
+    // for each apply() above (recordAuditEvent). A subsequent external read
+    // with no intervening mutation must reuse that same cached array.
+    const external1 = order.getDomainEvents();
+    const external2 = order.getDomainEvents();
+
+    expect(external1).toHaveLength(2);
+    expect(external2).toBe(external1);
+    expect(audit.getAuditLog()).toHaveLength(2);
+  });
+
+  it('every event AuditCapability records via the interception hot path is deep-frozen, including nested payload data', () => {
+    const { order, audit } = newAuditedOrder();
+    order.applyEvent('Created', { id: 'o-1', nested: { a: 1 } });
+
+    const entry = audit.getAuditLog()[0]!;
+    // recordAuditEvent() reads the last event straight out of
+    // aggregate.getDomainEvents() — the stored payload reference must be the
+    // deep-frozen one, not a pre-freeze copy.
+    expect(Object.isFrozen(entry.payload)).toBe(true);
+    expect(Object.isFrozen((entry.payload as { nested: unknown }).nested)).toBe(true);
+  });
+
+  it('the cache is invalidated between applies even though AuditCapability forces a rebuild after every single apply()', () => {
+    const { order, audit } = newAuditedOrder();
+    order.applyEvent('Created', { id: 'o-1' });
+    const afterFirst = order.getDomainEvents();
+
+    order.applyEvent('Updated', { changed: true });
+    const afterSecond = order.getDomainEvents();
+
+    expect(afterSecond).not.toBe(afterFirst);
+    expect(afterFirst).toHaveLength(1); // frozen stale snapshot, unaffected by the second apply
+    expect(afterSecond).toHaveLength(2);
+    expect(audit.getAuditLog().map(e => e.eventName)).toEqual(['Created', 'Updated']);
   });
 });

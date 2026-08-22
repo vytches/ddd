@@ -26,6 +26,20 @@ pnpm add @vytches/ddd-nestjs @nestjs/common @nestjs/core reflect-metadata rxjs
 
 ## Quick start
 
+> **Wire the buses through `VytchesDDDModule`.** `VytchesExplorerService` — the
+> service that finds your `@CommandHandler` / `@QueryHandler` classes and puts
+> them on a bus — only exists inside a module created by `forRoot()`,
+> `forContext()`, `forContexts()`, `forFeature()` or `forTesting()`, and it
+> injects the buses via `COMMAND_BUS_TOKEN` / `QUERY_BUS_TOKEN`. Those factories
+> bridge your `ICommandBus` / `IQueryBus` providers onto those tokens for you.
+>
+> Building your own module that instantiates `EnhancedCommandBus` /
+> `EnhancedQueryBus` directly and skips these factories is supported for
+> non-NestJS setups, but in a NestJS app it leaves you with no explorer, or an
+> explorer with no bus: discovery reports success, nothing is registered, and
+> every `execute()` throws `No handler registered for ...`. If you must wire by
+> hand, alias the tokens yourself — see [Manual wiring](#manual-wiring).
+
 ```typescript
 import { Module } from '@nestjs/common';
 import { VytchesDDDModule } from '@vytches/ddd-nestjs';
@@ -51,9 +65,67 @@ import { UnifiedEventBus, IEventBus } from '@vytches/ddd-events';
 export class AppModule {}
 ```
 
+## The recommended pattern
+
+`forRoot()` (or `forRootAsync()`) once at the application root, then one
+`forFeature()` per bounded context:
+
+```typescript
+@Module({ imports: [VytchesDDDModule.forRoot()] })
+export class AppModule {}
+
+@Module({
+  imports: [VytchesDDDModule.forFeature('orders', { busType: 'enhanced' })],
+  providers: [CreateOrderHandler, OrderRepository],
+})
+export class OrdersModule {}
+```
+
+That is the whole decision. The other factories:
+
+| Factory                              | Use it for                                              |
+| ------------------------------------ | ------------------------------------------------------- |
+| `forRoot(options)`                   | the application root, one per app                       |
+| `forRootAsync(options)`              | same, when the options come from `ConfigService`        |
+| `forFeature(name, options)`          | one bounded context — its own buses and local event bus |
+| `forTesting(options)`                | test modules; wires stubs                               |
+| ~~`forContext`~~ / ~~`forContexts`~~ | **deprecated** since 0.31.0 — see below                 |
+
+`forContext()` and `forContexts()` are deprecated predecessors of
+`forFeature()`. They register a named explorer per context but leave the buses
+shared, so handlers from different contexts still land on the same `ICommandBus`
+— they never actually isolated anything. `forContexts()` additionally falls back
+to `forRoot()` when its `contexts` option is missing or not an object, so a typo
+yields a working module with zero contexts instead of an error. Migrate to one
+`forFeature()` per context; both still work for one release.
+
+A runnable end-to-end example of the full flow — aggregate → command handler →
+repository → per-context event bus → event handler, wired via `forFeature()` —
+lives in
+[`examples/nestjs/src/inventory.context.ts`](../../examples/nestjs/src/inventory.context.ts).
+
+### Async configuration
+
+```typescript
+VytchesDDDModule.forRootAsync({
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => ({
+    autoDiscovery: { enabled: config.get('DDD_DISCOVERY') !== 'off' },
+  }),
+});
+```
+
+`useClass` and `useExisting` are supported too. One caveat worth knowing: NestJS
+needs `providers`, `imports` and the `global` flag _before_ the DI container
+exists, so those are declared on the async options object itself, while the
+factory supplies the options read at runtime. Returning `providers` from the
+factory is not an error — it is simply ignored.
+
 ## VytchesDDDModule.forRoot
 
-The only static factory method available. Accepts `VytchesDDDModuleOptions`:
+The entry point for a single-context application, and the one to reach for
+first. Accepts `VytchesDDDModuleOptions`:
 
 ```typescript
 interface VytchesDDDModuleOptions {
@@ -107,6 +179,40 @@ export class PaymentsACLAdapter extends SimpleACLAdapter<
 
 The explorer discovers all `@ACLAdapterFor`-decorated classes and registers them
 in the `ACLRegistry` provided under the `ACL_REGISTRY` token.
+
+## Manual wiring
+
+If your application already builds its own DDD module and cannot move to
+`forRoot()` yet, alias the Symbol tokens onto whatever you provide the buses
+under. Without this the explorer receives `undefined` and registers nothing:
+
+```typescript
+import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+
+providers: [
+  { provide: ICommandBus, useValue: myCommandBus },
+  { provide: IQueryBus, useValue: myQueryBus },
+  { provide: COMMAND_BUS_TOKEN, useExisting: ICommandBus },
+  { provide: QUERY_BUS_TOKEN, useExisting: IQueryBus },
+];
+```
+
+Use `useExisting` only where the class-token provider is guaranteed to exist —
+NestJS raises a DI error for `useExisting` against an absent token even under
+`@Optional()`. Where it may be missing, mirror what the module factories do:
+
+```typescript
+{
+  provide: COMMAND_BUS_TOKEN,
+  useFactory: (bus?: ICommandBus) => bus,
+  inject: [{ token: ICommandBus, optional: true }],
+}
+```
+
+You still need `VytchesExplorerService` itself in the graph, which means
+importing one of the module factories. If handlers are discovered but no bus
+resolved, the explorer says so at `warn` level during bootstrap.
 
 ## Package boundaries
 

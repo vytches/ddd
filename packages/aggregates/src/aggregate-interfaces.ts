@@ -111,6 +111,21 @@ export interface IAggregateConstructorParams<TId = string> {
    * Leave undefined for "no limit" (preserves backward compatibility).
    */
   maxEvents?: number;
+  /**
+   * VF-023 (D-4, AC6, non-breaking addition): controls what happens when
+   * `apply()` (live) or `loadFromHistory()` (replay) processes an event for
+   * which no handler was registered via `registerEventHandler()`.
+   *
+   * - `"warn"` (default): the event is still recorded/replayed, but a
+   *   warning is logged via the library's internal logger. Preserves the
+   *   previous behavior's intent (missing handlers did not throw) without
+   *   silently swallowing the condition.
+   * - `"throw"`: fail fast instead — useful in tests or strict environments
+   *   where a missing handler indicates a real bug.
+   *
+   * Leave undefined for the default `"warn"` behavior (backward compatible).
+   */
+  onMissingHandler?: 'warn' | 'throw';
 }
 
 // ==========================================
@@ -236,45 +251,12 @@ export interface IMiddlewareCapability extends IAggregateCapability {
   use(middleware: EventAggregateMiddleware): this;
 }
 
-// ==========================================
-// BUILDER INTERFACE
-// ==========================================
-
-/**
- * Builder interface for creating aggregates with capabilities.
- * Provides fluent API for configuring aggregate features before construction.
- */
-export interface IAggregateBuilder<TId> {
-  /**
-   * Adds snapshot capability
-   */
-  withSnapshots<TState = unknown, TMeta = unknown>(): this;
-
-  /**
-   * Adds versioning capability
-   */
-  withVersioning(): this;
-
-  /**
-   * Adds event sourcing capability
-   */
-  withEventSourcing(eventStore?: IEventStore): this;
-
-  /**
-   * Adds audit capability
-   */
-  withAudit(): this;
-
-  /**
-   * Adds custom capability
-   */
-  withCustomCapability<T extends IAggregateCapability>(name: string, capability: T): this;
-
-  /**
-   * Builds the aggregate with all configured capabilities
-   */
-  build(): IAggregateRoot<TId>;
-}
+// VF-031 (D-10): removed `IAggregateBuilder<TId>`. It was exported from the
+// package barrel but shape-incompatible with the real `AggregateBuilder`
+// class (e.g. `build()` never returns a bare `IAggregateRoot<TId>`) — a
+// broken public interface is worse than none. This is a BREAKING CHANGE,
+// see CHANGELOG. If you need the builder's contract, use the concrete
+// `AggregateBuilder` class from `./aggregate-builder` directly.
 
 // ==========================================
 // SUPPORTING TYPES AND INTERFACES
@@ -368,194 +350,11 @@ export type AggregateWithCapabilities<
             : IAggregateCapability;
 };
 
-// ==========================================
-// AGGREGATE FACTORY INTERFACE
-// ==========================================
-
-/**
- * Factory interface for creating and rebuilding aggregates.
- * Provides standard methods for aggregate lifecycle management.
- * @template TId - The type of the aggregate ID value (string, number, etc.)
- */
-export interface IAggregateFactory<
-  TId = string,
-  TAggregate extends IAggregateRoot<TId> = IAggregateRoot<TId>,
-> {
-  /**
-   * Creates a new aggregate instance
-   */
-  create(id: EntityId<TId>, ...args: unknown[]): TAggregate;
-
-  /**
-   * Rebuilds aggregate from events
-   */
-  fromEvents(id: EntityId<TId>, events: IDomainEvent[]): TAggregate;
-
-  /**
-   * Rebuilds aggregate from snapshot and subsequent events
-   */
-  fromSnapshot<TState, TMeta>(
-    snapshot: IAggregateSnapshot<TState, TMeta>,
-    events: IDomainEvent[]
-  ): TAggregate;
-}
-
-// ==========================================
-// VALIDATION INTERFACES
-// ==========================================
-
-/**
- * Interface for validating aggregate state and operations.
- * Enables business rule validation at the aggregate level.
- */
-export interface IAggregateValidator<TAggregate extends IAggregateRoot<unknown>> {
-  /**
-   * Validates aggregate state
-   */
-  validate(aggregate: TAggregate): ValidationResult;
-
-  /**
-   * Validates aggregate before applying event
-   */
-  validateBeforeEvent(aggregate: TAggregate, event: IDomainEvent): ValidationResult;
-}
-
-/**
- * Result of aggregate validation operation.
- * Contains validation status and any error details.
- */
-export interface ValidationResult {
-  /** Whether the validation passed */
-  isValid: boolean;
-  /** List of validation errors if any */
-  errors: IValidationError[];
-}
-
-/**
- * Represents a single validation error.
- * Provides details about what failed validation and why.
- */
-export interface IValidationError {
-  /** The field or property that failed validation */
-  field: string;
-  /** Human-readable error message */
-  message: string;
-  /** Optional error code for programmatic handling */
-  code?: string;
-}
-
-// ==========================================
-// ADVANCED CAPABILITY INTERFACES
-// ==========================================
-
-/**
- * Capability for caching aggregate data.
- * Provides key-value storage with TTL support for performance optimization.
- */
-export interface ICachingCapability extends IAggregateCapability {
-  /**
-   * Gets cached value
-   */
-  get<T>(key: string): T | undefined;
-
-  /**
-   * Sets cached value
-   */
-  set<T>(key: string, value: T, ttl?: number): void;
-
-  /**
-   * Clears all cached values
-   */
-  clear(): void;
-
-  /**
-   * Invalidates specific cached value
-   */
-  invalidate(key: string): void;
-}
-
-/**
- * Capability for collecting aggregate metrics.
- * Enables monitoring and observability of aggregate operations.
- */
-export interface IMetricsCapability extends IAggregateCapability {
-  /**
-   * Records a metric
-   */
-  record(name: string, value: number, tags?: Record<string, string>): void;
-
-  /**
-   * Increments a counter
-   */
-  increment(name: string, tags?: Record<string, string>): void;
-
-  /**
-   * Records timing information
-   */
-  timing(name: string, duration: number, tags?: Record<string, string>): void;
-
-  /**
-   * Gets recorded metrics
-   */
-  getMetrics(): MetricData[];
-}
-
-/**
- * Represents a single metric data point.
- * Contains metric information with optional tags and timestamp.
- */
-export interface MetricData {
-  /** Metric name */
-  name: string;
-  /** Metric value */
-  value: number;
-  /** Type of metric */
-  type: 'counter' | 'gauge' | 'timing';
-  /** Optional tags for metric categorization */
-  tags?: Record<string, string>;
-  /** When the metric was recorded */
-  timestamp: Date;
-}
-
-/**
- * Capability for security features like encryption and authorization.
- * Provides security controls for sensitive aggregate operations.
- */
-export interface ISecurityCapability extends IAggregateCapability {
-  /**
-   * Encrypts sensitive data
-   */
-  encrypt(data: unknown): string;
-
-  /**
-   * Decrypts sensitive data
-   */
-  decrypt(encryptedData: string): unknown;
-
-  /**
-   * Checks if user has permission to perform action
-   */
-  hasPermission(action: string, user?: unknown): boolean;
-
-  /**
-   * Logs security events
-   */
-  logSecurityEvent(event: SecurityEvent): void;
-}
-
-/**
- * Represents a security-related event.
- * Used for audit trails and security monitoring.
- */
-export interface SecurityEvent {
-  /** Type of security event */
-  type: 'access' | 'modification' | 'failure';
-  /** Action that was performed */
-  action: string;
-  /** User who performed the action */
-  user?: unknown;
-  /** When the event occurred */
-  timestamp: Date;
-  /** Additional event metadata */
-  metadata?: Record<string, unknown>;
-}
+// VF-031 (D-9): removed the duplicate/speculative interface block that used
+// to live here: `IAggregateFactory`, `IAggregateValidator` (+ its
+// `ValidationResult`/`IValidationError` support types), and the "advanced
+// capability" trio `ICachingCapability` / `IMetricsCapability` (+
+// `MetricData`) / `ISecurityCapability` (+ `SecurityEvent`). None of them
+// were exported from the package barrel or implemented/consumed anywhere in
+// the codebase — pure speculative dead code, same cleanup pattern as
+// REL-009 (`IAggregateSnapshot`) above.

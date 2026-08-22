@@ -39,9 +39,9 @@ pnpm add @vytches/ddd-validation
 
 ### Business rules
 
-| Export                     | Kind  | Description                                                         |
-| -------------------------- | ----- | ------------------------------------------------------------------- |
-| `BusinessRuleValidator<T>` | class | Fluent validator builder — chain `must()`, `ensure()`, `validate()` |
+| Export                     | Kind  | Description                                                                      |
+| -------------------------- | ----- | -------------------------------------------------------------------------------- |
+| `BusinessRuleValidator<T>` | class | Fluent validator builder — chain `addRule()`, `addSpecification()`, `validate()` |
 
 ### Validation errors
 
@@ -58,11 +58,23 @@ pnpm add @vytches/ddd-validation
 
 ### Rules registry
 
+Built-in default validation engine — express rules directly in this library's
+own vocabulary, no external dependency required.
+
 | Export          | Kind  | Description                  |
 | --------------- | ----- | ---------------------------- |
 | `RulesRegistry` | class | Registry for named rule sets |
 
 ### Adapters
+
+External-validator path — wrap a third-party schema library (Zod,
+class-validator, etc.) as an `IValidator<T>` for teams that already standardize
+on one elsewhere.
+
+`RulesRegistry` and `BaseValidationAdapter` are two equally first-class,
+permanent options, not a legacy/modern pair — pick whichever engine fits your
+team; both produce the same `IValidator<T>` / `Result<T, ValidationErrors>`
+contract.
 
 | Export                  | Kind  | Description                                              |
 | ----------------------- | ----- | -------------------------------------------------------- |
@@ -104,9 +116,9 @@ interface CreateUser {
 }
 
 const validator = BusinessRuleValidator.create<CreateUser>()
-  .must(u => u.name.length > 0, 'name', 'Name is required')
-  .must(u => u.email.includes('@'), 'email', 'Invalid email')
-  .must(u => u.age >= 18, 'age', 'Must be 18 or older');
+  .addRule('name', u => u.name.length > 0, 'Name is required')
+  .addRule('email', u => u.email.includes('@'), 'Invalid email')
+  .addRule('age', u => u.age >= 18, 'Must be 18 or older');
 
 const result = validator.validate({
   name: 'Alice',

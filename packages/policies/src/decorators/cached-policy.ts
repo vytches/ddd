@@ -1,4 +1,5 @@
 import type { Result } from '@vytches/ddd-utils';
+import { BaseBusinessPolicy } from '../core/base/base-business-policy';
 import type {
   IBusinessPolicy,
   IPolicyComposer,
@@ -8,15 +9,64 @@ import type {
 } from '../core/interfaces/business-policy.interface';
 import type { PolicyViolation } from '../core/models/policy-violation';
 
+/**
+ * VB-008 (AC1): adapter that lets a decorator (`this`) participate in
+ * and()/or()/when() composition through BaseBusinessPolicy's composer
+ * machinery — private to base-business-policy.ts — while still routing
+ * check() through the decorator itself rather than its raw inner policy.
+ * Without this, composing a cached policy silently drops the cache wrapper.
+ */
+class ComposableSelf<T> extends BaseBusinessPolicy<T> {
+  constructor(private readonly self: IBusinessPolicy<T>) {
+    super(self.id, self.domain, self.name);
+  }
+
+  public check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
+    return this.self.check(request);
+  }
+}
+
+/**
+ * Default `maxSize` used by `PolicyCache.set()` and by factories that don't
+ * ask the consumer for a size (`PolicyCachingBehaviorFactory.withTTL()`,
+ * `.withCustomKey()`). See VB-006: those two factories previously left
+ * `maxSize` unset entirely, which disabled the size-based eviction backstop
+ * and let the cache grow without bound (F6/F7).
+ */
+const DEFAULT_MAX_SIZE = 1000;
+
+/**
+ * Default `maxSize` for `PolicyCachingBehaviorFactory.forExpensivePolicy()`.
+ * Deliberately lower than `DEFAULT_MAX_SIZE`: this factory targets expensive
+ * operations, whose entries are typically larger/costlier per key, so a
+ * smaller cap keeps memory bounded at a similar total cost.
+ */
+const DEFAULT_EXPENSIVE_MAX_SIZE = 500;
+
 export interface PolicyCacheConfig {
   /**
-   * Time to live in milliseconds for cached policy results
+   * Time to live in milliseconds for cached policy results.
+   *
+   * Expiry is LAZY: it is only checked when a key is read back via `get()`.
+   * There is no background sweeper/timer (the library has no lifecycle hook
+   * to own one). A key that is written and never read again does NOT expire
+   * on a timer — it simply sits in the cache until evicted by `maxSize`
+   * eviction. Size-based eviction is therefore the only real memory
+   * backstop; see `maxSize`.
    */
   ttl: number;
 
   /**
-   * Custom key generator for cache entries
-   * Generates cache key from entity and context
+   * Custom key generator for cache entries.
+   *
+   * This is the preferred way to cache by aggregate identity (e.g.
+   * `request => \`${aggregateId}:${version}\``). It gives full control
+   * over the cache key and avoids the cost of serialising the entire entity.
+   *
+   * The default serialisation (`JSON.stringify(entity)`) is a fallback that
+   * works for plain objects but may be unstable for aggregates with value
+   * objects, transient fields, or circular references. Provide `keyGenerator`
+   * whenever your entity has a natural identity.
    */
   keyGenerator?: (request: PolicyRequest<unknown>) => string;
 
@@ -26,17 +76,41 @@ export interface PolicyCacheConfig {
   namespace?: string;
 
   /**
-   * Maximum number of cache entries for this policy
+   * Maximum number of cache entries for this policy.
+   *
+   * This is the ONLY real memory backstop: TTL expiry is lazy (see `ttl`
+   * doc) and never reclaims a key that is set and then never read again.
+   * When omitted, the implementation falls back to an internal default
+   * rather than leaving the cache unbounded — see the `@vytches/ddd-policies`
+   * changelog entry for VB-006 for the exact default per factory.
    */
   maxSize?: number;
 
   /**
-   * Whether to cache failure results (violations)
+   * Whether to cache failure results (violations).
+   *
+   * WARNING: Caching negative (deny) results in authorisation policies is
+   * dangerous. A revocation decision (e.g. blacklisting a user or revoking a
+   * role) will not take effect until the cached entry expires. This means an
+   * entity that should receive `deny` continues to receive a stale `allow`
+   * for up to `ttl` milliseconds after the policy is updated. Only enable
+   * this for non-security policies or when staleness is explicitly acceptable.
    */
   cacheFailures?: boolean;
 
   /**
-   * Whether to enable cache metrics collection
+   * Whether to collect cache metrics (hits, misses, evictions, entries)
+   * exposed through `getCacheMetrics()`.
+   *
+   * Defaults to `true` when omitted. Metrics are observational only —
+   * nothing in the cache reads them for control flow (eviction is driven by
+   * `maxSize` against the live entry count, never by the counters), so
+   * disabling collection cannot change caching behaviour, only what
+   * `getCacheMetrics()` reports.
+   *
+   * An explicit `false` is honoured: prior to VB-006 this option was
+   * declared and documented but never read, so metrics were collected
+   * unconditionally.
    */
   enableMetrics?: boolean;
 }
@@ -47,16 +121,56 @@ export interface PolicyCacheConfig {
 interface CacheEntry<T> {
   result: Result<T, PolicyViolation>;
   timestamp: Date;
-  lastAccess: number;
   ttl: number;
 }
 
 /**
- * Simple in-memory cache implementation for policies
- * Enterprise-ready with TTL, size limits, and metrics
+ * Node in the doubly-linked list used for O(1) LRU tracking.
+ */
+interface LruNode {
+  key: string;
+  prev: LruNode | null;
+  next: LruNode | null;
+}
+
+/**
+ * Snapshot of `PolicyCache`'s counters, as returned by
+ * `PolicyCachingBehavior.getCacheMetrics()`.
+ *
+ * VB-008 (AC3): named explicitly so consumers can reference the return type
+ * — it used to be `ReturnType<PolicyCache['getMetrics']>`, an anonymous type
+ * derived from an unexported internal class.
+ */
+export interface PolicyCacheMetrics {
+  readonly hits: number;
+  readonly misses: number;
+  readonly evictions: number;
+  readonly entries: number;
+}
+
+/**
+ * Simple in-memory cache implementation for policies.
+ * Enterprise-ready with TTL, size limits, and metrics.
+ *
+ * LRU eviction is O(1) — implemented as a Map + doubly-linked list so that
+ * both insertion and access update the MRU position in constant time.
+ *
+ * Size contract (VB-006, AC3): `maxSize` is the only real memory backstop,
+ * because TTL expiry is lazy (only checked on `get()`, see
+ * `PolicyCacheConfig.ttl`). `set()` always receives a `maxSize` — either the
+ * caller's explicit value or a module default (`DEFAULT_MAX_SIZE` /
+ * `DEFAULT_EXPENSIVE_MAX_SIZE`) — so eviction never silently no-ops.
  */
 class PolicyCache {
   private cache = new Map<string, CacheEntry<unknown>>();
+
+  // Doubly-linked list for O(1) LRU tracking.
+  // `lruHead` = least recently used (eviction candidate)
+  // `lruTail` = most recently used
+  private lruNodes = new Map<string, LruNode>();
+  private lruHead: LruNode | null = null;
+  private lruTail: LruNode | null = null;
+
   private metrics = {
     hits: 0,
     misses: 0,
@@ -65,13 +179,24 @@ class PolicyCache {
   };
 
   /**
+   * @param metricsEnabled When `false`, every counter update below is
+   * skipped and `getMetrics()` keeps reporting zeroes. Defaults to `true`
+   * so that callers which never pass the flag keep the pre-VB-006
+   * behaviour. Counters are never read for control flow, so this switch is
+   * safe by construction — see `PolicyCacheConfig.enableMetrics`.
+   */
+  constructor(private readonly metricsEnabled = true) {}
+
+  /**
    * Get cached result if valid
    */
   public get<T>(key: string): Result<T, PolicyViolation> | null {
     const entry = this.cache.get(key) as CacheEntry<T> | undefined;
 
     if (!entry) {
-      this.metrics.misses++;
+      if (this.metricsEnabled) {
+        this.metrics.misses++;
+      }
       return null;
     }
 
@@ -80,54 +205,81 @@ class PolicyCache {
     const age = now - entry.timestamp.getTime();
 
     if (age > entry.ttl) {
+      this.removeNode(key);
       this.cache.delete(key);
-      this.metrics.evictions++;
-      this.metrics.entries--;
-      this.metrics.misses++;
+      if (this.metricsEnabled) {
+        this.metrics.evictions++;
+        this.metrics.entries--;
+        this.metrics.misses++;
+      }
       return null;
     }
 
-    // Update last access for LRU tracking
-    entry.lastAccess = now;
+    // Move to MRU position (O(1) LRU refresh on hit)
+    this.touchNode(key);
 
-    this.metrics.hits++;
+    if (this.metricsEnabled) {
+      this.metrics.hits++;
+    }
     return entry.result;
   }
 
   /**
-   * Set cache entry with TTL
+   * Set cache entry with TTL.
+   *
+   * `maxSize` defaults to `DEFAULT_MAX_SIZE` when the caller omits it, so
+   * eviction is always active — see the class-level "Size contract" doc.
    */
   public set<T>(
     key: string,
     result: Result<T, PolicyViolation>,
     ttl: number,
-    maxSize?: number
+    maxSize: number = DEFAULT_MAX_SIZE
   ): void {
-    // Enforce max size by removing least recently used entry
-    if (maxSize && this.cache.size >= maxSize) {
-      let lruKey: string | undefined;
-      let lruAccess = Infinity;
-      for (const [k, v] of this.cache.entries()) {
-        if (v.lastAccess < lruAccess) {
-          lruAccess = v.lastAccess;
-          lruKey = k;
-        }
-      }
-      if (lruKey) {
+    // D1 (VB-006): capture before any capacity check. A re-set of an
+    // existing key does not grow the effective cache size, so it must not
+    // be treated the same as a brand-new insertion below.
+    const isUpdate = this.cache.has(key);
+
+    // Enforce max size by evicting the least recently used entry (O(1)).
+    // Gated on `!isUpdate` (D1): checking capacity before this gate would
+    // evict an unrelated entry on a same-key re-set even though the entry
+    // count doesn't actually change.
+    if (!isUpdate && this.cache.size >= maxSize) {
+      const lruKey = this.lruHead?.key;
+      if (lruKey !== undefined) {
+        this.removeNode(lruKey);
         this.cache.delete(lruKey);
-        this.metrics.evictions++;
-        this.metrics.entries--;
+        if (this.metricsEnabled) {
+          this.metrics.evictions++;
+          this.metrics.entries--;
+        }
       }
     }
 
-    const now = Date.now();
     this.cache.set(key, {
       result,
       timestamp: new Date(),
-      lastAccess: now,
       ttl,
     });
-    this.metrics.entries++;
+
+    // D2 (VB-006): detach any existing LRU node for this key before
+    // appending a fresh one. Without this, re-setting a key that was
+    // previously `lruHead` leaves that node orphaned but still reachable
+    // from `lruHead` (F8) — the next eviction would then read the stale
+    // `lruHead.key`, look it up in the (already overwritten) `lruNodes` map,
+    // and delete the wrong, still-live entry.
+    if (this.lruNodes.has(key)) {
+      this.removeNode(key);
+    }
+    this.addNode(key);
+
+    // D3 (VB-006): only count real insertions. Counting on every call (the
+    // prior behaviour) drifts `metrics.entries` upward on every re-set,
+    // once re-sets became reachable after the D1/D2 fix (F9).
+    if (!isUpdate && this.metricsEnabled) {
+      this.metrics.entries++;
+    }
   }
 
   /**
@@ -135,13 +287,16 @@ class PolicyCache {
    */
   public clear(): void {
     this.cache.clear();
+    this.lruNodes.clear();
+    this.lruHead = null;
+    this.lruTail = null;
     this.metrics.entries = 0;
   }
 
   /**
    * Get cache metrics
    */
-  public getMetrics(): typeof this.metrics {
+  public getMetrics(): PolicyCacheMetrics {
     return { ...this.metrics };
   }
 
@@ -151,10 +306,71 @@ class PolicyCache {
   public size(): number {
     return this.cache.size;
   }
+
+  // --- LRU linked-list helpers ---
+
+  /** Append a new node for `key` at the MRU tail. */
+  private addNode(key: string): void {
+    const node: LruNode = { key, prev: this.lruTail, next: null };
+    if (this.lruTail) {
+      this.lruTail.next = node;
+    } else {
+      this.lruHead = node;
+    }
+    this.lruTail = node;
+    this.lruNodes.set(key, node);
+  }
+
+  /** Move existing node for `key` to MRU tail. */
+  private touchNode(key: string): void {
+    const node = this.lruNodes.get(key);
+    if (!node || node === this.lruTail) return; // already MRU
+
+    // Detach from current position
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    if (this.lruHead === node) this.lruHead = node.next;
+
+    // Append at tail
+    node.prev = this.lruTail;
+    node.next = null;
+    if (this.lruTail) this.lruTail.next = node;
+    this.lruTail = node;
+  }
+
+  /** Remove node for `key` from the linked list. */
+  private removeNode(key: string): void {
+    const node = this.lruNodes.get(key);
+    if (!node) return;
+
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    if (this.lruHead === node) this.lruHead = node.next;
+    if (this.lruTail === node) this.lruTail = node.prev;
+
+    this.lruNodes.delete(key);
+  }
 }
 
 export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
-  private readonly cache = new PolicyCache();
+  private readonly cache: PolicyCache;
+
+  /**
+   * Evaluations currently running, keyed by cache key (VB-007).
+   *
+   * The cache only absorbs repeated cost *after* the first call completes, so a
+   * burst of simultaneous misses for one key used to pay full price N times —
+   * worst of all in `forExpensivePolicy()`, the factory whose whole purpose is
+   * shielding callers from repeated expensive evaluation, and whose callers are
+   * therefore the most likely to fan out concurrently.
+   *
+   * Deliberately separate from the LRU (D3): an entry here is not a cached
+   * value and must never be evictable, or an eviction mid-flight would strand
+   * the callers awaiting it. Entries are removed when the evaluation settles —
+   * no timers, no background sweep (the library has no lifecycle hook; see
+   * VB-006 D5).
+   */
+  private readonly inFlight = new Map<string, Promise<Result<T, PolicyViolation>>>();
 
   public readonly id: string;
   public readonly domain: string;
@@ -164,6 +380,14 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
     private readonly innerPolicy: IBusinessPolicy<T>,
     private readonly config: PolicyCacheConfig
   ) {
+    // VB-006: `enableMetrics` was declared and documented but never read —
+    // the same dead-switch defect class as `cacheFailures` (fixed above).
+    // `??` (not `||`) so an explicit `false` survives; the `true` default
+    // keeps behaviour unchanged for callers that omit the option. Built
+    // here rather than as a field initializer so `config` is guaranteed
+    // assigned.
+    this.cache = new PolicyCache(config.enableMetrics ?? true);
+
     this.id = `cached_${innerPolicy.id}`;
     this.domain = innerPolicy.domain;
     this.name = `Cached ${innerPolicy.name}`;
@@ -173,7 +397,7 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
    * Check policy with caching
    */
   public async check(request: PolicyRequest<T>): Promise<Result<T, PolicyViolation>> {
-    const cacheKey = this.generateCacheKey(request);
+    const cacheKey = await this.generateCacheKey(request);
 
     // Try cache first
     const cached = this.cache.get<T>(cacheKey);
@@ -181,22 +405,77 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
       return cached;
     }
 
-    // Execute actual policy
+    // VB-007: join an evaluation already running for this key rather than
+    // starting a second one. A caller arriving while an in-flight evaluation
+    // is past its TTL still joins it (D2): TTL bounds how long a *stored*
+    // result stays usable, and an evaluation that started moments ago is
+    // fresher than anything the cache could hand back.
+    const pending = this.inFlight.get(cacheKey);
+    if (pending) {
+      return pending;
+    }
+
+    const evaluation = this.evaluate(request, cacheKey);
+    this.inFlight.set(cacheKey, evaluation);
+
+    try {
+      return await evaluation;
+    } finally {
+      // Cleared on settle, success or failure alike, so a rejected evaluation
+      // cannot poison the key — the next caller re-evaluates (AC2). Callers
+      // already awaiting this promise hold their own reference and still
+      // receive its outcome.
+      this.inFlight.delete(cacheKey);
+    }
+  }
+
+  /**
+   * Runs the inner policy and stores the result. Split out of {@link check} so
+   * the promise can be registered in {@link inFlight} before it is awaited.
+   */
+  private async evaluate(
+    request: PolicyRequest<T>,
+    cacheKey: string
+  ): Promise<Result<T, PolicyViolation>> {
     const result = await this.innerPolicy.check(request);
 
     // Cache result if enabled and TTL > 0
     const shouldCache = (this.config.cacheFailures || result.isSuccess) && this.config.ttl > 0;
     if (shouldCache) {
-      this.cache.set(cacheKey, result, this.config.ttl, this.config.maxSize);
+      // D4/F6 (VB-006): factories that don't ask the consumer for a size
+      // (`withTTL()`, `withCustomKey()`) leave `config.maxSize` unset. Fall
+      // back to `DEFAULT_MAX_SIZE` here rather than letting `undefined`
+      // reach `PolicyCache.set()` implicitly, so the bound is explicit at
+      // the call site that feeds every configuration path.
+      this.cache.set(cacheKey, result, this.config.ttl, this.config.maxSize ?? DEFAULT_MAX_SIZE);
     }
 
     return result;
   }
 
   /**
-   * Generate cache key for request
+   * Generate cache key for request.
+   *
+   * When `keyGenerator` is provided it is used as-is (consumer override).
+   * Otherwise the default key hashes the full context (userId + tenantId +
+   * environment) and entity serialisation through SHA-256 so that no raw PII
+   * is materialised as a plain-text Map key.
+   *
+   * Uses `globalThis.crypto.subtle` (Web Crypto) instead of `node:crypto` to
+   * remain compatible with platform-agnostic bundles (Vite externalises
+   * `node:` builtins for browser-compat builds).
+   *
+   * R1 (VP-012c): context and entity are hashed through a single `hashString`
+   * call over a combined, length-prefixed buffer instead of two separate
+   * `hashString` calls. This is a mechanical reduction of digest invocations
+   * only (2 → 1) — the digest primitive itself is unchanged (still SHA-256,
+   * still the 128-bit prefix from `hashString`, see its doc comment). A
+   * cross-user collision on the same cached entity requires colliding only
+   * `contextHash` under the previous two-call scheme (F7); merging into one
+   * digest over both fields removes that narrower collision surface without
+   * weakening the hash itself.
    */
-  private generateCacheKey(request: PolicyRequest<T>): string {
+  private async generateCacheKey(request: PolicyRequest<T>): Promise<string> {
     if (this.config.keyGenerator) {
       return this.config.keyGenerator(request);
     }
@@ -213,9 +492,31 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
       entityKey = this.generateFallbackKey(request.entity);
     }
 
-    const contextKey = `${request.context.userId}_${request.context.tenantId || ''}_${request.context.environment}`;
+    // F4: hash the full context string so that raw userId/tenantId are not
+    // materialised as plain text in the in-memory Map keys.
+    // Use NUL (\x00) as the field separator — it cannot appear in normal
+    // identifiers, so it removes the delimiter ambiguity a printable separator
+    // would allow (e.g. userId "a_b" + tenant "c" vs "a" + "b_c").
+    const contextRaw = `${request.context.userId}\x00${request.context.tenantId || ''}\x00${request.context.environment}`;
 
-    return `${namespace}:${contextKey}:${this.hashString(entityKey)}`;
+    // R1 (VP-012c): single hashString() call over a length-prefixed combined
+    // buffer, replacing the former two separate calls (contextHash +
+    // entityHash). NUL cannot be reused as the context/entity boundary here —
+    // it is already the internal field separator *inside* contextRaw (line
+    // above), so a bare NUL boundary would let an attacker shift bytes across
+    // the context/entity split (e.g. move a trailing NUL-delimited context
+    // field into the entity portion, or vice versa) while still landing on
+    // the same combined buffer and colliding the cache key. A decimal
+    // length-prefix of contextRaw is unambiguous regardless of which bytes
+    // (including NUL) appear inside contextRaw or entityKey: the parser reads
+    // digits up to the ':' separator, consumes exactly that many bytes as the
+    // context, and treats everything after as the entity — there is no value
+    // of contextRaw that can be crafted to produce the same combined buffer
+    // as a different (context, entity) pair.
+    const combined = `${contextRaw.length}:${contextRaw}${entityKey}`;
+    const combinedHash = await this.hashString(combined);
+
+    return `${namespace}:${combinedHash}`;
   }
 
   /**
@@ -263,16 +564,40 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   }
 
   /**
-   * Simple string hash for cache keys
+   * Hash a string using SHA-256 (Web Crypto) and return the first 32 hex
+   * characters (128-bit prefix). This replaces the former djb2 implementation
+   * which had a 32-bit effective space (~2³¹ after Math.abs) causing
+   * birthday collisions at ~65k entries per namespace/context.
+   *
+   * `globalThis.crypto.subtle` is used rather than `node:crypto` to avoid
+   * Vite externalization issues in browser-compat builds. Available on
+   * Node.js >= 19 (standard, no import needed); `engines.node >= 22.19.0`
+   * guarantees availability.
+   *
+   * Async because `subtle.digest` returns a Promise.
+   *
+   * NON-GOAL (VP-012c / D3, binding): do NOT replace this primitive with
+   * FNV-1a, djb2, or any other non-cryptographic hash in the name of "hot
+   * path optimisation". That substitution was evaluated and rejected — a
+   * 32-bit non-cryptographic hash collides cheaply (birthday bound ~2^16
+   * entries), and because this hash forms authorization cache keys
+   * (`CachedPolicy`/`PolicyCachingBehavior.generateCacheKey`), a collision
+   * is not a performance footnote: it lets one tenant's cached policy
+   * `allow` result be served to a different tenant/entity — cross-tenant
+   * data disclosure. Collision resistance here is a security property of
+   * the cache key, not an implementation detail open to swapping for
+   * throughput. Any future change to this digest must go through a
+   * threat-model update (see `docs/security/threat-models/TM-VP-012c.md`)
+   * and `security-privacy-architect` review, not a standalone perf PR.
    */
-  private hashString(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash).toString(16);
+  private async hashString(str: string): Promise<string> {
+    const encoded = new TextEncoder().encode(str);
+    const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', encoded);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('')
+      .slice(0, 32);
   }
 
   /**
@@ -285,7 +610,7 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   /**
    * Get cache metrics
    */
-  public getCacheMetrics(): ReturnType<PolicyCache['getMetrics']> {
+  public getCacheMetrics(): PolicyCacheMetrics {
     return this.cache.getMetrics();
   }
 
@@ -298,12 +623,20 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
 
   // Implement IBusinessPolicy interface
 
+  // AC1 (VB-008): and()/or()/when() must compose THIS decorator, not the raw
+  // inner policy, or the cache wrapper is silently dropped from the result.
+  // AndPolicyComposer/OrPolicyComposer/ConditionalPolicyBuilder are private to
+  // base-business-policy.ts, so `this` is routed through the composable-self
+  // adapter to reach that machinery while still calling this.check()
+  // (cached) for its branch. not() below already gets this right by
+  // re-wrapping the negated inner policy in a fresh PolicyCachingBehavior.
+
   public and(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.innerPolicy.and(other);
+    return new ComposableSelf<T>(this).and(other);
   }
 
   public or(other: IBusinessPolicy<T>): IPolicyComposer<T> {
-    return this.innerPolicy.or(other);
+    return new ComposableSelf<T>(this).or(other);
   }
 
   public not(): IBusinessPolicy<T> {
@@ -311,87 +644,133 @@ export class PolicyCachingBehavior<T> implements IBusinessPolicy<T> {
   }
 
   public when(condition: PolicyCondition<T>): IPolicyConditionalBuilder<T> {
-    return this.innerPolicy.when(condition);
+    return new ComposableSelf<T>(this).when(condition);
   }
 
   /**
-   * Create cached policy decorator
+   * Create cached policy decorator.
+   *
+   * VB-008 (AC4): `config` is optional — an omitted config reproduces the
+   * defaults that `withDefaults()` used to hard-code (5 minute TTL, no
+   * failure caching, metrics on, `DEFAULT_MAX_SIZE` cap).
    */
   public static create<T>(
     policy: IBusinessPolicy<T>,
-    config: PolicyCacheConfig
+    config?: PolicyCacheConfig
   ): PolicyCachingBehavior<T> {
-    return new PolicyCachingBehavior(policy, config);
+    return new PolicyCachingBehavior(
+      policy,
+      config ?? {
+        ttl: 300000, // 5 minutes default
+        cacheFailures: false,
+        enableMetrics: true,
+        maxSize: DEFAULT_MAX_SIZE,
+      }
+    );
   }
 
+  private static withDefaultsWarned = false;
+
   /**
-   * Create cached policy with default configuration
+   * Create cached policy with default configuration.
+   *
+   * @deprecated Since v0.31.0 (VB-008). Use `create(policy)` instead — an
+   * omitted `config` now reproduces this method's defaults. Will be removed
+   * in the following minor release.
    */
   public static withDefaults<T>(
     policy: IBusinessPolicy<T>,
     ttl = 300000 // 5 minutes default
   ): PolicyCachingBehavior<T> {
-    return new PolicyCachingBehavior(policy, {
+    if (!PolicyCachingBehavior.withDefaultsWarned) {
+      PolicyCachingBehavior.withDefaultsWarned = true;
+      console.warn(
+        "[@vytches/ddd-policies] PolicyCachingBehavior.withDefaults() is deprecated since v0.31.0 and will be removed in the following minor release. Use PolicyCachingBehavior.create(policy) instead — an omitted config reproduces this method's defaults."
+      );
+    }
+    return PolicyCachingBehavior.create(policy, {
       ttl,
       cacheFailures: false,
       enableMetrics: true,
-      maxSize: 1000,
+      maxSize: DEFAULT_MAX_SIZE,
     });
   }
 }
 
-export class PolicyCachingBehaviorFactory {
-  /**
-   * Create cached policy with TTL
-   */
-  public static withTTL<T>(policy: IBusinessPolicy<T>, ttlMs: number): PolicyCachingBehavior<T> {
-    return PolicyCachingBehavior.create(policy, {
-      ttl: ttlMs,
-      cacheFailures: false,
-    });
-  }
-
-  /**
-   * Create cached policy for expensive operations
-   */
-  public static forExpensivePolicy<T>(
-    policy: IBusinessPolicy<T>,
-    options: {
-      ttl?: number;
-      maxSize?: number;
-      cacheFailures?: boolean;
-    } = {}
-  ): PolicyCachingBehavior<T> {
-    const cachedPolicy = PolicyCachingBehavior.create(policy, {
-      ttl: options.ttl || 600000, // 10 minutes for expensive operations
-      maxSize: options.maxSize || 500,
-      cacheFailures: options.cacheFailures || true, // Cache failures for expensive ops
-      enableMetrics: true,
-      namespace: `expensive_${policy.id}`,
-    });
-    // Override the ID to include expensive prefix
-    // Override the ID to include expensive prefix
-    Object.defineProperty(cachedPolicy, 'id', {
-      value: `expensive_cached_${policy.id}`,
-      writable: false,
-      enumerable: true,
-      configurable: false,
-    });
-    return cachedPolicy;
-  }
-
-  /**
-   * Create cached policy with custom key generation
-   */
-  public static withCustomKey<T>(
-    policy: IBusinessPolicy<T>,
-    keyGenerator: (request: PolicyRequest<unknown>) => string,
-    ttl = 300000
-  ): PolicyCachingBehavior<T> {
-    return PolicyCachingBehavior.create(policy, {
-      ttl,
-      keyGenerator,
-      enableMetrics: true,
-    });
-  }
+/**
+ * Create cached policy with TTL.
+ *
+ * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
+ * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
+ * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
+ * need a different cap.
+ */
+function withTTL<T>(policy: IBusinessPolicy<T>, ttlMs: number): PolicyCachingBehavior<T> {
+  return PolicyCachingBehavior.create(policy, {
+    ttl: ttlMs,
+    cacheFailures: false,
+  });
 }
+
+/**
+ * Create cached policy for expensive operations.
+ *
+ * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Defaults to a smaller
+ * `maxSize` than `withTTL()`/`withCustomKey()` (see `DEFAULT_EXPENSIVE_MAX_SIZE`),
+ * on the assumption that entries here are individually costlier; pass
+ * `maxSize` explicitly to raise or lower it.
+ */
+function forExpensivePolicy<T>(
+  policy: IBusinessPolicy<T>,
+  options: {
+    ttl?: number;
+    maxSize?: number;
+    cacheFailures?: boolean;
+  } = {}
+): PolicyCachingBehavior<T> {
+  const cachedPolicy = PolicyCachingBehavior.create(policy, {
+    ttl: options.ttl ?? 600000, // 10 minutes for expensive operations
+    maxSize: options.maxSize ?? DEFAULT_EXPENSIVE_MAX_SIZE,
+    cacheFailures: options.cacheFailures ?? true, // Cache failures for expensive ops
+    enableMetrics: true,
+    namespace: `expensive_${policy.id}`,
+  });
+  // Override the ID to include expensive prefix
+  Object.defineProperty(cachedPolicy, 'id', {
+    value: `expensive_cached_${policy.id}`,
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  });
+  return cachedPolicy;
+}
+
+/**
+ * Create cached policy with custom key generation.
+ *
+ * TTL expiry is lazy — see `PolicyCacheConfig.ttl`. Size is bounded by the
+ * internal `DEFAULT_MAX_SIZE` default (this factory doesn't take a
+ * `maxSize` option); use `PolicyCachingBehavior.create()` directly if you
+ * need a different cap.
+ */
+function withCustomKey<T>(
+  policy: IBusinessPolicy<T>,
+  keyGenerator: (request: PolicyRequest<unknown>) => string,
+  ttl = 300000
+): PolicyCachingBehavior<T> {
+  return PolicyCachingBehavior.create(policy, {
+    ttl,
+    keyGenerator,
+    enableMetrics: true,
+  });
+}
+
+/**
+ * VB-008 (AC2): frozen object export, not a static-only class — same export
+ * name, same call syntax (`PolicyCachingBehaviorFactory.withTTL(...)`).
+ */
+export const PolicyCachingBehaviorFactory = {
+  withTTL,
+  forExpensivePolicy,
+  withCustomKey,
+} as const;

@@ -3,7 +3,6 @@ import { safeRun } from '@vytches/ddd-utils';
 import {
   PolicyEventBus,
   PolicyEventHandlers,
-  globalPolicyEventBus,
   type PolicyEvaluationEvent,
   type PolicyEventHandler,
 } from '../../src/events';
@@ -462,12 +461,6 @@ describe('PolicyEventBus', () => {
       const metricsHandler = PolicyEventHandlers.createMetricsHandler(metricsCollector);
 
       expect(typeof metricsHandler).toBe('function');
-    });
-  });
-
-  describe('Global Event Bus', () => {
-    it('should provide global event bus instance', () => {
-      expect(globalPolicyEventBus).toBeInstanceOf(PolicyEventBus);
     });
   });
 });

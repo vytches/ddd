@@ -115,9 +115,17 @@ export class PolicyViolation extends Error {
   }
 
   /**
-   * Convert to plain object for serialization
+   * Convert to plain object for serialization.
+   *
+   * VS-017 (SA-H5): `stack` is now opt-in and OFF by default — absolute
+   * server file paths and internal call structure must not cross a
+   * serialization boundary (a log pipeline, an API response, a queued
+   * event) without an explicit request. `JSON.stringify(violation)` calls
+   * `toJSON()` with no arguments, so the default (safe) path is always
+   * taken; only an explicit `violation.toJSON({ includeStack: true })` call
+   * includes it.
    */
-  public toJSON(): PolicyViolationData {
+  public toJSON(options?: { includeStack?: boolean }): PolicyViolationData {
     return {
       name: this.name,
       code: this.code,
@@ -128,7 +136,7 @@ export class PolicyViolation extends Error {
       ...(this.policyId && { policyId: this.policyId }),
       ...(this.domain && { domain: this.domain }),
       timestamp: this.timestamp.toISOString(),
-      ...(this.stack && { stack: this.stack }),
+      ...(options?.includeStack && this.stack && { stack: this.stack }),
     };
   }
 

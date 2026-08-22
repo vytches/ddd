@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "extends": "../../api-extractor.base.json",
+
+  // enterprise re-exports from sibling packages, so extraction needs its own
+  // tsconfig (the regular one does not resolve those paths). This is the only
+  // setting that genuinely differs from the shared base.
+  "compiler": {
+    "tsconfigFilePath": "<projectFolder>/tsconfig.api-extractor.json"
+  }
+}

@@ -1,11 +1,11 @@
-import { Logger } from '@vytches/ddd-logging';
-import 'reflect-metadata';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
+import { SimpleContainer } from './containers/simple-container';
 import { HandlerDiscoveryRegistry } from './discovery/handler-discovery-registry';
 import type { HandlerInfo, IHandlerDiscoveryPlugin } from './discovery/handler-discovery.interface';
 import {
   ContainerConfigurationError,
   ContainerDisposedError,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
 } from './errors';
 import type { IDependencyContainer, ServiceToken } from './types';
 import { ServiceLifetime } from './types';
@@ -83,7 +83,6 @@ export interface IServiceLocator {
 
 export class ServiceLocator implements IServiceLocator {
   private static instance: ServiceLocator;
-  private readonly logger = Logger.forContext('ServiceLocator');
   private globalContainer?: IDependencyContainer | undefined;
   private readonly contextContainers = new Map<string, IDependencyContainer>();
   private readonly discoveryRegistry = new HandlerDiscoveryRegistry();
@@ -132,34 +131,60 @@ export class ServiceLocator implements IServiceLocator {
   }
 
   /**
-   * Smart resolution: context-aware when available, global otherwise
+   * Smart resolution: context-aware when available, global otherwise.
+   *
+   * D-3/A: uses a single lookup per container (no isRegistered() pre-check).
+   * CircularDependencyError is never caught here — only ContainerServiceNotFoundError
+   * is suppressed during the context→global fallback.
    */
   resolve<T>(token: ServiceToken<T>, context?: string): T {
     this.ensureNotDisposed();
 
-    // Try context-specific container first
-    if (context) {
-      const contextContainer = this.contextContainers.get(context);
-      if (contextContainer && contextContainer.isRegistered(token)) {
-        return contextContainer.resolve<T>(token);
-      }
-    }
-
-    // Fall back to global container
     if (!this.globalContainer) {
       throw new ContainerConfigurationError(
         'No global container configured. Call configure() first.'
       );
     }
 
-    if (!this.globalContainer.isRegistered(token)) {
-      throw new ServiceNotFoundError(
-        typeof token === 'string' ? token : 'unknown',
-        'Service not registered in any container'
-      );
+    // Try context-specific container first (single lookup)
+    if (context) {
+      const contextContainer = this.contextContainers.get(context);
+      if (contextContainer) {
+        const result = this.trySingleLookup<T>(contextContainer, token);
+        if (result !== undefined) return result;
+      }
     }
 
-    return this.globalContainer.resolve<T>(token);
+    // Try global container (single lookup)
+    const result = this.trySingleLookup<T>(this.globalContainer, token);
+    if (result !== undefined) return result;
+
+    // Preserve the exact error type and message required by D-3/A
+    throw new ContainerServiceNotFoundError(
+      typeof token === 'string' ? token : 'unknown',
+      'Service not registered in any container'
+    );
+  }
+
+  /**
+   * D-3/A: Single-lookup helper. Returns undefined when the service is absent
+   * (ContainerServiceNotFoundError). Any other error (e.g. CircularDependencyError) is
+   * re-thrown immediately so it is never swallowed.
+   */
+  private trySingleLookup<T>(
+    container: IDependencyContainer,
+    token: ServiceToken<T>
+  ): T | undefined {
+    if (container instanceof SimpleContainer) {
+      return container.tryResolve<T>(token);
+    }
+    // Generic fallback for external DI adapters that do not expose tryResolve.
+    try {
+      return container.resolve<T>(token);
+    } catch (e) {
+      if (e instanceof ContainerServiceNotFoundError) return undefined;
+      throw e; // Re-throw CircularDependencyError and all other errors
+    }
   }
 
   /**
@@ -226,8 +251,6 @@ export class ServiceLocator implements IServiceLocator {
     for (const handler of handlers) {
       this.registerHandlerInContainer(handler, this.globalContainer);
     }
-
-    this.logger.info('Discovered and registered handlers', { count: handlers.length });
   }
 
   /**
@@ -248,7 +271,7 @@ export class ServiceLocator implements IServiceLocator {
         lifetime: ServiceLifetime.Transient,
       });
     } catch (error) {
-      this.logger.warn('Failed to register handler', {
+      internalLogger.warn('ServiceLocator: Failed to register handler', {
         handlerName: handler.handlerType.name,
         error: String(error),
       });
@@ -271,10 +294,8 @@ export class ServiceLocator implements IServiceLocator {
 
       // Reset disposed flag
       this.disposed = false;
-
-      this.logger.info('ServiceLocator reset completed');
     } catch (error) {
-      this.logger.warn('Error during ServiceLocator reset', { error: String(error) });
+      internalLogger.warn('ServiceLocator: Error during reset', { error: String(error) });
     }
   }
 
@@ -297,7 +318,7 @@ export class ServiceLocator implements IServiceLocator {
             container.dispose();
           }
         } catch (error) {
-          this.logger.warn('Error disposing context container', {
+          internalLogger.warn('ServiceLocator: Error disposing context container', {
             contextName,
             error: String(error),
           });
@@ -312,9 +333,8 @@ export class ServiceLocator implements IServiceLocator {
       this.globalContainer = undefined;
 
       this.disposed = true;
-      this.logger.info('ServiceLocator disposed');
     } catch (error) {
-      this.logger.warn('Error during ServiceLocator disposal', { error: String(error) });
+      internalLogger.warn('ServiceLocator: Error during disposal', { error: String(error) });
       this.disposed = true;
     }
   }
@@ -368,6 +388,12 @@ export class VytchesDDD {
 
   /**
    * Get the global container
+   *
+   * @remarks
+   * In a NestJS application prefer `VytchesDDDModule`, which owns the container
+   * wiring and the handler auto-discovery that goes with it. Passing this
+   * container into a hand-built module works, but that module has no
+   * `VytchesExplorerService`, so no handler is ever registered on a bus.
    */
   static getGlobalContainer(): IDependencyContainer {
     return VytchesDDD.serviceLocator.getGlobalContainer();

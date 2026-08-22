@@ -1,7 +1,7 @@
 import { Capability } from '@vytches/ddd-contracts';
 import type { IVersioningCapability, IDomainEvent, IEventUpcaster } from '@vytches/ddd-contracts';
 import type { IAggregateRoot, IAggregateEventHandler } from '../aggregate-interfaces';
-import { Logger } from '@vytches/ddd-logging';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 
 /**
  * Capability that handles **event schema evolution** — when a stored event
@@ -90,7 +90,20 @@ export class VersioningCapability
   }
 
   /**
-   * @param {IDomainEvent} event - Event to process with version handling
+   * Applies registered upcasters to bring `event` from its stored version up
+   * to the aggregate's current version, then invokes the matching handler.
+   *
+   * **Upcasting only activates if `event.metadata.targetVersion` is set.**
+   * This is NOT inferred automatically from registered upcasters or from
+   * any aggregate-level "current version" — the caller (typically your
+   * event-sourcing replay/load path) must explicitly stamp each historical
+   * event's metadata with `targetVersion` before calling this method. If
+   * `targetVersion` is absent, `currentVersion` falls back to `eventVersion`
+   * (i.e. no upcasting happens — the event is passed through unchanged even
+   * if upcasters are registered for it).
+   *
+   * @param {IDomainEvent} event - Event to process with version handling;
+   *   set `event.metadata.targetVersion` to enable upcasting
    * @param {Map<string, IAggregateEventHandler>} handlers - Map of event handlers
    */
   handleVersionedEvent(event: IDomainEvent, handlers: Map<string, IAggregateEventHandler>): void {
@@ -104,12 +117,11 @@ export class VersioningCapability
     if (eventVersion < currentVersion && this.upcasters.has(event.eventName)) {
       const eventUpcasters = this.upcasters.get(event.eventName)!;
 
-      const logger = Logger.forContext('VersioningCapability');
       for (let version = eventVersion; version < currentVersion; version++) {
         const upcaster = eventUpcasters.get(version);
         if (!upcaster) {
-          logger.warn(
-            'Missing upcaster for event version — event will be processed without upcast',
+          internalLogger.warn(
+            'VersioningCapability: Missing upcaster for event version — event will be processed without upcast',
             {
               eventName: event.eventName,
               fromVersion: version,

@@ -702,8 +702,8 @@ diagnosing naming conflicts.
 | Symbol                                                                                                                                                                                                                                                         | Source package                                                                      |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `IDomainEvent`, `ISpecification`, `IEntityId`, `IEventBus`, `IUnitOfWork`, `Capability`, `CapabilityRegistry`                                                                                                                                                  | `@vytches/ddd-contracts`                                                            |
-| `BaseEntityId`                                                                                                                                                                                                                                                 | `@vytches/ddd-contracts` (aliased to avoid conflict with value-objects' `EntityId`) |
-| `BaseValueObject`, `EntityId`, `EntityIdFactory` (deprecated)                                                                                                                                                                                                  | `@vytches/ddd-value-objects`                                                        |
+| `ContractsEntityId`                                                                                                                                                                                                                                            | `@vytches/ddd-contracts` (aliased to avoid conflict with value-objects' `EntityId`) |
+| `BaseValueObject`, `EntityId`                                                                                                                                                                                                                                  | `@vytches/ddd-value-objects`                                                        |
 | `AggregateRoot`, `AggregateBuilder`, `SnapshotCapability`, `AuditCapability`, `VersioningCapability`, `EventSourcingCapability`, `AggregateError`, `IAggregateRoot`                                                                                            | `@vytches/ddd-aggregates`                                                           |
 | `Specification`, `CompositeSpecification`, `AsyncCompositeSpecification`, `BusinessRuleValidator`, `ValidationError`, `ValidationErrors`                                                                                                                       | `@vytches/ddd-validation`                                                           |
 | `DomainEvent`, `IntegrationEvent`, `UnifiedEventBus`, `BaseEventBus`, `EventHandler`, `DomainToIntegrationTransformer`, `EventDiscoveryPlugin`, `UniversalEventDispatcher`, `IDomainEventBus`, `IIntegrationEventBus`                                          | `@vytches/ddd-events`                                                               |
@@ -715,8 +715,8 @@ diagnosing naming conflicts.
 
 ### Naming conflicts resolved in `@vytches/ddd`
 
-| Conflict           | Resolution                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| `EntityId`         | Value-objects version is primary (`EntityId`); contracts version exported as `BaseEntityId` |
-| `ValidationError`  | Domain-primitives version is primary; CQRS variant exported as `CqrsValidationError`        |
-| `ExecutionContext` | CQRS version is primary                                                                     |
+| Conflict           | Resolution                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------ |
+| `EntityId`         | Value-objects version is primary (`EntityId`); contracts version exported as `ContractsEntityId` |
+| `ValidationError`  | Domain-primitives version is primary; CQRS variant exported as `CqrsValidationError`             |
+| `ExecutionContext` | CQRS version is primary                                                                          |

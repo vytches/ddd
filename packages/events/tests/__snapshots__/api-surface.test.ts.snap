@@ -2,8 +2,8 @@
 
 exports[`@vytches/ddd-events public API surface > exports the documented set of symbols 1`] = `
 [
+  "AggregatedEventHandlerError",
   "BaseEventBus",
-  "CUSTOM_MIDDLEWARE_SYMBOL",
   "DomainEvent",
   "DomainToIntegrationTransformer",
   "EventDiscoveryPlugin",

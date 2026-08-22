@@ -440,11 +440,53 @@ describe('RetryPolicy', () => {
       expect(retryPolicy.name).toBe('Policy Retry Unreliable Policy');
     });
 
-    it('should support policy composition', () => {
+    // VB-008 (AC1/AC5-unit3): replaces `expect(() => …).not.toThrow()`. A
+    // composed policy that silently dropped the retry decorator would still
+    // not throw — a single transient failure from `unreliablePolicy` would
+    // just fail the composite immediately. The call counter is what proves
+    // the retry loop (not the raw inner policy) is what and()/or() composed.
+    it('should keep retry behavior when composed with and()', async () => {
+      unreliablePolicy.failuresBeforeSuccess = 1;
+      unreliablePolicy.violationSeverity = 'WARNING'; // retryable by default
       const otherPolicy = new UnreliablePolicy();
 
-      expect(() => retryPolicy.and(otherPolicy)).not.toThrow();
-      expect(() => retryPolicy.or(otherPolicy)).not.toThrow();
+      const composed = retryPolicy.and(otherPolicy);
+      const resultPromise = composed.check(request);
+      await vi.runAllTimersAsync();
+      const result = await resultPromise;
+
+      expect(result.isSuccess).toBe(true);
+      // 1 failed attempt + 1 successful retry: only observable if and()
+      // composed the retry decorator itself, not unreliablePolicy raw.
+      expect(unreliablePolicy.callCount).toBe(2);
+    });
+
+    it('should keep retry behavior when composed with or()', async () => {
+      unreliablePolicy.failuresBeforeSuccess = 1;
+      unreliablePolicy.violationSeverity = 'WARNING';
+      const otherPolicy = new UnreliablePolicy(); // always passes (failuresBeforeSuccess = 0)
+
+      const composed = retryPolicy.or(otherPolicy);
+      const resultPromise = composed.check(request);
+      await vi.runAllTimersAsync();
+      const result = await resultPromise;
+
+      expect(result.isSuccess).toBe(true);
+      expect(unreliablePolicy.callCount).toBe(2);
+    });
+
+    it('should route when() through the retry decorator, not the raw inner policy', () => {
+      // Same caveat as the cached-policy suite: `ConditionalPolicyBuilder`'s
+      // `.then()`/`.thenMust()` unconditionally throw regardless of which
+      // policy they wrap, so there is no retry-count side effect to observe
+      // through when(). This only confirms when() still delegates into that
+      // builder machinery post-AC1, rather than throwing or silently no-op'ing.
+      const otherPolicy = new UnreliablePolicy();
+      const builder = retryPolicy.when(() => true);
+
+      expect(() => builder.then(otherPolicy)).toThrow(
+        'Use PolicyBuilder.when().then() for conditional policies'
+      );
     });
 
     it('should support negation with retry preservation', () => {
@@ -526,5 +568,42 @@ describe('RetryPolicy', () => {
       expect(result.error.details?.totalAttempts).toBe(3);
       expect(result.error.details?.retryConfig).toBeDefined();
     });
+  });
+});
+
+/**
+ * VB-008 AC4/D11 — deprecation notice for `withDefaults()`.
+ *
+ * Same contract as the caching sibling: once per class, naming the replacement
+ * and the removal version. The flag is reset because earlier tests in this file
+ * already consumed the one-shot warning.
+ */
+describe('VB-008 AC4: PolicyRetryBehavior.withDefaults() deprecation notice', () => {
+  beforeEach(() => {
+    (PolicyRetryBehavior as unknown as { withDefaultsWarned: boolean }).withDefaultsWarned = false;
+  });
+
+  it('warns exactly once no matter how many times it is called', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const policy = new UnreliablePolicy();
+
+    PolicyRetryBehavior.withDefaults(policy);
+    PolicyRetryBehavior.withDefaults(policy, 5);
+    PolicyRetryBehavior.withDefaults(policy);
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it('names the replacement and the removal version (PA7 / BC8)', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    PolicyRetryBehavior.withDefaults(new UnreliablePolicy());
+
+    const message = String(warn.mock.calls[0]?.[0] ?? '');
+    expect(message).toContain('deprecated');
+    expect(message).toContain('create(');
+    expect(message).toMatch(/v?0\.\d+/);
+    warn.mockRestore();
   });
 });

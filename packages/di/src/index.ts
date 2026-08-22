@@ -33,7 +33,7 @@ export {
   DIError,
   InvalidRegistrationError,
   ServiceAlreadyRegisteredError,
-  ServiceNotFoundError,
+  ContainerServiceNotFoundError,
 } from './errors';
 
 // Service locator + main facade
@@ -45,7 +45,7 @@ export { ContainerBuilder } from './containers/container-builder';
 export { SimpleContainer } from './containers/simple-container';
 
 // Adapters
-export { BaseContainerAdapter } from './adapters/base-adapter';
+export { BaseContainerAdapter, NOT_REGISTERED } from './adapters/base-adapter';
 
 // Handler discovery plugin system
 export { HandlerDiscoveryRegistry } from './discovery';

@@ -9,6 +9,7 @@ exports[`@vytches/ddd-resilience public API surface > exports the documented set
   "BulkheadStrategy",
   "CircuitBreaker",
   "CircuitBreakerDecorator",
+  "CircuitBreakerHalfOpenLimitError",
   "CircuitBreakerMetricCollector",
   "CircuitBreakerOpenError",
   "CircuitBreakerState",
@@ -38,6 +39,7 @@ exports[`@vytches/ddd-resilience public API surface > exports the documented set
   "TimeoutError",
   "TimeoutMetricCollector",
   "TimeoutStrategy",
+  "getResilienceConfig",
   "getResilienceMetrics",
 ]
 `;

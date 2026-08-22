@@ -1,15 +1,19 @@
-import type { OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
+import type { OnApplicationBootstrap, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { DiscoveryService, ModuleRef } from '@nestjs/core';
 import type { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper';
 import type { Constructor } from '@vytches/ddd-di';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
-import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
-import { IEventBus, EVENT_HANDLER_METADATA } from '@vytches/ddd-contracts';
-import { Logger } from '@vytches/ddd-logging';
-import type { HandlerInfo, VytchesContextOptions } from '../types';
-import { ACL_ADAPTER_METADATA, ACL_REGISTRY } from '../constants';
+import type { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+// eslint-disable-next-line @nx/enforce-module-boundaries -- Required for DI injection tokens
+import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-cqrs';
+import { IEventBus } from '@vytches/ddd-contracts';
+import { EVENT_HANDLER_METADATA, internalLogger } from '@vytches/ddd-contracts/internal';
+import type { HandlerInfo, VytchesContextOptions, VytchesDDDModuleOptions } from '../types';
+import { ACL_ADAPTER_METADATA, ACL_REGISTRY, VYTCHES_DDD_OPTIONS } from '../constants';
 import type { ACLAdapterMetadata } from '../decorators/acl-adapter.decorator';
+import { BusRegistrationLedger } from './bus-registration-ledger';
+import { readDiHandlerMetadata } from './handler-metadata';
 
 /**
  * Minimal interface for ACL registry — avoids hard dependency on @vytches/ddd-acl
@@ -42,13 +46,18 @@ interface HandlerMetadata {
  *
  * @example
  * ```typescript
- * // In your module - buses are injected automatically:
+ * // In your module - buses are injected automatically.
+ * // Prefer useFactory over useValue: a useValue bus is a process-global
+ * // singleton whose handler registrations outlive the module that created
+ * // them, which leaks stale handler factories across sequentially-created
+ * // modules (e.g. multiple Test.createTestingModule() calls in one process).
+ * // useFactory gives each module its own bus instance, tied to its lifecycle.
  * @Module({
  *   imports: [DiscoveryModule],
  *   providers: [
  *     VytchesExplorerService,
- *     { provide: ICommandBus, useValue: new EnhancedCommandBus(container) },
- *     { provide: IQueryBus, useValue: new EnhancedQueryBus(container) },
+ *     { provide: ICommandBus, useFactory: () => new EnhancedCommandBus(container) },
+ *     { provide: IQueryBus, useFactory: () => new EnhancedQueryBus(container) },
  *   ],
  * })
  * export class MyModule {}
@@ -60,28 +69,64 @@ interface BusWithRegistration {
   registerFactory?(messageType: unknown, factory: () => unknown): void;
   subscribe?(eventType: unknown, handler: unknown): void;
   registerHandler?(eventType: unknown, handler: unknown): void;
+  reset?(): void;
+  dispose?(): void;
 }
 
 @Injectable()
-export class VytchesExplorerService implements OnModuleInit, OnApplicationBootstrap {
-  private readonly logger = Logger.forContext('VytchesExplorerService');
+export class VytchesExplorerService
+  implements OnModuleInit, OnApplicationBootstrap, OnModuleDestroy
+{
   private _contextOptions?: VytchesContextOptions;
   private discoveredHandlers: HandlerInfo[] = [];
   private initialized = false;
+  private strictHandlerRegistration = false;
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- class constructor ref used as Set key for reflection
   private readonly claimedTypes = new Set<Function>();
 
   constructor(
     @Inject(ModuleRef) private readonly moduleRef: ModuleRef,
     @Inject(DiscoveryService) private readonly discoveryService: DiscoveryService,
-    @Optional() @Inject(ICommandBus) private readonly commandBus?: ICommandBus,
-    @Optional() @Inject(IQueryBus) private readonly queryBus?: IQueryBus,
+    @Optional() @Inject(COMMAND_BUS_TOKEN) private readonly commandBus?: ICommandBus,
+    @Optional() @Inject(QUERY_BUS_TOKEN) private readonly queryBus?: IQueryBus,
     @Optional() @Inject(IEventBus) private readonly eventBus?: IEventBus,
-    @Optional() @Inject(ACL_REGISTRY) private readonly aclRegistry?: IACLRegistryLike
+    @Optional() @Inject(ACL_REGISTRY) private readonly aclRegistry?: IACLRegistryLike,
+    @Optional() @Inject(VYTCHES_DDD_OPTIONS) private readonly options?: VytchesDDDModuleOptions
   ) {}
 
   async onModuleInit(): Promise<void> {
     if (this.initialized) {
+      return;
+    }
+
+    // Warn when an injected bus is present but does not support reset().
+    // Without reset() the bus cannot evict stale handler factories on module
+    // teardown, so sequentially-recreated modules (e.g. in tests) will leak
+    // stale closures into the next module. This is a misconfiguration, not a
+    // crash — warn only (do NOT throw).
+    for (const [busLabel, bus] of [
+      ['commandBus', this.commandBus],
+      ['queryBus', this.queryBus],
+      ['eventBus', this.eventBus],
+    ] as const) {
+      if (
+        bus !== undefined &&
+        typeof (bus as unknown as BusWithRegistration).reset !== 'function'
+      ) {
+        internalLogger.warn(
+          `VytchesExplorer: injected ${busLabel} does not implement reset() — stale handler factories will not be evicted on module destroy`,
+          { busLabel, busType: bus.constructor?.name ?? 'unknown' }
+        );
+      }
+    }
+
+    // autoDiscovery.enabled === false opts out of the reflection scan entirely.
+    // Absent options (or an absent flag) keep discovery on, matching the
+    // documented default and every module built before the options token
+    // existed.
+    if (this.options?.autoDiscovery?.enabled === false) {
+      this.discoveredHandlers = [];
+      this.initialized = true;
       return;
     }
 
@@ -90,9 +135,13 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
       await this.discoverAndRegisterACLAdapters();
       this.initialized = true;
     } catch (error) {
-      this.logger.error('Initialization failed', error instanceof Error ? error : undefined, {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      internalLogger.error(
+        'VytchesExplorer: Initialization failed',
+        error instanceof Error ? error : undefined,
+        {
+          error: error instanceof Error ? error.message : String(error),
+        }
+      );
       throw error;
     }
   }
@@ -105,7 +154,67 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
    */
   async onApplicationBootstrap(): Promise<void> {
     const unclaimed = this.discoveredHandlers.filter(h => !this.claimedTypes.has(h.messageType));
-    await this.registerHandlersWithBuses(unclaimed);
+    const registered = await this.registerHandlersWithBuses(unclaimed);
+
+    // Handlers exist, none of them reached a bus: the application will answer
+    // every command and query with "No handler registered for ...". Say so once
+    // with the whole picture, so the cause is visible at boot rather than
+    // reconstructed from a pile of failing requests.
+    if (unclaimed.length > 0 && registered === 0) {
+      internalLogger.warn(
+        'VytchesExplorer: handlers were discovered but none were registered — every dispatch will fail. Check that a bus is provided under COMMAND_BUS_TOKEN / QUERY_BUS_TOKEN (VytchesDDDModule.forRoot() bridges the ICommandBus / IQueryBus class tokens for you)',
+        {
+          discovered: this.discoveredHandlers.length,
+          claimedByFeatureModules: this.discoveredHandlers.length - unclaimed.length,
+          registered,
+          hasCommandBus: this.commandBus !== undefined,
+          hasQueryBus: this.queryBus !== undefined,
+          hasEventBus: this.eventBus !== undefined,
+        }
+      );
+    }
+  }
+
+  /**
+   * Evict this module's handler registrations from the buses on teardown.
+   *
+   * Handlers are registered as factory closures over this service's moduleRef.
+   * When a bus instance outlives the module that populated it (e.g. a process-
+   * global bus shared across sequentially-created test modules), those closures
+   * become stale once the module is destroyed. Resetting the bus here drops them
+   * so the next module starts clean. Buses that do not support reset() (i.e. do
+   * not implement IResettableBus) are skipped.
+   *
+   * After reset() (which evicts handlers/state), dispose() is called on buses
+   * that implement IDisposableBus to release background resources — primarily
+   * the cache-cleanup setInterval. reset() does not stop those timers; without
+   * an explicit dispose() they accumulate across repeated create→destroy cycles
+   * in one process (e.g. sequential test modules). Buses without dispose() are
+   * skipped. Ordering matters: reset() clears state first, dispose() then
+   * releases I/O. Both are error-tolerant — failures warn, never throw.
+   */
+  onModuleDestroy(): void {
+    for (const bus of [this.commandBus, this.queryBus, this.eventBus]) {
+      const lifecycle = bus as unknown as BusWithRegistration | undefined;
+      if (lifecycle && typeof lifecycle.reset === 'function') {
+        try {
+          lifecycle.reset();
+        } catch (error) {
+          internalLogger.warn('VytchesExplorer: Failed to reset bus on module destroy', {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+      if (lifecycle && typeof lifecycle.dispose === 'function') {
+        try {
+          lifecycle.dispose();
+        } catch (error) {
+          internalLogger.warn('VytchesExplorer: Failed to dispose bus on module destroy', {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }
+    }
   }
 
   /**
@@ -122,6 +231,23 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
 
   configureContext(options: VytchesContextOptions): void {
     this._contextOptions = options;
+    if (options.strictHandlerRegistration !== undefined) {
+      this.strictHandlerRegistration = options.strictHandlerRegistration;
+    }
+  }
+
+  /**
+   * Opt into strict handler registration. When enabled, a failure to register
+   * any discovered handler aborts bootstrap (the error is rethrown from
+   * onApplicationBootstrap) instead of being logged and skipped. Off by default
+   * to preserve backward-compatible boot behavior.
+   *
+   * Call before onApplicationBootstrap() runs (e.g. in your module's
+   * onModuleInit) for it to take effect on auto-discovered handlers.
+   */
+  setStrictHandlerRegistration(enabled = true): this {
+    this.strictHandlerRegistration = enabled;
+    return this;
   }
 
   /**
@@ -235,14 +361,16 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
 
   private getHandlerMetadata(target: Constructor): HandlerMetadata | null {
     try {
-      // DI-aware handler metadata (new pattern)
-      const diHandlerType = Reflect.getMetadata(DI_HANDLER_TYPE, target);
-      const diHandlerMetadata = Reflect.getMetadata(DI_HANDLER_METADATA, target);
-      if (diHandlerType && diHandlerMetadata?.messageType) {
-        return {
-          type: diHandlerType as 'command' | 'query' | 'event' | 'domain-service',
-          messageType: diHandlerMetadata.messageType,
-        };
+      // DI-aware handler metadata (new pattern) — shared with
+      // FeatureHandlerRegistrar via readDiHandlerMetadata (VF-032b AC2). The
+      // legacy fallbacks below stay here: they are this scanner's own
+      // backward-compatibility surface, not part of the di:* contract.
+      const di = readDiHandlerMetadata(target);
+      if (di) {
+        // The shared reader types messageType as the ledger's ClassRef
+        // (Function) because the registrar keys a Map on it; this scanner
+        // wants the narrower Constructor. Same value either way.
+        return { type: di.kind, messageType: di.messageType as Constructor };
       }
 
       // Command handler metadata
@@ -302,7 +430,9 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
     return null;
   }
 
-  private async registerHandlersWithBuses(handlers: HandlerInfo[]): Promise<void> {
+  /** @returns how many handlers reached a bus — 0 with a non-empty input means nothing is wired */
+  private async registerHandlersWithBuses(handlers: HandlerInfo[]): Promise<number> {
+    let registered = 0;
     for (const handler of handlers) {
       try {
         const { handlerType, messageType } = handler;
@@ -312,53 +442,119 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
         };
 
         if (handler.type === 'command' && this.commandBus) {
+          registered++;
           const bus = this.commandBus as unknown as BusWithRegistration;
-          if (typeof bus.registerFactory === 'function') {
-            bus.registerFactory(messageType, handlerFactory);
-          } else if (typeof bus.register === 'function') {
-            bus.register(messageType, handlerFactory());
+          // F-M5: bus-scoped ledger prevents double-registering the same
+          // handler (e.g. when forRoot() and forContext() each run their own
+          // VytchesExplorerService instance against the same shared bus) and
+          // rejects a genuine conflict (a different handler claiming the
+          // same messageType on the same bus).
+          const claim = BusRegistrationLedger.claimCommandOrQuery(
+            bus,
+            'command',
+            messageType,
+            handlerType
+          );
+          if (claim === 'register') {
+            if (typeof bus.registerFactory === 'function') {
+              bus.registerFactory(messageType, handlerFactory);
+            } else if (typeof bus.register === 'function') {
+              bus.register(messageType, handlerFactory());
+            }
           }
         } else if (handler.type === 'query' && this.queryBus) {
+          registered++;
           const bus = this.queryBus as unknown as BusWithRegistration;
-          if (typeof bus.registerFactory === 'function') {
-            bus.registerFactory(messageType, handlerFactory);
-          } else if (typeof bus.register === 'function') {
-            bus.register(messageType, handlerFactory());
+          const claim = BusRegistrationLedger.claimCommandOrQuery(
+            bus,
+            'query',
+            messageType,
+            handlerType
+          );
+          if (claim === 'register') {
+            if (typeof bus.registerFactory === 'function') {
+              bus.registerFactory(messageType, handlerFactory);
+            } else if (typeof bus.register === 'function') {
+              bus.register(messageType, handlerFactory());
+            }
           }
         } else if (handler.type === 'event' && this.eventBus) {
+          registered++;
           const bus = this.eventBus as unknown as BusWithRegistration;
           const eventTypeName =
             typeof messageType === 'function' ? messageType.name : String(messageType);
 
           const handlerMeta = handler.metadata as Record<string, unknown> | undefined;
-          if (handlerMeta?.methodName) {
-            // Method-level event handler - subscribe with bound method
-            const methodName = handlerMeta.methodName as string;
-            const instance = handlerFactory() as Record<string, unknown>;
-            const method = instance[methodName];
-            if (typeof method === 'function' && typeof bus.subscribe === 'function') {
-              bus.subscribe(eventTypeName, method.bind(instance));
-            }
-          } else {
-            // Class-level event handler with handle() method
-            const handlerInstance = handlerFactory();
-            if (typeof bus.registerHandler === 'function') {
-              bus.registerHandler(eventTypeName, handlerInstance);
+          // F-M5: events legitimately allow multiple distinct handler types
+          // per eventType (fan-out) — the ledger only dedupes exact
+          // (eventType, handlerType) repeats, it never conflicts here.
+          const claim = BusRegistrationLedger.claimEvent(bus, eventTypeName, handlerType);
+          if (claim === 'register') {
+            if (handlerMeta?.methodName) {
+              // Method-level event handler - subscribe with bound method
+              const methodName = handlerMeta.methodName as string;
+              const instance = handlerFactory() as Record<string, unknown>;
+              const method = instance[methodName];
+              if (typeof method === 'function' && typeof bus.subscribe === 'function') {
+                bus.subscribe(eventTypeName, method.bind(instance));
+              }
+            } else {
+              // Class-level event handler with handle() method
+              const handlerInstance = handlerFactory();
+              if (typeof bus.registerHandler === 'function') {
+                bus.registerHandler(eventTypeName, handlerInstance);
+              }
             }
           }
+        } else {
+          // The handler was discovered but the bus it belongs on was never
+          // injected, so it is dropped here without a trace. Every dispatch of
+          // this message type then fails at runtime while discovery keeps
+          // reporting success — the exact combination that makes a DI token
+          // mismatch cost hours to trace. Name the missing bus instead.
+          internalLogger.warn(
+            `VytchesExplorer: ${handler.type} handler discovered but no ${handler.type} bus is injected — it will not be registered and dispatching this message type will fail`,
+            {
+              handlerName: handlerType.name,
+              handlerType: handler.type,
+              messageType:
+                typeof messageType === 'function' ? messageType.name : String(messageType),
+            }
+          );
         }
       } catch (error) {
-        this.logger.warn('Failed to register handler', {
-          handlerName: handler.handlerType.name,
-          error: error instanceof Error ? error.message : String(error),
-        });
+        // A failed registration leaves the bus without a handler for this
+        // message type — every execute() for it will fail at runtime (500).
+        // Surface it loudly at error level so the misconfiguration is visible
+        // at bootstrap rather than discovered as an opaque runtime failure.
+        internalLogger.error(
+          'VytchesExplorer: Failed to register handler — messages of this type will fail at runtime',
+          error instanceof Error ? error : undefined,
+          {
+            handlerName: handler.handlerType.name,
+            handlerType: handler.type,
+            error: error instanceof Error ? error.message : String(error),
+          }
+        );
+        // Opt-in fail-fast: surface the misconfiguration at bootstrap instead
+        // of letting it become an opaque runtime failure.
+        if (this.strictHandlerRegistration) {
+          throw error instanceof Error ? error : new Error(String(error));
+        }
       }
     }
+    return registered;
   }
 
-  // Legacy compatibility
+  // Legacy compatibility: `.context` mirrors `_contextOptions.name`, set via
+  // configureContext(). Historically this read an unsafely-cast private
+  // `contextConfig` field set directly by forContext()/forContexts(); both now
+  // go through the real configureContext() API instead (F-M5 / D-3).
   getContextConfiguration(): Record<string, unknown> | null {
-    return ((this as Record<string, unknown>).contextConfig as Record<string, unknown>) || null;
+    if (!this._contextOptions) {
+      return null;
+    }
+    return { context: this._contextOptions.name, ...this._contextOptions };
   }
 
   /**
@@ -427,7 +623,7 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
         const { contextName, description, version } = aclMetadata;
 
         if (this.aclRegistry.hasContext(contextName)) {
-          this.logger.warn('ACL adapter already registered, skipping', {
+          internalLogger.warn('VytchesExplorer: ACL adapter already registered, skipping', {
             contextName,
             adapterClass: metatype.name,
           });
@@ -441,17 +637,9 @@ export class VytchesExplorerService implements OnModuleInit, OnApplicationBootst
         });
 
         registered++;
-        this.logger.info('ACL adapter auto-registered', {
-          contextName,
-          adapterClass: metatype.name,
-        });
       } catch {
         // Skip problematic providers
       }
-    }
-
-    if (registered > 0) {
-      this.logger.info(`Auto-discovered ${registered} ACL adapter(s)`);
     }
   }
 }

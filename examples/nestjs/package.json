@@ -1,0 +1,27 @@
+{
+  "name": "@vytches/nestjs-example",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Minimal NestJS wiring for @vytches/ddd — the shape the docs teach, compiled and tested",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vytches/ddd-aggregates": "workspace:*",
+    "@vytches/ddd-contracts": "workspace:*",
+    "@vytches/ddd-cqrs": "workspace:*",
+    "@vytches/ddd-events": "workspace:*",
+    "@vytches/ddd-nestjs": "workspace:*"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^11.1.18",
+    "@nestjs/core": "^11.1.18",
+    "@nestjs/testing": "^11.1.18",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.0"
+  }
+}

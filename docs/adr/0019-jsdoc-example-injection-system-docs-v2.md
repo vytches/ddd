@@ -186,8 +186,9 @@ interface ExampleValidationRules {
 
 ## References
 
-- [JSDOC_EXAMPLES_ROADMAP.md](../JSDOC_EXAMPLES_ROADMAP.md) - Implementation
-  roadmap
+- [JSDOC_EXAMPLES_ROADMAP.md](../archive/JSDOC_EXAMPLES_ROADMAP.md) -
+  Implementation roadmap (status: abandoned/superseded — plan was never
+  executed)
 - [ADR-0013](./0013-enterprise-documentation-standards-and-llm-optimization.md) -
   Documentation standards
 - [TypeDoc Documentation](https://typedoc.org/) - JSDoc rendering

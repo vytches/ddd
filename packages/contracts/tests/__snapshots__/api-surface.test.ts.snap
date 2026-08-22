@@ -4,16 +4,16 @@ exports[`@vytches/ddd-contracts public API surface > exports the documented set 
 [
   "Capability",
   "CapabilityRegistry",
-  "EVENT_HANDLER_METADATA",
-  "EVENT_HANDLER_OPTIONS",
   "EntityId",
   "IEnhancedEventDispatcher",
   "IEventBus",
   "IEventDispatcher",
   "IEventPersistenceHandler",
   "Result",
+  "configureDiagnostics",
   "createCapabilityRegistry",
   "createDomainEvent",
+  "enrichEvent",
   "isEventHandler",
 ]
 `;

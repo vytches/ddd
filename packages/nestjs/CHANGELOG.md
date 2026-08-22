@@ -3,6 +3,167 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.31.0](https://github.com/vytches/ddd/compare/v0.31.0-alpha.0...v0.31.0) (2026-08-22)
+
+### Bug Fixes
+
+- **nestjs:** register the CQRS token bridge in every module factory
+  ([1384dce](https://github.com/vytches/ddd/commit/1384dcea2200cf276f6cfcaa655c4a9d6fa9d0e9))
+- **nestjs:** report at bootstrap when no handler could be registered
+  ([8074352](https://github.com/vytches/ddd/commit/8074352463106888a8da4a48479deaff510b902a))
+- **nestjs:** warn when a discovered handler has no bus to register on
+  ([b428e34](https://github.com/vytches/ddd/commit/b428e3479ed131beedd60a7c6297b7b1fa28a56c))
+
+### Features
+
+- **nestjs:** add forRootAsync and route forFeature through CQRSConfiguration
+  ([abab7ba](https://github.com/vytches/ddd/commit/abab7ba2266d9869ab387cd38e32915c0de1d0ab))
+- **nestjs:** re-export COMMAND_BUS_TOKEN and QUERY_BUS_TOKEN
+  ([39972c9](https://github.com/vytches/ddd/commit/39972c9169e9a311d96010c59a490644a3138a57))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## [Unreleased]
+
+### BREAKING CHANGES
+
+#### Already shipped in 0.31.0-alpha.0 — documented here for the first time
+
+**`VytchesExplorerService` resolves the CQRS buses through Symbol tokens**
+(VP-009 Bug #3, commit `02adf265`).
+
+It injects `@Optional() @Inject(COMMAND_BUS_TOKEN)` / `@Inject(QUERY_BUS_TOKEN)`
+instead of the `ICommandBus` / `IQueryBus` class references, so that DI keeps
+working when the same module is loaded once as ESM and once as CJS and the two
+class identities diverge.
+
+The injection is `@Optional()`, so a token mismatch does not fail at boot. It
+degrades silently: discovery reports success, nothing is registered, and every
+`execute()` throws `No handler registered for ...` at runtime.
+
+_You are affected if_ the buses are provided outside a `VytchesDDDModule`
+factory — typically a hand-rolled `@Global()` module doing
+`{ provide: ICommandBus, useValue: new EnhancedCommandBus(...) }`.
+
+_Migration._ Wire through `VytchesDDDModule.forRoot()` (or `forContext()` /
+`forContexts()` / `forFeature()`), which registers the bridge and provides the
+explorer. If that is not possible yet:
+
+```ts
+import { COMMAND_BUS_TOKEN, QUERY_BUS_TOKEN } from '@vytches/ddd-nestjs';
+import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
+
+providers: [
+  { provide: ICommandBus, useValue: myCommandBus },
+  { provide: IQueryBus, useValue: myQueryBus },
+  { provide: COMMAND_BUS_TOKEN, useExisting: ICommandBus },
+  { provide: QUERY_BUS_TOKEN, useExisting: IQueryBus },
+];
+```
+
+`useExisting` only where the class-token provider is guaranteed present; NestJS
+raises a DI error against an absent token even under `@Optional()`. Otherwise
+use `useFactory` with `inject: [{ token: ICommandBus, optional: true }]`.
+
+_Self-audit._ `grep -rn "provide: ICommandBus\|provide: IQueryBus" src/` and
+confirm each hit is inside a factory call or carries a Symbol alias.
+
+### Added
+
+- `COMMAND_BUS_TOKEN` and `QUERY_BUS_TOKEN` are re-exported from this package,
+  so the aliases above no longer need an import from `@vytches/ddd-cqrs`.
+
+### Fixed
+
+- The Symbol→class token bridge is registered by every module factory.
+  Previously only `forRoot()` and `forTesting()` had it, so an explorer created
+  by `forContext()` or `forContexts()` received no bus and registered nothing.
+  `forFeature()` now aliases the tokens onto its own per-context buses so
+  `@Inject(COMMAND_BUS_TOKEN)` and `@Inject(ICommandBus)` agree inside a feature
+  module; `GLOBAL_COMMAND_BUS` / `GLOBAL_QUERY_BUS` stay out of `forFeature()`
+  on purpose, since reaching the root bus is their job. ADR-0034 claimed
+  `forRoot()` and `forFeature()` both carried the bridge — corrected.
+
+- A discovered handler with no bus to register on is reported at `warn` level,
+  naming the handler, its type and its message type. It used to be skipped
+  silently.
+
+- When handlers are discovered and none could be registered, bootstrap emits one
+  summary warning with discovered/registered counts, which buses resolved, and
+  the tokens to check.
+
+### Changed
+
+- README and LLMGUIDE state up front that handler auto-discovery exists only
+  inside `VytchesDDDModule`, and carry a "Manual wiring" section for
+  applications that provide the buses themselves. The stale claim that
+  `forRoot()` is the only factory method is gone — there are five.
+
+# [0.31.0-alpha.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.31.0-alpha.0) (2026-07-19)
+
+### Bug Fixes
+
+- **config:** include benchmarks/ in nestjs and di tsconfig for type-check
+  coverage
+  ([b0d6884](https://github.com/vytches/ddd/commit/b0d6884e24947c6d83fcc40fdf61879c03cdf4e5))
+- **di:** key DI tokens by reference identity, fix adapter lifetime and errors
+  (VF-030)
+  ([3f7fcff](https://github.com/vytches/ddd/commit/3f7fcff28162db78b4e70334e0079549f751b476))
+- **nestjs:** repair forFeature() DI wiring so bounded-context handlers stay
+  local (VB-003)
+  ([ddbedb6](https://github.com/vytches/ddd/commit/ddbedb6c17e60f8266bf561011df245454db77af))
+- **nestjs:** resolve importing consumer module in feature handler registrar
+  ([efda71f](https://github.com/vytches/ddd/commit/efda71f44c3f056fe06080c0895aa321d6d6af38)),
+  closes [#1](https://github.com/vytches/ddd/issues/1)
+- **nestjs:** surface failed handler registrations and reset buses on destroy
+  (VS-003)
+  ([7460d72](https://github.com/vytches/ddd/commit/7460d729eb1be7d0ceb831bee60dc00cdf56dc06))
+- **nestjs:** switch VytchesExplorerService injection to Symbol.for DI tokens
+  (VP-009 Bug [#3](https://github.com/vytches/ddd/issues/3))
+  ([02adf26](https://github.com/vytches/ddd/commit/02adf2653c19cedba7d3963bd38901381e3c5c57))
+- **release:** repair broken npm publish artifacts across all packages (VB-002)
+  ([82d92fd](https://github.com/vytches/ddd/commit/82d92fdc39194d2e5398593dde27f9d9c126a527))
+
+### Code Refactoring
+
+- **config:** curate public API surface ahead of first publish (VF-024)
+  ([3f8758d](https://github.com/vytches/ddd/commit/3f8758d0d0e07b73bace4ed9609e3f60b6bd8eea))
+
+### Features
+
+- **config:** add ddd-005 deep-import-instead-of-barrel lint rule
+  ([ee6c817](https://github.com/vytches/ddd/commit/ee6c8170e4700351e9d2ae4b4ccbb36af054c454))
+- **nestjs:** add GLOBAL_COMMAND_BUS / GLOBAL_QUERY_BUS tokens for cross-context
+  ACL (VP-009 Bug [#2](https://github.com/vytches/ddd/issues/2))
+  ([0b47e4d](https://github.com/vytches/ddd/commit/0b47e4d16b54dc696194a25860d81d9c1f02070f))
+- **nestjs:** opt-in strict handler registration (fail-fast on bootstrap)
+  ([bd320b5](https://github.com/vytches/ddd/commit/bd320b57b7641a82755d714bea0f6399e50026f3))
+- **nestjs:** warn when injected bus does not implement reset()
+  ([747c87b](https://github.com/vytches/ddd/commit/747c87b510b5f03e453b75dafb328e36a0efdc7a)),
+  closes [#3](https://github.com/vytches/ddd/issues/3)
+
+### Performance Improvements
+
+- **nestjs:** registry-first resolve, lazy paramtypes cache, COW scopes
+  (VP-006b)
+  ([9b56a71](https://github.com/vytches/ddd/commit/9b56a71ad7779f6626c35192d60c4eea3a51b8c3))
+
+### BREAKING CHANGES
+
+- **config:** ServiceNotFoundError, EntityIdFactory, internalLogger barrel
+  export, BaseEntityId, and globalPolicyEventBus all removed/renamed — see
+  CHANGELOG.md for migration notes.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.30.0](https://github.com/vytches/ddd/compare/v0.27.0...v0.30.0) (2026-05-26)
 
 **Note:** Version bump only for package @vytches/ddd-nestjs

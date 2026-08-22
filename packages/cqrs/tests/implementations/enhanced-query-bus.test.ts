@@ -2,8 +2,8 @@ import type { IDependencyContainer } from '@vytches/ddd-di';
 import { safeRun } from '@vytches/ddd-utils';
 import 'reflect-metadata';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import type { IQuery, IQueryHandler, LoggingMiddleware } from '../../src';
-import { EnhancedQueryBus, IQueryBus } from '../../src';
+import type { IQuery, IQueryHandler } from '../../src';
+import { EnhancedQueryBus, HandlerNotFoundError, IQueryBus, LoggingMiddleware } from '../../src';
 
 // Test query implementation
 class TestQuery implements IQuery<string> {
@@ -42,6 +42,16 @@ describe('EnhancedQueryBus', () => {
   describe('constructor', () => {
     it('should extend IQueryBus', () => {
       expect(enhancedQueryBus).toBeInstanceOf(IQueryBus);
+    });
+
+    it('does not install LoggingMiddleware by default (VS-018)', () => {
+      expect(enhancedQueryBus['middlewares']).toEqual([]);
+    });
+
+    it('installs LoggingMiddleware only when enableExecutionLogging is explicitly true (VS-018)', () => {
+      const loggingBus = new EnhancedQueryBus(mockContainer, { enableExecutionLogging: true });
+      expect(loggingBus['middlewares']).toHaveLength(1);
+      expect(loggingBus['middlewares'][0]).toBeInstanceOf(LoggingMiddleware);
     });
 
     it('should initialize metrics with default values', () => {
@@ -394,8 +404,14 @@ describe('EnhancedQueryBus', () => {
         },
       };
 
+      // VS-018: LoggingMiddleware is opt-in (no longer installed by default),
+      // so this test explicitly enables it to exercise middleware ordering.
+      const loggingQueryBus = new EnhancedQueryBus(mockContainer, {
+        enableExecutionLogging: true,
+      });
+
       // Mock LoggingMiddleware to track execution
-      const loggingMiddleware = enhancedQueryBus['middlewares'][0] as LoggingMiddleware;
+      const loggingMiddleware = loggingQueryBus['middlewares'][0] as LoggingMiddleware;
       const originalHandle = loggingMiddleware.handle.bind(loggingMiddleware);
       vi.spyOn(loggingMiddleware, 'handle').mockImplementation(async (context, next) => {
         executionOrder.push('logging-start');
@@ -404,7 +420,7 @@ describe('EnhancedQueryBus', () => {
         return result;
       });
 
-      enhancedQueryBus.use(customMiddleware);
+      loggingQueryBus.use(customMiddleware);
 
       vi.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
         if (key === 'di:query-handler') {
@@ -422,7 +438,7 @@ describe('EnhancedQueryBus', () => {
         return `Result for ${query.id}`;
       });
 
-      await enhancedQueryBus.execute(query);
+      await loggingQueryBus.execute(query);
 
       expect(executionOrder).toEqual([
         'logging-start',
@@ -634,6 +650,222 @@ describe('EnhancedQueryBus', () => {
       const result = await enhancedQueryBus.execute(new LegacyQuery());
 
       expect(result).toBe('by-string');
+    });
+  });
+
+  describe('typed handler maps (no execute-probe misclassification)', () => {
+    it('invokes a factory even when the factory function itself carries an `execute` property', async () => {
+      class ProbeQuery implements IQuery<string> {}
+      const realHandler = { execute: vi.fn().mockResolvedValue('from-factory') };
+      // The old `'execute' in registered` probe would misclassify this factory
+      // as a handler instance (functions can carry an `execute` prop) and call
+      // factory.execute() instead of factory(). Typed maps make kind explicit.
+      const factory = Object.assign(() => realHandler, { execute: vi.fn() });
+
+      enhancedQueryBus.registerFactory(ProbeQuery, factory as unknown as () => typeof realHandler);
+
+      const result = await enhancedQueryBus.execute(new ProbeQuery());
+      expect(result).toBe('from-factory');
+      expect(factory.execute).not.toHaveBeenCalled();
+    });
+
+    it('last registration wins across register/registerFactory kinds', async () => {
+      class SwapQuery implements IQuery<string> {}
+      const instance = { execute: vi.fn().mockResolvedValue('instance') };
+      const factoryHandler = { execute: vi.fn().mockResolvedValue('factory') };
+
+      enhancedQueryBus.register(SwapQuery, instance);
+      enhancedQueryBus.registerFactory(SwapQuery, () => factoryHandler);
+      expect(await enhancedQueryBus.execute(new SwapQuery())).toBe('factory');
+
+      enhancedQueryBus.register(SwapQuery, instance);
+      expect(await enhancedQueryBus.execute(new SwapQuery())).toBe('instance');
+    });
+  });
+
+  describe('stale handler factory eviction (VS-003)', () => {
+    class StaleQuery implements IQuery<string> {}
+
+    it('should throw HandlerNotFoundError when a registered factory throws', async () => {
+      enhancedQueryBus.registerFactory(StaleQuery, () => {
+        throw new Error('dead moduleRef');
+      });
+
+      await expect(enhancedQueryBus.execute(new StaleQuery())).rejects.toBeInstanceOf(
+        HandlerNotFoundError
+      );
+    });
+
+    it('should evict the stale factory so the next call re-resolves from the container', async () => {
+      const goodHandler = { execute: vi.fn().mockResolvedValue('recovered') };
+      vi.spyOn(Reflect, 'getMetadata').mockImplementation((key: string) => {
+        if (key === 'di:query-handler') {
+          return { handlerType: class {} };
+        }
+        return undefined;
+      });
+      (mockContainer.resolve as Mock).mockReturnValue(goodHandler);
+
+      let calls = 0;
+      enhancedQueryBus.registerFactory(StaleQuery, () => {
+        calls++;
+        throw new Error('dead moduleRef');
+      });
+
+      // First call invokes the stale factory and fails clearly.
+      await expect(enhancedQueryBus.execute(new StaleQuery())).rejects.toBeInstanceOf(
+        HandlerNotFoundError
+      );
+
+      // Second call must NOT re-invoke the (now evicted) factory — it falls
+      // through to the container instead.
+      const result = await enhancedQueryBus.execute(new StaleQuery());
+      expect(result).toBe('recovered');
+      expect(calls).toBe(1);
+    });
+  });
+
+  describe('reset (VS-003)', () => {
+    it('should evict all registered handlers', async () => {
+      class ResettableQuery implements IQuery<string> {}
+      const handler = { execute: vi.fn().mockResolvedValue('before-reset') };
+      enhancedQueryBus.register(ResettableQuery, handler);
+
+      expect(await enhancedQueryBus.execute(new ResettableQuery())).toBe('before-reset');
+
+      enhancedQueryBus.reset();
+
+      // After reset the handler is gone; with no container match this throws.
+      vi.spyOn(Reflect, 'getMetadata').mockReturnValue(undefined);
+      await expect(enhancedQueryBus.execute(new ResettableQuery())).rejects.toBeInstanceOf(
+        HandlerNotFoundError
+      );
+    });
+  });
+
+  describe('cache-cleanup interval lifecycle (VS-003)', () => {
+    it('should NOT start a cleanup interval when cache is disabled (default)', () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      expect((bus as unknown as { cacheCleanupInterval?: unknown }).cacheCleanupInterval).toBe(
+        undefined
+      );
+      bus.dispose();
+    });
+
+    it('should start a cleanup interval only once cache is enabled', () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      bus.enableCache(true);
+      expect(
+        (bus as unknown as { cacheCleanupInterval?: unknown }).cacheCleanupInterval
+      ).toBeDefined();
+      bus.dispose();
+    });
+
+    it('should start the cleanup interval when constructed with cache enabled', () => {
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: true });
+      expect(
+        (bus as unknown as { cacheCleanupInterval?: unknown }).cacheCleanupInterval
+      ).toBeDefined();
+      bus.dispose();
+    });
+  });
+
+  describe('VP-010 #1 — cache-cleanup timer unref (query bus)', () => {
+    it('should call unref() on the cleanup interval when cache is enabled at construction', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: true });
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      setIntervalSpy.mockRestore();
+      bus['cacheCleanupInterval'] = undefined;
+    });
+
+    it('should call unref() on the interval when enableCache(true) is called', () => {
+      const unrefSpy = vi.fn();
+      const fakeInterval = { unref: unrefSpy } as unknown as ReturnType<typeof setInterval>;
+      const setIntervalSpy = vi
+        .spyOn(global, 'setInterval')
+        .mockReturnValueOnce(fakeInterval as unknown as NodeJS.Timeout);
+
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: false });
+      expect(setIntervalSpy).not.toHaveBeenCalled();
+
+      bus.enableCache(true);
+
+      expect(setIntervalSpy).toHaveBeenCalledTimes(1);
+      expect(unrefSpy).toHaveBeenCalledTimes(1);
+
+      setIntervalSpy.mockRestore();
+      bus['cacheCleanupInterval'] = undefined;
+    });
+  });
+
+  describe('VP-010 #4 — stale-bus hint in HandlerNotFoundError message (query bus)', () => {
+    it('should include stale-bus hint in error message when factory throws', async () => {
+      class HintQuery implements IQuery<string> {}
+
+      enhancedQueryBus.registerFactory(HintQuery, () => {
+        throw new Error('dead moduleRef');
+      });
+
+      const [error] = await safeRun(() => enhancedQueryBus.execute(new HintQuery()));
+      expect(error).toBeInstanceOf(HandlerNotFoundError);
+      expect((error as HandlerNotFoundError).message).toContain('hint');
+      expect((error as HandlerNotFoundError).message).toContain('useFactory');
+    });
+  });
+
+  describe('VP-010 #5 — IDisposableBus contract (query bus)', () => {
+    it('EnhancedQueryBus exposes a dispose() method', () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+
+    it('dispose() can be called safely when no interval is active', () => {
+      const bus = new EnhancedQueryBus(mockContainer, { enableCache: false });
+      expect(() => bus.dispose()).not.toThrow();
+    });
+
+    it('EnhancedQueryBus satisfies the IDisposableBus shape', () => {
+      const bus: import('../../src').IDisposableBus = new EnhancedQueryBus(mockContainer);
+      expect(typeof bus.dispose).toBe('function');
+      bus.dispose();
+    });
+  });
+
+  // VP-010 #6 — regression: reset() evicts factories so a new module starts clean
+  describe('VP-010 #6 — reset evicts factories; new module starts clean (query bus)', () => {
+    it('should not execute stale factory after reset(), and fresh factory registered after reset() works', async () => {
+      const bus = new EnhancedQueryBus(mockContainer);
+      class ResetRegressionQuery implements IQuery<string> {}
+
+      // "Module 1": register a factory that will become stale
+      const staleHandler = { execute: vi.fn().mockResolvedValue('stale') };
+      bus.registerFactory(ResetRegressionQuery, () => staleHandler);
+
+      expect(await bus.execute(new ResetRegressionQuery())).toBe('stale');
+
+      // Simulate module teardown — VytchesExplorerService.onModuleDestroy calls reset()
+      bus.reset();
+
+      // After reset, the stale factory is gone; executing should throw
+      const [errorAfterReset] = await safeRun(() => bus.execute(new ResetRegressionQuery()));
+      expect(errorAfterReset).toBeInstanceOf(HandlerNotFoundError);
+
+      // "Module 2": register a fresh factory (new module lifecycle)
+      const freshHandler = { execute: vi.fn().mockResolvedValue('fresh') };
+      bus.registerFactory(ResetRegressionQuery, () => freshHandler);
+
+      expect(await bus.execute(new ResetRegressionQuery())).toBe('fresh');
+      expect(staleHandler.execute).toHaveBeenCalledTimes(1); // only called pre-reset
     });
   });
 });

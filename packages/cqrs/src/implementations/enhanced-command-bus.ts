@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
+// F-C3 (VB-002): type-only import for reflect-metadata's ambient
+// Reflect.getMetadata typings — no runtime side effect (see README).
+import type {} from 'reflect-metadata';
 import type { IDependencyContainer, ServiceToken } from '@vytches/ddd-di';
 import type { ResilienceStrategy } from '@vytches/ddd-resilience';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import {
   BulkheadStrategy,
   CircuitBreakerStrategy,
@@ -9,19 +13,29 @@ import {
   RetryStrategy,
   TimeoutStrategy,
 } from '@vytches/ddd-resilience';
-import 'reflect-metadata';
 import { ICommandBus } from '../abstracts';
 import { HandlerNotFoundError } from '../errors';
-import type { ICommand, ICommandHandler } from '../interfaces';
+import type { ICommand, ICommandHandler, IDisposableBus, IResettableBus } from '../interfaces';
 import type { ICQRSMiddleware } from '../middleware';
 import { CQRSExecutionContext, LoggingMiddleware } from '../middleware';
 import type { ICqrsValidatable } from '../validation';
+import type { BusRetryOptions } from './bus-retry-options';
+import { normalizeBusRetryOptions } from './bus-retry-options';
 
 /**
  * Configuration options for enhanced command bus
  */
 export interface EnhancedCommandBusOptions {
   enableMetrics?: boolean;
+  /**
+   * Install the default {@link LoggingMiddleware}, which logs every
+   * command's start/completion/failure via `console` (or a custom logger
+   * passed to it directly). **Off by default** (VS-018) — decoupled from
+   * `enableMetrics`, which previously implied logging as a side effect and
+   * bypassed `configureDiagnostics` entirely. Opt in explicitly for
+   * execution tracing during development/debugging.
+   */
+  enableExecutionLogging?: boolean;
   enableCache?: boolean;
   defaultTimeout?: number;
   defaultRetries?: number;
@@ -33,15 +47,13 @@ export interface EnhancedCommandBusOptions {
       enabled?: boolean;
       failureThreshold?: number;
       resetTimeout?: number;
-      halfOpenMaxAttempts?: number;
     };
-    retry?: {
-      enabled?: boolean;
-      maxAttempts?: number;
-      baseDelay?: number;
-      maxDelay?: number;
-      backoffMultiplier?: number;
-    };
+    /**
+     * `true` is a legacy alias for `{ enabled: true }` (D12). The object form
+     * requires `enabled: true` explicitly — `{ maxAttempts: 5 }` alone does
+     * NOT enable retry. See {@link BusRetryOptions}.
+     */
+    retry?: boolean | BusRetryOptions;
     timeout?: {
       enabled?: boolean;
       timeoutMs?: number;
@@ -74,14 +86,28 @@ interface BatchEntry<T extends ICommand = ICommand, TResult = void> {
 
 /**
  * Performance-optimized Enhanced Command Bus with resilience patterns
+ *
+ * @remarks
+ * In a NestJS application, provide this through `VytchesDDDModule.forRoot()`
+ * (or `forContext()` / `forContexts()` / `forFeature()`) rather than
+ * instantiating it in a module of your own. Handler auto-discovery lives in
+ * `VytchesExplorerService`, which those factories provide and which resolves
+ * the bus via `COMMAND_BUS_TOKEN`. A hand-built module that skips them leaves
+ * no explorer, or an explorer with no bus: nothing is registered and every
+ * `execute()` throws `No handler registered for ...`.
+ *
+ * Direct instantiation is the right call outside NestJS, and for tests.
  */
-export class EnhancedCommandBus extends ICommandBus {
+export class EnhancedCommandBus extends ICommandBus implements IResettableBus, IDisposableBus {
   // Core properties
   private middlewares: ICQRSMiddleware[] = [];
-  private handlers = new Map<
-    Function | string,
-    ICommandHandler<ICommand, unknown> | (() => ICommandHandler<ICommand, unknown>)
-  >();
+  // Registered handlers split by registration kind. Keeping instances and
+  // factories in separate, typed maps removes the brittle `'execute' in x`
+  // runtime probe (which could misclassify a callable handler or a factory
+  // returning a non-handler). A given key lives in exactly one map: register()
+  // and registerFactory() evict the other kind, preserving last-write-wins.
+  private handlerInstances = new Map<Function | string, ICommandHandler<ICommand, unknown>>();
+  private handlerFactories = new Map<Function | string, () => ICommandHandler<ICommand, unknown>>();
 
   // Performance optimization: Handler cache
   private handlerCache = new Map<Function | string, CachedHandler>();
@@ -132,7 +158,10 @@ export class EnhancedCommandBus extends ICommandBus {
 
     // Initialize configuration with defaults
     this.maxRetries = options.defaultRetries ?? 3;
-    this.cacheEnabled = options.enableCache ?? true;
+    // Default false matches EnhancedQueryBus (was true, changed for symmetry —
+    // see VP-010 #2). Consumers who relied on implicit command-bus cache should
+    // opt in: new EnhancedCommandBus(container, { enableCache: true }).
+    this.cacheEnabled = options.enableCache ?? false;
     this.batchingEnabled = options.enableBatching ?? false;
     this.maxBatchSize = options.maxBatchSize ?? 10;
     this.batchDelayMs = options.batchDelayMs ?? 100;
@@ -140,14 +169,21 @@ export class EnhancedCommandBus extends ICommandBus {
     // Setup resilience patterns
     this.setupResilience(options.resilience);
 
-    // Add default logging middleware if metrics enabled
-    if (options.enableMetrics !== false) {
+    // VS-018: execution logging is opt-in (default off), decoupled from
+    // enableMetrics. LoggingMiddleware defaults to raw console when no
+    // custom logger is supplied — that is only reachable when a consumer
+    // explicitly requests it here.
+    if (options.enableExecutionLogging === true) {
       this.use(new LoggingMiddleware());
     }
 
     // Clean cache periodically
     if (this.cacheEnabled) {
       this.cacheCleanupInterval = setInterval(() => this.cleanHandlerCache(), this.CACHE_TTL);
+      // unref() allows the process / vitest-worker to exit even when this timer
+      // is still pending. Guards environments that do not have unref (e.g. some
+      // browser runtimes) with an optional-call.
+      this.cacheCleanupInterval.unref?.();
     }
   }
 
@@ -181,14 +217,19 @@ export class EnhancedCommandBus extends ICommandBus {
     }
 
     // Retry Strategy (opt-in — see BREAKING note above)
-    if (config?.retry?.enabled === true) {
+    const retryOptions = normalizeBusRetryOptions(config?.retry);
+    if (retryOptions?.enabled === true) {
       strategies.push(
         new RetryStrategy({
-          maxAttempts: config?.retry?.maxAttempts ?? this.maxRetries,
-          baseDelay: config?.retry?.baseDelay ?? 1000,
-          maxDelay: config?.retry?.maxDelay ?? 30000,
-          backoffMultiplier: config?.retry?.backoffMultiplier ?? 2,
-          jitter: false,
+          maxAttempts: retryOptions.maxAttempts ?? this.maxRetries,
+          baseDelay: retryOptions.baseDelay ?? 1000,
+          maxDelay: retryOptions.maxDelay ?? 30000,
+          backoffMultiplier: retryOptions.backoffMultiplier ?? 2,
+          // AC1/SA-H3: was hardcoded `false` regardless of caller intent —
+          // every retried call backed off on the identical schedule. Now
+          // defaults to `true` (RetryPolicy.defaultConfig()) and honors an
+          // explicit `jitter: false` override.
+          jitter: retryOptions.jitter ?? true,
         })
       );
     }
@@ -245,14 +286,17 @@ export class EnhancedCommandBus extends ICommandBus {
   setRetries(maxRetries: number): this {
     this.maxRetries = maxRetries;
 
-    // Update retry configuration
+    // Update retry configuration. Normalize first: this.options.resilience.retry
+    // may currently hold the legacy boolean form, which cannot be spread.
+    const previousRetry = normalizeBusRetryOptions(this.options?.resilience?.retry);
+
     this.options = {
       ...this.options,
       defaultRetries: maxRetries,
       resilience: {
         ...this.options?.resilience,
         retry: {
-          ...this.options?.resilience?.retry,
+          ...previousRetry,
           enabled: true,
           maxAttempts: maxRetries,
         },
@@ -277,6 +321,7 @@ export class EnhancedCommandBus extends ICommandBus {
       }
     } else if (!this.cacheCleanupInterval) {
       this.cacheCleanupInterval = setInterval(() => this.cleanHandlerCache(), this.CACHE_TTL);
+      this.cacheCleanupInterval.unref?.();
     }
     return this;
   }
@@ -299,7 +344,8 @@ export class EnhancedCommandBus extends ICommandBus {
     handler: ICommandHandler<T, TResult>
   ): void {
     const key = typeof commandType === 'string' ? commandType : (commandType as Function);
-    this.handlers.set(key, handler as ICommandHandler<ICommand, unknown>);
+    this.handlerInstances.set(key, handler as ICommandHandler<ICommand, unknown>);
+    this.handlerFactories.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
   }
 
@@ -311,7 +357,8 @@ export class EnhancedCommandBus extends ICommandBus {
     factory: () => ICommandHandler<T, TResult>
   ): void {
     const key = typeof commandType === 'string' ? commandType : (commandType as Function);
-    this.handlers.set(key, factory as () => ICommandHandler<ICommand, unknown>);
+    this.handlerFactories.set(key, factory as () => ICommandHandler<ICommand, unknown>);
+    this.handlerInstances.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
   }
 
@@ -436,22 +483,62 @@ export class EnhancedCommandBus extends ICommandBus {
 
     this.metrics.cacheMisses++;
 
-    // Function ref first, string fallback for handlers registered by name (BC)
-    const registered = this.handlers.get(commandClass) ?? this.handlers.get(commandClass.name);
-    if (registered) {
-      const handler =
-        typeof registered === 'function' && !('execute' in registered)
-          ? (registered as () => ICommandHandler<T, TResult>)()
-          : (registered as ICommandHandler<T, TResult>);
-
+    // Function ref first, string-name fallback for handlers registered by name
+    // (BC). A directly-registered instance is returned as-is; a factory is
+    // invoked lazily. No `'execute' in x` probe — the map a handler lives in is
+    // its kind.
+    const instance =
+      this.handlerInstances.get(commandClass) ?? this.handlerInstances.get(commandClass.name);
+    if (instance) {
       if (this.cacheEnabled) {
         this.handlerCache.set(commandClass, {
-          handler: handler as ICommandHandler<ICommand, void>,
+          handler: instance as ICommandHandler<ICommand, void>,
           resolvedAt: Date.now(),
         });
       }
+      return instance as unknown as ICommandHandler<T, TResult>;
+    }
 
-      return handler;
+    const factory =
+      this.handlerFactories.get(commandClass) ?? this.handlerFactories.get(commandClass.name);
+    if (factory) {
+      try {
+        const handler = factory() as ICommandHandler<T, TResult>;
+
+        if (this.cacheEnabled) {
+          this.handlerCache.set(commandClass, {
+            handler: handler as ICommandHandler<ICommand, void>,
+            resolvedAt: Date.now(),
+          });
+        }
+
+        return handler;
+      } catch (factoryError) {
+        // The factory threw — almost always a stale closure over a destroyed DI
+        // scope (e.g. a NestJS moduleRef from a torn-down test module). Left in
+        // place it poisons every future call to this command with an opaque 500.
+        // Evict the dead entry so the next call re-resolves cleanly from the
+        // container, and fail this call with a diagnosable error instead of
+        // leaking the raw factory exception.
+        this.handlerFactories.delete(commandClass);
+        this.handlerFactories.delete(commandClass.name);
+        this.handlerCache.delete(commandClass);
+        internalLogger.warn(
+          'EnhancedCommandBus: Evicted stale command handler factory; next call re-resolves',
+          {
+            commandName: commandClass.name,
+            error: factoryError instanceof Error ? factoryError.message : String(factoryError),
+          }
+        );
+        // Include stale-bus hint so the consumer can diagnose the root cause.
+        // The factory threw — most likely the bus was not recreated after
+        // module teardown (use useFactory, not useValue, to tie bus lifetime
+        // to module lifecycle — see VP-010).
+        throw new HandlerNotFoundError(
+          `${commandClass.name} (hint: factory threw — bus may be stale; recreate it via useFactory on each module init)`,
+          'command'
+        );
+      }
     }
 
     // Resolve from DI container
@@ -563,18 +650,27 @@ export class EnhancedCommandBus extends ICommandBus {
     commands: T[],
     concurrencyLimit: number
   ): Promise<TResult[]> {
-    const results: TResult[] = [] as TResult[];
+    // Pre-sized so results[] preserves input order (indexed by original
+    // command position), not completion order — commands can settle out of
+    // order once concurrencyLimit forces interleaving.
+    const results: TResult[] = new Array(commands.length);
     const executing: Promise<void>[] = [];
 
-    for (const command of commands) {
+    for (let idx = 0; idx < commands.length; idx++) {
+      const command = commands[idx] as T;
       const promise = this.executeWithResilience<T, TResult>(command).then(result => {
-        results.push(result as TResult);
+        results[idx] = result as TResult;
       });
 
       executing.push(promise);
 
       if (executing.length >= concurrencyLimit) {
-        await Promise.race(executing);
+        // Single indexed race replaces the former probe-race + index-race pair:
+        // FIFO microtask ordering on an already-settled parent always yields
+        // the lowest actually-settled index, so one race is sufficient. Do
+        // NOT add a rejection handler here — a rejected command must still
+        // abort this race (and executeInParallel) instead of being silently
+        // swallowed into an unhandledRejection later.
         const completed = await Promise.race(executing.map((p, i) => p.then(() => i)));
         executing.splice(completed, 1);
       }
@@ -658,6 +754,18 @@ export class EnhancedCommandBus extends ICommandBus {
       retries: 0,
       batchesProcessed: 0,
     };
+  }
+
+  /**
+   * Evict all registered handlers and the handler cache, returning the bus to
+   * a clean state. Use on DI module teardown (e.g. between test modules sharing
+   * one bus instance) to drop handler factories bound to a destroyed scope.
+   * Does not stop the cache-cleanup timer — use {@link dispose} for that.
+   */
+  reset(): void {
+    this.handlerInstances.clear();
+    this.handlerFactories.clear();
+    this.handlerCache.clear();
   }
 
   /**

@@ -459,6 +459,39 @@ describe('BaseModelTranslator', () => {
         expect((error as TranslationError).message).toContain('Reference error');
       }
     });
+
+    it('VS-017 (SA-C1): a translation failure through the real BaseModelTranslator path never leaks the source model into JSON.stringify, even with PII-bearing fields', () => {
+      const piiBearingDomainModel: OrderDomainModel = {
+        ...sampleDomainModel,
+        customerName: 'ssn:123-45-6789 email:user@example.com',
+      };
+      const translator = new (class extends BaseModelTranslator<
+        OrderDomainModel,
+        OrderExternalModel
+      > {
+        protected performToExternalTranslation(_domainModel: OrderDomainModel): OrderExternalModel {
+          throw new Error('Conversion failed');
+        }
+        protected performFromExternalTranslation(
+          _externalModel: OrderExternalModel
+        ): OrderDomainModel {
+          throw new Error('Conversion failed');
+        }
+      })('PIIContext');
+
+      try {
+        translator.toExternal(piiBearingDomainModel);
+        expect.fail('Should have thrown TranslationError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(TranslationError);
+        const json = JSON.stringify(error);
+        expect(json).not.toContain('123-45-6789');
+        expect(json).not.toContain('user@example.com');
+        // Still accessible programmatically (debugger/catch block) -- only
+        // JSON serialization is blocked, not the property itself.
+        expect((error as TranslationError).sourceModel).toBe(piiBearingDomainModel);
+      }
+    });
   });
 
   describe('abstract methods', () => {
