@@ -321,6 +321,7 @@ import { PolicyBuilder } from '@vytches/ddd-policies';
 import { PolicyBuilderConfig } from '@vytches/ddd-policies';
 import { PolicyBuildStep } from '@vytches/ddd-policies';
 import { PolicyCacheConfig } from '@vytches/ddd-policies';
+import { PolicyCacheMetrics } from '@vytches/ddd-policies';
 import { PolicyCachingBehavior } from '@vytches/ddd-policies';
 import { PolicyCachingBehaviorFactory } from '@vytches/ddd-policies';
 import { PolicyCondition } from '@vytches/ddd-policies';
@@ -1077,6 +1078,8 @@ export { PolicyBuilderConfig }
 export { PolicyBuildStep }
 
 export { PolicyCacheConfig }
+
+export { PolicyCacheMetrics }
 
 export { PolicyCachingBehavior }
 
