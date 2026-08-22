@@ -103,18 +103,39 @@ Kolejne alpha po poprawkach:
 pnpm release:alpha   # → alpha.1, alpha.2, itd.
 ```
 
-Graduacja do stabilnej — po zmergowaniu do main:
+Graduacja do stabilnej — gdy alpha jest przetestowana:
+
+Branch wychodzi z `develop`, tak samo jak przy standardowym release — zgodnie z
+sekcją [Branch Strategy](#branch-strategy). Alphy w tym repo są mergowane do
+`develop`, a nie do `main`; `main` dostaje wszystko dopiero release'owym PR-em,
+więc potrafi być setki commitów z tyłu. Startowanie brancha graduacyjnego z
+`main` wyda stabilną wersję z przestarzałego drzewa, bez pracy zrobionej od
+ostatniego release'u.
 
 ```bash
-git checkout main && git pull
+# CLAUDE robi (1-3):
+
+# 1. Branch z develop
+git checkout develop && git pull
 git checkout -b release/YYYY-MM-DD
 git push -u origin release/YYYY-MM-DD
-pnpm lerna version --conventional-commits --conventional-graduate --yes
-pnpm build && pnpm publish:packages
+
+# 2. Zbumpuj wersje z graduacją (TYLKO wersjonowanie, bez build/publish)
+NX_DAEMON=false pnpm lerna version --conventional-commits --conventional-graduate --yes
+
+# 3. Release branch gotowy — Claude kończy pracę tutaj
+
+# WŁAŚCICIEL robi (4-5):
+# 4. Utwórz PR release/YYYY-MM-DD → main i zmerguj
+# 5. GitHub Actions → "Release" workflow → Run workflow → publish-only
 ```
 
 > **Uwaga:** Standardowy `pnpm release` bumpuje alpha → alpha+1 (nie do
 > stabilnej). Do graduacji użyj `--conventional-graduate`.
+
+> **Sanity check przed krokiem 2:**
+> `git merge-base --is-ancestor v<ostatnia-alpha> develop` musi przejść. Jeśli
+> nie — branch alphowy nie jest w `develop` i graduacja pominie jego zawartość.
 
 ---
 
