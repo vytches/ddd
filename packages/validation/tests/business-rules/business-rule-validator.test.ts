@@ -289,6 +289,55 @@ describe('BusinessRuleValidator', () => {
       expect(result.isFailure).toBe(true);
       expect(result.error.errors.length).toBeGreaterThanOrEqual(1);
     });
+
+    it('UX-C12: and() preserves both validators per-field errors instead of collapsing them', () => {
+      // Arrange: both sides fail, on different properties, with different messages
+      const nameValidator = BusinessRuleValidator.create<TestUser>().addRule(
+        'name',
+        user => user.name.length > 0,
+        'Name is required'
+      );
+
+      const ageValidator = BusinessRuleValidator.create<TestUser>().addRule(
+        'age',
+        user => user.age >= 18,
+        'Must be 18 or older'
+      );
+
+      // Act
+      const combinedValidator = nameValidator.and(ageValidator);
+      const result = combinedValidator.validate(invalidUser);
+
+      // Assert: neither error is collapsed into a generic '' / "Failed combined validation"
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors).toHaveLength(2);
+      expect(result.error.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ property: 'name', message: 'Name is required' }),
+          expect.objectContaining({ property: 'age', message: 'Must be 18 or older' }),
+        ])
+      );
+      expect(result.error.errors.some(e => e.message === 'Failed combined validation')).toBe(false);
+    });
+
+    it('UX-C12: and() succeeds only when both validators succeed', () => {
+      const nameValidator = BusinessRuleValidator.create<TestUser>().addRule(
+        'name',
+        user => user.name.length > 0,
+        'Name is required'
+      );
+
+      const ageValidator = BusinessRuleValidator.create<TestUser>().addRule(
+        'age',
+        user => user.age >= 18,
+        'Must be 18 or older'
+      );
+
+      const combinedValidator = nameValidator.and(ageValidator);
+      const result = combinedValidator.validate(validUser);
+
+      expect(result.isSuccess).toBe(true);
+    });
   });
 
   describe('Static factory methods', () => {

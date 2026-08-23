@@ -1,10 +1,12 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-23 — post-publish board correction: v0.31.0 is live on npm
-(`latest: 0.31.0`, 2026-08-22, PR #87), so **VF-036 was archived** (it had sat
-in `tasks/` with `status: done` and all ACs checked) and **VB-008 was demoted P1
-→ P3** — its promotion was pre-publish window reasoning that the release
-invalidated. VF-033 is now next. Prior: 2026-08-21 — runtime series closed (7
+_Last updated 2026-08-23 (same-day follow-up) — **VF-033 shipped** (validation
+hardening: all 6 ACs, moved to `completed-tasks/`); VF-025 is now the sole
+remaining runtime defect. Prior (same day): post-publish board correction —
+v0.31.0 is live on npm (`latest: 0.31.0`, 2026-08-22, PR #87), so **VF-036 was
+archived** (it had sat in `tasks/` with `status: done` and all ACs checked) and
+**VB-008 was demoted P1 → P3** — its promotion was pre-publish window reasoning
+that the release invalidated. Prior: 2026-08-21 — runtime series closed (7
 tasks: VF-032a/b, VF-027, VB-007, VP-006c/d, VF-040) and boards re-prioritised.
 **Board correction the same day**: VF-032a and VF-032b had sat on the P2 board
 for a day after being archived — the row deletions were exact-string matches
@@ -49,23 +51,19 @@ least one downstream application is running 0.31.0 in anger. Judge remaining
 tasks by _defect severity to a real consumer_, not by _how cheap the decision is
 today_ — that second axis no longer exists.
 
-**Next three things, in order:**
+**Next two things, in order:**
 
-1. **VF-033** — validation hardening. `CoreRules.minLength` passes on a missing
-   field (`String(undefined)` is 9 chars) and `range` accepts `null`
-   (`Number(null) === 0`). A validation bypass in published code. Its
-   `depends_on: VF-031 AC6` is resolved: VF-031 shipped and kept
-   `RulesRegistry`/`CoreRules`, so the bugs are live rather than deleted.
-   Medium, 6h, two packages, ready to implement.
-2. **VF-025** — the other remaining runtime defect, and the worse one by
+1. **VF-025** — the last remaining runtime defect, and the worse one by
    consequence: `clearProjectionState` calls `deleteAll()` instead of deleting
    one projection (data loss), and a consumer's `retryConfig` is ignored by
-   `shouldRetry`. But it is `complexity: complex`, 11h, four packages, **and its
-   ACs are partly stale** — VF-029 already closed AC1's cap enforcement, AC2,
-   and AC3's error aggregation. Needs a scope reconciliation pass before any
-   code.
-3. **VB-008** — re-analyse or leave alone; see the P3 note. Its P1 promotion was
+   `shouldRetry`. `complexity: complex`, 11h, four packages, **and its ACs are
+   partly stale** — VF-029 already closed AC1's cap enforcement, AC2, and AC3's
+   error aggregation. Needs a scope reconciliation pass before any code.
+2. **VB-008** — re-analyse or leave alone; see the P3 note. Its P1 promotion was
    pre-publish reasoning that no longer holds.
+
+_**VF-033** (validation hardening) shipped 2026-08-23 — see "Shipped and
+archived" under P1._
 
 **Two things a newcomer to this board should not have to rediscover:**
 
@@ -369,13 +367,12 @@ _VS-016 (the prior sole P0) shipped 2026-07-10._
 _Runtime-value first (owner directive 2026-08-09): things that change or protect
 how the library behaves at run time outrank docs/lint work. Re-prioritised
 2026-08-21 after the runtime series — the six runtime-impacting tasks that
-review found are now five done and two left (VF-025, VF-033, both P2). What
-ranked P1 after that was the release gate and the decisions whose window closed
-at first publish — **both are gone as of 2026-08-23**: the gate (VF-036) was
-collected and v0.31.0 shipped, and the window closed with it, which is why
+review found are now six done, one left (VF-025, P2; VF-033 shipped 2026-08-23).
+What ranked P1 after that was the release gate and the decisions whose window
+closed at first publish — **both are gone as of 2026-08-23**: the gate (VF-036)
+was collected and v0.31.0 shipped, and the window closed with it, which is why
 VB-008 went back to P3. What is left on this board is one tooling defect; the
-two remaining runtime defects sit at the top of P2 and are the actual next
-work._
+one remaining runtime defect sits at the top of P2 and is the actual next work._
 
 | ID     | Title                                                    | Status                                                 | Age |
 | ------ | -------------------------------------------------------- | ------------------------------------------------------ | --- |
@@ -401,25 +398,27 @@ same day by other work, `83019997`). 2026-08-20: **VP-012** (hot-path quick wins
 — cqrs single race, aggregates getDomainEvents() memoization, policies
 combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 (benchmark proof) formally unmet — pre-existing broken harness, spun off as
-**VB-005**._
+**VB-005**. 2026-08-23: **VF-033** (validation hardening — `CoreRules`
+`minLength`/`maxLength`/`range` no longer coerce absent values, `.and()`
+flattens errors instead of collapsing them, `ValidationError.code`, async
+short-circuit JSDoc, decision-tree guide linked from three LLMGUIDEs, `testing`
+seeder rename)._
 
 ## P2 — Normal / Medium
 
-_**VF-025 and VF-033 are the last two runtime-impacting tasks in the whole
-backlog** — the 2026-08-20 review found six, and five shipped in the runtime
-series. Take them before anything else here: both are live defects in published
-behaviour, not hardening. VF-033: `CoreRules.minLength` passes on a missing
-field (`String(undefined)` is 9 chars) and `range` accepts `null`
-(`Number(null) === 0`). VF-025: a consumer's `retryConfig` is ignored by
-`shouldRetry`, and `clearProjectionState` calls `deleteAll()` instead of
-deleting one projection. Then VT-007/VT-006 (test debt), then docs & tooling
-(VD-008, VF-038, VF-034, VD-006b)._
+_**VF-025 is the last runtime-impacting task in the whole backlog** — the
+2026-08-20 review found six, VF-033 shipped 2026-08-23 (six of six done). A live
+defect in published behaviour, not hardening: a consumer's `retryConfig` is
+ignored by `shouldRetry`, and `clearProjectionState` calls `deleteAll()` instead
+of deleting one projection. Its ACs are partly stale — VF-029 already closed
+AC1's cap enforcement, AC2, and AC3's error aggregation; needs a scope
+reconciliation pass before any code. Then VT-007/VT-006 (test debt), then docs &
+tooling (VD-008, VF-038, VF-034, VD-006b)._
 
 | ID      | Title                                                             | Status  | Age |
 | ------- | ----------------------------------------------------------------- | ------- | --- |
 | VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 49d |
 | VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 11d |
-| VF-033  | Validation hardening & one validation story                       | backlog | 41d |
 | VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 49d |
 | VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 11d |
 | VF-038  | Give docstring quality its own lint lane                          | backlog | 8d  |

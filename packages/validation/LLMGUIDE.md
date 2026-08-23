@@ -369,6 +369,12 @@ const validator = BusinessRuleValidator.create<Order>().whenSatisfies(
 **`BusinessRuleValidator.addNested()` propagates dot-notation paths.** Nested
 validators prefix error property paths automatically (e.g., `address.zip`).
 
+## Related Guides
+
+- [`docs/guides/specification-vs-policy.md`](../../docs/guides/specification-vs-policy.md)
+  — "where do I validate what" decision tree: VO constructor invariant vs
+  `Specification` vs `BusinessRuleValidator` vs `PolicyBuilder`.
+
 ## Package Dependencies
 
 `@vytches/ddd-validation` depends on:

@@ -762,6 +762,7 @@ export interface IUnitOfWork {
 
 // @public (undocumented)
 export interface IValidationError {
+    code?: string | undefined;
     // (undocumented)
     context?: Record<string, unknown> | undefined;
     // (undocumented)

@@ -4,7 +4,15 @@ export class ValidationError implements IValidationError {
   constructor(
     public readonly property: string,
     public readonly message: string,
-    public readonly context?: Record<string, unknown>
+    public readonly context?: Record<string, unknown>,
+    /**
+     * Stable, machine-readable error identity for i18n/programmatic
+     * consumers who previously had to string-match `message` (VF-033 AC4).
+     * Built-in `CoreRules` emit stable codes (`'required'`, `'min_length'`,
+     * `'max_length'`, `'pattern'`, `'range'`, `'email'`); custom rules may
+     * pass their own via `BusinessRuleValidator.addRule(..., code)`.
+     */
+    public readonly code?: string
   ) {}
 
   toString(): string {

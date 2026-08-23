@@ -8,9 +8,23 @@ import { Result } from '@vytches/ddd-utils';
 import { faker } from '@faker-js/faker';
 
 /**
- * Business rule validator function type
+ * UX-T2.7 fix: renamed from `BusinessRuleValidator` — that name collided
+ * (same identifier, structurally incompatible shape) with
+ * `@vytches/ddd-validation`'s exported `BusinessRuleValidator` class. This
+ * package does not depend on `@vytches/ddd-validation`, so the collision was
+ * silent (no type error) but confusing to anyone reading both packages.
+ * Seeder-local rule function type, unrelated to the validation package's
+ * class of (nearly) the same former name.
  */
-export type BusinessRuleValidator<T> = (value: T) => boolean | Promise<boolean>;
+export type SeederRuleFn<T> = (value: T) => boolean | Promise<boolean>;
+
+/**
+ * UX-T2.7 fix: mirrors `CoreRules.email`'s pattern
+ * (`@vytches/ddd-validation/src/rules-registry.ts`) — kept as an inline
+ * constant rather than an import to avoid adding a `testing` -> `validation`
+ * package dependency for one regex. Keep both in sync if either changes.
+ */
+const EMAIL_FORMAT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Value object generator strategy
@@ -127,7 +141,7 @@ export class ValueObjectBuilder<T> {
   private readonly ValueObjectClass: new (...args: any[]) => T;
   private readonly config: ValueObjectBuilderConfig<T>;
   private constraints: ValueObjectConstraints = {};
-  private businessRules: Map<string, BusinessRuleValidator<T>> = new Map();
+  private businessRules: Map<string, SeederRuleFn<T>> = new Map();
   private templates: Map<string, ValueObjectTemplate<T>> = new Map();
   private customValidators: Array<(value: T) => ValidationResult | Promise<ValidationResult>> = [];
 
@@ -201,7 +215,7 @@ export class ValueObjectBuilder<T> {
    *   ]);
    * ```
    */
-  withBusinessRules(rules: Array<string | BusinessRuleValidator<T>>): this {
+  withBusinessRules(rules: Array<string | SeederRuleFn<T>>): this {
     for (const rule of rules) {
       if (typeof rule === 'string') {
         // Use built-in rule
@@ -659,7 +673,7 @@ export class ValueObjectBuilder<T> {
     // Email-specific validators
     this.businessRules.set('valid-email-format', (value: any) => {
       const email = value.value || value.email || value;
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email));
+      return EMAIL_FORMAT_REGEX.test(String(email));
     });
 
     this.businessRules.set('no-disposable-emails', (value: any) => {

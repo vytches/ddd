@@ -19,14 +19,30 @@ export abstract class AsyncCompositeSpecification<T> implements IAsyncSpecificat
   readonly description?: string | undefined;
 
   /**
-   * Combine with another async specification using AND logic
+   * Combine with another async specification using AND logic.
+   *
+   * **No short-circuit (UX-C17):** both branches always run via
+   * `Promise.all`, evaluated concurrently for throughput. If the left
+   * branch is `false`, the right branch still executes in full — a
+   * side-effecting or metered right branch (e.g. an external API call) is
+   * never skipped. If you need short-circuit evaluation (skip the right
+   * branch once the left is known to fail), await the branches manually
+   * instead of using `.and()`.
    */
   and(other: IAsyncSpecification<T>): IAsyncSpecification<T> {
     return new AndAsyncSpecification<T>(this, other);
   }
 
   /**
-   * Combine with another async specification using OR logic
+   * Combine with another async specification using OR logic.
+   *
+   * **No short-circuit (UX-C17):** both branches always run via
+   * `Promise.all`, evaluated concurrently for throughput. If the left
+   * branch is `true`, the right branch still executes in full — a
+   * side-effecting or metered right branch (e.g. an external API call) is
+   * never skipped. If you need short-circuit evaluation (skip the right
+   * branch once the left is known to succeed), await the branches manually
+   * instead of using `.or()`.
    */
   or(other: IAsyncSpecification<T>): IAsyncSpecification<T> {
     return new OrAsyncSpecification<T>(this, other);
@@ -82,6 +98,10 @@ class PredicateAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
 }
 
 /**
+ * **No short-circuit (UX-C17):** `isSatisfiedByAsync` always evaluates both
+ * `left` and `right` via `Promise.all`, concurrently, regardless of either
+ * branch's result. A side-effecting or metered branch always runs.
+ *
  * @since 0.4.2
  */
 export class AndAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
@@ -132,6 +152,10 @@ export class AndAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
 }
 
 /**
+ * **No short-circuit (UX-C17):** `isSatisfiedByAsync` always evaluates both
+ * `left` and `right` via `Promise.all`, concurrently, regardless of either
+ * branch's result. A side-effecting or metered branch always runs.
+ *
  * @since 0.4.2
  */
 export class OrAsyncSpecification<T> extends AsyncCompositeSpecification<T> {
