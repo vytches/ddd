@@ -1,21 +1,25 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-21 — runtime series closed (7 tasks: VF-032a/b, VF-027,
-VB-007, VP-006c/d, VF-040) and boards re-prioritised. **Board correction the
-same day**: VF-032a and VF-032b had sat on the P2 board for a day after being
-archived — the row deletions were exact-string matches that stopped matching
-once `prettier --write` realigned the table columns. Cross-checked every board
-row against `tasks/` afterwards; the only entries now absent from a board are
-the three `split` parents (VD-006, VF-032, VF-039), which is intended. Prior:
-2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
-VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
-sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
-initially flagged VF-028 as "branch active, not yet done" — a direct user check
-("czy 028 właśnie nie skończyliśmy?") caught that this was itself stale: VF-028
-was implemented and committed the same day (`05ac364a`), just never had its task
-file updated. Verified (resilience 104/104, policies 237/237 green) and archived
-alongside VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09
-(maturity-audit re-prioritization: 5 new tasks filed
+_Last updated 2026-08-23 — post-publish board correction: v0.31.0 is live on npm
+(`latest: 0.31.0`, 2026-08-22, PR #87), so **VF-036 was archived** (it had sat
+in `tasks/` with `status: done` and all ACs checked) and **VB-008 was demoted P1
+→ P3** — its promotion was pre-publish window reasoning that the release
+invalidated. VF-033 is now next. Prior: 2026-08-21 — runtime series closed (7
+tasks: VF-032a/b, VF-027, VB-007, VP-006c/d, VF-040) and boards re-prioritised.
+**Board correction the same day**: VF-032a and VF-032b had sat on the P2 board
+for a day after being archived — the row deletions were exact-string matches
+that stopped matching once `prettier --write` realigned the table columns.
+Cross-checked every board row against `tasks/` afterwards; the only entries now
+absent from a board are the three `split` parents (VD-006, VF-032, VF-039),
+which is intended. Prior: 2026-08-19 by `/pulse` + same-day correction (37-day
+sync gap — VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a
+status sync; VF-039 split into VF-039a/VF-039b same day. **Correction**:
+`/pulse` initially flagged VF-028 as "branch active, not yet done" — a direct
+user check ("czy 028 właśnie nie skończyliśmy?") caught that this was itself
+stale: VF-028 was implemented and committed the same day (`05ac364a`), just
+never had its task file updated. Verified (resilience 104/104, policies 237/237
+green) and archived alongside VF-037 — both moved to `completed-tasks/`.) Prior:
+2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
 VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
 ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
@@ -30,23 +34,38 @@ release checklist, then merge `develop` → `main` (178 commits ahead, `main`'s
 last reachable tag is `v0.27.0`) and tag. Age = days since created_at. Grouped
 by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
-## Start here (2026-08-21)
+## Start here (2026-08-23)
 
-**Repo state.** `develop` is **221 commits ahead of `main`** and **nothing is
-pushed** — the entire runtime series lives locally only. `main`'s last reachable
-tag is `v0.27.0`. Full suite green: 2673 passed / 7 skipped / 11 todo;
-`validate:api` green across five packages.
+**v0.31.0 is published.** `npm view @vytches/ddd` → `latest: 0.31.0`, all 19
+packages, released 2026-08-22 via PR #87. VF-036's AC-SIGNOFF — the gate the
+2026-08-21 note called "the one gate on the tag" — was collected the next day
+and the release went out. `main` was reset to origin and `develop` recreated
+from it. VF-036 sat in `tasks/` with `status: done` and every AC checked until
+2026-08-23; archived now.
 
-**The one gate on the v0.31.0 tag is still VF-036's AC-SIGNOFF.** Everything
-else on P1 is a window-closing decision, not a blocker.
+**What that changes.** Every "before first publish" framing on this board has
+expired. Breaking changes are no longer free: the packages are public and at
+least one downstream application is running 0.31.0 in anger. Judge remaining
+tasks by _defect severity to a real consumer_, not by _how cheap the decision is
+today_ — that second axis no longer exists.
 
 **Next three things, in order:**
 
-1. **VF-036 sign-off** → release checklist → merge `develop` → `main` → tag.
-2. **VB-008** — run `/analyze VB-008` first. Breaking export-shape change; free
-   to decide now, a major bump after publish.
-3. **VF-025 and VF-033** — the last two runtime defects in the backlog (P2, top
-   of the list, see the note there).
+1. **VF-033** — validation hardening. `CoreRules.minLength` passes on a missing
+   field (`String(undefined)` is 9 chars) and `range` accepts `null`
+   (`Number(null) === 0`). A validation bypass in published code. Its
+   `depends_on: VF-031 AC6` is resolved: VF-031 shipped and kept
+   `RulesRegistry`/`CoreRules`, so the bugs are live rather than deleted.
+   Medium, 6h, two packages, ready to implement.
+2. **VF-025** — the other remaining runtime defect, and the worse one by
+   consequence: `clearProjectionState` calls `deleteAll()` instead of deleting
+   one projection (data loss), and a consumer's `retryConfig` is ignored by
+   `shouldRetry`. But it is `complexity: complex`, 11h, four packages, **and its
+   ACs are partly stale** — VF-029 already closed AC1's cap enforcement, AC2,
+   and AC3's error aggregation. Needs a scope reconciliation pass before any
+   code.
+3. **VB-008** — re-analyse or leave alone; see the P3 note. Its P1 promotion was
+   pre-publish reasoning that no longer holds.
 
 **Two things a newcomer to this board should not have to rediscover:**
 
@@ -58,6 +77,9 @@ else on P1 is a window-closing decision, not a blocker.
 - **Prettier reformats these tables.** Editing a board row by exact-string match
   silently misses after a `prettier --write`; two completed tasks sat on the P2
   board for a day that way. Match on the ID, verify afterwards.
+- **`@vytches/ddd-nestjs:test` has a flaky test.** A lone failure that clears on
+  re-run is that, not a regression — Nx says so itself ("Nx detected a flaky
+  task"). Never reach for `--no-verify`.
 
 ---
 
@@ -348,23 +370,27 @@ _Runtime-value first (owner directive 2026-08-09): things that change or protect
 how the library behaves at run time outrank docs/lint work. Re-prioritised
 2026-08-21 after the runtime series — the six runtime-impacting tasks that
 review found are now five done and two left (VF-025, VF-033, both P2). What
-ranks P1 now is **the release gate and the decisions whose window closes at
-first publish**, not raw runtime value._
+ranked P1 after that was the release gate and the decisions whose window closed
+at first publish — **both are gone as of 2026-08-23**: the gate (VF-036) was
+collected and v0.31.0 shipped, and the window closed with it, which is why
+VB-008 went back to P3. What is left on this board is one tooling defect; the
+two remaining runtime defects sit at the top of P2 and are the actual next
+work._
 
-| ID     | Title                                                     | Status                                                 | Age |
-| ------ | --------------------------------------------------------- | ------------------------------------------------------ | --- |
-| VF-036 | getIdentityComponents() equality hook (consumer-gated BC) | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 12d |
-| VB-008 | Behaviors export shape violates public-api-pattern        | planned — **needs `/analyze VB-008` before any code**  | 1d  |
-| VB-005 | Benchmark harness broken (pnpm bench doesn't run at all)  | backlog _(discovered 2026-08-20 while closing VP-012)_ | 1d  |
+| ID     | Title                                                    | Status                                                 | Age |
+| ------ | -------------------------------------------------------- | ------------------------------------------------------ | --- |
+| VB-005 | Benchmark harness broken (pnpm bench doesn't run at all) | backlog _(discovered 2026-08-20 while closing VP-012)_ | 1d  |
 
-> **VB-008 promoted P3 → P1 on 2026-08-21**, not because it became more urgent
-> but because its window is closing. It changes the export _shape_ of three
-> behaviour families in `@vytches/ddd-policies` (concrete classes where the
-> pattern wants interface + factory), which is a breaking change the moment the
-> package is published — its own `release_target` says "major or a deprecation
-> window". Deciding it now costs a discussion; deciding it later costs a major
-> bump. Note the status: it needs analysis first, and is **not** ready to
-> implement — the same trap VF-032 fell into before it was split.
+> **VB-008 demoted P1 → P3 on 2026-08-23.** Its promotion the day before was
+> explicitly about a closing window — "deciding it now costs a discussion;
+> deciding it later costs a major bump" — and the window closed when 0.31.0 went
+> to npm on 2026-08-22. The change itself is unaffected (three behaviour
+> families in `@vytches/ddd-policies` export concrete classes where
+> `public-api-pattern` wants interface + factory), but it is now a major-bump or
+> deprecation-window decision like any other post-publish shape change, with no
+> discount for doing it this week. Still **not** ready to implement: it needs
+> `/analyze VB-008` first, and that analysis has to be redone under the new
+> constraint rather than assuming the pre-publish framing.
 
 _Shipped and archived to `completed-tasks/` 2026-08-19: **VF-028** (resilience
 correctness, `05ac364a`), **VF-037** (isolation regression suite + behavioral-BC
@@ -402,12 +428,13 @@ deleting one projection. Then VT-007/VT-006 (test debt), then docs & tooling
 
 ## P3 — Low
 
-| ID      | Title                                                        | Status  | Age  |
-| ------- | ------------------------------------------------------------ | ------- | ---- |
-| VF-039b | Churn guard — blocked on churn-ledger placement decision     | blocked | 0d   |
-| VD-009  | Priority example workspaces (repos+UoW, outbox, CQRS+resil.) | backlog | 10d  |
-| VD-004  | Interactive Documentation System                             | backlog | 141d |
-| VF-002  | Strategic Design Documentation                               | backlog | 141d |
+| ID      | Title                                                               | Status  | Age  |
+| ------- | ------------------------------------------------------------------- | ------- | ---- |
+| VF-039b | Churn guard — blocked on churn-ledger placement decision            | blocked | 0d   |
+| VD-009  | Priority example workspaces (repos+UoW, outbox, CQRS+resil.)        | backlog | 10d  |
+| VB-008  | Behaviors export shape violates public-api-pattern (needs /analyze) | backlog | 3d   |
+| VD-004  | Interactive Documentation System                                    | backlog | 141d |
+| VF-002  | Strategic Design Documentation                                      | backlog | 141d |
 
 ## Backlog
 
