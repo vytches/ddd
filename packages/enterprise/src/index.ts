@@ -542,7 +542,9 @@ export {
 } from '@vytches/ddd-resilience';
 export type {
   BulkheadDecoratorConfig,
+  CircuitBreakerConfig,
   CircuitBreakerDecoratorConfig,
+  CircuitBreakerMetrics,
   CompositeResilienceConfig,
   HistogramBucket,
   HistogramMetric,

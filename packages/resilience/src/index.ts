@@ -6,6 +6,8 @@ export {
   CircuitBreakerState,
 } from './patterns/circuit-breaker';
 
+export type { CircuitBreakerConfig, CircuitBreakerMetrics } from './patterns/circuit-breaker';
+
 export { MaxRetriesExceededError, RetryPolicy } from './patterns/retry';
 
 export { Bulkhead, BulkheadRejectedException } from './patterns/bulkhead';
