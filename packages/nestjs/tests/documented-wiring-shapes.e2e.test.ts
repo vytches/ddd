@@ -20,11 +20,12 @@
 import 'reflect-metadata';
 import { describe, it, expect } from 'vitest';
 import { Test } from '@nestjs/testing';
-import { Global, Module } from '@nestjs/common';
+import { Global, Inject, Injectable, Module } from '@nestjs/common';
 // eslint-disable-next-line @nx/enforce-module-boundaries -- DI tokens are needed verbatim
 import { ICommandBus, IQueryBus } from '@vytches/ddd-cqrs';
 import { VytchesDDDModule } from '../src/vytches-ddd.module';
 import { VytchesExplorerService } from '../src/services/vytches-explorer.service';
+import { GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS } from '../src/constants';
 
 const busStub = () => ({
   register: () => undefined,
@@ -121,5 +122,80 @@ describe('documented wiring shape — buses as sibling providers (LLMGUIDE "Glob
     expect(explorer.hasQueryBus()).toBe(true);
 
     await module.close();
+  });
+});
+
+/**
+ * `forRoot({ providers })` puts the buses inside `VytchesDDDModule`. Handler
+ * discovery is unaffected (the explorer resolves handlers through `ModuleRef`,
+ * not through DI visibility), so this only bites when application code — a
+ * controller, an HTTP adapter, a scheduled job — injects a bus by constructor
+ * from a *different* module. `options.exports` is what makes that work; before
+ * it was honoured, the field was declared on `VytchesDDDModuleOptions` and
+ * silently dropped, and the failure surfaced as an opaque bootstrap error.
+ */
+describe('forRoot({ providers }) — reaching the buses from another module', () => {
+  @Injectable()
+  class NeedsCommandBus {
+    constructor(@Inject(ICommandBus) readonly bus: ICommandBus) {}
+  }
+
+  const rootWith = (exports?: unknown[]) =>
+    VytchesDDDModule.forRoot({
+      providers: [
+        { provide: ICommandBus, useFactory: busStub },
+        { provide: IQueryBus, useFactory: busStub },
+      ],
+      ...(exports ? { exports: exports as never } : {}),
+    });
+
+  it('exports its own three tokens even when the caller passes none', async () => {
+    const dynamic = VytchesDDDModule.forRoot();
+
+    expect(dynamic.exports).toEqual([VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS]);
+  });
+
+  it('appends options.exports after its own tokens rather than replacing them', () => {
+    const dynamic = rootWith([ICommandBus, IQueryBus]);
+
+    expect(dynamic.exports).toEqual([
+      VytchesExplorerService,
+      GLOBAL_COMMAND_BUS,
+      GLOBAL_QUERY_BUS,
+      ICommandBus,
+      IQueryBus,
+    ]);
+  });
+
+  it('lets a provider in another module inject a bus declared via options.exports', async () => {
+    @Module({ imports: [rootWith([ICommandBus])], providers: [NeedsCommandBus] })
+    class ConsumerModule {}
+
+    const moduleRef = await Test.createTestingModule({ imports: [ConsumerModule] }).compile();
+
+    expect(moduleRef.get(NeedsCommandBus, { strict: false }).bus).toBeDefined();
+
+    await moduleRef.close();
+  });
+
+  it('still fails, by design, when the bus is provided but never exported', async () => {
+    @Module({ imports: [rootWith()], providers: [NeedsCommandBus] })
+    class ConsumerModule {}
+
+    await expect(Test.createTestingModule({ imports: [ConsumerModule] }).compile()).rejects.toThrow(
+      /ICommandBus/
+    );
+  });
+
+  it('honours options.exports in forTesting() too', () => {
+    const token = Symbol('SOME_TEST_DOUBLE');
+    const dynamic = VytchesDDDModule.forTesting({
+      providers: [{ provide: token, useValue: {} }],
+      exports: [token],
+    });
+
+    expect(dynamic.exports).toContain(token);
+    // its own tokens are still there
+    expect(dynamic.exports).toContain(VytchesExplorerService);
   });
 });

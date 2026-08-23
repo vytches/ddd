@@ -46,7 +46,33 @@ export interface VytchesDDDModuleOptions {
   imports?: ModuleMetadata['imports'];
 
   /**
-   * Additional module exports
+   * Extra tokens this module should export, appended to the ones it always
+   * exports (`VytchesExplorerService`, `GLOBAL_COMMAND_BUS`, `GLOBAL_QUERY_BUS`
+   * for `forRoot()`).
+   *
+   * Needed whenever something declared in {@link providers} has to be
+   * injectable from another module. A bus provided through `providers` and not
+   * listed here still serves handler auto-discovery — the explorer resolves
+   * handlers through `ModuleRef`, not through DI visibility — but a controller
+   * or scheduled job in a different module cannot inject it, and NestJS reports
+   * that only at bootstrap:
+   *
+   * ```
+   * Nest can't resolve dependencies of the InvoicesApi (?). Please make sure
+   * that the argument ICommandBus at index [0] is available in the
+   * InvoicesApiModule context.
+   * ```
+   *
+   * Honoured by `forRoot()` and `forTesting()`. `forRootAsync()` has no
+   * equivalent (a `DynamicModule`'s export list must exist before the DI
+   * container that the async factory depends on), and the deprecated
+   * `forContext()` / `forContexts()` ignore it.
+   *
+   * @example
+   * VytchesDDDModule.forRoot({
+   *   providers: [{ provide: ICommandBus, useFactory: makeCommandBus }],
+   *   exports: [ICommandBus],
+   * });
    */
   exports?: ModuleMetadata['exports'];
 
@@ -247,7 +273,12 @@ export interface VytchesDDDOptionsFactory {
  * that are read at runtime — currently {@link VytchesDDDModuleOptions.autoDiscovery}
  * and {@link VytchesDDDModuleOptions.context}. Returning `providers`/`imports`/
  * `exports`/`isGlobal` from the factory is not an error, but those fields are
- * ignored; declare them here instead.
+ * ignored; declare `providers`, `imports` and `isGlobal` here instead.
+ *
+ * `exports` is the one field with no static counterpart here: the async form
+ * exports only its own fixed tokens. A provider that must be injectable from
+ * another module belongs in that module, or in a `forRoot()` call with
+ * {@link VytchesDDDModuleOptions.exports}.
  *
  * @example ConfigService-driven setup
  * ```typescript

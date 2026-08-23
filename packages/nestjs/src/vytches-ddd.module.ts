@@ -152,7 +152,18 @@ export class VytchesDDDModule {
       module: VytchesDDDModule,
       imports: [DiscoveryModule, ...(options.imports || [])],
       providers,
-      exports: [VytchesExplorerService, GLOBAL_COMMAND_BUS, GLOBAL_QUERY_BUS],
+      // `options.exports` is appended, not merged over: the three tokens below
+      // are this module's own contract and always ship. Anything the caller
+      // passed through `options.providers` stays invisible to other modules
+      // unless it is named here — a bus provided that way and not exported
+      // resolves fine for handler discovery (the explorer goes through
+      // ModuleRef) but cannot be injected by a controller in another module.
+      exports: [
+        VytchesExplorerService,
+        GLOBAL_COMMAND_BUS,
+        GLOBAL_QUERY_BUS,
+        ...(options.exports || []),
+      ],
       global: options.isGlobal !== false,
     };
   }
@@ -483,6 +494,7 @@ export class VytchesDDDModule {
         ICommandBus,
         IQueryBus,
         IEventBus,
+        ...(options.exports || []),
       ],
       global: false,
     };
