@@ -58,7 +58,7 @@ export class AppModule {}
 
 | Export                              | Kind      | Purpose                                                                                                                                                                                                                                          |
 | ----------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `VytchesDDDModule`                  | class     | Static module with `forRoot()`, `forContext()`, `forTesting()`                                                                                                                                                                                   |
+| `VytchesDDDModule`                  | class     | Static module with `forRoot()`, `forRootAsync()`, `forFeature()`, `forTesting()`                                                                                                                                                                 |
 | `VytchesExplorerService`            | class     | Auto-discovers decorated handlers in `onApplicationBootstrap`                                                                                                                                                                                    |
 | `NestJSContainerAdapter`            | class     | Bridge between NestJS DI and VytchesDDD container                                                                                                                                                                                                |
 | `ACLAdapterFor`                     | decorator | Marks ACL adapter for auto-discovery (since 0.24.0)                                                                                                                                                                                              |
@@ -415,19 +415,37 @@ async onOrderPlaced(event: OrderPlaced): Promise<void> { ... }
 async onOrderPlaced(event: OrderPlaced): Promise<void> { ... }
 ```
 
-**Applying `@EventHandler` at class level.** It is a method decorator only.
+**Applying `@EventHandler` at class level without a `handle()` method.** Both
+placements are discovered. Method-level is preferred — one class can handle
+several events and the method name is free. Class-level works too, but the bus
+then calls `handle(event)` on the instance, and a class-level handler that
+exposes only `execute()` fails at dispatch with
+`handler.handle is not a function` — wrapped in `AggregatedEventHandlerError`,
+so it surfaces as a failed publish rather than a registration error.
 
 ```typescript
-// WRONG: class-level
-@EventHandler(OrderPlaced)
+// WRONG: class-level decorator, no handle() to call
 @Injectable()
-class OrderPlacedHandler { ... }
+@EventHandler(OrderPlaced)
+class OrderPlacedHandler {
+  async execute(event: OrderPlaced): Promise<void> { ... }
+}
 
-// CORRECT: method-level, one class for multiple events
+// OK: class-level, one event per class, handle() present
+@Injectable()
+@EventHandler(OrderPlaced)
+class OrderPlacedHandler {
+  async handle(event: OrderPlaced): Promise<void> { ... }
+}
+
+// PREFERRED: method-level, one class for multiple events
 @Injectable()
 class OrdersAuditHandler {
   @EventHandler(OrderPlaced)
   async onOrderPlaced(event: OrderPlaced): Promise<void> { ... }
+
+  @EventHandler(OrderCancelled)
+  async onOrderCancelled(event: OrderCancelled): Promise<void> { ... }
 }
 ```
 
@@ -465,8 +483,55 @@ export class OrdersModule implements OnModuleInit {
 alongside `@CommandHandler`/`@QueryHandler` for DI to work.
 
 **Creating separate `VytchesDDDModule.forRoot()` per bounded context.** Use
-`forContext('name')` instead — it provides handler isolation without multiple
-global modules.
+`forFeature('name')` instead — it gives the context its own buses and local
+event bus. (`forContext()` is the deprecated predecessor; it shares the root
+buses, so it never isolated anything.)
+
+**Re-running discovery from a lifecycle hook.** `VytchesExplorerService` already
+registers everything it discovered in its own `onApplicationBootstrap()`. A
+module that repeats the walk registers the same handlers twice — invisible on a
+command bus (map overwrite), a second subscription on an event bus.
+
+```typescript
+// WRONG: the explorer has already done exactly this
+export class DddModule implements OnApplicationBootstrap {
+  async onApplicationBootstrap() {
+    for (const h of await this.explorer.discoverHandlers()) {
+      await this.explorer.registerHandler(h);
+    }
+  }
+}
+```
+
+`explorer.registerHandler()` stays public for handlers that genuinely cannot
+carry a decorator — one built by a factory, or registered conditionally at
+runtime. It is not a supplement to discovery.
+
+**Handing the buses to `forRoot({ providers })` in a multi-module app.**
+`forRoot()` exports `VytchesExplorerService`, `GLOBAL_COMMAND_BUS`,
+`GLOBAL_QUERY_BUS` and whatever `options.exports` lists — so a bus passed in
+through `options.providers` and not named in `options.exports` is not injectable
+from other modules. Auto-discovery still works (the explorer resolves handlers
+through `ModuleRef`), so the failure appears only when a controller or scheduled
+job injects a bus by constructor.
+
+```typescript
+// WRONG: provided, never exported
+VytchesDDDModule.forRoot({
+  providers: [{ provide: ICommandBus, useFactory: makeBus }],
+});
+
+// OK: exported alongside the module's own tokens
+VytchesDDDModule.forRoot({
+  providers: [{ provide: ICommandBus, useFactory: makeBus }],
+  exports: [ICommandBus],
+});
+```
+
+`forRootAsync()` has no `exports` option — a `DynamicModule`'s export list must
+exist before the DI container its factory depends on — so provide and export the
+buses from your own `@Global()` module there. See README.md, "Where the buses
+live".
 
 **Not providing bus instances.** `VytchesDDDModule` does not create bus
 instances. You must provide `ICommandBus`, `IQueryBus`, `IEventBus`.

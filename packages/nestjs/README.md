@@ -40,30 +40,193 @@ pnpm add @vytches/ddd-nestjs @nestjs/common @nestjs/core reflect-metadata rxjs
 > every `execute()` throws `No handler registered for ...`. If you must wire by
 > hand, alias the tokens yourself — see [Manual wiring](#manual-wiring).
 
+The smallest wiring that dispatches — one module holding the buses, the
+`forRoot()` import and the handlers:
+
 ```typescript
 import { Module } from '@nestjs/common';
-import { VytchesDDDModule } from '@vytches/ddd-nestjs';
+import { ModuleRef } from '@nestjs/core';
+import { NestJSContainerAdapter, VytchesDDDModule } from '@vytches/ddd-nestjs';
 import {
   EnhancedCommandBus,
   EnhancedQueryBus,
   ICommandBus,
   IQueryBus,
 } from '@vytches/ddd-cqrs';
-import { UnifiedEventBus, IEventBus } from '@vytches/ddd-events';
 
 @Module({
   imports: [
     VytchesDDDModule.forRoot({
       providers: [
-        { provide: ICommandBus, useClass: EnhancedCommandBus },
-        { provide: IQueryBus, useClass: EnhancedQueryBus },
-        { provide: IEventBus, useClass: UnifiedEventBus },
+        {
+          provide: ICommandBus,
+          useFactory: (ref: ModuleRef) =>
+            new EnhancedCommandBus(new NestJSContainerAdapter(ref)),
+          inject: [ModuleRef],
+        },
+        {
+          provide: IQueryBus,
+          useFactory: (ref: ModuleRef) =>
+            new EnhancedQueryBus(new NestJSContainerAdapter(ref)),
+          inject: [ModuleRef],
+        },
       ],
     }),
   ],
+  providers: [PlaceOrderHandler, GetOrderHandler],
 })
 export class AppModule {}
 ```
+
+Read [Where the buses live](#where-the-buses-live) before you grow past one
+module — this shape does not survive a controller in a second module.
+
+## Where the buses live
+
+`forRoot()` always exports `VytchesExplorerService`, `GLOBAL_COMMAND_BUS` and
+`GLOBAL_QUERY_BUS`. Anything else you hand it through `options.providers` lives
+_inside_ `VytchesDDDModule`, so unless you say otherwise a provider in another
+module cannot inject it:
+
+```
+Nest can't resolve dependencies of the InvoicesApi (?).
+Please make sure that the argument ICommandBus at index [0]
+is available in the InvoicesApiModule context.
+```
+
+Handlers keep working either way (the explorer resolves them through
+`ModuleRef`, not through DI visibility), so the problem only appears when
+application code — a controller, an HTTP adapter, a scheduled job — injects a
+bus by constructor.
+
+There are two ways out. The direct one is `options.exports`, appended to the
+three tokens above:
+
+```typescript
+VytchesDDDModule.forRoot({
+  providers: [
+    { provide: ICommandBus, useFactory: makeCommandBus, inject: [ModuleRef] },
+    { provide: IQueryBus, useFactory: makeQueryBus, inject: [ModuleRef] },
+  ],
+  exports: [ICommandBus, IQueryBus],
+});
+```
+
+`forTesting()` honours it too. `forRootAsync()` has no equivalent — a
+`DynamicModule`'s export list has to exist before the DI container its factory
+depends on — and the deprecated `forContext()` / `forContexts()` ignore it.
+
+The second way — and the one applications tend to settle on — keeps the buses in
+**your own `@Global()` module** that _provides and exports_ them and _imports_
+`forRoot()`. It costs one extra module and buys two things `options.exports`
+cannot: the application-specific providers that sit next to the buses anyway (an
+event dispatcher, a persistence handler) get somewhere to live, and
+`forRootAsync()` stays available. The explorer's bridge injects `ICommandBus` /
+`IQueryBus` optionally and resolves them from the global registry, so
+auto-discovery is unaffected either way.
+
+```typescript
+@Global()
+@Module({
+  imports: [VytchesDDDModule.forRoot()],
+  providers: [
+    {
+      provide: ICommandBus,
+      useFactory: (ref: ModuleRef) =>
+        new EnhancedCommandBus(new NestJSContainerAdapter(ref)),
+      inject: [ModuleRef],
+    },
+    {
+      provide: IQueryBus,
+      useFactory: (ref: ModuleRef) =>
+        new EnhancedQueryBus(new NestJSContainerAdapter(ref)),
+      inject: [ModuleRef],
+    },
+    { provide: IEventBus, useFactory: () => new UnifiedEventBus() },
+  ],
+  exports: [ICommandBus, IQueryBus, IEventBus],
+})
+export class DddModule {}
+```
+
+Both shapes are compiled and tested in
+[`examples/nestjs`](../../examples/nestjs) — `src/orders.module.ts` and
+`src/app-root.module.ts`; `tests/app-root.test.ts` pins the failure above so it
+cannot quietly come back.
+
+### `useFactory`, not `useValue`
+
+A `useValue` bus is constructed once when the module file is first imported. One
+instance is then shared by every module built in the process and survives every
+teardown, so its handler factories close over a destroyed `ModuleRef` and leak
+into the next module created in the same process — in practice, the next test
+module, which then dispatches into handlers belonging to the previous one. A
+factory gives each module its own pair, and
+`VytchesExplorerService.onModuleDestroy()` resets them on teardown.
+
+## Bounded-context modules
+
+A context module lists its handlers as providers. That is all:
+
+```typescript
+@Module({
+  imports: [DddModule, DatabaseModule],
+  providers: [
+    ArchiveInvoiceHandler, // @CommandHandler(ArchiveInvoiceCommand)
+    GetInvoiceStateHandler, // @QueryHandler(GetInvoiceStateQuery)
+    InvoiceArchivedAuditHandler, // @EventHandler(InvoiceArchived)
+    { provide: INVOICE_REPOSITORY, useClass: KyselyInvoiceRepository },
+  ],
+  exports: [INVOICE_REPOSITORY],
+})
+export class InvoicesModule {}
+```
+
+No `OnModuleInit`, no `commandBus.register(...)`, no `ModuleRef.get(...)` to
+fetch a handler instance. The explorer discovers every decorated provider in the
+graph during `onApplicationBootstrap` — after all `onModuleInit()` hooks — and
+registers the NestJS-resolved instance.
+
+`onModuleInit()` is still the right place for ACL-registry registration and
+error-mapper registration. It is handler registration specifically that is
+automatic.
+
+### What not to do
+
+**Do not register handlers by hand on top of the decorators.** The handler then
+runs twice per message. On a command bus the second registration overwrites a
+map entry and nothing looks wrong; on an event bus it is a second subscription,
+so an event handler that writes a row inserts it twice — a unique-constraint
+violation that aborts the surrounding transaction, surfacing as a failed save
+far from its cause.
+
+```typescript
+// ❌ the handler is already discovered by its decorator
+export class InvoicesModule implements OnModuleInit {
+  onModuleInit() {
+    this.eventBus.registerHandler(InvoiceArchived, this.auditHandler);
+  }
+}
+```
+
+**Do not re-run discovery from a lifecycle hook.** `VytchesExplorerService` runs
+its own `onApplicationBootstrap` and registers everything it found. A module
+that repeats the walk registers the same handlers a second time:
+
+```typescript
+// ❌ the explorer has already done exactly this
+export class DddModule implements OnApplicationBootstrap {
+  async onApplicationBootstrap() {
+    for (const handler of await this.explorer.discoverHandlers()) {
+      await this.explorer.registerHandler(handler);
+    }
+  }
+}
+```
+
+`explorer.registerHandler()` remains public for handlers that genuinely cannot
+carry a decorator — a handler built by a factory, or one registered
+conditionally at runtime. It is not a supplement to discovery.
 
 ## The recommended pattern
 
@@ -131,12 +294,19 @@ first. Accepts `VytchesDDDModuleOptions`:
 interface VytchesDDDModuleOptions {
   providers?: Provider[]; // bus implementations, adapters, etc.
   imports?: any[]; // additional NestJS modules to import
-  exports?: any[]; // additional symbols to export
+  autoDiscovery?: { enabled?: boolean };
+  isGlobal?: boolean; // default: true
 }
 ```
 
 `VytchesExplorerService` is always exported and can be injected into any NestJS
-provider to query discovered handler metadata.
+provider to query discovered handler metadata. `GLOBAL_COMMAND_BUS` and
+`GLOBAL_QUERY_BUS` are exported too, and always resolve to the root buses
+regardless of any `forFeature()` shadowing.
+
+`exports` is appended to that fixed list, never replaces it — use it when
+something declared in `providers` has to be injectable from another module. See
+[Where the buses live](#where-the-buses-live).
 
 ## Handler auto-discovery
 
