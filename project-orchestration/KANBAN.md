@@ -1,27 +1,36 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-23 (same-day follow-up) — **VF-033 shipped** (validation
-hardening: all 6 ACs, moved to `completed-tasks/`); VF-025 is now the sole
-remaining runtime defect. Prior (same day): post-publish board correction —
-v0.31.0 is live on npm (`latest: 0.31.0`, 2026-08-22, PR #87), so **VF-036 was
-archived** (it had sat in `tasks/` with `status: done` and all ACs checked) and
-**VB-008 was demoted P1 → P3** — its promotion was pre-publish window reasoning
-that the release invalidated. Prior: 2026-08-21 — runtime series closed (7
-tasks: VF-032a/b, VF-027, VB-007, VP-006c/d, VF-040) and boards re-prioritised.
-**Board correction the same day**: VF-032a and VF-032b had sat on the P2 board
-for a day after being archived — the row deletions were exact-string matches
-that stopped matching once `prettier --write` realigned the table columns.
-Cross-checked every board row against `tasks/` afterwards; the only entries now
-absent from a board are the three `split` parents (VD-006, VF-032, VF-039),
-which is intended. Prior: 2026-08-19 by `/pulse` + same-day correction (37-day
-sync gap — VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a
-status sync; VF-039 split into VF-039a/VF-039b same day. **Correction**:
-`/pulse` initially flagged VF-028 as "branch active, not yet done" — a direct
-user check ("czy 028 właśnie nie skończyliśmy?") caught that this was itself
-stale: VF-028 was implemented and committed the same day (`05ac364a`), just
-never had its task file updated. Verified (resilience 104/104, policies 237/237
-green) and archived alongside VF-037 — both moved to `completed-tasks/`.) Prior:
-2026-08-09 (maturity-audit re-prioritization: 5 new tasks filed
+_Last updated 2026-08-24 — **VF-025 shipped** (patch scope A+C+E+G — events
+dedup+diagnostics, projections clearProjectionState fix + opt-in checkpoint
+resume, resilience circuit-breaker HALF_OPEN fix, cqrs typed registration —
+`library-quality-verifier` GO, merged to `develop` fast-forward `4801b799`,
+moved to `completed-tasks/`). Remaining scope (retryConfig classification,
+error-propagation, autoRegisterHandlers opt-in flip, resilience metrics wire-up)
+deferred — reserved names `VF-025b/c/d` in
+`project-orchestration/completed-tasks/VF-025-event-projections-hardening.md`
+§Zamknięcie, **no task files exist yet for them**, refile from the analysis
+before picking that work up. Prior: 2026-08-23 (same-day follow-up) — **VF-033
+shipped** (validation hardening: all 6 ACs, moved to `completed-tasks/`). Prior
+(same day): post-publish board correction — v0.31.0 is live on npm
+(`latest: 0.31.0`, 2026-08-22, PR #87), so **VF-036 was archived** (it had sat
+in `tasks/` with `status: done` and all ACs checked) and **VB-008 was demoted P1
+→ P3** — its promotion was pre-publish window reasoning that the release
+invalidated. Prior: 2026-08-21 — runtime series closed (7 tasks: VF-032a/b,
+VF-027, VB-007, VP-006c/d, VF-040) and boards re-prioritised. **Board correction
+the same day**: VF-032a and VF-032b had sat on the P2 board for a day after
+being archived — the row deletions were exact-string matches that stopped
+matching once `prettier --write` realigned the table columns. Cross-checked
+every board row against `tasks/` afterwards; the only entries now absent from a
+board are the three `split` parents (VD-006, VF-032, VF-039), which is intended.
+Prior: 2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
+VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
+sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
+initially flagged VF-028 as "branch active, not yet done" — a direct user check
+("czy 028 właśnie nie skończyliśmy?") caught that this was itself stale: VF-028
+was implemented and committed the same day (`05ac364a`), just never had its task
+file updated. Verified (resilience 104/104, policies 237/237 green) and archived
+alongside VF-037 — both moved to `completed-tasks/`.) Prior: 2026-08-09
+(maturity-audit re-prioritization: 5 new tasks filed
 VF-036/VF-037/VD-008/VT-007/VD-009, VP-012 promoted to P1, runtime-first
 ordering per owner directive — see the 2026-08-09 note above the boards). Prior:
 2026-07-18 by `/task-tidy` (VP-006b reconciled: task file was stuck at
@@ -36,7 +45,7 @@ release checklist, then merge `develop` → `main` (178 commits ahead, `main`'s
 last reachable tag is `v0.27.0`) and tag. Age = days since created_at. Grouped
 by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
-## Start here (2026-08-23)
+## Start here (2026-08-24)
 
 **v0.31.0 is published.** `npm view @vytches/ddd` → `latest: 0.31.0`, all 19
 packages, released 2026-08-22 via PR #87. VF-036's AC-SIGNOFF — the gate the
@@ -51,19 +60,17 @@ least one downstream application is running 0.31.0 in anger. Judge remaining
 tasks by _defect severity to a real consumer_, not by _how cheap the decision is
 today_ — that second axis no longer exists.
 
-**Next two things, in order:**
+**Next thing:**
 
-1. **VF-025** — the last remaining runtime defect, and the worse one by
-   consequence: `clearProjectionState` calls `deleteAll()` instead of deleting
-   one projection (data loss), and a consumer's `retryConfig` is ignored by
-   `shouldRetry`. `complexity: complex`, 11h, four packages, **and its ACs are
-   partly stale** — VF-029 already closed AC1's cap enforcement, AC2, and AC3's
-   error aggregation. Needs a scope reconciliation pass before any code.
-2. **VB-008** — re-analyse or leave alone; see the P3 note. Its P1 promotion was
-   pre-publish reasoning that no longer holds.
+1. **VB-008** — re-analyse or leave alone; see the P3 note. Its P1 promotion was
+   pre-publish reasoning that no longer holds, but the headline item (behaviour
+   wrapper silently dropped across composition) is a live defect in seven
+   published releases — worth an `/analyze VB-008` pass to confirm whether P1
+   should come back on that basis alone.
 
-_**VF-033** (validation hardening) shipped 2026-08-23 — see "Shipped and
-archived" under P1._
+_**VF-025** (event/projections/resilience/cqrs patch hardening) shipped
+2026-08-24 — see "Shipped and archived" below. **VF-033** (validation hardening)
+shipped 2026-08-23 — see "Shipped and archived" under P1._
 
 **Two things a newcomer to this board should not have to rediscover:**
 
@@ -402,28 +409,31 @@ combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 `minLength`/`maxLength`/`range` no longer coerce absent values, `.and()`
 flattens errors instead of collapsing them, `ValidationError.code`, async
 short-circuit JSDoc, decision-tree guide linked from three LLMGUIDEs, `testing`
-seeder rename)._
+seeder rename). 2026-08-24: **VF-025** (patch scope A+C+E+G, `4801b799` —
+events: WARN-only handler dedup + autoRegisterHandlers catch diagnostics;
+projections: `clearProjectionState` deletes one projection not all + opt-in
+checkpoint resume; resilience: circuit-breaker HALF_OPEN failureCount reset +
+immediate-retrip rule shipped as one unit; cqrs: `registerTyped()`/
+`registerFactoryTyped()` + overwrite warn. Remaining original scope (retryConfig
+classification, error-propagation, autoRegisterHandlers opt-in flip, resilience
+metrics wire-up) deferred, reserved names `VF-025b/c/d`, no task files filed yet
+— see the task's own "Zamknięcie" section before picking that up)._
 
 ## P2 — Normal / Medium
 
-_**VF-025 is the last runtime-impacting task in the whole backlog** — the
-2026-08-20 review found six, VF-033 shipped 2026-08-23 (six of six done). A live
-defect in published behaviour, not hardening: a consumer's `retryConfig` is
-ignored by `shouldRetry`, and `clearProjectionState` calls `deleteAll()` instead
-of deleting one projection. Its ACs are partly stale — VF-029 already closed
-AC1's cap enforcement, AC2, and AC3's error aggregation; needs a scope
-reconciliation pass before any code. Then VT-007/VT-006 (test debt), then docs &
+_2026-08-20 review found six runtime-impacting tasks; VF-033 shipped 2026-08-23,
+VF-025 shipped 2026-08-24 (six of six done — see "Shipped and archived"). Board
+now clear of runtime defects. Next: VT-007/VT-006 (test debt), then docs &
 tooling (VD-008, VF-038, VF-034, VD-006b)._
 
-| ID      | Title                                                             | Status  | Age |
-| ------- | ----------------------------------------------------------------- | ------- | --- |
-| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 49d |
-| VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 11d |
-| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 49d |
-| VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 11d |
-| VF-038  | Give docstring quality its own lint lane                          | backlog | 8d  |
-| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 41d |
-| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 47d |
+| ID      | Title                                                           | Status  | Age |
+| ------- | --------------------------------------------------------------- | ------- | --- |
+| VT-007  | Re-enable domain-services e2e suite (missing container classes) | backlog | 11d |
+| VT-006  | Policies test coverage + testing pkg hardening                  | backlog | 49d |
+| VD-008  | Docs truth & parity sweep + docs-compile-gate extension         | backlog | 11d |
+| VF-038  | Give docstring quality its own lint lane                        | backlog | 8d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check      | backlog | 41d |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)    | backlog | 47d |
 
 ## P3 — Low
 
