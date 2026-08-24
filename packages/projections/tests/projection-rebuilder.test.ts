@@ -89,7 +89,7 @@ describe('ProjectionRebuilder', () => {
 
       const result = await rebuilder.rebuild(filter, config);
 
-      expect(projectionStore.deleteAll).toHaveBeenCalled();
+      expect(projectionStore.delete).toHaveBeenCalledWith('TestProjection');
       expect(eventStore.createEventReplay).toHaveBeenCalled();
       expect(eventReplay.replayAll).toHaveBeenCalled();
       expect(result).toEqual(mockReplayResult);
@@ -107,7 +107,7 @@ describe('ProjectionRebuilder', () => {
 
       await rebuilder.rebuild(undefined, config);
 
-      expect(projectionStore.deleteAll).not.toHaveBeenCalled();
+      expect(projectionStore.delete).not.toHaveBeenCalled();
     });
 
     it('should handle event processing errors when skipErrors is true', async () => {
@@ -225,18 +225,119 @@ describe('ProjectionRebuilder', () => {
   });
 
   describe('clearProjectionState', () => {
-    it('should clear projection store', async () => {
+    it('should clear projection store for this projection only', async () => {
       await rebuilder.clearProjectionState();
 
-      expect(projectionStore.deleteAll).toHaveBeenCalled();
+      expect(projectionStore.delete).toHaveBeenCalledWith('TestProjection');
+    });
+
+    it('should clear the checkpoint when a checkpoint capability is registered', async () => {
+      const checkpointCapability = { clearCheckpoint: vi.fn().mockResolvedValue(undefined) };
+      projectionEngine.getCapability = vi.fn().mockReturnValue(checkpointCapability);
+
+      await rebuilder.clearProjectionState();
+
+      expect(checkpointCapability.clearCheckpoint).toHaveBeenCalled();
+    });
+
+    it('should not fail when no checkpoint capability is registered', async () => {
+      projectionEngine.getCapability = vi.fn().mockReturnValue(undefined);
+
+      await expect(rebuilder.clearProjectionState()).resolves.toBeUndefined();
     });
 
     it('should handle clear errors', async () => {
       const error = new Error('Clear failed');
-      projectionStore.deleteAll = vi.fn().mockRejectedValue(error);
+      projectionStore.delete = vi.fn().mockRejectedValue(error);
 
       const [clearError] = await safeRun(async () => await rebuilder.clearProjectionState());
       expect(clearError?.message).toBe('Failed to clear state for projection TestProjection');
+    });
+  });
+
+  describe('rebuild with resumeFromCheckpoint', () => {
+    it('should fall back to full rebuild when no checkpoint capability is registered', async () => {
+      projectionEngine.getCapability = vi.fn().mockReturnValue(undefined);
+
+      await rebuilder.rebuild(undefined, { resumeFromCheckpoint: true });
+
+      const [, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      expect(filter.fromPosition).toBeUndefined();
+      expect(projectionStore.save).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to full rebuild when there is no persisted checkpoint', async () => {
+      const checkpointCapability = { loadCheckpoint: vi.fn().mockResolvedValue(null) };
+      projectionEngine.getCapability = vi.fn().mockReturnValue(checkpointCapability);
+
+      await rebuilder.rebuild(undefined, { resumeFromCheckpoint: true });
+
+      const [, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      expect(filter.fromPosition).toBeUndefined();
+      expect(projectionStore.save).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to full rebuild when the checkpoint position is not a positive safe integer', async () => {
+      const checkpointCapability = {
+        loadCheckpoint: vi.fn().mockResolvedValue({ state: { count: 1 }, position: 0 }),
+      };
+      projectionEngine.getCapability = vi.fn().mockReturnValue(checkpointCapability);
+
+      await rebuilder.rebuild(undefined, { resumeFromCheckpoint: true });
+
+      const [, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      expect(filter.fromPosition).toBeUndefined();
+      expect(projectionStore.save).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to full rebuild when the checkpoint position is not a safe integer', async () => {
+      const checkpointCapability = {
+        loadCheckpoint: vi.fn().mockResolvedValue({ state: { count: 1 }, position: 1.5 }),
+      };
+      projectionEngine.getCapability = vi.fn().mockReturnValue(checkpointCapability);
+
+      await rebuilder.rebuild(undefined, { resumeFromCheckpoint: true });
+
+      const [, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      expect(filter.fromPosition).toBeUndefined();
+      expect(projectionStore.save).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to full rebuild when the checkpoint position exceeds MAX_SAFE_INTEGER', async () => {
+      const checkpointCapability = {
+        loadCheckpoint: vi
+          .fn()
+          .mockResolvedValue({ state: { count: 1 }, position: Number.MAX_SAFE_INTEGER + 2 }),
+      };
+      projectionEngine.getCapability = vi.fn().mockReturnValue(checkpointCapability);
+
+      await rebuilder.rebuild(undefined, { resumeFromCheckpoint: true });
+
+      const [, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      expect(filter.fromPosition).toBeUndefined();
+      expect(projectionStore.save).not.toHaveBeenCalled();
+    });
+
+    it('should resume from the checkpoint position and seed the projection state', async () => {
+      const checkpointState = { count: 42 };
+      const checkpointCapability = {
+        loadCheckpoint: vi.fn().mockResolvedValue({ state: checkpointState, position: 123 }),
+      };
+      projectionEngine.getCapability = vi.fn().mockReturnValue(checkpointCapability);
+
+      await rebuilder.rebuild(undefined, { resumeFromCheckpoint: true });
+
+      expect(projectionStore.save).toHaveBeenCalledWith('TestProjection', checkpointState);
+      const [, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      expect(filter.fromPosition).toBe(123n);
+    });
+
+    it('should not resolve a resume position when resumeFromCheckpoint is not set', async () => {
+      await rebuilder.rebuild();
+
+      expect(projectionEngine.getCapability).not.toHaveBeenCalled();
+      const [, filter] = (eventReplay.replayAll as any).mock.calls[0];
+      expect(filter.fromPosition).toBeUndefined();
     });
   });
 });

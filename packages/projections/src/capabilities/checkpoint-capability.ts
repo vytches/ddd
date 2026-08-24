@@ -46,4 +46,13 @@ export class CheckpointCapability<TReadModel> extends BaseIntervalCapability<
 
     return checkpoint ? { state: checkpoint.state, position: checkpoint.position } : null;
   }
+
+  /**
+   * Delete the persisted checkpoint for this projection.
+   */
+  async clearCheckpoint(): Promise<void> {
+    this.ensureAttached();
+
+    await this.checkpointStore.delete(this.context!.getProjectionName());
+  }
 }

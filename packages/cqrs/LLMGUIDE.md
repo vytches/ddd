@@ -49,36 +49,37 @@ const orderId = await bus.execute(new PlaceOrderCommand('c-1', 500));
 
 ## Key API
 
-| Export                           | Kind           | Description                                                                                                                                                                                                      |
-| -------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ICommand`                       | interface      | Empty marker interface; all commands implement this                                                                                                                                                              |
-| `IQuery<TResult>`                | interface      | Marker with result type parameter                                                                                                                                                                                |
-| `ICommandHandler<TCmd, TResult>` | interface      | Contract: `execute(command): Promise<TResult>`                                                                                                                                                                   |
-| `IQueryHandler<TQuery, TResult>` | interface      | Contract: `execute(query): Promise<TResult>`                                                                                                                                                                     |
-| `CommandBus`                     | class          | Routes commands to registered handlers with middleware                                                                                                                                                           |
-| `QueryBus`                       | class          | Routes queries to registered handlers with middleware                                                                                                                                                            |
-| `ICommandBus`                    | abstract class | Abstract base / DI token for command bus                                                                                                                                                                         |
-| `IQueryBus`                      | abstract class | Abstract base / DI token for query bus                                                                                                                                                                           |
-| `EnhancedCommandBus`             | class          | `CommandBus` + circuit breaker, retry, timeout, bulkhead (requires `@vytches/ddd-resilience`)                                                                                                                    |
-| `EnhancedQueryBus`               | class          | `QueryBus` + resilience patterns                                                                                                                                                                                 |
-| `CommandHandler(CmdClass)`       | decorator      | Marks a class as a command handler and stores metadata                                                                                                                                                           |
-| `QueryHandler(QueryClass)`       | decorator      | Marks a class as a query handler and stores metadata                                                                                                                                                             |
-| `CQRSExecutionContext`           | class          | Carries command/query, handler, type, and a metadata map through middleware                                                                                                                                      |
-| `LoggingMiddleware`              | class          | Built-in middleware that logs execution time                                                                                                                                                                     |
-| `ICQRSMiddleware`                | interface      | Contract: `execute(ctx, next): Promise<void>`                                                                                                                                                                    |
-| `CQRSDiscoveryPlugin`            | class          | Auto-discovers and registers decorated handlers from a DI container                                                                                                                                              |
-| `HandlerNotFoundError`           | error          | Thrown when no handler is registered for a command/query                                                                                                                                                         |
-| `CQRSModule`                     | class          | Optional configuration entry point                                                                                                                                                                               |
-| `CQRSConfiguration`              | class          | One-stop bootstrap that wires `commandBus` + `queryBus` from a single options object; see Patterns                                                                                                               |
-| `COMMAND_BUS_TOKEN`              | constant       | Stable `Symbol.for('vytches:cqrs:command-bus')` DI token for `ICommandBus`; see Patterns                                                                                                                         |
-| `QUERY_BUS_TOKEN`                | constant       | Stable `Symbol.for('vytches:cqrs:query-bus')` DI token for `IQueryBus`; see Patterns                                                                                                                             |
-| `IDisposableBus`                 | interface      | Optional capability (`dispose(): void`) implemented by `EnhancedCommandBus`/`EnhancedQueryBus` to release background resources (timers, open handles); see Patterns                                              |
-| `IResettableBus`                 | interface      | Optional capability (`reset(): void`) implemented by `EnhancedCommandBus`/`EnhancedQueryBus`; evicts registered handlers/caches for test isolation between DI modules                                            |
-| `IMiddlewareLogger`              | interface      | Minimal logger contract (`log(message, ...args): void`) accepted by `LoggingMiddleware`'s constructor; any object with a `log` method (console, Pino, Winston) satisfies it                                      |
-| `ICqrsValidatable`               | interface      | Optional contract (`validate?(): Promise<void> \| void`) a command/query can implement so `CommandBus`/`QueryBus` run validation before dispatch — see the `CommandBus` "With middleware and validation" example |
-| `CqrsValidationError`            | error          | Error class for signaling failed business validation; typically thrown from an `ICqrsValidatable.validate()` implementation. Carries an optional `field` property                                                |
-| `CQRSConfigurationError`         | error          | Thrown by `CommandBus`/`QueryBus` when handler resolution is misconfigured (e.g. decorator/DI metadata missing); carries a `component` property naming the failing part                                          |
-| `QueryExecutionError`            | error          | Exported error type for wrapping a failed query execution; carries `queryType` and `originalError` properties                                                                                                    |
+| Export                                                       | Kind           | Description                                                                                                                                                                                                                           |
+| ------------------------------------------------------------ | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ICommand`                                                   | interface      | Empty marker interface; all commands implement this                                                                                                                                                                                   |
+| `IQuery<TResult>`                                            | interface      | Marker with result type parameter                                                                                                                                                                                                     |
+| `ICommandHandler<TCmd, TResult>`                             | interface      | Contract: `execute(command): Promise<TResult>`                                                                                                                                                                                        |
+| `IQueryHandler<TQuery, TResult>`                             | interface      | Contract: `execute(query): Promise<TResult>`                                                                                                                                                                                          |
+| `CommandBus`                                                 | class          | Routes commands to registered handlers with middleware                                                                                                                                                                                |
+| `QueryBus`                                                   | class          | Routes queries to registered handlers with middleware                                                                                                                                                                                 |
+| `ICommandBus`                                                | abstract class | Abstract base / DI token for command bus                                                                                                                                                                                              |
+| `IQueryBus`                                                  | abstract class | Abstract base / DI token for query bus                                                                                                                                                                                                |
+| `EnhancedCommandBus`                                         | class          | `CommandBus` + circuit breaker, retry, timeout, bulkhead (requires `@vytches/ddd-resilience`)                                                                                                                                         |
+| `EnhancedCommandBus#registerTyped` / `#registerFactoryTyped` | method         | Type-safe variants of `register()`/`registerFactory()` — `commandType` is constrained to a constructor of the handler's command type (or a string key), so a mismatched handler fails to compile. Same runtime behavior; see Patterns |
+| `EnhancedQueryBus`                                           | class          | `QueryBus` + resilience patterns                                                                                                                                                                                                      |
+| `CommandHandler(CmdClass)`                                   | decorator      | Marks a class as a command handler and stores metadata                                                                                                                                                                                |
+| `QueryHandler(QueryClass)`                                   | decorator      | Marks a class as a query handler and stores metadata                                                                                                                                                                                  |
+| `CQRSExecutionContext`                                       | class          | Carries command/query, handler, type, and a metadata map through middleware                                                                                                                                                           |
+| `LoggingMiddleware`                                          | class          | Built-in middleware that logs execution time                                                                                                                                                                                          |
+| `ICQRSMiddleware`                                            | interface      | Contract: `execute(ctx, next): Promise<void>`                                                                                                                                                                                         |
+| `CQRSDiscoveryPlugin`                                        | class          | Auto-discovers and registers decorated handlers from a DI container                                                                                                                                                                   |
+| `HandlerNotFoundError`                                       | error          | Thrown when no handler is registered for a command/query                                                                                                                                                                              |
+| `CQRSModule`                                                 | class          | Optional configuration entry point                                                                                                                                                                                                    |
+| `CQRSConfiguration`                                          | class          | One-stop bootstrap that wires `commandBus` + `queryBus` from a single options object; see Patterns                                                                                                                                    |
+| `COMMAND_BUS_TOKEN`                                          | constant       | Stable `Symbol.for('vytches:cqrs:command-bus')` DI token for `ICommandBus`; see Patterns                                                                                                                                              |
+| `QUERY_BUS_TOKEN`                                            | constant       | Stable `Symbol.for('vytches:cqrs:query-bus')` DI token for `IQueryBus`; see Patterns                                                                                                                                                  |
+| `IDisposableBus`                                             | interface      | Optional capability (`dispose(): void`) implemented by `EnhancedCommandBus`/`EnhancedQueryBus` to release background resources (timers, open handles); see Patterns                                                                   |
+| `IResettableBus`                                             | interface      | Optional capability (`reset(): void`) implemented by `EnhancedCommandBus`/`EnhancedQueryBus`; evicts registered handlers/caches for test isolation between DI modules                                                                 |
+| `IMiddlewareLogger`                                          | interface      | Minimal logger contract (`log(message, ...args): void`) accepted by `LoggingMiddleware`'s constructor; any object with a `log` method (console, Pino, Winston) satisfies it                                                           |
+| `ICqrsValidatable`                                           | interface      | Optional contract (`validate?(): Promise<void> \| void`) a command/query can implement so `CommandBus`/`QueryBus` run validation before dispatch — see the `CommandBus` "With middleware and validation" example                      |
+| `CqrsValidationError`                                        | error          | Error class for signaling failed business validation; typically thrown from an `ICqrsValidatable.validate()` implementation. Carries an optional `field` property                                                                     |
+| `CQRSConfigurationError`                                     | error          | Thrown by `CommandBus`/`QueryBus` when handler resolution is misconfigured (e.g. decorator/DI metadata missing); carries a `component` property naming the failing part                                                               |
+| `QueryExecutionError`                                        | error          | Exported error type for wrapping a failed query execution; carries `queryType` and `originalError` properties                                                                                                                         |
 
 ## Patterns
 
@@ -162,6 +163,41 @@ const bus = new EnhancedQueryBus(container, {
 });
 ```
 
+### registerTyped() vs register() on EnhancedCommandBus
+
+`register()`/`registerFactory()` accept `commandType: unknown` to support
+dynamic/plugin registration by string key — that means a handler generic
+mismatch is not caught at compile time:
+
+```typescript
+import { EnhancedCommandBus } from '@vytches/ddd-cqrs';
+
+const bus = new EnhancedCommandBus(container);
+
+// register(): compiles even though the handler is for the wrong command
+bus.register(PlaceOrderCommand, new CancelOrderHandler());
+```
+
+`registerTyped()`/`registerFactoryTyped()` constrain `commandType` to a
+constructor of the handler's command type (or a string key for the dynamic case)
+— same runtime behavior, but a mismatch is a type error at the call site:
+
+```typescript
+const bus = new EnhancedCommandBus(container);
+
+// registerTyped(): rejected at compile time — CancelOrderHandler is not
+// ICommandHandler<PlaceOrderCommand, TResult>
+bus.registerTyped(PlaceOrderCommand, new PlaceOrderHandler()); // ✅ compiles
+bus.registerTyped(PlaceOrderCommand, new CancelOrderHandler()); // ❌ type error
+
+bus.registerFactoryTyped(PlaceOrderCommand, () => new PlaceOrderHandler());
+```
+
+Prefer `registerTyped()`/`registerFactoryTyped()` by default. Also note:
+registering a second handler under the same command key — via either method, in
+either combination of instance/factory — logs a warning (overwrite is still
+allowed, last-write-wins; this is diagnostics only).
+
 ### CQRSConfiguration one-stop bootstrap
 
 ```typescript
@@ -235,8 +271,9 @@ value without wrapping in a Promise breaks the middleware pipeline and error
 propagation.
 
 **Registering the same command class under multiple handlers.** `CommandBus`
-uses the class name as the key. Registering a second handler silently replaces
-the first. Use distinct command classes for distinct operations.
+uses the class name as the key. Registering a second handler replaces the first
+(`EnhancedCommandBus` logs a warning when this happens; `CommandBus` does not).
+Use distinct command classes for distinct operations.
 
 **Throwing raw `Error` instead of a domain error.** Handlers should throw typed
 errors or return a `Result` type so that middleware can distinguish business

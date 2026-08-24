@@ -23,6 +23,15 @@ import type { BusRetryOptions } from './bus-retry-options';
 import { normalizeBusRetryOptions } from './bus-retry-options';
 
 /**
+ * Command class constructor shape accepted by {@link EnhancedCommandBus.registerTyped}
+ * / {@link EnhancedCommandBus.registerFactoryTyped}. Mirrors the unexported
+ * `CommandConstructor<T>` in `abstracts/command-bus.abstract.ts` — kept local
+ * here (rather than imported) because that type is not part of the abstract
+ * class's public export surface.
+ */
+type CommandConstructor<T extends ICommand = ICommand> = new (...args: unknown[]) => T;
+
+/**
  * Configuration options for enhanced command bus
  */
 export interface EnhancedCommandBusOptions {
@@ -337,29 +346,94 @@ export class EnhancedCommandBus extends ICommandBus implements IResettableBus, I
   }
 
   /**
-   * Register command handler
+   * Register command handler.
+   *
+   * Prefer {@link registerTyped} for compile-time safety — it constrains
+   * `commandType` to a constructor of `T` (or a string key), so a handler
+   * whose generic parameter doesn't match the command class is rejected at
+   * the call site. `register()` stays `commandType: unknown` and is kept
+   * for dynamic/plugin registration paths that resolve a command key as a
+   * runtime string with no compile-time command class available.
    */
   register<T extends ICommand, TResult = void>(
     commandType: unknown,
     handler: ICommandHandler<T, TResult>
   ): void {
     const key = typeof commandType === 'string' ? commandType : (commandType as Function);
+    this.warnIfOverwritingHandler(key, 'instance');
     this.handlerInstances.set(key, handler as ICommandHandler<ICommand, unknown>);
     this.handlerFactories.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
   }
 
   /**
-   * Register factory for lazy handler initialization
+   * Type-safe variant of {@link register}. `commandType` is constrained to a
+   * constructor of `T` (or a string key), so a `handler` whose generic
+   * parameter doesn't match the command class fails to compile instead of
+   * silently registering a mismatched handler. Delegates to `register()` —
+   * runtime behavior is identical.
+   */
+  registerTyped<T extends ICommand, TResult = void>(
+    commandType: CommandConstructor<T> | string,
+    handler: ICommandHandler<T, TResult>
+  ): void {
+    this.register(commandType, handler);
+  }
+
+  /**
+   * Register factory for lazy handler initialization.
+   *
+   * Prefer {@link registerFactoryTyped} for compile-time safety, for the
+   * same reason `registerTyped()` is preferred over `register()` — see its
+   * doc comment.
    */
   registerFactory<T extends ICommand, TResult = void>(
     commandType: unknown,
     factory: () => ICommandHandler<T, TResult>
   ): void {
     const key = typeof commandType === 'string' ? commandType : (commandType as Function);
+    this.warnIfOverwritingHandler(key, 'factory');
     this.handlerFactories.set(key, factory as () => ICommandHandler<ICommand, unknown>);
     this.handlerInstances.delete(key); // last write wins across kinds
     this.handlerCache.delete(key);
+  }
+
+  /**
+   * Type-safe variant of {@link registerFactory}. Delegates to
+   * `registerFactory()` — runtime behavior is identical.
+   */
+  registerFactoryTyped<T extends ICommand, TResult = void>(
+    commandType: CommandConstructor<T> | string,
+    factory: () => ICommandHandler<T, TResult>
+  ): void {
+    this.registerFactory(commandType, factory);
+  }
+
+  /**
+   * Diagnostics-only guard for `register()`/`registerFactory()`: warns when a
+   * command key already has a registration — under either kind, since an
+   * instance being replaced by a factory (or vice versa) is a silent
+   * overwrite too. Does not block the overwrite; last-write-wins is
+   * unchanged.
+   */
+  private warnIfOverwritingHandler(
+    key: Function | string,
+    incomingKind: 'instance' | 'factory'
+  ): void {
+    const hadInstance = this.handlerInstances.has(key);
+    const hadFactory = this.handlerFactories.has(key);
+    if (!hadInstance && !hadFactory) {
+      return;
+    }
+
+    internalLogger.warn(
+      'EnhancedCommandBus: overwriting existing command handler registration for this command key',
+      {
+        commandName: typeof key === 'string' ? key : key.name,
+        previousKind: hadInstance ? 'instance' : 'factory',
+        incomingKind,
+      }
+    );
   }
 
   /**

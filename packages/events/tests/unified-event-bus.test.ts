@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { safeRun } from '@vytches/ddd-utils';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { AggregatedEventHandlerError, DomainEvent, UnifiedEventBus } from '../src';
 import type { IIntegrationEvent } from '../src/integration/integration-event-interfaces';
 
@@ -452,6 +453,97 @@ describe('UnifiedEventBus', () => {
       await eventBus.publish(testEvent);
 
       expect(handler).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Duplicate Handler Registration Warning (VF-025 AC1 / D3)', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('still invokes the same handler reference twice per dispatch when registered twice with the same contexts (no behavior regression)', async () => {
+      const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+      const handler = vi.fn();
+
+      eventBus.subscribe(TestDomainEvent, 'shared-context', handler);
+      eventBus.subscribe(TestDomainEvent, 'shared-context', handler);
+
+      await eventBus.publish(new TestDomainEvent({ id: 'test-1' }, 'shared-context'));
+
+      expect(handler).toHaveBeenCalledTimes(2);
+
+      const duplicateWarnings = warnSpy.mock.calls.filter(([message]) =>
+        String(message).includes('duplicate handler registration detected')
+      );
+      expect(duplicateWarnings).toHaveLength(1);
+      expect(duplicateWarnings[0]?.[1]).toMatchObject({
+        eventName: 'TestDomainEvent',
+      });
+    });
+
+    it('does not warn when two different handlers are registered for the same event', async () => {
+      const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+      const handler1 = vi.fn();
+      const handler2 = vi.fn();
+
+      eventBus.subscribe(TestDomainEvent, handler1);
+      eventBus.subscribe(TestDomainEvent, handler2);
+
+      const duplicateWarnings = warnSpy.mock.calls.filter(([message]) =>
+        String(message).includes('duplicate handler registration detected')
+      );
+      expect(duplicateWarnings).toHaveLength(0);
+    });
+
+    it('does not warn when the same handler reference is registered with different contexts', async () => {
+      const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+      const handler = vi.fn();
+
+      eventBus.subscribe(TestDomainEvent, 'context-a', handler);
+      eventBus.subscribe(TestDomainEvent, 'context-b', handler);
+
+      const duplicateWarnings = warnSpy.mock.calls.filter(([message]) =>
+        String(message).includes('duplicate handler registration detected')
+      );
+      expect(duplicateWarnings).toHaveLength(0);
+    });
+  });
+
+  describe('autoRegisterHandlers Diagnostics (VF-025 SA-M5)', () => {
+    const globalRecord = globalThis as Record<string, unknown>;
+    let originalVytchesDDD: unknown;
+
+    beforeEach(() => {
+      originalVytchesDDD = globalRecord.VytchesDDD;
+    });
+
+    afterEach(() => {
+      if (originalVytchesDDD === undefined) {
+        delete globalRecord.VytchesDDD;
+      } else {
+        globalRecord.VytchesDDD = originalVytchesDDD;
+      }
+      vi.restoreAllMocks();
+    });
+
+    it('completes construction and logs a warning when globalThis.VytchesDDD.discoverHandlers() throws', () => {
+      const warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+      globalRecord.VytchesDDD = {
+        discoverHandlers: () => {
+          throw new Error('discovery boom');
+        },
+      };
+
+      let bus: UnifiedEventBus | undefined;
+      expect(() => {
+        bus = new UnifiedEventBus({ enableLogging: false });
+      }).not.toThrow();
+
+      expect(bus).toBeInstanceOf(UnifiedEventBus);
+      expect(warnSpy).toHaveBeenCalledWith(
+        'UnifiedEventBus: auto-registration of discovered handlers failed',
+        expect.objectContaining({ errorMessage: expect.stringContaining('discovery boom') })
+      );
     });
   });
 });

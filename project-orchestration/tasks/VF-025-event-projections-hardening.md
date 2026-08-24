@@ -11,11 +11,36 @@ complexity: complex
 estimated_time: 11h
 created_by: LIB-AUDIT-2026-07-02
 created_at: 2026-07-02
-status: backlog
+status: in-progress
 release_target: post-first-publish OK (ale przed 1.0)
 package: '@vytches/ddd-events', '@vytches/ddd-projections', '@vytches/ddd-resilience', '@vytches/ddd-cqrs'
 findings: [F-H7, F-H9, F-H10, F-H11, F-M1, F-M3, F-M4, F-M6, F-M9, F-M13, F-M16, SA-M5, SA-M6]
 ```
+
+## Scope note (2026-08-23, po /analyze + approval)
+
+Zatwierdzona analiza (`project-orchestration/analysis/VF-025.analysis.md`, Q1,
+jednomyślne potwierdzenie 4 agentów doradczych) zawęziła zakres TEGO wydania
+(PATCH) do czterech bezpiecznych, izolowanych jednostek:
+
+- **A** — AC1 dedup handlerów (warn, nie twardy dedup — D3) + naprawa
+  `getHandlers()`; AC4's diagnostyka w `catch` (SA-M5), BEZ flipu
+  `autoRegisterHandlers` opt-out→opt-in (to → VF-025b).
+- **C** — AC8 (deleteAll→delete, D2) + reset checkpointów przy clear; AC9's
+  część RESUME (`loadCheckpoint` wpięte, opt-in, walidacja — Q4), BEZ AC9's
+  error-propagation części ani AC7 retryConfig (to → VF-025c).
+- **E** — AC10's BONUS wyłącznie: reset `failureCount` przy OPEN→HALF_OPEN RAZEM
+  z regułą "porażka w HALF_OPEN zawsze tripuje" jako jedna niepodzielna
+  jednostka (Q2), BEZ metrics wire-up (to → VF-025d).
+- **G** — AC11's typing: nowa `registerTyped<T extends ICommand>()` obok
+  istniejącej `register()` (Q6), BEZ zawężania istniejącej sygnatury; warn przy
+  silent overwrite handlera.
+
+Wydzielone follow-up taski: `VF-025b` (flip autoRegisterHandlers), `VF-025c`
+(AC7 retryConfig + AC9 error-propagation), `VF-025d` (AC10 metrics wire-up +
+AC13 singleton hardening). AC12 (opcjonalny split query/command bus), AC14
+(eventName/minifikacja — dokumentacja) pozostają nieprzypisane, poza zakresem
+tego wydania.
 
 ## Dlaczego
 
