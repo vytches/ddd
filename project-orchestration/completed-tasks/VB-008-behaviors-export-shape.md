@@ -14,13 +14,39 @@ estimated_time: 6h
 created_by: agent (analysis VB-006-policy-cache-v2, decision D9 / Q3)
 created_at: 2026-08-20
 rescoped_at: 2026-08-21 # after /analyze VB-008 + four-agent review round; see analysis artefact
-status: ready
+status: done
+completed_at: 2026-08-25
 release_target:
   next 0.x minor — ships in the imminent release, breaking, with migration notes
 package: '@vytches/ddd-policies'
 analysis: project-orchestration/analysis/VB-008-behaviors-export-shape.analysis.md
 findings: [F11 (VB-006), F11/F12/F15/F18/F19/F20 (this analysis)]
 ```
+
+## Zamknięcie (2026-08-25)
+
+Wszystkie siedem kryteriów akceptacji zweryfikowane niezależnie przez
+`library-quality-verifier` (świeże, nie cache'owane uruchomienia): **GO** na
+AC1–AC7, zero naruszeń. Kod był już zaimplementowany i scommitowany w drzewie (w
+tym `ComposableSelf<T>` dla AC1, zamrożone obiekty fabryk dla AC2, nazwany
+`PolicyCacheMetrics` dla AC3, scalone `create(policy, config?)` z deprecation
+warningiem dla AC4, przykłady 09–13 + poprawki README/LLMGUIDE + CI grep gate
+`check:retired-symbols` dla AC5, wpisy w `packages/policies/CHANGELOG.md` dla
+AC6) — `/orchestrate VB-008` odkrył ten stan podczas preflightu i uruchomił
+wyłącznie weryfikację, bez ponownej implementacji.
+
+Branch `fix/VB-008-behaviors-export-shape` wskazuje na ten sam commit co
+`develop` (`23825237`) — **merge nie był potrzebny**, zmiana jest już częścią
+`develop`.
+
+**Release jeszcze nie wyszedł.** Cztery changesety czekają nieskonsumowane w
+`.changeset/`: `vb-008-composition-wrapper-loss.md` (patch, AC1),
+`vb-008-factory-namespace-shape.md` (patch, AC2), `vb-008-cache-metrics-type.md`
+(minor, AC3), `vb-008-withdefaults-deprecation.md` (minor, AC4). Szczegółowe
+wpisy migracyjne siedzą pod `## [Unreleased]` w
+`packages/policies/CHANGELOG.md:48-153`, nie pod ostatnią opublikowaną wersją
+`0.31.0`. Wersjonowanie idzie przez release tooling — nie edytować ręcznie pól
+wersji.
 
 ## Why this task no longer says what it used to
 

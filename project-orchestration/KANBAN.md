@@ -1,12 +1,17 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-24 — **VF-025 shipped** (patch scope A+C+E+G — events
-dedup+diagnostics, projections clearProjectionState fix + opt-in checkpoint
-resume, resilience circuit-breaker HALF_OPEN fix, cqrs typed registration —
-`library-quality-verifier` GO, merged to `develop` fast-forward `4801b799`,
-moved to `completed-tasks/`). Remaining scope (retryConfig classification,
-error-propagation, autoRegisterHandlers opt-in flip, resilience metrics wire-up)
-deferred — reserved names `VF-025b/c/d` in
+_Last updated 2026-08-25 — **VB-008 shipped** (policy behaviours: composition-
+wrapper preservation across `and()`/`or()`/`when()` + factory export shape +
+named cache-metrics type + `create()`/`withDefaults()` collapse + examples/CI
+gate, `library-quality-verifier` GO on all 7 ACs, no merge needed — branch was
+already at `develop`'s commit, moved to `completed-tasks/`; four changesets
+await release). Prior: 2026-08-24 — **VF-025 shipped** (patch scope A+C+E+G —
+events dedup+diagnostics, projections clearProjectionState fix + opt-in
+checkpoint resume, resilience circuit-breaker HALF_OPEN fix, cqrs typed
+registration — `library-quality-verifier` GO, merged to `develop` fast-forward
+`4801b799`, moved to `completed-tasks/`). Remaining scope (retryConfig
+classification, error-propagation, autoRegisterHandlers opt-in flip, resilience
+metrics wire-up) deferred — reserved names `VF-025b/c/d` in
 `project-orchestration/completed-tasks/VF-025-event-projections-hardening.md`
 §Zamknięcie, **no task files exist yet for them**, refile from the analysis
 before picking that work up. Prior: 2026-08-23 (same-day follow-up) — **VF-033
@@ -62,15 +67,17 @@ today_ — that second axis no longer exists.
 
 **Next thing:**
 
-1. **VB-008** — re-analyse or leave alone; see the P3 note. Its P1 promotion was
-   pre-publish reasoning that no longer holds, but the headline item (behaviour
-   wrapper silently dropped across composition) is a live defect in seven
-   published releases — worth an `/analyze VB-008` pass to confirm whether P1
-   should come back on that basis alone.
+1. **VB-005** — the sole P1 item: `pnpm bench` doesn't run at all (module
+   resolution + stale `Money` bench class). ~2-3h.
+2. **VT-006** / **VT-007** — top of P2, both test debt: policies decorator
+   coverage (temporal/cached/retry) + `testing` pkg hardening (~10h), or
+   re-enabling the skipped domain-services e2e suite (~5h).
 
-_**VF-025** (event/projections/resilience/cqrs patch hardening) shipped
-2026-08-24 — see "Shipped and archived" below. **VF-033** (validation hardening)
-shipped 2026-08-23 — see "Shipped and archived" under P1._
+_**VB-008** (policy behaviours — composition-wrapper fix + factory export shape)
+shipped 2026-08-25 — see the P1 note above. **VF-025** (event/projections/
+resilience/cqrs patch hardening) shipped 2026-08-24 — see "Shipped and archived"
+below. **VF-033** (validation hardening) shipped 2026-08-23 — see "Shipped and
+archived" under P1._
 
 **Two things a newcomer to this board should not have to rediscover:**
 
@@ -385,16 +392,23 @@ one remaining runtime defect sits at the top of P2 and is the actual next work._
 | ------ | -------------------------------------------------------- | ------------------------------------------------------ | --- |
 | VB-005 | Benchmark harness broken (pnpm bench doesn't run at all) | backlog _(discovered 2026-08-20 while closing VP-012)_ | 1d  |
 
-> **VB-008 demoted P1 → P3 on 2026-08-23.** Its promotion the day before was
-> explicitly about a closing window — "deciding it now costs a discussion;
-> deciding it later costs a major bump" — and the window closed when 0.31.0 went
-> to npm on 2026-08-22. The change itself is unaffected (three behaviour
-> families in `@vytches/ddd-policies` export concrete classes where
-> `public-api-pattern` wants interface + factory), but it is now a major-bump or
-> deprecation-window decision like any other post-publish shape change, with no
-> discount for doing it this week. Still **not** ready to implement: it needs
-> `/analyze VB-008` first, and that analysis has to be redone under the new
-> constraint rather than assuming the pre-publish framing.
+> **VB-008 shipped 2026-08-25.** Demoted P1 → P3 on 2026-08-23 (pre-publish
+> window closed), then `/analyze VB-008` (2026-08-21, re-run under the
+> post-publish constraint) rejected the original class→interface+factory premise
+> (ADR-0012 already accepted the factory-method shape) and narrowed scope to:
+> preserve the behaviour wrapper across `and()`/`or()`/`when()` composition (a
+> live defect in all seven published releases, AC1), rename the three
+> static-only factory classes to frozen objects with identical call syntax (AC2,
+> invisible to callers — no major bump needed), name the cache metrics return
+> type (AC3), collapse `create()`/`withDefaults()` (AC4, deprecation-window, not
+> a hard cut), plus working examples and a CI retired-symbol grep gate
+> (AC5/AC6). `/orchestrate VB-008` (2026-08-25) found all seven ACs already
+> implemented and committed, verified GO independently
+> (`library-quality-verifier`, fresh non-cached gate runs). No merge needed —
+> branch was already at the same commit as `develop`. Four changesets await
+> release:
+> `.changeset/vb-008-{composition-wrapper-loss,factory-namespace-shape, cache-metrics-type,withdefaults-deprecation}.md`.
+> Archived to `completed-tasks/`.
 
 _Shipped and archived to `completed-tasks/` 2026-08-19: **VF-028** (resilience
 correctness, `05ac364a`), **VF-037** (isolation regression suite + behavioral-BC
@@ -437,13 +451,12 @@ tooling (VD-008, VF-038, VF-034, VD-006b)._
 
 ## P3 — Low
 
-| ID      | Title                                                               | Status  | Age  |
-| ------- | ------------------------------------------------------------------- | ------- | ---- |
-| VF-039b | Churn guard — blocked on churn-ledger placement decision            | blocked | 0d   |
-| VD-009  | Priority example workspaces (repos+UoW, outbox, CQRS+resil.)        | backlog | 10d  |
-| VB-008  | Behaviors export shape violates public-api-pattern (needs /analyze) | backlog | 3d   |
-| VD-004  | Interactive Documentation System                                    | backlog | 141d |
-| VF-002  | Strategic Design Documentation                                      | backlog | 141d |
+| ID      | Title                                                        | Status  | Age  |
+| ------- | ------------------------------------------------------------ | ------- | ---- |
+| VF-039b | Churn guard — blocked on churn-ledger placement decision     | blocked | 0d   |
+| VD-009  | Priority example workspaces (repos+UoW, outbox, CQRS+resil.) | backlog | 10d  |
+| VD-004  | Interactive Documentation System                             | backlog | 141d |
+| VF-002  | Strategic Design Documentation                               | backlog | 141d |
 
 ## Backlog
 
