@@ -1,17 +1,30 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-25 — **VB-008 shipped** (policy behaviours: composition-
-wrapper preservation across `and()`/`or()`/`when()` + factory export shape +
-named cache-metrics type + `create()`/`withDefaults()` collapse + examples/CI
-gate, `library-quality-verifier` GO on all 7 ACs, no merge needed — branch was
-already at `develop`'s commit, moved to `completed-tasks/`; four changesets
-await release). Prior: 2026-08-24 — **VF-025 shipped** (patch scope A+C+E+G —
-events dedup+diagnostics, projections clearProjectionState fix + opt-in
-checkpoint resume, resilience circuit-breaker HALF_OPEN fix, cqrs typed
-registration — `library-quality-verifier` GO, merged to `develop` fast-forward
-`4801b799`, moved to `completed-tasks/`). Remaining scope (retryConfig
-classification, error-propagation, autoRegisterHandlers opt-in flip, resilience
-metrics wire-up) deferred — reserved names `VF-025b/c/d` in
+_Last updated 2026-08-25 — **VB-005 shipped** (benchmark harness repair: the
+`resolve.alias` object-form prefix-matching bug in
+`benchmarks/vitest.config.mts` that broke `pnpm run bench` entirely — fixed to
+array form with `/internal` subpath entries before base entries, matching the
+VF-024 precedent already applied in the root config and
+`packages/nestjs/vitest.bench.config.ts`, and extended to cover a second,
+undiscovered instance of the same bug in `@vytches/ddd-events/internal`;
+`Money`'s missing `validate()` in `hot-paths.bench.ts` fixed alongside it — a
+real compile-time defect masked by the alias failure; README now documents how
+to verify the harness locally. `library-quality-verifier` GO, `pnpm run bench`
+confirmed exit 0 with all 11 `hot-paths.bench.ts` results present. Committed
+`bf8d54cc` on `fix/VB-005-benchmark-harness-broken`, moved to
+`completed-tasks/`. P1 is now empty.) Prior (same day): **VB-008 shipped**
+(policy behaviours: composition-wrapper preservation across
+`and()`/`or()`/`when()` + factory export shape + named cache-metrics type +
+`create()`/`withDefaults()` collapse + examples/CI gate,
+`library-quality-verifier` GO on all 7 ACs, no merge needed — branch was already
+at `develop`'s commit, moved to `completed-tasks/`; four changesets await
+release). Prior: 2026-08-24 — **VF-025 shipped** (patch scope A+C+E+G — events
+dedup+diagnostics, projections clearProjectionState fix + opt-in checkpoint
+resume, resilience circuit-breaker HALF_OPEN fix, cqrs typed registration —
+`library-quality-verifier` GO, merged to `develop` fast-forward `4801b799`,
+moved to `completed-tasks/`). Remaining scope (retryConfig classification,
+error-propagation, autoRegisterHandlers opt-in flip, resilience metrics wire-up)
+deferred — reserved names `VF-025b/c/d` in
 `project-orchestration/completed-tasks/VF-025-event-projections-hardening.md`
 §Zamknięcie, **no task files exist yet for them**, refile from the analysis
 before picking that work up. Prior: 2026-08-23 (same-day follow-up) — **VF-033
@@ -67,17 +80,18 @@ today_ — that second axis no longer exists.
 
 **Next thing:**
 
-1. **VB-005** — the sole P1 item: `pnpm bench` doesn't run at all (module
-   resolution + stale `Money` bench class). ~2-3h.
-2. **VT-006** / **VT-007** — top of P2, both test debt: policies decorator
+1. **VT-006** / **VT-007** — top of P2, both test debt: policies decorator
    coverage (temporal/cached/retry) + `testing` pkg hardening (~10h), or
-   re-enabling the skipped domain-services e2e suite (~5h).
+   re-enabling the skipped domain-services e2e suite (~5h). P1 is empty — this
+   is the actual next work.
 
-_**VB-008** (policy behaviours — composition-wrapper fix + factory export shape)
-shipped 2026-08-25 — see the P1 note above. **VF-025** (event/projections/
-resilience/cqrs patch hardening) shipped 2026-08-24 — see "Shipped and archived"
-below. **VF-033** (validation hardening) shipped 2026-08-23 — see "Shipped and
-archived" under P1._
+\_**VB-005** (benchmark harness repair) shipped 2026-08-25 — see the header note
+above; P1 is now empty. **VB-008** (policy behaviours — composition-wrapper fix
+
+- factory export shape) shipped 2026-08-25 — see the header note above.
+  **VF-025** (event/projections/resilience/cqrs patch hardening) shipped
+  2026-08-24 — see "Shipped and archived" below. **VF-033** (validation
+  hardening) shipped 2026-08-23 — see "Shipped and archived" under P1.\_
 
 **Two things a newcomer to this board should not have to rediscover:**
 
@@ -385,12 +399,32 @@ review found are now six done, one left (VF-025, P2; VF-033 shipped 2026-08-23).
 What ranked P1 after that was the release gate and the decisions whose window
 closed at first publish — **both are gone as of 2026-08-23**: the gate (VF-036)
 was collected and v0.31.0 shipped, and the window closed with it, which is why
-VB-008 went back to P3. What is left on this board is one tooling defect; the
-one remaining runtime defect sits at the top of P2 and is the actual next work._
+VB-008 went back to P3. VB-005, the one remaining tooling defect, shipped
+2026-08-25 — P1 is now empty._
 
-| ID     | Title                                                    | Status                                                 | Age |
-| ------ | -------------------------------------------------------- | ------------------------------------------------------ | --- |
-| VB-005 | Benchmark harness broken (pnpm bench doesn't run at all) | backlog _(discovered 2026-08-20 while closing VP-012)_ | 1d  |
+_Empty._
+
+> **VB-005 shipped 2026-08-25.** Root cause was not the `tsconfig.json`
+> `rootDir` hypothesis in the original task — it was
+> `benchmarks/vitest.config.mts`'s object-form `resolve.alias`, whose
+> string-prefix matching silently mangled the `@vytches/ddd-contracts/internal`
+> subpath import into a broken path (`ENOTDIR .../index.ts/internal`). Fixed to
+> array form with subpath entries before base entries, the same shape already
+> proven in the root config and `packages/nestjs/vitest.bench.config.ts` under
+> VF-024 — and extended to a second, undiscovered instance of the identical bug
+> in `@vytches/ddd-events/internal`, which would have failed immediately after
+> the first fix if left unaddressed. `Money`'s missing `validate()` in
+> `hot-paths.bench.ts` (a real compile-time defect, masked until the alias was
+> fixed) was fixed alongside it. `benchmarks/README.md` now documents a
+> result-count check, not just exit code, as the standard for "the harness
+> works" — the include glob covers every `*.bench.ts` file, so a future added
+> suite could otherwise mask a silent collection failure the same way. Verified
+> via a real `pnpm run bench` run, not just static review: exit 0, all 11
+> `hot-paths.bench.ts` results present. `library-quality-verifier` GO. Deferred
+> without prejudice (analysis `open_questions`, all answered "not now"): CI
+> wiring for `bench`, `baseline.json` re-capture, a `type-check` target for
+> `benchmarks/`. Committed `bf8d54cc` on `fix/VB-005-benchmark-harness-broken`,
+> archived to `completed-tasks/`.
 
 > **VB-008 shipped 2026-08-25.** Demoted P1 → P3 on 2026-08-23 (pre-publish
 > window closed), then `/analyze VB-008` (2026-08-21, re-run under the
@@ -431,7 +465,11 @@ immediate-retrip rule shipped as one unit; cqrs: `registerTyped()`/
 `registerFactoryTyped()` + overwrite warn. Remaining original scope (retryConfig
 classification, error-propagation, autoRegisterHandlers opt-in flip, resilience
 metrics wire-up) deferred, reserved names `VF-025b/c/d`, no task files filed yet
-— see the task's own "Zamknięcie" section before picking that up)._
+— see the task's own "Zamknięcie" section before picking that up). 2026-08-25:
+**VB-005** (benchmark harness repair — `resolve.alias` array-form fix in
+`benchmarks/vitest.config.mts` for both `contracts/internal` and
+`events/internal` subpaths, `Money.validate()` added, README verification notes,
+`bf8d54cc`)._
 
 ## P2 — Normal / Medium
 

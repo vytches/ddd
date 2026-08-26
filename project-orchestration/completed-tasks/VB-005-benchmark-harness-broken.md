@@ -12,7 +12,7 @@ complexity: medium
 estimated_time: 2-3h
 created_by: agent (orchestrate VP-012-hotpath-quickwins, discovered 2026-08-20)
 created_at: 2026-08-20
-status: backlog
+status: done
 release_target: post-first-publish OK
 package: '@vytches/benchmarks'
 ```
@@ -46,14 +46,16 @@ benchmarkowego "przed/po" (np. VP-012 AC4) są dziś niespełnialne bez tej napr
 
 ## Acceptance Criteria
 
-1. [ ] `pnpm run bench` uruchamia się bez błędu (exit 0) i faktycznie wykonuje
+1. [x] `pnpm run bench` uruchamia się bez błędu (exit 0) i faktycznie wykonuje
        wszystkie `bench()` w `benchmarks/suites/hot-paths.bench.ts`.
-2. [ ] Naprawiony import `@vytches/ddd-contracts/internal` (i inne subpath
+       Zweryfikowane realnym uruchomieniem: exit 0, 11/11 wyników w 5 blokach
+       `describe`.
+2. [x] Naprawiony import `@vytches/ddd-contracts/internal` (i inne subpath
        exporty używane w suicie) — bez obchodzenia przez zmianę importu na
        ścieżkę względną (to ukryłoby problem configu zamiast go naprawić).
-3. [ ] `Money` w suicie implementuje `validate()` (albo suita używa realnej
+3. [x] `Money` w suicie implementuje `validate()` (albo suita używa realnej
        klasy wartości z biblioteki zamiast lokalnego, niepełnego przykładu).
-4. [ ] Krótka notatka w `benchmarks/README.md`, jak lokalnie zweryfikować że
+4. [x] Krótka notatka w `benchmarks/README.md`, jak lokalnie zweryfikować że
        harness działa PRZED poleganiem na nim w kolejnym tasku (żeby ten sam
        problem nie powtórzył się cicho).
 
@@ -68,3 +70,44 @@ prawdopodobnie od momentu dodania paczki `benchmarks`.
 - Odkryte przy:
   `project-orchestration/completed-tasks/VP-012-hotpath-quickwins.md`
   (Completion Notes, 2026-08-20)
+
+## Zamknięcie (2026-08-25)
+
+**Root cause był INNY niż hipoteza w tasku.** Nie `tsconfig.json`/`rootDir` —
+`benchmarks/vitest.config.mts` miał `resolve.alias` w formie OBIEKTU mapującego
+każdy pakiet workspace na konkretny plik `index.ts`. Mechanizm dopasowania
+aliasu w Vite/rollup-plugin-alias
+(`importee === find || importee.startsWith(find + "/")`, potem
+`.replace(find, replacement)`) podmieniał dopasowany prefiks i doklejał resztę
+ścieżki subpath exportu na końcu — dając dokładnie `.../src/index.ts/internal` z
+błędu w tasku. Vitest/esbuild nie czyta tsconfig `paths`/`rootDir` przy
+resolution w runtime.
+
+**Naprawa**: `resolve.alias` przepisany na formę TABLICOWĄ, z wpisami subpath
+(`@vytches/ddd-contracts/internal`, `@vytches/ddd-events/internal`) PRZED
+wpisami bazowymi — dokładnie ten sam kształt, który to repo już raz zastosowało
+pod VF-024 w root `vitest.config.mts` i
+`packages/nestjs/vitest.bench.config.ts`. `events/internal` był drugą,
+nieodkrytą pierwotnie w tasku miną tego samego rodzaju
+(`packages/events/src/index.ts` sam importuje własny subpath internal) —
+naprawiona w tym samym commicie, zamiast czekać na osobne zgłoszenie.
+
+`Money.validate()` dodane, oparte wyłącznie na parametrze `value` (nigdy na
+polach `this` — konstruktor bazowy woła `validate()` przed inicjalizacją pól
+podklasy).
+
+Panel analizy (`ecc:architect` + `backend-technology-expert` +
+`library-api-guardian` + synteza `tech-lead`) rozważył alternatywę — alias na
+katalog `src/` generowany dynamicznie, pokrywający systemowo każdy przyszły
+subpath — i ją odrzucił: czyniłaby importowalnym każdy plik z 22 pakietów
+zamiast 5-7 zadeklarowanych, więc benchmark przestałby wykrywać dryf zależności
+(D1 w artefakcie analizy).
+
+Weryfikacja: realne uruchomienie `pnpm run bench` (nie tylko przegląd kodu)
+przez warstwę verify i niezależnie przez bramkę końcową
+`library-quality-verifier` — oba GO. Świadomie odłożone bez uszczerbku
+(odpowiedzi na `open_questions` analizy): automatyzacja `bench` w CI,
+odświeżenie `benchmarks/baseline.json`, target `type-check` dla `benchmarks/`.
+
+Commit `bf8d54cc` na `fix/VB-005-benchmark-harness-broken`. Artefakt analizy:
+`project-orchestration/analysis/VB-005-benchmark-harness-broken.analysis.md`.
