@@ -85,13 +85,12 @@ today_ — that second axis no longer exists.
    re-enabling the skipped domain-services e2e suite (~5h). P1 is empty — this
    is the actual next work.
 
-\_**VB-005** (benchmark harness repair) shipped 2026-08-25 — see the header note
+_**VB-005** (benchmark harness repair) shipped 2026-08-25 — see the header note
 above; P1 is now empty. **VB-008** (policy behaviours — composition-wrapper fix
-
-- factory export shape) shipped 2026-08-25 — see the header note above.
-  **VF-025** (event/projections/resilience/cqrs patch hardening) shipped
-  2026-08-24 — see "Shipped and archived" below. **VF-033** (validation
-  hardening) shipped 2026-08-23 — see "Shipped and archived" under P1.\_
+and factory export shape) shipped 2026-08-25 — see the header note above.
+**VF-025** (event/projections/resilience/cqrs patch hardening) shipped
+2026-08-24 — see "Shipped and archived" below. **VF-033** (validation hardening)
+shipped 2026-08-23 — see "Shipped and archived" under P1._
 
 **Two things a newcomer to this board should not have to rediscover:**
 
@@ -404,7 +403,7 @@ VB-008 went back to P3. VB-005, the one remaining tooling defect, shipped
 
 _Empty._
 
-> **VB-005 shipped 2026-08-25.** Root cause was not the `tsconfig.json`
+> **VB-005 shipped 2026-08-25.** Root cause was not the `tsconfig.json` >
 > `rootDir` hypothesis in the original task — it was
 > `benchmarks/vitest.config.mts`'s object-form `resolve.alias`, whose
 > string-prefix matching silently mangled the `@vytches/ddd-contracts/internal`
