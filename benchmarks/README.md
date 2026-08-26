@@ -12,6 +12,34 @@ pnpm bench           # one-shot run
 pnpm bench:watch     # continuous on file change
 ```
 
+## Verifying the harness locally
+
+Before relying on this harness in a follow-up task, confirm it actually runs end
+to end — a green exit code from `pnpm bench` is **not** sufficient proof. The
+benchmark `include` glob (`suites/**/*.bench.ts`) matches every `*.bench.ts`
+file under `suites/`, present or future; if `hot-paths.bench.ts` fails during
+test collection (e.g. a thrown error in a `describe()` body) but some other
+suite file in the glob still runs cleanly, the overall run can still report
+success while `hot-paths.bench.ts`'s results are silently missing from the
+reporter output. Today `hot-paths.bench.ts` is the only file matching the glob,
+so this failure mode currently means "0 result lines, exit 0" rather than
+"another suite's lines mask the gap" — check for the result lines regardless,
+since a future added suite could reintroduce the masking risk.
+
+To verify, run `pnpm bench` and inspect the console output directly: confirm
+that all **5** `describe` blocks in `hot-paths.bench.ts` —
+`AggregateRoot.apply()`, `BaseValueObject.equals()`, `EntityId hot paths`,
+`LibUtils.deepEqual() — value comparison`, and
+`CachedPolicy.generateCacheKey() — R1 hash-merge (VP-012c)` — each printed a
+result line for every one of their `bench()` cases (**11** benchmarks total). If
+any block is missing from the output, or a block shows fewer result lines than
+it has `bench()` calls, the harness is broken even though the command exited 0.
+
+Note: the `/internal` subpath aliases in `vitest.config.mts` deliberately bypass
+each package's `package.json#exports` map. This is a conscious, narrowly-scoped
+exception for this dev-only, `private: true` package — it is **not** a pattern
+to copy into any published `@vytches/ddd-*` package.
+
 ## Baseline (v0.25.0-beta.1, Node 22, dev hardware)
 
 Captured 2026-05-09. See `baseline.json` for the machine-readable form.

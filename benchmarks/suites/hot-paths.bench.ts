@@ -59,6 +59,21 @@ class Money extends BaseValueObject<MoneyProps> {
   constructor(amount: number, currency: string) {
     super({ amount, currency });
   }
+
+  // VB-005: required by BaseValueObject — the base constructor invokes
+  // validate() via prototype dispatch BEFORE this subclass's own
+  // constructor body runs, so `this.value` (and any other subclass field)
+  // is not yet set. Must depend only on the `value` parameter, never on
+  // `this` (see base-value-object.ts constructor doc comment).
+  validate(value: unknown): boolean {
+    const props = value as MoneyProps;
+    return (
+      typeof props?.amount === 'number' &&
+      Number.isFinite(props.amount) &&
+      typeof props?.currency === 'string' &&
+      props.currency.length > 0
+    );
+  }
 }
 
 // === Benchmarks ==============================================================
