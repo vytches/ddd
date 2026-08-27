@@ -1,7 +1,16 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-25 — **VB-005 shipped** (benchmark harness repair: the
-`resolve.alias` object-form prefix-matching bug in
+_Last updated 2026-08-27 by `/pulse`_ — **board reconciled, no task changes.**
+P1 confirmed empty. New finding: `develop` is 15 commits ahead of `main` —
+carrying six shipped fixes (VF-041 type-export fix, an `nestjs`
+forRoot/forTesting exports fix, VF-033, VF-025, VB-008, VB-005) not yet in the
+published npm package. `main` and `develop` were genuinely synced right at the
+2026-08-22 v0.31.0 publish; nothing has merged since. No release date decided —
+see `TEAM-STATE.md` Critical Now #1. VA-001's demand-signal check (due "this
+week" as of 2026-08-19) is unresolved for a second consecutive pulse cycle.
+
+_Prior — Last updated 2026-08-25 — **VB-005 shipped** (benchmark harness repair:
+the `resolve.alias` object-form prefix-matching bug in
 `benchmarks/vitest.config.mts` that broke `pnpm run bench` entirely — fixed to
 array form with `/internal` subpath entries before base entries, matching the
 VF-024 precedent already applied in the root config and
