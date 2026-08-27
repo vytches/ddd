@@ -59,7 +59,7 @@ const CONFIG = {
     cqrs: 40,
     validation: 25,
     policies: 45,
-    projections: 75,
+    projections: 85, // Raised after VF-025 checkpoint-resume tests (legit +7, was 78/79 vs 75)
     acl: 60,
     messaging: 120,
     resilience: 25,

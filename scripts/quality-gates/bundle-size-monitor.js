@@ -41,7 +41,7 @@ const CONFIG = {
 
     // Architecture packages (can be larger)
     events: 100,
-    cqrs: 100, // Complex architecture patterns
+    cqrs: 110, // Raised after VF-025's registerTyped()/registerFactoryTyped() (+76 lines, was 102.38KB vs 100)
     projections: 100,
 
     // Integration packages
