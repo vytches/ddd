@@ -176,3 +176,4 @@ project-orchestration/.workflow/
 .claude/agents/tech-lead.md
 
 .claude/config/runtime.yml
+.claude/worktrees

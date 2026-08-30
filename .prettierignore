@@ -20,3 +20,5 @@ dist/
 *.cjs
 *.mjs
 pnpm-lock.yaml
+
+.nx/self-healing
