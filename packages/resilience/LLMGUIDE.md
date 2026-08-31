@@ -46,26 +46,30 @@ const result = await policy.execute(() => externalService.call(payload));
 
 ### Patterns
 
-| Export                             | Kind      | Description                                                                                                |
-| ---------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------- |
-| `CircuitBreaker`                   | class     | Three-state breaker (Closed / Open / Half-Open) with thresholds                                            |
-| `CircuitBreakerOpenError`          | error     | Thrown when execution attempted while breaker is Open                                                      |
-| `CircuitBreakerHalfOpenLimitError` | error     | Thrown when HALF_OPEN already has `halfOpenMaxProbes` probes in flight (extends `CircuitBreakerOpenError`) |
-| `CircuitBreakerState`              | enum      | `Closed`, `Open`, `HalfOpen`                                                                               |
-| `RetryPolicy`                      | class     | Exponential backoff retry with optional jitter                                                             |
-| `MaxRetriesExceededError`          | error     | Thrown when retry budget is exhausted                                                                      |
-| `Bulkhead`                         | class     | Concurrency limiter with optional queue                                                                    |
-| `BulkheadRejectedException`        | error     | Thrown when both active and queue are saturated                                                            |
-| `TimeoutError`                     | error     | Thrown by `TimeoutStrategy` when deadline exceeded                                                         |
-| `OperationCancelledError`          | error     | Thrown when operation is cancelled mid-flight via context                                                  |
-| `ResiliencePolicyBuilder`          | class     | Fluent builder for composing strategies                                                                    |
-| `ResilienceStrategy`               | interface | `execute<T>(fn): Promise<T>`                                                                               |
-| `CompositeResilienceStrategy`      | class     | Chains multiple strategies into one                                                                        |
-| `RetryStrategy`                    | class     | Strategy wrapper around RetryPolicy                                                                        |
-| `CircuitBreakerStrategy`           | class     | Strategy wrapper around CircuitBreaker                                                                     |
-| `BulkheadStrategy`                 | class     | Strategy wrapper around Bulkhead                                                                           |
-| `TimeoutStrategy`                  | class     | Reject promise after N ms                                                                                  |
-| `DefaultResilienceContext`         | class     | Carries cancel signal + correlation ID through strategies                                                  |
+| Export                             | Kind      | Description                                                                                                                               |
+| ---------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `CircuitBreaker`                   | class     | Three-state breaker (Closed / Open / Half-Open) with thresholds                                                                           |
+| `CircuitBreakerOpenError`          | error     | Thrown when execution attempted while breaker is Open                                                                                     |
+| `CircuitBreakerHalfOpenLimitError` | error     | Thrown when HALF_OPEN already has `halfOpenMaxProbes` probes in flight (extends `CircuitBreakerOpenError`)                                |
+| `CircuitBreakerState`              | enum      | `Closed`, `Open`, `HalfOpen`                                                                                                              |
+| `RetryPolicy`                      | class     | Exponential backoff retry with optional jitter                                                                                            |
+| `MaxRetriesExceededError`          | error     | Thrown when retry budget is exhausted                                                                                                     |
+| `Bulkhead`                         | class     | Concurrency limiter with optional queue                                                                                                   |
+| `BulkheadRejectedException`        | error     | Thrown when both active and queue are saturated                                                                                           |
+| `TimeoutError`                     | error     | Thrown by `TimeoutStrategy` when deadline exceeded                                                                                        |
+| `OperationCancelledError`          | error     | Thrown when operation is cancelled mid-flight via context                                                                                 |
+| `ResiliencePolicyBuilder`          | class     | Fluent builder for composing strategies                                                                                                   |
+| `ResilienceStrategy`               | interface | `execute<T>(fn): Promise<T>`                                                                                                              |
+| `CompositeResilienceStrategy`      | class     | Chains multiple strategies into one                                                                                                       |
+| `RetryStrategy`                    | class     | Strategy wrapper around RetryPolicy                                                                                                       |
+| `CircuitBreakerStrategy`           | class     | Strategy wrapper around CircuitBreaker                                                                                                    |
+| `BulkheadStrategy`                 | class     | Strategy wrapper around Bulkhead                                                                                                          |
+| `TimeoutStrategy`                  | class     | Reject promise after N ms                                                                                                                 |
+| `DefaultResilienceContext`         | class     | Carries cancel signal + correlation ID through strategies                                                                                 |
+| `CompensationStack`                | class     | In-process LIFO stack pairing a resource acquisition (outside a DB transaction) with its undo — see "Compensating for side effects" below |
+| `runCompensated(stack, fn)`        | function  | Runs `fn` against a `CompensationStack`; unwinds it on failure, leaves it armed on success                                                |
+| `CompensationFailure`              | type      | `{ label, error }` — one compensation that itself failed while unwinding                                                                  |
+| `CompensationOutcome<TError>`      | type      | `{ cause, compensationFailures }` — unconditional failure shape returned by `runCompensated`                                              |
 
 ### Decorators (method-level)
 
@@ -247,6 +251,75 @@ inside the same circuit breaker (retry runs _inside_ the breaker in
 `CompositeResilienceStrategy`) — so full recovery can take noticeably longer
 than `recoveryTimeout` alone suggests when a probe itself retries with backoff.
 
+### Compensating for side effects outside the transaction (try-confirm-cancel)
+
+**No durability.** `CompensationStack` is in-process, in-memory only — nothing
+here is persisted. If the process dies mid-flight, whatever was already pushed
+onto the stack is lost with it and its compensation never runs. There is no
+durable log, no persistence, and no recovery after a restart. This is not a saga
+implementation; if the flow needs to survive a process crash, that is a separate
+concern this primitive does not attempt to solve.
+
+Reservations, calls into another bounded context, and external API side effects
+happen outside the database transaction — the transaction rolls itself back on
+failure, these do not, so the caller has to undo them by hand.
+`CompensationStack.acquire` runs the acquisition and files its undo in a single
+call, so there is no path through this API where a resource gets acquired
+without a compensation also being on file:
+
+```typescript
+import { CompensationStack, runCompensated } from '@vytches/ddd-resilience';
+
+const stack = CompensationStack.create();
+const outcome = await runCompensated(stack, async s => {
+  const reservationId = await s.acquire(
+    'inventory-reservation',
+    () => inventoryClient.reserve(orderId, items),
+    id => inventoryClient.release(id)
+  );
+  return placeOrder(orderId, reservationId);
+});
+
+if (outcome.isFailure) {
+  const { cause, compensationFailures } = outcome.error;
+  logger.error('order placement failed', cause);
+  if (compensationFailures.length > 0) {
+    logger.error('cleanup also failed', compensationFailures);
+  }
+}
+```
+
+On failure, `stack.unwind()` runs every registered compensation
+most-recently-acquired first, one at a time — sequential `await`s, never
+`Promise.all`. A compensation that itself throws is recorded as a
+`CompensationFailure` and does not stop the rest of the unwind. The resulting
+failure shape is unconditional: `cause` (the original error) plus
+`compensationFailures` (possibly empty) are always both present — a failed
+cleanup is reported alongside the real error, never in place of it. `unwind()`
+is idempotent by latching its first run's promise, so concurrent or repeated
+calls (including two `await`s racing on the same instance) all resolve to that
+one run instead of compensating twice.
+
+On success, the stack is left **armed** — neither `acquire` nor `runCompensated`
+clears it. That is deliberate: a caller whose own database transaction commits
+after this flow completes, then has to roll back later for an unrelated reason,
+can still call `stack.unwind()` on this same instance from that later hook and
+get a real, first-time run. `runCompensated` takes the stack as a parameter
+rather than creating one internally for the same reason — the caller keeps a
+reference to unwind again from outside the call.
+
+**What this does not enforce.** Nothing here prevents you from acquiring a
+resource through a call that bypasses `acquire` and forgetting to register its
+compensation — the inseparability guarantee only covers calls that go through
+`CompensationStack.acquire`. Nor does it check that the `compensate` function
+you pass actually reverses what `acquire` did; that correspondence is on the
+caller. The primitive also takes no transaction argument and reaches for no
+request-scoped context of its own — it does not manage a transaction boundary,
+and there is no `AsyncLocalStorage` or CQRS-pipeline integration in this
+version. Neither timeouts nor retries are applied around a compensation call;
+compose the `compensate` function with this package's own `RetryPolicy` or
+`TimeoutStrategy` if a cleanup call itself needs either.
+
 ## Anti-Patterns
 
 - **Do not retry domain command handlers** — most are not idempotent.
@@ -265,3 +338,15 @@ than `recoveryTimeout` alone suggests when a probe itself retries with backoff.
 - **Do not assume `scope: 'shared'` on a decorator is the default** — it isn't.
   Per-instance policies are the default (`scope: 'instance'`); opt into
   `'shared'` deliberately, only when you actually want cross-instance sharing.
+- **Do not assume `CompensationStack` survives a process crash** — it is
+  in-memory only. If the process dies mid-flight, whatever was pushed is lost
+  and never compensated; pair it with your own durable saga/outbox if the flow
+  needs to survive a restart.
+- **Do not acquire a resource outside `CompensationStack.acquire`** and expect
+  it to be covered — only acquisitions that go through `acquire` get an undo
+  filed automatically. A side effect performed any other way is invisible to
+  `unwind()`.
+- **Do not call `Promise.all` on multiple compensations yourself** — `unwind()`
+  already runs them sequentially, LIFO; racing them concurrently outside the
+  stack can let one compensation's rejection go unobserved as an unhandled
+  rejection instead of a reported `CompensationFailure`.

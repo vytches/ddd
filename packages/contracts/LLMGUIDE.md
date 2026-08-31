@@ -169,9 +169,10 @@ const event: IDomainEvent<OrderPlacedPayload> = {
 
 ### Shared (additional)
 
-| Export                             | Kind      | Description                                                                                                                                                                          |
-| ---------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `IAggregateSnapshot<TState,TMeta>` | interface | `{ aggregateId, version, aggregateType, state, timestamp, metadata?, lastEventId?, checksum? }` — used by `ISnapshotCapability` and `IAdvancedEventStore.getSnapshot`/`saveSnapshot` |
+| Export                             | Kind      | Description                                                                                                                                                                                                                                                                                                                             |
+| ---------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IAggregateSnapshot<TState,TMeta>` | interface | `{ aggregateId, version, aggregateType, state, timestamp, metadata?, lastEventId?, checksum? }` — used by `ISnapshotCapability` and `IAdvancedEventStore.getSnapshot`/`saveSnapshot`                                                                                                                                                    |
+| `Result<TValue, TError = Error>`   | class     | Outcome wrapper. Constructors: `ok`/`fail`/`empty`/`try`/`tryAsync`. Chainable: `map`/`flatMap`/`match`/`tap`/`tapError`/`mapError`/`mapAsync`/`flatMapAsync`. Aggregation across several `Result`s: `combine`/`combineWithAllErrors`. Canonical home — `@vytches/ddd-utils` re-exports the same class. See "Result combinators" below. |
 
 ### Diagnostics
 
@@ -452,6 +453,104 @@ configureDiagnostics({
 });
 ```
 
+### Result combinators: chaining instead of repeated `isFailure` checks
+
+`Result<TValue, TError>` (this package's `shared/result.ts` — canonical home;
+`@vytches/ddd-utils` re-exports the same class) carries chainable combinators
+beyond the `ok`/`fail`/`empty`/`try`/`tryAsync` constructors, for composing
+several fallible steps without a manual `isFailure` check after each one:
+
+```typescript
+import { Result } from '@vytches/ddd-contracts';
+
+function createOrder(dto: OrderDto): Result<Order, ValidationError> {
+  return Email.create(dto.email)
+    .flatMap(email => FullName.create(dto.name).map(name => ({ email, name })))
+    .flatMap(({ email, name }) => Order.create(email, name, dto.amount))
+    .mapError(error => new ValidationError(error.message))
+    .tap(order => logger.info(`Order ${order.getId()} created`))
+    .tapError(error => logger.warn('Order creation failed', error));
+}
+```
+
+**Anti-pattern — manually re-checking `isFailure` after every step:**
+
+```typescript
+// Avoid: this block repeats once per fallible step
+if (x.isFailure) return Result.fail(x.error);
+```
+
+Replace it with `flatMap` (chain another `Result`-returning step) or `match`
+(collapse to a single non-`Result` value at a boundary):
+
+```typescript
+// Prefer: chain instead of manually re-checking isFailure
+return x.flatMap(value => nextStep(value));
+
+// Or, at a boundary that must return something other than a Result:
+return x.match(
+  value => ({ status: 200, body: value }),
+  error => ({ status: 400, body: error.message })
+);
+```
+
+### Combining multiple Results
+
+`Result.combine` and `Result.combineWithAllErrors` replace the pattern of
+checking `isFailure` once per field when constructing several value objects at
+once — both require every input `Result` to share the same error type `TError`:
+
+```typescript
+import { Result } from '@vytches/ddd-contracts';
+
+// First error wins — stops at the first failure; success is a tuple, in order
+const combined = Result.combine([
+  Email.create(dto.email),
+  FullName.create(dto.name),
+  Address.create(dto.address),
+]);
+if (combined.isFailure) return Result.fail(combined.error);
+const [email, name, address] = combined.value;
+
+// All errors — every failing input is reported, not just the first
+const validated = Result.combineWithAllErrors([
+  Email.create(dto.email),
+  FullName.create(dto.name),
+  Address.create(dto.address),
+]);
+```
+
+`combineWithAllErrors` returns the **original error objects** on failure — never
+flattened to messages or strings. The error array is also **compacted**: it
+contains only the positions that actually failed, in input order. Position N in
+the error array does NOT correspond to input N — if only input index 3 fails,
+the error array has length 1 at index 0, not a sparse array with a value at
+index 3. Carry the input's own identity inside the error object itself if the
+caller needs to know which field produced which error.
+
+An empty input array succeeds with an empty tuple for both variants.
+
+The shared error type `TError` is inferred from the input tuple, with two
+gotchas. An entry typed exactly `Error` — the default when `Result.ok(x)` is
+written without an explicit error type — is treated as a placeholder and
+ignored, not as a real error type competing for `TError`; this only matters in a
+mixed tuple, since an all-`Error` tuple still infers `Error`. And when the
+remaining (non-placeholder) error types don't reduce to one common type — e.g.
+sibling classes `ValidationError` and `NotFoundError` that both extend a common
+`DomainError` base but don't extend each other — `TError` infers as `never`, so
+`combined.error.field` fails to compile. Fix it at the source: declare one
+shared error type across the combined factories (for example, widen them to a
+common base type) instead of relying on inference to find one.
+
+There is no `combineAsync`. Resolve the promises first, then combine the settled
+`Result`s:
+
+```typescript
+const combined = Result.combine(
+  await Promise.all([createEmail(dto), createName(dto)])
+);
+```
+
 ## Anti-Patterns
 
 **Using `any` instead of generic parameters.** Every interface is generic.
@@ -484,6 +583,11 @@ decorator, NestJS explorer service) can resolve them via the standard import
 path. They carry no semver guarantee and may be reshaped or removed without
 notice. Use `configureDiagnostics` to control diagnostics output instead of
 touching `internalLogger` directly.
+
+**Writing a manual `if (x.isFailure) return Result.fail(x.error)` block for
+every field of a multi-field construction.** Use `Result.combine` (first error
+wins) or `Result.combineWithAllErrors` (every error, as original error objects,
+in a compacted array) instead — see "Combining multiple Results" above.
 
 ## Hidden Features
 

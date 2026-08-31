@@ -155,6 +155,60 @@ codebase.
 - **You want explicit dependency boundaries** — sub-packages document what layer
   each piece belongs to.
 
+## Patterns
+
+### Result combinators instead of repeated `isFailure` checks
+
+`Result` (re-exported from `ddd-contracts` via the `ddd-utils` path — see
+"Naming Conflict Resolution" above) chains rather than requiring a manual
+`isFailure` check after every fallible step:
+
+```typescript
+import { Result } from '@vytches/ddd';
+
+function createOrder(dto: OrderDto): Result<Order, Error> {
+  return Email.create(dto.email)
+    .flatMap(email => Order.create(email, dto.amount))
+    .tapError(error => logger.warn('Order creation failed', error));
+}
+```
+
+```typescript
+// Avoid: this block repeats once per fallible step
+if (x.isFailure) return Result.fail(x.error);
+```
+
+### Combining several Results at once
+
+```typescript
+import { Result } from '@vytches/ddd';
+
+// First error wins — success value is a tuple, in input order
+const combined = Result.combine([
+  Email.create(dto.email),
+  FullName.create(dto.name),
+]);
+if (combined.isFailure) return Result.fail(combined.error);
+const [email, name] = combined.value;
+
+// Every failing field instead of just the first — original error objects,
+// in a compacted array (position N does NOT correspond to input N)
+const validated = Result.combineWithAllErrors([
+  Email.create(dto.email),
+  FullName.create(dto.name),
+]);
+```
+
+The combined error type is inferred: a plain `Error` entry in a mixed tuple is
+ignored as a placeholder, and error types that don't reduce to one common type
+(e.g. unrelated sibling classes under the same base) infer as `never` instead of
+a union — declare one shared error type across the combined factories to avoid
+it.
+
+No `combineAsync` exists — `await Promise.all([...])` first, then `combine` the
+resolved array. Full combinator reference (including the `never` inference
+gotcha): `packages/contracts/LLMGUIDE.md`.
+
 ## Anti-Patterns
 
 - **Do not mix imports from `@vytches/ddd` and `@vytches/ddd-*` in the same
@@ -163,5 +217,8 @@ codebase.
 - **Do not import the entire library inside an aggregate file** — aggregates
   should depend only on `@vytches/ddd-aggregates` (or sub-packages a notch
   below). Avoid pulling in CQRS, messaging, etc. from the domain layer.
+- **Do not write a manual `isFailure` check per field** when constructing
+  several value objects at once — use `Result.combine` /
+  `Result.combineWithAllErrors` instead (see "Patterns" above).
 - **Do not assume every sub-package's public API is re-exported here** — the
   meta-package curates. Some experimental APIs are sub-package-only on purpose.

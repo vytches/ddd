@@ -35,23 +35,29 @@ if (err) return Result.fail(err);
 
 ## Key API
 
-| Export                       | Kind              | Description                                                          |
-| ---------------------------- | ----------------- | -------------------------------------------------------------------- |
-| `Result<T, E>`               | class (re-export) | Outcome wrapper. Canonical source: `@vytches/ddd-contracts`          |
-| `Result.ok(value)`           | static            | Successful result                                                    |
-| `Result.fail(error)`         | static            | Failed result                                                        |
-| `Result.empty()`             | static            | Successful void result                                               |
-| `Result.try(fn)`             | static            | Wrap throwing sync fn into a Result                                  |
-| `Result.tryAsync(fn)`        | static            | Wrap throwing async fn into a Result                                 |
-| `LibUtils.getUUID()`         | static            | RFC 4122 v4 UUID string                                              |
-| `LibUtils.deepEqual(a, b)`   | static            | Structural equality with cycle detection (Date/Map/Set/RegExp aware) |
-| `LibUtils.isEmpty(value)`    | static            | Robust empty check (handles `0`, `false`, `MIN_SAFE_INTEGER`, etc.)  |
-| `LibUtils.hasValue(value)`   | static            | Inverse of isEmpty                                                   |
-| `LibUtils.sleep(ms)`         | static            | Promise-based delay                                                  |
-| `LibUtils.isValidUUID(s)`    | static            | UUID v1–v8 format check                                              |
-| `safeRun(fn)`                | function          | Returns `[Error \| undefined, T \| undefined]`; never throws         |
-| `MiddlewarePipelineExecutor` | class             | Compose `IMiddleware<T>` chains for command/event buses              |
-| `IMiddleware<T>`             | interface         | `handle(ctx, next): Promise<R>`                                      |
+| Export                                 | Kind              | Description                                                          |
+| -------------------------------------- | ----------------- | -------------------------------------------------------------------- |
+| `Result<T, E>`                         | class (re-export) | Outcome wrapper. Canonical source: `@vytches/ddd-contracts`          |
+| `Result.ok(value)`                     | static            | Successful result                                                    |
+| `Result.fail(error)`                   | static            | Failed result                                                        |
+| `Result.empty()`                       | static            | Successful void result                                               |
+| `Result.try(fn)`                       | static            | Wrap throwing sync fn into a Result                                  |
+| `Result.tryAsync(fn)`                  | static            | Wrap throwing async fn into a Result                                 |
+| `.flatMap(fn)`                         | method            | Chain another `Result`-returning step; short-circuits on failure     |
+| `.mapError(fn)`                        | method            | Transform the error only, leaving a success value untouched          |
+| `.match(onSuccess, onFailure)`         | method            | Collapse to one value at a boundary, no `isFailure` branch needed    |
+| `.tap(fn)` / `.tapError(fn)`           | method            | Side effect on success/failure; returns the same `Result` unchanged  |
+| `Result.combine(results)`              | static            | First failure wins; success value is a tuple, in input order         |
+| `Result.combineWithAllErrors(results)` | static            | Every original error (compacted array), not just the first           |
+| `LibUtils.getUUID()`                   | static            | RFC 4122 v4 UUID string                                              |
+| `LibUtils.deepEqual(a, b)`             | static            | Structural equality with cycle detection (Date/Map/Set/RegExp aware) |
+| `LibUtils.isEmpty(value)`              | static            | Robust empty check (handles `0`, `false`, `MIN_SAFE_INTEGER`, etc.)  |
+| `LibUtils.hasValue(value)`             | static            | Inverse of isEmpty                                                   |
+| `LibUtils.sleep(ms)`                   | static            | Promise-based delay                                                  |
+| `LibUtils.isValidUUID(s)`              | static            | UUID v1–v8 format check                                              |
+| `safeRun(fn)`                          | function          | Returns `[Error \| undefined, T \| undefined]`; never throws         |
+| `MiddlewarePipelineExecutor`           | class             | Compose `IMiddleware<T>` chains for command/event buses              |
+| `IMiddleware<T>`                       | interface         | `handle(ctx, next): Promise<R>`                                      |
 
 ## Patterns
 
@@ -87,6 +93,40 @@ const pipeline = MiddlewarePipelineExecutor.from([loggingMiddleware]);
 await pipeline.execute(event, finalHandler);
 ```
 
+### Chain Results instead of repeating `isFailure` checks
+
+```typescript
+// Avoid: this block repeats once per fallible step
+if (x.isFailure) return Result.fail(x.error);
+
+// Prefer: chain another Result-returning step
+return x.flatMap(value => nextStep(value));
+```
+
+Building several value objects at once? Use `Result.combine` (first failure
+wins, values come back as a tuple) or `Result.combineWithAllErrors` (every
+failing input reported — the ORIGINAL error objects, in a compacted array, never
+flattened to messages):
+
+```typescript
+const combined = Result.combine([
+  Email.create(dto.email),
+  FullName.create(dto.name),
+]);
+if (combined.isFailure) return Result.fail(combined.error);
+const [email, name] = combined.value;
+```
+
+The combined error type is inferred, not declared — a plain `Error` entry in a
+mixed tuple is ignored as a placeholder, and error types that don't reduce to
+one common type (e.g. unrelated sibling classes) infer as `never` instead of a
+union. Declare one shared error type across the combined factories to avoid it.
+
+There is no `combineAsync` — `await Promise.all([...])` the individual results
+first, then pass the resolved array to `combine`. Full combinator reference
+(including the exact `combineWithAllErrors` compaction rule and the `never`
+inference gotcha): see `packages/contracts/LLMGUIDE.md`.
+
 ## Anti-Patterns
 
 - **Do not use `instanceof Result`** — class identity differs across bundles.
@@ -94,6 +134,8 @@ await pipeline.execute(event, finalHandler);
 - **Do not import `Result` from `@vytches/ddd-utils` in new code** — prefer
   `@vytches/ddd-contracts` (the canonical home). The utils export is a re-export
   shim kept for backwards compatibility.
+- **Do not write a manual `isFailure` check per field** when combining several
+  `Result`s — use `Result.combine` / `Result.combineWithAllErrors` instead.
 - **Do not put domain logic in `LibUtils`** — it is intentionally generic.
   Domain helpers belong in `@vytches/ddd-domain-primitives` or a bounded
   context.
