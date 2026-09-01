@@ -14,7 +14,7 @@
     "test": {
       "inputs": ["default", "^production", "{workspaceRoot}/vitest.config.ts"],
       "cache": true,
-      "executor": "@nx/vite:test",
+      "executor": "@nx/vitest:test",
       "outputs": ["{workspaceRoot}/coverage"],
       "options": {
         "passWithNoTests": true,
@@ -118,5 +118,6 @@
     }
   ],
   "parallel": 3,
-  "defaultBase": "main"
+  "defaultBase": "main",
+  "analytics": false
 }

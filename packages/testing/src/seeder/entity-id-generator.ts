@@ -92,6 +92,7 @@ export class EntityIdGenerator {
    */
   static uuid(): EntityId {
     // Import dynamically to avoid circular dependencies
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- deliberate runtime require(), see file header (F-C2/VB-002); @vytches/ddd-value-objects is an already-declared package.json dependency of this package
     const { EntityId: EntityIdImpl } = require('@vytches/ddd-value-objects');
     return EntityIdImpl.createWithRandomUUID();
   }
@@ -109,6 +110,7 @@ export class EntityIdGenerator {
    * ```
    */
   static text(value?: string): EntityId {
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- deliberate runtime require(), see file header (F-C2/VB-002); @vytches/ddd-value-objects is an already-declared package.json dependency of this package
     const { EntityId: EntityIdImpl } = require('@vytches/ddd-value-objects');
     const textValue = value ?? `id_${faker.string.alphanumeric(8)}`;
     return EntityIdImpl.fromText(textValue);
@@ -129,6 +131,7 @@ export class EntityIdGenerator {
    * ```
    */
   static sequential(prefix: string, padding = 3): EntityId {
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- deliberate runtime require(), see file header (F-C2/VB-002); @vytches/ddd-value-objects is an already-declared package.json dependency of this package
     const { EntityId: EntityIdImpl } = require('@vytches/ddd-value-objects');
     const sequence = SequenceCounter.get(prefix);
     const paddedSequence = String(sequence).padStart(padding, '0');
@@ -171,6 +174,7 @@ export class EntityIdGenerator {
    * ```
    */
   static pattern(template: string, context = 'default'): EntityId {
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- deliberate runtime require(), see file header (F-C2/VB-002); @vytches/ddd-value-objects is an already-declared package.json dependency of this package
     const { EntityId: EntityIdImpl } = require('@vytches/ddd-value-objects');
 
     let result = template;
@@ -235,6 +239,7 @@ export class EntityIdGenerator {
    * ```
    */
   static fromPattern(pattern: EntityIdPattern, context = 'default'): EntityId {
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- deliberate runtime require(), see file header (F-C2/VB-002); @vytches/ddd-value-objects is an already-declared package.json dependency of this package
     const { EntityId: EntityIdImpl } = require('@vytches/ddd-value-objects');
 
     const parts: string[] = [];

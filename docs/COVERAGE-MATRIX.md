@@ -10,7 +10,7 @@
 > imports it", NOT "this package has adequate unit test coverage". Do not
 > conflate the two.
 
-Generated: 2026-08-22T19:55:04.789Z
+Generated: 2026-09-01T12:33:39.357Z
 
 ## Summary
 
@@ -52,6 +52,7 @@ _(planned) — declared future work per `expected-combinations.yaml`'s `planned:
 | examples/domain-services/src/03-inventory-management.ts | @vytches/ddd-domain-services, @vytches/ddd-utils | VERIFIED | examples/domain-services/tests/domain-services-examples.test.ts |
 | examples/domain-services/src/06-transaction-rollback.ts | @vytches/ddd-domain-services, @vytches/ddd-utils | VERIFIED | examples/domain-services/tests/domain-services-examples.test.ts |
 | examples/domain-services/src/07-testing-domain-services.ts | @vytches/ddd-contracts, @vytches/ddd-domain-services, @vytches/ddd-events, @vytches/ddd-utils | VERIFIED | examples/domain-services/tests/domain-services-examples.test.ts |
+| examples/nestjs/src/app-root.module.ts | @vytches/ddd-contracts, @vytches/ddd-cqrs, @vytches/ddd-events, @vytches/ddd-nestjs | VERIFIED | examples/nestjs/tests/app-root.test.ts |
 | examples/nestjs/src/inventory.context.ts | @vytches/ddd-aggregates, @vytches/ddd-contracts, @vytches/ddd-cqrs, @vytches/ddd-nestjs | VERIFIED | examples/nestjs/tests/inventory-flow.test.ts |
 | examples/nestjs/src/orders.module.ts | @vytches/ddd-cqrs, @vytches/ddd-nestjs | VERIFIED | examples/nestjs/tests/wiring.test.ts |
 | examples/policies/src/04-conditional-policy.ts | @vytches/ddd-policies, @vytches/ddd-validation | VERIFIED | examples/policies/tests/policies-examples.test.ts |

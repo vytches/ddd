@@ -5,6 +5,11 @@ export interface IValidationError {
   property: string;
   message: string;
   context?: Record<string, unknown> | undefined;
+  /**
+   * Stable, machine-readable error identity for i18n/programmatic
+   * consumers (VF-033 AC4) — an alternative to string-matching `message`.
+   */
+  code?: string | undefined;
 }
 
 export interface IValidationErrors {

@@ -1,20 +1,60 @@
-# Specification vs Policy — which to use when
+# Where to validate what: VO invariants, Specification, BusinessRuleValidator, Policy
 
-`@vytches/ddd` ships two related-but-distinct tools for expressing business
-rules: `Specification` (from `@vytches/ddd-validation`) and `PolicyBuilder`
-(from `@vytches/ddd-policies`). They compose with each other, but they solve
-different problems — using the wrong one leads to either an over-engineered
-one-off rule or a policy that can't express the context it needs.
+`@vytches/ddd` ships several related-but-distinct tools for expressing
+correctness rules: `BaseValueObject`'s constructor invariant (from
+`@vytches/ddd-value-objects`), `Specification` / `BusinessRuleValidator` (from
+`@vytches/ddd-validation`), and `PolicyBuilder` (from `@vytches/ddd-policies`).
+They compose with each other, but they solve different problems — using the
+wrong one leads to either an over-engineered one-off rule, a Value Object that
+can construct in an invalid state, or a policy that can't express the context it
+needs.
 
 ## TL;DR
 
-| Question                                                              | Answer                     |
-| --------------------------------------------------------------------- | -------------------------- |
-| Is this a pure predicate over an object's own state?                  | **Specification**          |
-| Does it need `userId`, tenant, IP, session, or other request context? | **Policy**                 |
-| Do you need structured violation info (code, message, severity)?      | **Policy**                 |
-| Is it a one-off / module-local rule?                                  | **Specification** (inline) |
-| Is it named, reusable, or registered centrally?                       | Either — see below         |
+| Question                                                                         | Answer                                    |
+| -------------------------------------------------------------------------------- | ----------------------------------------- |
+| Is this an invariant a Value Object must _always_ hold, with no valid exception? | **`BaseValueObject.validate()`** (throws) |
+| Is this a pure predicate over an object's own state?                             | **Specification**                         |
+| Do you need to know _which_ field(s) failed and why (not just true/false)?       | **`BusinessRuleValidator`**               |
+| Does it need `userId`, tenant, IP, session, or other request context?            | **Policy**                                |
+| Do you need structured violation info (code, message, severity)?                 | **Policy**                                |
+| Is it a one-off / module-local rule?                                             | **Specification** (inline)                |
+| Is it named, reusable, or registered centrally?                                  | Either — see below                        |
+
+## Value Object constructor invariants — the first line of defense
+
+`BaseValueObject<T>`'s constructor calls the subclass's `validate(value)` hook
+and **throws synchronously** on failure (VF-023 AC1) — there is no
+`Result`-returning factory variant; a VO either constructs successfully or the
+constructor throws. This is deliberately not configurable per-instance:
+"always-valid domain model" means an invalid VO can never exist, not even
+transiently.
+
+```ts compile-check
+import { BaseValueObject } from '@vytches/ddd-value-objects';
+
+class Email extends BaseValueObject<string> {
+  validate(value: string): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  protected override getInvalidValueMessage(value: string): string {
+    return `Invalid email: "${value}"`;
+  }
+}
+
+new Email('not-an-email'); // throws synchronously
+```
+
+Use this for invariants that are true of the type itself, independent of any
+particular aggregate or use case — the kind of rule that, if violated, means the
+value was never a valid instance of that VO to begin with. If constructing the
+value can legitimately fail for reasons the caller should handle instead of
+catching an exception (e.g. building a VO from untrusted external input), wrap
+construction in a `Result`-returning factory function at the call site — the
+VO's own constructor still throws; the factory is what turns that throw into a
+`Result` for its caller. See the value-objects LLMGUIDE's "Result-Returning
+Factories" pattern.
 
 ## Specification — pure, composable predicates
 
@@ -145,6 +185,10 @@ const resolved = registry.resolve('order-placement');
 
 ## Decision guide
 
+0. **Is it a Value Object's own invariant?** Put it in that VO's `validate()`
+   override — `BaseValueObject`'s constructor enforces it automatically, on
+   every construction path, with no way to forget it. Don't duplicate it as a
+   `Specification`/policy check elsewhere.
 1. **Start with an inline `Specification`.** It's the cheapest tool and covers
    most business rules — pure predicates over the aggregate/entity's own state.
 2. **Promote to `CompositeSpecification`** only when the rule needs to be named,
@@ -162,3 +206,5 @@ const resolved = registry.resolve('order-placement');
   `@vytches/ddd-validation` and `@vytches/ddd-policies`
 - [`QUICK_START.md`](../../QUICK_START.md) — inline specification example in
   context (Order aggregate)
+- `packages/value-objects/LLMGUIDE.md`'s "Result-Returning Factories" pattern —
+  turning a throwing VO constructor into a `Result<VO, Error>` at the call site

@@ -458,6 +458,7 @@ export class AggregateFactory<T extends SeedableAggregate> {
    */
   private generateEntityId(): EntityId {
     // Import EntityId dynamically to avoid circular dependencies
+    // eslint-disable-next-line @nx/enforce-module-boundaries -- deliberate runtime require(), see entity-id-generator.ts header (F-C2/VB-002); @vytches/ddd-value-objects is an already-declared package.json dependency of this package
     const { EntityId } = require('@vytches/ddd-value-objects');
     return EntityId.createWithRandomUUID();
   }

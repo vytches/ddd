@@ -9,6 +9,19 @@ JSDoc were free to drift apart — and they did, until a consumer wired their ow
 module and lost handler registration entirely without a single error message.
 `tests/wiring.test.ts` is the guard against that happening again.
 
+## Two shapes, two files
+
+| File                       | Shape                                                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `src/orders.module.ts`     | Everything in one module. The smallest thing that dispatches.                                                                  |
+| `src/app-root.module.ts`   | What an application actually runs: a `@Global()` DDD module, a bounded-context module, and a third module injecting the buses. |
+| `src/inventory.context.ts` | `forFeature()` — per-context buses and a local event bus.                                                                      |
+
+Start with `orders.module.ts` to see the mechanism, then read
+`app-root.module.ts` before wiring a real application: the one-module shape
+stops working as soon as a controller in another module needs the bus, and
+`tests/app-root.test.ts` pins both the working shape and that failure.
+
 ## What it shows
 
 - `VytchesDDDModule.forRoot({ providers })` as the entry point. The explorer

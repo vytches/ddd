@@ -762,6 +762,7 @@ export interface IUnitOfWork {
 
 // @public (undocumented)
 export interface IValidationError {
+    code?: string | undefined;
     // (undocumented)
     context?: Record<string, unknown> | undefined;
     // (undocumented)
@@ -816,6 +817,10 @@ export type ReplayProgressHandler = (progress: IReplayProgress) => void;
 
 // @public (undocumented)
 export class Result<TValue, TError = Error> {
+    // Warning: (ae-forgotten-export) The symbol "UnwrapAll" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "ExtractError" needs to be exported by the entry point index.d.ts
+    static combine<TResults extends readonly Result<unknown, unknown>[]>(results: readonly [...TResults]): Result<UnwrapAll<TResults>, ExtractError<TResults>>;
+    static combineWithAllErrors<TResults extends readonly Result<unknown, unknown>[]>(results: readonly [...TResults]): Result<UnwrapAll<TResults>, readonly ExtractError<TResults>[]>;
     static empty<TError = Error>(): Result<void, TError>;
     get error(): TError;
     static fail<TValue, TError = Error>(error: TError): Result<TValue, TError>;

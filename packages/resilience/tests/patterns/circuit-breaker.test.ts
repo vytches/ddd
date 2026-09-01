@@ -153,6 +153,63 @@ describe('CircuitBreaker', () => {
       const metrics = circuitBreaker.getMetrics();
       expect(metrics.state).toBe(CircuitBreakerState.OPEN);
     });
+
+    // VF-025 AC10 (bonus) — see project-orchestration/analysis/VF-025.analysis.md
+    // Q2. Resetting failureCount on OPEN->HALF_OPEN (updateStateIfNeeded) and
+    // "any HALF_OPEN failure re-trips immediately" (onFailure's HALF_OPEN
+    // branch, checked BEFORE the failureThreshold comparison) are one
+    // inseparable unit: reset alone would be a regression, since a single
+    // failure from a fresh failureCount=0 would then need
+    // `failureThreshold` more failures to trip again instead of just one.
+    it('re-trips to OPEN on a single HALF_OPEN failure, without needing failureThreshold more failures', async () => {
+      const context = DefaultResilienceContext.create();
+      const failOperation = vi.fn().mockRejectedValue(new Error('single failure'));
+
+      // failureThreshold is 3 (defaultConfig) — if the immediate-trip branch
+      // in onFailure() were missing (i.e. only the failureCount reset had
+      // shipped), a lone failure here would land at failureCount=1, which is
+      // below threshold, and the circuit would stay HALF_OPEN instead of
+      // re-opening. Asserting OPEN after exactly one failure is what
+      // discriminates the real fix from that isolated-reset regression.
+      const [error] = await safeRun(() => circuitBreaker.execute(failOperation, context));
+      expect(error).toBeInstanceOf(Error);
+      expect(failOperation).toHaveBeenCalledTimes(1);
+
+      const metrics = circuitBreaker.getMetrics();
+      expect(metrics.state).toBe(CircuitBreakerState.OPEN);
+      // onFailure()'s HALF_OPEN branch trips and returns before the
+      // failureThreshold increment runs, so failureCount stays at the reset
+      // value (0) — the trip is driven by the immediate-trip rule itself,
+      // not by the counter reaching any particular number.
+      expect(metrics.failureCount).toBe(0);
+      expect(metrics.nextAttemptTime).toBeDefined();
+    });
+
+    // VF-025 AC10 (bonus), Q2 — the other half of the same unit: failureCount
+    // must already read 0 by the time the very first HALF_OPEN probe runs,
+    // not only after it settles. Verified from inside the probe operation
+    // itself (gated so we can inspect metrics mid-flight) rather than after
+    // execute() resolves, so this fails if the reset were ever moved to run
+    // after the probe instead of before it.
+    it('resets failureCount to 0 on entering HALF_OPEN, before the first probe runs', async () => {
+      const context = DefaultResilienceContext.create();
+
+      let releaseGate!: () => void;
+      const gate = new Promise<void>(resolve => {
+        releaseGate = resolve;
+      });
+
+      const probe = circuitBreaker.execute(async () => {
+        const metricsDuringProbe = circuitBreaker.getMetrics();
+        expect(metricsDuringProbe.state).toBe(CircuitBreakerState.HALF_OPEN);
+        expect(metricsDuringProbe.failureCount).toBe(0);
+        await gate;
+        return 'success';
+      }, context);
+
+      releaseGate();
+      await expect(probe).resolves.toBe('success');
+    });
   });
 
   describe('metrics', () => {

@@ -171,6 +171,143 @@ describe('CoreRules', () => {
     });
   });
 
+  describe('UX-C11: minLength/maxLength/range no longer coerce absent values', () => {
+    it('minLength fails (does not pass) on undefined instead of coercing to "undefined"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.minLength('name', 3, 'too short')
+      );
+
+      const result = validator.validate({ ...validData, name: undefined as unknown as string });
+
+      expect(result.isFailure).toBe(true);
+    });
+
+    it('minLength fails on null', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.minLength('name', 3, 'too short')
+      );
+
+      const result = validator.validate({ ...validData, name: null as unknown as string });
+
+      expect(result.isFailure).toBe(true);
+    });
+
+    it('maxLength fails on undefined instead of coercing to "undefined"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.maxLength('description', 20, 'too long')
+      );
+
+      const result = validator.validate({
+        ...validData,
+        description: undefined as unknown as string,
+      });
+
+      expect(result.isFailure).toBe(true);
+    });
+
+    it('range fails on null instead of coercing Number(null) to 0', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.range('age', 0, 150, 'out of range')
+      );
+
+      const result = validator.validate({ ...validData, age: null as unknown as number });
+
+      expect(result.isFailure).toBe(true);
+    });
+
+    it('range fails on undefined', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.range('age', 0, 150, 'out of range')
+      );
+
+      const result = validator.validate({ ...validData, age: undefined as unknown as number });
+
+      expect(result.isFailure).toBe(true);
+    });
+
+    it('range fails on NaN', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.range('age', 0, 150, 'out of range')
+      );
+
+      const result = validator.validate({ ...validData, age: NaN });
+
+      expect(result.isFailure).toBe(true);
+    });
+
+    it('range still accepts a valid number within bounds', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.range('age', 0, 150, 'out of range')
+      );
+
+      const result = validator.validate({ ...validData, age: 42 });
+
+      expect(result.isSuccess).toBe(true);
+    });
+
+    it('minLength/maxLength still accept unicode strings measured by UTF-16 code units', () => {
+      const validator = BusinessRuleValidator.create<TestData>()
+        .apply(coreRules.minLength('name', 2, 'too short'))
+        .apply(coreRules.maxLength('name', 10, 'too long'));
+
+      const result = validator.validate({ ...validData, name: '日本語テスト' });
+
+      expect(result.isSuccess).toBe(true);
+    });
+  });
+
+  describe('AC4: built-in rules emit stable error codes', () => {
+    it('required emits code "required"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(coreRules.required('name'));
+      const result = validator.validate({ ...validData, name: null as unknown as string });
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors[0]?.code).toBe('required');
+    });
+
+    it('minLength emits code "min_length"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.minLength('name', 10)
+      );
+      const result = validator.validate(validData);
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors[0]?.code).toBe('min_length');
+    });
+
+    it('maxLength emits code "max_length"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.maxLength('name', 1)
+      );
+      const result = validator.validate(validData);
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors[0]?.code).toBe('max_length');
+    });
+
+    it('pattern emits code "pattern"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.pattern('name', /^\d+$/)
+      );
+      const result = validator.validate(validData);
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors[0]?.code).toBe('pattern');
+    });
+
+    it('range emits code "range"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(
+        coreRules.range('age', 0, 1)
+      );
+      const result = validator.validate(validData);
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors[0]?.code).toBe('range');
+    });
+
+    it('email emits code "email"', () => {
+      const validator = BusinessRuleValidator.create<TestData>().apply(coreRules.email('email'));
+      const result = validator.validate(invalidData);
+      expect(result.isFailure).toBe(true);
+      expect(result.error.errors[0]?.code).toBe('email');
+    });
+  });
+
   describe('Specification-based rules', () => {
     it('should validate with satisfies', () => {
       // Arrange

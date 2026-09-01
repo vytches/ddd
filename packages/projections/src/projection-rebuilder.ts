@@ -1,4 +1,5 @@
 import type {
+  CapabilityConstructor,
   IEventStore,
   IDomainEvent,
   IReplayConfig,
@@ -7,6 +8,7 @@ import type {
 } from '@vytches/ddd-contracts';
 import { ProjectionError } from './projection-errors';
 import { internalLogger } from '@vytches/ddd-contracts/internal';
+import { CheckpointCapability } from './capabilities';
 import type { IProjectionEngine, IProjectionStore } from './projection-interfaces';
 
 export interface IProjectionRebuildConfig extends IReplayConfig {
@@ -14,6 +16,34 @@ export interface IProjectionRebuildConfig extends IReplayConfig {
    * Clear projection state before rebuilding
    */
   clearBeforeReplay?: boolean;
+
+  /**
+   * Resume replay from the last persisted checkpoint instead of replaying
+   * from the beginning. Requires a `CheckpointCapability` to be registered
+   * on the projection engine.
+   *
+   * If no checkpoint exists, or the checkpoint position is invalid, resume
+   * is refused and a full rebuild runs instead (a warning is logged).
+   *
+   * @default false
+   */
+  resumeFromCheckpoint?: boolean;
+}
+
+/**
+ * Reasons a `resumeFromCheckpoint` request can be refused.
+ */
+const RESUME_FROM_CHECKPOINT_REJECTED_REASON = {
+  NO_CHECKPOINT: 'no checkpoint found',
+  INVALID_POSITION: 'checkpoint position must be a positive safe integer',
+} as const;
+
+/**
+ * Single source of truth for the resume-rejection warning text so it stays
+ * grep-able across call sites and tests.
+ */
+function formatResumeFromCheckpointRejectedMessage(projectionName: string, reason: string): string {
+  return `ProjectionRebuilder: resumeFromCheckpoint rejected for "${projectionName}" - ${reason}. Falling back to full rebuild.`;
 }
 
 export interface IProjectionRebuilder<TReadModel> {
@@ -108,6 +138,10 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
         await this.clearProjectionState();
       }
 
+      const resumeFromPosition = config?.resumeFromCheckpoint
+        ? await this.resolveResumePosition(context.projectionName)
+        : undefined;
+
       const replay = this.getReplay();
 
       // Create event handler for projection
@@ -136,6 +170,7 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
       const projectionFilter: IReplayFilter = {
         ...filter,
         eventTypes: filter?.eventTypes || this.projectionEngine.getEventTypes(),
+        ...(resumeFromPosition !== undefined ? { fromPosition: resumeFromPosition } : {}),
       };
 
       // Start replay
@@ -272,16 +307,77 @@ export class ProjectionRebuilder<TReadModel> implements IProjectionRebuilder<TRe
     return results;
   }
 
+  /**
+   * Look up the `CheckpointCapability` registered on this projection's
+   * engine, if any. `CheckpointCapability` is generic over `TReadModel`
+   * while `CapabilityConstructor` isn't, hence the explicit cast — the
+   * registry itself is untyped storage, this just recovers the static type
+   * for this rebuilder's `TReadModel`.
+   */
+  private getCheckpointCapability(): CheckpointCapability<TReadModel> | undefined {
+    return this.projectionEngine.getCapability<CheckpointCapability<TReadModel>>(
+      CheckpointCapability as CapabilityConstructor<CheckpointCapability<TReadModel>>
+    );
+  }
+
+  /**
+   * Validate and resolve the checkpoint to resume from, if any.
+   *
+   * Returns the checkpoint position as a replay `fromPosition` and seeds the
+   * projection store with the checkpoint's state, so the caller's replay
+   * only has to apply events that happened after the checkpoint.
+   *
+   * Returns `undefined` (and logs a warning) when there is no usable
+   * checkpoint to resume from - callers should then run a full rebuild.
+   */
+  private async resolveResumePosition(projectionName: string): Promise<bigint | undefined> {
+    const checkpointCapability = this.getCheckpointCapability();
+    const checkpoint = checkpointCapability ? await checkpointCapability.loadCheckpoint() : null;
+
+    if (!checkpoint) {
+      internalLogger.warn(
+        formatResumeFromCheckpointRejectedMessage(
+          projectionName,
+          RESUME_FROM_CHECKPOINT_REJECTED_REASON.NO_CHECKPOINT
+        ),
+        { projectionName }
+      );
+      return undefined;
+    }
+
+    if (checkpoint.position <= 0 || !Number.isSafeInteger(checkpoint.position)) {
+      internalLogger.warn(
+        formatResumeFromCheckpointRejectedMessage(
+          projectionName,
+          RESUME_FROM_CHECKPOINT_REJECTED_REASON.INVALID_POSITION
+        ),
+        { projectionName, checkpointPosition: checkpoint.position }
+      );
+      return undefined;
+    }
+
+    // Safe: guarded by Number.isSafeInteger above.
+    const fromPosition = BigInt(checkpoint.position);
+
+    // Seed projection state from the checkpoint so replay only has to apply
+    // events that happened after it, instead of rebuilding from scratch.
+    await this.projectionStore.save(projectionName, checkpoint.state);
+
+    return fromPosition;
+  }
+
   async clearProjectionState(): Promise<void> {
     const projectionName = this.projectionEngine.getProjectionName();
 
     try {
       // Clear all read models for this projection
-      await this.projectionStore.deleteAll();
+      await this.projectionStore.delete(projectionName);
 
       // Reset checkpoint if projection has checkpoint capability
-      // Note: This would require access to the capability through the projection engine
-      // For now, we'll just clear the store state
+      const checkpointCapability = this.getCheckpointCapability();
+      if (checkpointCapability) {
+        await checkpointCapability.clearCheckpoint();
+      }
     } catch (error) {
       internalLogger.error(
         'ProjectionRebuilder: failed to clear projection state',

@@ -137,6 +137,64 @@ class OrderLine extends Entity<string> {
 }
 ```
 
+## Late-bound event data at the persistence boundary
+
+`getDomainEvents()` returns deep-frozen events — payload and nested objects
+included. That is deliberate: an event is a record of something that already
+happened, so nothing downstream may rewrite it. But a repository sometimes has
+to attach data only the persistence boundary knows: an encryption key id
+resolved at save time, an encrypted payload, a correlation id assigned at
+dispatch.
+
+`transformDomainEvents()` is the sanctioned way in. It replaces `payload` and
+`metadata` on the aggregate's own events — identity, prototype and `instanceof`
+survive, and the event constructor is never called. It has to land on the
+aggregate rather than on a local copy, because the dispatcher reads the
+aggregate's events again after `save()`; a local copy would leave the in-process
+event bus publishing the untransformed originals.
+
+The callback is synchronous, so anything asynchronous (a key lookup, an encrypt
+call) runs first and the results are applied by index:
+
+```typescript
+protected async encryptEventPii(aggregate: TAggregate): Promise<void> {
+  const events = aggregate.getDomainEvents();
+  const replacements = new Map<number, { payload: unknown }>();
+
+  for (let i = 0; i < events.length; i++) {
+    const event = events[i];
+    if (!isPiiCarrying(event)) continue;
+
+    // async: resolve the per-subject key, then encrypt
+    const keyId = await this.keys.resolve(event.payload.crypto.subjectKeyRef);
+    const payload = event.payload as Record<string, unknown>;
+
+    replacements.set(i, {
+      payload: {
+        ...payload,
+        piiData: await this.crypto.encrypt(payload.piiData),
+        crypto: { ...(payload.crypto as object), keyId },
+      },
+    });
+  }
+
+  if (replacements.size > 0) {
+    aggregate.transformDomainEvents((_event, index) => replacements.get(index));
+  }
+}
+```
+
+Return nothing for an event to leave it untouched. `eventName`, identity, and
+the number and order of events are fixed — changing those would desync handlers
+on replay or break the version invariant.
+
+**Reaching into `_domainEvents` instead is not a supported substitute.** It is
+private, it is not part of the public contract, and code that does it silently
+depends on an internal field name. The one thing it can do that
+`transformDomainEvents()` deliberately cannot is swap a whole event _instance_
+(for example to restore a prototype lost by an older serialization path) — if
+you need that, treat it as a migration step, not as a pattern.
+
 ## API Reference
 
 ### Core Classes

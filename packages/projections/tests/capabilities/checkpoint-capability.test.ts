@@ -223,6 +223,40 @@ describe('CheckpointCapability', () => {
     });
   });
 
+  describe('checkpoint clearing', () => {
+    it('should delete the persisted checkpoint', async () => {
+      // Arrange
+      await store.save('TestProjection', {
+        state: { id: 'test', version: 1 },
+        position: 100,
+        timestamp: new Date(),
+        eventCount: 3,
+      });
+
+      // Act
+      await capability.clearCheckpoint();
+
+      // Assert
+      const result = await store.load('TestProjection');
+      expect(result).toBeNull();
+    });
+
+    it('should not throw when there is no checkpoint to clear', async () => {
+      // Act & Assert
+      const [error] = await safeRun(() => capability.clearCheckpoint());
+      expect(error).toBeUndefined();
+    });
+
+    it('should throw error when not attached to context', async () => {
+      // Arrange
+      const unattachedCapability = new CheckpointCapability(store);
+
+      // Act & Assert
+      const [error] = await safeRun(() => unattachedCapability.clearCheckpoint());
+      expect(error).toBeInstanceOf(Error);
+    });
+  });
+
   describe('error handling', () => {
     it('should handle store errors gracefully during save', async () => {
       // Arrange

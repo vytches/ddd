@@ -121,6 +121,83 @@ shipOrder(orderId); // OK
 shipOrder(customerId); // TypeScript compile error!
 ```
 
+## Keeping a specific validation error with `getInvalidValueMessage()`
+
+_Since VF-023 — the constructor validates, see
+[`CHANGELOG.md`](./CHANGELOG.md)._
+
+`BaseValueObject`'s constructor calls `validate()` and throws on failure, before
+the subclass constructor body runs. `validate()` returns a boolean, so any value
+object whose real validation produces a _rich_ error — which field, which rule,
+which expected checksum — has to swallow that error to satisfy the signature.
+What reaches the caller is then the generic default:
+
+```
+Error: Invalid value for Regon
+```
+
+Override `getInvalidValueMessage()` to put the specific message back. It is
+called only on the failing path, so re-running the detailed validation there
+costs nothing in the happy case:
+
+```typescript
+export abstract class NationalIdentifier extends BaseValueObject<IdentifierProps> {
+  /** Throws a rich, typed error. Called by validate() and, on failure, here. */
+  protected abstract assertValid(value: string): void;
+
+  validate(props: IdentifierProps): boolean {
+    try {
+      this.assertValid(props.value);
+      return props.locale === this.expectedLocale;
+    } catch {
+      return false; // the detail is lost here — recovered below
+    }
+  }
+
+  protected override getInvalidValueMessage(props: IdentifierProps): string {
+    try {
+      this.assertValid(props.value);
+    } catch (error) {
+      // "REGON has invalid checksum: expected 5, got 6"
+      return error instanceof Error ? error.message : String(error);
+    }
+    return `${this.typeName} requires locale '${this.expectedLocale}', got '${props.locale}'`;
+  }
+}
+```
+
+Two constraints apply, both from the undefined-during-`super()` trap: the
+override may read only its `value` parameter and state the base constructor has
+already set (`this.value` is assigned before the throw), never a field
+initialized in the subclass constructor — that field is still `undefined` here.
+
+A `Result`-returning factory keeps the typed error by re-wrapping what the
+constructor threw:
+
+```typescript
+static create(value: string): Result<Regon, IdentifierValidationError> {
+  try {
+    return Result.ok(new Regon({ value, locale: 'pl-PL' }));
+  } catch (error) {
+    if (error instanceof IdentifierValidationError) return Result.fail(error);
+    // Generic Error from the base constructor — message already specific,
+    // thanks to getInvalidValueMessage() above.
+    return Result.fail(
+      new IdentifierValidationError(
+        error instanceof Error ? error.message : 'Unknown error',
+        'REGON'
+      )
+    );
+  }
+}
+```
+
+**Migration note.** Before VF-023 the common shape was `new X(props)` followed
+by `x.assertValid(...)` in the factory — the constructor did not validate, so
+the factory's own call produced the error. That second call is now unreachable:
+the base class throws first. A factory relying on it silently changes its error
+type from the typed one to a plain `Error`.
+
 ## Partial-identity equality with `getIdentityComponents()`
 
 _Since VF-036 — additive minor, see [`CHANGELOG.md`](./CHANGELOG.md)._

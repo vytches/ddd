@@ -69,10 +69,12 @@ import { CapabilityType } from '@vytches/ddd-contracts';
 import { CheckpointCapability } from '@vytches/ddd-projections';
 import { CircuitBreaker } from '@vytches/ddd-resilience';
 import { CircuitBreakerCapability } from '@vytches/ddd-projections';
+import { CircuitBreakerConfig } from '@vytches/ddd-resilience';
 import { CircuitBreakerDecorator } from '@vytches/ddd-resilience';
 import { CircuitBreakerDecoratorConfig } from '@vytches/ddd-resilience';
 import { CircuitBreakerHalfOpenLimitError } from '@vytches/ddd-resilience';
 import { CircuitBreakerMetricCollector } from '@vytches/ddd-resilience';
+import { CircuitBreakerMetrics } from '@vytches/ddd-resilience';
 import { CircuitBreakerOpenError } from '@vytches/ddd-resilience';
 import { CircuitBreakerState } from '@vytches/ddd-resilience';
 import { CircuitBreakerStrategy } from '@vytches/ddd-resilience';
@@ -575,6 +577,8 @@ export { CircuitBreaker }
 
 export { CircuitBreakerCapability }
 
+export { CircuitBreakerConfig }
+
 export { CircuitBreakerDecorator }
 
 export { CircuitBreakerDecoratorConfig }
@@ -582,6 +586,8 @@ export { CircuitBreakerDecoratorConfig }
 export { CircuitBreakerHalfOpenLimitError }
 
 export { CircuitBreakerMetricCollector }
+
+export { CircuitBreakerMetrics }
 
 export { CircuitBreakerOpenError }
 

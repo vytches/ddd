@@ -318,6 +318,13 @@ cancelOrder(orderId); // OK
 Available factories: `createBrandedId<Tag>(entityId)`, `newBrandedId<Tag>()`,
 `brandedIdFromUUID<Tag>(uuid)`, `brandedIdFromText<Tag>(text)`.
 
+## Related Guides
+
+- [`docs/guides/specification-vs-policy.md`](../../docs/guides/specification-vs-policy.md)
+  — "where do I validate what" decision tree: when a rule belongs in a VO's
+  `validate()` constructor invariant vs `Specification` /
+  `BusinessRuleValidator` / `PolicyBuilder`.
+
 ## Package Dependencies
 
 **Depends on:** `@vytches/ddd-contracts`, `@vytches/ddd-domain-primitives`,

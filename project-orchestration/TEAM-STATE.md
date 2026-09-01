@@ -1,37 +1,38 @@
 # Team State — @vytches/ddd
 
-_Last sync: 2026-08-19 by `/pulse`_ _Updated by `/pulse`. Read-only for humans —
+_Last sync: 2026-08-27 by `/pulse`_ _Updated by `/pulse`. Read-only for humans —
 agents write here._
 
 ---
 
 ## 🎯 Sprint Focus
 
-**v0.31.0's code-side gate is down to one item**: **VF-036 AC-SIGNOFF** (code
-merged `c88e728e`; only the consumer's full-suite run on a patched build is
-outstanding). **VF-028** (resilience correctness) was flagged mid-pulse as
-"still active" — that framing was itself stale: it was implemented and committed
-the same day (`05ac364a`), verified (resilience 104/104, policies 237/237 tests
-green) and archived to `completed-tasks/`. Remaining gate besides VF-036:
-**juz-ide-api manual validation**, still deliberately deferred by prior explicit
-authorization, no deadline. Owner decision 2026-08-19: collect VF-036's
-sign-off, run the full release checklist, **then** merge `develop` → `main`
-(currently 178 commits behind, `main`'s last reachable tag is `v0.27.0`) and
-tag/publish.
+**v0.31.0 shipped 2026-08-22** (npm `latest: 0.31.0`, all 19 packages, PR #87).
+VF-036's AC-SIGNOFF gate was collected, `main` was reset to origin and `develop`
+recreated from it — at that moment the two branches were genuinely in sync. **8
+days on, they no longer are**: `develop` is now **15 commits ahead of `main`**,
+carrying six shipped, verified fixes that real npm consumers on 0.31.0 do not
+yet have — `VF-041` (missing `CircuitBreakerConfig`/`CircuitBreakerMetrics` type
+exports), a `forRoot()`/`forTesting()` `options.exports` wiring fix in
+`@vytches/ddd-nestjs`, **VF-033** (validation hardening), **VF-025**
+(event/projections/resilience/cqrs patch hardening), **VB-008** (policy
+behaviours), **VB-005** (benchmark harness repair). No task file or note records
+a decision on when to cut the next release (patch or minor) — this is new since
+the last pulse, not carried forward from it.
 
-**Since the 2026-07-13 pulse, also landed** (found this pulse without a prior
-status sync — 37-day gap): **VF-037** (standing cross-context isolation
-regression suite + behavioral-BC checklist, done `c393a04b`, now archived) and
-**VF-039**, split 2026-08-19 into **VF-039a** (revert-ban, design-complete,
-ready to ship) and **VF-039b** (churn-guard, deprioritised pending a design
-decision on churn-ledger placement).
+**Since the 2026-08-19 pulse (8 days)**, also landed and archived to
+`completed-tasks/`: **VF-033**, **VF-025**, **VB-008**, **VB-005** (see above).
+P1 board is now **empty** — VB-008 was demoted P1→P3 on 2026-08-23 once the
+pre-publish urgency it was promoted under stopped applying, then shipped anyway.
+VT-006/VT-007 (test debt) are top of P2 and the recommended next work.
 
-**Housekeeping flagged this pulse**: VF-028 and VF-037 both had stale task files
-(status/AC checkboxes not updated after their commits landed) — corrected and
-archived 2026-08-19. VP-012's `priority: normal` field still hasn't caught up
-with its recorded 2026-08-09 P2→P1 promotion — left unresolved, needs owner
-confirmation before flipping it (unlike VF-028/VF-037, git history alone doesn't
-settle what VP-012's priority _should_ say).
+**Open, non-blocking**: **VF-039b** (churn-guard) remains blocked on an
+architecture decision — where the churn ledger lives (copy-adapted script vs.
+shared module) — deprioritised 2026-08-19 in favor of higher-impact work, not
+reassessed since. **VA-001**'s own demand-signal window
+(`juz-ide-api scoping AI integration — expect attention ~2026-08/09`) is now
+**18+ days expired with zero recorded check** — flagged "check this week" on
+2026-08-19, still unchecked, second consecutive pulse cycle unresolved.
 
 ---
 
@@ -39,25 +40,29 @@ settle what VP-012's priority _should_ say).
 
 <!-- @tech-lead updates this section on /pulse -->
 
-1. **VF-036 AC-SIGNOFF outstanding — now the sole npm-tag gate.** Code is merged
-   (`c88e728e`); only the downstream consumer's full-suite run on the patched
-   build remains. Owner decision 2026-08-19: finish this, then run the full
-   release checklist before merging `develop` → `main`.
-2. **`main` is 178 commits behind `develop`** (last tag reachable from `main`:
-   `v0.27.0`). The old `release/2026-07-18-alpha` branch is already fully
-   absorbed into `develop` (`d836beeb`) — nothing separate to bring over. Merge
-   to `main` is deliberately queued behind item 1 + the release checklist, per
-   owner decision this session — not a red alert, a sequencing choice.
-3. **VF-028 was closed the same day it was flagged.** This pulse initially
-   reported it as "active, not done" — that was the pulse's own stale read,
-   corrected after a direct user check. It shipped (`05ac364a`), verified
-   (resilience 104/104, policies 237/237 green) and archived to
-   `completed-tasks/`. No action needed; listed here only so the correction is
-   visible, not buried.
+1. **`main` is 15 commits behind `develop` — six shipped fixes are not yet in
+   the published npm package.** `main` and `develop` were genuinely in sync
+   right after the 2026-08-22 v0.31.0 publish; every commit since then (`VF-041`
+   type-export fix, an `nestjs` `forRoot()`/`forTesting()` exports fix,
+   **VF-033**, **VF-025**, **VB-008**, **VB-005**) landed on `develop` only. No
+   decision is recorded anywhere on when to cut the next release. This is new
+   since the last pulse — not a carried-forward item.
+2. **VF-039b blocked on an architecture decision** (where the churn ledger lives
+   — copy-adapted script vs. shared module). Deprioritised 2026-08-19 in favor
+   of higher-impact work; not reassessed since. Non-urgent, but genuinely stuck
+   until someone answers the question.
+3. **VA-001's demand-signal check is now 18+ days overdue and unresolved for the
+   second consecutive pulse.** Its own task file names the trigger —
+   `juz-ide-api scoping AI integration — expect attention ~2026-08/09` — and
+   nobody has recorded whether that happened. Needs a direct maintainer
+   question, not another silent cycle.
 
-**Housekeeping (non-blocking)**: VP-012's task file still reads
-`priority: normal` despite its recorded 2026-08-09 P2→P1 promotion — needs a
-`/task-tidy` pass or an explicit owner call on the intended value.
+**Housekeeping (non-blocking)**: VT-007's `release_target` field still reads
+`"before first non-alpha tag preferred"` — that tag shipped 2026-08-22; the
+field describes a window that already closed and should be corrected to reflect
+real post-publish stakes (untested e2e surface, real consumer). VF-025's
+reserved follow-ups (`VF-025b/c/d`) have no task files yet — create them from
+the analysis before anyone picks that work up.
 
 ---
 
@@ -69,99 +74,136 @@ _N/A — this is a library project, no mobile UI._
 
 ## ⚙️ Technical Pulse
 
-<!-- Updated by @tech-lead on 2026-08-19 — scanned 23/24 active tasks, 37-day sync gap -->
+<!-- Updated by @tech-lead on 2026-08-27 — scanned 14/14 active tasks, 8-day sync gap -->
 
-**Status**: 🟢 GREEN (revised same-day from 🟡 AMBER) — the metadata drift this
-pulse first flagged on VF-028 turned out to be the pulse's own read being stale,
-not the work: VF-028 was already done. AC-SIGNOFF gate on VF-036 is the only
-thing left blocking publish. Zero blocked dependency chains, zero tech debt.
+**Status**: 🟢 GREEN, with one new fact worth attention: v0.31.0 shipped, P1
+board is empty, all pre-publish gates cleared — but `main` has drifted 15
+commits behind `develop` since publish day, and nobody has decided when to cut
+the next release (see Critical Now #1). Zero blocked _task_ dependency chains
+(VF-039b's block is an open architecture question, not an upstream task).
 
-**Blocked chains**: 0 upstream dependencies. VF-039b is deprioritised on an open
-architecture question (churn-ledger placement), not blocked by another task.
+**Blocked chains**: 0 upstream task dependencies (no `dependencies:`/`blocks:`
+fields exist in this project's schema, so this is computed from
+prose/frontmatter cross-reference, not a graph). VF-039b is blocked on a design
+decision, not another task.
 
-**Since the 2026-07-13 pulse (37 days)**: three new high-priority tasks landed
-without a status sync — **VF-036** (code merged `c88e728e`, AC-SIGNOFF
-outstanding), **VF-037** (done, `c393a04b`, now archived), **VF-039** (split
-same-day into VF-039a/VF-039b).
+**Since the 2026-08-19 pulse (8 days)**: v0.31.0 published 2026-08-22 (npm
+`latest: 0.31.0`); VF-036 AC-SIGNOFF collected; **VF-033**, **VF-025**,
+**VB-008**, **VB-005** all shipped and archived; the 2026-08-21 runtime series
+(VF-032a/b et al.) archived. `main`↔`develop` were synced at publish, then
+diverged again — see Critical Now #1 for the six-commit gap this opened.
 
-**Same-day self-correction**: initial pulse read VF-028's task file
-(`status: backlog`) at face value and reported it as still active. A direct user
-question caught the drift going the other way — the code was already merged
-(`05ac364a`) the same day. Re-verified before archiving: resilience 104/104 and
-policies 237/237 tests green; a `@vytches/ddd-cqrs` run showed 3 failures traced
-by `git blame` to 2025-08-23, unrelated to this change. Lesson: a task file's
-`status` field is a claim about the past, not a live signal — cross-check git
-log/branch state when the two disagree, don't just report the file.
+**Stale (>14d)**: VD-004/VF-002 (148d, deliberate opportunistic hold — no
+runtime value per 2026-08-09 owner directive), VA-001 (99d, deliberate hold on
+an now-overdue demand signal — see Critical Now #3), VT-006 (56d, legitimately
+queued as top of P2 with P1 empty). None forgotten — each is either a deliberate
+hold or genuinely next-in-queue.
 
-**Stale (>14d)**: VD-004/VF-002 (141d, deliberate opportunistic hold), VA-001
-(91d, deliberate hold — see Business Pulse), VP-012/VT-006/VF-025 (~48d),
-VF-032/VF-033/VF-034 (40d). None flagged as forgotten — either deliberately
-deferred or genuinely next-in-queue.
+**Critical path (post-v0.31.0)**: none blocking publication — that gate is
+closed. Two independent threads instead: (1) decide when to cut a release
+carrying the six develop-only fixes, (2) VT-006/VT-007 (~10h combined, P2 test
+debt) as the next scheduled work once someone picks it up.
 
-**Critical path to v0.31.0**: VF-036 consumer sign-off → full release checklist
-→ merge `develop` → `main` (178 commits ahead, `main` last tagged `v0.27.0`) →
-tag. Then VF-039a (2h, design-complete) clears the rest of the P1 board.
+**Debt**: 0 major, 0 minor (no `tech_debt:` fields declared in any task file —
+schema limitation, not a claim that no debt exists).
 
-**Debt**: 0 major, 0 minor (no `tech_debt:` fields declared in any task file).
-
-**Housekeeping found this pulse**: VF-028 and VF-037 task files both had stale
-status/AC fields relative to their actual git state — corrected and archived
-2026-08-19. VP-012's `priority: normal` field still hasn't caught up with its
-recorded 2026-08-09 P2→P1 promotion — left open, needs an owner call rather than
-an inferred fix.
+**Housekeeping found this pulse**: VF-025's reserved follow-ups (`VF-025b/c/d`)
+have no task files yet despite being named in the completed task's own
+"Zamknięcie" section — create before picking that work up. VT-007's
+`release_target` field is stale (describes a pre-publish window that already
+closed). VA-001's demand-signal check is unresolved for a second consecutive
+pulse cycle.
 
 ---
 
 ## 💼 Business Pulse
 
-<!-- Updated by @product-owner on 2026-08-19 — scanned 23/23 tasks -->
+<!-- Updated by @product-owner on 2026-08-27 — scanned 14/14 tasks, 8-day sync gap -->
 
-**Next milestone**: v0.31.0 — down to 1 critical-path item: **VF-036
-AC-SIGNOFF**. VF-028 was reported in-progress earlier this pulse; that was stale
-— it shipped the same day (`05ac364a`) and is archived. No `due_date` field
-exists in this task schema, so no overdue count is computed — that's a genuine
-gap, not an omission. juz-ide-api manual sign-off remains deferred, no deadline.
+**Next milestone**: v0.31.0 already shipped (npm `latest: 0.31.0`, 2026-08-22).
+No next milestone is named in any doc — 0 critical-path tasks remain from the
+last stated one. Open question this pulse could not resolve from any doc:
+whether the separately-named "juz-ide-api manual validation" gate (2026-08-19
+wording) was folded into VF-036's AC-SIGNOFF before publish, or bypassed — worth
+an explicit owner confirmation, not a pulse guess.
 
-**Unvalidated features**: VD-004 (interactive docs) — its "80% faster discovery"
-claim has no cited source anywhere in the task file; correctly already demoted
-P2→P3 on 2026-08-09. VA-001 is **not** unvalidated — it's gated on a named
-demand signal, not an assumption.
+**Unvalidated features**: VD-004/VF-002 (already P3, unchanged). **New this
+pulse**: VD-006b (10h R&D semantic-eval harness) — no task-file line cites a
+customer or consumer asking for it; it exists because `/analyze-ddd` split it
+out of VD-006, not because of demand. VA-001 remains correctly demand-gated, not
+assumed — but see below, its gate has gone silent.
 
 **Mobile UX**: N/A — library has no UI, no `mobile_impact` field in schema.
 
-**Segment coverage** (qualitative — no `segment` field in schema):
-production/scaling teams well-served (VF-028/VF-025/VP-012/VF-037 are all
-runtime-hardening work, prioritized by the 2026-08-09 owner directive).
-First-time DDD adopters underserved (VD-008/VD-009 sit at P2/P3). AI-agent
-integrators 0% — VA-001 still `backlog`.
+**Segment coverage** (qualitative — no `segment` field in schema): production/
+scaling teams well-served (the whole runtime-hardening series —
+VF-025/VF-028/VF-033/VB-005/VB-006/VB-007/VB-008/VP-012 — landed for them).
+First-time DDD adopters underserved (VD-008/VD-009 at P2/P3). AI-agent
+integrators 0% — VA-001 still `backlog`. **Material shift since 2026-08-19**:
+"production/scaling" is no longer a hypothetical segment — v0.31.0 has at least
+one real consumer running it in production, which raises the real cost of any
+defect shipped to that lane, including the six fixes currently sitting on
+`develop` unreleased (see Critical Now #1).
 
-**Cut candidate if capacity tightens**: **VP-006c** — its own task title states
-"no live callers," a weaker business case than VD-004 (which at least claims an
-unverified benefit). Recommend cutting VP-006c first if scope needs trimming.
+**Cut candidate if capacity tightens**: **VD-006b** — the most expensive
+remaining discretionary item with the thinnest business justification; its own
+dependency (VD-006a) already shipped the mechanical half of the original ask.
 
-**Validate with the maintainer this week**: VA-001's task file names its own
-trigger —
-`demand_signal: juz-ide-api scoping AI integration — expect attention ~2026-08/09`
-— and that window is open now. Worth a direct check: has juz-ide-api actually
-started scoping AI integration? If yes, VA-001's entry conditions may be met; if
-no, re-date the deferral rather than leave it on an expired signal.
+**Validate with the maintainer this week**: **VA-001** — its demand-signal
+window (`~2026-08/09`) is now 18+ days expired with zero recorded check, the
+second consecutive pulse cycle this has gone unresolved. Direct question: has
+juz-ide-api actually started scoping AI integration? If yes, promote off
+`backlog`; if no, re-date the deferral rather than leave it silently expired.
 
 **Actions this week**:
 
-1. Collect VF-036's AC-SIGNOFF — the sole remaining npm-tag gate (VF-028 already
-   shipped, archived 2026-08-19).
-2. Run `/task-tidy` on VP-012 (fix stale priority field) — VF-028/VF-037 are
-   already archived.
-3. Check with the maintainer whether VA-001's demand signal has actually
-   materialized.
-4. After 1: run the full release checklist, then merge `develop` → `main` and
-   tag.
+1. Decide when to cut the next release (patch or minor) — six shipped fixes are
+   sitting on `develop` unreleased since 2026-08-22.
+2. Check with the maintainer whether VA-001's demand signal has actually
+   materialized — second cycle this is unresolved.
+3. Correct VT-007's stale `release_target` field (describes a window that
+   already closed).
+4. Create task files for VF-025's reserved follow-ups (`VF-025b/c/d`) before
+   anyone picks that work up.
 
 ---
 
 ## 📝 Team Notes
 
 <!-- Chronological, newest first. Format: [YYYY-MM-DD] @agent: insight -->
+
+[2026-08-27] @human: Merged `fix/VB-005-benchmark-harness-broken` into `develop`
+(fast-forward, no conflicts — `develop` had nothing new since the branch point)
+and ran `/pulse`.
+
+[2026-08-27] @pulse: 8-day sync gap (last pulse 2026-08-19). A lot shipped
+without a status sync: v0.31.0 published to npm 2026-08-22 (all 19 packages, PR
+#87), then VF-033/VF-025/VB-008/VB-005 all shipped and archived on top of that.
+**Corrected a stale claim from @tech-lead's own draft this pulse**: it initially
+reported `main`/`develop` as "synced post-release" — verified independently
+(`git log main..develop` / `develop..main`) and found `develop` is actually 15
+commits ahead of `main`, carrying six shipped fixes (VF-041 type-export fix, an
+nestjs forRoot/forTesting exports fix, VF-033, VF-025, VB-008, VB-005) that are
+not in the published npm package. The two branches _were_ genuinely synced right
+at the 2026-08-22 publish moment — they just didn't stay that way, and nothing
+recorded the drift until this pulse. Promoted to Critical Now #1. Health: 🟢
+GREEN otherwise — P1 empty, zero blocked task dependencies, zero tech debt.
+VA-001's demand-signal check is now unresolved for a second consecutive pulse
+cycle — worth a direct maintainer question rather than a third silent cycle.
+
+[2026-08-27] @tech-lead: 🟢 GREEN. P1 board empty, all pre-publish gates
+cleared. VF-039b remains blocked on an architecture decision (churn-ledger
+placement) — deprioritised, not urgent. VT-006/VT-007 (~10h combined) are the
+recommended next work. Flagged VF-025b/c/d as reserved-but-unfiled follow-up
+task files. (Initial draft claimed main/develop were synced post-release —
+corrected by the pulse coordinator's independent git check; see the note above.)
+
+[2026-08-27] @product-owner: No next milestone is named anywhere in the docs now
+that v0.31.0 has shipped — flagging this as a gap rather than guessing a name.
+New unvalidated-feature flag: VD-006b (10h R&D) has no cited demand. VT-007's
+`release_target` field still describes a pre-publish urgency window that already
+closed — a metadata correction, not just an observation. VA-001's demand-signal
+check, due "this week" as of 2026-08-19, is still undone 8 days later.
 
 [2026-08-19] @human: Asked "czy 028 właśnie nie skończyliśmy?" — caught that the
 `/pulse` run minutes earlier had reported VF-028 as still active/backlog, which

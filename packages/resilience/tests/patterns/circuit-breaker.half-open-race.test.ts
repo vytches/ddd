@@ -3,6 +3,7 @@ import {
   CircuitBreaker,
   CircuitBreakerHalfOpenLimitError,
   CircuitBreakerOpenError,
+  CircuitBreakerState,
   DefaultResilienceContext,
 } from '../../src';
 
@@ -94,5 +95,90 @@ describe('CircuitBreaker HALF_OPEN admission race (AC3)', () => {
       // keep working unchanged.
       expect(reason).toBeInstanceOf(CircuitBreakerOpenError);
     }
+  });
+});
+
+/**
+ * VF-025 AC10 (bonus), Q2 — documented, ACCEPTED edge case, not a bug to fix
+ * here: with `halfOpenMaxProbes > 1`, two concurrent HALF_OPEN probes can
+ * settle at nearly the same moment, one failing and one succeeding. The
+ * failure re-trips the circuit to OPEN immediately (onFailure's HALF_OPEN
+ * branch). If the success's onSuccess() runs afterwards, the circuit is
+ * already OPEN (not HALF_OPEN) by then, so onSuccess() falls into its "else"
+ * branch and zeroes `failureCount` — a metric that transiently reads 0 on an
+ * OPEN circuit. State transitions are driven solely by
+ * `nextAttemptTime`/`shouldAttemptReset()`, never by `failureCount`, so this
+ * never flips the circuit back CLOSED or HALF_OPEN; it only skews what
+ * `getMetrics().failureCount` reports. This test pins that outcome down so a
+ * future change can't silently "fix" the metric in a way that breaks the
+ * state guarantee instead.
+ */
+describe('CircuitBreaker HALF_OPEN failure/success race (VF-025 Q2, accepted edge case)', () => {
+  it('ends OPEN when a concurrent HALF_OPEN failure settles before a concurrent HALF_OPEN success, even though the success then zeroes the failureCount metric', async () => {
+    const breaker = new CircuitBreaker({
+      failureThreshold: 1,
+      recoveryTimeout: 0,
+      successThreshold: 1,
+      timeout: 5000,
+      name: 'half-open-race-outcome',
+      halfOpenMaxProbes: 2,
+    });
+
+    const context = DefaultResilienceContext.create({});
+
+    // 1) Trip the breaker to OPEN.
+    await expect(
+      breaker.execute(async () => {
+        throw new Error('boom');
+      }, context)
+    ).rejects.toThrow('boom');
+
+    // 2) Two concurrent HALF_OPEN probes, each externally gated so we can
+    // control settlement order precisely. Both admission checks run
+    // synchronously back-to-back (see the AC3 test above for why), so both
+    // are accepted under halfOpenMaxProbes=2 before either settles.
+    let releaseFail!: (reason: unknown) => void;
+    let releaseSucceed!: () => void;
+    const failGate = new Promise<never>((_resolve, reject) => {
+      releaseFail = reject;
+    });
+    const succeedGate = new Promise<void>(resolve => {
+      releaseSucceed = resolve;
+    });
+
+    const failProbe = breaker.execute(async () => {
+      await failGate;
+      return 'unreachable';
+    }, context);
+    const succeedProbe = breaker.execute(async () => {
+      await succeedGate;
+      return 'ok';
+    }, context);
+
+    // Attach a rejection handler immediately so the pending failure doesn't
+    // trigger an unhandled-rejection warning while we sequence the gates.
+    const failSettled = failProbe.catch((reason: unknown) => reason);
+
+    // Release the failure first and await its full settlement — this drives
+    // onFailure()/tripCircuit() to completion (both run synchronously inside
+    // execute()'s catch block) before the success is allowed to resolve,
+    // matching the ordering the documented edge case describes.
+    releaseFail(new Error('boom'));
+    const failReason = await failSettled;
+    expect(failReason).toBeInstanceOf(Error);
+    expect((failReason as Error).message).toBe('boom');
+
+    expect(breaker.getMetrics().state).toBe(CircuitBreakerState.OPEN);
+
+    // 3) Now let the concurrent success resolve. Its onSuccess() runs while
+    // the circuit is already OPEN, not HALF_OPEN, so it lands in the "else"
+    // branch and zeroes failureCount without touching state.
+    releaseSucceed();
+    await expect(succeedProbe).resolves.toBe('ok');
+
+    const metrics = breaker.getMetrics();
+    expect(metrics.state).toBe(CircuitBreakerState.OPEN);
+    // Documented, transiently-misleading metric (Q2) — not a state bug.
+    expect(metrics.failureCount).toBe(0);
   });
 });

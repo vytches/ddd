@@ -31,6 +31,16 @@ describe('ValidationError', () => {
     expect(error.context).toEqual(context);
   });
 
+  it('AC4: code is undefined when not provided (BC-safe optional field)', () => {
+    const error = new ValidationError('email', 'Invalid email format');
+    expect(error.code).toBeUndefined();
+  });
+
+  it('AC4: code carries a stable, machine-readable error identity when provided', () => {
+    const error = new ValidationError('email', 'Invalid email format', undefined, 'email');
+    expect(error.code).toBe('email');
+  });
+
   it('should convert to string with property and message', () => {
     // Arrange
     const property = 'age';

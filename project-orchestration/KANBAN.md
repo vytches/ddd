@@ -1,13 +1,55 @@
 # KANBAN — @vytches/ddd
 
-_Last updated 2026-08-21 — runtime series closed (7 tasks: VF-032a/b, VF-027,
-VB-007, VP-006c/d, VF-040) and boards re-prioritised. **Board correction the
-same day**: VF-032a and VF-032b had sat on the P2 board for a day after being
-archived — the row deletions were exact-string matches that stopped matching
-once `prettier --write` realigned the table columns. Cross-checked every board
-row against `tasks/` afterwards; the only entries now absent from a board are
-the three `split` parents (VD-006, VF-032, VF-039), which is intended. Prior:
-2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
+_Last updated 2026-08-27 by `/pulse`_ — **board reconciled, no task changes.**
+P1 confirmed empty. New finding: `develop` is 15 commits ahead of `main` —
+carrying six shipped fixes (VF-041 type-export fix, an `nestjs`
+forRoot/forTesting exports fix, VF-033, VF-025, VB-008, VB-005) not yet in the
+published npm package. `main` and `develop` were genuinely synced right at the
+2026-08-22 v0.31.0 publish; nothing has merged since. No release date decided —
+see `TEAM-STATE.md` Critical Now #1. VA-001's demand-signal check (due "this
+week" as of 2026-08-19) is unresolved for a second consecutive pulse cycle.
+
+_Prior — Last updated 2026-08-25 — **VB-005 shipped** (benchmark harness repair:
+the `resolve.alias` object-form prefix-matching bug in
+`benchmarks/vitest.config.mts` that broke `pnpm run bench` entirely — fixed to
+array form with `/internal` subpath entries before base entries, matching the
+VF-024 precedent already applied in the root config and
+`packages/nestjs/vitest.bench.config.ts`, and extended to cover a second,
+undiscovered instance of the same bug in `@vytches/ddd-events/internal`;
+`Money`'s missing `validate()` in `hot-paths.bench.ts` fixed alongside it — a
+real compile-time defect masked by the alias failure; README now documents how
+to verify the harness locally. `library-quality-verifier` GO, `pnpm run bench`
+confirmed exit 0 with all 11 `hot-paths.bench.ts` results present. Committed
+`bf8d54cc` on `fix/VB-005-benchmark-harness-broken`, moved to
+`completed-tasks/`. P1 is now empty.) Prior (same day): **VB-008 shipped**
+(policy behaviours: composition-wrapper preservation across
+`and()`/`or()`/`when()` + factory export shape + named cache-metrics type +
+`create()`/`withDefaults()` collapse + examples/CI gate,
+`library-quality-verifier` GO on all 7 ACs, no merge needed — branch was already
+at `develop`'s commit, moved to `completed-tasks/`; four changesets await
+release). Prior: 2026-08-24 — **VF-025 shipped** (patch scope A+C+E+G — events
+dedup+diagnostics, projections clearProjectionState fix + opt-in checkpoint
+resume, resilience circuit-breaker HALF_OPEN fix, cqrs typed registration —
+`library-quality-verifier` GO, merged to `develop` fast-forward `4801b799`,
+moved to `completed-tasks/`). Remaining scope (retryConfig classification,
+error-propagation, autoRegisterHandlers opt-in flip, resilience metrics wire-up)
+deferred — reserved names `VF-025b/c/d` in
+`project-orchestration/completed-tasks/VF-025-event-projections-hardening.md`
+§Zamknięcie, **no task files exist yet for them**, refile from the analysis
+before picking that work up. Prior: 2026-08-23 (same-day follow-up) — **VF-033
+shipped** (validation hardening: all 6 ACs, moved to `completed-tasks/`). Prior
+(same day): post-publish board correction — v0.31.0 is live on npm
+(`latest: 0.31.0`, 2026-08-22, PR #87), so **VF-036 was archived** (it had sat
+in `tasks/` with `status: done` and all ACs checked) and **VB-008 was demoted P1
+→ P3** — its promotion was pre-publish window reasoning that the release
+invalidated. Prior: 2026-08-21 — runtime series closed (7 tasks: VF-032a/b,
+VF-027, VB-007, VP-006c/d, VF-040) and boards re-prioritised. **Board correction
+the same day**: VF-032a and VF-032b had sat on the P2 board for a day after
+being archived — the row deletions were exact-string matches that stopped
+matching once `prettier --write` realigned the table columns. Cross-checked
+every board row against `tasks/` afterwards; the only entries now absent from a
+board are the three `split` parents (VD-006, VF-032, VF-039), which is intended.
+Prior: 2026-08-19 by `/pulse` + same-day correction (37-day sync gap —
 VF-036/VF-037/VF-039 work landed since the 2026-07-13 pulse without a status
 sync; VF-039 split into VF-039a/VF-039b same day. **Correction**: `/pulse`
 initially flagged VF-028 as "branch active, not yet done" — a direct user check
@@ -30,23 +72,34 @@ release checklist, then merge `develop` → `main` (178 commits ahead, `main`'s
 last reachable tag is `v0.27.0`) and tag. Age = days since created_at. Grouped
 by priority (P0 critical · P1 high · P2 normal/medium · P3 low · backlog)._
 
-## Start here (2026-08-21)
+## Start here (2026-08-24)
 
-**Repo state.** `develop` is **221 commits ahead of `main`** and **nothing is
-pushed** — the entire runtime series lives locally only. `main`'s last reachable
-tag is `v0.27.0`. Full suite green: 2673 passed / 7 skipped / 11 todo;
-`validate:api` green across five packages.
+**v0.31.0 is published.** `npm view @vytches/ddd` → `latest: 0.31.0`, all 19
+packages, released 2026-08-22 via PR #87. VF-036's AC-SIGNOFF — the gate the
+2026-08-21 note called "the one gate on the tag" — was collected the next day
+and the release went out. `main` was reset to origin and `develop` recreated
+from it. VF-036 sat in `tasks/` with `status: done` and every AC checked until
+2026-08-23; archived now.
 
-**The one gate on the v0.31.0 tag is still VF-036's AC-SIGNOFF.** Everything
-else on P1 is a window-closing decision, not a blocker.
+**What that changes.** Every "before first publish" framing on this board has
+expired. Breaking changes are no longer free: the packages are public and at
+least one downstream application is running 0.31.0 in anger. Judge remaining
+tasks by _defect severity to a real consumer_, not by _how cheap the decision is
+today_ — that second axis no longer exists.
 
-**Next three things, in order:**
+**Next thing:**
 
-1. **VF-036 sign-off** → release checklist → merge `develop` → `main` → tag.
-2. **VB-008** — run `/analyze VB-008` first. Breaking export-shape change; free
-   to decide now, a major bump after publish.
-3. **VF-025 and VF-033** — the last two runtime defects in the backlog (P2, top
-   of the list, see the note there).
+1. **VT-006** / **VT-007** — top of P2, both test debt: policies decorator
+   coverage (temporal/cached/retry) + `testing` pkg hardening (~10h), or
+   re-enabling the skipped domain-services e2e suite (~5h). P1 is empty — this
+   is the actual next work.
+
+_**VB-005** (benchmark harness repair) shipped 2026-08-25 — see the header note
+above; P1 is now empty. **VB-008** (policy behaviours — composition-wrapper fix
+and factory export shape) shipped 2026-08-25 — see the header note above.
+**VF-025** (event/projections/resilience/cqrs patch hardening) shipped
+2026-08-24 — see "Shipped and archived" below. **VF-033** (validation hardening)
+shipped 2026-08-23 — see "Shipped and archived" under P1._
 
 **Two things a newcomer to this board should not have to rediscover:**
 
@@ -58,6 +111,9 @@ else on P1 is a window-closing decision, not a blocker.
 - **Prettier reformats these tables.** Editing a board row by exact-string match
   silently misses after a `prettier --write`; two completed tasks sat on the P2
   board for a day that way. Match on the ID, verify afterwards.
+- **`@vytches/ddd-nestjs:test` has a flaky test.** A lone failure that clears on
+  re-run is that, not a regression — Nx says so itself ("Nx detected a flaky
+  task"). Never reach for `--no-verify`.
 
 ---
 
@@ -347,24 +403,54 @@ _VS-016 (the prior sole P0) shipped 2026-07-10._
 _Runtime-value first (owner directive 2026-08-09): things that change or protect
 how the library behaves at run time outrank docs/lint work. Re-prioritised
 2026-08-21 after the runtime series — the six runtime-impacting tasks that
-review found are now five done and two left (VF-025, VF-033, both P2). What
-ranks P1 now is **the release gate and the decisions whose window closes at
-first publish**, not raw runtime value._
+review found are now six done, one left (VF-025, P2; VF-033 shipped 2026-08-23).
+What ranked P1 after that was the release gate and the decisions whose window
+closed at first publish — **both are gone as of 2026-08-23**: the gate (VF-036)
+was collected and v0.31.0 shipped, and the window closed with it, which is why
+VB-008 went back to P3. VB-005, the one remaining tooling defect, shipped
+2026-08-25 — P1 is now empty._
 
-| ID     | Title                                                     | Status                                                 | Age |
-| ------ | --------------------------------------------------------- | ------------------------------------------------------ | --- |
-| VF-036 | getIdentityComponents() equality hook (consumer-gated BC) | in-progress — AC-SIGNOFF outstanding, blocks npm tag   | 12d |
-| VB-008 | Behaviors export shape violates public-api-pattern        | planned — **needs `/analyze VB-008` before any code**  | 1d  |
-| VB-005 | Benchmark harness broken (pnpm bench doesn't run at all)  | backlog _(discovered 2026-08-20 while closing VP-012)_ | 1d  |
+_Empty._
 
-> **VB-008 promoted P3 → P1 on 2026-08-21**, not because it became more urgent
-> but because its window is closing. It changes the export _shape_ of three
-> behaviour families in `@vytches/ddd-policies` (concrete classes where the
-> pattern wants interface + factory), which is a breaking change the moment the
-> package is published — its own `release_target` says "major or a deprecation
-> window". Deciding it now costs a discussion; deciding it later costs a major
-> bump. Note the status: it needs analysis first, and is **not** ready to
-> implement — the same trap VF-032 fell into before it was split.
+> **VB-005 shipped 2026-08-25.** Root cause was not the `tsconfig.json` >
+> `rootDir` hypothesis in the original task — it was
+> `benchmarks/vitest.config.mts`'s object-form `resolve.alias`, whose
+> string-prefix matching silently mangled the `@vytches/ddd-contracts/internal`
+> subpath import into a broken path (`ENOTDIR .../index.ts/internal`). Fixed to
+> array form with subpath entries before base entries, the same shape already
+> proven in the root config and `packages/nestjs/vitest.bench.config.ts` under
+> VF-024 — and extended to a second, undiscovered instance of the identical bug
+> in `@vytches/ddd-events/internal`, which would have failed immediately after
+> the first fix if left unaddressed. `Money`'s missing `validate()` in
+> `hot-paths.bench.ts` (a real compile-time defect, masked until the alias was
+> fixed) was fixed alongside it. `benchmarks/README.md` now documents a
+> result-count check, not just exit code, as the standard for "the harness
+> works" — the include glob covers every `*.bench.ts` file, so a future added
+> suite could otherwise mask a silent collection failure the same way. Verified
+> via a real `pnpm run bench` run, not just static review: exit 0, all 11
+> `hot-paths.bench.ts` results present. `library-quality-verifier` GO. Deferred
+> without prejudice (analysis `open_questions`, all answered "not now"): CI
+> wiring for `bench`, `baseline.json` re-capture, a `type-check` target for
+> `benchmarks/`. Committed `bf8d54cc` on `fix/VB-005-benchmark-harness-broken`,
+> archived to `completed-tasks/`.
+
+> **VB-008 shipped 2026-08-25.** Demoted P1 → P3 on 2026-08-23 (pre-publish
+> window closed), then `/analyze VB-008` (2026-08-21, re-run under the
+> post-publish constraint) rejected the original class→interface+factory premise
+> (ADR-0012 already accepted the factory-method shape) and narrowed scope to:
+> preserve the behaviour wrapper across `and()`/`or()`/`when()` composition (a
+> live defect in all seven published releases, AC1), rename the three
+> static-only factory classes to frozen objects with identical call syntax (AC2,
+> invisible to callers — no major bump needed), name the cache metrics return
+> type (AC3), collapse `create()`/`withDefaults()` (AC4, deprecation-window, not
+> a hard cut), plus working examples and a CI retired-symbol grep gate
+> (AC5/AC6). `/orchestrate VB-008` (2026-08-25) found all seven ACs already
+> implemented and committed, verified GO independently
+> (`library-quality-verifier`, fresh non-cached gate runs). No merge needed —
+> branch was already at the same commit as `develop`. Four changesets await
+> release:
+> `.changeset/vb-008-{composition-wrapper-loss,factory-namespace-shape, cache-metrics-type,withdefaults-deprecation}.md`.
+> Archived to `completed-tasks/`.
 
 _Shipped and archived to `completed-tasks/` 2026-08-19: **VF-028** (resilience
 correctness, `05ac364a`), **VF-037** (isolation regression suite + behavioral-BC
@@ -375,30 +461,39 @@ same day by other work, `83019997`). 2026-08-20: **VP-012** (hot-path quick wins
 — cqrs single race, aggregates getDomainEvents() memoization, policies
 combined-digest cache key; 3 units via `/orchestrate`, `98e53666`). AC4
 (benchmark proof) formally unmet — pre-existing broken harness, spun off as
-**VB-005**._
+**VB-005**. 2026-08-23: **VF-033** (validation hardening — `CoreRules`
+`minLength`/`maxLength`/`range` no longer coerce absent values, `.and()`
+flattens errors instead of collapsing them, `ValidationError.code`, async
+short-circuit JSDoc, decision-tree guide linked from three LLMGUIDEs, `testing`
+seeder rename). 2026-08-24: **VF-025** (patch scope A+C+E+G, `4801b799` —
+events: WARN-only handler dedup + autoRegisterHandlers catch diagnostics;
+projections: `clearProjectionState` deletes one projection not all + opt-in
+checkpoint resume; resilience: circuit-breaker HALF_OPEN failureCount reset +
+immediate-retrip rule shipped as one unit; cqrs: `registerTyped()`/
+`registerFactoryTyped()` + overwrite warn. Remaining original scope (retryConfig
+classification, error-propagation, autoRegisterHandlers opt-in flip, resilience
+metrics wire-up) deferred, reserved names `VF-025b/c/d`, no task files filed yet
+— see the task's own "Zamknięcie" section before picking that up). 2026-08-25:
+**VB-005** (benchmark harness repair — `resolve.alias` array-form fix in
+`benchmarks/vitest.config.mts` for both `contracts/internal` and
+`events/internal` subpaths, `Money.validate()` added, README verification notes,
+`bf8d54cc`)._
 
 ## P2 — Normal / Medium
 
-_**VF-025 and VF-033 are the last two runtime-impacting tasks in the whole
-backlog** — the 2026-08-20 review found six, and five shipped in the runtime
-series. Take them before anything else here: both are live defects in published
-behaviour, not hardening. VF-033: `CoreRules.minLength` passes on a missing
-field (`String(undefined)` is 9 chars) and `range` accepts `null`
-(`Number(null) === 0`). VF-025: a consumer's `retryConfig` is ignored by
-`shouldRetry`, and `clearProjectionState` calls `deleteAll()` instead of
-deleting one projection. Then VT-007/VT-006 (test debt), then docs & tooling
-(VD-008, VF-038, VF-034, VD-006b)._
+_2026-08-20 review found six runtime-impacting tasks; VF-033 shipped 2026-08-23,
+VF-025 shipped 2026-08-24 (six of six done — see "Shipped and archived"). Board
+now clear of runtime defects. Next: VT-007/VT-006 (test debt), then docs &
+tooling (VD-008, VF-038, VF-034, VD-006b)._
 
-| ID      | Title                                                             | Status  | Age |
-| ------- | ----------------------------------------------------------------- | ------- | --- |
-| VF-025  | Event/projections hardening (UnifiedEventBus, retry, checkpoints) | backlog | 49d |
-| VT-007  | Re-enable domain-services e2e suite (missing container classes)   | backlog | 11d |
-| VF-033  | Validation hardening & one validation story                       | backlog | 41d |
-| VT-006  | Policies test coverage + testing pkg hardening                    | backlog | 49d |
-| VD-008  | Docs truth & parity sweep + docs-compile-gate extension           | backlog | 11d |
-| VF-038  | Give docstring quality its own lint lane                          | backlog | 8d  |
-| VF-034  | Dead-code detection (knip/ts-prune) informational CI check        | backlog | 41d |
-| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)      | backlog | 47d |
+| ID      | Title                                                           | Status  | Age |
+| ------- | --------------------------------------------------------------- | ------- | --- |
+| VT-007  | Re-enable domain-services e2e suite (missing container classes) | backlog | 11d |
+| VT-006  | Policies test coverage + testing pkg hardening                  | backlog | 49d |
+| VD-008  | Docs truth & parity sweep + docs-compile-gate extension         | backlog | 11d |
+| VF-038  | Give docstring quality its own lint lane                        | backlog | 8d  |
+| VF-034  | Dead-code detection (knip/ts-prune) informational CI check      | backlog | 41d |
+| VD-006b | Semantic combination-sanity evaluator harness + pilots (R&D)    | backlog | 47d |
 
 ## P3 — Low
 

@@ -65,42 +65,73 @@ export class CoreRules implements ICoreRules, IRulesProvider {
       validator.addRule(
         property as string,
         value => value[property] !== undefined && value[property] !== null,
-        message
+        message,
+        undefined,
+        'required'
       );
 
+  /**
+   * UX-C11 fix: requires the property to actually be a `string` before
+   * measuring its length. Previously `String(value[property])` coerced
+   * `undefined` to the literal text `"undefined"` (9 characters), so
+   * `minLength(prop, 3)` silently passed on a missing field. A missing,
+   * null, or non-string value now fails the rule instead of being coerced.
+   */
   minLength =
     <T>(property: keyof T, length: number, message?: string) =>
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
-        value => String(value[property]).length >= length,
-        message || `Minimum length is ${length}`
+        value => typeof value[property] === 'string' && value[property].length >= length,
+        message || `Minimum length is ${length}`,
+        undefined,
+        'min_length'
       );
 
+  /**
+   * UX-C11 fix: see {@link minLength} — same `typeof` guard, no coercion of
+   * a missing/null/non-string value.
+   */
   maxLength =
     <T>(property: keyof T, length: number, message?: string) =>
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
-        value => String(value[property]).length <= length,
-        message || `Maximum length is ${length}`
+        value => typeof value[property] === 'string' && value[property].length <= length,
+        message || `Maximum length is ${length}`,
+        undefined,
+        'max_length'
       );
 
   pattern =
     <T>(property: keyof T, regex: RegExp, message = 'Invalid format') =>
     (validator: BusinessRuleValidator<T>) =>
-      validator.addRule(property as string, value => regex.test(String(value[property])), message);
+      validator.addRule(
+        property as string,
+        value => regex.test(String(value[property])),
+        message,
+        undefined,
+        'pattern'
+      );
 
+  /**
+   * UX-C11 fix: requires the property to actually be a finite `number`.
+   * Previously `Number(value[property])` coerced `null` to `0`, so
+   * `range('age', 0, 150)` silently accepted `age: null`. A missing, null,
+   * non-number, or `NaN` value now fails the rule instead of being coerced.
+   */
   range =
     <T>(property: keyof T, min: number, max: number, message?: string) =>
     (validator: BusinessRuleValidator<T>) =>
       validator.addRule(
         property as string,
         value => {
-          const num = Number(value[property]);
-          return !isNaN(num) && num >= min && num <= max;
+          const num = value[property];
+          return typeof num === 'number' && !isNaN(num) && num >= min && num <= max;
         },
-        message || `Value must be between ${min} and ${max}`
+        message || `Value must be between ${min} and ${max}`,
+        undefined,
+        'range'
       );
 
   email =
@@ -109,7 +140,9 @@ export class CoreRules implements ICoreRules, IRulesProvider {
       validator.addRule(
         property as string,
         value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value[property])),
-        message
+        message,
+        undefined,
+        'email'
       );
 
   satisfies =

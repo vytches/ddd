@@ -174,6 +174,59 @@ const result = await bus.execute(new PlaceOrderCommand('c-1', 500));
 > in module `providers`. `VytchesExplorerService` registers it with the command
 > bus automatically. See `QUICK_START_NESTJS.md` for the full wiring pattern.
 
+### Combine Multiple Results
+
+Building an aggregate out of several value objects means several fallible steps
+in a row. Do not write one manual `isFailure` check per field:
+
+```typescript
+// Avoid: repeats once per field
+const emailResult = Email.create(dto.email);
+if (emailResult.isFailure) return Result.fail(emailResult.error);
+const nameResult = FullName.create(dto.name);
+if (nameResult.isFailure) return Result.fail(nameResult.error);
+```
+
+Use `Result.combine` instead — first failure wins, success is a tuple:
+
+```typescript
+import { Result } from '@vytches/ddd';
+
+const combined = Result.combine([
+  Email.create(dto.email),
+  FullName.create(dto.name),
+  Address.create(dto.address),
+]);
+if (combined.isFailure) return Result.fail(combined.error);
+const [email, name, address] = combined.value;
+```
+
+Need every failing field reported at once (e.g. form validation), not just the
+first? Use `Result.combineWithAllErrors` — it returns the ORIGINAL error
+objects, never flattened to strings, in a **compacted** array (only the
+positions that actually failed, in input order — position N in the error array
+does NOT correspond to input N).
+
+The combined error type is inferred, with two gotchas: a plain `Error` entry in
+a mixed tuple is ignored as a placeholder (not counted as a real error type),
+and error types that don't reduce to one common type — e.g. sibling classes that
+share a base but don't extend each other — infer as `never` instead of a union,
+so reading `combined.error.field` fails to compile. Fix it by declaring one
+shared error type across the combined factories.
+
+There is no `combineAsync` — resolve the promises first:
+
+```typescript
+const combined = Result.combine(
+  await Promise.all([createEmail(dto), createName(dto)])
+);
+```
+
+Beyond `combine`, `Result` also chains: `flatMap` (another `Result`-returning
+step), `mapError` (transform the error), `match` (collapse to one value at a
+boundary), `tap`/`tapError` (side effects on success/failure). Full combinator
+reference: `packages/contracts/LLMGUIDE.md`.
+
 ### Create a Domain Event
 
 ```typescript
@@ -384,18 +437,19 @@ const result = await registry
 
 Foundation. Zero dependencies. Every package depends on this.
 
-| Export                                      | Description                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `IDomainEvent<P>`                           | Base event interface: `eventName`, `payload?`, `metadata?`                            |
-| `IEventMetadata`                            | Tracing: `eventId`, `correlationId`, `causationId`, `aggregateId`, `aggregateVersion` |
-| `IEventBus<T>`                              | Abstract class / DI token: `publish`, `subscribe`, `registerHandler`, `publishMany`   |
-| `IEntityId<T>`                              | Typed identifier: `getValue()`, `equals()`, `toString()`, `isType()`                  |
-| `EntityId<T>`                               | Base implementation (prefer value-objects' `EntityId` in application code)            |
-| `IRepository<T>` / `IExtendedRepository<T>` | CRUD persistence contracts                                                            |
-| `IUnitOfWork`                               | Transaction: `begin`, `commit`, `rollback`, `getRepository`                           |
-| `ISpecification<T>`                         | `isSatisfiedBy`, `and`, `or`, `not`, `explainFailure?`                                |
-| `IAsyncSpecification<T>`                    | Async version with optional `context` parameter                                       |
-| `Capability` / `CapabilityRegistry`         | Base for aggregate capabilities                                                       |
+| Export                                      | Description                                                                                                                                                                                             |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `IDomainEvent<P>`                           | Base event interface: `eventName`, `payload?`, `metadata?`                                                                                                                                              |
+| `IEventMetadata`                            | Tracing: `eventId`, `correlationId`, `causationId`, `aggregateId`, `aggregateVersion`                                                                                                                   |
+| `IEventBus<T>`                              | Abstract class / DI token: `publish`, `subscribe`, `registerHandler`, `publishMany`                                                                                                                     |
+| `IEntityId<T>`                              | Typed identifier: `getValue()`, `equals()`, `toString()`, `isType()`                                                                                                                                    |
+| `EntityId<T>`                               | Base implementation (prefer value-objects' `EntityId` in application code)                                                                                                                              |
+| `IRepository<T>` / `IExtendedRepository<T>` | CRUD persistence contracts                                                                                                                                                                              |
+| `IUnitOfWork`                               | Transaction: `begin`, `commit`, `rollback`, `getRepository`                                                                                                                                             |
+| `ISpecification<T>`                         | `isSatisfiedBy`, `and`, `or`, `not`, `explainFailure?`                                                                                                                                                  |
+| `IAsyncSpecification<T>`                    | Async version with optional `context` parameter                                                                                                                                                         |
+| `Capability` / `CapabilityRegistry`         | Base for aggregate capabilities                                                                                                                                                                         |
+| `Result<TValue, TError>`                    | Outcome wrapper — canonical source. `map`/`flatMap`/`match`/`tap`/`tapError`/`mapError`, plus `combine`/`combineWithAllErrors` for aggregating several `Result`s (see "Combine Multiple Results" above) |
 
 ### @vytches/ddd-value-objects
 
@@ -622,6 +676,18 @@ silently allows invalid operations to proceed.
 **Create a new `ACLRegistry` per request.** `ACLRegistry` must be an
 application-scoped singleton. Per-request instances discard all adapter
 registrations.
+
+**Write `if (x.isFailure) return Result.fail(x.error)` once per field when
+combining several `Result`s.** Use `Result.combine` (first error wins) or
+`Result.combineWithAllErrors` (every error, as original error objects, in a
+compacted array) instead — see "Combine Multiple Results" above.
+
+**Let a `CompensationStack` entry outlive its own confirmation.** A stack stays
+armed for a later external hook to unwind only until an irreversible operation
+(a confirm step) has run — confirmation must be the last operation in the flow,
+with anything that can still fail happening before it, never after. See
+`@vytches/ddd-resilience`'s `LLMGUIDE.md` ("Compensating for side effects
+outside the transaction") for the full rule and example.
 
 ---
 

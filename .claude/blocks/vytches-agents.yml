@@ -1,0 +1,39 @@
+# Blok lokalny: vytches-agents — dopina do panelu /analyze dwóch specjalistów, którzy
+# leżeli w .claude/agents/ od dawna (era ręcznych @-mention, patrz .claude/README.md),
+# ale nigdy nie zostały wpięte do silnika bloków (ADR 0008) po jego wdrożeniu.
+#
+# Z 9 lokalnych agentów tylko te dwa dają wartość, której nie da się zdeterminować
+# skryptem — ta sama zasada co w blocks/ts-library.yml (audyt vytches-ddd 2026-08-10):
+# agent pracuje tam, gdzie skryptu nie ma, nie obok niego "na oko".
+# - performance-optimizer: ryzyko bundla PRZED napisaniem kodu — `pnpm bundle:analyze`
+#   sprawdza już napisany kod, nic nie ostrzega na etapie planowania zmiany.
+# - ddd-patterns-expert: poprawność granic agregatu / value objectu to osąd, nie coś
+#   do zeskryptowania — a to jest biblioteka DDD, więc trafia w sedno produktu.
+#
+# Świadomie pominięte (2026-08-31, przegląd wszystkich 9 agentów):
+# - ddd-compliance-guardian: duplikuje ddd-patterns-expert, mniej konkretny (ogólny
+#   żargon strategiczny Evans/Vernon zamiast przykładów z tego kodu).
+# - architecture-guardian: duplikuje istniejący etap boundary-analysis z nx-monorepo.
+# - library-expert, testing-excellence: permissionMode dontAsk + Edit/Write/Bash —
+#   kształt implementera, nie doradcy; /analyze ma być zero-implementacji.
+# - documentation-master, developer-experience: treść dokumentacyjno-marketingowa,
+#   nie ocena ryzyka przed implementacją.
+# - security-audit: generyczny szablon bez konkretów specyficznych dla tego kodu.
+name: vytches-agents
+axis: analysis-overlay
+requires: []
+
+analyze:
+  panel:
+    - {
+        stage: performance-risk,
+        agent: "performance-optimizer",
+        when: "bundle|tree-shak|perf|performance|benchmark|memory|cache|lazy|import|export",
+        advisory: true,
+      }
+    - {
+        stage: ddd-pattern-review,
+        agent: "ddd-patterns-expert",
+        when: "agregat|aggregate|value object|domain event|CQRS|saga|bounded context|repository|specification",
+        advisory: true,
+      }

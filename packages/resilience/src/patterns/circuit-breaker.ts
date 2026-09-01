@@ -143,12 +143,33 @@ export class CircuitBreaker {
         this.reset();
       }
     } else {
+      // Known accepted trade-off (not a bug): with halfOpenMaxProbes > 1, a
+      // concurrent probe can fail (tripping the circuit back to OPEN via
+      // onFailure's HALF_OPEN branch) at nearly the same moment another
+      // probe succeeds. That success lands in this branch and zeroes
+      // failureCount even though the circuit just re-opened. State
+      // transitions are driven solely by nextAttemptTime/shouldAttemptReset(),
+      // so this only transiently skews getMetrics().failureCount, never the
+      // OPEN/HALF_OPEN/CLOSED state itself.
       this.failureCount = 0;
     }
   }
 
   private onFailure(): void {
     this.lastFailureTime = new Date();
+
+    // A single failed probe while HALF_OPEN must immediately re-trip the
+    // circuit, regardless of failureCount. Without this branch, once
+    // failureCount is reset on entering HALF_OPEN (see updateStateIfNeeded),
+    // one failure would require `failureThreshold` more failures to trip
+    // again instead of just one - a resilience regression versus today's
+    // (accidental) behavior where the stale, never-reset counter already
+    // sits at/above the threshold from the previous trip.
+    if (this.state === CircuitBreakerState.HALF_OPEN) {
+      this.tripCircuit();
+      return;
+    }
+
     this.failureCount++;
 
     if (this.failureCount >= this.config.failureThreshold) {
@@ -172,6 +193,14 @@ export class CircuitBreaker {
     if (this.state === CircuitBreakerState.OPEN && this.shouldAttemptReset()) {
       this.state = CircuitBreakerState.HALF_OPEN;
       this.successCount = 0;
+      // failureCount must also be reset here: it is not zeroed elsewhere on
+      // entering HALF_OPEN, so without this a single failure while HALF_OPEN
+      // would rely on the stale counter already sitting at/above threshold
+      // from the previous trip. Now that it's explicitly reset, onFailure()
+      // restores the same guarantee explicitly via its HALF_OPEN branch,
+      // which trips on the very first failure instead of requiring
+      // failureThreshold more.
+      this.failureCount = 0;
     }
   }
 

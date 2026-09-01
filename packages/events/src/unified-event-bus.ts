@@ -147,8 +147,16 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
           }
         }
       }
-    } catch {
-      // DI auto-registration not available — silent, not an error
+    } catch (error) {
+      // DI auto-registration not being available (no globalThis.VytchesDDD) is
+      // expected and never reaches this catch — the `if` above simply doesn't
+      // enter. This only catches a real thrown error (e.g. discoverHandlers()
+      // itself throwing), which we surface for visibility instead of
+      // swallowing silently. Never rethrown: a broken DI setup must not
+      // prevent bus construction.
+      internalLogger.warn('UnifiedEventBus: auto-registration of discovered handlers failed', {
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -400,7 +408,50 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
   ): void {
     const handlers = this.handlerRegistry.get(eventName) || [];
     this.assertHandlerCapacity(handlers.length, eventName);
+
+    // WARN-only duplicate detection (VF-025 AC1 / D3): flag the accidental
+    // case of the exact same handler reference registered with the exact
+    // same contexts more than once. This is visibility only — the entry is
+    // still appended below, so the number of invocations at dispatch time is
+    // unchanged. See getHandlers() for the introspection-side implication.
+    const isDuplicate = handlers.some(
+      entry =>
+        entry.handler === handler && UnifiedEventBus.contextsAreEqual(entry.contexts, contexts)
+    );
+    if (isDuplicate) {
+      internalLogger.warn('UnifiedEventBus: duplicate handler registration detected', {
+        eventName,
+        message:
+          'This handler is already registered with the same contexts for this event name. ' +
+          'The new registration was still added (not deduplicated), so it will run once per ' +
+          'registration at dispatch time — this warning only flags a likely accidental duplicate.',
+      });
+    }
+
     this.handlerRegistry.set(eventName, [...handlers, { handler, contexts }]);
+  }
+
+  /**
+   * Order-independent equality for the `contexts` filter of two handler
+   * registrations. Used only for the duplicate-registration warning in
+   * {@link registerHandlerWithContext}.
+   */
+  private static contextsAreEqual(
+    a: string | string[] | undefined,
+    b: string | string[] | undefined
+  ): boolean {
+    if (a === b) {
+      return true;
+    }
+    if (a === undefined || b === undefined) {
+      return false;
+    }
+    const arrA = Array.isArray(a) ? [...a].sort() : [a];
+    const arrB = Array.isArray(b) ? [...b].sort() : [b];
+    if (arrA.length !== arrB.length) {
+      return false;
+    }
+    return arrA.every((value, index) => value === arrB[index]);
   }
 
   /**
@@ -409,6 +460,15 @@ export class UnifiedEventBus extends BaseEventBus<BaseEvent> implements IEventBu
    * `UnifiedEventBus` does not use). Returns a snapshot `Set` of the
    * registered handler functions; class-based handlers appear as their
    * wrapper functions. Useful for testing and debugging.
+   *
+   * Note: because the return type is a `Set`, it collapses entries that
+   * share the same handler function reference. If the same handler was
+   * registered multiple times with the same `contexts` (which now logs a
+   * warning at registration — see `registerHandlerWithContext`), the
+   * `Set`'s size will be *smaller* than the number of times that handler
+   * actually runs per matching event at dispatch time. Use this method for
+   * introspecting which unique handler functions are wired up, not for
+   * counting invocations.
    */
   override getHandlers(
     eventName: string | Constructor<BaseEvent>

@@ -1,7 +1,8 @@
 import type { IDependencyContainer } from '@vytches/ddd-di';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { safeRun } from '@vytches/ddd-utils';
 import 'reflect-metadata';
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import type { ICommand, ICommandHandler } from '../../src';
 import {
   EnhancedCommandBus,
@@ -776,6 +777,187 @@ describe('EnhancedCommandBus', () => {
       const commands = delays.map((delayMs, seq) => new OrderedCommand(seq, delayMs));
 
       await expect(bus.executeMany<OrderedCommand, number>(commands)).rejects.toThrow('boom-seq-2');
+    });
+  });
+
+  // VF-025 AC11 — registerTyped()/registerFactoryTyped() are thin, delegating
+  // compile-time-safe wrappers: same runtime behavior as register()/
+  // registerFactory(), just a narrower parameter type at the call site.
+  describe('registerTyped / registerFactoryTyped (VF-025 AC11)', () => {
+    class TypedCommand implements ICommand {}
+
+    it('registerTyped() delegates to register() — handler resolves and executes', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      const handler = { execute: vi.fn().mockResolvedValue('typed-instance') };
+
+      bus.registerTyped(TypedCommand, handler);
+
+      const result = await bus.execute(new TypedCommand());
+      expect(result).toBe('typed-instance');
+    });
+
+    it('registerTyped() accepts a string key, same as register()', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      const handler = { execute: vi.fn().mockResolvedValue('typed-by-string') };
+
+      bus.registerTyped('TypedStringCommand', handler);
+
+      class TypedStringCommand implements ICommand {}
+      const result = await bus.execute(new TypedStringCommand());
+      expect(result).toBe('typed-by-string');
+    });
+
+    it('registerFactoryTyped() delegates to registerFactory() — factory is invoked lazily', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      const handler = { execute: vi.fn().mockResolvedValue('typed-factory') };
+      const factory = vi.fn().mockReturnValue(handler);
+
+      bus.registerFactoryTyped(TypedCommand, factory);
+      expect(factory).not.toHaveBeenCalled();
+
+      const result = await bus.execute(new TypedCommand());
+      expect(result).toBe('typed-factory');
+      expect(factory).toHaveBeenCalledTimes(1);
+    });
+
+    it('registerTyped() and register() are interchangeable — last write still wins across kinds', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      const instance = { execute: vi.fn().mockResolvedValue('instance') };
+      const factoryHandler = { execute: vi.fn().mockResolvedValue('factory') };
+
+      bus.registerTyped(TypedCommand, instance);
+      bus.registerFactoryTyped(TypedCommand, () => factoryHandler);
+
+      expect(await bus.execute(new TypedCommand())).toBe('factory');
+    });
+  });
+
+  // VF-025 AC11 — silent-overwrite diagnostic on register()/registerFactory().
+  // Non-blocking: the overwrite always succeeds, this only asserts the warning.
+  describe('overwrite warning (VF-025 AC11)', () => {
+    class WarnCommand implements ICommand {}
+    let warnSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      warnSpy = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+    });
+
+    afterEach(() => {
+      warnSpy.mockRestore();
+    });
+
+    it('does not warn on first registration (no false positive)', () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      bus.register(WarnCommand, { execute: vi.fn() });
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not warn on first registerFactory() call (no false positive)', () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      bus.registerFactory(WarnCommand, () => ({ execute: vi.fn() }));
+      expect(warnSpy).not.toHaveBeenCalled();
+    });
+
+    it('warns when register() overwrites an existing instance registration (same kind)', () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      bus.register(WarnCommand, { execute: vi.fn() });
+      warnSpy.mockClear();
+
+      bus.register(WarnCommand, { execute: vi.fn() });
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('overwriting'),
+        expect.objectContaining({
+          commandName: 'WarnCommand',
+          previousKind: 'instance',
+          incomingKind: 'instance',
+        })
+      );
+    });
+
+    it('warns when registerFactory() overwrites an existing factory registration (same kind)', () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      bus.registerFactory(WarnCommand, () => ({ execute: vi.fn() }));
+      warnSpy.mockClear();
+
+      bus.registerFactory(WarnCommand, () => ({ execute: vi.fn() }));
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('overwriting'),
+        expect.objectContaining({
+          commandName: 'WarnCommand',
+          previousKind: 'factory',
+          incomingKind: 'factory',
+        })
+      );
+    });
+
+    it('warns when registerFactory() replaces an existing instance registration (instance -> factory)', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      bus.register(WarnCommand, { execute: vi.fn().mockResolvedValue('instance') });
+      warnSpy.mockClear();
+
+      const newHandler = { execute: vi.fn().mockResolvedValue('factory') };
+      bus.registerFactory(WarnCommand, () => newHandler);
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('overwriting'),
+        expect.objectContaining({
+          commandName: 'WarnCommand',
+          previousKind: 'instance',
+          incomingKind: 'factory',
+        })
+      );
+      // Non-blocking: the overwrite still takes effect.
+      expect(await bus.execute(new WarnCommand())).toBe('factory');
+    });
+
+    it('warns when register() replaces an existing factory registration (factory -> instance)', async () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      bus.registerFactory(WarnCommand, () => ({ execute: vi.fn().mockResolvedValue('factory') }));
+      warnSpy.mockClear();
+
+      const newHandler = { execute: vi.fn().mockResolvedValue('instance') };
+      bus.register(WarnCommand, newHandler);
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('overwriting'),
+        expect.objectContaining({
+          commandName: 'WarnCommand',
+          previousKind: 'factory',
+          incomingKind: 'instance',
+        })
+      );
+      // Non-blocking: the overwrite still takes effect.
+      expect(await bus.execute(new WarnCommand())).toBe('instance');
+    });
+
+    it('warns with the string key when registration uses a string commandType', () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      bus.register('StringKeyCommand', { execute: vi.fn() });
+      warnSpy.mockClear();
+
+      bus.register('StringKeyCommand', { execute: vi.fn() });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('overwriting'),
+        expect.objectContaining({ commandName: 'StringKeyCommand' })
+      );
+    });
+
+    it('does not warn for a different command key sharing no registration history', () => {
+      const bus = new EnhancedCommandBus(mockContainer);
+      class OtherCommand implements ICommand {}
+      bus.register(WarnCommand, { execute: vi.fn() });
+      warnSpy.mockClear();
+
+      bus.register(OtherCommand, { execute: vi.fn() });
+
+      expect(warnSpy).not.toHaveBeenCalled();
     });
   });
 });

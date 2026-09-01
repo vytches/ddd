@@ -6,9 +6,15 @@ export {
   CircuitBreakerState,
 } from './patterns/circuit-breaker';
 
+export type { CircuitBreakerConfig, CircuitBreakerMetrics } from './patterns/circuit-breaker';
+
 export { MaxRetriesExceededError, RetryPolicy } from './patterns/retry';
 
 export { Bulkhead, BulkheadRejectedException } from './patterns/bulkhead';
+
+export { CompensationStack, runCompensated } from './patterns/compensation-stack';
+
+export type { CompensationFailure, CompensationOutcome } from './patterns/compensation-stack';
 
 export {
   BulkheadStrategy,

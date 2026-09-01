@@ -17,14 +17,15 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     property: string,
     validationFn: (value: T) => boolean,
     message: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
+    code?: string
   ): BusinessRuleValidator<T> {
     this.rules.push({
       property,
       validate: (value: T) => {
         return validationFn(value)
           ? Result.ok(true)
-          : Result.fail(new ValidationError(property, message, context));
+          : Result.fail(new ValidationError(property, message, context, code));
       },
     });
     return this;
@@ -34,9 +35,16 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     property: string,
     specification: ISpecification<T>,
     message: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
+    code?: string
   ): BusinessRuleValidator<T> {
-    return this.addRule(property, value => specification.isSatisfiedBy(value), message, context);
+    return this.addRule(
+      property,
+      value => specification.isSatisfiedBy(value),
+      message,
+      context,
+      code
+    );
   }
 
   /**
@@ -45,9 +53,10 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
   mustSatisfy(
     specification: ISpecification<T>,
     message: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
+    code?: string
   ): BusinessRuleValidator<T> {
-    return this.addSpecification('', specification, message, context);
+    return this.addSpecification('', specification, message, context, code);
   }
 
   /**
@@ -58,13 +67,15 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
     specification: ISpecification<P>,
     message: string,
     getValue: (obj: T) => P,
-    context?: Record<string, any>
+    context?: Record<string, any>,
+    code?: string
   ): BusinessRuleValidator<T> {
     return this.addRule(
       property,
       value => specification.isSatisfiedBy(getValue(value)),
       message,
-      context
+      context,
+      code
     );
   }
 
@@ -237,13 +248,31 @@ export class BusinessRuleValidator<T> implements IValidator<T> {
   }
 
   /**
-   * Łączy ten walidator z innym
+   * Łączy ten walidator z innym.
+   *
+   * UX-C12 fix: previously collapsed the `other` validator's per-field
+   * errors into a single generic `''`-property "Failed combined validation"
+   * error, hiding which field actually failed. Now flattens both
+   * validators' errors (own rules + `other`'s), matching
+   * `Validation.combine()`'s guarantee that no error detail is lost.
    */
   and(other: IValidator<T>): BusinessRuleValidator<T> {
     const combined = new BusinessRuleValidator<T>();
-    combined.rules = [...this.rules];
 
-    combined.addRule('', value => other.validate(value).isSuccess, 'Failed combined validation');
+    combined.validate = (value: T): Result<T, ValidationErrors> => {
+      const selfResult = this.validate(value);
+      const otherResult = other.validate(value);
+
+      const errors: ValidationError[] = [];
+      if (selfResult.isFailure) {
+        errors.push(...(selfResult.error.errors as ValidationError[]));
+      }
+      if (otherResult.isFailure) {
+        errors.push(...(otherResult.error.errors as ValidationError[]));
+      }
+
+      return errors.length > 0 ? Result.fail(new ValidationErrors(errors)) : Result.ok(value);
+    };
 
     return combined;
   }

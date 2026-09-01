@@ -14,6 +14,7 @@ exports[`@vytches/ddd-resilience public API surface > exports the documented set
   "CircuitBreakerOpenError",
   "CircuitBreakerState",
   "CircuitBreakerStrategy",
+  "CompensationStack",
   "CompositeMetricExporter",
   "CompositeResilienceStrategy",
   "CsvMetricExporter",
@@ -41,5 +42,6 @@ exports[`@vytches/ddd-resilience public API surface > exports the documented set
   "TimeoutStrategy",
   "getResilienceConfig",
   "getResilienceMetrics",
+  "runCompensated",
 ]
 `;

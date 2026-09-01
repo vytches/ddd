@@ -445,6 +445,12 @@ instance instead: `new PolicyEventBus()`.
 wrapping a spec as a named, domain-tagged policy in one line — useful when you
 already have a spec and want to register it in the `PolicyRegistry`.
 
+## Related Guides
+
+- [`docs/guides/specification-vs-policy.md`](../../docs/guides/specification-vs-policy.md)
+  — "where do I validate what" decision tree: VO constructor invariant vs
+  `Specification` vs `BusinessRuleValidator` vs `PolicyBuilder`.
+
 ## Package Dependencies
 
 `@vytches/ddd-policies` depends on:
