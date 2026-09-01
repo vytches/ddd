@@ -682,6 +682,13 @@ combining several `Result`s.** Use `Result.combine` (first error wins) or
 `Result.combineWithAllErrors` (every error, as original error objects, in a
 compacted array) instead — see "Combine Multiple Results" above.
 
+**Let a `CompensationStack` entry outlive its own confirmation.** A stack stays
+armed for a later external hook to unwind only until an irreversible operation
+(a confirm step) has run — confirmation must be the last operation in the flow,
+with anything that can still fail happening before it, never after. See
+`@vytches/ddd-resilience`'s `LLMGUIDE.md` ("Compensating for side effects
+outside the transaction") for the full rule and example.
+
 ---
 
 ## NestJS Integration

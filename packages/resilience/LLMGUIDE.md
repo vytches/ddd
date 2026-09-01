@@ -308,6 +308,55 @@ get a real, first-time run. `runCompensated` takes the stack as a parameter
 rather than creating one internally for the same reason — the caller keeps a
 reference to unwind again from outside the call.
 
+**Rule: confirmation must be the last operation.** Staying armed after a
+successful run only holds for as long as nothing irreversible has happened in
+that run. The moment an operation that cannot be undone — a confirm step against
+a payment gateway, say — has executed, treat that entry (or, under the
+one-resource-per-stack recommendation below, the whole stack) as closed. Do not
+rely on a later external hook to unwind it: by then there is nothing an unwind
+could meaningfully reverse. Confirmation must therefore be the **last**
+operation performed in the flow — anything else that can still fail has to
+happen before it, never after. Getting this backwards is exactly the bug below.
+
+```typescript
+// WRONG — confirmation runs, then an unwrapped write can still throw.
+const outcome = await runCompensated(stack, async s => {
+  const reservationId = await s.acquire(
+    'inventory-reservation',
+    () => inventoryClient.reserve(orderId, items),
+    id => inventoryClient.release(id)
+  );
+  await paymentGateway.confirm(reservationId); // irreversible
+  await orderRepository.save(orderId, reservationId); // can still reject!
+  return Result.ok(orderId);
+});
+// If the save() above throws, runCompensated unwinds the stack and releases
+// the inventory reservation — but the payment is already confirmed and
+// stays charged. The customer is charged with no order saved, no delivery,
+// and no compensation entry or log recording any of it.
+```
+
+Move the write before the confirm and the same failure instead lands cleanly on
+the normal failure path: the payment is never confirmed, and the reservation is
+released like any other compensated step.
+
+**Recommendation: one entry per stack.** Keep exactly one entry per
+`CompensationStack` instance. This is not a property of try-confirm-cancel
+itself — the canonical TCC pattern coordinates several participants under one
+coordinator by design. It is specific to this primitive, which deliberately has
+no persistence, no per-participant retry, and no partial-failure tracking beyond
+the flat `CompensationFailure` list `unwind()` returns. Coordinating multiple
+resources with those guarantees belongs in a separate, durable
+saga/process-manager primitive outside this package, not in this one — one stack
+per resource keeps the irreversible-after-confirm boundary above easy to reason
+about independently for each resource.
+
+**Timeout note.** On the throw path, `runCompensated` awaits `unwind()` before
+letting the exception propagate, so a compensation that hangs delays that
+propagating exception indefinitely. If that risk needs bounding, wrap the
+individual `compensate` function passed to `acquire` with this package's own
+`TimeoutStrategy`.
+
 **What this does not enforce.** Nothing here prevents you from acquiring a
 resource through a call that bypasses `acquire` and forgetting to register its
 compensation — the inseparability guarantee only covers calls that go through

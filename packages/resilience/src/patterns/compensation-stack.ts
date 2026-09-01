@@ -64,6 +64,28 @@ interface CompensationEntry {
  * create a fresh `CompensationStack` for the next flow instead of reusing
  * this one.
  *
+ * WARNING — staying armed after success is conditional, not unconditional:
+ * it holds only for as long as nothing irreversible has happened in this
+ * run. The moment one of the registered steps does something that cannot be
+ * undone — a confirm step against a payment gateway, for instance — that
+ * entry (or, under the one-resource-per-stack convention recommended below,
+ * the whole stack) must be treated as closed from then on. Do not rely on a
+ * later external hook to unwind it; there is nothing left an unwind could
+ * meaningfully reverse. Confirmation must therefore be the LAST operation
+ * performed in the flow — anything that can still fail has to happen before
+ * it, never after.
+ *
+ * RECOMMENDATION — keep exactly one entry per `CompensationStack` instance.
+ * This is not a property of try-confirm-cancel itself: the canonical TCC
+ * pattern coordinates several participants under one coordinator by design.
+ * It is specific to this primitive, which deliberately has no persistence,
+ * no per-participant retry, and no partial-failure tracking beyond the flat
+ * {@link CompensationFailure} list `unwind()` returns. Coordinating multiple
+ * resources with those guarantees belongs in a separate, durable
+ * saga/process-manager primitive outside this package — one stack per
+ * resource keeps the irreversible-after-confirm boundary above easy to
+ * reason about for each resource independently.
+ *
  * @example
  * ```typescript
  * const stack = CompensationStack.create();
@@ -161,7 +183,7 @@ export class CompensationStack {
       }
     }
 
-    return failures;
+    return Object.freeze(failures);
   }
 }
 
@@ -188,6 +210,16 @@ export class CompensationStack {
  * live and compensatable until the caller decides otherwise by calling
  * `stack.unwind()` themselves.
  *
+ * WARNING — "left armed" is not "safe to undo forever". It holds only for
+ * as long as nothing irreversible has happened inside `fn`. Once one of the
+ * steps performs an operation that cannot be undone — confirming a payment,
+ * for example — the entry it belongs to (or, under the recommended
+ * one-resource-per-stack convention on {@link CompensationStack}, the whole
+ * stack) must be treated as closed, not as something a later external hook
+ * can still unwind. Make confirmation the LAST thing `fn` does before it
+ * resolves, and do any step that can still fail before it, never after —
+ * see {@link CompensationStack} for the full rule and rationale.
+ *
  * On failure — `fn` resolving to `Result.fail` — the stack is unwound and
  * the returned failure always carries both the original `cause` and the
  * (possibly empty) list of compensations that themselves failed; a failed
@@ -209,6 +241,13 @@ export class CompensationStack {
  * re-run any compensation; it simply returns the same settled list of
  * failures from the run this function already triggered.
  *
+ * TIMEOUT NOTE — on this throw path, `unwind()` is awaited before the
+ * exception is let through, so a hung compensation delays the propagating
+ * exception indefinitely. If that risk needs bounding, wrap the individual
+ * `compensate` function passed to {@link CompensationStack.acquire} with
+ * this package's own `TimeoutStrategy` rather than expecting this function
+ * to impose one itself.
+ *
  * This primitive takes no transaction argument and reaches for no
  * request-scoped context of its own — by construction, it does not manage a
  * transaction boundary or hook into anything else that does.
@@ -222,7 +261,19 @@ export class CompensationStack {
  *     () => inventoryClient.reserve(orderId, items),
  *     (id) => inventoryClient.release(id)
  *   );
- *   return placeOrder(orderId, reservationId);
+ *
+ *   // Anything that can still fail happens BEFORE confirmation — including
+ *   // this repository write. Doing the write after confirming instead is
+ *   // exactly the bug this rule exists to prevent: if the write then threw,
+ *   // this function would unwind and release the reservation, but the
+ *   // payment would already be confirmed and stay charged regardless —
+ *   // a charge with no order to show for it, and no compensation for it.
+ *   await orderRepository.save(orderId, reservationId);
+ *
+ *   // Confirmation is irreversible, so it is deliberately the LAST
+ *   // operation of the flow, right before returning success.
+ *   await paymentGateway.confirm(reservationId);
+ *   return Result.ok(orderId);
  * });
  *
  * if (outcome.isFailure) {

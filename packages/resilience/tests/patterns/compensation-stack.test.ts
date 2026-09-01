@@ -263,6 +263,65 @@ describe('CompensationStack', () => {
     expect(maxConcurrent).toBe(1);
     expect(started).toEqual(['c', 'b', 'a']);
   });
+
+  it('unwind() returns a frozen failures array -- the readonly contract is enforced at runtime, not just at the type level', async () => {
+    const stack = CompensationStack.create();
+
+    await stack.acquire(
+      'flaky-release',
+      () => Promise.resolve('resource'),
+      () => Promise.reject(new Error('release endpoint returned 500'))
+    );
+
+    const failures = await stack.unwind();
+
+    expect(failures).toHaveLength(1);
+    expect(Object.isFrozen(failures)).toBe(true);
+    // Declared return type is `readonly CompensationFailure[]`, so a mutating
+    // call is a type error at the call site; cast to prove the readonly-ness
+    // is also enforced at runtime, not just erased by the compiler.
+    const mutableFailures = failures as CompensationFailure[];
+    expect(() => mutableFailures.push({ label: 'x', error: new Error('y') })).toThrow();
+  });
+
+  // KNOWN GAP, tracked in VF-042: calling acquire() while unwind() is
+  // already in flight silently never gets that new entry compensated in
+  // this run. runUnwind() captures `entries.length - 1` as its starting
+  // index before the loop begins; an entry pushed after that capture but
+  // before the loop reaches index 0 is invisible to this run entirely — not
+  // skipped-with-a-record, just never looked at. This test demonstrates the
+  // gap; it does not assert a fix, because none exists yet.
+  it('KNOWN GAP, tracked in VF-042 -- acquire() during an in-flight unwind() silently drops the new entry from that run', async () => {
+    const compensateA = vi.fn().mockResolvedValue(undefined);
+    const compensateB = vi.fn().mockResolvedValue(undefined);
+    const deferredA = createDeferred<void>();
+    const stack = CompensationStack.create();
+
+    await stack.acquire(
+      'a',
+      () => Promise.resolve('a-resource'),
+      () => {
+        compensateA();
+        return deferredA.promise;
+      }
+    );
+
+    // unwind() starts and blocks on compensating 'a'.
+    const unwindPromise = stack.unwind();
+    await flushMicrotasks();
+    expect(compensateA).toHaveBeenCalledTimes(1);
+
+    // A new entry is registered while that unwind is still in flight.
+    await stack.acquire('b', () => Promise.resolve('b-resource'), compensateB);
+
+    deferredA.resolve(undefined);
+    const failures = await unwindPromise;
+
+    // 'b' was never compensated in this run, and no CompensationFailure was
+    // recorded for it either — runUnwind's loop never saw it at all.
+    expect(compensateB).not.toHaveBeenCalled();
+    expect(failures).toEqual([]);
+  });
 });
 
 describe('runCompensated', () => {
