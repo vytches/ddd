@@ -25,9 +25,15 @@ requires: []
 
 analyze:
   panel:
-    - { stage: performance-risk, agent: "performance-optimizer",
+    - {
+        stage: performance-risk,
+        agent: "performance-optimizer",
         when: "bundle|tree-shak|perf|performance|benchmark|memory|cache|lazy|import|export",
-        advisory: true }
-    - { stage: ddd-pattern-review, agent: "ddd-patterns-expert",
+        advisory: true,
+      }
+    - {
+        stage: ddd-pattern-review,
+        agent: "ddd-patterns-expert",
         when: "agregat|aggregate|value object|domain event|CQRS|saga|bounded context|repository|specification",
-        advisory: true }
+        advisory: true,
+      }
