@@ -15,6 +15,8 @@ estimated_time: 6h
 created_by: VF-040 (consumer exchange, 2026-08-30/31)
 created_at: 2026-08-31
 status: backlog
+analysis: project-orchestration/analysis/VF-042-stale-compensation-invalidation.analysis.md
+analysis_status: approved # zatwierdzone 2026-08-31 po konsultacji 5-agentowego panelu doradczego; scope = dokumentacja + PATCH (D2) + test regresyjny (D7), zero nowego publicznego API
 updated_at: 2026-08-31
 release_target: undecided — see framing question
 package: "'@vytches/ddd-resilience'"
