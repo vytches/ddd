@@ -1,1 +1,0 @@
-/opt/projects/claude-patterns/agents/universal/tech-lead.md

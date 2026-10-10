@@ -1,1 +1,0 @@
-/opt/projects/claude-patterns/agents/stacks/typescript-library/library-quality-verifier.md

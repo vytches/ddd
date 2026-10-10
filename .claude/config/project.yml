@@ -36,3 +36,7 @@ cost:
   opus: "<20%"
   sonnet: "~60%"
   haiku: ">20%"
+
+# Opt-out z domyślnego "integrations" (grantflow/log-time) — logowanie godzin nie dotyczy tego repo (2026-10-10).
+exclude_skills:
+  - integrations
