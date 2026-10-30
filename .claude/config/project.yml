@@ -12,7 +12,7 @@ project:
   # `approval-gate` wnosi twardą bramkę PAUSE — /analyze kończy się artefaktem czekającym
   # na odpowiedzi, a /orchestrate-blocks nie ruszy bez `status: approved`.
   # `stack_profile` zostaje: stary system presetów działa równolegle do końca pilota (D7).
-  stack_blocks: [typescript-library, approval-gate]
+  stack_blocks: [typescript-library, approval-gate, ./vytches-agents]
   language: typescript
   stack: "TypeScript 5.8, Nx, Vitest, pnpm"
   testing: "Vitest"
@@ -40,3 +40,14 @@ cost:
 # Opt-out z domyślnego "integrations" (grantflow/log-time) — logowanie godzin nie dotyczy tego repo (2026-10-10).
 exclude_skills:
   - integrations
+
+# Zalążki wpisów blogowych (ADR 0013 w claude-patterns). Start w dry-run — live po kalibracji.
+blog_seeds:
+  enabled: true
+  public_alias: "biblioteka DDD w TypeScript"
+  targets: [{id: product, path: ../juz-ide-blog}, {id: personal, path: ../personal-blog}]
+  routing_hint: auto
+  mode: dry-run
+  exclude:
+    project: false
+
