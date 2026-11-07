@@ -18,7 +18,7 @@ created_by:
   consumer application
 created_at: 2026-10-30
 status: in-progress
-updated_at: 2026-11-06
+updated_at: 2026-11-07
 package:
   'new packages/eslint-plugin-ddd (role resolver + roleScoped + API preset)'
 related: [VF-026, VF-034, VF-038]
@@ -27,13 +27,53 @@ consumer_first_adopter:
   side
 ```
 
-## Current status (2026-11-06)
+## Current status (2026-11-07)
 
-**Phase 1 is implemented and staged on branch
-`feature/VF-043-eslint-plugin-ddd-agent-feedback-lane`, not committed, not
-pushed, not published.** It was built by one `/orchestrate` run (Phase 1 only,
-decision D1) plus manual fixes afterwards. Phase 2 (formal AC-DOGFOOD, migration
-note, guide) has not started.
+**Phase 1 is released.** `@vytches/eslint-plugin-ddd` 0.32.0 is public on npm
+(`@beta`, peer `eslint ^9.39.0 || ^10.0.0`). Phase 2 (formal AC-DOGFOOD,
+migration note, guide) has not started.
+
+- **0.32.0:** release PR #89, merged into `main` as `d482a466`. It was a
+  **squash** merge (one parent), so the tag `v0.32.0` (on `2e1f061a`) is not in
+  the history of `main`. Consequence: on `main`, `git describe` finds `v0.31.1`
+  and `lerna` treats all 20 packages as changed. The 0.32.1 bump worked around
+  it with a temporary local annotated tag on `d482a466`; the remote tag was not
+  touched. Fix for good: merge release PRs with a **merge commit**, and decide
+  whether to move the remote `v0.32.0` to `d482a466` (a force-push of a public
+  tag, so only on the owner's say).
+- **CI problems found and fixed on the way to 0.32.0:** `format:check` on five
+  files from earlier `develop` commits; six lint errors and two type errors in
+  the plugin's tests; `dist/*.d.ts.map` pointing at an unpublished `src` (the
+  smoke test caught it; `sourceMap` and `declarationMap` are now off like the
+  other packages); no bundle limit for the plugin (150 KB, measured 138.81 KB);
+  `pnpm audit` (`@faker-js/faker` 8 to 10.5 in `@vytches/ddd-testing`, which
+  needs Node `^20.19 || ^22.13 || >=24`; overrides for `js-yaml` and
+  `csv-parse`); `deps:check` ran through `npx` without TypeScript and checked 0
+  modules, so `dependency-cruiser` is now a root devDependency.
+- **0.32.1 (prepared, not yet merged or published):** branch
+  `release/2026-11-07-1`, tag `v0.32.1`, only the plugin is bumped. It adds
+  `validateRoleConfig({ countRoles: true })` with `roleCounts`; ships `docs/` in
+  the tarball (the README linked to pages that were missing); corrects the
+  README (it still said `private`); documents aiming a core rule through
+  `builtinRules` and running the plugin next to an ESLint 8 project; publishes
+  packages in dependency order (`scripts/publish-order.mjs`; before,
+  `@vytches/ddd` reached npm before its dependencies and installs failed with
+  404 for several minutes).
+- **Consumer adoption (a second copy of the primary consumer):** done on the
+  consumer side, on its own branch, not pushed. The plugin runs as a side track:
+  a workspace package with its own ESLint 9.39.5 and a flat config, next to the
+  untouched ESLint 8 setup (an aliased second ESLint in the root made pnpm
+  replace `node_modules/.bin/eslint`, so it was rejected). Result over 9880
+  files in about 25 s, 0 parse errors: 1 error and 158 warnings.
+  `no-new-entity-id` 1 (real, a `new BaseEntityId(...)` that grep for
+  `new EntityId(` cannot see), `no-deprecated-entity-id-factories` 149 (all
+  real), the other four recommended rules 0. `settings.ddd.tsconfig` is
+  required: `DomainEvent` 342 classes with it, 15 without. Three project rules
+  built on `roleScoped` (no `throw` in aggregates, no async in domain classes,
+  no framework import in domain files) measured on that code; one more (no
+  `userId` in commands, 64 hits, precision unclear) was described, not enabled.
+  Still open there: a real `docker build`, whether `lint:ddd` goes into CI, and
+  a full ESLint 9 migration (blocked by `eslint-config-airbnb-*` peer ranges).
 
 - Source of truth for the design is still the approved analysis
   (`project-orchestration/analysis/VF-043-eslint-plugin-ddd-agent-feedback-lane.analysis.md`).
@@ -46,12 +86,13 @@ note, guide) has not started.
   `event-handler-requires-handle`, `no-internal-imports`. Opt-in:
   `no-new-entity-id`, `policy-builder-required-calls`. Everything is marked
   `@beta @since 0.32.0`. CI matrix for ESLint 9/10 was added to
-  `.github/workflows/ci.yml`; a changeset is in `.changeset/`.
+  `.github/workflows/ci.yml`; a changeset is in `.changeset/`. (Written before
+  the release; the package is now public.)
 - **Verified locally:** 26 test files / 455 tests green (explicit file paths,
   `.claude/test-guard.json` `allowUnit`), `tsc` clean, the built ESM and CJS
-  entry points load. The package's own lint is **not** verified: ESLint 9
-  rejects the repo's root `.eslintrc.json`. The ESLint 10 matrix can only be
-  confirmed on GitHub Actions.
+  entry points load. The package's own lint was not verified at that time (since
+  2026-11-07 it runs under the repo's ESLint 8 config through `nx` and passes).
+  The ESLint 10 matrix can only be confirmed on GitHub Actions.
 - **Fixed after the run:** the ESM build imported `../package.json` without an
   import attribute (`ERR_IMPORT_ATTRIBUTE_MISSING`). `vite.config.mts` now
   inlines `package.json`. The meta-package `@vytches/ddd` exports `EntityId` as
@@ -96,7 +137,7 @@ Node 24.14), using the repo's own fixture consumer.
 
 | Check                                       | Result                                                                                                                                                                                                          |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tarball contents                            | `dist`, README, LLMGUIDE, LICENSE, `package.json` (125 files); no `workspace:` specifiers; `private: true` still set                                                                                            |
+| Tarball contents                            | `dist`, README, LLMGUIDE, LICENSE, `package.json` (125 files); no `workspace:` specifiers; `private: true` was still set (removed for the release)                                                              |
 | Flat config via ESM and via CJS `require`   | identical results on both ESLint versions: 7 findings on the violations file, one per rule (`no-internal-imports` twice), none on clean files                                                                   |
 | `/agent` entry, ESM and CJS                 | 7 exports each, equal                                                                                                                                                                                           |
 | Types, `moduleResolution: bundler`          | 0 errors with and without `skipLibCheck`; a negative control shows the types are real (`DddConfigs`), not `any`                                                                                                 |
@@ -116,7 +157,10 @@ Two repository problems found and fixed on the way:
 README now says that `settings.ddd.tsconfig` is required for path aliases. The
 stray `.claude/run-state/typecheck.tsbuildinfo` under the package was removed.
 
-### Before pushing (open)
+### Before pushing (closed 2026-11-07)
+
+All three items below were done: the decision was taken, the consumer facts were
+used, and the branch was pushed and released.
 
 1. ~~`no-internal-imports` semantics~~ **Decided (2026-11-07): keep as is.** The
    founder delegated the question to the library agents. Three of them (library,
@@ -151,6 +195,9 @@ stray `.claude/run-state/typecheck.tsbuildinfo` under the package was removed.
 
 ### Known gaps and follow-ups
 
+- `/agent` imports `eslint` itself; whether it fails under ESLint 8 (peer
+  resolves to 8.57 when the plugin is installed in an ESLint 8 project) was not
+  checked.
 - Decorator binding to a **function or `const`** in a project file gives a false
   `export-not-found` (a `src/resolver` bug; separate task).
 - Dynamic-import destructuring is unsupported (documented, silent by design).
@@ -292,11 +339,13 @@ Inputs added by the dogfood spike (2026-11-05):
 
 ### How to resume in a new context
 
-1. Read this file's "Current status" and "Before pushing", then the analysis
-   artifact (frontmatter `decisions`, `units`, `open_questions`).
-2. Phase 1 code is staged in `packages/eslint-plugin-ddd`; the tarball check is
-   done. Next: the `no-internal-imports` decision, then commit (conventional
-   commits, no push without the founder's say).
+1. Read this file's "Current status", then the analysis artifact (frontmatter
+   `decisions`, `units`, `open_questions`).
+2. 0.32.0 is public; 0.32.1 is prepared on `release/2026-11-07-1` and waits for
+   the owner to merge it (merge commit, not squash) and run the "Release"
+   workflow. After that: sync `develop` with `main`, then Phase 2 (AC-DOGFOOD on
+   a second consumer, migration note, guide, typed tier) and the consumer-side
+   decisions listed under "Consumer adoption".
 3. Tests: `.claude/test-guard.json` allows unit runs only through the repo's
    `test:unit` script with explicit test file paths. Never a recursive grep from
    the repo root.
