@@ -16,6 +16,11 @@ export interface ValidateRoleConfigOptions extends RoleResolverOptions {
   readonly files?: readonly string[];
   /** Parser returning an ESTree `Program`; defaults to `@typescript-eslint/parser` (optional peer). */
   readonly parse?: (text: string, filename: string) => AstNode;
+  /**
+   * Count the classes per role over every scanned file, built-in roles included. Off by
+   * default: without it the scan stops as soon as every declared role was matched.
+   */
+  readonly countRoles?: boolean;
 }
 
 /** @beta @since 0.32.0 */
@@ -24,6 +29,8 @@ export interface ValidateRoleConfigResult {
   readonly problems: readonly ConfigProblem[];
   readonly scannedFiles: number;
   readonly unparsedFiles: number;
+  /** Classes per role. Present only when `countRoles` was set; roles with no class are absent. */
+  readonly roleCounts?: Readonly<Record<string, number>>;
 }
 
 async function defaultParser(): Promise<(text: string, filename: string) => AstNode> {
@@ -62,19 +69,24 @@ export async function validateRoleConfig(
   const problems: ConfigProblem[] = [...resolver.checkBindings()];
   const declared = new Set<RoleName>((options.bindings ?? []).map(b => b.role));
   const pending = new Set(declared);
+  const countRoles = options.countRoles === true;
+  const counts = new Map<RoleName, number>();
   let scanned = 0;
   let unparsed = 0;
-  if (pending.size > 0) {
+  if (pending.size > 0 || countRoles) {
     const parse = options.parse ?? (await defaultParser());
     for (const file of options.files ?? listSourceFiles(cwd)) {
-      if (pending.size === 0) break;
+      if (pending.size === 0 && !countRoles) break;
       const abs = resolve(cwd, file);
       const text = fs.readFile(abs);
       if (text === undefined || !/\bclass\b/.test(text)) continue;
       scanned++;
       try {
         for (const c of resolver.classify(parse(text, abs), abs, text)) {
-          for (const r of c.roles) pending.delete(r);
+          for (const r of c.roles) {
+            pending.delete(r);
+            if (countRoles) counts.set(r, (counts.get(r) ?? 0) + 1);
+          }
         }
       } catch {
         unparsed++;
@@ -88,5 +100,11 @@ export async function validateRoleConfig(
       });
     }
   }
-  return { ok: problems.length === 0, problems, scannedFiles: scanned, unparsedFiles: unparsed };
+  const result = {
+    ok: problems.length === 0,
+    problems,
+    scannedFiles: scanned,
+    unparsedFiles: unparsed,
+  };
+  return countRoles ? { ...result, roleCounts: Object.fromEntries(counts) } : result;
 }

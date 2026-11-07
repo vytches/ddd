@@ -91,6 +91,44 @@ describe('validateRoleConfig (validation level ii)', () => {
     expect(result.problems.map(p => p.code)).toEqual(['role-matches-nothing']);
   });
 
+  describe('countRoles', () => {
+    it('leaves roleCounts out of the result when the option is not set', async () => {
+      const result = await run([AUDITED]);
+      expect(result).not.toHaveProperty('roleCounts');
+    });
+
+    it('keeps scanning after every declared role matched, so the counts cover all files', async () => {
+      const result = await run([AUDITED], { countRoles: true });
+      expect(result.scannedFiles).toBe(3);
+      expect(result.roleCounts).toMatchObject({ AuditedAggregate: 1 });
+    });
+
+    it('counts built-in roles even when the project declares none', async () => {
+      const result = await run([], { countRoles: true });
+      expect(result.ok).toBe(true);
+      expect(result.scannedFiles).toBe(3);
+      // BaseAggregate extends the library AggregateRoot; Order extends BaseAggregate.
+      expect(result.roleCounts).toEqual({ Aggregate: 2 });
+    });
+
+    it('omits roles that no class has, and still reports a declared role that matches nothing', async () => {
+      const result = await run(
+        [{ role: 'Unused', extends: { from: 'some-pkg', name: 'Nothing' } }],
+        {
+          countRoles: true,
+        }
+      );
+      expect(result.roleCounts).not.toHaveProperty('Unused');
+      expect(result.problems.map(p => p.code)).toEqual(['role-matches-nothing']);
+    });
+
+    it('is deterministic', async () => {
+      expect(await run([AUDITED], { countRoles: true })).toEqual(
+        await run([AUDITED], { countRoles: true })
+      );
+    });
+  });
+
   it('is deterministic: two runs over the same input give the same result', async () => {
     const bindings = [AUDITED, { role: 'Unused', extends: { from: 'some-pkg', name: 'Nothing' } }];
     expect(await run(bindings)).toEqual(await run(bindings));
