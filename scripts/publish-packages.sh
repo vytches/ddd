@@ -18,7 +18,12 @@ echo "📦 Publishing packages to $REGISTRY"
 echo "   Using pnpm publish (converts workspace:* to versions automatically)"
 echo ""
 
-for pkg in packages/*/; do
+# Publish dependencies before their dependents (see scripts/publish-order.mjs). A directory
+# glob is alphabetical, which put the meta-package @vytches/ddd on npm before the packages
+# it depends on and broke installs for several minutes (v0.32.0).
+mapfile -t PACKAGE_DIRS < <(node scripts/publish-order.mjs packages)
+
+for pkg in "${PACKAGE_DIRS[@]}"; do
   if [ ! -f "$pkg/package.json" ]; then
     continue
   fi

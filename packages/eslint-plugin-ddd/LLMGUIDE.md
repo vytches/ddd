@@ -39,7 +39,7 @@ All exports are named; there is no default export. The plugin namespace is
 | `resolveRole({ resolver, program, filename, node })` | beta      | Roles of one class node                                                             |
 | `createRoleResolver(opts)`                           | beta      | Builds a role resolver (bindings, tsconfig, depth)                                  |
 | `resolverFromSettings`, `createSettingsResolver()`   | beta      | Resolver provider that reads `settings.ddd` of a rule context                       |
-| `validateRoleConfig({ cwd, ... })`                   | beta      | Gate check: unresolved bindings, roles that match no class                          |
+| `validateRoleConfig({ cwd, countRoles? })`           | beta      | Gate check: unresolved bindings, roles that match no class; `roleCounts` on request |
 | `DddConfigError`, `parseSettings`, `SETTINGS_KEY`    | beta      | Configuration errors and shape validation of `settings.ddd`                         |
 | `createAgentLinter(opts)` (`/agent`)                 | beta      | `lintText(text, filePath)` returning `ok \| skipped \| parse-error \| config-error` |
 | `newFindings(before, after)` (`/agent`)              | beta      | Findings in `after` that `before` does not account for                              |

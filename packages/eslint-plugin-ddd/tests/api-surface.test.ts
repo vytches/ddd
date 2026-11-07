@@ -4,7 +4,7 @@
 // the severities of `configs.recommended`, the keys of `settings.ddd`, the role names, the
 // `exports` map of package.json and the type signatures of every exported symbol. Any change
 // here is a public API change: update the expectation on purpose, never to make a build pass.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -35,6 +35,7 @@ const pkg = JSON.parse(readFileSync(resolve(PACKAGE_DIR, 'package.json'), 'utf8'
   exports: Record<string, unknown>;
   dependencies?: Record<string, string>;
   publishConfig?: Record<string, unknown>;
+  files?: string[];
   typesVersions?: Record<string, Record<string, string[]>>;
   peerDependencies: Record<string, string>;
   peerDependenciesMeta: Record<string, { optional?: boolean }>;
@@ -231,6 +232,13 @@ describe('package manifest', () => {
     expect(pkg.private).toBeUndefined();
     expect(pkg.publishConfig).toEqual({ registry: 'https://registry.npmjs.org', access: 'public' });
     expect(pkg.typesVersions).toEqual({ '*': { agent: ['./dist/agent/index.d.ts'] } });
+  });
+
+  it('ships the per-rule pages the README and every rule meta.docs.url point to', () => {
+    expect(pkg.files).toEqual(expect.arrayContaining(['dist', 'docs', 'README.md', 'LLMGUIDE.md']));
+    for (const name of Object.keys(rules)) {
+      expect(existsSync(resolve(PACKAGE_DIR, 'docs', 'rules', `${name}.md`))).toBe(true);
+    }
   });
 });
 

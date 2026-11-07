@@ -10,8 +10,7 @@ ESLint plugin for projects built on `@vytches/ddd`. It does two jobs:
    agent.
 
 > **Status: beta.** Symbols marked `@beta` may change in a minor release. The
-> package ships with `private: true` until it has been validated on real
-> projects.
+> package is published on npm and follows the monorepo version.
 
 ## Requirements
 
@@ -165,6 +164,68 @@ const noThrowInAggregate = roleScoped(noRestrictedSyntaxRule, 'Aggregate', {
 Do **not** wrap the library import rules in `roleScoped`: an import can sit in a
 file that has no role class, so they run on every file.
 
+#### Aiming an ESLint core rule
+
+The plugin never imports ESLint's rules, so you hand it the rule object. ESLint
+exposes the core rules as `builtinRules` from `eslint/use-at-your-own-risk`. The
+name is ESLint's: it is not a supported public API. It works on ESLint 9.39 and
+10.14, the versions this package is tested with:
+
+```js
+import { builtinRules } from 'eslint/use-at-your-own-risk';
+import { roleScoped, resolverFromSettings } from '@vytches/eslint-plugin-ddd';
+
+const scoped = (rule, roles, scope = 'class') =>
+  roleScoped(rule, roles, { resolver: resolverFromSettings, scope });
+
+const plugin = {
+  rules: {
+    // no `throw` inside an aggregate
+    'aggregate-no-throw': scoped(
+      builtinRules.get('no-restricted-syntax'),
+      'Aggregate'
+    ),
+    // no framework import in a file that holds a domain class
+    'domain-no-framework-import': scoped(
+      builtinRules.get('no-restricted-imports'),
+      ['Aggregate', 'Entity', 'ValueObject'],
+      'file'
+    ),
+  },
+};
+
+export default [
+  { files: ['**/*.ts'], plugins: { project: plugin } },
+  {
+    files: ['**/*.ts'],
+    rules: {
+      'project/aggregate-no-throw': [
+        'error',
+        {
+          selector: 'ThrowStatement',
+          message: 'Return Result.fail(...) instead.',
+        },
+      ],
+      'project/domain-no-framework-import': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@nestjs/*'],
+              message: 'The domain layer is framework-free.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+];
+```
+
+The options you give the rule are the options of the wrapped rule. Measure a new
+rule on your code before you set it to `error`: the selector sees every class of
+the role, so a rule that is right for one project can be noisy in another.
+
 ### Validating the role configuration
 
 Resolvability of bindings is checked on every run (cheap, cached). "This role
@@ -183,6 +244,20 @@ if (!result.ok) {
   for (const p of result.problems) console.error(p.message);
   process.exitCode = 1;
 }
+```
+
+Pass `countRoles: true` to also get `result.roleCounts`, the number of classes
+per role (built-in roles included, roles with no class absent). It scans every
+file instead of stopping once each declared role matched, so use it in a gate or
+a one-off check, not per file. A quick way to see whether your bindings and
+`tsconfig` are doing their job:
+
+```js
+const { roleCounts } = await validateRoleConfig({
+  ...roleConfigFromSettings(cwd, settings.ddd),
+  countRoles: true,
+});
+console.table(roleCounts);
 ```
 
 ## Agent lane (`@vytches/eslint-plugin-ddd/agent`)
@@ -244,13 +319,34 @@ Lane rules:
   old ones in the file are left alone. It ignores line shifts and counts
   duplicates.
 
+## Next to an ESLint 8 / eslintrc project
+
+The plugin needs ESLint 9 or 10 and a flat config. If your project is still on
+ESLint 8 with `.eslintrc`, you do not have to migrate first: give the plugin its
+own small package (for example a workspace package `tools/lint-ddd`) with its
+own `eslint@^9`, a flat config and a script that runs it from the repository
+root. Do not alias a second ESLint into the root `devDependencies`: pnpm links
+the highest version to `node_modules/.bin/eslint` and replaces your ESLint 8.
+
+Two things to know when the code base already carries ESLint 8 directives:
+
+- ESLint 9 reports `// eslint-disable some-plugin/rule` as an error when the
+  config does not define that rule. Register no-op stub plugins for the old
+  prefixes in the side-track config (a plugin whose `rules` is a `Proxy`
+  returning a rule with an empty `create`). Inline directives for `ddd/*` keep
+  working.
+- ESLint 9 ignores `.eslintignore`. Put the paths in a flat `ignores` entry.
+
+The `/agent` entry imports `eslint` itself, so it needs the ESLint 9 or 10 that
+the side-track package provides.
+
 ## Cold-process cost
 
-A cold Node process with ESLint and the TypeScript parser costs roughly one to
-two seconds before the first result (a figure for ESLint plus parser in general;
-it is not yet measured for this package); warm calls on the same linter are much
-cheaper. Keep one `createAgentLinter` instance alive where you can, and do not
-use ESLint's `--cache` with the agent lane.
+A cold Node process that loads ESLint, the TypeScript parser and this plugin and
+lints one file costs about 230 ms (p50) and 250 ms (p95) on Node 24, ESLint 9.39
+and 10.14 (N = 30; ESLint alone: about 80 ms). Warm calls on the same linter are
+much cheaper. Keep one `createAgentLinter` instance alive where you can, and do
+not use ESLint's `--cache` with the agent lane.
 
 ## Versioning
 

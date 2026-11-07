@@ -282,6 +282,10 @@ describe('validateRoleConfig types', () => {
     expectTypeOf<ValidateRoleConfigResult['ok']>().toBeBoolean();
     expectTypeOf<ValidateRoleConfigResult['scannedFiles']>().toBeNumber();
     expectTypeOf<ValidateRoleConfigResult['unparsedFiles']>().toBeNumber();
+    expectTypeOf<ValidateRoleConfigResult['roleCounts']>().toEqualTypeOf<
+      Readonly<Record<string, number>> | undefined
+    >();
+    expectTypeOf<ValidateRoleConfigOptions['countRoles']>().toEqualTypeOf<boolean | undefined>();
     expect(true).toBe(true);
   });
 });

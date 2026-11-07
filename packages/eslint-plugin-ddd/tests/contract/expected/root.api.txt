@@ -27,8 +27,8 @@ interface RoleResolverOptions: export interface RoleResolverOptions { readonly c
 interface RoleScopedOptions: export interface RoleScopedOptions { readonly resolver: ResolverSource; readonly scope?: RoleScope; readonly docsUrl?: string; }
 interface SettingsResolver: export interface SettingsResolver { (context: SettingsContext): RoleResolver; reset(): void; }
 interface SettingsResolverOptions: export interface SettingsResolverOptions { readonly fs?: ResolverFs; readonly onWarning?: (warning: ResolverWarning) => void; }
-interface ValidateRoleConfigOptions: export interface ValidateRoleConfigOptions extends RoleResolverOptions { readonly files?: readonly string[]; readonly parse?: (text: string, filename: string) => AstNode; }
-interface ValidateRoleConfigResult: export interface ValidateRoleConfigResult { readonly ok: boolean; readonly problems: readonly ConfigProblem[]; readonly scannedFiles: number; readonly unparsedFiles: number; }
+interface ValidateRoleConfigOptions: export interface ValidateRoleConfigOptions extends RoleResolverOptions { readonly files?: readonly string[]; readonly parse?: (text: string, filename: string) => AstNode; readonly countRoles?: boolean; }
+interface ValidateRoleConfigResult: export interface ValidateRoleConfigResult { readonly ok: boolean; readonly problems: readonly ConfigProblem[]; readonly scannedFiles: number; readonly unparsedFiles: number; readonly roleCounts?: Readonly<Record<string, number>>; }
 type BindingProblemCode: export type BindingProblemCode = 'empty-binding' | 'invalid-glob' | 'file-not-found' | 'export-not-found';
 type ConfigProblem: export type ConfigProblem = BindingProblem | { readonly code: 'role-matches-nothing'; readonly role: RoleName; readonly message: string; };
 type LibraryRoleName: export type LibraryRoleName = 'Aggregate' | 'Entity' | 'ValueObject' | 'DomainEvent' | 'IntegrationEvent' | 'Command' | 'Query' | 'CommandHandler' | 'QueryHandler' | 'EventHandler' | 'DomainService' | 'Repository' | 'Specification' | 'Policy' | 'ACLAdapter';

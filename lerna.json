@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
-  "version": "0.32.0",
+  "version": "0.32.1",
   "npmClient": "pnpm",
   "packages": ["packages/*"],
   "command": {
@@ -9,7 +9,8 @@
       "conventionalCommits": true,
       "message": "chore: publish releases",
       "allowBranch": ["main", "master", "release/*"],
-      "ignoreChanges": ["**/*.md", "**/*.test.ts", "**/*.spec.ts", "**/tests/**"]
+      "ignoreChanges": ["**/*.md", "**/*.test.ts", "**/*.spec.ts", "**/tests/**"],
+      "includeMergedTags": true
     },
     "version": {
       "conventionalCommits": true,
@@ -19,7 +20,12 @@
       },
       "createRelease": false,
       "exact": true,
-      "allowBranch": ["main", "master", "release/*", "hotfix/*"]
+      "allowBranch": ["main", "master", "release/*", "hotfix/*"],
+      "forcePublish": true,
+      "includeMergedTags": true
+    },
+    "changed": {
+      "includeMergedTags": true
     }
   },
   "changelogPreset": {

@@ -23,13 +23,13 @@ Publish odbywa się ręcznie przez właściciela w GitHub Actions: → Actions �
 
 ## Stan aktualny
 
-| Co              | Gdzie                                                 |
-| --------------- | ----------------------------------------------------- |
-| Registry        | **npmjs.org** (publiczny, bez auth)                   |
-| Wersjonowanie   | Fixed — wszystkie pakiety tą samą wersją (lerna.json) |
-| Branching       | `develop` → `release/*` → `main`                      |
-| Publish tool    | `pnpm publish` (konwertuje `workspace:*`)             |
-| Versioning tool | `lerna version --conventional-commits`                |
+| Co              | Gdzie                                                                 |
+| --------------- | --------------------------------------------------------------------- |
+| Registry        | **npmjs.org** (publiczny, bez auth)                                   |
+| Wersjonowanie   | Fixed — wszystkie pakiety tą samą wersją (lerna.json, `forcePublish`) |
+| Branching       | `develop` → `release/*` → `main`                                      |
+| Publish tool    | `pnpm publish` (konwertuje `workspace:*`)                             |
+| Versioning tool | `lerna version --conventional-commits`                                |
 
 ---
 
@@ -45,7 +45,10 @@ git checkout develop && git pull
 git checkout -b release/YYYY-MM-DD
 git push -u origin release/YYYY-MM-DD
 
-# 2. Zbumpuj wersje (TYLKO wersjonowanie, bez build/publish)
+# 2. Check that lerna will count changes from the right tag (it stops and says
+#    why if not, see "Process pitfalls"), then bump the versions
+#    (versioning ONLY, no build/publish)
+pnpm release:preflight
 NX_DAEMON=false pnpm lerna version --conventional-commits --yes
 
 # 3. Release branch gotowy — Claude kończy pracę tutaj
@@ -225,40 +228,111 @@ develop          ← cała aktywna praca
 Lerna blokuje `lerna version` poza `release/*` i `hotfix/*` — to celowe, żeby
 nie wersjonować przypadkowo z feature branches.
 
-### PR release'owy: merge commit, NIE squash
+## Process pitfalls
 
-`lerna version` tworzy tag na branchu `release/*`. Squash zbija całą historię
-tego brancha w jeden nowy commit na `main`, więc otagowany commit **przestaje
-być przodkiem `main`** — tag zostaje osierocony, mimo że treść jest identyczna.
+This section exists because several settings look unnecessary or odd, and each
+one answers a specific failure. Read why it is there before you change it.
 
-Skutek jest cichy i ujawnia się dopiero przy następnym wydaniu:
+### 1. Every package gets the same version (`forcePublish`)
+
+In fixed mode lerna bumps **only the packages that changed** since the last tag
+by default. A release that touched a single package (0.32.1: only the ESLint
+plugin) left `@vytches/ddd` and the rest on the old number, although this guide
+says the version is shared. So `lerna.json` sets
+`command.version.forcePublish: true`: every release raises all packages and
+`lerna.json` to the same version.
+
+The cost: every release also publishes the packages that did not change (same
+content, new number). If you ever want to bump only what changed:
+`pnpm lerna version patch --no-force-publish --yes`. Note that `lerna changed`
+reads this setting too, so it reports everything as changed.
+
+### 2. Lerna has to see the tag of the previous release
+
+Lerna works out "what changed" from the **last tag it can reach**. If that is
+not the tag for the version in `lerna.json`, nothing fails: you get a changelog
+that repeats work already released, and every package marked as changed. Three
+things decide whether lerna sees the tag:
+
+| Condition                                                               | Why                                                                                                                                                               |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The tag is **annotated** (`git tag -a`)                                 | The `git describe` lerna uses has no `--tags`, so it skips lightweight tags                                                                                       |
+| The release PR is merged with a **merge commit, not a squash**          | A squash collapses the branch into a new commit on `main`; the tagged commit stops being an ancestor of `main`                                                    |
+| `lerna.json` sets `includeMergedTags: true` (version, changed, publish) | Lerna searches with `--first-parent` by default, and after a merge commit the tag sits on the second parent, so **a merge commit alone is not enough** without it |
+
+Checked by experiment (lerna 8.2.4): on a throwaway merge commit,
+`git describe --first-parent` returned `v0.31.1` and plain `git describe`
+returned `v0.32.1`. Lerna with default settings searched from `v0.31.1` and
+treated 20 packages as changed. With `includeMergedTags` it searched from
+`v0.32.1` and found no changes.
+
+`pnpm release:preflight` (`scripts/release-preflight.mjs`) checks this before
+`lerna version` and stops the release with an explanation when the last
+reachable tag is not `v<version from lerna.json>`, when that tag is lightweight,
+or when someone removed `includeMergedTags`. Do not run `lerna version` while it
+exits with an error.
+
+### 3. A squash already happened: what to do
+
+It happened at 0.27, 0.31.0 and 0.32.0. Compare the content first:
 
 ```bash
-git describe --tags origin/main
-# po squashu:      v0.27.0-7-gfc4e172e   ← widzi tag sprzed czterech wydań
-# po merge commit: v0.31.0
+git diff --stat <tag-commit> origin/main    # how does the tag differ from what was released?
 ```
 
-`lerna version --conventional-commits` i `pnpm release:collect` wyznaczają
-zakres commitów od ostatniego osiągalnego tagu. Z osieroconym tagiem policzą go
-od wydania sprzed kilku wersji i wygenerują changelog obejmujący pracę już
-wydaną — a przy zmianach łamiących mogą też źle wyliczyć bump.
-
-Dlatego PR `release/*` → `main` **mergujemy commitem scalającym**. Jeśli squash
-już się wydarzył, napraw tag zaraz po merge'u — treść jest identyczna
-(`git diff <tag> main` musi być puste), więc przeniesienie niczego nie gubi:
+**The difference is empty** (as with 0.31.0): move the tag to the squash commit.
+The content is identical, so nothing is lost.
 
 ```bash
-git diff --stat <stary-commit-tagu> main   # MUSI być puste
-git tag -f -a vX.Y.Z main -m "vX.Y.Z"
+git tag -f -a vX.Y.Z origin/main -m "vX.Y.Z"
 git push origin :refs/tags/vX.Y.Z
 git push origin vX.Y.Z
-git describe --tags origin/main            # musi zwrócić vX.Y.Z
+git describe --tags origin/main            # must return vX.Y.Z
 ```
 
-> Przenoszenie tagu jest bezpieczne tylko dopóki drzewa są identyczne. Jeśli
-> `git diff` cokolwiek pokazuje, tag opisuje inną treść niż to, co wydano —
-> wtedy nie przenoś, tylko wyjaśnij rozjazd.
+**The difference is not empty** (as with 0.32.0: the tag sat before the CI
+fixes, and `main` is what went to npm): do **not** move the tag, because it
+would describe different content than what was released. Instead, for the
+duration of one versioning run, set a **local** annotated tag on the squash
+commit so that lerna and `release:preflight` count from the right place, and
+restore the original afterwards. Leave the remote tag alone.
+
+```bash
+git rev-parse vX.Y.Z                                          # note the original tag object
+git tag -f -a vX.Y.Z origin/main -m "temporary, local"        # before lerna version
+# ... pnpm release:preflight && pnpm lerna version ... --no-push
+git tag -f vX.Y.Z <noted-tag-object>                          # after versioning
+```
+
+Do not run `git fetch --tags --force` between creating a new tag and pushing it:
+it overwrites the local tag with the remote one.
+
+Merge the next release PR with a merge commit. Its tag then enters the history
+of `main`, and later releases need no workaround.
+
+### 4. Publish order
+
+`scripts/publish-packages.sh` publishes packages in dependency order
+(`scripts/publish-order.mjs`), not alphabetically. Alphabetically,
+`@vytches/ddd` (`packages/enterprise`) reached npm before `events`, `utils` and
+`value-objects`, which it depends on by exact version, and for a few minutes
+installs failed with a 404 (v0.32.0). Do not replace this with a loop over
+`packages/*/`.
+
+### 5. Before you hand a release to the owner
+
+Not everything that breaks the pipeline shows up without trying it. Replay the
+jobs of `.github/workflows/ci.yml` locally on the release branch:
+`format:check`; `nx affected` for `lint`, `type-check`, `test` and `build`;
+`api-extractor` for the four packages; `pnpm deps:check`; `madge`;
+`docs-compile-gate:check`; `example-matrix:check`; the quality gates and
+`bundle-size-monitor`; `pnpm build` together with the publish smoke test
+(`pnpm test:smoke`); `pnpm audit --prod --audit-level moderate`. A new package
+needs an entry in `sizeThresholds` in
+`scripts/quality-gates/bundle-size-monitor.js`, otherwise it gets the default
+100 KB. A `401` in the `npm whoami` step of the "Release" workflow is a problem
+with the `NPM_TOKEN` secret (expired, or limited to existing packages), not with
+the repo.
 
 ---
 
