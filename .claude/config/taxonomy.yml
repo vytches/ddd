@@ -14,9 +14,11 @@
 # Validate the merged vocabulary:
 #   node <claude-patterns>/scripts/lint-patterns.mjs --project .
 
-areas: []
+areas:
+  []
   # - catalog
   # - fulfillment
 
-variants_seen: {}
+variants_seen:
+  {}
   # auth: [magic-link]

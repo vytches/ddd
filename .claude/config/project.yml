@@ -45,9 +45,8 @@ exclude_skills:
 blog_seeds:
   enabled: true
   public_alias: "biblioteka DDD w TypeScript"
-  targets: [{id: product, path: ../juz-ide-blog}, {id: personal, path: ../personal-blog}]
+  targets: [{ id: product, path: ../juz-ide-blog }, { id: personal, path: ../personal-blog }]
   routing_hint: auto
   mode: dry-run
   exclude:
     project: false
-
