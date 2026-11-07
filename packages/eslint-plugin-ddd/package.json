@@ -1,6 +1,6 @@
 {
   "name": "@vytches/eslint-plugin-ddd",
-  "version": "0.31.1",
+  "version": "0.32.0",
   "description": "ESLint plugin (flat config) with a DDD role model for @vytches/ddd and a feedback lane for coding agents",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -58,7 +58,6 @@
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {},
   "peerDependencies": {
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.39.0 || ^10.0.0"
