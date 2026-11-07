@@ -1,7 +1,6 @@
 {
   "name": "@vytches/eslint-plugin-ddd",
   "version": "0.31.1",
-  "private": true,
   "description": "ESLint plugin (flat config) with a DDD role model for @vytches/ddd and a feedback lane for coding agents",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -19,6 +18,13 @@
       "require": "./dist/agent.cjs"
     },
     "./package.json": "./package.json"
+  },
+  "typesVersions": {
+    "*": {
+      "agent": [
+        "./dist/agent/index.d.ts"
+      ]
+    }
   },
   "sideEffects": false,
   "files": [

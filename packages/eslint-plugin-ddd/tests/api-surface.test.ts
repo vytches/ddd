@@ -225,8 +225,10 @@ describe('package manifest', () => {
     expect(pkg.peerDependenciesMeta).toEqual({ '@typescript-eslint/parser': { optional: true } });
   });
 
-  it('stays out of the npm registry until the dogfooding sign-off', () => {
-    expect(pkg.private).toBe(true);
+  it('is publishable to the public npm registry with the /agent types reachable on node10', () => {
+    expect(pkg.private).toBeUndefined();
+    expect(pkg.publishConfig).toEqual({ registry: 'https://registry.npmjs.org', access: 'public' });
+    expect(pkg.typesVersions).toEqual({ '*': { agent: ['./dist/agent/index.d.ts'] } });
   });
 });
 

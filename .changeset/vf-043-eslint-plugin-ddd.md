@@ -5,9 +5,11 @@
 feat(eslint-plugin-ddd): new flat-config ESLint plugin with a DDD role model and
 an agent feedback lane (VF-043)
 
-The package is `private: true` during Phase 1, so nothing is published to npm
-until the flag is removed as a separate, deliberate step (after dogfooding and
-after CI runs `publint` and `attw`). Its API is `@beta`.
+Published as a normal release; the API is `@beta` (names and options may still
+change in a minor until two consumers have built on it). Known limitation shared
+with the other packages: declaration files use extension-less relative imports,
+so strict `node16`/`nodenext` type resolution with `skipLibCheck: false` reports
+errors; runtime is unaffected.
 
 **Main entry (`@vytches/eslint-plugin-ddd`):** named exports only: `plugin`,
 `rules`, `configs` (`recommended`), `meta`, plus the `@beta` helpers
