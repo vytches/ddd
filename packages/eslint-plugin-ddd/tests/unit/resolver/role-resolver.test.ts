@@ -211,7 +211,7 @@ describe('project bindings', () => {
   it('resolves tsconfig paths (JSONC, extends, trailing commas, all targets)', () => {
     const files = {
       [BASE_FILE]: BASE_TEXT,
-      '/proj/tsconfig.base.json': `﻿{ // shared\n "compilerOptions": { "baseUrl": ".", "paths": { "@shared/*": ["nope/*", "src/shared/*"], }, }, }`,
+      '/proj/tsconfig.base.json': `\uFEFF{ // shared\n "compilerOptions": { "baseUrl": ".", "paths": { "@shared/*": ["nope/*", "src/shared/*"], }, }, }`,
       '/proj/tsconfig.json': `{ /* app */ "extends": "./tsconfig.base.json", }`,
     };
     const code = `import { BaseAggregate } from '@shared/base.aggregate';\nexport class Order extends BaseAggregate {}`;

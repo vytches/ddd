@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type -- `{}` is the subject of these assertions: it checks which inputs are optional */
 // Compile-time contract of the public surface (LT3): the assertions are checked by `tsc`
 // (`type-check` target); at runtime they are no-ops, so each test also checks a runtime fact.
 import type { Linter, Rule } from 'eslint';

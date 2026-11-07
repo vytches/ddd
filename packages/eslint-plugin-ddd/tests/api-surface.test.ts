@@ -33,7 +33,9 @@ const pkg = JSON.parse(readFileSync(resolve(PACKAGE_DIR, 'package.json'), 'utf8'
   version: string;
   private?: boolean;
   exports: Record<string, unknown>;
-  dependencies: Record<string, string>;
+  dependencies?: Record<string, string>;
+  publishConfig?: Record<string, unknown>;
+  typesVersions?: Record<string, Record<string, string[]>>;
   peerDependencies: Record<string, string>;
   peerDependenciesMeta: Record<string, { optional?: boolean }>;
 };

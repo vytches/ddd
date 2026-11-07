@@ -5,9 +5,8 @@
     "moduleResolution": "bundler",
     "types": ["node"],
     "declaration": true,
-    "sourceMap": true,
-    "declarationMap": true,
-    "inlineSources": true,
+    "sourceMap": false,
+    "declarationMap": false,
     "composite": false,
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo"

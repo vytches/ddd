@@ -15,9 +15,8 @@ const VALID_USE_VARIANTS = new Set([
 ]);
 
 function entryText(prelude: string, setup: string | undefined, usage: string): string {
-  return (
-    [prelude, setup, usage].filter(part => part !== undefined && part !== '').join('\n') + '\n'
-  );
+  const body = [prelude, setup, usage].filter(part => part !== undefined && part !== '').join('\n');
+  return `${body}\n`;
 }
 
 /** The whole corpus: violations the rules must see and valid code they must leave alone. */
