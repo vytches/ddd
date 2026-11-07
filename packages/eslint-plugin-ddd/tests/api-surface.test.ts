@@ -217,7 +217,7 @@ describe('package manifest', () => {
   });
 
   it('has no runtime dependencies and the documented peers', () => {
-    expect(pkg.dependencies).toEqual({});
+    expect(pkg.dependencies ?? {}).toEqual({});
     expect(pkg.peerDependencies).toEqual({
       '@typescript-eslint/parser': '^8.0.0',
       eslint: '^9.39.0 || ^10.0.0',
