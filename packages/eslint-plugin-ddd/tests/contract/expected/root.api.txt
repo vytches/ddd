@@ -1,0 +1,40 @@
+class DddConfigError: new (problems: readonly ConfigIssue[]): DddConfigError { problems: readonly ConfigIssue[] }
+const SETTINGS_KEY: "ddd"
+const configs: DddConfigs
+const meta: DddPluginMeta
+const plugin: DddPlugin
+const resolverFromSettings: SettingsResolver
+const rules: Readonly<Record<"no-instanceof-result" | "no-new-entity-id" | "no-deprecated-entity-id-factories" | "event-handler-requires-handle" | "no-internal-imports" | "policy-builder-required-calls", Rule.RuleModule>>
+function createRoleResolver: (options: RoleResolverOptions): RoleResolver
+function createSettingsResolver: (options?: SettingsResolverOptions): SettingsResolver
+function parseSettings: (raw: unknown): DddSettings
+function resolveRole: (input: ResolveRoleInput): readonly RoleName[]
+function roleConfigFromSettings: (cwd: string, rawSettings: unknown): RoleResolverOptions
+function roleScoped: (rule: Rule.RuleModule, role: RoleName | readonly RoleName[], options: RoleScopedOptions): Rule.RuleModule
+function validateRoleConfig: (options: ValidateRoleConfigOptions): Promise<ValidateRoleConfigResult>
+interface BindingProblem: export interface BindingProblem { readonly code: BindingProblemCode; readonly role: RoleName; readonly message: string; }
+interface BindingTarget: export interface BindingTarget { readonly from: string; readonly name: string; }
+interface ConfigIssue: export interface ConfigIssue { readonly code: string; readonly message: string; readonly path?: string; readonly role?: string; }
+interface DddConfigs: export interface DddConfigs { readonly recommended: Linter.Config; }
+interface DddPlugin: export interface DddPlugin { readonly meta: DddPluginMeta; readonly rules: Readonly<Record<RuleName, Rule.RuleModule>>; readonly configs: DddConfigs; }
+interface DddPluginMeta: export interface DddPluginMeta { readonly name: string; readonly version: string; readonly namespace: string; }
+interface DddSettings: export interface DddSettings { readonly bindings?: readonly RoleBinding[]; readonly tsconfig?: string | false; readonly includeLibraryRoles?: boolean; readonly maxDepth?: number; }
+interface ResolveRoleInput: export interface ResolveRoleInput { readonly resolver: RoleResolver; readonly program: AstNode; readonly filename: string; readonly node: AstNode; }
+interface ResolverFs: export interface ResolverFs { readFile(path: string): string | undefined; stat(path: string): { readonly isFile: boolean; readonly mtimeMs: number; } | undefined; }
+interface RoleBinding: export interface RoleBinding { readonly role: RoleName; readonly extends?: BindingTarget | readonly BindingTarget[]; readonly implements?: BindingTarget | readonly BindingTarget[]; readonly decorator?: BindingTarget | readonly BindingTarget[]; readonly files?: string; readonly implies?: readonly RoleName[]; }
+interface RoleResolver: export interface RoleResolver { classify(program: AstNode, filename: string, sourceText?: string): readonly ClassRoles[]; checkBindings(): readonly BindingProblem[]; reset(): void; readonly warnings: readonly ResolverWarning[]; }
+interface RoleResolverOptions: export interface RoleResolverOptions { readonly cwd: string; readonly bindings?: readonly RoleBinding[]; readonly tsconfig?: string | false; readonly includeLibraryRoles?: boolean; readonly maxDepth?: number; readonly fs?: ResolverFs; readonly onWarning?: (warning: ResolverWarning) => void; }
+interface RoleScopedOptions: export interface RoleScopedOptions { readonly resolver: ResolverSource; readonly scope?: RoleScope; readonly docsUrl?: string; }
+interface SettingsResolver: export interface SettingsResolver { (context: SettingsContext): RoleResolver; reset(): void; }
+interface SettingsResolverOptions: export interface SettingsResolverOptions { readonly fs?: ResolverFs; readonly onWarning?: (warning: ResolverWarning) => void; }
+interface ValidateRoleConfigOptions: export interface ValidateRoleConfigOptions extends RoleResolverOptions { readonly files?: readonly string[]; readonly parse?: (text: string, filename: string) => AstNode; }
+interface ValidateRoleConfigResult: export interface ValidateRoleConfigResult { readonly ok: boolean; readonly problems: readonly ConfigProblem[]; readonly scannedFiles: number; readonly unparsedFiles: number; }
+type BindingProblemCode: export type BindingProblemCode = 'empty-binding' | 'invalid-glob' | 'file-not-found' | 'export-not-found';
+type ConfigProblem: export type ConfigProblem = BindingProblem | { readonly code: 'role-matches-nothing'; readonly role: RoleName; readonly message: string; };
+type LibraryRoleName: export type LibraryRoleName = 'Aggregate' | 'Entity' | 'ValueObject' | 'DomainEvent' | 'IntegrationEvent' | 'Command' | 'Query' | 'CommandHandler' | 'QueryHandler' | 'EventHandler' | 'DomainService' | 'Repository' | 'Specification' | 'Policy' | 'ACLAdapter';
+type ResolverSource: export type ResolverSource = RoleResolver | ((context: Rule.RuleContext) => RoleResolver);
+type ResolverWarning: export type ResolverWarning = { readonly code: 'max-depth'; readonly file: string; readonly name: string; } | { readonly code: 'tsconfig'; readonly file: string; readonly message: string; };
+type RoleName: export type RoleName = LibraryRoleName | (string & {});
+type RoleScope: export type RoleScope = 'class' | 'file';
+type RuleName: export type RuleName = keyof typeof RULE_CATALOG;
+type SettingsContext: export type SettingsContext = Pick<Rule.RuleContext, 'settings'> & { readonly cwd?: string; };

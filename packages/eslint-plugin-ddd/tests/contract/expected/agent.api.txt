@@ -1,0 +1,17 @@
+function createAgentLinter: (options?: AgentLinterOptions): AgentLinter
+function isAgentSeverity: (value: unknown): value is AgentSeverity
+function isLintConfigError: (result: AgentLintResult): result is AgentLintConfigError
+function isLintOk: (result: AgentLintResult): result is AgentLintOk
+function isLintParseError: (result: AgentLintResult): result is AgentLintParseError
+function isLintSkipped: (result: AgentLintResult): result is AgentLintSkipped
+function newFindings: (before: readonly AgentFinding[], after: readonly AgentFinding[]): readonly AgentFinding[]
+interface AgentFinding: export interface AgentFinding { readonly ruleId: string; readonly severity: AgentSeverity; readonly message: string; readonly line: number; readonly column: number; readonly endLine?: number; readonly endColumn?: number; }
+interface AgentLinter: export interface AgentLinter { lintText(text: string, filePath: string): Promise<AgentLintResult>; }
+interface AgentLinterOptions: export interface AgentLinterOptions { readonly config?: Linter.Config | readonly Linter.Config[]; readonly rulePrefixes?: readonly string[]; readonly minSeverity?: AgentSeverity; readonly cwd?: string; readonly noInlineConfig?: boolean; readonly resettables?: readonly Resettable[]; }
+interface Resettable: export interface Resettable { reset(): void; }
+type AgentLintConfigError: export type AgentLintConfigError = Extract<AgentLintResult, { readonly status: 'config-error'; }>;
+type AgentLintOk: export type AgentLintOk = Extract<AgentLintResult, { readonly status: 'ok'; }>;
+type AgentLintParseError: export type AgentLintParseError = Extract<AgentLintResult, { readonly status: 'parse-error'; }>;
+type AgentLintResult: export type AgentLintResult = { readonly status: 'ok'; readonly findings: readonly AgentFinding[]; } | { readonly status: 'skipped'; readonly reason: string; } | { readonly status: 'parse-error'; readonly message: string; readonly line?: number; readonly column?: number; } | { readonly status: 'config-error'; readonly message: string; readonly issues?: readonly ConfigIssue[]; };
+type AgentLintSkipped: export type AgentLintSkipped = Extract<AgentLintResult, { readonly status: 'skipped'; }>;
+type AgentSeverity: export type AgentSeverity = 'error' | 'warn';

@@ -1,0 +1,5 @@
+{
+  "name": "ddd-plugin-fixture-consumer",
+  "private": true,
+  "type": "module"
+}

@@ -92,6 +92,17 @@
       "includeInEnterprise": false,
       "category": "bundle"
     },
+    "eslint-plugin-ddd": {
+      "description": "ESLint plugin (flat config) with a DDD role model and an agent feedback lane",
+      "dependencies": [],
+      "scope": "eslint-plugin",
+      "type": "lib",
+      "includeInEnterprise": false,
+      "category": "tooling",
+      "peerDependencies": {
+        "eslint": "^9.39.0 || ^10.0.0"
+      }
+    },
     "contracts": {
       "dependencies": [],
       "scope": "contracts",

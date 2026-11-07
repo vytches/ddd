@@ -1,0 +1,46 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "name": "@vytches/eslint-plugin-ddd",
+  "projectType": "library",
+  "sourceRoot": "packages/eslint-plugin-ddd/src",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "command": "vite build",
+        "cwd": "packages/eslint-plugin-ddd"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run packages/eslint-plugin-ddd/tests --reporter=verbose"
+      }
+    },
+    "perf": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm vitest run --reporter=verbose --passWithNoTests=false",
+        "cwd": "packages/eslint-plugin-ddd",
+        "env": {
+          "DDD_PLUGIN_PERF": "1"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/eslint-plugin-ddd/**/*.ts"]
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit --project packages/eslint-plugin-ddd/tsconfig.json"
+      }
+    }
+  },
+  "tags": ["type:lib", "scope:eslint-plugin", "layer:tooling"]
+}
