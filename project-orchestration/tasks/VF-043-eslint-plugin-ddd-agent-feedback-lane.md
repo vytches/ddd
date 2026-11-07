@@ -41,8 +41,14 @@ migration note, guide) has not started.
   touched. Do **not** move `v0.32.0`: `docs/RELEASE-GUIDE.md` allows that only
   when `git diff <tag commit> main` is empty, and here it shows 14 files (the
   tag sits before the CI fixes; npm was published from `main`). The fix is
-  forward: merge the 0.32.1 release PR with a **merge commit**, so `v0.32.1` is
-  an ancestor of `main` and `git describe` finds it.
+  forward: merge the 0.32.1 release PR with a **merge commit**. That alone is
+  not enough: lerna looks for the last tag with `--first-parent` and would still
+  skip the tag on the merged branch. The release branch therefore also sets
+  `includeMergedTags` and `forcePublish` in `lerna.json` (all 20 packages are
+  bumped together, as the guide says) and adds `pnpm release:preflight`, which
+  stops a release whose last reachable tag is not `v<lerna.json version>`. Why
+  each of these exists is written down in `docs/RELEASE-GUIDE.md`, section
+  "Pułapki procesu".
 - **CI problems found and fixed on the way to 0.32.0:** `format:check` on five
   files from earlier `develop` commits; six lint errors and two type errors in
   the plugin's tests; `dist/*.d.ts.map` pointing at an unpublished `src` (the
@@ -53,7 +59,7 @@ migration note, guide) has not started.
   `csv-parse`); `deps:check` ran through `npx` without TypeScript and checked 0
   modules, so `dependency-cruiser` is now a root devDependency.
 - **0.32.1 (prepared, not yet merged or published):** branch
-  `release/2026-11-07-1`, tag `v0.32.1`, only the plugin is bumped. It adds
+  `release/2026-11-07-1`, tag `v0.32.1`, all 20 packages at 0.32.1. It adds
   `validateRoleConfig({ countRoles: true })` with `roleCounts`; ships `docs/` in
   the tarball (the README linked to pages that were missing); corrects the
   README (it still said `private`); documents aiming a core rule through
