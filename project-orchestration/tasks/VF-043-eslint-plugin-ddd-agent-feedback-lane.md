@@ -18,7 +18,7 @@ created_by:
   consumer application
 created_at: 2026-10-30
 status: in-progress
-updated_at: 2026-11-04
+updated_at: 2026-11-06
 package:
   'new packages/eslint-plugin-ddd (role resolver + roleScoped + API preset)'
 related: [VF-026, VF-034, VF-038]
@@ -27,15 +27,140 @@ consumer_first_adopter:
   side
 ```
 
-## Current status (2026-11-04)
+## Current status (2026-11-06)
 
-**Phase 0 (gate) is about 60% done and paused at a deliberate hand-over point.**
-The two risky questions are answered: the feedback channel works for subagents
-(a), and the role-scoping approach is fast and precise enough (b). Three small
-items remain (c, d, e), then founder sign-off. No plugin code exists in the repo
-yet. The throw-away spike code is kept for reference in
-`project-orchestration/analysis/VF-043-spike/`; Phase 1 rebuilds it properly,
-guided by the spike logs below.
+**Phase 1 is implemented and staged on branch
+`feature/VF-043-eslint-plugin-ddd-agent-feedback-lane`, not committed, not
+pushed, not published.** It was built by one `/orchestrate` run (Phase 1 only,
+decision D1) plus manual fixes afterwards. Phase 2 (formal AC-DOGFOOD, migration
+note, guide) has not started.
+
+- Source of truth for the design is still the approved analysis
+  (`project-orchestration/analysis/VF-043-eslint-plugin-ddd-agent-feedback-lane.analysis.md`).
+  Decisions D18 (public-api type guards only on input unions) and D19 (the five
+  specs that sat in `src/` moved to `tests/unit/`) were added during the run.
+- **Package** `packages/eslint-plugin-ddd`: roles resolver, `roleScoped`,
+  `settings.ddd` config with validation, recommended preset, agent lane
+  (`/agent`: `createAgentLinter`, `newFindings`). Rules in `recommended`:
+  `no-instanceof-result`, `no-deprecated-entity-id-factories`,
+  `event-handler-requires-handle`, `no-internal-imports`. Opt-in:
+  `no-new-entity-id`, `policy-builder-required-calls`. Everything is marked
+  `@beta @since 0.32.0`. CI matrix for ESLint 9/10 was added to
+  `.github/workflows/ci.yml`; a changeset is in `.changeset/`.
+- **Verified locally:** 26 test files / 455 tests green (explicit file paths,
+  `.claude/test-guard.json` `allowUnit`), `tsc` clean, the built ESM and CJS
+  entry points load. The package's own lint is **not** verified: ESLint 9
+  rejects the repo's root `.eslintrc.json`. The ESLint 10 matrix can only be
+  confirmed on GitHub Actions.
+- **Fixed after the run:** the ESM build imported `../package.json` without an
+  import attribute (`ERR_IMPORT_ATTRIBUTE_MISSING`). `vite.config.mts` now
+  inlines `package.json`. The meta-package `@vytches/ddd` exports `EntityId` as
+  `ContractsEntityId`; `no-new-entity-id` missed `new BaseEntityId(...)` through
+  that alias. `src/rules/shared/symbols.ts` now maps it back, with a regression
+  test.
+- **Run outcome:** final gate was NO_GO by machine only (unverified scope, blind
+  probe), so the files were staged "needs review" per ORC-084. The run report
+  `.claude/run-state/VF-043-eslint-plugin-ddd-agent-feedback-lane.report.md` was
+  written before the manual fixes and is partly outdated.
+
+### Real-consumer check (2026-11-06, read-only)
+
+The staged package was run against a checkout of the primary consumer (9218
+`src` files). The consumer is on ESLint 8 with eslintrc, so the check used
+scratch flat configs and ESLint 9 from this repo; **nothing in the consumer
+checkout was changed** (its working tree only has changes that predate this
+check: one modified config file and one untracked analysis file). The harness is
+kept in `project-orchestration/analysis/VF-043-phase1-dogfood/` (sanitised, run
+with `CONSUMER_DIR=<checkout>`), because the previous harness was lost with its
+scratchpad.
+
+| Check                                                                                | Result                                                                                                                                 |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Run on all files                                                                     | 0 fatal errors, about 21 s for the full corpus                                                                                         |
+| Library import rules on the meta-package `@vytches/ddd`                              | work; the consumer has ~3978 imports from it                                                                                           |
+| `/internal` subpaths                                                                 | detected for the meta-package and for sub-packages                                                                                     |
+| `no-deprecated-entity-id-factories`                                                  | 125 findings; grep shows 131, of which 2 are comments and 4 are destructured `await import(...)`, which the plugin does not follow     |
+| Custom bindings (the consumer's own domain-event and integration-event base classes) | 346 of 347 and 91 of 91 classes; the one miss is a comment in code. Aggregates 60, value objects 248 match grep                        |
+| Path aliases                                                                         | roles resolve only with `settings.ddd.tsconfig: 'tsconfig.json'`; with `tsconfig: false` just 15 of 347 events. **README must say so** |
+| `no-new-entity-id` alias bug                                                         | found and fixed (see above); the plugin now reports the consumer's one real case                                                       |
+
+These numbers come from hand-assembled configs pointing at `dist/`. The
+installed tarball was checked separately on the repo's fixture consumer (next
+section), not on the consumer's own code.
+
+### Tarball check (2026-11-07)
+
+Built with `nx build`, packed with `pnpm pack`, installed into two empty
+projects (ESLint 9.39.2 and ESLint 10.14.0, `@typescript-eslint/parser` 8.68,
+Node 24.14), using the repo's own fixture consumer.
+
+| Check                                       | Result                                                                                                                                                                                                          |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tarball contents                            | `dist`, README, LLMGUIDE, LICENSE, `package.json` (125 files); no `workspace:` specifiers; `private: true` still set                                                                                            |
+| Flat config via ESM and via CJS `require`   | identical results on both ESLint versions: 7 findings on the violations file, one per rule (`no-internal-imports` twice), none on clean files                                                                   |
+| `/agent` entry, ESM and CJS                 | 7 exports each, equal                                                                                                                                                                                           |
+| Types, `moduleResolution: bundler`          | 0 errors with and without `skipLibCheck`; a negative control shows the types are real (`DddConfigs`), not `any`                                                                                                 |
+| Types, `nodenext` and `skipLibCheck: false` | 17 errors (TS2834): `.d.ts` files use extensionless relative imports. Same style as every other package here (`contracts`, `utils`), so repo-wide, not specific to this package. Fine with `skipLibCheck: true` |
+| Cold process (new `node` per run, N = 30)   | ESLint 9.39: p50 232 ms, p95 247 ms. ESLint 10.14: p50 226 ms, p95 237 ms. ESLint alone without the plugin: p50 82 ms. Target p95 <= 300 ms met                                                                 |
+
+Two repository problems found and fixed on the way:
+
+- `pnpm pack` failed (`ERR_PNPM_CANNOT_RESOLVE_WORKSPACE_PROTOCOL`) because
+  `pnpm install` had never been run after the package was added. After
+  `pnpm install --frozen-lockfile` it works.
+- `tests/fixtures/consumer/package.json` matched the `packages/**` workspace
+  glob and registered as a workspace project, dirtying `pnpm-lock.yaml`. It is
+  now excluded in `pnpm-workspace.yaml`; the lockfile is back to the staged
+  state.
+
+README now says that `settings.ddd.tsconfig` is required for path aliases. The
+stray `.claude/run-state/typecheck.tsbuildinfo` under the package was removed.
+
+### Before pushing (open)
+
+1. ~~`no-internal-imports` semantics~~ **Decided (2026-11-07): keep as is.** The
+   founder delegated the question to the library agents. Three of them (library,
+   developer-experience, pragmatist) independently recommended no known-package
+   list: it would go stale, the plugin must stay dependency-free, and the
+   `@vytches` scope is the library's own, so a flag on a nonexistent package
+   costs nothing. Only `contracts` and `events` export `./internal`, for sibling
+   packages. One docs sentence was added saying that matching is by name.
+   Revisit only if a third-party `@vytches/ddd-*` package with a public
+   `/internal` subpath appears; the cheapest hybrid would be a `knownPackages`
+   option that downgrades unknown packages.
+2. **Consumer adoption needs ESLint 9 flat config** (consumer side, separate
+   task). Facts collected from the consumer on 2026-11-06/07:
+   - It is on ESLint 8.57 + eslintrc; `lint:arch` uses the same
+     `.eslintrc.json`, so one config to migrate.
+   - **Blocked on ESLint 9 by peer ranges:** `eslint-config-airbnb-base` 15.0.0
+     and `eslint-config-airbnb-typescript` 18.0.0. Everything else declares
+     ESLint 9 support or no peer limit (`boundaries` 7.4.1, `vitest` 0.5.4,
+     `security` 4.2.1, `import` 2.32, `@typescript-eslint` 8.72.1).
+   - Custom rules (`eslint-local-rules/`, `eslint-rules/`) use one removed API,
+     `context.getSourceCode()`, in one file; `eslint-plugin-local-rules` loads
+     as a normal plugin, no `--rulesdir`.
+   - ESLint 8 baseline (needs `NODE_OPTIONS=--max-old-space-size=8192`, it
+     aborted without): `src` 9133 files, 424 errors, 3151 warnings, 383 s;
+     `test` 76 files, 4 errors, 3 warnings, 18 s. Top rules: `no-explicit-any`
+     2501, `security/detect-non-literal-fs-filename` 286,
+     `local-rules/enforce-authorization-guards` 162, `import/order` 137.
+   - The plugin alone ran over the same `src` in ~21 s, so its cost is small
+     next to the existing 383 s.
+3. **Commit and push the branch** so the CI matrix (ESLint 9 and 10, Node
+   versions) runs; do not publish to npm. The founder decides when.
+
+### Known gaps and follow-ups
+
+- Decorator binding to a **function or `const`** in a project file gives a false
+  `export-not-found` (a `src/resolver` bug; separate task).
+- Dynamic-import destructuring is unsupported (documented, silent by design).
+- No `.d.cts` for `exports.require`, and `.d.ts` files without extensions (see
+  the tarball check); run `attw` before publishing.
+- Phase 2: formal AC-DOGFOOD (two consumers, promotion criterion in the dogfood
+  inputs below), migration note, guide, typed tier.
+- Phase 0 leftovers from the old table below ((c) typed decorators, (e) "before"
+  baseline, ESLint 10 load) were never run as separate spikes; (c) is covered
+  only indirectly by Phase 1 fixtures.
 
 ### Done
 
@@ -47,6 +172,13 @@ guided by the spike logs below.
 | AC-SPIKE (a), behaviour: the subagent fixes the code in the same turn           | ✅ only with a **blocking** channel: PreToolUse deny 4/4, PostToolUse block 5/7. Advisory `additionalContext` fixed 0/12 on Haiku. Sonnet rarely violates the rule at all |
 | AC-SPIKE (b), `roleScoped` prototype                                            | ✅ role resolution 100% on the consumer, structural precision 40/40, cold single-file run ~240 ms, warm p50 1.3 ms, so no daemon for the untyped tier                     |
 
+### Done since the previous update (2026-11-04/05)
+
+| Item                                                                                  | Result                                                                                                                                                   |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/analyze` with a five-advisor panel (API, quality, library, docs, DDD patterns)      | done: decisions D1–D17 and units written, status `approved`; Q1–Q9 answered, Q10 (sign-off gate) deliberately open                                       |
+| Dogfood spike on a copy of the primary consumer (ESLint 9.39.2, flat config, untyped) | ✅ see "Spike log: dogfood (2026-11-05)". Rules work; four design corrections found (D10, D5, and two Phase 1 inputs below); nothing in the repo changed |
+
 ### Still open in Phase 0
 
 | Item                                          | What to do                                                                                                                                                                                                                            | Effort | Needs consumer?               |
@@ -56,6 +188,20 @@ guided by the spike logs below.
 | AC-SPIKE (e), "before" baseline               | Read-only: from workflow step metrics, run-state journals and subagent transcripts of a few completed consumer tasks, count verifier findings that lint could have caught, fix rounds, spawns and tokens                              | ~2h    | read-only, no checkout needed |
 | AC-SPIKE (a), sandboxed real-orchestrator run | optional; only if the founder wants end-to-end proof beyond the synthetic delegation prompt                                                                                                                                           | ~$2    | detached worktree             |
 | Phase 0 sign-off                              | Short summary of (a) to (e) and the final API shape, for the founder                                                                                                                                                                  | n/a    | no                            |
+
+Notes on the table above:
+
+- **(d) is half done.** Flat config on ESLint 9.39.2 loaded the plugin and ran
+  `roleScoped` around core rules during the dogfood. Still open: the same on
+  ESLint 10, and the cold-process measurement. The eslintrc question is decided
+  (analysis D3: flat config only, peer `^9.39.0 || ^10.0.0`).
+- **The 240 ms figure measured `lintFiles` after ESLint was loaded.** A hook
+  starts a cold process on every write. The dogfood measured that (30 runs, wall
+  clock, `lintText`, nine rules): median 245–292 ms, p95 275–314 ms, of which
+  loading ESLint and the parser is about 209 ms. The worst case (a handler whose
+  base class is reached through several barrels) is slightly over the 300 ms
+  target. This was a prototype; **repeat it on the real package, on ESLint 9.39
+  and 10, N ≥ 30, and write p50/p95 down** before the sign-off.
 
 ### Decisions waiting for the founder
 
@@ -72,8 +218,16 @@ guided by the spike logs below.
 
    Without it, agents implementing Phase 1 cannot run the plugin's tests.
 
-2. **Phase 0 sign-off** before Phase 1 starts (needs (c), (d), (e) first).
-3. The four open decisions in "Open decisions (founder)" below.
+   Analysis Q9 was answered "yes". The three manual steps still have to be done
+   by a human before `/orchestrate`: add the `test:unit` script (it is part of
+   the `scaffold` unit), create `.claude/test-guard.json` with
+   `{"allowUnit": true}` and a ban on `-u`/`--update`, and update the testing
+   agent's instructions.
+
+2. **Phase 0 sign-off** before Phase 1 starts (needs (c), (d), (e) and the
+   cold-process measurement first). Tracked as analysis Q10.
+3. The four open decisions below are **resolved** by analysis Q3–Q8 (see "Open
+   decisions" for the mapping).
 
 ### Design inputs for Phase 1 learned from the spikes
 
@@ -97,15 +251,75 @@ guided by the spike logs below.
   rule-aware wording belongs in the orchestrator's delegation templates (outside
   the library).
 
+Inputs added by the dogfood spike (2026-11-05):
+
+- **Library import rules run on every file, not only on files with a role.**
+  Only about 20% of the consumer's files contain a class with a role, so an
+  import rule wrapped in a role filter detected 27% of injected `/internal`
+  imports; unwrapped, 100%. `roleScoped` keeps a `scope: 'file'` mode for
+  project rules that deliberately target role files (analysis D10).
+- **The agent lane must filter results by rule-id prefix (`ddd/`).** On 9217
+  files ESLint produced 318 messages without a `ruleId` (for example unused
+  directives), which look like parse errors if not filtered.
+- **The tsconfig/JSONC reader must be string-aware** (a naive comment stripper
+  corrupts `"@scope/*"` paths) **and BOM-safe.** Parsing must also tolerate a
+  shebang and CRLF; all six line-ending/prefix variants were exercised.
+- **Resolver correctness items found by mutation:** respect scope (a parameter,
+  local class or local `const` named `Result`/`EntityId` is not the library
+  symbol); unwrap `as`, `!`, `satisfies`; follow `const A = Import` aliases and
+  namespace imports (`ns.PolicyBuilder`, `export * as`). Known unsupported:
+  destructuring (`const { createText } = EntityId`), dynamic aliases, a
+  `PolicyBuilder` chain split across variables (the rule then stays silent
+  instead of raising a false alarm).
+- **Split rule (b).** `new EntityId(...)` is the misuse (candidate for `error`).
+  The `@deprecated` static factories are a deprecation (`warn`, 125 natural hits
+  in 81 files, all genuine). The `error` rule may enter `recommended` only after
+  `contracts/LLMGUIDE.md:26`, which itself writes
+  `new EntityId('abc-123','text')`, is corrected, because AC "zero hits on
+  documented usage" would otherwise fail.
+- **Project convention rules need a ratchet, not `error`.** `throw` inside a
+  command handler has 55 natural hits in 36 files; it is a deliberate rollback
+  idiom of that consumer (its handler base class documents it). A frozen
+  baseline plus "no new `throw`" is the right shape. `Specification` without
+  `@BusinessRule` has 28 hits in 18 files (a documented "ALWAYS" convention;
+  part may be intentional helper classes).
+- **Promotion criterion for opt-in rules.** Most rules have 0 natural hits on
+  one consumer, so their precision is inferred from mutations and from the
+  documentation corpus, not measured. A rule is promoted to `recommended` only
+  on ≥95% precision over natural hits (≥60 without a false one) pooled from the
+  AC-DOGFOOD consumers; otherwise it stays opt-in. Mutation evidence alone does
+  not promote.
+
 ### How to resume in a new context
 
-1. Read this section, then the three "Spike log" sections below.
-2. The non-invasive recipe is proven: a detached `git worktree` of the consumer,
-   `claude -p --settings <scratch file>` with `--setting-sources user`, an env
-   kill-switch, `ECC_GATEGUARD=off`, and a shadow-mode control arm. Never edit
-   shared hooks or global settings for experiments.
-3. Do (d), (c), (e) in that order (cheapest first), append a spike log for each,
-   then ask for sign-off.
+1. Read this file's "Current status" and "Before pushing", then the analysis
+   artifact (frontmatter `decisions`, `units`, `open_questions`).
+2. Phase 1 code is staged in `packages/eslint-plugin-ddd`; the tarball check is
+   done. Next: the `no-internal-imports` decision, then commit (conventional
+   commits, no push without the founder's say).
+3. Tests: `.claude/test-guard.json` allows unit runs only through the repo's
+   `test:unit` script with explicit test file paths. Never a recursive grep from
+   the repo root.
+4. The non-invasive experiment recipe is proven: a detached `git worktree` of
+   the consumer, `claude -p --settings <scratch file>` with
+   `--setting-sources user`, an env kill-switch, `ECC_GATEGUARD=off`, and a
+   shadow-mode control arm. Never edit shared hooks or global settings for
+   experiments.
+5. **The first dogfood harness no longer exists** (the Phase 1 one is in
+   `project-orchestration/analysis/VF-043-phase1-dogfood/`). It lived only in
+   the analysis session's scratchpad (resolver, nine rules, mutation engine,
+   independent text scanner, cold-start driver) and the system cleaned that
+   directory on 2026-11-05, before it was copied into the repo. What survives is
+   the result record in "Spike log: dogfood (2026-11-05)" above, and the first
+   prototype in `project-orchestration/analysis/VF-043-spike/proto/`. Phase 1
+   must rebuild the resolver and rules, and Phase 1's own tests (RuleTester,
+   real-CLI fixture, mutation-style fixtures) replace the harness. Best-effort
+   pointer: the subagent that wrote the harness left a transcript with most of
+   its source in `cat > file <<EOF` blocks
+   (`~/.claude/projects/-opt-projects-vytches-ddd/989ab2ec-2504-4536-a04e-ab1a4cce2c5c/subagents/agent-a74ef78ca5de5b7dd.jsonl`);
+   it cannot be replayed blindly (several files were rewritten and patched with
+   `sed`). Treat the dogfood numbers as reported, not reproducible, until
+   AC-DOGFOOD repeats them with committed code.
 
 **Sandbox state.** All temporary consumer worktrees were removed on 2026-11-04.
 The consumer repository's working tree, branch and commits were never modified.
@@ -231,7 +445,11 @@ verifier.
   - `Result.isSuccess` is a plain boolean, so `.value` throws but TypeScript
     does not narrow.
   - `ICommand` is `{}`.
-  - `@EventHandler` accepts a string.
+  - ~~`@EventHandler` accepts a string.~~ **Corrected 2026-11-05:** it does not.
+    `@EventHandler(eventName: new (...args: any[]) => T)` takes an event class
+    (`packages/events/src/decorators/event-handler.decorator.ts:23-24`), so the
+    compiler already rejects a string. There is no gap here and no lint rule for
+    it.
   - `PolicyBuilder.build()` throws at runtime without `withId`, `withDomain` and
     `withName`.
 
@@ -277,14 +495,14 @@ a project base-class name, or a convention such as "no throw in handlers".
 
 ### Delivered by the library (`@vytches/eslint-plugin-ddd`)
 
-| Deliverable                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Role vocabulary + resolver**        | Aggregate, Entity, ValueObject, DomainEvent, IntegrationEvent, Command, Query, CommandHandler, QueryHandler, EventHandler, DomainService, Repository, Specification, Policy and ACLAdapter. Detection order: library decorator, then `extends`/`implements` resolved by import source (tsconfig `paths` read as JSON and cached), then an optional glob. Projects bind their own bases, facades and decorators to roles, and may declare custom roles that derive from library roles. The resolver is exposed as an API (`resolveRole`) so project tests and scripts can reuse it.                 |
-| **`roleScoped(rule, role, options)`** | An adapter that scopes **any** existing ESLint rule to nodes inside classes of a role, by filtering the wrapped rule's reports (prior art: `eslint-rule-composer`). This single mechanism replaces most of the primitives drafted earlier.                                                                                                                                                                                                                                                                                                                                                         |
-| **Role-native rules**                 | Only rules that make no sense without roles: allowed bases per role, and a role confined to a layer or glob.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| **`recommended` preset**              | Strictly **incorrect use of the library API**. Candidates, each sourced from an LLMGUIDE or anti-pattern section: `instanceof Result`; `new EntityId(…)` and the deprecated `EntityId` statics; `@EventHandler('string')`; a class-level `@EventHandler` without `handle()`; `PolicyBuilder.build()` without `withId`/`withDomain`/`withName`; imports of internal symbols (`internalLogger`, `EVENT_HANDLER_METADATA`); deep subpath imports (port of `ddd-005`); and an aggregate `apply()`-ing an `IntegrationEvent`. Typed opt-in: discarded `Result`, and `@typescript-eslint/no-deprecated`. |
-| **Config validation**                 | A role that matches nothing, or a bound base or decorator that cannot be resolved, is an **error**, not silence. This addresses the SA-M1 silent no-op and the drifted hook configs.                                                                                                                                                                                                                                                                                                                                                                                                               |
-| **Agent-oriented output**             | Message format `<what is wrong>. <why>. Fix: <instruction>. See: <LLMGUIDE anchor>`. Every rule has `meta.docs.url`, and projects can override `id`, `fix` and `see`, for example to carry a rule-card ID.                                                                                                                                                                                                                                                                                                                                                                                         |
+| Deliverable                           | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Role vocabulary + resolver**        | Aggregate, Entity, ValueObject, DomainEvent, IntegrationEvent, Command, Query, CommandHandler, QueryHandler, EventHandler, DomainService, Repository, Specification, Policy and ACLAdapter. Detection order: library decorator, then `extends`/`implements` resolved by import source (tsconfig `paths` read as JSON and cached), then an optional glob. Projects bind their own bases, facades and decorators to roles, and may declare custom roles that derive from library roles. The resolver is exposed as an API (`resolveRole`) so project tests and scripts can reuse it.                                                                                                                                                                                                                                                                                                                                                           |
+| **`roleScoped(rule, role, options)`** | An adapter that scopes **any** existing ESLint rule to nodes inside classes of a role, by filtering the wrapped rule's reports (prior art: `eslint-rule-composer`). This single mechanism replaces most of the primitives drafted earlier.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Role-native rules**                 | Only rules that make no sense without roles: allowed bases per role, and a role confined to a layer or glob.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **`recommended` preset**              | Strictly **incorrect use of the library API**. Candidates, each sourced from an LLMGUIDE or anti-pattern section: `instanceof Result`; `new EntityId(…)` resolved by import source (there are two `EntityId` classes), with the deprecated statics as a separate `warn` rule; a class-level `@EventHandler` without `handle()`; imports of internal symbols (`internalLogger`, `EVENT_HANDLER_METADATA`, `/internal`) merged with deep subpath imports (port of `ddd-005`); and, as **opt-in outside `recommended`**, `PolicyBuilder.build()` without `withId`/`withName` (and `withDomain` unless `defaultDomain`). **Dropped by analysis D5:** `@EventHandler('string')` (the compiler already rejects it) and "an aggregate `apply()`-ing an `IntegrationEvent`" (no documentation source, and the NestJS dispatcher legitimately routes it to the global bus). Typed opt-in: discarded `Result`, and `@typescript-eslint/no-deprecated`. |
+| **Config validation**                 | A role that matches nothing, or a bound base or decorator that cannot be resolved, is an **error**, not silence. This addresses the SA-M1 silent no-op and the drifted hook configs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **Agent-oriented output**             | Message format `<what is wrong>. <why>. Fix: <instruction>. See: <LLMGUIDE anchor>`. Every rule has `meta.docs.url`, and projects can override `id`, `fix` and `see`, for example to carry a rule-card ID.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ### Not in the library (project, or a shared conventions package owned by the projects)
 
@@ -307,13 +525,13 @@ a project base-class name, or a convention such as "no throw in handlers".
 
 ## Enforcement layers: put each rule in the cheapest layer that can express it
 
-| Layer          | Library contribution                                                                                                                                                                                                                                                                                                      | Status          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| **Types**      | Additive, non-breaking API improvements: an `isOk(): this is Ok<T>` type guard on `Result`, typed decorators that constrain the decorated class shape, `@EventHandler(Class)` overloads with deprecation of the string form, and possibly a typestate `PolicyBuilder`. Lint rules with autofix act as the migration path. | follow-up tasks |
-| **Lint**       | This task.                                                                                                                                                                                                                                                                                                                | VF-043          |
-| **Startup**    | A `strict` mode in discovery (`VytchesExplorerService`) that reports unregistered handlers, events without an aggregate handler, and missing providers, in the same message format.                                                                                                                                       | follow-up task  |
-| **Tests**      | Role-based architecture matchers in the testing package for cross-file and "majority" rules.                                                                                                                                                                                                                              | follow-up task  |
-| **Generators** | Role templates that projects can override, with the role config as input.                                                                                                                                                                                                                                                 | later           |
+| Layer          | Library contribution                                                                                                                                                                                                                                                                                                               | Status          |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| **Types**      | Additive, non-breaking API improvements: an `isOk(): this is Ok<T>` type guard on `Result`, typed decorators that constrain the decorated class shape, and possibly a typestate `PolicyBuilder`. (`@EventHandler` already takes only an event class, so no overload is needed.) Lint rules with autofix act as the migration path. | follow-up tasks |
+| **Lint**       | This task.                                                                                                                                                                                                                                                                                                                         | VF-043          |
+| **Startup**    | A `strict` mode in discovery (`VytchesExplorerService`) that reports unregistered handlers, events without an aggregate handler, and missing providers, in the same message format.                                                                                                                                                | follow-up task  |
+| **Tests**      | Role-based architecture matchers in the testing package for cross-file and "majority" rules.                                                                                                                                                                                                                                       | follow-up task  |
+| **Generators** | Role templates that projects can override, with the role config as input.                                                                                                                                                                                                                                                          | later           |
 
 ## Agent feedback loop (requirements on the library; wiring lives outside)
 
@@ -369,6 +587,9 @@ The hooks are not part of this library, but they constrain its design:
    - (c) A typed-decorator spike: can `@CommandHandler` constrain the class
      shape under `experimentalDecorators` (NestJS)?
    - (d) An ESLint 9 flat config load test, and a decision on eslintrc support.
+     **Result so far (2026-11-05):** flat config on ESLint 9.39.2 ✅ (dogfood);
+     eslintrc decided: flat only (analysis D3). Open: ESLint 10, and the
+     cold-process measurement on the real package.
    - (e) A "before" baseline from a few completed consumer tasks: verifier
      findings that lint could have caught, and the number of fix rounds.
    - Outcome: the founder decides the final API shape.
@@ -560,6 +781,92 @@ flat config and `@typescript-eslint/parser`, untyped.
 - Files with no class of a scoped role skip the wrapped rule entirely. That is
   where most of the low overhead comes from.
 
+### Spike log: dogfood on a copy of the primary consumer, 2026-11-05
+
+**Purpose.** Before publishing anything, run the planned rules against a
+temporary copy of the primary consumer, deliberately break its code, and check
+that every break is caught. Also encode the consumer's own conventions (its base
+command handler, its specification decorator) as project rules and check those.
+
+**Setup (nothing in either repository changed).** A detached git worktree of the
+consumer's `develop`, removed afterwards. Corpus: 9217 `src/**/*.ts` files (6248
+production). ESLint 9.39.2, `@typescript-eslint/parser` 8.68.0, flat config,
+untyped, Node 24. Code and data lived in the session scratchpad, which was later
+deleted (see "How to resume", item 5): **the numbers below are the only record
+and cannot be re-derived from committed code.** Method: one injected violation
+per run on a random real file, in memory, linted with `lintText` under the
+original path. Each mutation was randomly prefixed or suffixed (plain, shebang,
+BOM, CRLF and combinations; every variant ≥ 774 cases, all detected) and varied
+(direct import, alias, namespace, project facade, second `paths` target,
+relative path, `const` alias, `as any`, `import type`, `export default class`,
+multi-line decorator, class expression, inheritance chains).
+
+**Result.**
+
+| Rule                                              | Positive mutations detected | False alarms on clean variants | Natural hits               | Precision of natural hits                   |
+| ------------------------------------------------- | --------------------------- | ------------------------------ | -------------------------- | ------------------------------------------- |
+| (a) `instanceof Result`                           | 252/252                     | 0/252                          | 0 (1797 `instanceof` seen) | n/a                                         |
+| (b) `new EntityId`                                | 252/252                     | 0/252                          | 1                          | 1/1                                         |
+| (b) deprecated `EntityId` statics (warn)          | 252/252                     | 0/252                          | 125 (81 files)             | 20/20 sampled, 125/125 by independent regex |
+| (d) class `@EventHandler` without `handle()`      | 252/252                     | 0/252                          | 0 (201 classes seen)       | n/a                                         |
+| (f+g) four import sub-rules, each                 | 252/252                     | 0/252 (shared pool)            | 0                          | n/a                                         |
+| (e) `PolicyBuilder.build` required calls (opt-in) | 252/252                     | 0/252                          | 0 (65 chains seen)         | n/a                                         |
+| project: no `throw` in a command handler          | 252/252                     | 0/252                          | 55 (36 files)              | 20/20 sampled                               |
+| project: `Specification` requires `@BusinessRule` | 252/252                     | 0/252                          | 28 (18 files)              | 20/20 sampled                               |
+| project: no `@nestjs/*` import in domain roles    | 252/252                     | 0/252                          | 0                          | n/a                                         |
+| **Total**                                         | **3024/3024**               | **0/2268**                     |                            |                                             |
+
+- **Role resolution.** For 5555 classes the resolver's role set equals an
+  independent text scanner's (extends/implements/decorators with name-based
+  inheritance closure): 0 differences. 1998 classes carry a role. Chains through
+  project classes: 15 classes with 2 hops, 8 with 3, 1 with 4. All imports
+  resolved (6137/6137 `@vytches/*`; 63,686/63,688 project, the two misses being
+  `.json` files).
+- **Config validation (AC-VALIDATE).** Five kinds of bad binding (missing file,
+  file without the export, export missing in the library, unknown package,
+  missing name) abort plugin creation with a readable `DddConfigError`. The same
+  typo without validation returned `roles = [[]]` for a real query handler: a
+  silent no-op.
+- **Is 100% meaningful?** Four deliberately broken resolvers (no scope check, no
+  cast unwrapping, no `const` alias, no namespaces) drop the same harness to
+  67–93%, so the harness does detect regressions. The first 33 "false alarms"
+  and 169 role mismatches were harness bugs (an appended `@nestjs/*` import
+  correctly tripping the project rule; a text scanner reading the word `class`
+  in strings), fixed in the harness, not in the rules.
+- **Library code as a negative.** On the library's own 305 source files (32
+  import `/internal`), the `/internal` rule gave 0 false alarms because the
+  nearest `package.json` name is `@vytches/ddd*`; the same files presented under
+  a consumer path gave 28/28 hits.
+- **Timing, cold process** (30 runs, external wall clock, `lintText`, nine
+  rules, all bindings), median / p95 in ms: `node -e 0` 13 / 14; loading ESLint
+  plus parser only 209 / 228; file with no roles 245 / 275; one role 257 / 285;
+  handler whose base is reached through several barrels (11 parses, 48 reads)
+  292 / 314. **The last case is slightly over the 300 ms target.** Full run over
+  all 9217 files in one process: parsing alone 22.0 s; all nine rules 30.1 s
+  (+47%).
+- **Project rules on the consumer's real code.** "No `throw` in a command
+  handler" is correct syntactically but fires on the consumer's deliberate
+  rollback idiom (55 hits), so it needs a ratchet, not `error`. "Specification
+  without `@BusinessRule`" found 28 genuine departures from a documented
+  convention.
+
+**Not closed by this spike.**
+
+- Zero natural hits for (a), (d), (f+g), (e) and the domain-import rule, so
+  their precision rests on mutations, the documentation corpus (earlier spike)
+  and independent regexes, not on natural violations.
+- The judge for the two project convention rules is a text scanner with the same
+  rule definition (different implementation, same definition).
+- Known unsupported shapes: destructuring, dynamic aliases, a `PolicyBuilder`
+  chain split across variables.
+- One consumer, one machine; timing is from a prototype, not from the future
+  package.
+
+**Consequences for the plan (already applied in the analysis):** D10 corrected
+(library import rules run on every file); D5 corrected ((b) split, (e) promotion
+criterion); D12 extended (string-aware JSONC, BOM, scope, unwrapping); ratchet
+required for convention rules that hit deliberate idioms.
+
 ## Phases
 
 - **Phase 0, gate (1–1.5d):** AC-SPIKE. Nothing else starts until the founder
@@ -599,6 +906,13 @@ that case the cost lives elsewhere, and we should say so.
 
 ## Open decisions (founder)
 
+**All four are resolved by the `/analyze` run (2026-11-05); the options below
+are kept as history.** Mapping: 1 → analysis Q7/D7 (`tools/ddd-lint` stays, 005
+moves to the preset, 001–003 become project examples); 2 → Q8/D8 (the
+constructor may throw, the non-throwing variant is a separate method returning
+`Result`, docs fixed in a separate task); 3 → Q4/D3 (flat config only); 4 →
+Q6/D6 (the vocabulary stays inside the plugin package).
+
 1. **Fate of `tools/ddd-lint`.** Its rules are conventions (001, 002, 003) plus
    one API-usage rule (005). Options: port 005 into the preset, hand 001–003 to
    the conventions side as examples, and deprecate the tool. Or keep it as the
@@ -615,7 +929,6 @@ that case the cost lives elsewhere, and we should say so.
 - **Types first:**
   - an `isOk()` type guard on `Result`;
   - typed handler decorators;
-  - `@EventHandler(Class)` overload plus deprecation;
   - a `PolicyBuilder` typestate (check whether it can be done without a breaking
     change).
 - **Startup `strict` mode** in discovery: wiring verification with the same
