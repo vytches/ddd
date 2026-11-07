@@ -29,6 +29,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "docs",
     "README.md",
     "LLMGUIDE.md",
     "LICENSE"
