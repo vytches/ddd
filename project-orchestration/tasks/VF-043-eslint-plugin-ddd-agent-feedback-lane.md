@@ -48,7 +48,7 @@ migration note, guide) has not started.
   bumped together, as the guide says) and adds `pnpm release:preflight`, which
   stops a release whose last reachable tag is not `v<lerna.json version>`. Why
   each of these exists is written down in `docs/RELEASE-GUIDE.md`, section
-  "Pułapki procesu".
+  "Process pitfalls".
 - **CI problems found and fixed on the way to 0.32.0:** `format:check` on five
   files from earlier `develop` commits; six lint errors and two type errors in
   the plugin's tests; `dist/*.d.ts.map` pointing at an unpublished `src` (the
