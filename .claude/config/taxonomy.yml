@@ -1,0 +1,24 @@
+# Tag taxonomy extension for THIS project.
+# Core vocabulary (stacks + shared areas): claude-patterns/blocks/_taxonomy.yml
+#
+# Add only domain areas the core does not cover — e.g. a shop: catalog, cart,
+# fulfillment. Never repeat or redefine a core entry (auth, geo, tests …):
+# a shared language is the only reason the core exists.
+#
+# An area is promoted to the core once a SECOND project starts using it —
+# the same rule that governs pattern promotion.
+#
+# Anything added here reaches runtime.yml on the next setup run, and only then
+# becomes a legal tag for ADRs, patterns and layers.
+#
+# Validate the merged vocabulary:
+#   node <claude-patterns>/scripts/lint-patterns.mjs --project .
+
+areas:
+  []
+  # - catalog
+  # - fulfillment
+
+variants_seen:
+  {}
+  # auth: [magic-link]

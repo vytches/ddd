@@ -20,7 +20,7 @@
 #   nie ocena ryzyka przed implementacją.
 # - security-audit: generyczny szablon bez konkretów specyficznych dla tego kodu.
 name: vytches-agents
-axis: analysis-overlay
+axis: process
 requires: []
 
 analyze:

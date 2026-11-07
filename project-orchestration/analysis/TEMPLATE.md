@@ -3,6 +3,7 @@
 # Pisany przez /analyze, edytowany przez CZŁOWIEKA, czytany przez /orchestrate.
 # Lokalizacja: project-orchestration/analysis/{TASK-ID}.analysis.md  (NIE tasks/ — tam tylko taski)
 task: TS-XXX-000
+telemetry_run: null # runId z `telemetry-emit run-start` (ANL-041); null gdy telemetria nie ruszyła
 status: awaiting-human # draft | awaiting-human | approved  ← BRAMKA MASZYNOWA
 # /orchestrate ODMÓWI startu dopóki status != approved LUB jakiekolwiek answer == null.
 
@@ -25,6 +26,12 @@ open_questions: # człowiek wypełnia answer; null = blokuje implementację
   - id: Q2
     ask: '...'
     q: '...'
+    # Klasyfikacja (ANL-047/048) — pola OPCJONALNE, starsze artefakty ich nie mają i przechodzą bramkę bez zmian.
+    # Nie kopiuj wartości z przykładu: klasę i typ drzwi ustala treść pytania, nie szablon.
+    class: <MECHANICAL|TASTE|USER_CHALLENGE>
+    door_type: <one-way|two-way> # one-way = trudne do cofnięcia; one-way ZAWSZE trafia do człowieka
+    decision: D2 # id decyzji z `decisions`, której to pytanie dotyczy (gdy dotyczy)
+    options: ['<opcja A> (recommended)', '<opcja B>'] # JEDNA linia (flow), nie lista blokowa; dokładnie jedna opcja z (recommended)
     answer: null
 
 decisions: # propozycje z analizy; człowiek weryfikuje/poprawia
@@ -37,12 +44,53 @@ decisions: # propozycje z analizy; człowiek weryfikuje/poprawia
       'Dwa obszary systemu przestają zależeć od siebie wprost, więc awaria
       jednego nie zatrzymuje drugiego.'
     rationale: '...'
+    # Klasyfikacja (ANL-047/048), opcjonalna. MECHANICAL rozstrzygasz sam i cytujesz w `rationale` regułę/wzorzec/kartę;
+    # TASTE, USER_CHALLENGE i każde one-way mają parę w `open_questions` (pole `decision: <id>`), a `choice` jest wtedy tylko propozycją.
+    # class: <MECHANICAL|TASTE|USER_CHALLENGE>
+    # door_type: <one-way|two-way>
+    # Kontrola decyzji przed zapisem (ANL-049/050) — FAKTY o decyzji; zgodę wyraża człowiek odpowiedzią na sparowane pytanie.
+    # premises: [{ claim: "handler nie pisze do bazy", evidence: "src/.../handler.ts:94", holds: false }]   # przesłanki o kodzie, sprawdzone w źródle
+    # premise_failed: true          # którakolwiek przesłanka ma holds: false → decyzja NIE jest rozstrzygnięta
+    # card_conflict: [CH5, QP1]     # choice przeczy regułom kart (ID reguł)
+    # Decyzja z premise_failed / card_conflict wymaga pytania z `decision: <id>`; odpowiedź zatwierdzająca zaczyna się od „Zatwierdzam".
 
 patterns: # grounding (z Pattern Discovery) — to samo w research i impl
   - domain/aggregate-pattern.md
   - application/command-handler-pattern.md
 
-units: [] # Ralphinho seam — pusty = jeden unit (cały task). MVP: zostaw [].
+patterns_exclude:
+  [] # fałszywe trafienia keywordów (np. wzorzec web na „dashboard")
+  # — ścieżki z doboru, których NIE wstrzykiwać. Wpis, który niczego nie wykluczył = ostrzeżenie.
+
+final_checks:
+  [] # skrypty/komendy, które decyzje analizy każą uruchomić w bramce końcowej
+  # (np. [test:l3, test:gateway] po zmianie konfiguracji e2e) — dopisywane do checks z bloków (ORC-121).
+
+# bundle_ack: "<dlaczego jeden przebieg>"   # ORC-142: pakiet kilku zadań (dwa sygnały: ponad 20 jednostek, ponad 4 konteksty; samo „PRn" nie zatrzymuje) startuje tylko z tą zgodą
+units:
+  [] # podział warstwy na jednostki — każda to osobny przebieg
+  # implement→verify (pod-warstwa <layer>:<id>). Pusty = warstwy z runtime.yml bez podziału.
+  # Warstwa z jednostkami NIE może być w layers_skip ani layers_scope. W dirs dopisz też
+  # pliki towarzyszące spoza katalogu (setup testów, .env.example, compose); test obok
+  # zmienianego pliku z tym samym rdzeniem nazwy (x.map.ts → x.adapter.spec.ts) wchodzi sam.
+  # - { id: audience, layer: infrastructure, dirs: ["src/contexts/audience/infrastructure/"], reason: "D3: repozytorium + kontroler" }
+  # - { id: campaigns, layer: infrastructure, dirs: ["src/contexts/campaigns/infrastructure/", "test/setup/env.ts"], checks: ["typecheck", "lint:check"] }
+
+layers_skip:
+  [] # warstwy z runtime.yml, których ten task NIE dotyka — z powodem.
+  # Bez tego wpisu silnik odpala implementera na każdej warstwie i po 3 próbach „zero zmian"
+  # eskaluje, bo nie odróżnia „nic do zrobienia" od „nie wykonał pracy". Typowo: task
+  # infrastrukturalny → domain i application pominięte. `id` = id warstwy z runtime.yml.
+  # - { id: domain, reason: "task nie zmienia modelu domenowego (D2)" }
+  # Skip jest CAŁKOWITY — implementer tej warstwy nie startuje. Powód mówiący „częściowo",
+  # „wyjątek", „7 z 8", „tylko dla …" zatrzymuje bramkę: to jest zawężenie, nie pominięcie.
+
+layers_scope:
+  [] # warstwy dotknięte CZĘŚCIOWO — wchodzą, ale tylko wskazane ścieżki.
+  # Implementer, weryfikator i sonda widzą wyłącznie `dirs` (katalogi albo pojedyncze pliki,
+  # ścieżki od korzenia repo); reszta katalogów warstwy jest dla tego tasku poza zakresem.
+  # Warstwa nie może być jednocześnie w layers_skip i layers_scope.
+  # - { id: application, dirs: ["src/contexts/shares/application/"], reason: "Q2: 6 handlerów kopiuje error.message z obcej domeny; pozostałe konteksty nietknięte" }
 ---
 
 # Analiza: {TASK-ID}
@@ -53,10 +101,14 @@ units: [] # Ralphinho seam — pusty = jeden unit (cały task). MVP: zostaw [].
 
 ## Otwarte pytania (DO DYSKUSJI — odpowiedz w frontmatter `answer:`)
 
+<!-- Kolejność dla człowieka (ANL-047): najpierw USER_CHALLENGE i one-way, każde osobno; potem wszystkie TASTE razem. -->
+
 - **Q1**: ...
-- **Q2**: ...
+- **Q2** [klasa, drzwi]: ...
 
 ## Decyzje (proponowane — zweryfikuj)
+
+<!-- MECHANICAL: rozstrzygnięte bez pytania, z uzasadnieniem. Reszta czeka na odpowiedź z sekcji wyżej. -->
 
 - **D1**: ...
 

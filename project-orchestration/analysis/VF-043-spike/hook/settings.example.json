@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node <ABSOLUTE_PATH_TO>/hook/post-edit-lint.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node <ABSOLUTE_PATH_TO>/hook/post-edit-lint.js"
+          }
+        ]
+      }
+    ]
+  }
+}

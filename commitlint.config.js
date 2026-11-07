@@ -45,6 +45,7 @@ module.exports = {
         'nestjs',
         'docs',
         'config',
+        'eslint-plugin-ddd',
       ],
     ],
     'subject-case': [2, 'never', ['sentence-case', 'start-case', 'pascal-case', 'upper-case']],

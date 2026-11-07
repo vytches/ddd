@@ -52,7 +52,9 @@
       "@vytches/ddd-testing": ["packages/testing/src/index.ts"],
       "@vytches/ddd-utils": ["packages/utils/src/index.ts"],
       "@vytches/ddd-validation": ["packages/validation/src/index.ts"],
-      "@vytches/ddd-value-objects": ["packages/value-objects/src/index.ts"]
+      "@vytches/ddd-value-objects": ["packages/value-objects/src/index.ts"],
+      "@vytches/eslint-plugin-ddd": ["packages/eslint-plugin-ddd/src/index.ts"],
+      "@vytches/eslint-plugin-ddd/agent": ["packages/eslint-plugin-ddd/src/agent/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp", "dist", "coverage"]

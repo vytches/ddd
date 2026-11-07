@@ -55,6 +55,7 @@ const CONFIG = {
     // Tooling packages (more flexible)
     cli: 750, // CLI framework with comprehensive examples and documentation generation engine
     testing: 150, // Test utilities with comprehensive seeder framework
+    'eslint-plugin-ddd': 150, // VF-043: role resolver, six rules and the agent lane; measured 138.81KB (src + dist) at 0.32.0
   },
 
   // Global thresholds

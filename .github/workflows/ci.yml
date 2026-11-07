@@ -384,6 +384,88 @@ jobs:
       - name: Run publish integrity smoke test
         run: pnpm test:smoke
 
+  # VF-043 (D17): @vytches/eslint-plugin-ddd declares `eslint: ^9.39.0 || ^10.0.0`
+  # as a peer. The main job only ever sees the single ESLint version the lockfile
+  # resolves, so without this matrix that range is a promise nobody verifies.
+  #
+  # Each leg re-resolves ESLint inside the plugin package ONLY (the workspace
+  # root and the committed lockfile stay as they are on disk — the change lives
+  # in this ephemeral runner), asserts the major that actually got installed,
+  # then runs the package's `test` gate against it. The floor leg pins the exact
+  # lowest supported release (9.39.0) rather than "whatever ^9 resolves to today",
+  # so a regression against the declared minimum cannot hide behind a newer 9.x.
+  #
+  # The cold-process latency measurement (`perf` target) is deliberately NOT part
+  # of the `test` gate: it is timing-based and unstable under parallel runs. It
+  # runs as its own step after the gate so a timing failure is reported as a
+  # performance failure, not as a broken test suite.
+  eslint-plugin-ddd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name == 'pull_request' && !contains(github.event.head_commit.message, '[skip ci]') && !contains(github.event.head_commit.message, '[docs only]')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - eslint-spec: "9.39.0"
+            eslint-major: "9"
+          - eslint-spec: "^10.0.0"
+            eslint-major: "10"
+    name: eslint-plugin-ddd (ESLint ${{ matrix.eslint-major }})
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install ESLint ${{ matrix.eslint-spec }} into the plugin package
+        run: pnpm --filter @vytches/eslint-plugin-ddd add --save-dev "eslint@${{ matrix.eslint-spec }}"
+
+      - name: Assert the ESLint major under test
+        working-directory: packages/eslint-plugin-ddd
+        run: |
+          installed=$(node -p "require('eslint/package.json').version")
+          echo "ESLint resolved by the plugin package: ${installed}"
+          if [ "${installed%%.*}" != "${{ matrix.eslint-major }}" ]; then
+            echo "::error::Expected ESLint ${{ matrix.eslint-major }}.x but the plugin package resolved ${installed}."
+            exit 1
+          fi
+          if [ "${{ matrix.eslint-major }}" = "9" ] && [ "${installed}" != "9.39.0" ]; then
+            echo "::error::The ESLint 9 leg must test the declared floor 9.39.0, got ${installed}."
+            exit 1
+          fi
+
+      # --skip-nx-cache: the cache key must never replay a result recorded
+      # against a different ESLint major.
+      - name: Build plugin
+        run: pnpm nx run @vytches/eslint-plugin-ddd:build --skip-nx-cache
+
+      - name: Type check plugin
+        run: pnpm nx run @vytches/eslint-plugin-ddd:type-check --skip-nx-cache
+
+      - name: Test plugin on ESLint ${{ matrix.eslint-major }}
+        run: pnpm nx run @vytches/eslint-plugin-ddd:test --skip-nx-cache
+        env:
+          CI: true
+
+      # Separate from the gate above (D17). `perf` runs vitest with
+      # --passWithNoTests=false, so a missing tests/perf/*.perf.ts fails here
+      # instead of silently measuring nothing.
+      - name: Measure cold-process lintText latency (perf)
+        run: pnpm nx run @vytches/eslint-plugin-ddd:perf --skip-nx-cache
+        env:
+          CI: true
+
   security:
     runs-on: ubuntu-latest
     # Run security checks primarily on PRs for early feedback

@@ -12,6 +12,9 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
+      // VF-043: deliberately violating sample files for the ESLint plugin, linted
+      // by the real CLI in contract tests, never run as tests themselves.
+      '**/tests/fixtures/**',
       '**/cypress/**',
       '**/.{idea,git,cache,output,temp}/**',
       '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
@@ -98,6 +101,15 @@ export default defineConfig({
     // because the workspace root's node_modules/@vytches only contains
     // ddd-testing.
     alias: [
+      {
+        find: '@vytches/eslint-plugin-ddd/agent',
+        replacement: new URL('./packages/eslint-plugin-ddd/src/agent/index.ts', import.meta.url)
+          .pathname,
+      },
+      {
+        find: '@vytches/eslint-plugin-ddd',
+        replacement: new URL('./packages/eslint-plugin-ddd/src/index.ts', import.meta.url).pathname,
+      },
       {
         find: '@vytches/ddd-contracts/internal',
         replacement: new URL('./packages/contracts/src/internal.ts', import.meta.url).pathname,

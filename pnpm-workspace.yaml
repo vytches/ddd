@@ -8,3 +8,6 @@ packages:
   # packages, breaking Nx project graph (see .nxignore).
   - '!.claude/**'
   - '!**/node_modules/**'
+  # VF-043: the eslint plugin's test fixtures carry their own package.json
+  # (ESM marker for the real-CLI test); they are not workspace packages.
+  - '!packages/eslint-plugin-ddd/tests/fixtures/**'

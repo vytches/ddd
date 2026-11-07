@@ -9,7 +9,8 @@
     "**/*.d.ts",
     ".nx/**",
     "coverage/**",
-    "**/index.d.ts"
+    "**/index.d.ts",
+    "packages/eslint-plugin-ddd/tests/fixtures/**"
   ],
   "plugins": ["@nx", "@typescript-eslint"],
   "extends": ["plugin:@typescript-eslint/recommended"],
@@ -207,6 +208,28 @@
                   "scope:utils",
                   "scope:contracts",
                   "scope:di"
+                ]
+              },
+              {
+                "sourceTag": "scope:eslint-plugin",
+                "onlyDependOnLibsWithTags": [
+                  "scope:acl",
+                  "scope:aggregates",
+                  "scope:contracts",
+                  "scope:cqrs",
+                  "scope:di",
+                  "scope:domain-primitives",
+                  "scope:domain-services",
+                  "scope:events",
+                  "scope:messaging",
+                  "scope:policies",
+                  "scope:projections",
+                  "scope:repositories",
+                  "scope:resilience",
+                  "scope:utils",
+                  "scope:validation",
+                  "scope:value-objects",
+                  "scope:eslint-plugin"
                 ]
               },
               {
