@@ -38,9 +38,11 @@ migration note, guide) has not started.
   the history of `main`. Consequence: on `main`, `git describe` finds `v0.31.1`
   and `lerna` treats all 20 packages as changed. The 0.32.1 bump worked around
   it with a temporary local annotated tag on `d482a466`; the remote tag was not
-  touched. Fix for good: merge release PRs with a **merge commit**, and decide
-  whether to move the remote `v0.32.0` to `d482a466` (a force-push of a public
-  tag, so only on the owner's say).
+  touched. Do **not** move `v0.32.0`: `docs/RELEASE-GUIDE.md` allows that only
+  when `git diff <tag commit> main` is empty, and here it shows 14 files (the
+  tag sits before the CI fixes; npm was published from `main`). The fix is
+  forward: merge the 0.32.1 release PR with a **merge commit**, so `v0.32.1` is
+  an ancestor of `main` and `git describe` finds it.
 - **CI problems found and fixed on the way to 0.32.0:** `format:check` on five
   files from earlier `develop` commits; six lint errors and two type errors in
   the plugin's tests; `dist/*.d.ts.map` pointing at an unpublished `src` (the
