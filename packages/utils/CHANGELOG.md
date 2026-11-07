@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.32.1](https://github.com/vytches/ddd/compare/v0.32.0...v0.32.1) (2026-11-07)
+
+**Note:** Version bump only for package @vytches/ddd-utils
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.32.0](https://github.com/vytches/ddd/compare/v0.31.1...v0.32.0) (2026-11-07)
 
 **Note:** Version bump only for package @vytches/ddd-utils

@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.32.1](https://github.com/vytches/ddd/compare/v0.32.0...v0.32.1) (2026-11-07)
+
+### Bug Fixes
+
+- **eslint-plugin-ddd:** ship rule pages, correct and extend the README
+  ([bae5795](https://github.com/vytches/ddd/commit/bae57952d67289ab8ae23c9cdc8f4d705fb5f4d0))
+- **release:** publish packages dependencies first
+  ([a196bf2](https://github.com/vytches/ddd/commit/a196bf2068812f0f660588b375390eac772bbeb3))
+
+### Features
+
+- **eslint-plugin-ddd:** count classes per role in validateRoleConfig
+  ([4910a1f](https://github.com/vytches/ddd/commit/4910a1f9ab8c4100df6587b1ddbe492f8cc91364))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 # [0.32.0](https://github.com/vytches/ddd/compare/v0.31.1...v0.32.0) (2026-11-07)
 
 ### Features
