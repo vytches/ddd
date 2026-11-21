@@ -17,24 +17,27 @@ pnpm add @vytches/ddd-messaging
 
 ## What's included
 
-| Export                   | Kind           | Description                                                              |
-| ------------------------ | -------------- | ------------------------------------------------------------------------ |
-| `MessageStatus`          | enum           | `PENDING \| PROCESSING \| PROCESSED \| FAILED`                           |
-| `MessagePriority`        | enum           | `low \| normal \| high \| critical`                                      |
-| `OutboxMessageFactory`   | class          | Creates `IOutboxMessage` instances                                       |
-| `OutboxProcessor`        | class          | Polls the repository and dispatches messages via registered handlers     |
-| `EventBusOutboxHandler`  | class          | `IOutboxMessageHandler` that publishes to an `IEventBus`                 |
-| `OutboxService`          | class          | High-level facade: store, schedule, and coordinate processing            |
-| `IOutboxRepository`      | abstract class | Base repository contract — extend this for your storage backend          |
-| `IOutboxMessage`         | interface      | Message shape with id, payload, status, priority, timestamps             |
-| `IOutboxMessageHandler`  | interface      | Single-method handler: `handle(message): Promise<void>`                  |
-| `OutboxMiddleware`       | type           | Middleware signature for the processor pipeline                          |
-| `OutboxProcessorOptions` | interface      | Processor configuration (interval, batch size, retries, backoff, hooks…) |
-| `OutboxProcessorHooks`   | interface      | Observability callbacks: batch complete, message failed, permanent fail  |
-| `OutboxServiceOptions`   | interface      | Service configuration                                                    |
-| `OutboxMessageOptions`   | interface      | Per-message options (priority, processAfter…)                            |
-| `RetryBackoffConfig`     | interface      | Exponential backoff configuration for the processor                      |
-| `comparePriority`        | function       | Compares two `MessagePriority` values by a given order array             |
+| Export                   | Kind           | Description                                                                             |
+| ------------------------ | -------------- | --------------------------------------------------------------------------------------- |
+| `MessageStatus`          | enum           | `PENDING \| PROCESSING \| PROCESSED \| FAILED`                                          |
+| `MessagePriority`        | enum           | `low \| normal \| high \| critical`                                                     |
+| `OutboxMessageFactory`   | class          | Creates `IOutboxMessage` instances                                                      |
+| `OutboxProcessor`        | class          | Polls the repository and dispatches messages via registered handlers                    |
+| `EventBusOutboxHandler`  | class          | `IOutboxMessageHandler` that publishes to an `IEventBus`                                |
+| `OutboxService`          | class          | High-level facade: store, schedule, and coordinate processing                           |
+| `IOutboxRepository`      | abstract class | Base repository contract — extend this for your storage backend                         |
+| `IOutboxMessage`         | interface      | Message shape with id, payload, status, priority, timestamps                            |
+| `IOutboxMessageHandler`  | interface      | Single-method handler: `handle(message, context?): Promise<void>`                       |
+| `OutboxMiddleware`       | type           | Middleware signature for the processor pipeline                                         |
+| `OutboxProcessorOptions` | interface      | Processor configuration (interval, batch size, retries, backoff, hooks…)                |
+| `OutboxProcessorHooks`   | interface      | Observability callbacks: batch, failures, timeouts, stale writes, status-write failures |
+| `OutboxHandlerContext`   | interface      | 2nd argument of `handle()`: `signal`, `attempt`, `deadline`, `messageId`                |
+| `OutboxTimeoutError`     | class          | Typed handler-timeout error (also the abort `signal.reason`)                            |
+| `FencedOutboxRepository` | type           | Repository that implements the opt-in `*Fenced` writes (`useFencing`)                   |
+| `OutboxServiceOptions`   | interface      | Service configuration                                                                   |
+| `OutboxMessageOptions`   | interface      | Per-message options (priority, processAfter…)                                           |
+| `RetryBackoffConfig`     | interface      | Exponential backoff configuration for the processor                                     |
+| `comparePriority`        | function       | Compares two `MessagePriority` values by a given order array                            |
 
 ## Quick start
 
@@ -44,7 +47,7 @@ import {
   OutboxMessageFactory,
   EventBusOutboxHandler,
   MessagePriority,
-  type IOutboxRepository,
+  IOutboxRepository,
 } from '@vytches/ddd-messaging';
 
 // 1. Implement IOutboxRepository for your storage (e.g. PostgreSQL)
@@ -101,15 +104,14 @@ processor.registerDefaultHandler({
 processor.start();
 
 // 3. Enqueue in the same transaction as your aggregate save
-const factory = new OutboxMessageFactory();
 await db.transaction(async tx => {
   await orderRepo.save(order, tx);
   await repo.saveMessage(
-    factory.create({
-      messageType: 'OrderCreated',
-      payload: { orderId: order.id },
-      priority: MessagePriority.HIGH,
-    })
+    OutboxMessageFactory.createMessage(
+      'OrderCreated',
+      { orderId: order.id },
+      { priority: MessagePriority.HIGH }
+    )
   );
 });
 ```
@@ -157,7 +159,8 @@ processor.registerDefaultHandler({
 `@vytches/ddd-messaging` depends on:
 
 - `@vytches/ddd-contracts` — `IDomainEvent`, `IEventBus`
-- `@vytches/ddd-logging` — internal structured logging
+- `@vytches/ddd-events` — event types
+- `@vytches/ddd-utils` — shared utilities
 
 ## Note on Sagas
 

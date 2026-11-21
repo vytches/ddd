@@ -42,6 +42,13 @@ export interface IOutboxMessage<T = unknown> {
 
   /** Last error message (if any) */
   lastError?: string;
+
+  /**
+   * Opaque token identifying ONE claim of this message. Set by a fencing-aware
+   * `claimBatch` (unique per claim — a re-claim after recovery gets a new value).
+   * Only read by `OutboxProcessor` when `useFencing` is enabled.
+   */
+  claimToken?: string;
 }
 
 export interface OutboxMessageOptions {
@@ -55,12 +62,49 @@ export interface OutboxMessageOptions {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Per-invocation context passed by {@link OutboxProcessor} to
+ * {@link IOutboxMessageHandler.handle} as its second argument.
+ *
+ * Handlers that declare only the `message` parameter are unaffected.
+ */
+export interface OutboxHandlerContext {
+  /**
+   * Aborted with an `OutboxTimeoutError` (as `signal.reason`) when the handler
+   * exceeds its `messageTimeout`. Aborting is a **request**: a handler that
+   * ignores the signal keeps running (the processor never kills it), and the
+   * message may be retried while it is still running — see the idempotency
+   * notes in the package guide.
+   *
+   * The signal is **not** aborted by `OutboxProcessor.stop()`.
+   */
+  readonly signal: AbortSignal;
+  /** 1-based number of this delivery attempt (`message.attempts + 1`). */
+  readonly attempt: number;
+  /** Instant at which this invocation times out (start + effective timeout). */
+  readonly deadline: Date;
+  /** Same as `message.id`, for handlers that only receive the context. */
+  readonly messageId: string;
+}
+
+/** Options accepted by `OutboxProcessor.registerHandler` / `registerDefaultHandler`. */
+export interface OutboxHandlerRegistrationOptions {
+  /**
+   * Timeout (ms) for this handler, overriding `OutboxProcessorOptions.messageTimeout`.
+   * Must be a positive finite number ≤ 2_147_483_647. When the processor has an
+   * explicit `crashRecoveryThresholdMs`, it must be ≥ this value.
+   */
+  messageTimeoutMs?: number;
+}
+
 export interface IOutboxMessageHandler<T = unknown> {
   /**
    * Handles a message from the outbox
    * @param message Message to handle
+   * @param context Always provided by `OutboxProcessor`; optional so existing
+   *   direct callers (`handler.handle(message)`) keep compiling.
    */
-  handle(message: IOutboxMessage<T>): Promise<void>;
+  handle(message: IOutboxMessage<T>, context?: OutboxHandlerContext): Promise<void>;
 }
 
 export type OutboxMiddleware = (

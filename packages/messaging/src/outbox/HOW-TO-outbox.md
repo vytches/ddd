@@ -22,6 +22,7 @@ interface IOutboxMessage<T = unknown> {
   processAfter?: Date; // for delayed / retry-backoff scheduling
   priority?: MessagePriority; // low | normal | high | critical
   lastError?: string;
+  claimToken?: string; // only with useFencing: unique per claim, set by claimBatch
 }
 ```
 
@@ -61,7 +62,13 @@ class PgOutboxRepository extends IOutboxRepository {
 
   // Optional overrides (default: no-op)
   async scheduleRetry(id: string, processAfter: Date): Promise<void> { ... }
-  async resetStaleProcessing(olderThan: Date): Promise<number> { ... }
+  async resetStaleProcessing(
+    olderThan: Date,
+    options?: { messageTypes?: readonly string[]; maxRetries?: number }
+  ): Promise<number> { ... }
+
+  // Optional, for useFencing: claimBatch (setting a unique claimToken per claim)
+  // plus completeFenced / recordFailureFenced / releaseFenced. See LLMGUIDE.md.
 }
 ```
 
@@ -70,13 +77,12 @@ class PgOutboxRepository extends IOutboxRepository {
 ```typescript
 import { OutboxMessageFactory, MessagePriority } from '@vytches/ddd-messaging';
 
-const factory = new OutboxMessageFactory();
-
-const message = factory.create({
-  messageType: 'order.placed',
-  payload: { orderId: '123', customerId: 'abc' },
-  priority: MessagePriority.HIGH,
-});
+// All factory methods are static.
+const message = OutboxMessageFactory.createMessage(
+  'order.placed',
+  { orderId: '123', customerId: 'abc' },
+  { priority: MessagePriority.HIGH }
+);
 ```
 
 ## Saving in a transaction
@@ -87,11 +93,11 @@ Always save the outbox message in the same transaction as the aggregate:
 await db.transaction(async tx => {
   await orderRepo.save(order, tx);
   await outboxRepo.saveMessage(
-    factory.create({
-      messageType: 'order.placed',
-      payload: { orderId: order.id },
-      priority: MessagePriority.HIGH,
-    })
+    OutboxMessageFactory.createMessage(
+      'order.placed',
+      { orderId: order.id },
+      { priority: MessagePriority.HIGH }
+    )
   );
 });
 ```
@@ -105,7 +111,7 @@ const processor = new OutboxProcessor(repo, {
   batchSize: 50,
   processingInterval: 2_000, // ms between polls
   maxRetries: 3,
-  messageTimeout: 30_000,
+  messageTimeout: 30_000, // per handler call; override per type in registerHandler
   retryBackoff: { initial: 1_000, multiplier: 2, maxDelay: 300_000 },
   startupJitterMs: 500, // de-synchronize multi-pod starts
   adaptiveRepoll: true, // drain backlog without waiting full interval
@@ -121,8 +127,12 @@ const processor = new OutboxProcessor(repo, {
 processor.registerHandler('order.placed', new OrderPlacedHandler(eventBus));
 processor.registerHandler(
   'payment.captured',
-  new PaymentCapturedHandler(queue)
+  new PaymentCapturedHandler(queue),
+  { messageTimeoutMs: 120_000 } // optional per-type timeout
 );
+
+// Handlers receive a context with an AbortSignal, aborted on timeout:
+//   async handle(message, ctx) { await fetch(url, { signal: ctx.signal }); }
 ```
 
 ### Default (catch-all) handler for fan-out
@@ -204,6 +214,19 @@ const processor = new OutboxProcessor(repo, {
         `Permanent outbox failure: ${message.messageType} / ${message.id}`
       );
     },
+    // A handler exceeded its timeout (it may still be running)
+    onHandlerTimeout(message, { timeoutMs, attempt }) {},
+    // ...and later settled; lateMs = time since the timeout
+    onLateSettle(message, outcome, lateMs) {},
+    // useFencing only: a write was rejected because the claim was lost
+    onStaleWrite(message, operation) {},
+    // isolateCompletionWriteFailures / useFencing only: the handler succeeded but
+    // the PROCESSED write failed (re-delivery follows)
+    onCompletionWriteFailed(
+      message,
+      error,
+      { consecutiveFailures, released }
+    ) {},
   },
 });
 ```
@@ -232,14 +255,16 @@ const generalProcessor = new OutboxProcessor(repo, {
 generalProcessor.registerDefaultHandler(fanOutHandler);
 generalProcessor.start();
 
-// Dedicated GDPR audit processor
-const gdprProcessor = new OutboxProcessor(repo, {
-  messageTypes: ['GdprAuditChainAppend'],
+// Dedicated audit processor
+const auditProcessor = new OutboxProcessor(repo, {
+  messageTypes: ['AuditAppend'],
   batchSize: 10,
 });
-gdprProcessor.registerHandler('GdprAuditChainAppend', new GdprChainHandler());
-gdprProcessor.start();
+auditProcessor.registerHandler('AuditAppend', new AuditAppendHandler());
+auditProcessor.start();
 ```
 
 Both processors use `FOR UPDATE SKIP LOCKED` (your repository implementation) to
-avoid processing the same row twice.
+avoid processing the same row twice. Set `crashRecoveryThresholdMs` on each to
+at least the largest timeout of ANY processor sharing the table, and make
+`resetStaleProcessing` honour `options.messageTypes`.

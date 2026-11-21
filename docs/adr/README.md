@@ -39,3 +39,4 @@
 - [36. logcommands-secure-by-default](0036-logcommands-secure-by-default.md)
 - [37. internal-diagnostics-control-sink-injection](0037-internal-diagnostics-control-sink-injection.md)
 - [38. di-token-identity-by-reference](0038-di-token-identity-by-reference.md)
+- [39. outbox-claim-fencing](0039-outbox-claim-fencing.md)

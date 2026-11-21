@@ -4,3 +4,4 @@ export * from './outbox-message-factory';
 export * from './outbox-processor';
 export * from './outbox-hooks';
 export * from './outbox-service';
+export * from './outbox-timeout-error';
