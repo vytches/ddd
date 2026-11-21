@@ -452,15 +452,22 @@ export {
   OutboxMessageFactory,
   OutboxProcessor,
   OutboxService,
+  OutboxTimeoutError,
 } from '@vytches/ddd-messaging';
 export type {
   IOutboxMessage,
   IOutboxMessageHandler,
+  OutboxHandlerContext,
+  OutboxHandlerRegistrationOptions,
+  OutboxHandlerTimeoutInfo,
+  OutboxLateSettleOutcome,
   OutboxMessageOptions,
   OutboxMiddleware,
   OutboxProcessorHooks,
   OutboxProcessorOptions,
   OutboxServiceOptions,
+  OutboxTimeoutErrorDetails,
+  ResetStaleProcessingOptions,
   RetryBackoffConfig,
 } from '@vytches/ddd-messaging';
 

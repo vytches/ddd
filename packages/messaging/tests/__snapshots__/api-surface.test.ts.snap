@@ -9,6 +9,7 @@ exports[`@vytches/ddd-messaging public API surface > exports the documented set 
   "OutboxMessageFactory",
   "OutboxProcessor",
   "OutboxService",
+  "OutboxTimeoutError",
   "comparePriority",
 ]
 `;

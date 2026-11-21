@@ -1,10 +1,20 @@
 import type { IEventBus } from '@vytches/ddd-contracts';
 import { LibUtils, safeRun } from '@vytches/ddd-utils';
 import { internalLogger } from '@vytches/ddd-contracts/internal';
-import type { IOutboxMessage, IOutboxMessageHandler, OutboxMiddleware } from './outbox-interfaces';
+import type {
+  IOutboxMessage,
+  IOutboxMessageHandler,
+  OutboxHandlerRegistrationOptions,
+  OutboxMiddleware,
+} from './outbox-interfaces';
 import { MessagePriority, MessageStatus } from './outbox-interfaces';
-import type { IOutboxRepository } from './outbox-repository.interface';
+import type { IOutboxRepository, ResetStaleProcessingOptions } from './outbox-repository.interface';
 import type { OutboxProcessorHooks } from './outbox-hooks';
+import { runHandlerWithTimeout } from './outbox-handler-runner';
+
+/** `setTimeout` fires immediately for delays above this (2^31 - 1). */
+const MAX_TIMER_MS = 2_147_483_647;
+const DEFAULT_CRASH_RECOVERY_FLOOR_MS = 300_000;
 
 export interface RetryBackoffConfig {
   /** Initial delay in milliseconds before first retry (default: 1000) */
@@ -24,7 +34,14 @@ export interface OutboxProcessorOptions {
   processingInterval?: number;
   /** Priority order for message processing */
   priorityOrder?: MessagePriority[];
-  /** Timeout for processing a single message */
+  /**
+   * Default timeout (ms) for a single `handler.handle()` call, per message (not per
+   * batch). Override per message type via `registerHandler(type, handler,
+   * { messageTimeoutMs })`. Covers only the handler — not middleware, claim or
+   * status writes. On expiry the handler's `AbortSignal` is aborted with an
+   * `OutboxTimeoutError`; a handler that ignores it keeps running and the
+   * message may be retried concurrently. Defaults to 30000.
+   */
   messageTimeout?: number;
   /** Enable logging */
   enableLogging?: boolean;
@@ -52,9 +69,15 @@ export interface OutboxProcessorOptions {
   crashRecoveryIntervalMs?: number;
   /**
    * How old (in ms) a `PROCESSING` message must be before crash recovery resets
-   * it to `PENDING`. Must be `>= messageTimeout` so legitimately in-flight
-   * messages are never reset. Defaults to `max(300_000, messageTimeout)`.
-   * Setting this below `messageTimeout` throws a `RangeError` from the constructor.
+   * it to `PENDING`. Must be `>= messageTimeout` (and `>=` every per-handler
+   * `messageTimeoutMs`) so legitimately in-flight messages are never reset.
+   * Defaults to `max(300_000, largest timeout)`, re-evaluated as handlers with
+   * longer timeouts are registered. Setting an explicit value below
+   * `messageTimeout` throws a `RangeError` from the constructor; registering a
+   * handler whose `messageTimeoutMs` exceeds it throws from `registerHandler`.
+   *
+   * With several processors on one table, set it to at least the largest timeout
+   * of ANY of them — each processor only knows its own.
    */
   crashRecoveryThresholdMs?: number;
   /**
@@ -128,6 +151,11 @@ export class OutboxProcessor {
   private readonly options: ResolvedOptions;
   private readonly handlers = new Map<string, IOutboxMessageHandler>();
   private defaultHandler?: IOutboxMessageHandler;
+  /** Per-type timeout overrides (only types registered with `messageTimeoutMs`). */
+  private readonly handlerTimeouts = new Map<string, number>();
+  private defaultHandlerTimeoutMs?: number | undefined;
+  /** The user-supplied threshold; `undefined` means "derive from the largest timeout". */
+  private readonly explicitCrashRecoveryThresholdMs: number | undefined;
   private readonly middlewares: OutboxMiddleware[] = [];
   private isRunning = false;
   private processingTimer?: NodeJS.Timeout | undefined;
@@ -155,7 +183,7 @@ export class OutboxProcessor {
     // still legitimately in-flight. Default to max(5min, messageTimeout) so the
     // invariant always holds out of the box; reject only explicit unsafe values.
     const crashRecoveryThresholdMs =
-      options.crashRecoveryThresholdMs ?? Math.max(300_000, messageTimeout);
+      options.crashRecoveryThresholdMs ?? Math.max(DEFAULT_CRASH_RECOVERY_FLOOR_MS, messageTimeout);
     if (crashRecoveryThresholdMs < messageTimeout) {
       throw new RangeError(
         `OutboxProcessor: crashRecoveryThresholdMs (${crashRecoveryThresholdMs}) must be ≥ messageTimeout (${messageTimeout}) to avoid resetting in-flight messages`
@@ -163,6 +191,7 @@ export class OutboxProcessor {
     }
 
     this.repository = repository;
+    this.explicitCrashRecoveryThresholdMs = options.crashRecoveryThresholdMs;
     this.options = {
       batchSize,
       maxRetries: options.maxRetries ?? 3,
@@ -208,10 +237,26 @@ export class OutboxProcessor {
   }
 
   /**
-   * Registers a message handler for a specific message type
+   * Registers a message handler for a specific message type.
+   *
+   * @param options `messageTimeoutMs` overrides the processor-wide
+   *   `messageTimeout` for this type. Re-registering a type replaces both the
+   *   handler and its timeout (omitting the option reverts to the default).
+   * @throws RangeError if `messageTimeoutMs` is invalid, or exceeds an explicit
+   *   `crashRecoveryThresholdMs` (the handler is then not registered).
    */
-  registerHandler(messageType: string, handler: IOutboxMessageHandler): void {
+  registerHandler(
+    messageType: string,
+    handler: IOutboxMessageHandler,
+    options?: OutboxHandlerRegistrationOptions
+  ): void {
+    const timeoutMs = this.validateHandlerTimeout(messageType, options);
     this.handlers.set(messageType, handler);
+    if (timeoutMs === undefined) {
+      this.handlerTimeouts.delete(messageType);
+    } else {
+      this.handlerTimeouts.set(messageType, timeoutMs);
+    }
   }
 
   /**
@@ -229,13 +274,65 @@ export class OutboxProcessor {
    *
    * Second/subsequent call emits a warning and replaces the previous handler.
    */
-  registerDefaultHandler(handler: IOutboxMessageHandler): void {
+  registerDefaultHandler(
+    handler: IOutboxMessageHandler,
+    options?: OutboxHandlerRegistrationOptions
+  ): void {
+    const timeoutMs = this.validateHandlerTimeout('<default>', options);
     if (this.defaultHandler) {
       internalLogger.warn(
         'registerDefaultHandler: replacing existing default handler — previous handler discarded'
       );
     }
     this.defaultHandler = handler;
+    this.defaultHandlerTimeoutMs = timeoutMs;
+  }
+
+  /** Validates a per-handler timeout; returns it, or `undefined` when not set. */
+  private validateHandlerTimeout(
+    label: string,
+    options: OutboxHandlerRegistrationOptions | undefined
+  ): number | undefined {
+    const timeoutMs = options?.messageTimeoutMs;
+    if (timeoutMs === undefined) {
+      return undefined;
+    }
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0 || timeoutMs > MAX_TIMER_MS) {
+      throw new RangeError(
+        `OutboxProcessor: messageTimeoutMs for '${label}' must be a positive number ≤ ${MAX_TIMER_MS}, got ${timeoutMs}`
+      );
+    }
+    const explicit = this.explicitCrashRecoveryThresholdMs;
+    if (explicit !== undefined && explicit < timeoutMs) {
+      throw new RangeError(
+        `OutboxProcessor: crashRecoveryThresholdMs (${explicit}) must be ≥ messageTimeoutMs (${timeoutMs}) of '${label}' to avoid resetting in-flight messages`
+      );
+    }
+    return timeoutMs;
+  }
+
+  /** Timeout that applies to a message type (override of the handler that will run it, else default). */
+  private resolveTimeoutMs(messageType: string): number {
+    const override = this.handlers.has(messageType)
+      ? this.handlerTimeouts.get(messageType)
+      : this.defaultHandlerTimeoutMs;
+    return override ?? this.options.messageTimeout;
+  }
+
+  /** Largest timeout any registered handler may use — the floor for the recovery threshold. */
+  private largestTimeoutMs(): number {
+    return Math.max(
+      this.options.messageTimeout,
+      this.defaultHandlerTimeoutMs ?? 0,
+      ...this.handlerTimeouts.values()
+    );
+  }
+
+  private effectiveCrashRecoveryThresholdMs(): number {
+    return (
+      this.explicitCrashRecoveryThresholdMs ??
+      Math.max(DEFAULT_CRASH_RECOVERY_FLOOR_MS, this.largestTimeoutMs())
+    );
   }
 
   /**
@@ -427,28 +524,17 @@ export class OutboxProcessor {
       throw new Error(`No handler registered for message type: ${message.messageType}`);
     }
     // Create the final handler function
-    const finalHandler = async (msg: IOutboxMessage): Promise<void> => {
-      let timeoutId: ReturnType<typeof setTimeout> | undefined;
-      try {
-        await Promise.race([
-          handler.handle(msg),
-          new Promise<never>((_, reject) => {
-            timeoutId = setTimeout(
-              () => reject(new Error('Message processing timeout')),
-              this.options.messageTimeout
-            );
-          }),
-        ]);
-      } finally {
-        // D-1: clear the timeout regardless of which race branch resolved —
-        // otherwise a fast handler.handle() still leaves the timeout timer
-        // running for the full messageTimeout, leaking a Node timer per
-        // message (visible under fake timers / vi.getTimerCount()). The race
-        // loser (the rejecting timer) never produces an unhandled rejection
-        // here because it is cleared, not left pending.
-        if (timeoutId !== undefined) clearTimeout(timeoutId);
-      }
-    };
+    const finalHandler = (msg: IOutboxMessage): Promise<void> =>
+      runHandlerWithTimeout(handler, msg, this.resolveTimeoutMs(msg.messageType), {
+        onTimeout: info =>
+          this.safelyInvokeHook('onHandlerTimeout', () =>
+            this.options.hooks?.onHandlerTimeout?.(msg, info)
+          ),
+        onLateSettle: (outcome, lateMs) =>
+          this.safelyInvokeHook('onLateSettle', () =>
+            this.options.hooks?.onLateSettle?.(msg, outcome, lateMs)
+          ),
+      });
 
     // Build the middleware chain from right to left
     return this.middlewares.reduceRight((next, middleware) => middleware(next), finalHandler);
@@ -561,8 +647,14 @@ export class OutboxProcessor {
    * logged, never thrown — crash recovery must not crash the processor.
    */
   private async runCrashRecovery(): Promise<void> {
-    const olderThan = new Date(Date.now() - this.options.crashRecoveryThresholdMs);
-    const [error, count] = await safeRun(() => this.repository.resetStaleProcessing(olderThan));
+    const olderThan = new Date(Date.now() - this.effectiveCrashRecoveryThresholdMs());
+    const recoveryOptions: ResetStaleProcessingOptions = {
+      maxRetries: this.options.maxRetries,
+      ...(this.options.messageTypes ? { messageTypes: [...this.options.messageTypes] } : {}),
+    };
+    const [error, count] = await safeRun(() =>
+      this.repository.resetStaleProcessing(olderThan, recoveryOptions)
+    );
 
     if (error) {
       internalLogger.error(

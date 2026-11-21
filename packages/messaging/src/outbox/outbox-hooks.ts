@@ -22,4 +22,26 @@ export interface OutboxProcessorHooks {
   onMessageFailed?(message: IOutboxMessage, error: Error, attempt: number): void;
   /** Fired when a message is marked `FAILED` after exhausting `maxRetries`. */
   onPermanentFailure?(message: IOutboxMessage, error: Error): void;
+  /**
+   * Fired the moment a handler exceeds its timeout (after the context signal is
+   * aborted, before the failure is recorded). The handler may still be running.
+   * Always followed by `onMessageFailed` for the same message.
+   */
+  onHandlerTimeout?(message: IOutboxMessage, info: OutboxHandlerTimeoutInfo): void;
+  /**
+   * Fired when a handler that previously timed out finally settles. `lateMs` is
+   * the time elapsed since the timeout. Use it to measure how long timed-out
+   * handlers keep running (overlap with retries). Never fired for handlers that
+   * finish in time, and never fired if the handler never settles.
+   */
+  onLateSettle?(message: IOutboxMessage, outcome: OutboxLateSettleOutcome, lateMs: number): void;
 }
+
+export interface OutboxHandlerTimeoutInfo {
+  /** The effective timeout that elapsed (per-handler override or processor default). */
+  timeoutMs: number;
+  /** 1-based attempt number of the invocation that timed out. */
+  attempt: number;
+}
+
+export type OutboxLateSettleOutcome = 'resolved' | 'rejected';

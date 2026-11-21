@@ -2,6 +2,22 @@
 import { MessageStatus } from './outbox-interfaces';
 import type { IOutboxMessage, MessagePriority } from './outbox-interfaces';
 
+/**
+ * Optional hints passed by `OutboxProcessor` to
+ * {@link IOutboxRepository.resetStaleProcessing}.
+ */
+export interface ResetStaleProcessingOptions {
+  /**
+   * The processor's `messageTypes` allow-list. When present, implementations
+   * SHOULD reset only `PROCESSING` messages of these types — several processors
+   * sharing one table partition it by type, and each has its own timeouts.
+   * Absent means "all types" (the pre-existing behaviour).
+   */
+  readonly messageTypes?: readonly string[];
+  /** The processor's `maxRetries`, for implementations that budget recoveries. */
+  readonly maxRetries?: number;
+}
+
 export abstract class IOutboxRepository {
   /**
    * Saves a message to the outbox
@@ -186,12 +202,24 @@ export abstract class IOutboxRepository {
    * **Safety:** implementations MUST only reset messages whose processing
    * started strictly before `olderThan`. `OutboxProcessor` always passes a past
    * timestamp (`now - crashRecoveryThresholdMs`, with the threshold validated to
-   * be `>= messageTimeout`), so legitimately in-flight messages are never reset.
+   * be `>= messageTimeout`, including per-handler timeouts), so legitimately
+   * in-flight messages are never reset.
+   *
+   * **Recovery does not consume the retry budget.** The processor increments
+   * `attempts` only when a handler throws or times out. A reset performed here
+   * leaves `attempts` untouched (it neither increments nor zeroes it) unless
+   * your implementation does so. Consequence: a message that kills its worker
+   * every time (OOM, SIGKILL) is recovered forever and never reaches `FAILED`.
+   * To bound it, increment `attempts` in your `resetStaleProcessing` and move
+   * messages with `attempts >= options.maxRetries` to `FAILED`; the processor
+   * does not do this for you, and `onPermanentFailure` is not fired for them.
    *
    * @param olderThan Reset only `PROCESSING` messages last touched before this instant
+   * @param options Optional hints (`messageTypes`, `maxRetries`). Implementations
+   *   declared with a single parameter keep working — the argument is ignored.
    * @returns Number of messages reset to `PENDING`
    */
-  resetStaleProcessing(_olderThan: Date): Promise<number> {
+  resetStaleProcessing(_olderThan: Date, _options?: ResetStaleProcessingOptions): Promise<number> {
     return Promise.resolve(0);
   }
 }

@@ -80,22 +80,26 @@ await db.transaction(async tx => {
 
 ## Key API
 
-| Export                   | Kind      | Description                                                                     |
-| ------------------------ | --------- | ------------------------------------------------------------------------------- |
-| `IOutboxMessage`         | interface | The shape of a stored outbox row                                                |
-| `IOutboxRepository`      | interface | **You implement this**: persistence for outbox messages                         |
-| `IOutboxMessageHandler`  | interface | How to dispatch a stored message (default: publish to event bus)                |
-| `OutboxMessageOptions`   | type      | `{ priority, dedupKey, headers }` per-message overrides                         |
-| `OutboxMiddleware`       | type      | Hook for cross-cutting concerns (tracing, encryption)                           |
-| `OutboxProcessorOptions` | type      | `{ pollIntervalMs, batchSize, maxRetries, ... }`                                |
-| `OutboxServiceOptions`   | type      | Top-level config bag                                                            |
-| `MessageStatus`          | enum      | `Pending`, `Dispatched`, `Failed`, `DeadLettered`                               |
-| `MessagePriority`        | enum      | `Low`, `Normal`, `High`, `Critical`                                             |
-| `OutboxMessageFactory`   | class     | Build `IOutboxMessage` from an integration event                                |
-| `OutboxProcessor`        | class     | Polls repo, dispatches via handler, updates status                              |
-| `EventBusOutboxHandler`  | class     | Default handler — publishes via an `IIntegrationEventBus`                       |
-| `OutboxService`          | class     | Facade combining factory + processor for the application                        |
-| `comparePriority`        | function  | Sorts `MessagePriority` values by a given order array (safe for partial arrays) |
+| Export                             | Kind      | Description                                                                     |
+| ---------------------------------- | --------- | ------------------------------------------------------------------------------- |
+| `IOutboxMessage`                   | interface | The shape of a stored outbox row                                                |
+| `IOutboxRepository`                | interface | **You implement this**: persistence for outbox messages                         |
+| `IOutboxMessageHandler`            | interface | How to dispatch a stored message (default: publish to event bus)                |
+| `OutboxMessageOptions`             | type      | `{ priority, dedupKey, headers }` per-message overrides                         |
+| `OutboxMiddleware`                 | type      | Hook for cross-cutting concerns (tracing, encryption)                           |
+| `OutboxProcessorOptions`           | type      | `{ pollIntervalMs, batchSize, maxRetries, ... }`                                |
+| `OutboxServiceOptions`             | type      | Top-level config bag                                                            |
+| `OutboxHandlerContext`             | type      | 2nd argument of `handle()`: `{ signal, attempt, deadline, messageId }`          |
+| `OutboxHandlerRegistrationOptions` | type      | `registerHandler` 3rd argument: `{ messageTimeoutMs }`                          |
+| `ResetStaleProcessingOptions`      | type      | 2nd argument of `resetStaleProcessing()`: `{ messageTypes, maxRetries }`        |
+| `OutboxTimeoutError`               | class     | Typed timeout error; also the `signal.reason` on timeout                        |
+| `MessageStatus`                    | enum      | `Pending`, `Dispatched`, `Failed`, `DeadLettered`                               |
+| `MessagePriority`                  | enum      | `Low`, `Normal`, `High`, `Critical`                                             |
+| `OutboxMessageFactory`             | class     | Build `IOutboxMessage` from an integration event                                |
+| `OutboxProcessor`                  | class     | Polls repo, dispatches via handler, updates status                              |
+| `EventBusOutboxHandler`            | class     | Default handler — publishes via an `IIntegrationEventBus`                       |
+| `OutboxService`                    | class     | Facade combining factory + processor for the application                        |
+| `comparePriority`                  | function  | Sorts `MessagePriority` values by a given order array (safe for partial arrays) |
 
 ## Patterns
 
@@ -242,6 +246,110 @@ messages.sort((a, b) =>
 
 `comparePriority` is safe with partial or custom order arrays — values absent
 from the array sort last rather than accidentally first.
+
+## Handler timeouts, cancellation and crash recovery
+
+### Timeouts are per message, and they do not stop the handler
+
+`messageTimeout` (default 30 000 ms) limits one `handler.handle()` call, **per
+message, not per batch**. It does not cover middleware, claiming or status
+writes. When it expires the processor records a failed attempt and resets the
+message to `PENDING` — but a handler that ignores cancellation **keeps
+running**, and the retry can start while it is still running. Always make
+handlers idempotent; cancellation only narrows the window.
+
+Override the timeout for one message type (everything else keeps the default):
+
+```typescript
+processor.registerHandler('payment.capture', paymentHandler, {
+  messageTimeoutMs: 120_000,
+});
+processor.registerDefaultHandler(fallbackHandler, { messageTimeoutMs: 10_000 });
+```
+
+`messageTimeoutMs` must be a positive number ≤ 2 147 483 647. If you set an
+explicit `crashRecoveryThresholdMs`, it must be ≥ every timeout
+(`registerHandler` throws `RangeError` otherwise). If you leave it unset it
+follows the largest timeout: `max(300_000, largest timeout)`.
+
+### Handlers with and without a signal
+
+`handle()` receives a second argument, always provided by `OutboxProcessor`:
+
+```typescript
+interface OutboxHandlerContext {
+  readonly signal: AbortSignal; // aborted with OutboxTimeoutError on timeout
+  readonly attempt: number; // 1-based (message.attempts + 1)
+  readonly deadline: Date; // when this invocation times out
+  readonly messageId: string;
+}
+```
+
+```typescript
+// Without a signal — unchanged, keeps working:
+class PlainHandler implements IOutboxMessageHandler {
+  async handle(message: IOutboxMessage): Promise<void> {
+    await this.mailer.send(message.payload);
+  }
+}
+
+// With a signal — pass it to anything cancellable:
+class CancellableHandler implements IOutboxMessageHandler {
+  async handle(
+    message: IOutboxMessage,
+    ctx?: OutboxHandlerContext
+  ): Promise<void> {
+    await fetch(this.url, {
+      method: 'POST',
+      body: JSON.stringify(message.payload),
+      signal: ctx?.signal,
+    });
+  }
+}
+```
+
+- The signal is aborted **only** by the timeout, with an `OutboxTimeoutError` as
+  `signal.reason` (its `message` is still `'Message processing timeout'`).
+- `OutboxProcessor.stop()` does **not** abort in-flight handlers: it is
+  synchronous, in-flight messages finish and write their status afterwards.
+  Aborting there would turn every graceful shutdown into counted failed
+  attempts.
+- The context is optional in the type so that `handler.handle(message)` calls in
+  your own tests still compile. A test that asserts
+  `expect(handle).toHaveBeenCalledWith(message)` must now expect the context
+  too.
+
+### Observing timeouts
+
+```typescript
+new OutboxProcessor(repo, {
+  hooks: {
+    // handler exceeded its timeout (it may still be running); precedes onMessageFailed
+    onHandlerTimeout: (message, { timeoutMs, attempt }) =>
+      metrics.inc('outbox_timeout', { type: message.messageType }),
+    // the timed-out handler finally settled; lateMs = time since the timeout
+    onLateSettle: (message, outcome, lateMs) =>
+      metrics.observe('outbox_late_settle_ms', lateMs, { outcome }),
+  },
+});
+```
+
+### Crash recovery and `attempts`
+
+`resetStaleProcessing(olderThan, options?)` receives
+`{ messageTypes, maxRetries }` from the processor (`messageTypes` only when the
+processor has an allow-list). The one-parameter form of your override keeps
+working.
+
+- With several processors on one table, **filter by `options.messageTypes`**;
+  each processor only knows its own timeouts, so an unfiltered reset can reclaim
+  messages another processor is still handling.
+- **Recovery does not touch `attempts`.** The processor increments it only when
+  a handler throws or times out. A message that kills its worker every time
+  (OOM, SIGKILL) is therefore recovered forever and never reaches `FAILED`. If
+  that matters, increment `attempts` inside your `resetStaleProcessing` and move
+  rows with `attempts >= options.maxRetries` to `FAILED` (the processor will not
+  fire `onPermanentFailure` for them).
 
 ## Anti-Patterns
 

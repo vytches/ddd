@@ -27,7 +27,7 @@ pnpm add @vytches/ddd-messaging
 | `OutboxService`          | class          | High-level facade: store, schedule, and coordinate processing            |
 | `IOutboxRepository`      | abstract class | Base repository contract — extend this for your storage backend          |
 | `IOutboxMessage`         | interface      | Message shape with id, payload, status, priority, timestamps             |
-| `IOutboxMessageHandler`  | interface      | Single-method handler: `handle(message): Promise<void>`                  |
+| `IOutboxMessageHandler`  | interface      | Single-method handler: `handle(message, context?): Promise<void>`        |
 | `OutboxMiddleware`       | type           | Middleware signature for the processor pipeline                          |
 | `OutboxProcessorOptions` | interface      | Processor configuration (interval, batch size, retries, backoff, hooks…) |
 | `OutboxProcessorHooks`   | interface      | Observability callbacks: batch complete, message failed, permanent fail  |

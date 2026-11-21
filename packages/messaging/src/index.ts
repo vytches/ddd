@@ -3,6 +3,12 @@ export type {
   IOutboxMessage,
   OutboxMessageOptions,
   IOutboxMessageHandler,
+  OutboxHandlerContext,
+  OutboxHandlerRegistrationOptions,
+  OutboxHandlerTimeoutInfo,
+  OutboxLateSettleOutcome,
+  OutboxTimeoutErrorDetails,
+  ResetStaleProcessingOptions,
   OutboxMiddleware,
   OutboxProcessorOptions,
   OutboxProcessorHooks,
@@ -23,4 +29,5 @@ export {
   OutboxProcessor,
   EventBusOutboxHandler,
   OutboxService,
+  OutboxTimeoutError,
 } from './outbox';
