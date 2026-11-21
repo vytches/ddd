@@ -18,6 +18,16 @@ export interface ResetStaleProcessingOptions {
   readonly maxRetries?: number;
 }
 
+/** Terminal/next state written by {@link IOutboxRepository.releaseFenced}. */
+export interface OutboxFencedReleaseOutcome {
+  /** `PENDING` to retry, `FAILED` once the retry budget is exhausted. */
+  readonly status: MessageStatus.PENDING | MessageStatus.FAILED;
+  /** Earliest time the message may be claimed again (retry backoff). */
+  readonly processAfter?: Date;
+  /** Failure to store as the message's last error. */
+  readonly error?: Error;
+}
+
 export abstract class IOutboxRepository {
   /**
    * Saves a message to the outbox
@@ -91,8 +101,11 @@ export abstract class IOutboxRepository {
    * to get real multi-worker/multi-processor safety.
    *
    * `OutboxProcessor` only calls this method when
-   * `OutboxProcessorOptions.useClaimBatch` is explicitly set to `true`
-   * (opt-in, default `false`) — see AC#1/AC#2. When enabled, the processor
+   * `OutboxProcessorOptions.useClaimBatch` (or `useFencing`, which implies it)
+   * is explicitly set to `true` (opt-in, default `false`) — see AC#1/AC#2.
+   * With `useFencing` the repository MUST override this method and set a
+   * unique `claimToken` on every returned message (the constructor rejects the
+   * inherited default). When enabled, the processor
    * skips its own redundant `updateStatus(id, PROCESSING)` call for messages
    * returned by `claimBatch`, since claiming already performed that mark.
    *
@@ -222,4 +235,53 @@ export abstract class IOutboxRepository {
   resetStaleProcessing(_olderThan: Date, _options?: ResetStaleProcessingOptions): Promise<number> {
     return Promise.resolve(0);
   }
+
+  /**
+   * **Fencing (opt-in, `OutboxProcessorOptions.useFencing`).** No default
+   * implementation: there is no safe shim, so a repository that does not
+   * implement the three `*Fenced` methods cannot be used with `useFencing`
+   * (the processor constructor throws).
+   *
+   * A fencing-aware `claimBatch` must set a fresh, unique `claimToken` on every
+   * message it claims (and persist it). Each `*Fenced` write below MUST apply
+   * only while the claim is still held, atomically in ONE statement, e.g.
+   * `... WHERE id = $1 AND status = 'PROCESSING' AND claim_token = $2`, and
+   * report whether a row changed. Checking `status` alone is not enough: a
+   * re-claim sets `PROCESSING` again (ABA) — the token is what identifies the
+   * claim. `resetStaleProcessing` MUST clear the token when it resets a row.
+   *
+   * `satisfies FencedOutboxRepository` verifies the three methods at compile time.
+   *
+   * Marks the message `PROCESSED` and clears the token.
+   * @returns `true` if applied, `false` if the claim is no longer held (stale).
+   *   May reject when the write itself fails; that is reported through the
+   *   `onCompletionWriteFailed` hook and is NOT a handler failure (fencing
+   *   implies `isolateCompletionWriteFailures`).
+   */
+  completeFenced?(id: string, claimToken: string): Promise<boolean>;
+
+  /**
+   * Atomically `attempts = attempts + 1` and stores `error` as the last error,
+   * only while the claim is held. The status stays `PROCESSING`; the processor
+   * follows up with {@link releaseFenced}.
+   * @returns The new attempts count, or `null` if the claim is no longer held.
+   */
+  recordFailureFenced?(id: string, claimToken: string, error: Error): Promise<number | null>;
+
+  /**
+   * In ONE statement: sets `outcome.status`, `process_after` (an absent
+   * `outcome.processAfter` clears it) and the last error, and clears the token — only while the claim is held. This
+   * replaces the legacy `updateStatus(PENDING)` + `scheduleRetry` pair, closing
+   * the window in which a retried message is claimable before its delay is set.
+   * @returns `true` if applied, `false` if the claim is no longer held (stale).
+   */
+  releaseFenced?(
+    id: string,
+    claimToken: string,
+    outcome: OutboxFencedReleaseOutcome
+  ): Promise<boolean>;
 }
+
+/** An {@link IOutboxRepository} that implements all three fenced writes. */
+export type FencedOutboxRepository = IOutboxRepository &
+  Required<Pick<IOutboxRepository, 'completeFenced' | 'recordFailureFenced' | 'releaseFenced'>>;

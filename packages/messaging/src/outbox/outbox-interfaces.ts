@@ -42,6 +42,13 @@ export interface IOutboxMessage<T = unknown> {
 
   /** Last error message (if any) */
   lastError?: string;
+
+  /**
+   * Opaque token identifying ONE claim of this message. Set by a fencing-aware
+   * `claimBatch` (unique per claim — a re-claim after recovery gets a new value).
+   * Only read by `OutboxProcessor` when `useFencing` is enabled.
+   */
+  claimToken?: string;
 }
 
 export interface OutboxMessageOptions {

@@ -6,6 +6,7 @@ import {
   type IOutboxMessageHandler,
   type OutboxHandlerContext,
 } from '../../src/outbox/outbox-interfaces';
+import { internalLogger } from '@vytches/ddd-contracts/internal';
 import { OutboxProcessor } from '../../src/outbox/outbox-processor';
 import {
   IOutboxRepository,
@@ -230,7 +231,7 @@ describe('A — handler context', () => {
     expect(repo.store.get('m-1')?.status).toBe(MessageStatus.PROCESSED);
   });
 
-  it('a synchronous throw from handle() is a normal failure and leaves no timer behind', async () => {
+  it('a synchronous throw from handle() is a normal failure (no timeout timer is ever armed)', async () => {
     const repo = new MemoryRepo();
     await repo.saveMessage(message());
     const processor = newProcessor(repo);
@@ -328,12 +329,12 @@ describe('B — per-type timeout', () => {
 
   it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY, 2_147_483_648])(
     'rejects an invalid messageTimeoutMs (%s) without registering the handler',
-    value => {
+    async value => {
       const processor = newProcessor(new MemoryRepo());
       expect(() =>
         processor.registerHandler('a.event', hangingHandler(), { messageTimeoutMs: value })
       ).toThrow(RangeError);
-      expect(processor.getStats()).resolves.toMatchObject({ registeredHandlers: [] });
+      await expect(processor.getStats()).resolves.toMatchObject({ registeredHandlers: [] });
     }
   );
 
@@ -539,16 +540,14 @@ describe('E — timeout diagnostics hooks', () => {
   it('a throwing hook neither breaks the batch nor swallows the timeout failure', async () => {
     const repo = new MemoryRepo();
     await repo.saveMessage(message());
-    const processor = newProcessor(repo, {
-      hooks: {
-        onHandlerTimeout: () => {
-          throw new Error('hook bug');
-        },
-        onLateSettle: () => {
-          throw new Error('hook bug');
-        },
-      },
+    vi.spyOn(internalLogger, 'error').mockImplementation(() => undefined);
+    const onHandlerTimeout = vi.fn(() => {
+      throw new Error('hook bug');
     });
+    const onLateSettle = vi.fn(() => {
+      throw new Error('hook bug');
+    });
+    const processor = newProcessor(repo, { hooks: { onHandlerTimeout, onLateSettle } });
     processor.registerHandler('a.event', {
       handle: () => new Promise<void>(resolve => setTimeout(resolve, 1_500)),
     });
@@ -558,7 +557,148 @@ describe('E — timeout diagnostics hooks', () => {
     await vi.advanceTimersByTimeAsync(1_500);
     await batch;
 
+    expect(onHandlerTimeout).toHaveBeenCalledOnce();
+    expect(onLateSettle).toHaveBeenCalledOnce();
     expect(repo.store.get('m-1')).toMatchObject({ status: MessageStatus.PENDING, attempts: 1 });
     processor.stop();
+  });
+});
+
+describe('review fixes — runner and validation', () => {
+  it('a handler that resolves INSIDE its abort listener still times out (it cannot win the race)', async () => {
+    const repo = new MemoryRepo();
+    await repo.saveMessage(message());
+    const onMessageFailed = vi.fn();
+    const onLateSettle = vi.fn();
+    const processor = newProcessor(repo, { hooks: { onMessageFailed, onLateSettle } });
+    processor.registerHandler('a.event', {
+      handle: (_m, ctx) =>
+        new Promise<void>(resolve => {
+          ctx?.signal.addEventListener('abort', () => resolve());
+        }),
+    });
+    processor.start();
+
+    const batch = processor.processBatch();
+    await vi.advanceTimersByTimeAsync(1_000);
+    await batch;
+
+    expect(onMessageFailed.mock.calls[0]![1]).toBeInstanceOf(OutboxTimeoutError);
+    expect(repo.store.get('m-1')).toMatchObject({ status: MessageStatus.PENDING, attempts: 1 });
+    processor.stop();
+  });
+
+  it('context.attempt falls back to 1 when a hand-rolled repository returns a non-numeric attempts', async () => {
+    const repo = new MemoryRepo();
+    await repo.saveMessage(message({ attempts: undefined as unknown as number }));
+    let attempt: number | undefined;
+    const processor = newProcessor(repo);
+    processor.registerHandler('a.event', {
+      handle: async (_m, ctx) => {
+        attempt = ctx?.attempt;
+      },
+    });
+    processor.start();
+
+    await processor.processBatch();
+
+    expect(attempt).toBe(1);
+    processor.stop();
+  });
+
+  it('an async hook that rejects is logged, not an unhandled rejection', async () => {
+    const repo = new MemoryRepo();
+    await repo.saveMessage(message());
+    const error = vi.spyOn(internalLogger, 'error').mockImplementation(() => undefined);
+    const processor = newProcessor(repo, {
+      hooks: { onBatchComplete: () => Promise.reject(new Error('async hook bug')) as never },
+    });
+    processor.registerHandler('a.event', { handle: () => Promise.resolve() });
+    processor.start();
+
+    await processor.processBatch();
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(error).toHaveBeenCalledWith(
+      expect.stringContaining('hook onBatchComplete threw'),
+      expect.any(Error),
+      { hookName: 'onBatchComplete' }
+    );
+    processor.stop();
+  });
+
+  it.each([0, -5, Number.NaN, Number.POSITIVE_INFINITY, 2_147_483_648])(
+    'does not reject a pre-existing option value setTimeout cannot honour (%s) — it only warns',
+    value => {
+      const warn = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+      expect(() => newProcessor(new MemoryRepo(), { messageTimeout: value })).not.toThrow();
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('messageTimeout'));
+    }
+  );
+
+  it.each([0, -1, Number.NaN])(
+    'only warns about an unusable crashRecoveryThresholdMs (%s)',
+    value => {
+      const warn = vi.spyOn(internalLogger, 'warn').mockImplementation(() => undefined);
+      // an explicit threshold below messageTimeout is still rejected (pre-existing rule),
+      // so use a huge messageTimeout-free comparison: NaN/0/negative are only reported
+      try {
+        newProcessor(new MemoryRepo(), { messageTimeout: 1, crashRecoveryThresholdMs: value });
+      } catch (error) {
+        expect(error).toBeInstanceOf(RangeError); // pre-existing "threshold < messageTimeout" rule
+      }
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('crashRecoveryThresholdMs'));
+    }
+  );
+
+  it('accepts the largest valid timer value for messageTimeoutMs', () => {
+    const processor = newProcessor(new MemoryRepo());
+    expect(() =>
+      processor.registerHandler('a.event', hangingHandler(), { messageTimeoutMs: 2_147_483_647 })
+    ).not.toThrow();
+  });
+
+  it('a type handler without an override does not inherit the default handler override', async () => {
+    const repo = new MemoryRepo();
+    await repo.saveMessage(message());
+    const processor = newProcessor(repo, { messageTimeout: 1_000 });
+    processor.registerDefaultHandler(hangingHandler(), { messageTimeoutMs: 100 });
+    processor.registerHandler('a.event', {
+      handle: () => new Promise<void>(resolve => setTimeout(resolve, 500)),
+    });
+    processor.start();
+
+    const batch = processor.processBatch();
+    await vi.advanceTimersByTimeAsync(500);
+    await batch;
+
+    expect(repo.store.get('m-1')?.status).toBe(MessageStatus.PROCESSED);
+    processor.stop();
+  });
+
+  it('the default handler timeout also feeds the derived recovery threshold', async () => {
+    const repo = new MemoryRepo();
+    const spy = vi.spyOn(repo, 'resetStaleProcessing');
+    const processor = newProcessor(repo, {
+      messageTimeout: 1_000,
+      crashRecoveryIntervalMs: 10_000,
+    });
+    processor.registerDefaultHandler(hangingHandler(), { messageTimeoutMs: 900_000 });
+    processor.start();
+
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    expect(Date.now() - spy.mock.calls[0]![0].getTime()).toBe(900_000);
+    processor.stop();
+  });
+
+  it('registerDefaultHandler validates its timeout like registerHandler', () => {
+    const processor = newProcessor(new MemoryRepo(), { crashRecoveryThresholdMs: 5_000 });
+    expect(() =>
+      processor.registerDefaultHandler(hangingHandler(), { messageTimeoutMs: -1 })
+    ).toThrow(RangeError);
+    expect(() =>
+      processor.registerDefaultHandler(hangingHandler(), { messageTimeoutMs: 6_000 })
+    ).toThrow(/crashRecoveryThresholdMs/);
   });
 });

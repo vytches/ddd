@@ -154,6 +154,7 @@ import { EventMiddleware } from '@vytches/ddd-contracts';
 import { EventSourcingCapability } from '@vytches/ddd-aggregates';
 import { ExecuteOptions } from '@vytches/ddd-acl';
 import { ExecutionContext } from '@vytches/ddd-cqrs';
+import { FencedOutboxRepository } from '@vytches/ddd-messaging';
 import { FrameworkErrorCode } from '@vytches/ddd-domain-primitives';
 import { getAggregateCapabilities } from '@vytches/ddd-aggregates';
 import { getDIDomainServiceMetadata } from '@vytches/ddd-domain-services';
@@ -310,6 +311,8 @@ import { ObservabilityEventListener } from '@vytches/ddd-resilience';
 import { OperationCancelledError } from '@vytches/ddd-resilience';
 import { OrAsyncSpecification } from '@vytches/ddd-validation';
 import { OrSpecification } from '@vytches/ddd-validation';
+import { OutboxCompletionWriteFailure } from '@vytches/ddd-messaging';
+import { OutboxFencedReleaseOutcome } from '@vytches/ddd-messaging';
 import { OutboxHandlerContext } from '@vytches/ddd-messaging';
 import { OutboxHandlerRegistrationOptions } from '@vytches/ddd-messaging';
 import { OutboxHandlerTimeoutInfo } from '@vytches/ddd-messaging';
@@ -322,6 +325,7 @@ import { OutboxProcessorHooks } from '@vytches/ddd-messaging';
 import { OutboxProcessorOptions } from '@vytches/ddd-messaging';
 import { OutboxService } from '@vytches/ddd-messaging';
 import { OutboxServiceOptions } from '@vytches/ddd-messaging';
+import { OutboxStaleWriteOperation } from '@vytches/ddd-messaging';
 import { OutboxTimeoutError } from '@vytches/ddd-messaging';
 import { OutboxTimeoutErrorDetails } from '@vytches/ddd-messaging';
 import { PlainDomainService } from '@vytches/ddd-domain-services';
@@ -754,6 +758,8 @@ export { ExecuteOptions }
 
 export { ExecutionContext }
 
+export { FencedOutboxRepository }
+
 export { FrameworkErrorCode }
 
 export { getAggregateCapabilities }
@@ -1066,6 +1072,10 @@ export { OrAsyncSpecification }
 
 export { OrSpecification }
 
+export { OutboxCompletionWriteFailure }
+
+export { OutboxFencedReleaseOutcome }
+
 export { OutboxHandlerContext }
 
 export { OutboxHandlerRegistrationOptions }
@@ -1089,6 +1099,8 @@ export { OutboxProcessorOptions }
 export { OutboxService }
 
 export { OutboxServiceOptions }
+
+export { OutboxStaleWriteOperation }
 
 export { OutboxTimeoutError }
 
