@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.33.0](https://github.com/vytches/ddd/compare/v0.32.1...v0.33.0) (2026-11-21)
+
+### Features
+
+- **messaging:** handler context, per-type timeouts, recovery options and
+  timeout hooks
+  ([c4bc630](https://github.com/vytches/ddd/commit/c4bc6304d321d29e4bcfa9fb457b0ea9713ef182))
+- **messaging:** opt-in claim fencing and completion-write isolation
+  ([7d714c0](https://github.com/vytches/ddd/commit/7d714c0ac01fb9ebbbe77afa7641448590a67373))
+
+# Change Log
+
+All notable changes to this project will be documented in this file. See
+[Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.32.1](https://github.com/vytches/ddd/compare/v0.32.0...v0.32.1) (2026-11-07)
 
 **Note:** Version bump only for package @vytches/ddd-messaging
